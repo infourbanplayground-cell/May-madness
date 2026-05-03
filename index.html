@@ -175,7 +175,7 @@ const GR=["A","B","C","D"];
 const SS=[{num:1,label:"Session 1",date:"Mon May 5",mult:1},{num:2,label:"Session 2",date:"Wed May 7",mult:1},{num:3,label:"Session 3",date:"Mon May 12",mult:1},{num:4,label:"Session 4",date:"Wed May 14",mult:1},{num:5,label:"Session 5",date:"Mon May 19",mult:1},{num:6,label:"Session 6",date:"Wed May 21",mult:1},{num:7,label:"Session 7",date:"Mon May 26",mult:2},{num:8,label:"Session 8",date:"Wed May 28",mult:2}];
 const TABS=["Register","Draw","Groups","Knockouts","Leaderboard","Points"];
 
-let state={sessions:[],activeIdx:null,tab:0,isAdmin:false,pasteText:"",parsedPairs:[],editingGroups:false};
+let state={sessions:[],activeIdx:null,tab:0,isAdmin:false,pasteText:"",parsedPairs:[],editingGroups:false,editingNames:false};
 let undoStack=[];
 const LS_KEY='maymadness_sessions';
 let saveTimer=null;
@@ -266,7 +266,59 @@ function extractPairs(text){const lines=text.split("\n").map(l=>l.trim()).filter
 
 function getSess(){return state.activeIdx!==null?state.sessions[state.activeIdx]:null;}
 
+function updateStandingsOnly(sess){
+  // Update done dots on match rows
+  (sess.groupMatches||[]).forEach(m=>{
+    const row=document.querySelector(`[data-mid="${m.id}"]`);
+    if(!row)return;
+    const dot=row.querySelector('.dd');
+    if(m.done&&!dot){const d=document.createElement('div');d.className='dd';row.appendChild(d);}
+    else if(!m.done&&dot){dot.remove();}
+  });
+  // Update standings tables
+  const standings=sess.standings||cSt(sess.groupMatches||[],sess.groups||{});
+  ['A','B','C','D'].forEach(g=>{
+    const rows=standings[g];if(!rows)return;
+    const table=document.querySelector(`[data-std="${g}"]`);
+    if(!table)return;
+    const tbody=table.querySelector('tbody');
+    if(!tbody)return;
+    tbody.innerHTML=rows.map((row,i)=>`<tr class="${i<2?'adv':''}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?'+':''}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`).join('');
+  });
+  // Show/hide generate KO button
+  const allDone=['A','B','C','D'].every(g=>(sess.groupMatches||[]).filter(m=>m.group===g).every(m=>m.done));
+  const existingBtn=document.querySelector('.gen-ko-btn');
+  if(allDone&&!sess.ko&&state.isAdmin){
+    if(!existingBtn){const btn=document.createElement('button');btn.className='btn2 gen-ko-btn';btn.textContent='Generate Knockout Bracket →';btn.onclick=genKO;document.getElementById('appBody').appendChild(btn);}
+  } else if(existingBtn){existingBtn.remove();}
+}
+
 function toggleEditGroups(){state.editingGroups=!state.editingGroups;render();}
+function toggleEditNames(){state.editingNames=!state.editingNames;render();}
+
+function renamePlayer(oldName, newName){
+  newName=newName.trim();
+  if(!newName||newName===oldName)return;
+  // Update name across all sessions
+  state.sessions=state.sessions.map(sess=>({
+    ...sess,
+    pairs:(sess.pairs||[]).map(pr=>{
+      const p1=pr.p1===oldName?newName:pr.p1;
+      const p2=pr.p2===oldName?newName:pr.p2;
+      return{...pr,p1,p2,label:`${p1} / ${p2}`};
+    }),
+    seeds:(sess.seeds||[]).map(s=>s.replace(oldName,newName).replace(new RegExp(oldName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'),newName)),
+    groups:Object.fromEntries(Object.entries(sess.groups||{}).map(([g,teams])=>[g,teams.map(t=>t.replace(oldName+" / ",newName+" / ").replace(" / "+oldName," / "+newName))])),
+    groupMatches:(sess.groupMatches||[]).map(m=>({...m,
+      home:m.home.replace(oldName+" / ",newName+" / ").replace(" / "+oldName," / "+newName),
+      away:m.away.replace(oldName+" / ",newName+" / ").replace(" / "+oldName," / "+newName),
+    })),
+  }));
+  // Save all sessions
+  saveLocal();
+  state.sessions.forEach(sess=>scheduleSave(sess));
+  render();
+}
 
 function saveGroups(){
   const sess=getSess();
@@ -314,10 +366,28 @@ function rBody(){
     h+=`<textarea class="paste-area" id="pasteArea" placeholder="Paste your WhatsApp sign up list:\n\n1- Ahmed / Salem\n2- Khalid / Omar\n..." oninput="onPaste(this.value)">${esc(state.pasteText)}</textarea>`;
     if(state.parsedPairs.length>0){
       const hasBanned=state.parsedPairs.some(pr=>isPB(pr.p1,pr.p2));
+      // Detect duplicate names across all players
+      const allPlayerNames=state.parsedPairs.flatMap(pr=>[pr.p1,pr.p2]);
+      const nameCounts={};
+      allPlayerNames.forEach(n=>{nameCounts[n]=(nameCounts[n]||0)+1;});
+      const hasDupes=Object.values(nameCounts).some(c=>c>1);
+      const dupeNames=new Set(Object.entries(nameCounts).filter(([,c])=>c>1).map(([n])=>n));
+      if(hasDupes)h+=`<div class="ban-note" style="border-left-color:#ff8a00;color:rgba(255,180,0,.7)">⚠️ Duplicate names detected — add a last initial (e.g. Ahmed K.) to differentiate</div>`;
       h+=`<div class="sec" style="margin-bottom:8px">${state.parsedPairs.length} pairs detected${hasBanned?" · Remove banned pairs":""}</div>`;
-      state.parsedPairs.forEach((pr,i)=>{const banned=isPB(pr.p1,pr.p2);h+=`<div class="pair-chip"><span class="pair-num">${String(i+1).padStart(2,"0")}</span><span>${esc(pr.p1)}</span><span class="pair-slash">/</span><span>${esc(pr.p2)}</span>${banned?`<span class="pair-banned">BANNED</span>`:""}<button class="pair-remove" onclick="removeParsed(${i})">×</button></div>`;});
-      h+=`<div class="note" style="margin-top:8px">${state.parsedPairs.length}/16 pairs</div>`;
-      h+=`<button class="btn" ${state.parsedPairs.length!==16||hasBanned?"disabled":""} onclick="confirmParsed()">Confirm & Run Draw →</button>`;
+      state.parsedPairs.forEach((pr,i)=>{
+        const banned=isPB(pr.p1,pr.p2);
+        const p1Dupe=dupeNames.has(pr.p1);const p2Dupe=dupeNames.has(pr.p2);
+        h+=`<div class="pair-chip"><span class="pair-num">${String(i+1).padStart(2,"00")}</span>`;
+        if(p1Dupe){h+=`<input type="text" value="${esc(pr.p1)}" style="flex:1;background:#07090e;border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:4px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editParsedName(${i},'p1',this.value)">`;}
+        else{h+=`<span style="flex:1">${esc(pr.p1)}</span>`;}
+        h+=`<span class="pair-slash">/</span>`;
+        if(p2Dupe){h+=`<input type="text" value="${esc(pr.p2)}" style="flex:1;background:#07090e;border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:4px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editParsedName(${i},'p2',this.value)">`;}
+        else{h+=`<span style="flex:1">${esc(pr.p2)}</span>`;}
+        if(banned)h+=`<span class="pair-banned">BANNED</span>`;
+        h+=`<button class="pair-remove" onclick="removeParsed(${i})">×</button></div>`;
+      });
+      h+=`<div class="note" style="margin-top:8px">${state.parsedPairs.length}/16 pairs${hasDupes?" · Fix duplicate names first":""}</div>`;
+      h+=`<button class="btn" ${state.parsedPairs.length!==16||hasBanned||hasDupes?"disabled":""} onclick="confirmParsed()">Confirm & Run Draw →</button>`;
     }else if(state.pasteText.trim()){h+=`<div class="note">No pairs found — names should be separated by /</div>`;}
   }
 
@@ -366,9 +436,9 @@ function rBody(){
       if(state.isAdmin&&undoStack.length>0){h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="tbt" onclick="undoLast()" style="font-size:11px;padding:4px 12px;color:rgba(255,180,0,.8);border-color:rgba(255,180,0,.3)">↩ Undo Last Score</button></div>`;}
       const standings=sess.standings||cSt(sess.groupMatches||[],sess.groups||{});
       h+=`<div class="sec">Results — tap TB for tiebreak</div><div class="mg">`;
-      GR.forEach((g,gi)=>{const gm=(sess.groupMatches||[]).filter(m=>m.group===g);if(!gm.length)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g} · Court ${gi+1}</div></div>`;gm.forEach(m=>{const dis=(!state.isAdmin||sess.status==="closed")?"disabled":"";h+=`<div class="mr"><div class="mt hm">${esc(m.home)}</div><input type="number" min="0" max="7" value="${m.hs}" ${dis} oninput="uG('${m.id}','hs',this.value)"><span class="vs">—</span><input type="number" min="0" max="7" value="${m.as}" ${dis} oninput="uG('${m.id}','as',this.value)"><div class="mt">${esc(m.away)}</div><button class="tbt ${m.isTB?"on":""}" ${dis} onclick="tGTB('${m.id}')">TB</button>${m.done?`<div class="dd"></div>`:""}</div>`;});h+=`</div>`;});
+      GR.forEach((g,gi)=>{const gm=(sess.groupMatches||[]).filter(m=>m.group===g);if(!gm.length)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g} · Court ${gi+1}</div></div>`;gm.forEach(m=>{const dis=(!state.isAdmin||sess.status==="closed")?"disabled":"";h+=`<div class="mr" data-mid="${m.id}"><div class="mt hm">${esc(m.home)}</div><input type="number" min="0" max="7" value="${m.hs}" ${dis} oninput="uG('${m.id}','hs',this.value)"><span class="vs">—</span><input type="number" min="0" max="7" value="${m.as}" ${dis} oninput="uG('${m.id}','as',this.value)"><div class="mt">${esc(m.away)}</div><button class="tbt ${m.isTB?"on":""}" ${dis} onclick="tGTB('${m.id}')">TB</button>${m.done?`<div class="dd"></div>`:""}</div>`;});h+=`</div>`;});
       h+=`</div><div class="sec">Standings</div><div class="sg">`;
-      GR.forEach(g=>{const rows=standings[g];if(!rows)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g}</div></div><table><thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;rows.forEach((row,i)=>{h+=`<tr class="${i<2?"adv":""}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?"+":""}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`;});h+=`</tbody></table></div>`;});
+      GR.forEach(g=>{const rows=standings[g];if(!rows)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g}</div></div><table data-std="${g}"><thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;rows.forEach((row,i)=>{h+=`<tr class="${i<2?"adv":""}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?"+":""}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`;});h+=`</tbody></table></div>`;});
       h+=`</div>`;
       const allDone=GR.every(g=>(sess.groupMatches||[]).filter(m=>m.group===g).every(m=>m.done));
       if(state.isAdmin&&allDone&&!sess.ko&&sess.status!=="closed")h+=`<button class="btn2" onclick="genKO()">Generate Knockout Bracket →</button>`;
@@ -388,7 +458,7 @@ function rBody(){
   }
 
   else if(state.tab===4){
-    h+=`<div class="ir"><div class="sec" style="margin:0">Season Leaderboard</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:rgba(255,255,255,.2)">${state.sessions.length}/8 sessions</span><button class="tbt" onclick="loadSessions()">↻ Refresh</button></div></div>`;
+    h+=`<div class="ir"><div class="sec" style="margin:0">Season Leaderboard</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:rgba(255,255,255,.2)">${state.sessions.length}/8 sessions</span><button class="tbt" onclick="loadSessions()">↻ Refresh</button>${state.isAdmin?`<button class="tbt" onclick="toggleEditNames()" style="color:rgba(255,180,0,.7);border-color:rgba(255,180,0,.3)">✏️ Edit Names</button>`:""}</div></div>`;
     h+=`<div class="note" style="margin-bottom:10px">Min 3 sessions to qualify · 🔥 streak · S7/S8 = 2×</div>`;
     const lb=Object.entries(sp).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(!lb.length){h+=`<div class="empty">No data yet. Complete matches to populate.</div>`;}
@@ -408,6 +478,18 @@ function newSession(){state.activeIdx=null;state.tab=0;state.pasteText="";state.
 function onPaste(val){state.pasteText=val;state.parsedPairs=extractPairs(val);render();}
 function removeParsed(i){state.parsedPairs.splice(i,1);render();}
 
+function editParsedName(pairIdx, field, val){
+  state.parsedPairs[pairIdx][field] = val.trim();
+  state.parsedPairs[pairIdx].label = state.parsedPairs[pairIdx].p1 + " / " + state.parsedPairs[pairIdx].p2;
+  // Don't re-render mid-type — just check for dupes and update button state
+  const allNames=state.parsedPairs.flatMap(pr=>[pr.p1,pr.p2]);
+  const counts={};allNames.forEach(n=>{counts[n]=(counts[n]||0)+1;});
+  const hasDupes=Object.values(counts).some(c=>c>1);
+  const hasBanned=state.parsedPairs.some(pr=>isPB(pr.p1,pr.p2));
+  const btn=document.querySelector('.btn[onclick="confirmParsed()"]');
+  if(btn)btn.disabled=state.parsedPairs.length!==16||hasBanned||hasDupes;
+}
+
 function confirmParsed(){
   if(state.parsedPairs.length!==16){alert("Need exactly 16 pairs.");return;}
   const seasonPts=gSP();
@@ -422,8 +504,34 @@ function confirmParsed(){
   saveSession(newSess);render();
 }
 
-function uG(id,field,val){pushUndo();const sess=getSess();sess.groupMatches=sess.groupMatches.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};u.done=u.hs!==""&&u.as!==""&&!isNaN(parseInt(u.hs))&&!isNaN(parseInt(u.as));return u;});sess.standings=cSt(sess.groupMatches,sess.groups);updateSess(sess);}
-function tGTB(id){const sess=getSess();sess.groupMatches=sess.groupMatches.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);updateSess(sess);render();}
+function uG(id,field,val){
+  const sess=getSess();
+  if(!sess)return;
+  sess.groupMatches=sess.groupMatches.map(m=>{
+    if(m.id!==id)return m;
+    const u={...m,[field]:val};
+    u.done=u.hs!==""&&u.as!==""&&!isNaN(parseInt(u.hs))&&!isNaN(parseInt(u.as));
+    return u;
+  });
+  sess.standings=cSt(sess.groupMatches,sess.groups);
+  // Update state without re-rendering (avoids clearing inputs mid-type)
+  state.sessions=state.sessions.map((s,i)=>i===state.activeIdx?sess:s);
+  saveLocal();
+  scheduleSave(sess);
+  // Only update the done dots and standings, not the whole page
+  updateStandingsOnly(sess);
+}
+function tGTB(id){
+  const sess=getSess();
+  if(!sess)return;
+  sess.groupMatches=sess.groupMatches.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);
+  state.sessions=state.sessions.map((s,i)=>i===state.activeIdx?sess:s);
+  saveLocal();
+  scheduleSave(sess);
+  // Just toggle the TB button visual without full re-render
+  const btn=document.querySelector(`.tbt[onclick="tGTB('${id}')"]`);
+  if(btn){const m=sess.groupMatches.find(m=>m.id===id);if(m)btn.className='tbt'+(m.isTB?' on':'');}
+}
 function genKO(){const sess=getSess();const st=sess.standings||cSt(sess.groupMatches,sess.groups);const q=GR.flatMap(g=>st[g]?.slice(0,2).map(t=>t.team)||[]);sess.ko=iKO(q);updateSess(sess);state.tab=3;render();}
 function uKO(stage,id,field,val){pushUndo();const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));const sd=m=>{if(field!=="isTB")m.done=m.hs!==""&&m.as!==""&&!isNaN(parseInt(m.hs))&&!isNaN(parseInt(m.as))&&parseInt(m.hs)!==parseInt(m.as);};if(stage==="qf")ko.qf=ko.qf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else if(stage==="sf")ko.sf=ko.sf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else{ko.final={...ko.final,[field]:val};sd(ko.final);}sess.ko=aKO(ko);updateSess(sess);render();}
 function tKTB(stage,id){const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));if(stage==="qf")ko.qf=ko.qf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else if(stage==="sf")ko.sf=ko.sf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else ko.final={...ko.final,isTB:!ko.final.isTB};sess.ko=ko;updateSess(sess);render();}
