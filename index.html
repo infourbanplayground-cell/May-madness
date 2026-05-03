@@ -180,6 +180,9 @@ let undoStack=[];
 const LS_KEY='maymadness_sessions';
 let saveTimer=null;
 
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify(state.sessions));}catch(e){}}
+function loadLocal(){try{const d=localStorage.getItem(LS_KEY);return d?JSON.parse(d):null;}catch(e){return null;}}
+
 async function apiGet(p) {
   const r = await fetch(API + "?" + new URLSearchParams(p), {method:"GET",redirect:"follow"});
   return r.json();
