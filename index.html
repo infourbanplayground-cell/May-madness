@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="May Madness">
+<title>May Madness 🎾</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090e;--bg2:#0b0f1a;--card:#0f1520;--border:rgba(255,138,0,.12);--orange:#ff8a00;--gold:#ffb700;--white:#e8e3da;--dim:rgba(255,255,255,.15);--green:#22c55e;--red:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overscroll-behavior:none}
+body{font-family:'Barlow Condensed',sans-serif;color:var(--white)}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px 10px;position:sticky;top:0;z-index:100}
+.brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.brand-title{font-size:22px;font-weight:800;font-style:italic;letter-spacing:.08em;color:#fff}
+.brand-title em{color:var(--orange);font-style:normal}
+.brand-sub{font-size:9px;font-weight:700;letter-spacing:.28em;color:rgba(255,138,0,.4);text-transform:uppercase}
+.topright{display:flex;align-items:center;gap:10px}
+.sync{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);font-weight:600}
+.sdot{width:7px;height:7px;border-radius:50%;background:#475569;flex-shrink:0}
+.sdot.ok{background:#22c55e;animation:pulse 2s infinite}
+.sdot.err{background:#ef4444}
+.sdot.saving{background:var(--orange);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.pin-btn{font-size:11px;padding:4px 10px;border-radius:3px;background:rgba(255,138,0,.08);border:1px solid rgba(255,138,0,.2);color:rgba(255,138,0,.7);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700}
+.admin-badge{font-size:10px;padding:2px 8px;border-radius:3px;background:rgba(255,138,0,.15);border:1px solid rgba(255,138,0,.3);color:var(--orange);font-weight:700;cursor:pointer}
+.sess-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.sess-row::-webkit-scrollbar{display:none}
+.sc{padding:4px 11px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,.08);background:transparent;color:rgba(255,255,255,.3);cursor:pointer;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.sc:hover{border-color:rgba(255,138,0,.3);color:rgba(255,138,0,.6)}
+.sc.on{background:rgba(255,138,0,.1);border-color:rgba(255,138,0,.35);color:var(--orange)}
+.sc.fw.on{background:rgba(255,60,0,.1);border-color:rgba(255,60,0,.4);color:#ff4400}
+.sc.closed{opacity:.5}
+.tabs{display:flex;background:#080c13;border-bottom:1px solid rgba(255,138,0,.08);overflow-x:auto;padding:0 20px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:11px 14px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.25);cursor:pointer;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange)}
+.body{padding:20px;max-width:960px;margin:0 auto}
+.sec{font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,138,0,.4);margin-bottom:12px}
+.note{font-size:11px;color:var(--dim);text-align:center;margin-bottom:12px}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.ch{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between}
+.cl{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,138,0,.55)}
+.mb{font-size:10px;padding:2px 7px;border-radius:2px;background:rgba(255,60,0,.12);border:1px solid rgba(255,60,0,.25);color:#ff4400;font-weight:700}
+.ban-note{margin-bottom:10px;padding:8px 12px;background:rgba(255,0,0,.05);border:1px solid rgba(255,0,0,.1);border-left:3px solid rgba(255,0,0,.3);border-radius:4px;font-size:11px;color:rgba(255,100,100,.55);font-weight:600}
+.ir{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.empty{text-align:center;padding:44px 20px;color:var(--dim);font-size:13px;font-style:italic}
+.readonly-note{text-align:center;padding:10px;background:rgba(255,138,0,.04);border:1px solid rgba(255,138,0,.1);border-radius:4px;font-size:11px;color:rgba(255,138,0,.5);margin-bottom:14px}
+.paste-area{width:100%;min-height:120px;background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:10px;font-size:13px;color:var(--white);font-family:'Barlow',sans-serif;resize:vertical;outline:none;margin-bottom:12px}
+.paste-area:focus{border-color:rgba(255,138,0,.4)}
+.paste-area::placeholder{color:rgba(255,255,255,.12)}
+.pair-chip{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--card);border:1px solid rgba(255,138,0,.08);border-radius:4px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--white)}
+.pair-num{color:rgba(255,138,0,.5);min-width:24px;font-size:10px}
+.pair-slash{color:rgba(255,138,0,.4)}
+.pair-banned{font-size:10px;color:rgba(255,80,80,.6);font-weight:700;margin-left:auto;flex-shrink:0}
+.pair-remove{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:16px;padding:0 3px;line-height:1;margin-left:4px;flex-shrink:0}
+.pair-remove:hover{color:rgba(255,80,80,.6)}
+.btn{background:linear-gradient(135deg,#ff8a00,#ff3d00);border:none;border-radius:4px;padding:11px 28px;font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;cursor:pointer;font-family:'Barlow Condensed',sans-serif;display:block;margin:0 auto;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.22;cursor:not-allowed}
+.btn2{background:rgba(255,138,0,.08);border:1px solid rgba(255,138,0,.2);border-radius:4px;padding:9px 22px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,138,0,.7);cursor:pointer;font-family:'Barlow Condensed',sans-serif;display:block;margin:12px auto 0}
+.btn-danger{background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:4px;padding:9px 22px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,80,80,.7);cursor:pointer;font-family:'Barlow Condensed',sans-serif;display:block;margin:12px auto 0}
+.gg{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:12px}
+.gh{padding:8px 12px;font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:var(--orange);background:rgba(255,138,0,.07);border-bottom:1px solid rgba(255,138,0,.08)}
+.gt{padding:8px 12px;font-size:11px;font-weight:600;color:var(--white);border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:6px}
+.gt:last-child{border-bottom:none}
+.seed-tag{font-size:9px;padding:1px 5px;border-radius:2px;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.2);color:var(--gold);font-weight:800;flex-shrink:0}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.mr{display:flex;align-items:center;gap:5px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.mr:last-child{border-bottom:none}
+.mt{flex:1;font-size:11px;font-weight:600;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mt.hm{text-align:right}
+input[type=number]{width:34px;background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:5px 2px;text-align:center;font-size:14px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;-moz-appearance:textfield;flex-shrink:0}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus{border-color:rgba(255,138,0,.45)}
+input[type=number]:disabled{opacity:.2}
+.vs{font-size:10px;color:rgba(255,255,255,.18);flex-shrink:0}
+.tbt{font-size:9px;padding:2px 5px;border-radius:2px;background:transparent;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.22);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0}
+.tbt.on{background:rgba(255,180,0,.1);border-color:rgba(255,180,0,.3);color:var(--gold)}
+.dd{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+th{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.22);text-align:center;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.05)}
+th:first-child{text-align:left;padding-left:12px}
+td{font-size:11px;color:#aaa;text-align:center;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.04)}
+td:first-child{text-align:left;padding-left:12px;font-weight:600;font-size:10px;color:var(--white)}
+tr:last-child td{border-bottom:none}
+tr.adv td{background:rgba(255,138,0,.05)}
+tr.adv td:first-child{border-left:2px solid rgba(255,138,0,.4)}
+.pv{color:var(--orange);font-weight:700;font-size:13px}
+.kos{margin-bottom:16px}
+.kl{font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,138,0,.4);margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.kl::after{content:'';flex:1;height:1px;background:rgba(255,138,0,.08)}
+.km{display:flex;align-items:center;gap:5px;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.km:last-child{border-bottom:none}
+.kt{flex:1;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kt.hm{text-align:right;color:var(--white)}
+.kt.aw{text-align:left;color:var(--white)}
+.kt.tbd{color:rgba(255,255,255,.2)}
+.wb{background:rgba(255,138,0,.06);border:1px solid rgba(255,138,0,.15);border-radius:6px;padding:16px;text-align:center;margin-top:14px}
+.wl{font-size:10px;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:rgba(255,138,0,.45);margin-bottom:5px}
+.wn{font-size:20px;font-weight:800;color:var(--orange);font-style:italic}
+.lb-card{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:0 16px}
+.lbr{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.lbr:last-child{border-bottom:none}
+.lbrk{font-size:12px;font-weight:800;width:30px;text-align:center;color:rgba(255,255,255,.2);font-style:italic}
+.lbrk.r1{color:var(--gold)}.lbrk.r2{color:#aaa}.lbrk.r3{color:#cd7f32}
+.lbn{flex:1;font-size:13px;font-weight:700;color:var(--white)}
+.lbsc{font-size:10px;color:rgba(255,255,255,.2);font-weight:600}
+.lbm{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.lbd{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.lbs{font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);font-weight:700}
+.lbs.fx{background:rgba(255,60,0,.08);color:rgba(255,100,0,.5)}
+.lbp{font-size:18px;font-weight:800;color:var(--orange);font-style:italic}
+.lbst{font-size:9px;color:rgba(255,138,0,.45);font-weight:700}
+.pref{background:var(--card);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:13px 15px;margin-bottom:10px}
+.prt{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,138,0,.4);margin-bottom:9px}
+.prg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pri{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:rgba(255,255,255,.02);border-radius:3px;gap:6px}
+.prl{font-size:11px;font-weight:600;color:rgba(255,255,255,.4)}
+.prv{font-size:13px;font-weight:800;color:var(--orange);font-style:italic}
+.prv.r{color:var(--red)}.prv.g{color:var(--green)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--bg2);border:1px solid rgba(255,138,0,.2);border-radius:8px;padding:22px;width:100%;max-width:340px}
+.modal-title{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:16px;text-align:center}
+.pin-input{width:100%;background:var(--bg);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:12px;font-size:22px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;text-align:center;letter-spacing:.2em}
+.pin-input:focus{border-color:rgba(255,138,0,.4)}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.modal-btn{flex:1;padding:10px;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Barlow Condensed',sans-serif;border:none}
+.modal-btn.p{background:linear-gradient(135deg,#ff8a00,#ff3d00);color:#fff}
+.modal-btn.s{background:rgba(255,255,255,.06);color:rgba(255,255,255,.5)}
+@media(max-width:700px){.gg{grid-template-columns:repeat(2,1fr)}.mg,.sg{grid-template-columns:1fr}.prg{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand-row">
+    <div>
+      <div class="brand-title">MAY <em>MADNESS</em></div>
+      <div class="brand-sub">Urban Social Series · Vol. 3</div>
+    </div>
+    <div class="topright">
+      <button class="pin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+      <div class="sync">
+        <div class="sdot" id="sdot"></div>
+        <span id="stxt">Loading...</span>
+      </div>
+    </div>
+  </div>
+  <div class="sess-row" id="sessRow"></div>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+<div class="body" id="appBody"></div>
+
+<div class="modal-overlay" id="pinModal" style="display:none" onclick="if(event.target===this)closePinModal()">
+  <div class="modal">
+    <div class="modal-title">Admin PIN</div>
+    <input class="pin-input" id="pinInput" type="password" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')submitPin()">
+    <div class="modal-btns">
+      <button class="modal-btn s" onclick="closePinModal()">Cancel</button>
+      <button class="modal-btn p" onclick="submitPin()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API="https://script.google.com/macros/s/AKfycbwq2z85GlIFlDaThwu_MuGTi1ln88gVx1nhOuxjZJrS1c0wwIAAcnFKHaUH167QZ6D8/exec";
+const ADMIN_PIN="1234";
+const GR=["A","B","C","D"];
+const SS=[{num:1,label:"Session 1",date:"Mon May 5",mult:1},{num:2,label:"Session 2",date:"Wed May 7",mult:1},{num:3,label:"Session 3",date:"Mon May 12",mult:1},{num:4,label:"Session 4",date:"Wed May 14",mult:1},{num:5,label:"Session 5",date:"Mon May 19",mult:1},{num:6,label:"Session 6",date:"Wed May 21",mult:1},{num:7,label:"Session 7",date:"Mon May 26",mult:2},{num:8,label:"Session 8",date:"Wed May 28",mult:2}];
+const TABS=["Register","Draw","Groups","Knockouts","Leaderboard","Points"];
+
+let state={sessions:[],activeIdx:null,tab:0,isAdmin:false,pasteText:"",parsedPairs:[]};
+let saveTimer=null;
+
+async function apiGet(p){const r=await fetch(API+"?"+new URLSearchParams(p));return r.json();}
+async function apiPost(b){const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});return r.json();}
+
+async function loadSessions(){
+  setSS("loading");
+  try{
+    const d=await apiGet({action:"getSessions"});
+    if(d.ok&&d.sessions){
+      const full=await Promise.all(d.sessions.map(s=>apiGet({action:"getSession",id:s.id}).then(r=>r.session||s)));
+      state.sessions=full;setSS("ok");render();
+    }
+  }catch(e){setSS("err");}
+}
+
+async function saveSession(sess){
+  setSS("saving");
+  try{await apiPost({action:"saveSession",session:sess});setSS("ok");}
+  catch(e){setSS("err");}
+}
+
+function scheduleSave(sess){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveSession(sess),1200);}
+
+function setSS(s){
+  const dot=document.getElementById("sdot"),txt=document.getElementById("stxt");
+  if(!dot)return;
+  dot.className="sdot"+(s==="ok"?" ok":s==="saving"?" saving":s==="err"?" err":"");
+  txt.textContent=s==="ok"?"Synced ✓":s==="saving"?"Saving...":s==="err"?"Connection error":"Loading...";
+}
+
+function toggleAdmin(){
+  if(state.isAdmin){state.isAdmin=false;const b=document.getElementById("adminBtn");b.textContent="Admin";b.className="pin-btn";render();}
+  else{document.getElementById("pinModal").style.display="flex";setTimeout(()=>document.getElementById("pinInput").focus(),100);}
+}
+function closePinModal(){document.getElementById("pinModal").style.display="none";document.getElementById("pinInput").value="";}
+function submitPin(){
+  if(document.getElementById("pinInput").value===ADMIN_PIN){state.isAdmin=true;const b=document.getElementById("adminBtn");b.textContent="Admin ✓";b.className="admin-badge";closePinModal();render();}
+  else{alert("Wrong PIN");document.getElementById("pinInput").value="";}
+}
+
+function mPts(my,opp,isTB){const m=parseInt(my),o=parseInt(opp);if(isNaN(m)||isNaN(o)||m===o)return 0;if(m>o)return 3;if(isTB)return 2;if(o===6&&m<=1)return 0;return 1;}
+function fP(sess,label){const pr=(sess.pairs||[]).find(p=>p.label===label);return pr?[pr.p1,pr.p2]:[];}
+function cSP(sess){
+  const pts={},mult=sess.mult||1;
+  (sess.pairs||[]).forEach(pr=>{pts[pr.p1]=0;pts[pr.p2]=0;});
+  function aw(hL,aL,hs,as,isTB){if(isNaN(parseInt(hs))||isNaN(parseInt(as)))return;const hp=fP(sess,hL),ap=fP(sess,aL);hp.forEach(p=>{if(p in pts)pts[p]+=mPts(hs,as,isTB)*mult;});ap.forEach(p=>{if(p in pts)pts[p]+=mPts(as,hs,isTB)*mult;});}
+  (sess.groupMatches||[]).forEach(m=>{if(m.done)aw(m.home,m.away,m.hs,m.as,m.isTB);});
+  if(sess.standings)GR.forEach(g=>{const top=sess.standings[g]?.[0];if(top)fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=1*mult;});});
+  if(sess.ko){[...(sess.ko.qf||[]),...(sess.ko.sf||[])].forEach(m=>{if(m?.done&&m.home&&m.away)aw(m.home,m.away,m.hs,m.as,m.isTB);});const fin=sess.ko.final;if(fin?.done&&fin.home&&fin.away){aw(fin.home,fin.away,fin.hs,fin.as,fin.isTB);[fin.home,fin.away].forEach(l=>fP(sess,l).forEach(p=>{if(p in pts)pts[p]+=2*mult;}));fP(sess,parseInt(fin.hs)>parseInt(fin.as)?fin.home:fin.away).forEach(p=>{if(p in pts)pts[p]+=3*mult;});}}
+  return pts;
+}
+function cSB(p,sessions,idx){let s=0;for(let i=idx;i>=0;i--){if((sessions[i].pairs||[]).some(pr=>pr.p1===p||pr.p2===p))s++;else break;}const m=sessions[idx]?.mult||1;if(s>=4)return 3*m;if(s===3)return 2*m;if(s===2)return m;return 0;}
+function gSP(){const t={};state.sessions.forEach((sess,idx)=>{const sp=cSP(sess);Object.entries(sp).forEach(([p,v])=>{t[p]=(t[p]||0)+v;});Object.keys(sp).forEach(p=>{t[p]=(t[p]||0)+cSB(p,state.sessions,idx);});});return t;}
+
+function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function gGM(groups){const ms=[];GR.forEach(g=>{const t=groups[g];if(!t)return;for(let i=0;i<t.length;i++)for(let j=i+1;j<t.length;j++)ms.push({id:`${g}${i}${j}`,group:g,home:t[i],away:t[j],hs:"",as:"",done:false,isTB:false});});return ms;}
+function cSt(matches,groups){const s={};GR.forEach(g=>{if(!groups[g])return;s[g]={};groups[g].forEach(t=>{s[g][t]={team:t,p:0,w:0,l:0,pts:0,gf:0,ga:0};});});(matches||[]).forEach(m=>{if(!m.done||!s[m.group])return;const h=parseInt(m.hs),a=parseInt(m.as),g=m.group;if(!s[g][m.home]||!s[g][m.away])return;s[g][m.home].p++;s[g][m.away].p++;s[g][m.home].gf+=h;s[g][m.home].ga+=a;s[g][m.away].gf+=a;s[g][m.away].ga+=h;if(h>a){s[g][m.home].w++;s[g][m.home].pts+=3;s[g][m.away].l++;}else if(a>h){s[g][m.away].w++;s[g][m.away].pts+=3;s[g][m.home].l++;}});const r={};Object.keys(s).forEach(g=>{r[g]=Object.values(s[g]).sort((a,b)=>{if(b.w!==a.w)return b.w-a.w;const gA=a.gf-a.ga,gB=b.gf-b.ga;if(gB!==gA)return gB-gA;const h2=(matches||[]).find(m=>m.done&&m.group===g&&((m.home===a.team&&m.away===b.team)||(m.home===b.team&&m.away===a.team)));if(h2){const aW=(h2.home===a.team&&parseInt(h2.hs)>parseInt(h2.as))||(h2.away===a.team&&parseInt(h2.as)>parseInt(h2.hs));return aW?-1:1;}return 0;});});return r;}
+function iKO(q){return{qf:[{id:"qf1",home:q[0],away:q[5],hs:"",as:"",done:false,isTB:false},{id:"qf2",home:q[2],away:q[7],hs:"",as:"",done:false,isTB:false},{id:"qf3",home:q[4],away:q[1],hs:"",as:"",done:false,isTB:false},{id:"qf4",home:q[6],away:q[3],hs:"",as:"",done:false,isTB:false}],sf:[{id:"sf1",home:null,away:null,hs:"",as:"",done:false,isTB:false},{id:"sf2",home:null,away:null,hs:"",as:"",done:false,isTB:false}],final:{id:"final",home:null,away:null,hs:"",as:"",done:false,isTB:false},winner:null};}
+function gW(m){if(!m?.done||!m.home||!m.away)return null;return parseInt(m.hs)>parseInt(m.as)?m.home:parseInt(m.as)>parseInt(m.hs)?m.away:null;}
+function aKO(ko){const k=JSON.parse(JSON.stringify(ko));const qw=k.qf.map(gW);if(qw[0])k.sf[0].home=qw[0];if(qw[1])k.sf[0].away=qw[1];if(qw[2])k.sf[1].home=qw[2];if(qw[3])k.sf[1].away=qw[3];const sw=k.sf.map(gW);if(sw[0])k.final.home=sw[0];if(sw[1])k.final.away=sw[1];k.winner=gW(k.final);return k;}
+function isPB(p1,p2){const last=state.sessions[state.sessions.length-1];if(!last)return false;return(last.pairs||[]).some(p=>(p.p1===p1&&p.p2===p2)||(p.p1===p2&&p.p2===p1));}
+function extractPairs(text){const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);const pairs=[];lines.forEach(line=>{const match=line.match(/^(?:\d+[\.\-\)]\s*)?(.+?)\s*[\/\|]\s*(.+)$/);if(match){const p1=match[1].trim(),p2=match[2].trim();if(p1&&p2)pairs.push({p1,p2,label:`${p1} / ${p2}`});}});return pairs;}
+
+function getSess(){return state.activeIdx!==null?state.sessions[state.activeIdx]:null;}
+function updateSess(updated){state.sessions=state.sessions.map((s,i)=>i===state.activeIdx?updated:s);scheduleSave(updated);}
+
+function render(){rSess();rTabs();rBody();}
+
+function rSess(){
+  let h="";
+  state.sessions.forEach((s,i)=>{h+=`<button class="sc ${s.mult===2?"fw":""} ${state.activeIdx===i?"on":""} ${s.status==="closed"?"closed":""}" onclick="setSession(${i})">${s.label}${s.mult===2?" 2×":""}${s.status==="closed"?" ✓":""}</button>`;});
+  if(state.isAdmin)h+=`<button class="sc" onclick="newSession()">+ New</button>`;
+  document.getElementById("sessRow").innerHTML=h;
+}
+
+function rTabs(){document.getElementById("tabBar").innerHTML=TABS.map((t,i)=>`<button class="tab ${state.tab===i?"on":""}" onclick="setTab(${i})">${t}</button>`).join("");}
+
+function rBody(){
+  const body=document.getElementById("appBody");
+  const sess=getSess();
+  const sp=gSP();
+  let h="";
+
+  if(state.tab===0){
+    if(!state.isAdmin){h=`<div class="readonly-note">View only — tap Admin to unlock</div>`;body.innerHTML=h;return;}
+    h+=`<div class="ir"><div class="sec" style="margin:0">Paste WhatsApp Sign Up List</div><span style="font-size:11px;color:rgba(255,255,255,.25)">Session ${state.sessions.length+1}</span></div>`;
+    h+=`<textarea class="paste-area" id="pasteArea" placeholder="Paste your WhatsApp sign up list:\n\n1- Ahmed / Salem\n2- Khalid / Omar\n..." oninput="onPaste(this.value)">${esc(state.pasteText)}</textarea>`;
+    if(state.parsedPairs.length>0){
+      const hasBanned=state.parsedPairs.some(pr=>isPB(pr.p1,pr.p2));
+      h+=`<div class="sec" style="margin-bottom:8px">${state.parsedPairs.length} pairs detected${hasBanned?" · Remove banned pairs":""}</div>`;
+      state.parsedPairs.forEach((pr,i)=>{const banned=isPB(pr.p1,pr.p2);h+=`<div class="pair-chip"><span class="pair-num">${String(i+1).padStart(2,"0")}</span><span>${esc(pr.p1)}</span><span class="pair-slash">/</span><span>${esc(pr.p2)}</span>${banned?`<span class="pair-banned">BANNED</span>`:""}<button class="pair-remove" onclick="removeParsed(${i})">×</button></div>`;});
+      h+=`<div class="note" style="margin-top:8px">${state.parsedPairs.length}/16 pairs</div>`;
+      h+=`<button class="btn" ${state.parsedPairs.length!==16||hasBanned?"disabled":""} onclick="confirmParsed()">Confirm & Run Draw →</button>`;
+    }else if(state.pasteText.trim()){h+=`<div class="note">No pairs found — names should be separated by /</div>`;}
+  }
+
+  else if(state.tab===1){
+    if(!sess){h=`<div class="empty">Register players to see the draw.</div>`;}
+    else{
+      h+=`<div class="ir"><div class="sec" style="margin:0">${sess.label} · ${sess.date||""}</div><div style="display:flex;gap:8px;align-items:center">${sess.mult===2?`<span class="mb">2× FINAL WEEK</span>`:""}${sess.status==="closed"?`<span style="font-size:10px;color:#22c55e;font-weight:700">CLOSED ✓</span>`:""}</div></div>`;
+      h+=`<div class="gg">`;
+      GR.forEach((g,gi)=>{h+=`<div class="card"><div class="gh">Group ${g} · Court ${gi+1}</div>`;(sess.groups[g]||[]).forEach(t=>{h+=`<div class="gt">${(sess.seeds||[]).includes(t)?`<span class="seed-tag">SEED</span>`:""}<span style="font-size:10px">${esc(t)}</span></div>`;});h+=`</div>`;});
+      h+=`</div><div class="note">Cross path: Court 1&4 · Court 2&3 · Top 2 qualify</div>`;
+    }
+  }
+
+  else if(state.tab===2){
+    if(!sess){h=`<div class="empty">Run a draw first.</div>`;}
+    else{
+      if(!state.isAdmin)h+=`<div class="readonly-note">View only — tap Admin to enter scores</div>`;
+      if(sess.mult===2)h+=`<div style="margin-bottom:10px"><span class="mb">2× FINAL WEEK</span></div>`;
+      const standings=sess.standings||cSt(sess.groupMatches||[],sess.groups||{});
+      h+=`<div class="sec">Results — tap TB for tiebreak</div><div class="mg">`;
+      GR.forEach((g,gi)=>{const gm=(sess.groupMatches||[]).filter(m=>m.group===g);if(!gm.length)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g} · Court ${gi+1}</div></div>`;gm.forEach(m=>{const dis=(!state.isAdmin||sess.status==="closed")?"disabled":"";h+=`<div class="mr"><div class="mt hm">${esc(m.home)}</div><input type="number" min="0" max="7" value="${m.hs}" ${dis} oninput="uG('${m.id}','hs',this.value)"><span class="vs">—</span><input type="number" min="0" max="7" value="${m.as}" ${dis} oninput="uG('${m.id}','as',this.value)"><div class="mt">${esc(m.away)}</div><button class="tbt ${m.isTB?"on":""}" ${dis} onclick="tGTB('${m.id}')">TB</button>${m.done?`<div class="dd"></div>`:""}</div>`;});h+=`</div>`;});
+      h+=`</div><div class="sec">Standings</div><div class="sg">`;
+      GR.forEach(g=>{const rows=standings[g];if(!rows)return;h+=`<div class="card"><div class="ch"><div class="cl">Group ${g}</div></div><table><thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;rows.forEach((row,i)=>{h+=`<tr class="${i<2?"adv":""}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?"+":""}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`;});h+=`</tbody></table></div>`;});
+      h+=`</div>`;
+      const allDone=GR.every(g=>(sess.groupMatches||[]).filter(m=>m.group===g).every(m=>m.done));
+      if(state.isAdmin&&allDone&&!sess.ko&&sess.status!=="closed")h+=`<button class="btn2" onclick="genKO()">Generate Knockout Bracket →</button>`;
+    }
+  }
+
+  else if(state.tab===3){
+    if(!sess?.ko){h=`<div class="empty">${sess?"Complete all group matches first.":"Run a draw first."}</div>`;}
+    else{
+      if(!state.isAdmin)h+=`<div class="readonly-note">View only — tap Admin to enter scores</div>`;
+      if(sess.mult===2)h+=`<div style="margin-bottom:10px"><span class="mb">2× FINAL WEEK</span></div>`;
+      [["qf","Quarter Finals"],["sf","Semi Finals"],["final","Final"]].forEach(([stage,label])=>{const ms=stage==="final"?[sess.ko.final]:sess.ko[stage];h+=`<div class="kos"><div class="kl">${label}</div><div class="card">`;ms.forEach(m=>{const dis=(!m.home||!m.away||!state.isAdmin||sess.status==="closed")?"disabled":"";h+=`<div class="km"><div class="kt hm ${!m.home?"tbd":""}">${esc(m.home||"TBD")}</div><input type="number" min="0" max="7" value="${m.hs}" ${dis} oninput="uKO('${stage}','${m.id}','hs',this.value)"><span class="vs">—</span><input type="number" min="0" max="7" value="${m.as}" ${dis} oninput="uKO('${stage}','${m.id}','as',this.value)"><div class="kt aw ${!m.away?"tbd":""}">${esc(m.away||"TBD")}</div><button class="tbt ${m.isTB?"on":""}" ${dis} onclick="tKTB('${stage}','${m.id}')">TB</button>${m.done?`<div class="dd"></div>`:""}</div>`;});h+=`</div></div>`;});
+      if(sess.ko.winner)h+=`<div class="wb"><div class="wl">🏆 ${sess.label} Champion</div><div class="wn">${esc(sess.ko.winner)}</div></div>`;
+      if(state.isAdmin&&sess.ko.winner&&sess.status!=="closed")h+=`<button class="btn-danger" onclick="closeSession()">Close & Archive Session →</button>`;
+    }
+  }
+
+  else if(state.tab===4){
+    h+=`<div class="ir"><div class="sec" style="margin:0">Season Leaderboard</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:rgba(255,255,255,.2)">${state.sessions.length}/8 sessions</span><button class="tbt" onclick="loadSessions()">↻ Refresh</button></div></div>`;
+    h+=`<div class="note" style="margin-bottom:10px">Min 3 sessions to qualify · 🔥 streak · S7/S8 = 2×</div>`;
+    const lb=Object.entries(sp).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(!lb.length){h+=`<div class="empty">No data yet. Complete matches to populate.</div>`;}
+    else{h+=`<div class="lb-card">`;lb.forEach(([player,pts],i)=>{const sc=state.sessions.filter(s=>s.pairs?.some(p=>p.p1===player||p.p2===player)).length;const el=sc>=3;let streak=0;for(let si=state.sessions.length-1;si>=0;si--){if(state.sessions[si]?.pairs?.some(p=>p.p1===player||p.p2===player))streak++;else break;}const bd=state.sessions.map((s,si)=>{const spp=cSP(s);return spp[player]!==undefined?{pts:spp[player],mult:s.mult}:null;});const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";h+=`<div class="lbr" style="${!el?"opacity:.4":""}"><div class="lbrk ${rc}">${el?(i===0?"1ST":i===1?"2ND":i===2?"3RD":i+1):"—"}</div><div><div class="lbn">${esc(player)}</div><div class="lbsc">${sc} session${sc!==1?"s":""}${!el?" · needs "+(3-sc)+" more":""}</div></div><div class="lbm"><div class="lbd">${bd.map((b,si)=>b?`<span class="lbs ${b.mult===2?"fx":""}">S${si+1}:${b.pts}</span>`:"").join("")}</div>${streak>=2?`<div class="lbst">🔥 ${streak} streak</div>`:""}</div><div class="lbp">${pts}</div></div>`;});h+=`</div>`;}
+  }
+
+  else if(state.tab===5){
+    [{t:"Match Points",items:[["Win","+3",""],["Competitive loss","+1",""],["Tiebreak loss","+2","g"],["Lost 6-0 or 6-1","0","r"]]},{t:"Bonus",items:[["Top of group","+1",""],["Reach Final","+2",""],["Win Final","+3","g"]]},{t:"Streak",items:[["2 in a row","+1",""],["3 in a row","+2",""],["4+ in a row","+3 MAX","g"]]},{t:"Multipliers",items:[["Sessions 1–6","1×",""],["Sessions 7–8","2× 🔥","g"]]},{t:"Partner Rules",items:[["Same pair back to back","NOT ALLOWED","r"],["Min sessions","3",""],["New players","Allowed","g"]]},{t:"Tiebreakers",items:[["1st","Wins",""],["2nd","Game diff",""],["3rd","Head to head",""],["4th","Coin flip",""]]}].forEach(sec=>{h+=`<div class="pref"><div class="prt">${sec.t}</div><div class="prg">`;sec.items.forEach(([l,v,c])=>h+=`<div class="pri"><span class="prl">${l}</span><span class="prv ${c}">${v}</span></div>`);h+=`</div></div>`;});
+  }
+
+  body.innerHTML=h;
+}
+
+function setTab(i){state.tab=i;render();}
+function setSession(i){state.activeIdx=i;state.tab=1;render();}
+function newSession(){state.activeIdx=null;state.tab=0;state.pasteText="";state.parsedPairs=[];render();}
+function onPaste(val){state.pasteText=val;state.parsedPairs=extractPairs(val);render();}
+function removeParsed(i){state.parsedPairs.splice(i,1);render();}
+
+function confirmParsed(){
+  if(state.parsedPairs.length!==16){alert("Need exactly 16 pairs.");return;}
+  const seasonPts=gSP();
+  const ranked=[...state.parsedPairs].sort((a,b)=>((seasonPts[b.p1]||0)+(seasonPts[b.p2]||0))-((seasonPts[a.p1]||0)+(seasonPts[a.p2]||0)));
+  const seeds=ranked.slice(0,4);const rest=shuf(ranked.slice(4));
+  const grps={A:[seeds[0].label],B:[seeds[1].label],C:[seeds[2].label],D:[seeds[3].label]};
+  [rest.slice(0,4),rest.slice(4,8),rest.slice(8,12)].forEach(pot=>{const sp2=shuf(pot);GR.forEach((g,i)=>grps[g].push(sp2[i].label));});
+  const idx=state.sessions.length;
+  const sI=SS[idx]||{num:idx+1,label:`Session ${idx+1}`,date:"",mult:1};
+  const newSess={...sI,id:Date.now(),pairs:ranked,seeds:seeds.map(s=>s.label),groups:grps,groupMatches:gGM(grps),standings:null,ko:null,status:"active"};
+  state.sessions.push(newSess);state.activeIdx=idx;state.pasteText="";state.parsedPairs=[];state.tab=1;
+  saveSession(newSess);render();
+}
+
+function uG(id,field,val){const sess=getSess();sess.groupMatches=sess.groupMatches.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};u.done=u.hs!==""&&u.as!==""&&!isNaN(parseInt(u.hs))&&!isNaN(parseInt(u.as));return u;});sess.standings=cSt(sess.groupMatches,sess.groups);updateSess(sess);}
+function tGTB(id){const sess=getSess();sess.groupMatches=sess.groupMatches.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);updateSess(sess);render();}
+function genKO(){const sess=getSess();const st=sess.standings||cSt(sess.groupMatches,sess.groups);const q=GR.flatMap(g=>st[g]?.slice(0,2).map(t=>t.team)||[]);sess.ko=iKO(q);updateSess(sess);state.tab=3;render();}
+function uKO(stage,id,field,val){const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));const sd=m=>{if(field!=="isTB")m.done=m.hs!==""&&m.as!==""&&!isNaN(parseInt(m.hs))&&!isNaN(parseInt(m.as))&&parseInt(m.hs)!==parseInt(m.as);};if(stage==="qf")ko.qf=ko.qf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else if(stage==="sf")ko.sf=ko.sf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else{ko.final={...ko.final,[field]:val};sd(ko.final);}sess.ko=aKO(ko);updateSess(sess);render();}
+function tKTB(stage,id){const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));if(stage==="qf")ko.qf=ko.qf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else if(stage==="sf")ko.sf=ko.sf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else ko.final={...ko.final,isTB:!ko.final.isTB};sess.ko=ko;updateSess(sess);render();}
+async function closeSession(){if(!confirm("Close this session? Scores will be locked."))return;const sess=getSess();sess.status="closed";updateSess(sess);await apiPost({action:"closeSession",sessionId:sess.id});render();}
+
+render();
+loadSessions();
+</script>
+</body>
+</html>
