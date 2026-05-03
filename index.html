@@ -181,34 +181,17 @@ const LS_KEY='maymadness_sessions';
 let saveTimer=null;
 
 async function apiGet(p) {
-  return new Promise((resolve, reject) => {
-    const cb = "cb_" + Date.now();
-    window[cb] = (data) => { delete window[cb]; document.head.removeChild(script); resolve(data); };
-    const script = document.createElement("script");
-    script.src = API + "?" + new URLSearchParams({...p, callback: cb});
-    script.onerror = () => reject(new Error("Network error"));
-    document.head.appendChild(script);
-  });
+  const r = await fetch(API + "?" + new URLSearchParams(p), {method:"GET",redirect:"follow"});
+  return r.json();
 }
 async function apiPost(b) {
-  // Encode POST body as base64 in a GET request via JSONP
-  return new Promise((resolve, reject) => {
-    const cb = "cb" + Date.now() + Math.floor(Math.random()*9999);
-    const payload = encodeURIComponent(JSON.stringify(b));
-    const script = document.createElement("script");
-    window[cb] = (data) => {
-      delete window[cb];
-      document.head.removeChild(script);
-      resolve(data);
-    };
-    script.onerror = () => {
-      delete window[cb];
-      document.head.removeChild(script);
-      reject(new Error("Network error"));
-    };
-    script.src = API + "?callback=" + cb + "&action=" + b.action + "&payload=" + payload;
-    document.head.appendChild(script);
+  const r = await fetch(API, {
+    method: "POST",
+    redirect: "follow",
+    headers: {"Content-Type": "text/plain"},
+    body: JSON.stringify(b)
   });
+  return r.json();
 }
 
 async function loadSessions(){
