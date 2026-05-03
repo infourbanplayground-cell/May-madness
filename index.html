@@ -169,7 +169,9 @@ tr.adv td:first-child{border-left:2px solid rgba(255,138,0,.4)}
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbwq2z85GlIFlDaThwu_MuGTi1ln88gVx1nhOuxjZJrS1c0wwIAAcnFKHaUH167QZ6D8/exec";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwq2z85GlIFlDaThwu_MuGTi1ln88gVx1nhOuxjZJrS1c0wwIAAcnFKHaUH167QZ6D8/exec";
+const PROXY="https://corsproxy.io/?";
+const API=PROXY+encodeURIComponent(SCRIPT_URL);
 const ADMIN_PIN="1234";
 const GR=["A","B","C","D"];
 const SS=[{num:1,label:"Session 1",date:"Mon May 5",mult:1},{num:2,label:"Session 2",date:"Wed May 7",mult:1},{num:3,label:"Session 3",date:"Mon May 12",mult:1},{num:4,label:"Session 4",date:"Wed May 14",mult:1},{num:5,label:"Session 5",date:"Mon May 19",mult:1},{num:6,label:"Session 6",date:"Wed May 21",mult:1},{num:7,label:"Session 7",date:"Mon May 26",mult:2},{num:8,label:"Session 8",date:"Wed May 28",mult:2}];
@@ -190,7 +192,11 @@ async function apiGet(p) {
     document.head.appendChild(script);
   });
 }
-async function apiPost(b){const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});return r.json();}
+async function apiPost(b){
+  const url=PROXY+encodeURIComponent(SCRIPT_URL);
+  const r=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+  return r.json();
+}
 
 async function loadSessions(){
   setSS("loading");
