@@ -287,7 +287,7 @@ function iKO(q){return{qf:[{id:"qf1",home:q[0],away:q[5],hs:"",as:"",done:false,
 function gW(m){if(!m?.done||!m.home||!m.away)return null;return parseInt(m.hs)>parseInt(m.as)?m.home:parseInt(m.as)>parseInt(m.hs)?m.away:null;}
 function aKO(ko){const k=JSON.parse(JSON.stringify(ko));const qw=k.qf.map(gW);if(qw[0])k.sf[0].home=qw[0];if(qw[1])k.sf[0].away=qw[1];if(qw[2])k.sf[1].home=qw[2];if(qw[3])k.sf[1].away=qw[3];const sw=k.sf.map(gW);if(sw[0])k.final.home=sw[0];if(sw[1])k.final.away=sw[1];k.winner=gW(k.final);return k;}
 function isPB(p1,p2){const last=state.sessions[state.sessions.length-1];if(!last||!last.ko||!last.ko.winner)return false;const winLabel=last.ko.winner;const winPair=(last.pairs||[]).find(p=>p.label===winLabel);if(!winPair)return false;return((winPair.p1===p1&&winPair.p2===p2)||(winPair.p1===p2&&winPair.p2===p1));}
-function extractPairs(text){const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);const pairs=[];lines.forEach(line=>{const match=line.match(/^(?:\d+[\.\-\)]\s*)?(.+?)\s*[\/\|]\s*(.+)$/);if(match){const p1=match[1].trim(),p2=match[2].trim();if(p1&&p2)pairs.push({p1,p2,label:`${p1} / ${p2}`});}});return pairs;}
+function extractPairs(text){const lines=text.split("\n").map(l=>l.trim()).filter(Boolean);const pairs=[];lines.forEach(line=>{const match=line.match(/^(?:\d+[\.\-\)]\s*)?(.+?)\s*[\/\|&+]\s*(.+)$/);if(match){const p1=match[1].trim(),p2=match[2].trim();if(p1&&p2)pairs.push({p1,p2,label:`${p1} / ${p2}`});}});return pairs;}
 
 function getSess(){return state.activeIdx!==null?state.sessions[state.activeIdx]:null;}
 
@@ -388,7 +388,7 @@ function rBody(){
   if(state.tab===0){
     if(!state.isAdmin){h=`<div class="readonly-note">View only — tap Admin to unlock</div>`;body.innerHTML=h;return;}
     h+=`<div class="ir"><div class="sec" style="margin:0">Paste WhatsApp Sign Up List</div><span style="font-size:11px;color:rgba(255,255,255,.25)">Session ${state.sessions.length+1}</span></div>`;
-    h+=`<textarea class="paste-area" id="pasteArea" placeholder="Paste your WhatsApp sign up list:\n\n1- Ahmed / Salem\n2- Khalid / Omar\n..." oninput="onPaste(this.value)">${esc(state.pasteText)}</textarea>`;
+    h+=`<textarea class="paste-area" id="pasteArea" placeholder="Paste your WhatsApp sign up list:\n\n1- Ahmed / Salem\n2- Khalid & Omar\n3- Faisal + Tariq\n..." oninput="onPaste(this.value)">${esc(state.pasteText)}</textarea>`;
     if(state.parsedPairs.length>0){
       const hasBanned=state.parsedPairs.some(pr=>isPB(pr.p1,pr.p2));
       // Detect duplicate names across all players
@@ -446,9 +446,9 @@ function rBody(){
         GR.forEach((g,gi)=>{h+=`<div class="card"><div class="gh">Group ${g} · Court ${gi+1}</div>`;(sess.groups[g]||[]).forEach(t=>{h+=`<div class="gt">${(sess.seeds||[]).includes(t)?`<span class="seed-tag">SEED</span>`:""}<span style="font-size:10px">${esc(t)}</span></div>`;});h+=`</div>`;});
         h+=`</div>`;
         h+=`<div class="note">Cross path: Court 1&4 · Court 2&3 · Top 2 qualify</div>`;
-        if(state.isAdmin&&sess.status!=="closed"){
+        if(state.isAdmin){
           h+=`<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">`;
-          h+=`<button class="btn2" style="margin:0" onclick="toggleEditGroups()">⚙️ Edit Groups</button>`;
+          if(sess.status!=="closed")h+=`<button class="btn2" style="margin:0" onclick="toggleEditGroups()">⚙️ Edit Groups</button>`;
           h+=`<button class="btn2" style="margin:0;color:rgba(252,165,165,.7);border-color:rgba(239,68,68,.2)" onclick="openResetModal()">⚠️ Reset Session</button>`;
           h+=`</div>`;
         }
@@ -487,14 +487,14 @@ function rBody(){
 
   else if(state.tab===4){
     h+=`<div class="ir"><div class="sec" style="margin:0">Season Leaderboard</div><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;color:rgba(255,255,255,.2)">${state.sessions.length}/8 sessions</span><button class="tbt" onclick="loadSessions()">↻ Refresh</button>${state.isAdmin?`<button class="tbt" onclick="toggleEditNames()" style="color:rgba(255,180,0,.7);border-color:rgba(255,180,0,.3)">✏️ Edit Names</button>`:""}</div></div>`;
-    h+=`<div class="note" style="margin-bottom:10px">Min 3 sessions to qualify · 🔥 streak · S7/S8 = 2×</div>`;
+    h+=`<div class="note" style="margin-bottom:10px">Min 2 sessions to qualify · 🔥 streak · S7/S8 = 2×</div>`;
     const lb=Object.entries(sp).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(!lb.length){h+=`<div class="empty">No data yet. Complete matches to populate.</div>`;}
-    else{h+=`<div class="lb-card">`;lb.forEach(([player,pts],i)=>{const sc=state.sessions.filter(s=>s.pairs?.some(p=>p.p1===player||p.p2===player)).length;const el=sc>=3;let streak=0;for(let si=state.sessions.length-1;si>=0;si--){if(state.sessions[si]?.pairs?.some(p=>p.p1===player||p.p2===player))streak++;else break;}const bd=state.sessions.map((s,si)=>{const spp=cSP(s);return spp[player]!==undefined?{pts:spp[player],mult:s.mult}:null;});const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";h+=`<div class="lbr" style="${!el?"opacity:.4":""}"><div class="lbrk ${rc}">${el?(i===0?"1ST":i===1?"2ND":i===2?"3RD":i+1):"—"}</div><div><div class="lbn">${esc(player)}</div><div class="lbsc">${sc} session${sc!==1?"s":""}${!el?" · needs "+(3-sc)+" more":""}</div></div><div class="lbm"><div class="lbd">${bd.map((b,si)=>b?`<span class="lbs ${b.mult===2?"fx":""}">S${si+1}:${b.pts}</span>`:"").join("")}</div>${streak>=2?`<div class="lbst">🔥 ${streak} streak</div>`:""}</div><div class="lbp">${pts}</div></div>`;});h+=`</div>`;}
+    else{h+=`<div class="lb-card">`;lb.forEach(([player,pts],i)=>{const sc=state.sessions.filter(s=>s.pairs?.some(p=>p.p1===player||p.p2===player)).length;const el=sc>=2;let streak=0;for(let si=state.sessions.length-1;si>=0;si--){if(state.sessions[si]?.pairs?.some(p=>p.p1===player||p.p2===player))streak++;else break;}const bd=state.sessions.map((s,si)=>{const spp=cSP(s);return spp[player]!==undefined?{pts:spp[player],mult:s.mult}:null;});const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";h+=`<div class="lbr" style="${!el?"opacity:.4":""}"><div class="lbrk ${rc}">${el?(i===0?"1ST":i===1?"2ND":i===2?"3RD":i+1):"—"}</div><div><div class="lbn">${esc(player)}</div><div class="lbsc">${sc} session${sc!==1?"s":""}${!el?" · needs "+(2-sc)+" more":""}</div></div><div class="lbm"><div class="lbd">${bd.map((b,si)=>b?`<span class="lbs ${b.mult===2?"fx":""}">S${si+1}:${b.pts}</span>`:"").join("")}</div>${streak>=2?`<div class="lbst">🔥 ${streak} streak</div>`:""}</div><div class="lbp">${pts}</div></div>`;});h+=`</div>`;}
   }
 
   else if(state.tab===5){
-    [{t:"Match Points",items:[["Win","+3",""],["Competitive loss","+1",""],["Tiebreak loss","+2","g"],["Lost 6-0 or 6-1","0","r"]]},{t:"Bonus",items:[["Top of group","+1",""],["Reach Final","+2",""],["Win Final","+3","g"]]},{t:"Streak",items:[["2 in a row","+1",""],["3 in a row","+2",""],["4+ in a row","+3 MAX","g"]]},{t:"Multipliers",items:[["Sessions 1–6","1×",""],["Sessions 7–8","2× 🔥","g"]]},{t:"Partner Rules",items:[["Winners re-pairing next session","NOT ALLOWED","r"],["Min sessions","3",""],["New players","Allowed","g"]]},{t:"Tiebreakers",items:[["1st","Wins",""],["2nd","Game diff",""],["3rd","Head to head",""],["4th","Coin flip",""]]}].forEach(sec=>{h+=`<div class="pref"><div class="prt">${sec.t}</div><div class="prg">`;sec.items.forEach(([l,v,c])=>h+=`<div class="pri"><span class="prl">${l}</span><span class="prv ${c}">${v}</span></div>`);h+=`</div></div>`;});
+    [{t:"Match Points",items:[["Win","+3",""],["Competitive loss","+1",""],["Tiebreak loss","+2","g"],["Lost 6-0 or 6-1","0","r"]]},{t:"Bonus",items:[["Top of group","+1",""],["Reach Final","+2",""],["Win Final","+3","g"]]},{t:"Streak",items:[["2 in a row","+1",""],["3 in a row","+2",""],["4+ in a row","+3 MAX","g"]]},{t:"Multipliers",items:[["Sessions 1–6","1×",""],["Sessions 7–8","2× 🔥","g"]]},{t:"Partner Rules",items:[["Winners re-pairing next session","NOT ALLOWED","r"],["Min sessions","2",""],["New players","Allowed","g"]]},{t:"Tiebreakers",items:[["1st","Wins",""],["2nd","Game diff",""],["3rd","Head to head",""],["4th","Coin flip",""]]}].forEach(sec=>{h+=`<div class="pref"><div class="prt">${sec.t}</div><div class="prg">`;sec.items.forEach(([l,v,c])=>h+=`<div class="pri"><span class="prl">${l}</span><span class="prv ${c}">${v}</span></div>`);h+=`</div></div>`;});
   }
 
   body.innerHTML=h;
