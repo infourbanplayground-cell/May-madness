@@ -763,7 +763,12 @@ function rBody(){
 
       if(hasDupes)h+=`<div class="ban-note" style="border-left-color:var(--orange);color:rgba(255,180,0,.7)">⚠️ Duplicate names detected — edit highlighted names to add a last initial</div>`;
       if(hasBan)h+=`<div class="ban-note">⚠️ Last session winners cannot re-pair — remove or edit that pair</div>`;
-      if(fmt)h+=`<div class="info-note">✅ ${n} teams → ${Object.entries(fmt.g).map(([g,s])=>`${g}(${s})`).join("+")}${fmt.po?` · Group ${fmt.po} = playoff`:""}${fmt.drop.length?` · Group${fmt.drop.length>1?"s":""} ${fmt.drop.join("/")} drop lowest`+"":`</div>`:`</div>`}`;
+      if(fmt){
+        const fmtDesc=Object.entries(fmt.g).map(([g,s])=>g+"("+s+")").join("+");
+        const dropDesc=fmt.drop.length?" · Group"+(fmt.drop.length>1?"s":"")+" "+fmt.drop.join("/")+" drop lowest":"";
+        const poDesc=fmt.po?" · Group "+fmt.po+" = playoff":"";
+        h+=`<div class="info-note">✅ ${n} teams → ${fmtDesc}${dropDesc}${poDesc}</div>`;
+      }
       else h+=`<div class="info-note">ℹ️ ${n} teams — supported range: 8 to 16</div>`;
 
       ST.parsed.forEach((pr,i)=>{
