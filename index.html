@@ -460,7 +460,19 @@ function isBanned(p1,p2){
 
 // ── LOCAL STORAGE & API ──────────────────────────────────────
 function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(ST.sessions));}catch(e){}}
-function loadLocal(){try{const d=localStorage.getItem(LS);return d?JSON.parse(d):null;}catch(e){return null;}}
+function loadLocal(){
+  try{
+    // Try new key first
+    let d=localStorage.getItem(LS);
+    if(d)return JSON.parse(d);
+    // Try old keys as fallback
+    for(const k of['maymadness_v2','maymadness_sessions','mm_v4']){
+      d=localStorage.getItem(k);
+      if(d){const parsed=JSON.parse(d);saveLocal();return parsed;}
+    }
+    return null;
+  }catch(e){return null;}
+}
 
 let saveTimer=null;
 function setSS(s){
@@ -726,6 +738,15 @@ function openSeedAndDraw(){
 }
 
 // ── RENDER ────────────────────────────────────────────────────
+function n2Desc(n){
+  const f=FMT[n];if(!f)return`${n} teams`;
+  const parts=Object.entries(f.g).map(([g,s])=>`Group ${g}: ${s} teams`);
+  let desc=parts.join(" · ");
+  if(f.drop.length)desc+=` · Group${f.drop.length>1?"s":""} ${f.drop.join("&")} play 4, drop lowest`;
+  if(f.po)desc+=` · Group ${f.po} has playoff for 2nd qualifier`;
+  return desc;
+}
+
 function render(){rSess();rTabs();rBody();}
 
 function rSess(){
@@ -797,7 +818,8 @@ function rBody(){
       const fmt=sess.fmt||getFmt(sess.teamCount||16);
       const keys=gk(fmt);
       h+=`<div class="ir"><div class="sec" style="margin:0">${sess.label} · ${sess.date||""}</div><div style="display:flex;gap:6px;align-items:center">${sess.mult===2?`<span class="mb">2× FINAL WEEK</span>`:""}${sess.status==="closed"?`<span style="font-size:10px;color:#22c55e;font-weight:700">CLOSED ✓</span>`:""}</div></div>`;
-      h+=`<div class="note">${n2Desc(sess.teamCount||Object.values(sess.groups).flat().length)}</div>`;
+      const _n=sess.teamCount||Object.values(sess.groups||{}).flat().length||16;
+      h+=`<div class="note">${n2Desc(_n)}</div>`;
 
       if(ST.editGroups&&ST.isAdmin){
         const allT=keys.flatMap(g=>sess.groups[g]||[]);
@@ -984,14 +1006,7 @@ function rBody(){
   body.innerHTML=h;
 }
 
-function n2Desc(n){
-  const f=FMT[n];if(!f)return`${n} teams`;
-  const parts=Object.entries(f.g).map(([g,s])=>`Group ${g}: ${s} teams`);
-  let desc=parts.join(" · ");
-  if(f.drop.length)desc+=` · Group${f.drop.length>1?"s":""} ${f.drop.join("&")} play 4, drop lowest`;
-  if(f.po)desc+=` · Group ${f.po} has playoff for 2nd qualifier`;
-  return desc;
-}
+
 
 // ── NAVIGATION ────────────────────────────────────────────────
 function setTab(i){ST.tab=i;render();}
