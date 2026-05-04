@@ -168,6 +168,31 @@ tr.adv td:first-child{border-left:2px solid rgba(255,138,0,.4)}
   </div>
 </div>
 
+
+<div class="modal-overlay" id="resetModal" style="display:none" onclick="if(event.target===this)closeResetModal()">
+  <div class="modal">
+    <div class="modal-title">⚠️ Reset Session</div>
+    <div style="font-size:12px;color:rgba(255,255,255,.4);text-align:center;margin-bottom:16px">Choose reset type</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="resetSession('scores')" style="background:rgba(255,138,0,.08);border:1px solid rgba(255,138,0,.2);color:rgba(255,138,0,.8);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:11px;border-radius:4px">🔄 Reset Scores — Keep Draw</button>
+      <button onclick="resetSession('redraw')" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:rgba(147,197,253,.8);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:11px;border-radius:4px">🎲 Redraw — Keep Pairs</button>
+      <button onclick="resetSession('delete')" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:rgba(252,165,165,.8);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:11px;border-radius:4px">🗑️ Delete Session Completely</button>
+      <button onclick="closeResetModal()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:11px;border-radius:4px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="seedModal" style="display:none" onclick="if(event.target===this)closeSeedModal()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">🌱 Edit Seeds</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:14px">Auto-seeded by season points. Drag to reorder or tap swap to change.</div>
+    <div id="seedList" style="margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeSeedModal()" style="flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:10px;border-radius:4px">Cancel</button>
+      <button onclick="confirmSeeds()" style="flex:1;background:linear-gradient(135deg,#ff8a00,#ff3d00);border:none;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;padding:10px;border-radius:4px">Confirm Seeds →</button>
+    </div>
+  </div>
+</div>
 <script>
 const API="https://script.google.com/macros/s/AKfycbwq2z85GlIFlDaThwu_MuGTi1ln88gVx1nhOuxjZJrS1c0wwIAAcnFKHaUH167QZ6D8/exec";
 const ADMIN_PIN="1234";
@@ -175,7 +200,7 @@ const GR=["A","B","C","D"];
 const SS=[{num:1,label:"Session 1",date:"Mon May 5",mult:1},{num:2,label:"Session 2",date:"Wed May 7",mult:1},{num:3,label:"Session 3",date:"Mon May 12",mult:1},{num:4,label:"Session 4",date:"Wed May 14",mult:1},{num:5,label:"Session 5",date:"Mon May 19",mult:1},{num:6,label:"Session 6",date:"Wed May 21",mult:1},{num:7,label:"Session 7",date:"Mon May 26",mult:2},{num:8,label:"Session 8",date:"Wed May 28",mult:2}];
 const TABS=["Register","Draw","Groups","Knockouts","Leaderboard","Points"];
 
-let state={sessions:[],activeIdx:null,tab:0,isAdmin:false,pasteText:"",parsedPairs:[],editingGroups:false,editingNames:false};
+let state={sessions:[],activeIdx:null,tab:0,isAdmin:false,pasteText:"",parsedPairs:[],editingGroups:false,editingNames:false,manualSeeds:null};
 let undoStack=[];
 const LS_KEY='maymadness_sessions';
 let saveTimer=null;
@@ -422,7 +447,10 @@ function rBody(){
         h+=`</div>`;
         h+=`<div class="note">Cross path: Court 1&4 · Court 2&3 · Top 2 qualify</div>`;
         if(state.isAdmin&&sess.status!=="closed"){
-          h+=`<button class="btn2" onclick="toggleEditGroups()">⚙️ Edit Group Assignments</button>`;
+          h+=`<div style="display:flex;gap:8px;justify-content:center;margin-top:10px">`;
+          h+=`<button class="btn2" style="margin:0" onclick="toggleEditGroups()">⚙️ Edit Groups</button>`;
+          h+=`<button class="btn2" style="margin:0;color:rgba(252,165,165,.7);border-color:rgba(239,68,68,.2)" onclick="openResetModal()">⚠️ Reset Session</button>`;
+          h+=`</div>`;
         }
       }
     }
@@ -494,14 +522,46 @@ function confirmParsed(){
   if(state.parsedPairs.length!==16){alert("Need exactly 16 pairs.");return;}
   const seasonPts=gSP();
   const ranked=[...state.parsedPairs].sort((a,b)=>((seasonPts[b.p1]||0)+(seasonPts[b.p2]||0))-((seasonPts[a.p1]||0)+(seasonPts[a.p2]||0)));
-  const seeds=ranked.slice(0,4);const rest=shuf(ranked.slice(4));
-  const grps={A:[seeds[0].label],B:[seeds[1].label],C:[seeds[2].label],D:[seeds[3].label]};
-  [rest.slice(0,4),rest.slice(4,8),rest.slice(8,12)].forEach(pot=>{const sp2=shuf(pot);GR.forEach((g,i)=>grps[g].push(sp2[i].label));});
+  state.manualSeeds=null;
+  window._pendingPairs=ranked;
+  openSeedModal(ranked);
+}
+
+function runDrawWithSeeds(ranked,seeds){
+  if(seeds.length<4){alert("Need at least 4 seeds (one per group).");return;}
+  // Seeds 1-4 go into groups A-D, seeds 5-8 go into groups D-A (snake)
+  const top4=seeds.slice(0,4);
+  const next4=seeds.slice(4,8);
+  const rest=shuf(ranked.filter(p=>!seeds.find(s=>s.label===p.label)));
+  const grps={A:[top4[0].label],B:[top4[1].label],C:[top4[2].label],D:[top4[3].label]};
+  // Snake seeds 5-8: D,C,B,A
+  if(next4.length===4){grps.D.push(next4[0].label);grps.C.push(next4[1].label);grps.B.push(next4[2].label);grps.A.push(next4[3].label);}
+  else{const sn=shuf(next4);GR.forEach((g,i)=>{if(sn[i])grps[g].push(sn[i].label);});}
+  // Fill remaining spots randomly
+  const spotsNeeded=GR.map(g=>4-grps[g].length);
+  let restIdx=0;
+  GR.forEach((g,i)=>{for(let j=0;j<spotsNeeded[i];j++){if(restIdx<rest.length)grps[g].push(rest[restIdx++].label);}});
   const idx=state.sessions.length;
   const sI=SS[idx]||{num:idx+1,label:`Session ${idx+1}`,date:"",mult:1};
   const newSess={...sI,id:Date.now(),pairs:ranked,seeds:seeds.map(s=>s.label),groups:grps,groupMatches:gGM(grps),standings:null,ko:null,status:"active"};
-  state.sessions.push(newSess);state.activeIdx=idx;state.pasteText="";state.parsedPairs=[];state.tab=1;
+  state.sessions.push(newSess);state.activeIdx=idx;
+  state.pasteText="";state.parsedPairs=[];state.manualSeeds=null;state.tab=1;
   saveSession(newSess);render();
+}
+
+function runDrawForSession(pairs,sessIdx){
+  const seasonPts=gSP();
+  const ranked=[...pairs].sort((a,b)=>((seasonPts[b.p1]||0)+(seasonPts[b.p2]||0))-((seasonPts[a.p1]||0)+(seasonPts[a.p2]||0)));
+  const seeds=ranked.slice(0,8);
+  const rest=shuf(ranked.slice(8));
+  const top4=seeds.slice(0,4),next4=seeds.slice(4,8);
+  const grps={A:[top4[0].label],B:[top4[1].label],C:[top4[2].label],D:[top4[3].label]};
+  grps.D.push(next4[0].label);grps.C.push(next4[1].label);grps.B.push(next4[2].label);grps.A.push(next4[3].label);
+  [rest.slice(0,4),rest.slice(4,8)].forEach(pot=>{const sp=shuf(pot);GR.forEach((g,i)=>{if(sp[i])grps[g].push(sp[i].label);});});
+  const existing=state.sessions[sessIdx];
+  const updated={...existing,pairs:ranked,seeds:seeds.map(s=>s.label),groups:grps,groupMatches:gGM(grps),standings:null,ko:null,status:"active"};
+  state.sessions=state.sessions.map((s,i)=>i===sessIdx?updated:s);
+  saveLocal();scheduleSave(updated);render();
 }
 
 function uG(id,field,val){
@@ -535,6 +595,91 @@ function tGTB(id){
 function genKO(){const sess=getSess();const st=sess.standings||cSt(sess.groupMatches,sess.groups);const q=GR.flatMap(g=>st[g]?.slice(0,2).map(t=>t.team)||[]);sess.ko=iKO(q);updateSess(sess);state.tab=3;render();}
 function uKO(stage,id,field,val){pushUndo();const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));const sd=m=>{if(field!=="isTB")m.done=m.hs!==""&&m.as!==""&&!isNaN(parseInt(m.hs))&&!isNaN(parseInt(m.as))&&parseInt(m.hs)!==parseInt(m.as);};if(stage==="qf")ko.qf=ko.qf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else if(stage==="sf")ko.sf=ko.sf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});else{ko.final={...ko.final,[field]:val};sd(ko.final);}sess.ko=aKO(ko);updateSess(sess);render();}
 function tKTB(stage,id){const sess=getSess();const ko=JSON.parse(JSON.stringify(sess.ko));if(stage==="qf")ko.qf=ko.qf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else if(stage==="sf")ko.sf=ko.sf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);else ko.final={...ko.final,isTB:!ko.final.isTB};sess.ko=ko;updateSess(sess);render();}
+// ── RESET ──
+function openResetModal(){document.getElementById('resetModal').style.display='flex';}
+function closeResetModal(){document.getElementById('resetModal').style.display='none';}
+
+async function resetSession(type){
+  closeResetModal();
+  const sess=getSess();
+  if(!sess)return;
+  if(type==='delete'){
+    if(!confirm('Delete this session completely? This cannot be undone.'))return;
+    state.sessions=state.sessions.filter((_,i)=>i!==state.activeIdx);
+    state.activeIdx=state.sessions.length>0?state.sessions.length-1:null;
+    saveLocal();
+    try{await apiPost({action:'deleteSession',sessionId:sess.id});}catch(e){}
+    render();
+  } else if(type==='scores'){
+    if(!confirm('Reset all scores? Draw and pairs will be kept.'))return;
+    const fresh={...sess,groupMatches:gGM(sess.groups),standings:null,ko:null,status:'active'};
+    state.sessions=state.sessions.map((s,i)=>i===state.activeIdx?fresh:s);
+    saveLocal();scheduleSave(fresh);render();
+  } else if(type==='redraw'){
+    if(!confirm('Redraw groups? Pairs stay, but groups and all scores reset.'))return;
+    state.manualSeeds=null;
+    runDrawForSession(sess.pairs,state.activeIdx);
+  }
+}
+
+// ── SEEDING ──
+function openSeedModal(rankedPairs){
+  const seeds=state.manualSeeds||rankedPairs.slice(0,8);
+  const rest=rankedPairs.filter(p=>!seeds.find(s=>s.label===p.label));
+  let html='';
+  seeds.forEach((pr,i)=>{
+    html+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:#0f1520;border:1px solid rgba(255,138,0,.1);border-radius:4px;margin-bottom:5px">
+      <span style="font-size:11px;font-weight:800;color:rgba(255,138,0,.5);min-width:20px">${i+1}</span>
+      <span style="flex:1;font-size:12px;font-weight:600;color:#e8e3da">${esc(pr.label)}</span>
+      ${i>0?`<button onclick="moveSeed(${i},-1)" style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:3px;cursor:pointer;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:11px">↑</button>`:''}
+      ${i<seeds.length-1?`<button onclick="moveSeed(${i},1)" style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);border-radius:3px;cursor:pointer;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:11px">↓</button>`:''}
+      <button onclick="removeSeed(${i})" style="background:none;border:1px solid rgba(255,0,0,.2);color:rgba(255,80,80,.5);border-radius:3px;cursor:pointer;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:11px">×</button>
+    </div>`;
+  });
+  if(rest.length>0){
+    html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.2);margin:10px 0 6px">Unseeded — tap + to add</div>`;
+    rest.forEach((pr,i)=>{
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.02);border-radius:4px;margin-bottom:4px">
+        <span style="flex:1;font-size:12px;font-weight:600;color:rgba(255,255,255,.4)">${esc(pr.label)}</span>
+        ${seeds.length<8?`<button onclick="addSeed('${esc(pr.label)}')" style="background:rgba(255,138,0,.08);border:1px solid rgba(255,138,0,.2);color:rgba(255,138,0,.7);border-radius:3px;cursor:pointer;padding:2px 7px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700">+ Seed</button>`:''}
+      </div>`;
+    });
+  }
+  document.getElementById('seedList').innerHTML=html;
+  window._seedRanked=rankedPairs;
+  document.getElementById('seedModal').style.display='flex';
+}
+
+function closeSeedModal(){document.getElementById('seedModal').style.display='none';}
+
+function moveSeed(idx,dir){
+  const seeds=state.manualSeeds||window._seedRanked.slice(0,8);
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=seeds.length)return;
+  [seeds[idx],seeds[newIdx]]=[seeds[newIdx],seeds[idx]];
+  state.manualSeeds=seeds;
+  openSeedModal(window._seedRanked);
+}
+
+function removeSeed(idx){
+  const seeds=state.manualSeeds||window._seedRanked.slice(0,8);
+  seeds.splice(idx,1);
+  state.manualSeeds=seeds;
+  openSeedModal(window._seedRanked);
+}
+
+function addSeed(label){
+  const seeds=state.manualSeeds||window._seedRanked.slice(0,8);
+  if(seeds.length>=8)return;
+  const pr=window._seedRanked.find(p=>p.label===label);
+  if(pr){seeds.push(pr);state.manualSeeds=seeds;openSeedModal(window._seedRanked);}
+}
+
+function confirmSeeds(){
+  closeSeedModal();
+  runDrawWithSeeds(window._seedRanked,state.manualSeeds||window._seedRanked.slice(0,8));
+}
+
 async function closeSession(){if(!confirm("Close this session? Scores will be locked."))return;const sess=getSess();sess.status="closed";updateSess(sess);await apiPost({action:"closeSession",sessionId:sess.id});render();}
 
 render();
