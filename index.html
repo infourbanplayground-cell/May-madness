@@ -373,8 +373,14 @@ function getQualifiers(st,fmt,n,poOverride){
   }
   // 16: top 2 from each group with cross-path seeding 1v8,4v5,2v7,3v6
   if(n===16){
+    // Cross-path seeding: Courts 1&4 vs Courts 2&3
+    // QF1:A1vD2, QF2:B2vC1, QF3:D1vA2, QF4:C2vB1
+    // q feeds mkKO as: q[0]vq[7], q[3]vq[4], q[1]vq[6], q[2]vq[5]
     const a=st["A"]||[],b=st["B"]||[],c=st["C"]||[],d=st["D"]||[];
-    return [a[0],d[1],c[0],b[1],b[0],c[1],d[0],a[1]].filter(Boolean).map(t=>t?.team).filter(Boolean);
+    const A1=a[0]?.team,A2=a[1]?.team,B1=b[0]?.team,B2=b[1]?.team;
+    const C1=c[0]?.team,C2=c[1]?.team,D1=d[0]?.team,D2=d[1]?.team;
+    // q[0]vq[7]=A1vD2, q[3]vq[4]=B2vC1, q[1]vq[6]=D1vA2, q[2]vq[5]=C2vB1
+    return [A1,D1,C2,B2,C1,B1,A2,D2].filter(Boolean);
   }
   // fallback
   keys.forEach(g=>(st[g]||[]).slice(0,2).forEach(t=>q.push(t.team)));
