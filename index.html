@@ -486,13 +486,28 @@ function calcSessPts(sess){
 }
 
 function calcStreak(player,sessions,idx){
+  // Count current streak ending at idx
   let s=0;
   for(let i=idx;i>=0;i--){
     if((sessions[i].pairs||[]).some(p=>p.p1===player||p.p2===player))s++;
     else break;
   }
+  // Count streak ending at idx-1
+  let sPrev=0;
+  if(idx>0){
+    for(let i=idx-1;i>=0;i--){
+      if((sessions[i].pairs||[]).some(p=>p.p1===player||p.p2===player))sPrev++;
+      else break;
+    }
+  }
   const mult=sessions[idx]?.mult||1;
-  if(s>=4)return 3*mult;if(s===3)return 2*mult;if(s===2)return mult;return 0;
+  const bonusNow=s>=4?3*mult:s===3?2*mult:s===2?mult:0;
+  // For sessions with 2x multiplier, recalculate prev with 1x then reapply 2x
+  // to avoid double-counting the multiplier on existing streak
+  const prevMult=idx>0?(sessions[idx-1]?.mult||1):1;
+  const bonusPrev=sPrev>=4?3*prevMult:sPrev===3?2*prevMult:sPrev===2?prevMult:0;
+  // Only return the increment
+  return Math.max(0, bonusNow - bonusPrev);
 }
 
 function getPlayerStats(player){
