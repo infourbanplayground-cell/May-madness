@@ -464,7 +464,7 @@ function calcSessPts(sess){
   if(sess.standings){
     gk(fmt).forEach(g=>{
       const top=sess.standings[g]?.[0];
-      if(top)fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=1*mult;});
+      if(top&&top.p>0)fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=1*mult;});
     });
   }
   // KO points
