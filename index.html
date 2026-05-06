@@ -492,17 +492,17 @@ function playerPlayed(sess,player){
 }
 
 function calcStreak(player,sessions,idx){
-  // Count current streak ending at idx
+  // Only count sessions where player actually played (has completed matches)
   let s=0;
   for(let i=idx;i>=0;i--){
-    if((sessions[i].pairs||[]).some(p=>p.p1===player||p.p2===player))s++;
+    if(playerPlayed(sessions[i],player))s++;
     else break;
   }
   // Count streak ending at idx-1
   let sPrev=0;
   if(idx>0){
     for(let i=idx-1;i>=0;i--){
-      if((sessions[i].pairs||[]).some(p=>p.p1===player||p.p2===player))sPrev++;
+      if(playerPlayed(sessions[i],player))sPrev++;
       else break;
     }
   }
