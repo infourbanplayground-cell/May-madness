@@ -784,12 +784,6 @@ function renamePlayer(oldName,newName){
   const rep=s=>s.split(" / ").map(n=>n===oldName?newName:n).join(" / ");
   const repTeam=t=>t===oldName?newName:rep(t);
   ST.sessions=ST.sessions.map(sess=>{
-    // Update standings team names too (critical for points calculation)
-    const newStandings=sess.standings?Object.fromEntries(
-      Object.entries(sess.standings).map(([g,rows])=>[g,
-        rows.map(row=>row.team===oldName||rep(row.team)!==row.team?{...row,team:rep(row.team)}:row)
-      ])
-    ):null;
     // Update KO bracket team names
     const repM=m=>m?{...m,
       home:m.home?rep(m.home):m.home,
@@ -804,16 +798,18 @@ function renamePlayer(oldName,newName){
       winner:sess.ko.winner?rep(sess.ko.winner):sess.ko.winner,
       poOverride:sess.ko.poOverride?rep(sess.ko.poOverride):sess.ko.poOverride
     }:null;
-    return{...sess,
+    // Build updated session with new names everywhere
+    const updated={...sess,
       pairs:(sess.pairs||[]).map(pr=>{const p1=pr.p1===oldName?newName:pr.p1,p2=pr.p2===oldName?newName:pr.p2;return{...pr,p1,p2,label:`${p1} / ${p2}`};}),
       seeds:(sess.seeds||[]).map(rep),
       groups:Object.fromEntries(Object.entries(sess.groups||{}).map(([g,t])=>[g,t.map(rep)])),
       groupMatches:(sess.groupMatches||[]).map(m=>({...m,home:rep(m.home),away:rep(m.away)})),
       ko:newKO
     };
-    // Recalculate standings from scratch so team labels match updated pair labels
-    // This fixes the top-of-group bonus disappearing after rename
-    if(updated.groupMatches && updated.groups){
+    // Recalculate standings from scratch AFTER updating all names
+    // Critical: standings.team must match pair labels for fP() to work correctly
+    // Otherwise top-of-group bonus breaks (fP returns [] for old label)
+    if(updated.groupMatches&&updated.groups){
       const fmt=updated.fmt||getFmt(updated.teamCount||16);
       updated.standings=calcStandings(updated.groupMatches,updated.groups,fmt);
     }
@@ -826,6 +822,69 @@ function renamePlayer(oldName,newName){
 function onPaste(val){ST.paste=val;ST.parsed=extractPairs(val);render();}
 function rmParsed(i){ST.parsed.splice(i,1);render();}
 function editPN(i,field,val){ST.parsed[i][field]=val.trim();ST.parsed[i].label=`${ST.parsed[i].p1} / ${ST.parsed[i].p2}`;}
+
+
+// ── FUZZY NAME MATCHING ───────────────────────────────────────
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i?j?0:i:j));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function normName(s){return s.toLowerCase().trim().replace(/[^a-z0-9]/g,'');}
+
+function fuzzyMatch(name,candidates){
+  // Returns best match if similar enough, null otherwise
+  const nn=normName(name);
+  if(!nn||nn.length<2)return null;
+  let best=null,bestScore=Infinity;
+  candidates.forEach(c=>{
+    const nc=normName(c);
+    if(!nc||nc===nn)return; // exact match, skip
+    const dist=levenshtein(nn,nc);
+    const maxLen=Math.max(nn.length,nc.length);
+    const ratio=dist/maxLen;
+    // Match if: edit distance <= 2, or ratio < 0.35, or one starts with the other
+    const isClose=dist<=2||ratio<0.35||nn.startsWith(nc)||nc.startsWith(nn);
+    if(isClose&&dist<bestScore){bestScore=dist;best=c;}
+  });
+  return best;
+}
+
+function getPrevPlayers(){
+  // Get all unique player names from previous sessions
+  const players=new Set();
+  ST.sessions.forEach(sess=>{
+    (sess.pairs||[]).forEach(pr=>{players.add(pr.p1);players.add(pr.p2);});
+  });
+  return [...players];
+}
+
+function getSuggestions(parsed){
+  const prev=getPrevPlayers();
+  if(!prev.length)return {};
+  const currentNames=new Set(parsed.flatMap(p=>[p.p1,p.p2]));
+  const suggestions={};
+  parsed.forEach((pr,i)=>{
+    [pr.p1,pr.p2].forEach((name,fi)=>{
+      // Skip if exact match exists in prev
+      if(prev.includes(name))return;
+      // Skip if it's clearly a new player (short abbreviation known pattern)
+      const match=fuzzyMatch(name,prev.filter(p=>!currentNames.has(p)||p===name));
+      if(match)suggestions[name]=match;
+    });
+  });
+  return suggestions;
+}
+
+function applySuggestion(pairIdx,field,newName){
+  ST.parsed[pairIdx][field]=newName;
+  ST.parsed[pairIdx].label=`${ST.parsed[pairIdx].p1} / ${ST.parsed[pairIdx].p2}`;
+  // Recalculate suggestions and re-render
+  render();
+}
 
 function canDraw(){
   const n=ST.parsed.length;
@@ -911,17 +970,41 @@ function rBody(){
       }
       else h+=`<div class="info-note">ℹ️ ${n} teams — supported range: 8 to 16</div>`;
 
+      const suggestions=getSuggestions(ST.parsed);
+      const hasSuggestions=Object.keys(suggestions).length>0;
+      if(hasSuggestions)h+=`<div class="info-note" style="border-left-color:#a78bfa;color:rgba(180,150,255,.8)">💡 Some names look similar to previous players — check suggestions below</div>`;
+
       ST.parsed.forEach((pr,i)=>{
         const ban=isBanned(pr.p1,pr.p2);
         const d1=dupes.has(pr.p1),d2=dupes.has(pr.p2);
-        h+=`<div class="pc"><span class="pn">${String(i+1).padStart(2,"0")}</span>`;
+        const s1=suggestions[pr.p1],s2=suggestions[pr.p2];
+
+        h+=`<div class="pc" style="flex-direction:column;align-items:stretch;gap:0;padding:0">`;
+        h+=`<div style="display:flex;align-items:center;gap:7px;padding:7px 12px">`;
+        h+=`<span class="pn">${String(i+1).padStart(2,"0")}</span>`;
+
+        // P1
         if(d1)h+=`<input type="text" value="${esc(pr.p1)}" style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:3px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editPN(${i},'p1',this.value)">`;
-        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(pr.p1)}</span>`;
+        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;${s1?'color:rgba(167,139,250,.9);font-weight:700':''}">${esc(pr.p1)}</span>`;
+
         h+=`<span class="ps">/</span>`;
+
+        // P2
         if(d2)h+=`<input type="text" value="${esc(pr.p2)}" style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:3px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editPN(${i},'p2',this.value)">`;
-        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(pr.p2)}</span>`;
+        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;${s2?'color:rgba(167,139,250,.9);font-weight:700':''}">${esc(pr.p2)}</span>`;
+
         if(ban)h+=`<span style="font-size:10px;color:rgba(255,80,80,.6);font-weight:700;flex-shrink:0">BAN</span>`;
-        h+=`<button class="pb" onclick="rmParsed(${i})">×</button></div>`;
+        h+=`<button class="pb" onclick="rmParsed(${i})">×</button>`;
+        h+=`</div>`;
+
+        // Suggestion chips
+        if(s1||s2){
+          h+=`<div style="display:flex;gap:6px;padding:4px 12px 8px;flex-wrap:wrap">`;
+          if(s1)h+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(167,139,250,.7)">💡 <span style="color:rgba(255,255,255,.4)">${esc(pr.p1)}</span> → <button onclick="applySuggestion(${i},'p1','${esc(s1)}')" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:rgba(167,139,250,.9);border-radius:3px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer">${esc(s1)} ✓</button> <button onclick="editPN(${i},'p1','${esc(pr.p1)}')" style="background:transparent;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer">keep</button></div>`;
+          if(s2)h+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(167,139,250,.7)">💡 <span style="color:rgba(255,255,255,.4)">${esc(pr.p2)}</span> → <button onclick="applySuggestion(${i},'p2','${esc(s2)}')" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:rgba(167,139,250,.9);border-radius:3px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer">${esc(s2)} ✓</button> <button onclick="editPN(${i},'p2','${esc(pr.p2)}')" style="background:transparent;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer">keep</button></div>`;
+          h+=`</div>`;
+        }
+        h+=`</div>`;
       });
       h+=`<div class="note" style="margin-top:8px">${n} pairs${!fmt?" · unsupported count":hasDupes?" · fix duplicate names":hasBan?" · remove banned pair":""}</div>`;
       h+=`<button class="btn" ${!canDraw()?"disabled":""} onclick="openSeedAndDraw()">Review Seeds & Draw →</button>`;
