@@ -1,0 +1,1447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="May Madness">
+<title>May Madness 🎾</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;1,800&family=Barlow:wght@400;500;600&display=swap');
+:root{
+  --bg:#060810;
+  --bg2:#0a0e1a;
+  --card:#0f1628;
+  --card2:#0d1120;
+  --orange:#ff7a00;
+  --orange2:#ff9a30;
+  --gold:#ffc040;
+  --white:#f0eade;
+  --dim:rgba(240,234,222,.5);
+  --green:#00e87a;
+  --red:#ff3b5c;
+  --glow:0 0 20px rgba(255,122,0,.25);
+  --glow-sm:0 0 10px rgba(255,122,0,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);overscroll-behavior:none}
+body{font-family:'Barlow Condensed',sans-serif;color:var(--white)}
+
+/* Neon grid background */
+body::before{content:'';position:fixed;inset:0;background:
+  linear-gradient(rgba(255,122,0,.03) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,122,0,.03) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -10%,rgba(255,122,0,.08) 0%,transparent 70%);pointer-events:none;z-index:0;}
+#sessRow,#tabBar,#appBody,.topbar,.body{position:relative;z-index:1;}
+
+.topbar{background:rgba(6,8,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,122,0,.15);padding:12px 20px 10px;position:sticky;top:0;z-index:100;box-shadow:0 1px 0 rgba(255,122,0,.08),0 4px 20px rgba(0,0,0,.4)}
+.brand-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.brand-title{font-size:26px;font-weight:800;font-style:italic;letter-spacing:.06em;color:#fff;text-shadow:0 0 30px rgba(255,122,0,.3)}
+.brand-title em{color:var(--orange);font-style:normal;text-shadow:0 0 20px rgba(255,122,0,.6)}
+.brand-sub{font-size:9px;font-weight:700;letter-spacing:.3em;color:rgba(255,122,0,.35);text-transform:uppercase}
+.topright{display:flex;align-items:center;gap:10px}
+.sync{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.3);font-weight:600}
+.sdot{width:7px;height:7px;border-radius:50%;background:#334155;flex-shrink:0}
+.sdot.ok{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.sdot.err{background:var(--red);box-shadow:0 0 8px var(--red)}
+.sdot.saving{background:var(--orange);box-shadow:0 0 8px var(--orange);animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.pin-btn{font-size:11px;padding:4px 11px;border-radius:3px;background:rgba(255,122,0,.06);border:1px solid rgba(255,122,0,.25);color:rgba(255,155,50,.8);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;transition:all .15s}
+.pin-btn:hover{background:rgba(255,122,0,.12);border-color:rgba(255,122,0,.45);box-shadow:var(--glow-sm)}
+.admin-badge{font-size:10px;padding:2px 9px;border-radius:3px;background:rgba(255,122,0,.12);border:1px solid rgba(255,122,0,.4);color:var(--orange);font-weight:700;cursor:pointer;box-shadow:var(--glow-sm)}
+.sess-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.sess-row::-webkit-scrollbar{display:none}
+.sc{padding:5px 13px;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.5);cursor:pointer;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.sc:hover{border-color:rgba(255,122,0,.3);color:rgba(255,155,50,.6)}
+.sc.on{background:rgba(255,122,0,.1);border-color:rgba(255,122,0,.4);color:var(--orange);box-shadow:var(--glow-sm),inset 0 0 12px rgba(255,122,0,.05)}
+.sc.fw.on{background:rgba(255,40,0,.1);border-color:rgba(255,40,0,.45);color:#ff5020;box-shadow:0 0 10px rgba(255,40,0,.25)}
+.sc.closed{opacity:.4}
+.tabs{display:flex;background:rgba(6,8,16,.8);border-bottom:1px solid rgba(255,122,0,.08);overflow-x:auto;padding:0 20px;backdrop-filter:blur(8px)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;border-bottom:2px solid transparent;padding:12px 16px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);cursor:pointer;white-space:nowrap;font-family:'Barlow Condensed',sans-serif;transition:all .2s}
+.tab:hover{color:rgba(255,155,50,.5)}
+.tab.on{color:var(--orange);border-bottom-color:var(--orange);text-shadow:0 0 12px rgba(255,122,0,.4)}
+.body{padding:16px 18px;max-width:100%;margin:0 auto}
+.sec{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,155,50,.8);margin-bottom:12px}
+.note{font-size:12px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:12px}
+.card{background:var(--card);border:1px solid rgba(255,122,0,.1);border-radius:6px;overflow:hidden;margin-bottom:10px;box-shadow:0 2px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04)}
+.ch{padding:9px 14px;border-bottom:1px solid rgba(255,122,0,.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px;background:rgba(255,122,0,.03)}
+.cl{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#ff9a30}
+.mb{font-size:10px;padding:2px 7px;border-radius:2px;background:rgba(255,40,0,.12);border:1px solid rgba(255,40,0,.3);color:#ff5020;font-weight:700;box-shadow:0 0 8px rgba(255,40,0,.15)}
+.ban-note{margin-bottom:10px;padding:9px 13px;background:rgba(255,40,0,.06);border:1px solid rgba(255,40,0,.15);border-left:3px solid rgba(255,40,0,.5);border-radius:4px;font-size:11px;color:rgba(255,120,120,.7);font-weight:600}
+.info-note{margin-bottom:10px;padding:9px 13px;background:rgba(255,122,0,.06);border:1px solid rgba(255,122,0,.18);border-left:3px solid rgba(255,122,0,.5);border-radius:4px;font-size:11px;color:rgba(255,180,80,.8);font-weight:600}
+.ir{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.empty{text-align:center;padding:44px 20px;color:rgba(255,255,255,.18);font-size:13px;font-style:italic}
+.ro-note{text-align:center;padding:10px;background:rgba(255,122,0,.04);border:1px solid rgba(255,122,0,.12);border-radius:4px;font-size:11px;color:rgba(255,155,50,.5);margin-bottom:14px}
+.paste-area{width:100%;min-height:100px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:10px;font-size:13px;color:var(--white);font-family:'Barlow',sans-serif;resize:vertical;outline:none;margin-bottom:12px;transition:border-color .15s}
+.paste-area:focus{border-color:rgba(255,122,0,.4);box-shadow:0 0 0 3px rgba(255,122,0,.06)}
+.paste-area::placeholder{color:rgba(255,255,255,.1)}
+.pc{display:flex;align-items:center;gap:7px;padding:7px 12px;background:var(--card);border:1px solid rgba(255,122,0,.1);border-radius:4px;margin-bottom:5px;font-size:12px;font-weight:600;color:#fff;transition:border-color .15s}
+.pc:hover{border-color:rgba(255,122,0,.22)}
+.pn{color:rgba(255,155,50,.5);min-width:22px;font-size:10px}
+.ps{color:rgba(255,122,0,.45);flex-shrink:0}
+.pb{background:none;border:none;color:rgba(255,255,255,.2);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;margin-left:auto;flex-shrink:0;transition:color .15s}
+.pb:hover{color:rgba(255,60,60,.7)}
+.btn{background:linear-gradient(135deg,#ff7a00,#ff3000);border:none;border-radius:4px;padding:11px 28px;font-size:14px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#fff;cursor:pointer;font-family:'Barlow Condensed',sans-serif;display:block;margin:0 auto;transition:all .15s;box-shadow:0 4px 20px rgba(255,80,0,.3),0 0 0 1px rgba(255,120,0,.2)}
+.btn:hover{box-shadow:0 4px 28px rgba(255,80,0,.5),0 0 0 1px rgba(255,140,0,.3);transform:translateY(-1px)}
+.btn:active{transform:translateY(0)}
+.btn:disabled{opacity:.2;cursor:not-allowed;box-shadow:none;transform:none}
+.btn2{background:rgba(255,122,0,.07);border:1px solid rgba(255,122,0,.22);border-radius:4px;padding:9px 22px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,155,50,.8);cursor:pointer;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.btn2:hover{background:rgba(255,122,0,.14);border-color:rgba(255,122,0,.4);box-shadow:var(--glow-sm)}
+.btn-danger{background:rgba(255,40,0,.07);border:1px solid rgba(255,40,0,.2);border-radius:4px;padding:9px 22px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,100,80,.7);cursor:pointer;font-family:'Barlow Condensed',sans-serif;transition:all .15s}
+.btn-danger:hover{background:rgba(255,40,0,.13);border-color:rgba(255,40,0,.35)}
+.btns-row{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.gg{display:grid;gap:9px;margin-bottom:12px}
+.gh{padding:10px 14px;font-size:13px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#ff9a30;background:rgba(255,122,0,.1);border-bottom:1px solid rgba(255,122,0,.12);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.gt{padding:10px 14px;font-size:13px;font-weight:600;color:#fff;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:6px}
+.gt:last-child{border-bottom:none}
+.stag{font-size:9px;padding:1px 5px;border-radius:2px;background:rgba(255,192,64,.1);border:1px solid rgba(255,192,64,.25);color:var(--gold);font-weight:800;flex-shrink:0;box-shadow:0 0 6px rgba(255,192,64,.15)}
+.dtag{font-size:9px;padding:1px 5px;border-radius:2px;background:rgba(255,122,0,.12);border:1px solid rgba(255,122,0,.3);color:rgba(255,180,70,.9);font-weight:700;flex-shrink:0}
+.ptag{font-size:9px;padding:1px 5px;border-radius:2px;background:rgba(255,60,100,.08);border:1px solid rgba(255,60,100,.2);color:rgba(255,130,150,.7);font-weight:700;flex-shrink:0}
+.mg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.mr{display:flex;align-items:center;gap:5px;padding:11px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.mr:last-child{border-bottom:none}
+.mt{flex:1;font-size:13px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.mt.hm{text-align:right}
+input[type=number]{width:38px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);border-radius:3px;padding:6px 2px;text-align:center;font-size:16px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;-moz-appearance:textfield;flex-shrink:0;transition:all .15s}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus{border-color:rgba(255,122,0,.5);box-shadow:0 0 0 3px rgba(255,122,0,.08),0 0 8px rgba(255,122,0,.2)}
+input[type=number]:disabled{opacity:.15}
+.vs{font-size:10px;color:rgba(255,255,255,.15);flex-shrink:0}
+.tbt{font-size:9px;padding:2px 5px;border-radius:2px;background:transparent;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.2);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-weight:700;flex-shrink:0;transition:all .15s}
+.tbt:hover{border-color:rgba(255,192,64,.3);color:rgba(255,192,64,.5)}
+.tbt.on{background:rgba(255,192,64,.1);border-color:rgba(255,192,64,.4);color:var(--gold);box-shadow:0 0 8px rgba(255,192,64,.2)}
+.dd{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;box-shadow:0 0 6px var(--green)}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:center;padding:7px 5px;border-bottom:1px solid rgba(255,122,0,.12)}
+th:first-child{text-align:left;padding-left:10px}
+td{font-size:13px;color:rgba(255,255,255,.8);text-align:center;padding:8px 5px;border-bottom:1px solid rgba(255,255,255,.04)}
+td:first-child{text-align:left;padding-left:10px;font-weight:700;font-size:13px;color:#fff}
+tr:last-child td{border-bottom:none}
+tr.adv td{background:rgba(255,122,0,.06)}
+tr.adv td:first-child{border-left:2px solid rgba(255,122,0,.5)}
+.pv{color:#ff9a30;font-weight:800;font-size:16px;text-shadow:0 0 10px rgba(255,122,0,.4)}
+.kos{margin-bottom:14px}
+.kl{font-size:11px;font-weight:800;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,122,0,.55);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.kl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(255,122,0,.15),transparent)}
+.km{display:flex;align-items:center;gap:5px;padding:12px 12px;border-bottom:1px solid rgba(255,255,255,.06)}
+.km:last-child{border-bottom:none}
+.kt{flex:1;font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.kt.hm{text-align:right;color:#fff}
+.kt.aw{text-align:left;color:#fff}
+.kt.tbd{color:rgba(255,255,255,.18)}
+.wb{background:linear-gradient(135deg,rgba(255,122,0,.08),rgba(255,80,0,.04));border:1px solid rgba(255,122,0,.2);border-radius:6px;padding:18px;text-align:center;margin-top:14px;box-shadow:0 0 30px rgba(255,122,0,.1),inset 0 1px 0 rgba(255,255,255,.05)}
+.wl{font-size:10px;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,155,50,.5);margin-bottom:6px}
+.wn{font-size:26px;font-weight:800;color:var(--orange);font-style:italic;text-shadow:0 0 20px rgba(255,122,0,.5)}
+.lb-card{background:var(--card);border:1px solid rgba(255,122,0,.1);border-radius:6px;padding:0 16px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.lbr{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.lbr:last-child{border-bottom:none}
+.lbrk{font-size:13px;font-weight:800;width:34px;text-align:center;color:rgba(255,255,255,.18);font-style:italic}
+.lbrk.r1{color:var(--gold);text-shadow:0 0 12px rgba(255,192,64,.4)}
+.lbrk.r2{color:#c0c8d8}
+.lbrk.r3{color:#c07840}
+.lbn{flex:1;font-size:15px;font-weight:700;color:#fff;letter-spacing:.01em}
+.lbsc{font-size:10px;color:rgba(255,255,255,.22);font-weight:600}
+.lbm{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.lbd{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end}
+.lbs{font-size:9px;padding:2px 5px;border-radius:2px;background:rgba(255,255,255,.04);color:rgba(255,255,255,.3);font-weight:700}
+.lbs.fx{background:rgba(255,80,0,.1);border:1px solid rgba(255,80,0,.2);color:rgba(255,140,60,.7)}
+.lbp{font-size:22px;font-weight:800;color:var(--orange);font-style:italic;white-space:nowrap;text-shadow:0 0 12px rgba(255,122,0,.3)}
+.lbst{font-size:9px;color:rgba(255,155,50,.5);font-weight:700}
+.pref{background:var(--card);border:1px solid rgba(255,122,0,.1);border-radius:6px;padding:13px 15px;margin-bottom:10px}
+.prt{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,122,0,.45);margin-bottom:9px}
+.prg{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pri{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;background:rgba(255,255,255,.02);border-radius:3px;gap:6px;border:1px solid rgba(255,255,255,.04)}
+.prl{font-size:12px;font-weight:600;color:rgba(255,255,255,.5)}
+.prv{font-size:15px;font-weight:800;color:var(--orange);font-style:italic}
+.prv.r{color:var(--red)}.prv.g{color:var(--green)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.mo{background:var(--bg2);border:1px solid rgba(255,122,0,.25);border-radius:8px;padding:22px;width:100%;max-width:380px;max-height:90vh;overflow-y:auto;box-shadow:0 0 40px rgba(255,122,0,.15),0 20px 60px rgba(0,0,0,.5)}
+.mt2{font-size:14px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:16px;text-align:center;text-shadow:0 0 15px rgba(255,122,0,.3)}
+.pi{width:100%;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:12px;font-size:22px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;text-align:center;letter-spacing:.2em}
+.pi:focus{border-color:rgba(255,122,0,.4);box-shadow:0 0 0 3px rgba(255,122,0,.08)}
+.mbtns{display:flex;gap:8px;margin-top:14px}
+.mbt{flex:1;padding:10px;border-radius:4px;font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Barlow Condensed',sans-serif;border:none;transition:all .15s}
+.mbt.p{background:linear-gradient(135deg,#ff7a00,#ff3000);color:#fff;box-shadow:0 4px 16px rgba(255,80,0,.3)}
+.mbt.p:hover{box-shadow:0 4px 24px rgba(255,80,0,.5);transform:translateY(-1px)}
+.mbt.s{background:rgba(255,255,255,.06);color:rgba(255,255,255,.45)}
+.si{display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--card);border:1px solid rgba(255,122,0,.12);border-radius:4px;margin-bottom:5px;transition:border-color .15s}
+.si:hover{border-color:rgba(255,122,0,.25)}
+.sr{font-size:11px;font-weight:800;color:rgba(255,155,50,.5);min-width:18px}
+.sn{flex:1;font-size:12px;font-weight:600;color:var(--white)}
+.sb{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);border-radius:3px;cursor:pointer;padding:2px 6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;transition:all .15s}
+.sb:hover{border-color:rgba(255,122,0,.35);color:var(--orange)}
+.eg-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+@media(max-width:700px){.mg,.sg{grid-template-columns:1fr}.prg{grid-template-columns:1fr}.eg-grid{grid-template-columns:1fr}}
+.mr-display{display:flex;align-items:center;gap:8px;padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;transition:background .15s}
+.mr-display:last-child{border-bottom:none}
+.mr-display:hover{background:rgba(255,122,0,.04)}
+.mr-display:active{background:rgba(255,122,0,.08)}
+.mr-score{font-size:20px;font-weight:800;color:#fff;min-width:22px;text-align:center}
+.mr-score.empty{font-size:16px;color:rgba(255,255,255,.18);font-weight:400}
+.mr-vs{font-size:10px;color:rgba(255,255,255,.18);flex-shrink:0}
+.mr-edit-btn{background:none;border:none;color:rgba(255,255,255,.2);font-size:13px;cursor:pointer;padding:0 3px;flex-shrink:0;transition:color .15s}
+.mr-edit-btn:hover{color:rgba(255,122,0,.7)}
+.mr-editing{display:flex;align-items:center;gap:5px;padding:10px 12px;border-bottom:1px solid rgba(255,122,0,.2);background:rgba(255,122,0,.04)}
+.mr-editing:last-child{border-bottom:none}
+.mr-save{background:rgba(0,232,122,.1);border:1px solid rgba(0,232,122,.3);color:#00e87a;border-radius:3px;padding:4px 10px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.mr-save:hover{background:rgba(0,232,122,.2)}
+.mr-cancel{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);border-radius:3px;padding:4px 8px;font-family:"Barlow Condensed",sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.mr-cancel:hover{border-color:rgba(255,80,80,.3);color:rgba(255,80,80,.5)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand-row">
+    <div>
+      <div class="brand-title" id="brandTitle" onclick="handleBrandTap()" style="cursor:default;user-select:none">MAY <em>MADNESS</em></div>
+      <div class="brand-sub" id="brandSub" onclick="handleSubTap()" style="cursor:default;user-select:none">Urban Social Series · Vol. 3</div>
+    </div>
+    <div class="topright">
+      <div style="display:flex;gap:6px;align-items:center">
+        <span id="adminBadge" style="display:none"></span>
+        <span id="scorerBadge" style="display:none"></span>
+      </div>
+      <div class="sync"><div class="sdot" id="sdot"></div><span id="stxt">Loading...</span></div>
+    </div>
+  </div>
+  <div class="sess-row" id="sessRow"></div>
+</div>
+<div class="tabs" id="tabBar"></div>
+<div class="body" id="appBody"></div>
+
+<!-- MODALS -->
+<div class="ov" id="scorerMo" style="display:none" onclick="if(event.target===this)closeScorerPin()">
+  <div class="mo"><div class="mt2">Scorer PIN</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:14px">Enter scorer PIN to input match scores</div>
+    <input class="pi" id="scorerIn" type="password" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')doScorerPin()">
+    <div class="mbtns"><button class="mbt s" onclick="closeScorerPin()">Cancel</button><button class="mbt p" onclick="doScorerPin()">Unlock</button></div>
+  </div>
+</div>
+
+<div class="ov" id="pinMo" style="display:none" onclick="if(event.target===this)closePin()">
+  <div class="mo"><div class="mt2">Admin PIN</div>
+    <input class="pi" id="pinIn" type="password" maxlength="6" placeholder="••••" onkeydown="if(event.key==='Enter')doPin()">
+    <div class="mbtns"><button class="mbt s" onclick="closePin()">Cancel</button><button class="mbt p" onclick="doPin()">Unlock</button></div>
+  </div>
+</div>
+
+<div class="ov" id="resetMo" style="display:none" onclick="if(event.target===this)closeReset()">
+  <div class="mo"><div class="mt2">⚠️ Reset Session</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button onclick="doReset('scores')" class="mbt" style="background:rgba(255,138,0,.1);border:1px solid rgba(255,138,0,.25);color:rgba(255,180,50,.9);padding:12px">🔄 Reset Scores — Keep Draw</button>
+      <button onclick="doReset('redraw')" class="mbt" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:rgba(147,197,253,.9);padding:12px">🎲 Redraw — Keep Pairs</button>
+      <button onclick="doReset('delete')" class="mbt" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:rgba(252,165,165,.9);padding:12px">🗑️ Delete Session Completely</button>
+      <button onclick="closeReset()" class="mbt s" style="padding:12px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="seedMo" style="display:none" onclick="if(event.target===this)closeSeed()">
+  <div class="mo" style="max-width:420px"><div class="mt2">🌱 Review Seeds</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:14px">Auto-ranked by season points · Use ↑↓ to reorder · × to remove</div>
+    <div id="seedList"></div>
+    <div class="mbtns"><button class="mbt s" onclick="closeSeed()">Cancel</button><button class="mbt p" onclick="confirmSeeds()">Confirm & Draw →</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// MAY MADNESS v5 — Full Rebuild
+// Urban Social Series Vol. 3
+// ═══════════════════════════════════════════════════════════════
+const API="https://script.google.com/macros/s/AKfycbwq2z85GlIFlDaThwu_MuGTi1ln88gVx1nhOuxjZJrS1c0wwIAAcnFKHaUH167QZ6D8/exec";
+const PIN="1234";
+const LS="mm_v5";
+const SCHED=[
+  {num:1,label:"Session 1",date:"Mon May 5",mult:1},{num:2,label:"Session 2",date:"Wed May 7",mult:1},
+  {num:3,label:"Session 3",date:"Mon May 12",mult:1},{num:4,label:"Session 4",date:"Wed May 14",mult:1},
+  {num:5,label:"Session 5",date:"Mon May 19",mult:1},{num:6,label:"Session 6",date:"Wed May 21",mult:1},
+  {num:7,label:"Session 7",date:"Mon May 26",mult:2},{num:8,label:"Session 8",date:"Wed May 28",mult:2}
+];
+const TABS=["Register","Draw","Groups","Knockouts","Leaderboard","Points"];
+
+// ── FORMAT ENGINE ─────────────────────────────────────────────
+// Validated for all 8-16 team counts
+// Rules: 3 matches per player (groups of 5: 4 played, drop lowest for standings)
+// Always 8 qualify to QF
+const FMT={
+  8: {g:{A:4,B:4},         drop:[],        po:null},
+  9: {g:{A:5,B:4},         drop:["A"],     po:null},
+  10:{g:{A:5,B:5},         drop:["A","B"], po:null},
+  11:{g:{A:4,B:4,C:3},     drop:[],        po:"C"},
+  12:{g:{A:4,B:4,C:4},     drop:[],        po:null},
+  13:{g:{A:4,B:4,C:5},     drop:["C"],     po:null},
+  14:{g:{A:5,B:5,C:4},     drop:["A","B"], po:null},
+  15:{g:{A:4,B:4,C:4,D:3}, drop:[],        po:"D"},
+  16:{g:{A:4,B:4,C:4,D:4}, drop:[],        po:null}
+};
+
+function getFmt(n){return FMT[n]||FMT[16];}
+function gk(f){return Object.keys(f.g);}
+
+function buildGroups(ranked,seeds,fmt){
+  const keys=gk(fmt),grps={};
+  keys.forEach(k=>{grps[k]=[];});
+  const top=seeds.slice(0,keys.length),bot=seeds.slice(keys.length,keys.length*2);
+  keys.forEach((k,i)=>{if(top[i])grps[k].push(top[i].label);});
+  [...keys].reverse().forEach((k,i)=>{if(bot[i])grps[k].push(bot[i].label);});
+  const used=new Set(seeds.map(s=>s.label));
+  const rest=shuf(ranked.filter(p=>!used.has(p.label)));
+  let ri=0;
+  keys.forEach(k=>{const need=fmt.g[k]-grps[k].length;for(let j=0;j<need;j++)if(ri<rest.length)grps[k].push(rest[ri++].label);});
+  return grps;
+}
+
+function buildMatches(grps,fmt){
+  const ms=[];
+  gk(fmt).forEach(g=>{
+    const t=grps[g];if(!t)return;
+    for(let i=0;i<t.length;i++)for(let j=i+1;j<t.length;j++)
+      ms.push({id:`${g}${i}${j}`,group:g,home:t[i],away:t[j],hs:"",as:"",done:false,isTB:false});
+  });
+  return ms;
+}
+
+function calcStandings(matches,grps,fmt){
+  const keys=fmt?gk(fmt):Object.keys(grps);
+  const s={};
+  keys.forEach(g=>{
+    if(!grps[g])return;s[g]={};
+    grps[g].forEach(t=>{s[g][t]={team:t,p:0,w:0,l:0,d:0,pts:0,gf:0,ga:0,all:[]};});
+  });
+  (matches||[]).forEach(m=>{
+    if(!m.done||!s[m.group])return;
+    const h=parseInt(m.hs),a=parseInt(m.as),g=m.group;
+    if(!s[g]?.[m.home]||!s[g]?.[m.away])return;
+    s[g][m.home].p++;s[g][m.away].p++;
+    s[g][m.home].gf+=h;s[g][m.home].ga+=a;
+    s[g][m.away].gf+=a;s[g][m.away].ga+=h;
+    s[g][m.home].all.push({sc:h,co:a,w:h>a,l:h<a,d:h===a});
+    s[g][m.away].all.push({sc:a,co:h,w:a>h,l:a<h,d:h===a});
+    if(h>a){s[g][m.home].w++;s[g][m.home].pts+=3;s[g][m.away].l++;}
+    else if(a>h){s[g][m.away].w++;s[g][m.away].pts+=3;s[g][m.home].l++;}
+    else{s[g][m.home].d++;s[g][m.away].d++;s[g][m.home].pts++;s[g][m.away].pts++;}
+  });
+  const res={};
+  keys.forEach(g=>{
+    const isDrop=fmt&&fmt.drop.includes(g);
+    let rows=Object.values(s[g]||{});
+    if(isDrop){
+      rows=rows.map(row=>{
+        if(row.all.length<4)return row;
+        // Drop worst result (sort best to worst by score diff, keep top 3)
+        const sorted=[...row.all].sort((a,b)=>(b.sc-b.co)-(a.sc-a.co));
+        const b3=sorted.slice(0,3);
+        return{...row,p:3,
+          w:b3.filter(r=>r.w).length,l:b3.filter(r=>r.l).length,d:b3.filter(r=>r.d).length,
+          pts:b3.reduce((s,r)=>s+(r.w?3:r.d?1:0),0),
+          gf:b3.reduce((s,r)=>s+r.sc,0),ga:b3.reduce((s,r)=>s+r.co,0)};
+      });
+    }
+    res[g]=rows.sort((a,b)=>{
+      if(b.w!==a.w)return b.w-a.w;
+      const gA=a.gf-a.ga,gB=b.gf-b.ga;
+      if(gB!==gA)return gB-gA;
+      const h2=(matches||[]).find(m=>m.done&&m.group===g&&
+        ((m.home===a.team&&m.away===b.team)||(m.home===b.team&&m.away===a.team)));
+      if(h2){const aW=(h2.home===a.team&&parseInt(h2.hs)>parseInt(h2.as))||
+        (h2.away===a.team&&parseInt(h2.as)>parseInt(h2.hs));return aW?-1:1;}
+      if(b.gf!==a.gf)return b.gf-a.gf; // most scored
+      return 0; // sudden death
+    });
+  });
+  return res;
+}
+
+function getQualifiers(st,fmt,n,poOverride){
+  const keys=gk(fmt);
+  const allR=keys.flatMap(g=>st[g]||[]);
+  const seed=(arr)=>[...arr].sort((a,b)=>{
+    const ra=allR.find(t=>t.team===a)||{w:0,gf:0,ga:0};
+    const rb=allR.find(t=>t.team===b)||{w:0,gf:0,ga:0};
+    return rb.w-ra.w||(rb.gf-rb.ga)-(ra.gf-ra.ga)||rb.gf-ra.gf;
+  });
+  let q=[];
+  // 8: all qualify, seeded by results
+  if(n===8)return allR.sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf).slice(0,8).map(t=>t.team);
+  // 9,10: top 4 from each group
+  if(n===9||n===10){(st["A"]||[]).slice(0,4).forEach(t=>q.push(t.team));(st["B"]||[]).slice(0,4).forEach(t=>q.push(t.team));return seed(q);}
+  // 11,15: top 2 from main groups + 1 auto + 1 playoff from group of 3
+  if(n===11||n===15){
+    const pg=fmt.po;
+    keys.filter(g=>g!==pg).forEach(g=>(st[g]||[]).slice(0,2).forEach(t=>q.push(t.team)));
+    const pgR=st[pg]||[];
+    if(pgR[0])q.push(pgR[0].team);
+    const pw=poOverride||(pgR[1]?.team);
+    if(pw&&!q.includes(pw))q.push(pw);
+    return seed(q.slice(0,8));
+  }
+  // 12,13: top 2 from each + 2 best 3rd place
+  if(n===12||n===13){
+    keys.forEach(g=>(st[g]||[]).slice(0,2).forEach(t=>q.push(t.team)));
+    const thirds=keys.map(g=>(st[g]||[])[2]).filter(Boolean)
+      .sort((a,b)=>b.w-a.w||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+    thirds.slice(0,2).forEach(t=>q.push(t.team));
+    return seed(q.slice(0,8));
+  }
+  // 14: top 3 from groups of 5, top 2 from group of 4
+  if(n===14){
+    (st["A"]||[]).slice(0,3).forEach(t=>q.push(t.team));
+    (st["B"]||[]).slice(0,3).forEach(t=>q.push(t.team));
+    (st["C"]||[]).slice(0,2).forEach(t=>q.push(t.team));
+    return seed(q.slice(0,8));
+  }
+  // 16: top 2 from each group with cross-path seeding 1v8,4v5,2v7,3v6
+  if(n===16){
+    // Cross-path seeding: Courts 1&4 vs Courts 2&3
+    // QF1:A1vD2, QF2:B2vC1, QF3:D1vA2, QF4:C2vB1
+    // q feeds mkKO as: q[0]vq[7], q[3]vq[4], q[1]vq[6], q[2]vq[5]
+    const a=st["A"]||[],b=st["B"]||[],c=st["C"]||[],d=st["D"]||[];
+    const A1=a[0]?.team,A2=a[1]?.team,B1=b[0]?.team,B2=b[1]?.team;
+    const C1=c[0]?.team,C2=c[1]?.team,D1=d[0]?.team,D2=d[1]?.team;
+    // q[0]vq[7]=A1vD2, q[3]vq[4]=B2vC1, q[1]vq[6]=D1vA2, q[2]vq[5]=C2vB1
+    return [A1,D1,C2,B2,C1,B1,A2,D2].filter(Boolean);
+  }
+  // fallback
+  keys.forEach(g=>(st[g]||[]).slice(0,2).forEach(t=>q.push(t.team)));
+  return q.slice(0,8);
+}
+
+function mkKO(q){
+  // Standard bracket: 1v8, 4v5, 2v7, 3v6
+  const m=(id,h,a)=>({id,home:q[h]||null,away:q[a]||null,hs:"",as:"",done:false,isTB:false});
+  return{
+    qf:[m("qf1",0,7),m("qf2",3,4),m("qf3",1,6),m("qf4",2,5)],
+    sf:[{id:"sf1",home:null,away:null,hs:"",as:"",done:false,isTB:false},{id:"sf2",home:null,away:null,hs:"",as:"",done:false,isTB:false}],
+    final:{id:"fin",home:null,away:null,hs:"",as:"",done:false,isTB:false},
+    winner:null,poOverride:null
+  };
+}
+
+function advKO(ko){
+  const k=JSON.parse(JSON.stringify(ko));
+  const w=m=>(!m?.done||!m.home||!m.away)?null:parseInt(m.hs)>parseInt(m.as)?m.home:parseInt(m.as)>parseInt(m.hs)?m.away:null;
+  const qw=k.qf.map(w);
+  if(qw[0])k.sf[0].home=qw[0];if(qw[1])k.sf[0].away=qw[1];
+  if(qw[2])k.sf[1].home=qw[2];if(qw[3])k.sf[1].away=qw[3];
+  const sw=k.sf.map(w);
+  if(sw[0])k.final.home=sw[0];if(sw[1])k.final.away=sw[1];
+  k.winner=w(k.final);
+  return k;
+}
+
+// ── POINTS ENGINE ─────────────────────────────────────────────
+// Tested: champion=24pts, runner-up=16pts, 2x in final week
+function mPts(my,opp,isTB){
+  const m=parseInt(my),o=parseInt(opp);
+  if(isNaN(m)||isNaN(o)||m===o)return 0;
+  if(m>o)return 3;           // win
+  if(isTB)return 2;          // tiebreak loss
+  if(o===6&&m<=1)return 0;   // 6-0 or 6-1 loss
+  return 1;                  // competitive loss
+}
+
+function fP(sess,label){const pr=(sess.pairs||[]).find(p=>p.label===label);return pr?[pr.p1,pr.p2]:[];}
+
+function calcSessPts(sess){
+  const pts={},mult=sess.mult||1;
+  (sess.pairs||[]).forEach(pr=>{pts[pr.p1]=0;pts[pr.p2]=0;});
+  const aw=(hL,aL,hs,as,isTB)=>{
+    if(isNaN(parseInt(hs))||isNaN(parseInt(as)))return;
+    fP(sess,hL).forEach(p=>{if(p in pts)pts[p]+=mPts(hs,as,isTB)*mult;});
+    fP(sess,aL).forEach(p=>{if(p in pts)pts[p]+=mPts(as,hs,isTB)*mult;});
+  };
+  // Group match points
+  (sess.groupMatches||[]).forEach(m=>{if(m.done)aw(m.home,m.away,m.hs,m.as,m.isTB);});
+  // Top of group bonus (+1 per player in winning pair)
+  const fmt=sess.fmt||getFmt(sess.teamCount||16);
+  if(sess.standings){
+    gk(fmt).forEach(g=>{
+      const top=sess.standings[g]?.[0];
+      if(top)fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=1*mult;});
+    });
+  }
+  // KO points
+  if(sess.ko){
+    [...(sess.ko.qf||[]),...(sess.ko.sf||[])].forEach(m=>{
+      if(m?.done&&m.home&&m.away)aw(m.home,m.away,m.hs,m.as,m.isTB);
+    });
+    const fin=sess.ko.final;
+    if(fin?.done&&fin.home&&fin.away){
+      aw(fin.home,fin.away,fin.hs,fin.as,fin.isTB);
+      // Both finalists get +2
+      [fin.home,fin.away].forEach(l=>fP(sess,l).forEach(p=>{if(p in pts)pts[p]+=2*mult;}));
+      // Winner gets +3 more
+      const champ=parseInt(fin.hs)>parseInt(fin.as)?fin.home:fin.away;
+      fP(sess,champ).forEach(p=>{if(p in pts)pts[p]+=3*mult;});
+    }
+  }
+  return pts;
+}
+
+function calcStreak(player,sessions,idx){
+  let s=0;
+  for(let i=idx;i>=0;i--){
+    if((sessions[i].pairs||[]).some(p=>p.p1===player||p.p2===player))s++;
+    else break;
+  }
+  const mult=sessions[idx]?.mult||1;
+  if(s>=4)return 3*mult;if(s===3)return 2*mult;if(s===2)return mult;return 0;
+}
+
+function getPlayerStats(player){
+  let wins=0,losses=0,tbWins=0,tbLosses=0,gf=0,ga=0,championships=0,finals=0,sessions=0;
+  ST.sessions.forEach(sess=>{
+    const inSess=(sess.pairs||[]).some(p=>p.p1===player||p.p2===player);
+    if(!inSess)return;
+    sessions++;
+    const pairs=(sess.pairs||[]).filter(p=>p.p1===player||p.p2===player);
+    const labels=pairs.map(p=>p.label);
+    // Group matches
+    (sess.groupMatches||[]).forEach(m=>{
+      if(!m.done)return;
+      const isHome=labels.includes(m.home),isAway=labels.includes(m.away);
+      if(!isHome&&!isAway)return;
+      const mySc=parseInt(isHome?m.hs:m.as),oppSc=parseInt(isHome?m.as:m.hs);
+      gf+=mySc;ga+=oppSc;
+      if(mySc>oppSc){wins++;if(m.isTB)tbWins++;}
+      else if(oppSc>mySc){losses++;if(m.isTB)tbLosses++;}
+    });
+    // KO matches
+    if(sess.ko){
+      [...(sess.ko.qf||[]),...(sess.ko.sf||[])].forEach(m=>{
+        if(!m.done)return;
+        const isHome=labels.includes(m.home),isAway=labels.includes(m.away);
+        if(!isHome&&!isAway)return;
+        const mySc=parseInt(isHome?m.hs:m.as),oppSc=parseInt(isHome?m.as:m.hs);
+        gf+=mySc;ga+=oppSc;
+        if(mySc>oppSc){wins++;if(m.isTB)tbWins++;}
+        else if(oppSc>mySc){losses++;if(m.isTB)tbLosses++;}
+      });
+      const fin=sess.ko.final;
+      if(fin?.done){
+        const isHome=labels.includes(fin.home),isAway=labels.includes(fin.away);
+        if(isHome||isAway){
+          finals++;
+          const mySc=parseInt(isHome?fin.hs:fin.as),oppSc=parseInt(isHome?fin.as:fin.hs);
+          gf+=mySc;ga+=oppSc;
+          if(mySc>oppSc){wins++;championships++;if(fin.isTB)tbWins++;}
+          else if(oppSc>mySc){losses++;if(fin.isTB)tbLosses++;}
+        }
+      }
+    }
+  });
+  const total=wins+losses;
+  const winRate=total>0?Math.round(wins/total*100):0;
+  return{wins,losses,tbWins,tbLosses,gf,ga,gd:gf-ga,championships,finals,sessions,winRate};
+}
+
+function getSeasonPts(){
+  const t={};
+  ST.sessions.forEach((sess,idx)=>{
+    const sp=calcSessPts(sess);
+    Object.entries(sp).forEach(([p,v])=>{t[p]=(t[p]||0)+v;});
+    Object.keys(sp).forEach(p=>{t[p]=(t[p]||0)+calcStreak(p,ST.sessions,idx);});
+  });
+  return t;
+}
+
+// ── UTILS ─────────────────────────────────────────────────────
+function shuf(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function esc(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+function extractPairs(text){
+  return text.split("\n").map(l=>l.trim()).filter(Boolean).reduce((arr,line)=>{
+    const m=line.match(/^(?:\d+[\.\-\)]\s*)?(.+?)\s*[\/\|&+]\s*(.+)$/);
+    if(m){const p1=m[1].trim(),p2=m[2].trim();if(p1&&p2)arr.push({p1,p2,label:`${p1} / ${p2}`});}
+    return arr;
+  },[]);
+}
+
+function isBanned(p1,p2){
+  const last=ST.sessions[ST.sessions.length-1];
+  if(!last?.ko?.winner)return false;
+  const wp=(last.pairs||[]).find(p=>p.label===last.ko.winner);
+  if(!wp)return false;
+  return(wp.p1===p1&&wp.p2===p2)||(wp.p1===p2&&wp.p2===p1);
+}
+
+// ── LOCAL STORAGE & API ──────────────────────────────────────
+function saveLocal(){try{localStorage.setItem(LS,JSON.stringify(ST.sessions));}catch(e){}}
+function loadLocal(){
+  try{
+    // Try new key first
+    let d=localStorage.getItem(LS);
+    if(d)return JSON.parse(d);
+    // Try old keys as fallback
+    for(const k of['maymadness_v2','maymadness_sessions','mm_v4']){
+      d=localStorage.getItem(k);
+      if(d){const parsed=JSON.parse(d);saveLocal();return parsed;}
+    }
+    return null;
+  }catch(e){return null;}
+}
+
+let saveTimer=null;
+function setSS(s){
+  const dot=document.getElementById("sdot"),txt=document.getElementById("stxt");
+  if(!dot)return;
+  dot.className="sdot"+(s==="ok"?" ok":s==="saving"?" saving":s==="err"?" err":"");
+  txt.textContent=s==="ok"?"Synced ✓":s==="saving"?"Saving...":s==="err"?"Connection error":"Loading...";
+}
+
+async function apiGet(p){const r=await fetch(API+"?"+new URLSearchParams(p),{method:"GET",redirect:"follow"});return r.json();}
+async function apiPost(b){const r=await fetch(API,{method:"POST",redirect:"follow",headers:{"Content-Type":"text/plain"},body:JSON.stringify(b)});return r.json();}
+
+async function loadSessions(){
+  setSS("loading");
+  const local=loadLocal();
+  if(local?.length){ST.sessions=local;render();}
+  try{
+    const d=await apiGet({action:"getSessions"});
+    if(d.ok&&d.sessions){
+      const full=await Promise.all(d.sessions.map(s=>apiGet({action:"getSession",id:s.id}).then(r=>r.session||s)));
+      ST.sessions=full;saveLocal();setSS("ok");render();
+    }else setSS("err");
+  }catch(e){local?.length?setSS("ok"):setSS("err");}
+}
+
+async function saveSession(sess){
+  saveLocal();setSS("saving");
+  try{await apiPost({action:"saveSession",session:sess});setSS("ok");}
+  catch(e){setSS("err");}
+}
+
+function sched(sess){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveSession(sess),1200);}
+
+// ── STATE ─────────────────────────────────────────────────────
+const ST={sessions:[],activeIdx:null,tab:0,isAdmin:false,isScorer:false,paste:"",parsed:[],seeds:null,editGroups:false,editNames:false,editingMatch:null};
+const SCORER_PIN="0000"; // Change this in Apps Script
+let undoStack=[];
+
+function getSess(){return ST.activeIdx!==null?ST.sessions[ST.activeIdx]:null;}
+function updSess(u){ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?u:s);saveLocal();sched(u);}
+function pushUndo(){const s=getSess();if(!s)return;undoStack.push(JSON.parse(JSON.stringify(s)));if(undoStack.length>20)undoStack.shift();}
+function undoLast(){if(!undoStack.length){alert("Nothing to undo.");return;}const p=undoStack.pop();ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?p:s);saveLocal();sched(p);render();}
+
+// ── ADMIN ─────────────────────────────────────────────────────
+// Triple tap counters
+let _adminTaps=0,_adminTimer=null,_scorerTaps=0,_scorerTimer=null;
+
+function handleBrandTap(){
+  _adminTaps++;
+  clearTimeout(_adminTimer);
+  _adminTimer=setTimeout(()=>{_adminTaps=0;},600);
+  if(_adminTaps>=3){_adminTaps=0;clearTimeout(_adminTimer);
+    if(ST.isAdmin){logoutAdmin();}
+    else{document.getElementById("pinMo").style.display="flex";setTimeout(()=>document.getElementById("pinIn").focus(),50);}
+  }
+}
+
+function handleSubTap(){
+  _scorerTaps++;
+  clearTimeout(_scorerTimer);
+  _scorerTimer=setTimeout(()=>{_scorerTaps=0;},600);
+  if(_scorerTaps>=3){_scorerTaps=0;clearTimeout(_scorerTimer);
+    if(ST.isScorer){logoutScorer();}
+    else if(!ST.isAdmin){openScorerPin();}
+  }
+}
+
+function logoutAdmin(){ST.isAdmin=false;ST.isScorer=false;updateAuthBadges();render();}
+function logoutScorer(){ST.isScorer=false;updateAuthBadges();render();}
+
+function updateAuthBadges(){
+  const ab=document.getElementById("adminBadge");
+  const sb=document.getElementById("scorerBadge");
+  if(ab){
+    ab.style.display=ST.isAdmin?"inline-flex":"none";
+    ab.innerHTML=ST.isAdmin?`<span class="admin-badge" onclick="logoutAdmin()" title="Tap to logout">Admin ✓</span>`:"";
+  }
+  if(sb){
+    sb.style.display=ST.isScorer?"inline-flex":"none";
+    sb.innerHTML=ST.isScorer?`<span class="admin-badge" style="color:#00e87a;border-color:rgba(0,232,122,.4)" onclick="logoutScorer()" title="Tap to logout">Scorer ✓</span>`:"";
+  }
+}
+
+function toggleAdmin(){
+  if(ST.isAdmin){logoutAdmin();}
+  else{document.getElementById("pinMo").style.display="flex";setTimeout(()=>document.getElementById("pinIn").focus(),50);}
+}
+function closePin(){document.getElementById("pinMo").style.display="none";document.getElementById("pinIn").value="";}
+function openScorerPin(){document.getElementById("scorerMo").style.display="flex";setTimeout(()=>document.getElementById("scorerIn").focus(),50);}
+function closeScorerPin(){document.getElementById("scorerMo").style.display="none";document.getElementById("scorerIn").value="";}
+function doScorerPin(){
+  if(document.getElementById("scorerIn").value===SCORER_PIN){
+    ST.isScorer=true;closeScorerPin();updateAuthBadges();render();
+  }else{alert("Wrong PIN");document.getElementById("scorerIn").value="";}
+}
+function doPin(){
+  if(document.getElementById("pinIn").value===PIN){ST.isAdmin=true;closePin();updateAuthBadges();render();}
+  else{alert("Wrong PIN");document.getElementById("pinIn").value="";}
+}
+
+// ── SEED MODAL ────────────────────────────────────────────────
+function openSeedModal(ranked){
+  window._sr=ranked;
+  const seeds=ST.seeds||ranked.slice(0,8);
+  const fmt=getFmt(ranked.length);
+  const minS=gk(fmt).length;
+  const used=new Set(seeds.map(s=>s.label));
+  const rest=ranked.filter(p=>!used.has(p.label));
+  let h=`<div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,138,0,.4);margin-bottom:8px">Seeds (${seeds.length}/8) — need at least ${minS}</div>`;
+  seeds.forEach((pr,i)=>{
+    h+=`<div class="si"><span class="sr">${i+1}</span><span class="sn">${esc(pr.label)}</span>
+      ${i>0?`<button class="sb" onclick="mvSeed(${i},-1)">↑</button>`:""}
+      ${i<seeds.length-1?`<button class="sb" onclick="mvSeed(${i},1)">↓</button>`:""}
+      <button class="sb" style="border-color:rgba(255,0,0,.2);color:rgba(255,80,80,.5)" onclick="rmSeed(${i})">×</button></div>`;
+  });
+  if(rest.length>0&&seeds.length<8){
+    h+=`<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.18);margin:10px 0 6px">Unseeded</div>`;
+    rest.forEach(pr=>{h+=`<div style="display:flex;align-items:center;gap:7px;padding:6px 10px;background:rgba(255,255,255,.02);border-radius:3px;margin-bottom:3px"><span style="flex:1;font-size:12px;font-weight:600;color:rgba(255,255,255,.35)">${esc(pr.label)}</span><button class="sb" style="border-color:rgba(255,138,0,.2);color:rgba(255,138,0,.6)" onclick="addSeed('${esc(pr.label)}')">+ Seed</button></div>`;});
+  }
+  document.getElementById("seedList").innerHTML=h;
+  document.getElementById("seedMo").style.display="flex";
+}
+function closeSeed(){document.getElementById("seedMo").style.display="none";}
+function mvSeed(i,d){const s=ST.seeds||window._sr.slice(0,8);const ni=i+d;if(ni<0||ni>=s.length)return;[s[i],s[ni]]=[s[ni],s[i]];ST.seeds=s;openSeedModal(window._sr);}
+function rmSeed(i){const s=ST.seeds||window._sr.slice(0,8);s.splice(i,1);ST.seeds=s;openSeedModal(window._sr);}
+function addSeed(label){const s=ST.seeds||window._sr.slice(0,8);if(s.length>=8)return;const pr=window._sr.find(p=>p.label===label);if(pr){s.push(pr);ST.seeds=s;openSeedModal(window._sr);}}
+
+function confirmSeeds(){
+  closeSeed();
+  const ranked=window._sr,seeds=ST.seeds||ranked.slice(0,8);
+  const fmt=getFmt(ranked.length);
+  if(seeds.length<gk(fmt).length){alert(`Need at least ${gk(fmt).length} seeds.`);return;}
+  const grps=buildGroups(ranked,seeds,fmt);
+  const idx=ST.sessions.length;
+  const sI=SCHED[idx]||{num:idx+1,label:`Session ${idx+1}`,date:"",mult:1};
+  const ns={...sI,id:Date.now(),pairs:ranked,seeds:seeds.map(s=>s.label),groups:grps,
+    groupMatches:buildMatches(grps,fmt),fmt,teamCount:ranked.length,standings:null,ko:null,status:"active"};
+  ST.sessions.push(ns);ST.activeIdx=idx;
+  ST.paste="";ST.parsed=[];ST.seeds=null;ST.tab=1;
+  saveSession(ns);render();
+}
+
+// ── RESET ─────────────────────────────────────────────────────
+function toggleScorer(){
+  if(ST.isScorer){ST.isScorer=false;const b=document.getElementById("scorerBtn");b.textContent="Scorer";b.className="pin-btn";render();}
+  else openScorerPin();
+}
+
+function openReset(){document.getElementById("resetMo").style.display="flex";}
+function closeReset(){document.getElementById("resetMo").style.display="none";}
+
+async function doReset(type){
+  closeReset();
+  const sess=getSess();if(!sess)return;
+  if(type==="delete"){
+    if(!confirm("Delete this session completely?"))return;
+    ST.sessions=ST.sessions.filter((_,i)=>i!==ST.activeIdx);
+    ST.activeIdx=ST.sessions.length>0?ST.sessions.length-1:null;
+    saveLocal();try{await apiPost({action:"deleteSession",sessionId:sess.id});}catch(e){}render();
+  }else if(type==="scores"){
+    if(!confirm("Reset all scores? Draw and pairs will be kept."))return;
+    const fmt=sess.fmt||getFmt(sess.teamCount||16);
+    updSess({...sess,groupMatches:buildMatches(sess.groups,fmt),standings:null,ko:null,status:"active"});
+    undoStack=[];render();
+  }else if(type==="redraw"){
+    if(!confirm("Redraw groups? Pairs stay, all scores reset."))return;
+    ST.seeds=null;
+    const sp=getSeasonPts();
+    const ranked=[...sess.pairs].sort((a,b)=>((sp[b.p1]||0)+(sp[b.p2]||0))-((sp[a.p1]||0)+(sp[a.p2]||0)));
+    window._sr=ranked;openSeedModal(ranked);
+  }
+}
+
+function setPoOverride(team){
+  const sess=getSess();if(!sess?.ko)return;
+  sess.ko.poOverride=sess.ko.poOverride===team?null:team;
+  updSess(sess);render();
+}
+
+// ── SCORE UPDATES ─────────────────────────────────────────────
+function openMatchEdit(id){
+  const sess=getSess();if(!sess)return;
+  const m=sess.groupMatches.find(m=>m.id===id);
+  if(!m)return;
+  // If already has scores, confirm first
+  if(m.done){
+    if(!confirm(`Change score for this match?\n${m.home} ${m.hs} — ${m.as} ${m.away}`))return;
+  }
+  pushUndo();
+  ST.editingMatch=id;
+  render();
+}
+
+function cancelMatchEdit(){
+  ST.editingMatch=null;
+  render();
+}
+
+function saveMatchEdit(id){
+  const hsEl=document.getElementById(`hs_${id}`);
+  const asEl=document.getElementById(`as_${id}`);
+  const tbEl=document.getElementById(`tb_${id}`);
+  if(!hsEl||!asEl)return;
+  const hs=hsEl.value,as=asEl.value,isTB=tbEl?tbEl.checked:false;
+  const sess=getSess();if(!sess)return;
+  sess.groupMatches=sess.groupMatches.map(m=>{
+    if(m.id!==id)return m;
+    const u={...m,hs,as,isTB};
+    u.done=hs!==""&&as!==""&&!isNaN(parseInt(hs))&&!isNaN(parseInt(as));
+    return u;
+  });
+  const fmt=sess.fmt||getFmt(sess.teamCount||16);
+  sess.standings=calcStandings(sess.groupMatches,sess.groups,fmt);
+  ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?sess:s);
+  ST.editingMatch=null;
+  saveLocal();sched(sess);render();
+}
+
+function openKOEdit(stage,id){
+  const sess=getSess();if(!sess)return;
+  const ms=stage==="final"?[sess.ko.final]:sess.ko[stage];
+  const m=ms.find(m=>m.id===id);
+  if(!m)return;
+  if(m.done){
+    if(!confirm(`Change score for this match?\n${m.home} ${m.hs} — ${m.as} ${m.away}`))return;
+  }
+  pushUndo();
+  ST.editingMatch=`${stage}_${id}`;
+  render();
+}
+
+function saveKOEdit(stage,id){
+  const hsEl=document.getElementById(`hs_${stage}_${id}`);
+  const asEl=document.getElementById(`as_${stage}_${id}`);
+  const tbEl=document.getElementById(`tb_${stage}_${id}`);
+  if(!hsEl||!asEl)return;
+  const hs=hsEl.value,as=asEl.value,isTB=tbEl?tbEl.checked:false;
+  const sess=getSess();if(!sess)return;
+  const ko=JSON.parse(JSON.stringify(sess.ko));
+  const sd=m=>{m.done=m.hs!==""&&m.as!==""&&!isNaN(parseInt(m.hs))&&!isNaN(parseInt(m.as))&&parseInt(m.hs)!==parseInt(m.as);};
+  if(stage==="qf")ko.qf=ko.qf.map(m=>{if(m.id!==id)return m;const u={...m,hs,as,isTB};sd(u);return u;});
+  else if(stage==="sf")ko.sf=ko.sf.map(m=>{if(m.id!==id)return m;const u={...m,hs,as,isTB};sd(u);return u;});
+  else{ko.final={...ko.final,hs,as,isTB};sd(ko.final);}
+  sess.ko=advKO(ko);
+  ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?sess:s);
+  ST.editingMatch=null;
+  saveLocal();sched(sess);render();
+}
+
+function uG(id,field,val){
+  const sess=getSess();if(!sess)return;
+  sess.groupMatches=sess.groupMatches.map(m=>{
+    if(m.id!==id)return m;
+    const u={...m,[field]:val};
+    if(field!=="isTB")u.done=u.hs!==""&&u.as!==""&&!isNaN(parseInt(u.hs))&&!isNaN(parseInt(u.as));
+    return u;
+  });
+  const fmt=sess.fmt||getFmt(sess.teamCount||16);
+  sess.standings=calcStandings(sess.groupMatches,sess.groups,fmt);
+  ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?sess:s);
+  saveLocal();sched(sess);
+  liveStandings(sess,fmt);
+}
+
+function tGTB(id){
+  const sess=getSess();if(!sess)return;
+  sess.groupMatches=sess.groupMatches.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);
+  ST.sessions=ST.sessions.map((s,i)=>i===ST.activeIdx?sess:s);
+  saveLocal();sched(sess);
+  const btn=document.querySelector(`.tbt[onclick="tGTB('${id}')"]`);
+  if(btn){const m=sess.groupMatches.find(m=>m.id===id);if(m)btn.className="tbt"+(m.isTB?" on":"");}
+}
+
+function liveStandings(sess,fmt){
+  gk(fmt).forEach(g=>{
+    const rows=sess.standings?.[g];if(!rows)return;
+    const tb=document.querySelector(`[data-std="${g}"] tbody`);
+    if(!tb)return;
+    tb.innerHTML=rows.map((row,i)=>{
+      const isAdv=fmt.po===g?i===0:i<2;
+      return`<tr class="${isAdv?"adv":""}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?"+":""}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`;
+    }).join("");
+  });
+  sess.groupMatches.forEach(m=>{
+    const row=document.querySelector(`[data-mid="${m.id}"]`);if(!row)return;
+    const dot=row.querySelector(".dd");
+    if(m.done&&!dot){const d=document.createElement("div");d.className="dd";row.appendChild(d);}
+    else if(!m.done&&dot)dot.remove();
+  });
+  const allDone=gk(fmt).every(g=>sess.groupMatches.filter(m=>m.group===g).every(m=>m.done));
+  const ex=document.querySelector(".gko-btn");
+  if(allDone&&!sess.ko&&ST.isAdmin){if(!ex){const b=document.createElement("button");b.className="btn2 gko-btn";b.style.cssText="display:block;margin:12px auto 0";b.textContent="Generate Knockout Bracket →";b.onclick=genKO;document.getElementById("appBody").appendChild(b);}}
+  else if(ex)ex.remove();
+}
+
+function uKO(stage,id,field,val){
+  pushUndo();
+  const sess=getSess();if(!sess)return;
+  const ko=JSON.parse(JSON.stringify(sess.ko));
+  const sd=m=>{if(field!=="isTB")m.done=m.hs!==""&&m.as!==""&&!isNaN(parseInt(m.hs))&&!isNaN(parseInt(m.as))&&parseInt(m.hs)!==parseInt(m.as);};
+  if(stage==="qf")ko.qf=ko.qf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});
+  else if(stage==="sf")ko.sf=ko.sf.map(m=>{if(m.id!==id)return m;const u={...m,[field]:val};sd(u);return u;});
+  else{ko.final={...ko.final,[field]:val};sd(ko.final);}
+  sess.ko=advKO(ko);updSess(sess);render();
+}
+
+function tKTB(stage,id){
+  const sess=getSess();if(!sess)return;
+  const ko=JSON.parse(JSON.stringify(sess.ko));
+  if(stage==="qf")ko.qf=ko.qf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);
+  else if(stage==="sf")ko.sf=ko.sf.map(m=>m.id===id?{...m,isTB:!m.isTB}:m);
+  else ko.final={...ko.final,isTB:!ko.final.isTB};
+  sess.ko=ko;updSess(sess);render();
+}
+
+function genKO(){
+  const sess=getSess();if(!sess)return;
+  const n=sess.teamCount||Object.values(sess.groups||{}).flat().length;
+  const fmt=sess.fmt||getFmt(n);
+  const st=sess.standings||calcStandings(sess.groupMatches,sess.groups,fmt);
+  const q=getQualifiers(st,fmt,n,sess.ko?.poOverride||null);
+  sess.ko=mkKO(q);sess.standings=st;updSess(sess);ST.tab=3;render();
+}
+
+async function closeSession(){
+  if(!confirm("Close this session? Scores will be locked."))return;
+  const sess=getSess();if(!sess)return;
+  const u={...sess,status:"closed"};updSess(u);
+  try{await apiPost({action:"closeSession",sessionId:sess.id});}catch(e){}render();
+}
+
+// ── EDIT GROUPS ───────────────────────────────────────────────
+function toggleEG(){ST.editGroups=!ST.editGroups;render();}
+
+function saveGroups(){
+  const sess=getSess();if(!sess)return;
+  const fmt=sess.fmt||getFmt(sess.teamCount||16);
+  const keys=gk(fmt);
+  const ng={};keys.forEach(g=>{ng[g]=[];});
+  document.querySelectorAll(".gs-sel").forEach(sel=>{
+    const team=sel.dataset.team,grp=sel.value;
+    if(ng[grp]!==undefined)ng[grp].push(team);
+  });
+  const bad=keys.find(g=>ng[g].length!==fmt.g[g]);
+  if(bad){alert(`Group ${bad} must have exactly ${fmt.g[bad]} teams.`);return;}
+  const u={...sess,groups:ng,groupMatches:buildMatches(ng,fmt),standings:null,ko:null};
+  ST.editGroups=false;updSess(u);render();
+}
+
+// ── NAME EDITING ──────────────────────────────────────────────
+function toggleEN(){ST.editNames=!ST.editNames;render();}
+
+function doRename(input){
+  const oldName=input.getAttribute("data-orig");
+  const newName=input.value;
+  // Decode HTML entities back
+  const d=document.createElement("textarea");
+  d.innerHTML=oldName;
+  renamePlayer(d.value, newName);
+}
+
+function renamePlayer(oldName,newName){
+  newName=newName.trim();
+  if(!newName||newName===oldName)return;
+  const rep=s=>s.split(" / ").map(n=>n===oldName?newName:n).join(" / ");
+  const repTeam=t=>t===oldName?newName:rep(t);
+  ST.sessions=ST.sessions.map(sess=>{
+    // Update KO bracket team names
+    const repM=m=>m?{...m,
+      home:m.home?rep(m.home):m.home,
+      away:m.away?rep(m.away):m.away,
+      winner:m.winner?rep(m.winner):m.winner
+    }:m;
+    const newKO=sess.ko?{
+      ...sess.ko,
+      qf:(sess.ko.qf||[]).map(repM),
+      sf:(sess.ko.sf||[]).map(repM),
+      final:repM(sess.ko.final),
+      winner:sess.ko.winner?rep(sess.ko.winner):sess.ko.winner,
+      poOverride:sess.ko.poOverride?rep(sess.ko.poOverride):sess.ko.poOverride
+    }:null;
+    // Build updated session with new names everywhere
+    const updated={...sess,
+      pairs:(sess.pairs||[]).map(pr=>{const p1=pr.p1===oldName?newName:pr.p1,p2=pr.p2===oldName?newName:pr.p2;return{...pr,p1,p2,label:`${p1} / ${p2}`};}),
+      seeds:(sess.seeds||[]).map(rep),
+      groups:Object.fromEntries(Object.entries(sess.groups||{}).map(([g,t])=>[g,t.map(rep)])),
+      groupMatches:(sess.groupMatches||[]).map(m=>({...m,home:rep(m.home),away:rep(m.away)})),
+      ko:newKO
+    };
+    // Recalculate standings from scratch AFTER updating all names
+    // Critical: standings.team must match pair labels for fP() to work correctly
+    // Otherwise top-of-group bonus breaks (fP returns [] for old label)
+    if(updated.groupMatches&&updated.groups){
+      const fmt=updated.fmt||getFmt(updated.teamCount||16);
+      updated.standings=calcStandings(updated.groupMatches,updated.groups,fmt);
+    }
+    return updated;
+  });
+  saveLocal();ST.sessions.forEach(sess=>sched(sess));render();
+}
+
+// ── REGISTER HELPERS ──────────────────────────────────────────
+function onPaste(val){ST.paste=val;ST.parsed=extractPairs(val);render();}
+function rmParsed(i){ST.parsed.splice(i,1);render();}
+function editPN(i,field,val){ST.parsed[i][field]=val.trim();ST.parsed[i].label=`${ST.parsed[i].p1} / ${ST.parsed[i].p2}`;}
+
+
+// ── FUZZY NAME MATCHING ───────────────────────────────────────
+function levenshtein(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i?j?0:i:j));
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++)
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  return dp[m][n];
+}
+
+function normName(s){return s.toLowerCase().trim().replace(/[^a-z0-9]/g,'');}
+
+function fuzzyMatch(name,candidates){
+  // Returns best match if similar enough, null otherwise
+  const nn=normName(name);
+  if(!nn||nn.length<2)return null;
+  let best=null,bestScore=Infinity;
+  candidates.forEach(c=>{
+    const nc=normName(c);
+    if(!nc||nc===nn)return; // exact match, skip
+    const dist=levenshtein(nn,nc);
+    const maxLen=Math.max(nn.length,nc.length);
+    const ratio=dist/maxLen;
+    // Match if: edit distance <= 2, or ratio < 0.35, or one starts with the other
+    const isClose=dist<=2||ratio<0.35||nn.startsWith(nc)||nc.startsWith(nn);
+    if(isClose&&dist<bestScore){bestScore=dist;best=c;}
+  });
+  return best;
+}
+
+function getPrevPlayers(){
+  // Get all unique player names from previous sessions
+  const players=new Set();
+  ST.sessions.forEach(sess=>{
+    (sess.pairs||[]).forEach(pr=>{players.add(pr.p1);players.add(pr.p2);});
+  });
+  return [...players];
+}
+
+function getSuggestions(parsed){
+  const prev=getPrevPlayers();
+  if(!prev.length)return {};
+  const currentNames=new Set(parsed.flatMap(p=>[p.p1,p.p2]));
+  const suggestions={};
+  parsed.forEach((pr,i)=>{
+    [pr.p1,pr.p2].forEach((name,fi)=>{
+      // Skip if exact match exists in prev
+      if(prev.includes(name))return;
+      // Skip if it's clearly a new player (short abbreviation known pattern)
+      const match=fuzzyMatch(name,prev.filter(p=>!currentNames.has(p)||p===name));
+      if(match)suggestions[name]=match;
+    });
+  });
+  return suggestions;
+}
+
+function applySuggestion(pairIdx,field,newName){
+  ST.parsed[pairIdx][field]=newName;
+  ST.parsed[pairIdx].label=`${ST.parsed[pairIdx].p1} / ${ST.parsed[pairIdx].p2}`;
+  // Recalculate suggestions and re-render
+  render();
+}
+
+function canDraw(){
+  const n=ST.parsed.length;
+  if(!FMT[n])return false;
+  const names=ST.parsed.flatMap(p=>[p.p1,p.p2]);
+  const c={};names.forEach(n=>{c[n]=(c[n]||0)+1;});
+  return!Object.values(c).some(v=>v>1)&&!ST.parsed.some(pr=>isBanned(pr.p1,pr.p2));
+}
+
+function openSeedAndDraw(){
+  if(!canDraw())return;
+  const sp=getSeasonPts();
+  const ranked=[...ST.parsed].sort((a,b)=>((sp[b.p1]||0)+(sp[b.p2]||0))-((sp[a.p1]||0)+(sp[a.p2]||0)));
+  ST.seeds=null;window._sr=ranked;openSeedModal(ranked);
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function n2Desc(n){
+  const f=FMT[n];if(!f)return`${n} teams`;
+  const parts=Object.entries(f.g).map(([g,s])=>`Group ${g}: ${s} teams`);
+  let desc=parts.join(" · ");
+  if(f.drop.length)desc+=` · Group${f.drop.length>1?"s":""} ${f.drop.join("&")} play 4, drop lowest`;
+  if(f.po)desc+=` · Group ${f.po} has playoff for 2nd qualifier`;
+  return desc;
+}
+
+function render(){rSess();rTabs();rBody();}
+
+function rSess(){
+  let h="";
+  ST.sessions.forEach((s,i)=>{
+    h+=`<button class="sc ${s.mult===2?"fw":""} ${ST.activeIdx===i?"on":""} ${s.status==="closed"?"closed":""}" onclick="setSession(${i})">${s.label}${s.mult===2?" 2×":""}${s.status==="closed"?" ✓":""}</button>`;
+  });
+  if(ST.isAdmin)h+=`<button class="sc ${ST.activeIdx===null&&ST.tab===0?"on":""}" onclick="newSess()">+ New</button>`;
+  document.getElementById("sessRow").innerHTML=h;
+  updateAuthBadges();
+}
+
+function rTabs(){
+  document.getElementById("tabBar").innerHTML=TABS.map((t,i)=>`<button class="tab ${ST.tab===i?"on":""}" onclick="setTab(${i})">${t}</button>`).join("");
+}
+
+function rBody(){
+  const body=document.getElementById("appBody");
+  const sess=getSess();
+  const sp=getSeasonPts();
+  let h="";
+
+  // ── REGISTER ──────────────────────────────────────────────
+  if(ST.tab===0){
+    if(!ST.isAdmin){h=`<div class="ro-note">View only — tap Admin to unlock</div>`;body.innerHTML=h;return;}
+    const n=ST.parsed.length,fmt=FMT[n];
+    const sIdx=ST.sessions.length,sI=SCHED[sIdx];
+    h+=`<div class="ir"><div class="sec" style="margin:0">Sign Up List — Session ${sIdx+1}</div><span style="font-size:11px;color:rgba(255,255,255,.2)">${sI?sI.date:""}</span></div>`;
+    h+=`<textarea class="paste-area" placeholder="Paste WhatsApp sign up list:\n1- Ahmed / Salem\n2- Khalid &amp; Omar\n3- Faisal + Tariq\n..." oninput="onPaste(this.value)">${esc(ST.paste)}</textarea>`;
+
+    if(ST.parsed.length>0){
+      const names=ST.parsed.flatMap(p=>[p.p1,p.p2]);
+      const cnts={};names.forEach(n=>{cnts[n]=(cnts[n]||0)+1;});
+      const dupes=new Set(Object.entries(cnts).filter(([,c])=>c>1).map(([n])=>n));
+      const hasDupes=dupes.size>0,hasBan=ST.parsed.some(pr=>isBanned(pr.p1,pr.p2));
+
+      if(hasDupes)h+=`<div class="ban-note" style="border-left-color:var(--orange);color:rgba(255,180,0,.7)">⚠️ Duplicate names detected — edit highlighted names to add a last initial</div>`;
+      if(hasBan)h+=`<div class="ban-note">⚠️ Last session winners cannot re-pair — remove or edit that pair</div>`;
+      if(fmt){
+        const fmtDesc=Object.entries(fmt.g).map(([g,s])=>g+"("+s+")").join("+");
+        const dropDesc=fmt.drop.length?" · Group"+(fmt.drop.length>1?"s":"")+" "+fmt.drop.join("/")+" drop lowest":"";
+        const poDesc=fmt.po?" · Group "+fmt.po+" = playoff":"";
+        h+=`<div class="info-note">✅ ${n} teams → ${fmtDesc}${dropDesc}${poDesc}</div>`;
+      }
+      else h+=`<div class="info-note">ℹ️ ${n} teams — supported range: 8 to 16</div>`;
+
+      const suggestions=getSuggestions(ST.parsed);
+      const hasSuggestions=Object.keys(suggestions).length>0;
+      if(hasSuggestions)h+=`<div class="info-note" style="border-left-color:#a78bfa;color:rgba(180,150,255,.8)">💡 Some names look similar to previous players — check suggestions below</div>`;
+
+      ST.parsed.forEach((pr,i)=>{
+        const ban=isBanned(pr.p1,pr.p2);
+        const d1=dupes.has(pr.p1),d2=dupes.has(pr.p2);
+        const s1=suggestions[pr.p1],s2=suggestions[pr.p2];
+
+        h+=`<div class="pc" style="flex-direction:column;align-items:stretch;gap:0;padding:0">`;
+        h+=`<div style="display:flex;align-items:center;gap:7px;padding:7px 12px">`;
+        h+=`<span class="pn">${String(i+1).padStart(2,"0")}</span>`;
+
+        // P1
+        if(d1)h+=`<input type="text" value="${esc(pr.p1)}" style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:3px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editPN(${i},'p1',this.value)">`;
+        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;${s1?'color:rgba(167,139,250,.9);font-weight:700':''}">${esc(pr.p1)}</span>`;
+
+        h+=`<span class="ps">/</span>`;
+
+        // P2
+        if(d2)h+=`<input type="text" value="${esc(pr.p2)}" style="flex:1;min-width:0;background:var(--bg);border:1px solid rgba(255,180,0,.4);border-radius:3px;padding:3px 6px;font-size:12px;color:#ffb700;font-family:'Barlow',sans-serif;outline:none" oninput="editPN(${i},'p2',this.value)">`;
+        else h+=`<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;${s2?'color:rgba(167,139,250,.9);font-weight:700':''}">${esc(pr.p2)}</span>`;
+
+        if(ban)h+=`<span style="font-size:10px;color:rgba(255,80,80,.6);font-weight:700;flex-shrink:0">BAN</span>`;
+        h+=`<button class="pb" onclick="rmParsed(${i})">×</button>`;
+        h+=`</div>`;
+
+        // Suggestion chips
+        if(s1||s2){
+          h+=`<div style="display:flex;gap:6px;padding:4px 12px 8px;flex-wrap:wrap">`;
+          if(s1)h+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(167,139,250,.7)">💡 <span style="color:rgba(255,255,255,.4)">${esc(pr.p1)}</span> → <button onclick="applySuggestion(${i},'p1','${esc(s1)}')" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:rgba(167,139,250,.9);border-radius:3px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer">${esc(s1)} ✓</button> <button onclick="editPN(${i},'p1','${esc(pr.p1)}')" style="background:transparent;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer">keep</button></div>`;
+          if(s2)h+=`<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(167,139,250,.7)">💡 <span style="color:rgba(255,255,255,.4)">${esc(pr.p2)}</span> → <button onclick="applySuggestion(${i},'p2','${esc(s2)}')" style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:rgba(167,139,250,.9);border-radius:3px;padding:2px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer">${esc(s2)} ✓</button> <button onclick="editPN(${i},'p2','${esc(pr.p2)}')" style="background:transparent;border:none;color:rgba(255,255,255,.25);font-size:10px;cursor:pointer">keep</button></div>`;
+          h+=`</div>`;
+        }
+        h+=`</div>`;
+      });
+      h+=`<div class="note" style="margin-top:8px">${n} pairs${!fmt?" · unsupported count":hasDupes?" · fix duplicate names":hasBan?" · remove banned pair":""}</div>`;
+      h+=`<button class="btn" ${!canDraw()?"disabled":""} onclick="openSeedAndDraw()">Review Seeds & Draw →</button>`;
+    }else if(ST.paste.trim()){
+      h+=`<div class="note">No pairs found — separate names with /, &, or +</div>`;
+    }
+  }
+
+  // ── DRAW ──────────────────────────────────────────────────
+  else if(ST.tab===1){
+    if(!sess){h=`<div class="empty">Register players and run a draw to see groups.</div>`;}
+    else{
+      const fmt=sess.fmt||getFmt(sess.teamCount||16);
+      const keys=gk(fmt);
+      h+=`<div class="ir"><div class="sec" style="margin:0">${sess.label} · ${sess.date||""}</div><div style="display:flex;gap:6px;align-items:center">${sess.mult===2?`<span class="mb">2× FINAL WEEK</span>`:""}${sess.status==="closed"?`<span style="font-size:10px;color:#22c55e;font-weight:700">CLOSED ✓</span>`:""}</div></div>`;
+      const _n=sess.teamCount||Object.values(sess.groups||{}).flat().length||16;
+      h+=`<div class="note">${n2Desc(_n)}</div>`;
+
+      if(ST.editGroups&&ST.isAdmin){
+        const allT=keys.flatMap(g=>sess.groups[g]||[]);
+        h+=`<div class="info-note">⚙️ Reassign teams to groups — each group must keep its required size</div>`;
+        h+=`<div class="eg-grid">`;
+        allT.forEach(team=>{
+          const cg=keys.find(g=>(sess.groups[g]||[]).includes(team))||keys[0];
+          h+=`<div class="pc" style="gap:7px">${(sess.seeds||[]).includes(team)?`<span class="stag">SEED</span>`:""}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:11px">${esc(team)}</span>`;
+          h+=`<select class="gs-sel" data-team="${esc(team)}" style="background:var(--bg);border:1px solid rgba(255,138,0,.3);border-radius:3px;color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:3px 6px;outline:none;cursor:pointer;flex-shrink:0">`;
+          keys.forEach(g=>h+=`<option value="${g}" ${g===cg?"selected":""}>${g} (${fmt.g[g]})</option>`);
+          h+=`</select></div>`;
+        });
+        h+=`</div><div class="btns-row"><button class="btn2" onclick="toggleEG()">Cancel</button><button class="btn" style="margin:0" onclick="saveGroups()">Save →</button></div>`;
+      }else{
+        const cols=keys.length<=2?2:keys.length<=4?4:2;
+        h+=`<div class="gg" style="grid-template-columns:repeat(${Math.min(cols,keys.length)},1fr)">`;
+        keys.forEach((g,gi)=>{
+          const isDrop=fmt.drop.includes(g),isPO=fmt.po===g;
+          h+=`<div class="card"><div class="gh">Group ${g}<span style="color:rgba(255,255,255,.2)">Court ${gi+1}</span>`;
+          if(isDrop)h+=`<span class="dtag">drop lowest</span>`;
+          if(isPO)h+=`<span class="ptag">playoff</span>`;
+          h+=`</div>`;
+          (sess.groups[g]||[]).forEach(team=>{
+            h+=`<div class="gt">${(sess.seeds||[]).includes(team)?`<span class="stag">SEED</span>`:""}<span style="font-size:14px;font-weight:700;color:#fff">${esc(team)}</span></div>`;
+          });
+          h+=`</div>`;
+        });
+        h+=`</div>`;
+        if(ST.isAdmin){
+          h+=`<div class="btns-row">`;
+          if(sess.status!=="closed")h+=`<button class="btn2" onclick="toggleEG()">⚙️ Edit Groups</button>`;
+          h+=`<button class="btn-danger" onclick="openReset()">⚠️ Reset</button></div>`;
+        }
+      }
+    }
+  }
+
+  // ── GROUPS ────────────────────────────────────────────────
+  else if(ST.tab===2){
+    if(!sess){h=`<div class="empty">Run a draw first.</div>`;}
+    else{
+      const fmt=sess.fmt||getFmt(sess.teamCount||16);
+      const keys=gk(fmt);
+      if(!ST.isAdmin)h+=`<div class="ro-note">View only — tap Admin to enter scores</div>`;
+      if(sess.mult===2)h+=`<div style="margin-bottom:10px"><span class="mb">2× FINAL WEEK — All points doubled</span></div>`;
+      if(ST.isAdmin&&undoStack.length>0)h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="tbt" onclick="undoLast()" style="font-size:11px;padding:4px 12px;color:rgba(255,180,0,.8);border-color:rgba(255,180,0,.3)">↩ Undo</button></div>`;
+
+      const st=sess.standings||calcStandings(sess.groupMatches||[],sess.groups||{},fmt);
+
+      h+=`<div class="sec">Results</div><div class="mg">`;
+      keys.forEach((g,gi)=>{
+        const gm=(sess.groupMatches||[]).filter(m=>m.group===g);if(!gm.length)return;
+        const isDrop=fmt.drop.includes(g),isPO=fmt.po===g;
+        h+=`<div class="card"><div class="ch"><div class="cl">Group ${g} · Court ${gi+1}</div>`;
+        if(isDrop)h+=`<span class="dtag">drop lowest</span>`;
+        if(isPO)h+=`<span class="ptag">playoff</span>`;
+        h+=`</div>`;
+        gm.forEach(m=>{
+          const canScore=(ST.isAdmin||ST.isScorer)&&sess.status!=="closed";
+          const isEditing=ST.editingMatch===m.id;
+          if(isEditing){
+            // Edit mode
+            h+=`<div class="mr-editing" data-mid="${m.id}">
+              <div class="mt hm" style="font-size:13px;font-weight:700">${esc(m.home)}</div>
+              <input id="hs_${m.id}" type="number" min="0" max="7" value="${m.hs}" style="width:38px;background:rgba(0,0,0,.4);border:1px solid rgba(255,122,0,.4);border-radius:3px;padding:6px 2px;text-align:center;font-size:16px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;-moz-appearance:textfield;flex-shrink:0" onkeydown="if(event.key==='Enter')saveMatchEdit('${m.id}')">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+                <span class="mr-vs">—</span>
+                <label style="display:flex;align-items:center;gap:3px;font-size:9px;color:rgba(255,192,64,.7);cursor:pointer;font-weight:700">
+                  <input id="tb_${m.id}" type="checkbox" ${m.isTB?"checked":""} style="accent-color:#ffb700;width:12px;height:12px">TB
+                </label>
+              </div>
+              <input id="as_${m.id}" type="number" min="0" max="7" value="${m.as}" style="width:38px;background:rgba(0,0,0,.4);border:1px solid rgba(255,122,0,.4);border-radius:3px;padding:6px 2px;text-align:center;font-size:16px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;-moz-appearance:textfield;flex-shrink:0" onkeydown="if(event.key==='Enter')saveMatchEdit('${m.id}')">
+              <div class="mt" style="font-size:13px;font-weight:700">${esc(m.away)}</div>
+              <button class="mr-save" onclick="saveMatchEdit('${m.id}')">✓</button>
+              <button class="mr-cancel" onclick="cancelMatchEdit()">✕</button>
+            </div>`;
+          } else {
+            // Display mode
+            const hs=m.done?m.hs:"–",as=m.done?m.as:"–";
+            const tbTag=m.isTB?`<span style="font-size:8px;padding:1px 4px;background:rgba(255,192,64,.1);border:1px solid rgba(255,192,64,.25);color:rgba(255,192,64,.7);border-radius:2px;font-weight:700;flex-shrink:0">TB</span>`:"";
+            const doneTag=m.done?`<div class="dd"></div>`:"";
+            const editBtn=canScore?`<button class="mr-edit-btn" onclick="openMatchEdit('${m.id}')" title="Edit score">✏️</button>`:"";
+            h+=`<div class="mr-display" data-mid="${m.id}" ${canScore&&!m.done?`onclick="openMatchEdit('${m.id}')"`:""}>
+              <div class="mt hm" style="font-size:14px;font-weight:700">${esc(m.home)}</div>
+              <span class="mr-score ${m.done?"":"empty"}">${hs}</span>
+              <span class="mr-vs">—</span>
+              <span class="mr-score ${m.done?"":"empty"}">${as}</span>
+              <div class="mt" style="font-size:14px;font-weight:700">${esc(m.away)}</div>
+              ${tbTag}${doneTag}${editBtn}
+            </div>`;
+          }
+        });
+        h+=`</div>`;
+      });
+      h+=`</div>`;
+
+      h+=`<div class="sec">Standings</div><div class="sg">`;
+      keys.forEach(g=>{
+        const rows=st[g];if(!rows)return;
+        const isPO=fmt.po===g;
+        h+=`<div class="card"><div class="ch"><div class="cl">Group ${g}${isPO?" · PLAYOFF":""}`;
+        if(fmt.drop.includes(g))h+=`<span class="dtag" style="margin-left:4px">drop lowest</span>`;
+        h+=`</div></div>`;
+        h+=`<table data-std="${g}"><thead><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>GD</th><th>Pts</th></tr></thead><tbody>`;
+        rows.forEach((row,i)=>{
+          const isAdv=isPO?i===0:i<2;
+          h+=`<tr class="${isAdv?"adv":""}"><td>${esc(row.team)}</td><td>${row.p}</td><td>${row.w}</td><td>${row.l}</td><td>${row.gf-row.ga>0?"+":""}${row.gf-row.ga}</td><td class="pv">${row.pts}</td></tr>`;
+        });
+        h+=`</tbody></table>`;
+        if(isPO)h+=`<div style="padding:7px 10px;font-size:10px;color:rgba(255,255,255,.25)">1st auto-qualifies · 2nd vs 3rd = playoff for last QF spot</div>`;
+        h+=`</div>`;
+      });
+      h+=`</div>`;
+
+      const allDone=keys.every(g=>(sess.groupMatches||[]).filter(m=>m.group===g).every(m=>m.done));
+      if(ST.isAdmin&&allDone&&!sess.ko&&sess.status!=="closed")h+=`<button class="btn2 gko-btn" style="display:block;margin:0 auto" onclick="genKO()">Generate Knockout Bracket →</button>`;
+      if(ST.isAdmin)h+=`<button class="btn-danger" style="display:block;margin:10px auto 0" onclick="openReset()">⚠️ Reset Session</button>`;
+    }
+  }
+
+  // ── KNOCKOUTS ─────────────────────────────────────────────
+  else if(ST.tab===3){
+    if(!sess?.ko){h=`<div class="empty">${sess?"Complete all group matches first.":"Run a draw first."}</div>`;}
+    else{
+      const fmt=sess.fmt||getFmt(sess.teamCount||16);
+      if(!ST.isAdmin)h+=`<div class="ro-note">View only — tap Admin to enter scores</div>`;
+      if(sess.mult===2)h+=`<div style="margin-bottom:10px"><span class="mb">2× FINAL WEEK</span></div>`;
+      if(ST.isAdmin&&undoStack.length>0)h+=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="tbt" onclick="undoLast()" style="font-size:11px;padding:4px 12px;color:rgba(255,180,0,.8);border-color:rgba(255,180,0,.3)">↩ Undo</button></div>`;
+
+      [["qf","Quarter Finals"],["sf","Semi Finals"],["final","Final"]].forEach(([stage,label])=>{
+        const ms=stage==="final"?[sess.ko.final]:sess.ko[stage];
+        h+=`<div class="kos"><div class="kl">${label}</div><div class="card">`;
+        ms.forEach(m=>{
+          const dis=(!m.home||!m.away||(!ST.isAdmin&&!ST.isScorer)||sess.status==="closed")?"disabled":"";
+          h+=`<div class="km"><div class="kt hm ${!m.home?"tbd":""}">${esc(m.home||"TBD")}</div><input type="number" min="0" max="7" value="${m.hs}" ${dis} oninput="uKO('${stage}','${m.id}','hs',this.value)"><span class="vs">—</span><input type="number" min="0" max="7" value="${m.as}" ${dis} oninput="uKO('${stage}','${m.id}','as',this.value)"><div class="kt aw ${!m.away?"tbd":""}">${esc(m.away||"TBD")}</div><button class="tbt ${m.isTB?"on":""}" ${dis} onclick="tKTB('${stage}','${m.id}')">TB</button>${m.done?`<div class="dd"></div>`:""}</div>`;
+        });
+        h+=`</div></div>`;
+      });
+
+      if(sess.ko.winner)h+=`<div class="wb"><div class="wl">🏆 ${sess.label} Champion</div><div class="wn">${esc(sess.ko.winner)}</div></div>`;
+
+      // Playoff group override
+      if(fmt.po&&ST.isAdmin&&!sess.ko.winner){
+        const pgR=(sess.standings&&sess.standings[fmt.po])||[];
+        h+=`<div style="background:rgba(255,138,0,.06);border:1px solid rgba(255,138,0,.15);border-radius:6px;padding:14px;margin-top:14px">`;
+        h+=`<div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,138,0,.6);margin-bottom:8px">⚙️ Group ${fmt.po} — Override 2nd Qualifier</div>`;
+        h+=`<div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:8px">${pgR[0]?.team||"TBD"} auto-qualifies as 1st · Select 2nd qualifier:</div>`;
+        h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+        pgR.slice(1).forEach(row=>{
+          const on=sess.ko.poOverride===row.team;
+          h+=`<button onclick="setPoOverride('${esc(row.team)}')" style="padding:5px 12px;border-radius:3px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${on?"rgba(255,138,0,.5)":"rgba(255,255,255,.12)"};background:${on?"rgba(255,138,0,.15)":"transparent"};color:${on?"#ff8a00":"rgba(255,255,255,.4)"}">${esc(row.team)}</button>`;
+        });
+        h+=`</div></div>`;
+      }
+
+      if(ST.isAdmin){
+        h+=`<div class="btns-row">`;
+        if(sess.ko.winner&&sess.status!=="closed")h+=`<button class="btn-danger" onclick="closeSession()">Close & Archive →</button>`;
+        h+=`<button class="btn-danger" onclick="openReset()">⚠️ Reset</button></div>`;
+      }
+    }
+  }
+
+  // ── LEADERBOARD ───────────────────────────────────────────
+  else if(ST.tab===4){
+    h+=`<div class="ir"><div class="sec" style="margin:0">Season Leaderboard</div><div style="display:flex;gap:7px;align-items:center">`;
+    h+=`<span style="font-size:10px;color:rgba(255,255,255,.2)">${ST.sessions.length}/8</span>`;
+    h+=`<button class="tbt" onclick="loadSessions()">↻ Refresh</button>`;
+    if(ST.isAdmin)h+=`<button class="tbt" onclick="toggleEN()" style="color:rgba(255,180,0,.7);border-color:rgba(255,180,0,.25)">✏️ Names</button>`;
+    h+=`</div></div>`;
+    h+=`<div class="note" style="margin-bottom:10px">Min 2 sessions to qualify · 🔥 streak bonus · Sessions 7&8 = 2×</div>`;
+
+    const lb=Object.entries(sp).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(!lb.length){h+=`<div class="empty">No data yet — complete some matches first.</div>`;}
+    else{
+      h+=`<div class="lb-card">`;
+      lb.forEach(([player,pts],i)=>{
+        const sc=ST.sessions.filter(s=>s.pairs?.some(p=>p.p1===player||p.p2===player)).length;
+        const el=sc>=2;
+        let streak=0;
+        for(let si=ST.sessions.length-1;si>=0;si--){if(ST.sessions[si]?.pairs?.some(p=>p.p1===player||p.p2===player))streak++;else break;}
+        const bd=ST.sessions.map((s,si)=>{const sp2=calcSessPts(s);return sp2[player]!==undefined?{pts:sp2[player],mult:s.mult}:null;});
+        const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
+        const safePlayer=esc(player).replace(/'/g,"&#39;");
+        const nameEl=ST.editNames&&ST.isAdmin
+          ?`<input type="text" value="${esc(player)}" data-orig="${safePlayer}" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,138,0,.35);border-radius:3px;padding:4px 9px;font-size:14px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;width:160px;max-width:100%;letter-spacing:.02em" onblur="doRename(this)" onkeydown="if(event.key==='Enter')this.blur()">`
+          :`<div class="lbn">${esc(player)}</div>`;
+        const stats=getPlayerStats(player);
+        const champIcon=stats.championships>0?`<span style="font-size:11px;margin-left:4px" title="${stats.championships} championship${stats.championships>1?"s":""}">🏆`.repeat(Math.min(stats.championships,3))+"</span>":"";
+        const finalIcon=stats.finals>stats.championships?`<span style="font-size:10px;color:rgba(255,192,64,.5);margin-left:2px" title="${stats.finals} final${stats.finals>1?"s":""}">🥈</span>`.repeat(Math.min(stats.finals-stats.championships,2)):"";
+        h+=`<div class="lbr" style="${!el?"opacity:.4":""}">`;
+        h+=`<div class="lbrk ${rc}">${el?(i===0?"1ST":i===1?"2ND":i===2?"3RD":i+1):"—"}</div>`;
+        h+=`<div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:4px">${nameEl}${champIcon}${finalIcon}</div>
+          <div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">
+            <span style="font-size:10px;color:rgba(0,232,122,.6);font-weight:700">${stats.wins}W</span>
+            <span style="font-size:10px;color:rgba(255,80,80,.5);font-weight:700">${stats.losses}L</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.25);font-weight:600">${stats.winRate}% WR</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.2)">GD ${stats.gd>0?"+":""}${stats.gd}</span>
+            ${sc} session${sc!==1?"s":""}${!el?` · needs ${2-sc} more`:""}
+          </div>
+        </div>`;
+        h+=`<div class="lbm">
+          <div class="lbd">${bd.map((b,si)=>b?`<span class="lbs ${b.mult===2?"fx":""}">S${si+1}:${b.pts}</span>`:"").join("")}</div>
+          ${streak>=2?`<div class="lbst">🔥 ${streak} streak</div>`:""}
+        </div>`;
+        h+=`<div class="lbp">${pts}</div></div>`;
+      });
+      h+=`</div>`;
+    }
+  }
+
+  // ── POINTS REFERENCE ──────────────────────────────────────
+  else if(ST.tab===5){
+    [
+      {t:"Match Points",items:[["Win any match","+3","g"],["Competitive loss (6-2 or closer)","+1",""],["Tiebreak loss","+2",""],["Lost 6-0 or 6-1","0 pts","r"]]},
+      {t:"Bonus Points",items:[["Top of group","+1",""],["Reach Final (both teams)","+2",""],["Win the Final","+3","g"]]},
+      {t:"Attendance Streak",items:[["2 sessions in a row","+1",""],["3 in a row","+2",""],["4+ in a row","+3 MAX","g"]]},
+      {t:"Session Multipliers",items:[["Sessions 1–6","1× normal",""],["Sessions 7–8 Final Week","2× EVERYTHING 🔥","g"]]},
+
+      {t:"Format by Team Count",items:[["8 teams","2×4 · all 8 qualify",""],["9","1×5 + 1×4 · drop lowest",""],["10","2×5 · drop lowest both",""],["11 / 15","3×4 + 1×3 · playoff",""],["12","3×4 · top 2 + 2 best 3rd",""],["13","2×4 + 1×5 · drop lowest",""],["14","2×5 + 1×4 · drop lowest",""],["16","4×4 · top 2 each","g"]]},
+      {t:"Tiebreakers",items:[["1st","Wins",""],["2nd","Game difference",""],["3rd","Head to head",""],["4th","Most games scored",""],["5th","Sudden death point (live)","r"]]},
+      {t:"Partner Rules",items:[["Last session winners re-pair","NOT ALLOWED","r"],["Min sessions for leaderboard","2 sessions",""],["New players joining mid-season","Always allowed","g"]]},
+    ].forEach(sec=>{
+      h+=`<div class="pref"><div class="prt">${sec.t}</div><div class="prg">`;
+      sec.items.forEach(([l,v,c])=>h+=`<div class="pri"><span class="prl">${l}</span><span class="prv ${c}">${v}</span></div>`);
+      h+=`</div></div>`;
+    });
+  }
+
+  body.innerHTML=h;
+}
+
+
+
+// ── NAVIGATION ────────────────────────────────────────────────
+function setTab(i){if(_lbOnly&&i!==4)return;ST.tab=i;render();}
+function setSession(i){ST.activeIdx=i;ST.tab=1;render();}
+function newSess(){ST.activeIdx=null;ST.tab=0;ST.paste="";ST.parsed=[];ST.seeds=null;render();}
+
+// ── INIT ──────────────────────────────────────────────────────
+// URL routing
+const _urlParams=new URLSearchParams(window.location.search);
+const _lbOnly=_urlParams.has("leaderboard");
+if(_lbOnly){
+  // Hide all tabs except leaderboard, lock to leaderboard view
+  ST.tab=4;
+  document.addEventListener("DOMContentLoaded",()=>{
+    const tabs=document.getElementById("tabBar");
+    if(tabs)tabs.style.display="none";
+  });
+}
+
+render();
+loadSessions();
+
+// Hide tabs in leaderboard-only mode after render
+if(_lbOnly){
+  const tabs=document.getElementById("tabBar");
+  if(tabs)tabs.style.display="none";
+  const sr=document.getElementById("sessRow");
+  if(sr)sr.style.display="none";
+}
+</script>
+</body>
+</html>
