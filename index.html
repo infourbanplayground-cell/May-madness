@@ -485,6 +485,12 @@ function calcSessPts(sess){
   return pts;
 }
 
+function playerPlayed(sess,player){
+  const labels=(sess.pairs||[]).filter(p=>p.p1===player||p.p2===player).map(p=>p.label);
+  if(!labels.length)return false;
+  return(sess.groupMatches||[]).some(m=>m.done&&(labels.includes(m.home)||labels.includes(m.away)));
+}
+
 function calcStreak(player,sessions,idx){
   // Count current streak ending at idx
   let s=0;
@@ -562,7 +568,10 @@ function getSeasonPts(){
   ST.sessions.forEach((sess,idx)=>{
     const sp=calcSessPts(sess);
     Object.entries(sp).forEach(([p,v])=>{t[p]=(t[p]||0)+v;});
-    Object.keys(sp).forEach(p=>{t[p]=(t[p]||0)+calcStreak(p,ST.sessions,idx);});
+    // Only add streak bonus if player actually played in this session
+    Object.keys(sp).forEach(p=>{
+      if(playerPlayed(sess,p))t[p]=(t[p]||0)+calcStreak(p,ST.sessions,idx);
+    });
   });
   return t;
 }
