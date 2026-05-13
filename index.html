@@ -965,28 +965,31 @@ function toggleEN(){ST.editNames=!ST.editNames;render();}
 
 function startEditName(player){
   ST.editingName=player;
-  ST.editingNameVal=player;
-  render();
-  // Focus the input after render
-  setTimeout(()=>{
-    const inp=document.getElementById("nameEditInput");
-    if(inp){inp.focus();inp.select();}
-  },50);
+  // Use modal - completely outside render cycle
+  const mo=document.getElementById("renameMo");
+  const inp=document.getElementById("renameInput");
+  const lbl=document.getElementById("renameOldLabel");
+  if(!mo||!inp)return;
+  lbl.textContent="Renaming: "+player;
+  inp.value=player;
+  mo.style.display="flex";
+  setTimeout(()=>{inp.focus();inp.select();},100);
 }
 
 function saveEditName(){
-  const newName=ST.editingNameVal.trim();
+  const inp=document.getElementById("renameInput");
+  const newName=inp?inp.value.trim():"";
   const oldName=ST.editingName;
+  document.getElementById("renameMo").style.display="none";
   ST.editingName=null;
   ST.editingNameVal="";
   if(newName&&newName!==oldName)renamePlayer(oldName,newName);
-  else render();
 }
 
 function cancelEditName(){
+  document.getElementById("renameMo").style.display="none";
   ST.editingName=null;
   ST.editingNameVal="";
-  render();
 }
 
 function doRename(input){
@@ -1411,17 +1414,9 @@ function rBody(){
         for(let si=ST.sessions.length-1;si>=0;si--){if(playerPlayed(ST.sessions[si],player))streak++;else break;}
         const bd=ST.sessions.map((s,si)=>{const sp2=calcSessPts(s);return sp2[player]!==undefined?{pts:sp2[player],mult:s.mult}:null;});
         const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
+        const safePlayer=player.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         const nameEl=ST.editNames&&ST.isAdmin
-          ?(ST.editingName===player
-            ?`<div style="display:flex;align-items:center;gap:5px">
-                <input id="nameEditInput" type="text" value="${esc(ST.editingNameVal)}" 
-                  style="background:rgba(0,0,0,.5);border:1px solid rgba(255,138,0,.5);border-radius:3px;padding:5px 9px;font-size:14px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;width:150px;max-width:100%;letter-spacing:.02em"
-                  oninput="ST.editingNameVal=this.value"
-                  onkeydown="if(event.key==='Enter')saveEditName();if(event.key==='Escape')cancelEditName()">
-                <button onclick="saveEditName()" style="background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.3);color:#00e87a;border-radius:3px;padding:4px 9px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✓</button>
-                <button onclick="cancelEditName()" style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);border-radius:3px;padding:4px 7px;font-family:'Barlow Condensed',sans-serif;font-size:12px;cursor:pointer;flex-shrink:0">✕</button>
-              </div>`
-            :`<div class="lbn" onclick="startEditName('${esc(player).replace(/'/g,"\'")}')" style="cursor:pointer" title="Tap to edit">${esc(player)} <span style="font-size:10px;opacity:.4">✏️</span></div>`)
+          ?`<div class="lbn" onclick="startEditName('${safePlayer}')" style="cursor:pointer">${esc(player)} <span style="font-size:10px;opacity:.35">✏️</span></div>`
           :`<div class="lbn">${esc(player)}</div>`;
         const stats=getPlayerStats(player);
         const champIcon=stats.championships>0?`<span style="font-size:11px;margin-left:4px" title="${stats.championships} championship${stats.championships>1?"s":""}">🏆`.repeat(Math.min(stats.championships,3))+"</span>":"";
@@ -1500,5 +1495,19 @@ if(_lbOnly){
   if(sr)sr.style.display="none";
 }
 </script>
+
+<div class="ov" id="renameMo" style="display:none" onclick="if(event.target===this)cancelEditName()">
+  <div class="mo" style="max-width:340px">
+    <div class="mt2">✏️ Edit Name</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-bottom:14px" id="renameOldLabel"></div>
+    <input id="renameInput" type="text" 
+      style="width:100%;background:rgba(0,0,0,.4);border:1px solid rgba(255,138,0,.4);border-radius:4px;padding:12px;font-size:18px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;letter-spacing:.02em;margin-bottom:14px"
+      onkeydown="if(event.key==='Enter')saveEditName();if(event.key==='Escape')cancelEditName()">
+    <div class="mbtns">
+      <button class="mbt s" onclick="cancelEditName()">Cancel</button>
+      <button class="mbt p" onclick="saveEditName()">Save Name</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
