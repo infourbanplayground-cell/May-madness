@@ -1414,9 +1414,8 @@ function rBody(){
         for(let si=ST.sessions.length-1;si>=0;si--){if(playerPlayed(ST.sessions[si],player))streak++;else break;}
         const bd=ST.sessions.map((s,si)=>{const sp2=calcSessPts(s);return sp2[player]!==undefined?{pts:sp2[player],mult:s.mult}:null;});
         const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
-        const safePlayer=player.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
         const nameEl=ST.editNames&&ST.isAdmin
-          ?`<div class="lbn" onclick="startEditName('${safePlayer}')" style="cursor:pointer">${esc(player)} <span style="font-size:10px;opacity:.35">✏️</span></div>`
+          ?`<div class="lbn edit-name-btn" data-player="${esc(player)}" style="cursor:pointer">${esc(player)} <span style="font-size:10px;opacity:.35">✏️</span></div>`
           :`<div class="lbn">${esc(player)}</div>`;
         const stats=getPlayerStats(player);
         const champIcon=stats.championships>0?`<span style="font-size:11px;margin-left:4px" title="${stats.championships} championship${stats.championships>1?"s":""}">🏆`.repeat(Math.min(stats.championships,3))+"</span>":"";
@@ -1462,6 +1461,10 @@ function rBody(){
   }
 
   body.innerHTML=h;
+  // Attach name edit handlers via delegation (avoids inline onclick issues)
+  document.querySelectorAll('.edit-name-btn').forEach(el=>{
+    el.addEventListener('click',()=>startEditName(el.getAttribute('data-player')));
+  });
 }
 
 
