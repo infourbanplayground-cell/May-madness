@@ -963,10 +963,35 @@ function saveGroups(){
 // ── NAME EDITING ──────────────────────────────────────────────
 function toggleEN(){ST.editNames=!ST.editNames;render();}
 
+function startEditName(player){
+  ST.editingName=player;
+  ST.editingNameVal=player;
+  render();
+  // Focus the input after render
+  setTimeout(()=>{
+    const inp=document.getElementById("nameEditInput");
+    if(inp){inp.focus();inp.select();}
+  },50);
+}
+
+function saveEditName(){
+  const newName=ST.editingNameVal.trim();
+  const oldName=ST.editingName;
+  ST.editingName=null;
+  ST.editingNameVal="";
+  if(newName&&newName!==oldName)renamePlayer(oldName,newName);
+  else render();
+}
+
+function cancelEditName(){
+  ST.editingName=null;
+  ST.editingNameVal="";
+  render();
+}
+
 function doRename(input){
   const oldName=input.getAttribute("data-orig");
   const newName=input.value;
-  // Decode HTML entities back
   const d=document.createElement("textarea");
   d.innerHTML=oldName;
   renamePlayer(d.value, newName);
@@ -1380,15 +1405,23 @@ function rBody(){
     else{
       h+=`<div class="lb-card">`;
       lb.forEach(([player,pts],i)=>{
-        const sc=ST.sessions.filter(s=>s.pairs?.some(p=>p.p1===player||p.p2===player)).length;
+        const sc=ST.sessions.filter(s=>playerPlayed(s,player)).length;
         const el=sc>=2;
         let streak=0;
-        for(let si=ST.sessions.length-1;si>=0;si--){if(ST.sessions[si]?.pairs?.some(p=>p.p1===player||p.p2===player))streak++;else break;}
+        for(let si=ST.sessions.length-1;si>=0;si--){if(playerPlayed(ST.sessions[si],player))streak++;else break;}
         const bd=ST.sessions.map((s,si)=>{const sp2=calcSessPts(s);return sp2[player]!==undefined?{pts:sp2[player],mult:s.mult}:null;});
         const rc=i===0?"r1":i===1?"r2":i===2?"r3":"";
-        const safePlayer=esc(player).replace(/'/g,"&#39;");
         const nameEl=ST.editNames&&ST.isAdmin
-          ?`<input type="text" value="${esc(player)}" data-orig="${safePlayer}" style="background:rgba(0,0,0,.4);border:1px solid rgba(255,138,0,.35);border-radius:3px;padding:4px 9px;font-size:14px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;width:160px;max-width:100%;letter-spacing:.02em" onblur="doRename(this)" onkeydown="if(event.key==='Enter')this.blur()">`
+          ?(ST.editingName===player
+            ?`<div style="display:flex;align-items:center;gap:5px">
+                <input id="nameEditInput" type="text" value="${esc(ST.editingNameVal)}" 
+                  style="background:rgba(0,0,0,.5);border:1px solid rgba(255,138,0,.5);border-radius:3px;padding:5px 9px;font-size:14px;font-weight:700;color:#fff;font-family:'Barlow Condensed',sans-serif;outline:none;width:150px;max-width:100%;letter-spacing:.02em"
+                  oninput="ST.editingNameVal=this.value"
+                  onkeydown="if(event.key==='Enter')saveEditName();if(event.key==='Escape')cancelEditName()">
+                <button onclick="saveEditName()" style="background:rgba(0,232,122,.12);border:1px solid rgba(0,232,122,.3);color:#00e87a;border-radius:3px;padding:4px 9px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0">✓</button>
+                <button onclick="cancelEditName()" style="background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.3);border-radius:3px;padding:4px 7px;font-family:'Barlow Condensed',sans-serif;font-size:12px;cursor:pointer;flex-shrink:0">✕</button>
+              </div>`
+            :`<div class="lbn" onclick="startEditName('${esc(player).replace(/'/g,"\'")}')" style="cursor:pointer" title="Tap to edit">${esc(player)} <span style="font-size:10px;opacity:.4">✏️</span></div>`)
           :`<div class="lbn">${esc(player)}</div>`;
         const stats=getPlayerStats(player);
         const champIcon=stats.championships>0?`<span style="font-size:11px;margin-left:4px" title="${stats.championships} championship${stats.championships>1?"s":""}">🏆`.repeat(Math.min(stats.championships,3))+"</span>":"";
