@@ -635,18 +635,16 @@ function setSS(s){
 
 async function apiGet(p){const r=await fetch(API+"?"+new URLSearchParams(p),{method:"GET",redirect:"follow"});return r.json();}
 async function apiPost(b){
-  // Use GET+JSONP to avoid CORS issues with Apps Script
-  return new Promise((resolve,reject)=>{
-    const cb="cb_"+Date.now();
-    const encoded=encodeURIComponent(JSON.stringify(b));
-    const url=API+"?callback="+cb+"&data="+encoded;
-    window[cb]=function(data){delete window[cb];document.body.removeChild(s);resolve(data);};
-    const s=document.createElement("script");
-    s.src=url;
-    s.onerror=()=>{delete window[cb];document.body.removeChild(s);reject(new Error("Script load failed"));};
-    document.body.appendChild(s);
-    setTimeout(()=>{if(window[cb]){delete window[cb];try{document.body.removeChild(s);}catch(e){}reject(new Error("Timeout"));}},15000);
-  });
+  // POST with no-cors — Apps Script doesn't need a response for saves
+  try{
+    await fetch(API,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"text/plain"},
+      body:JSON.stringify(b)
+    });
+    return {ok:true};
+  }catch(e){throw e;}
 }
 
 async function loadSessions(){
