@@ -675,7 +675,13 @@ async function saveSession(sess){
   catch(e){setSS("err");}
 }
 
-function sched(sess){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveSession(sess),1200);}
+function sched(sess){
+  // New sessions (no matches yet) save immediately
+  // Score updates are debounced to avoid hammering the API
+  const hasMatches=(sess.groupMatches||[]).some(m=>m.done)||(sess.ko?.qf||[]).some(m=>m.done);
+  if(!hasMatches){clearTimeout(saveTimer);saveSession(sess);}
+  else{clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveSession(sess),1200);}
+}
 
 // ── STATE ─────────────────────────────────────────────────────
 const ST={sessions:[],activeIdx:null,tab:0,isAdmin:false,isScorer:false,paste:"",parsed:[],seeds:null,editGroups:false,editNames:false,editingMatch:null};
@@ -783,7 +789,9 @@ function confirmSeeds(){
     groupMatches:buildMatches(grps,fmt),fmt,teamCount:ranked.length,standings:null,ko:null,status:"active"};
   ST.sessions.push(ns);ST.activeIdx=idx;
   ST.paste="";ST.parsed=[];ST.seeds=null;ST.tab=1;
-  saveSession(ns);render();
+  saveLocal();render();
+  // Save immediately with no delay - critical so other devices see the new session
+  saveSession(ns);
 }
 
 // ── RESET ─────────────────────────────────────────────────────
