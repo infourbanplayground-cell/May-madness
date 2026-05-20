@@ -288,11 +288,14 @@ function gk(f){return Object.keys(f.g);}
 function buildGroups(ranked,seeds,fmt){
   const keys=gk(fmt),grps={};
   keys.forEach(k=>{grps[k]=[];});
+  // Place seeds in snake order: top seeds one per group, then reverse for second round
   const top=seeds.slice(0,keys.length),bot=seeds.slice(keys.length,keys.length*2);
   keys.forEach((k,i)=>{if(top[i])grps[k].push(top[i].label);});
   [...keys].reverse().forEach((k,i)=>{if(bot[i])grps[k].push(bot[i].label);});
-  const used=new Set(seeds.map(s=>s.label));
-  const rest=shuf(ranked.filter(p=>!used.has(p.label)));
+  // Only mark actually-placed seeds as used, not all seeds
+  const placed=new Set([...top,...bot].filter(Boolean).map(s=>s.label));
+  // Remaining seeds + non-seeds all go into rest pool (shuffled)
+  const rest=shuf(ranked.filter(p=>!placed.has(p.label)));
   let ri=0;
   keys.forEach(k=>{const need=fmt.g[k]-grps[k].length;for(let j=0;j<need;j++)if(ri<rest.length)grps[k].push(rest[ri++].label);});
   return grps;
@@ -466,6 +469,16 @@ function calcSessPts(sess){
       const top=sess.standings[g]?.[0];
       if(top&&top.p>0)fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=1*mult;});
     });
+  }
+  // Ghost match bonus: in 11/15 team formats, Group D 1st place auto-qualifies
+  // and sits out the playoff — award +3 to compensate for the missing match
+  if(fmt.po&&sess.standings){
+    const poGroup=fmt.po;
+    const top=sess.standings[poGroup]?.[0];
+    if(top&&top.p>0){
+      // Only award if they played (group of 3 = 2 matches played)
+      fP(sess,top.team).forEach(p=>{if(p in pts)pts[p]+=3*mult;});
+    }
   }
   // KO points
   if(sess.ko){
@@ -1246,10 +1259,10 @@ function rBody(){
         h+=`</div><div class="btns-row"><button class="btn2" onclick="toggleEG()">Cancel</button><button class="btn" style="margin:0" onclick="saveGroups()">Save →</button></div>`;
       }else{
         const cols=keys.length<=2?2:keys.length<=4?4:2;
-        h+=`<div class="gg" style="grid-template-columns:repeat(${Math.min(cols,keys.length)},1fr)">`;
+        h+=`<div class="gg" style="grid-template-columns:repeat(${Math.min(cols,keys.length)},1fr);overflow:visible">`;
         keys.forEach((g,gi)=>{
           const isDrop=fmt.drop.includes(g),isPO=fmt.po===g;
-          h+=`<div class="card"><div class="gh">Group ${g}<span style="color:rgba(255,255,255,.2)">Court ${gi+1}</span>`;
+          h+=`<div class="card" style="overflow:visible"><div class="gh">Group ${g}<span style="color:rgba(255,255,255,.2)">Court ${gi+1}</span>`;
           if(isDrop)h+=`<span class="dtag">drop lowest</span>`;
           if(isPO)h+=`<span class="ptag">playoff</span>`;
           h+=`</div>`;
