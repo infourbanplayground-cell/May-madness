@@ -644,7 +644,27 @@ async function loadSessions(){
     const d=await apiGet({action:"getSessions"});
     if(d.ok&&d.sessions){
       const full=await Promise.all(d.sessions.map(s=>apiGet({action:"getSession",id:s.id}).then(r=>r.session||s)));
-      ST.sessions=full;saveLocal();setSS("ok");render();
+      // Merge: keep any local session not yet in Sheets (by id)
+      // and push them to Sheets in background
+      const sheetIds=new Set(full.map(s=>s.id));
+      const localOnly=(local||[]).filter(s=>!sheetIds.has(s.id));
+      if(localOnly.length>0){
+        // Local has sessions Sheets doesn't — keep them and push to Sheets
+        const merged=[...full,...localOnly];
+        ST.sessions=merged;saveLocal();setSS("ok");render();
+        localOnly.forEach(sess=>saveSession(sess));
+      }else{
+        // Sheets is up to date — also merge any updates by taking latest per id
+        const localMap=Object.fromEntries((local||[]).map(s=>[s.id,s]));
+        const merged=full.map(s=>{
+          const loc=localMap[s.id];
+          // If local version has more matches done, prefer local
+          const locDone=(loc?.groupMatches||[]).filter(m=>m.done).length;
+          const shDone=(s.groupMatches||[]).filter(m=>m.done).length;
+          return locDone>shDone?loc:s;
+        });
+        ST.sessions=merged;saveLocal();setSS("ok");render();
+      }
     }else setSS("err");
   }catch(e){local?.length?setSS("ok"):setSS("err");}
 }
