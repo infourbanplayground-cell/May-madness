@@ -460,8 +460,43 @@ function calcSessPts(sess){
     fP(sess,hL).forEach(p=>{if(p in pts)pts[p]+=mPts(hs,as,isTB)*mult;});
     fP(sess,aL).forEach(p=>{if(p in pts)pts[p]+=mPts(as,hs,isTB)*mult;});
   };
-  // Group match points
-  (sess.groupMatches||[]).forEach(m=>{if(m.done)aw(m.home,m.away,m.hs,m.as,m.isTB);});
+  // Group match points — apply drop-lowest for groups that require it
+  const fmt2=sess.fmt||getFmt(sess.teamCount||16);
+  const dropGroups=new Set(fmt2.drop||[]);
+  if(dropGroups.size>0){
+    // For drop-lowest groups, only count best 3 matches per team
+    gk(fmt2).forEach(g=>{
+      if(!dropGroups.has(g))return;
+      const gms=(sess.groupMatches||[]).filter(m=>m.group===g&&m.done);
+      // Get all players in this group
+      const groupTeams=sess.groups?.[g]||[];
+      groupTeams.forEach(label=>{
+        const players=fP(sess,label);
+        // Get this team's matches
+        const teamMatches=gms.filter(m=>m.home===label||m.away===label);
+        // Calculate pts per match
+        const matchPts=teamMatches.map(m=>{
+          const isHome=m.home===label;
+          const my=isHome?m.hs:m.as, op=isHome?m.as:m.hs;
+          const gd=parseInt(my)-parseInt(op);
+          return {pts:mPts(my,op,m.isTB)*mult, gd, m};
+        });
+        // Sort by pts asc, then gd asc — drop worst
+        matchPts.sort((a,b)=>a.pts-b.pts||a.gd-b.gd);
+        const kept=matchPts.slice(1); // drop lowest
+        kept.forEach(({pts})=>{
+          players.forEach(p=>{if(p in pts)pts[p]+=pts;});
+        });
+      });
+    });
+    // Non-drop groups process normally
+    (sess.groupMatches||[]).forEach(m=>{
+      if(m.done&&!dropGroups.has(m.group))aw(m.home,m.away,m.hs,m.as,m.isTB);
+    });
+  }else{
+    // No drop groups — process all normally
+    (sess.groupMatches||[]).forEach(m=>{if(m.done)aw(m.home,m.away,m.hs,m.as,m.isTB);});
+  }
   // Top of group bonus (+1 per player in winning pair)
   const fmt=sess.fmt||getFmt(sess.teamCount||16);
   if(sess.standings){
