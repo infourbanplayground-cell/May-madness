@@ -663,32 +663,27 @@ function setSS(s){
 
 async function apiGet(p){const r=await fetch(API+"?"+new URLSearchParams(p),{method:"GET",redirect:"follow"});return r.json();}
 async function apiPost(b){
-  // Use GET+JSONP - send data in chunks to avoid URL length limits
+  // Encode data as base64, split into chunks, send via JSONP GET
+  // Apps Script PropertiesService assembles chunks server-side (persistent between requests)
   const json=JSON.stringify(b);
-  const chunkSize=1500;
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  const chunkSize=1800;
   const chunks=[];
-  for(let i=0;i<json.length;i+=chunkSize)chunks.push(json.slice(i,i+chunkSize));
-  const totalChunks=chunks.length;
+  for(let i=0;i<b64.length;i+=chunkSize)chunks.push(b64.slice(i,i+chunkSize));
   const uploadId="u"+Date.now();
-  // Send each chunk
-  for(let i=0;i<chunks.length;i++){
+  const total=chunks.length;
+  for(let i=0;i<total;i++){
     await new Promise((resolve,reject)=>{
       const cb="cb_"+Date.now()+"_"+i;
-      const params=new URLSearchParams({
-        action:"chunk",
-        uploadId,
-        chunkIndex:i,
-        totalChunks,
-        data:chunks[i],
-        callback:cb
-      });
-      const url=API+"?"+params.toString();
-      window[cb]=(d)=>{delete window[cb];try{document.body.removeChild(s);}catch(e){}resolve(d);};
+      const url=API+"?action=chunk&uploadId="+encodeURIComponent(uploadId)
+        +"&ci="+i+"&ct="+total+"&d="+encodeURIComponent(chunks[i])+"&callback="+cb;
+      window[cb]=(d)=>{delete window[cb];try{document.body.removeChild(s);}catch(e){}
+        if(d&&d.error)reject(new Error(d.error));else resolve(d);};
       const s=document.createElement("script");
       s.src=url;
-      s.onerror=()=>{delete window[cb];try{document.body.removeChild(s);}catch(e){}reject(new Error("chunk failed"));};
+      s.onerror=()=>{delete window[cb];try{document.body.removeChild(s);}catch(e){}reject(new Error("chunk "+i+" failed"));};
       document.body.appendChild(s);
-      setTimeout(()=>{if(window[cb]){delete window[cb];try{document.body.removeChild(s);}catch(e){}reject(new Error("timeout"));}},10000);
+      setTimeout(()=>{if(window[cb]){delete window[cb];try{document.body.removeChild(s);}catch(e){}reject(new Error("chunk "+i+" timeout"));}},15000);
     });
   }
   return {ok:true};
