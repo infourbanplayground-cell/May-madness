@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC 2026 BET</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>body{margin:0;background:#080d18}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ─── i18n ────────────────────────────────────────────────────────────────────
+const T = {
+  ar: {
+    dir: "rtl",
+    title: "WC 2026 BET",
+    subtitle: "منصة التوقع الرسمية",
+    matches: "المباريات",
+    myBets: "رهاناتي",
+    leaderboard: "المتصدرون",
+    enterName: "أدخل اسمك للمشاركة",
+    username: "اسم المستخدم...",
+    enter: "دخول",
+    participants: "المشاركون",
+    profit: "ربح",
+    myProfit: "ربح/خسارة",
+    totalBets: "إجمالي الرهانات",
+    pending: "قيد الانتظار",
+    allGroups: "🌍 الكل",
+    group: "المجموعة",
+    betLocked: "🔒 الرهان مغلق",
+    betAmount: "مبلغ الرهان",
+    potentialWin: "ربح محتمل",
+    placeBet: "🎯 راهن $100",
+    chooseType: "اختر نوع الرهان",
+    alreadyBet: "✅ راهنت على",
+    factor: "معامل",
+    homeWin: "فوز 1",
+    draw: "تعادل",
+    awayWin: "فوز 2",
+    homeOrDraw: "1X",
+    awayOrDraw: "X2",
+    betsClosed: "انتهى وقت الرهان",
+    alreadyBetMsg: "لقد راهنت بالفعل",
+    chooseBetFirst: "اختر نوع الرهان أولاً",
+    betPlaced: "✅ تم وضع الرهان!",
+    welcome: "مرحباً",
+    noMyBets: "لم تقم بأي رهان بعد",
+    noMyBetsHint: "اذهب إلى تبويب المباريات وابدأ",
+    noParticipants: "لا يوجد مشاركون بعد",
+    rankPlayer: "اللاعب",
+    rankBets: "الرهانات",
+    rankWon: "فاز",
+    rankLost: "خسر",
+    rankPending: "انتظار",
+    rankProfit: "الربح/الخسارة",
+    resultPending: "⏳ قيد الانتظار",
+    resultWon: "✅ فزت",
+    resultLost: "❌ خسرت",
+    rules: "📋 القواعد",
+    rule1: "مبلغ الرهان: $100 لكل مباراة",
+    rule2: "يغلق الرهان 5 دقائق قبل المباراة",
+    rule3: "رهان واحد فقط لكل مباراة",
+    rule4: "معاملات الرهان حقيقية",
+    rule5: "الأرباح تُحتسب تلقائياً",
+    recentBets: "🎯 آخر رهاناتي",
+    noBetsYet: "لا توجد رهانات بعد",
+    days: "ي",
+    hours: "س",
+    mins: "د",
+    secs: "ث",
+    stadium: "الملعب",
+    myStats: "إحصائياتي",
+    totalMatches: "مباريات",
+    groupStage: "دور المجموعات",
+  },
+  en: {
+    dir: "ltr",
+    title: "WC 2026 BET",
+    subtitle: "Official Prediction Platform",
+    matches: "Matches",
+    myBets: "My Bets",
+    leaderboard: "Leaderboard",
+    enterName: "Enter your name to join",
+    username: "Username...",
+    enter: "Enter",
+    participants: "Participants",
+    profit: "Profit",
+    myProfit: "P&L",
+    totalBets: "Total Bets",
+    pending: "Pending",
+    allGroups: "🌍 All",
+    group: "Group",
+    betLocked: "🔒 Betting Closed",
+    betAmount: "Bet Amount",
+    potentialWin: "Potential Win",
+    placeBet: "🎯 Bet $100",
+    chooseType: "Select a bet type",
+    alreadyBet: "✅ You bet on",
+    factor: "Odds",
+    homeWin: "Home Win",
+    draw: "Draw",
+    awayWin: "Away Win",
+    homeOrDraw: "1X",
+    awayOrDraw: "X2",
+    betsClosed: "Betting deadline passed",
+    alreadyBetMsg: "You already placed a bet",
+    chooseBetFirst: "Select a bet type first",
+    betPlaced: "✅ Bet placed!",
+    welcome: "Welcome",
+    noMyBets: "No bets placed yet",
+    noMyBetsHint: "Go to Matches tab to start",
+    noParticipants: "No participants yet",
+    rankPlayer: "Player",
+    rankBets: "Bets",
+    rankWon: "Won",
+    rankLost: "Lost",
+    rankPending: "Pending",
+    rankProfit: "Profit / Loss",
+    resultPending: "⏳ Pending",
+    resultWon: "✅ Won",
+    resultLost: "❌ Lost",
+    rules: "📋 Rules",
+    rule1: "Bet amount: $100 per match",
+    rule2: "Betting closes 5 minutes before kickoff",
+    rule3: "One bet per match only",
+    rule4: "Real betting odds applied",
+    rule5: "Profits calculated automatically",
+    recentBets: "🎯 Recent Bets",
+    noBetsYet: "No bets yet",
+    days: "d",
+    hours: "h",
+    mins: "m",
+    secs: "s",
+    stadium: "Stadium",
+    myStats: "My Stats",
+    totalMatches: "matches",
+    groupStage: "Group Stage",
+  },
+};
+
+// ─── Official WC 2026 Group Stage Fixtures ───────────────────────────────────
+const MATCHES = [
+  // ── Group A ──────────────────────────────────────────────────────────────
+  { id:1,  group:"A", home:"Mexico",       homeAr:"المكسيك",       homef:"🇲🇽", away:"South Africa",  awayAr:"جنوب أفريقيا",  awayf:"🇿🇦", date:"2026-06-11", time:"15:00", stadium:"Mexico City",       o1:1.90, ox:3.50, o2:4.20, o1x:1.22, ox2:2.40 },
+  { id:2,  group:"A", home:"South Korea",  homeAr:"كوريا الجنوبية",homef:"🇰🇷", away:"Czechia",       awayAr:"التشيك",        awayf:"🇨🇿", date:"2026-06-11", time:"22:00", stadium:"Guadalajara",       o1:2.50, ox:3.10, o2:2.80, o1x:1.50, ox2:1.60 },
+  { id:3,  group:"A", home:"Czechia",      homeAr:"التشيك",        homef:"🇨🇿", away:"South Africa",  awayAr:"جنوب أفريقيا",  awayf:"🇿🇦", date:"2026-06-18", time:"12:00", stadium:"Atlanta",           o1:1.80, ox:3.40, o2:4.50, o1x:1.20, ox2:2.60 },
+  { id:4,  group:"A", home:"Mexico",       homeAr:"المكسيك",       homef:"🇲🇽", away:"South Korea",   awayAr:"كوريا الجنوبية",awayf:"🇰🇷", date:"2026-06-18", time:"21:00", stadium:"Guadalajara",       o1:1.95, ox:3.40, o2:3.80, o1x:1.25, ox2:2.20 },
+  { id:5,  group:"A", home:"Mexico",       homeAr:"المكسيك",       homef:"🇲🇽", away:"Czechia",       awayAr:"التشيك",        awayf:"🇨🇿", date:"2026-06-26", time:"15:00", stadium:"Kansas City",       o1:1.80, ox:3.50, o2:4.20, o1x:1.20, ox2:2.40 },
+  { id:6,  group:"A", home:"South Africa", homeAr:"جنوب أفريقيا",  homef:"🇿🇦", away:"South Korea",   awayAr:"كوريا الجنوبية",awayf:"🇰🇷", date:"2026-06-26", time:"15:00", stadium:"Dallas",            o1:3.20, ox:3.10, o2:2.20, o1x:2.00, ox2:1.55 },
+  // ── Group B ──────────────────────────────────────────────────────────────
+  { id:7,  group:"B", home:"Canada",       homeAr:"كندا",          homef:"🇨🇦", away:"Bosnia",        awayAr:"البوسنة",       awayf:"🇧🇦", date:"2026-06-12", time:"15:00", stadium:"Toronto",           o1:1.85, ox:3.40, o2:4.50, o1x:1.22, ox2:2.60 },
+  { id:8,  group:"B", home:"Qatar",        homeAr:"قطر",           homef:"🇶🇦", away:"Switzerland",   awayAr:"سويسرا",        awayf:"🇨🇭", date:"2026-06-13", time:"15:00", stadium:"San Francisco",     o1:4.50, ox:3.50, o2:1.80, o1x:2.80, ox2:1.25 },
+  { id:9,  group:"B", home:"Switzerland",  homeAr:"سويسرا",        homef:"🇨🇭", away:"Bosnia",        awayAr:"البوسنة",       awayf:"🇧🇦", date:"2026-06-18", time:"15:00", stadium:"Los Angeles",       o1:1.75, ox:3.50, o2:4.80, o1x:1.20, ox2:2.70 },
+  { id:10, group:"B", home:"Canada",       homeAr:"كندا",          homef:"🇨🇦", away:"Qatar",         awayAr:"قطر",           awayf:"🇶🇦", date:"2026-06-18", time:"18:00", stadium:"Vancouver",         o1:1.50, ox:4.00, o2:6.50, o1x:1.18, ox2:3.50 },
+  { id:11, group:"B", home:"Canada",       homeAr:"كندا",          homef:"🇨🇦", away:"Switzerland",   awayAr:"سويسرا",        awayf:"🇨🇭", date:"2026-06-26", time:"15:00", stadium:"Seattle",           o1:2.40, ox:3.20, o2:2.90, o1x:1.45, ox2:1.70 },
+  { id:12, group:"B", home:"Bosnia",       homeAr:"البوسنة",       homef:"🇧🇦", away:"Qatar",         awayAr:"قطر",           awayf:"🇶🇦", date:"2026-06-26", time:"15:00", stadium:"Kansas City",       o1:2.00, ox:3.30, o2:3.80, o1x:1.28, ox2:2.10 },
+  // ── Group C ──────────────────────────────────────────────────────────────
+  { id:13, group:"C", home:"Brazil",       homeAr:"البرازيل",      homef:"🇧🇷", away:"Morocco",       awayAr:"المغرب",        awayf:"🇲🇦", date:"2026-06-13", time:"18:00", stadium:"New York/NJ",       o1:1.55, ox:4.00, o2:5.50, o1x:1.18, ox2:3.00 },
+  { id:14, group:"C", home:"Haiti",        homeAr:"هايتي",         homef:"🇭🇹", away:"Scotland",      awayAr:"اسكتلندا",      awayf:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", date:"2026-06-13", time:"21:00", stadium:"Boston",            o1:5.00, ox:3.80, o2:1.60, o1x:3.20, ox2:1.18 },
+  { id:15, group:"C", home:"Scotland",     homeAr:"اسكتلندا",      homef:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", away:"Morocco",      awayAr:"المغرب",        awayf:"🇲🇦", date:"2026-06-19", time:"18:00", stadium:"Boston",            o1:3.20, ox:3.20, o2:2.20, o1x:2.00, ox2:1.55 },
+  { id:16, group:"C", home:"Brazil",       homeAr:"البرازيل",      homef:"🇧🇷", away:"Haiti",         awayAr:"هايتي",         awayf:"🇭🇹", date:"2026-06-19", time:"21:00", stadium:"Philadelphia",      o1:1.08, ox:9.00, o2:25.0, o1x:1.03, ox2:8.00 },
+  { id:17, group:"C", home:"Brazil",       homeAr:"البرازيل",      homef:"🇧🇷", away:"Scotland",      awayAr:"اسكتلندا",      awayf:"🏴󠁧󠁢󠁳󠁣󠁴󠁿", date:"2026-06-24", time:"21:00", stadium:"Miami",             o1:1.35, ox:5.00, o2:8.00, o1x:1.12, ox2:4.00 },
+  { id:18, group:"C", home:"Morocco",      homeAr:"المغرب",        homef:"🇲🇦", away:"Haiti",         awayAr:"هايتي",         awayf:"🇭🇹", date:"2026-06-24", time:"18:00", stadium:"Atlanta",           o1:1.25, ox:6.00, o2:12.0, o1x:1.08, ox2:5.00 },
+  // ── Group D ──────────────────────────────────────────────────────────────
+  { id:19, group:"D", home:"USA",          homeAr:"الولايات المتحدة",homef:"🇺🇸", away:"Paraguay",    awayAr:"باراغواي",      awayf:"🇵🇾", date:"2026-06-12", time:"21:00", stadium:"Los Angeles",       o1:1.75, ox:3.50, o2:4.80, o1x:1.20, ox2:2.70 },
+  { id:20, group:"D", home:"Australia",    homeAr:"أستراليا",      homef:"🇦🇺", away:"Turkiye",       awayAr:"تركيا",         awayf:"🇹🇷", date:"2026-06-13", time:"21:00", stadium:"Vancouver",         o1:2.70, ox:3.10, o2:2.60, o1x:1.60, ox2:1.55 },
+  { id:21, group:"D", home:"USA",          homeAr:"الولايات المتحدة",homef:"🇺🇸", away:"Australia",   awayAr:"أستراليا",      awayf:"🇦🇺", date:"2026-06-19", time:"15:00", stadium:"Seattle",           o1:1.70, ox:3.60, o2:5.00, o1x:1.20, ox2:2.80 },
+  { id:22, group:"D", home:"Turkiye",      homeAr:"تركيا",         homef:"🇹🇷", away:"Paraguay",      awayAr:"باراغواي",      awayf:"🇵🇾", date:"2026-06-19", time:"00:00", stadium:"San Francisco",     o1:2.10, ox:3.20, o2:3.50, o1x:1.35, ox2:2.00 },
+  { id:23, group:"D", home:"USA",          homeAr:"الولايات المتحدة",homef:"🇺🇸", away:"Turkiye",     awayAr:"تركيا",         awayf:"🇹🇷", date:"2026-06-26", time:"15:00", stadium:"Philadelphia",      o1:1.80, ox:3.40, o2:4.50, o1x:1.22, ox2:2.60 },
+  { id:24, group:"D", home:"Paraguay",     homeAr:"باراغواي",      homef:"🇵🇾", away:"Australia",     awayAr:"أستراليا",      awayf:"🇦🇺", date:"2026-06-26", time:"15:00", stadium:"Houston",           o1:2.30, ox:3.10, o2:3.20, o1x:1.40, ox2:1.80 },
+  // ── Group E ──────────────────────────────────────────────────────────────
+  { id:25, group:"E", home:"Germany",      homeAr:"ألمانيا",       homef:"🇩🇪", away:"Curacao",       awayAr:"كوراساو",       awayf:"🇨🇼", date:"2026-06-14", time:"13:00", stadium:"Houston",           o1:1.10, ox:8.00, o2:20.0, o1x:1.04, ox2:7.00 },
+  { id:26, group:"E", home:"Ivory Coast",  homeAr:"ساحل العاج",    homef:"🇨🇮", away:"Ecuador",       awayAr:"الإكوادور",     awayf:"🇪🇨", date:"2026-06-14", time:"19:00", stadium:"Philadelphia",      o1:2.20, ox:3.10, o2:3.30, o1x:1.38, ox2:1.85 },
+  { id:27, group:"E", home:"Germany",      homeAr:"ألمانيا",       homef:"🇩🇪", away:"Ivory Coast",   awayAr:"ساحل العاج",    awayf:"🇨🇮", date:"2026-06-20", time:"16:00", stadium:"Toronto",           o1:1.55, ox:3.90, o2:5.50, o1x:1.18, ox2:3.00 },
+  { id:28, group:"E", home:"Ecuador",      homeAr:"الإكوادور",     homef:"🇪🇨", away:"Curacao",       awayAr:"كوراساو",       awayf:"🇨🇼", date:"2026-06-20", time:"20:00", stadium:"Kansas City",       o1:1.40, ox:4.50, o2:7.50, o1x:1.14, ox2:3.80 },
+  { id:29, group:"E", home:"Germany",      homeAr:"ألمانيا",       homef:"🇩🇪", away:"Ecuador",       awayAr:"الإكوادور",     awayf:"🇪🇨", date:"2026-06-27", time:"15:00", stadium:"New York/NJ",       o1:1.65, ox:3.70, o2:5.00, o1x:1.20, ox2:2.90 },
+  { id:30, group:"E", home:"Ivory Coast",  homeAr:"ساحل العاج",    homef:"🇨🇮", away:"Curacao",       awayAr:"كوراساو",       awayf:"🇨🇼", date:"2026-06-27", time:"15:00", stadium:"Boston",            o1:1.35, ox:4.80, o2:8.00, o1x:1.12, ox2:4.00 },
+  // ── Group F ──────────────────────────────────────────────────────────────
+  { id:31, group:"F", home:"Netherlands",  homeAr:"هولندا",        homef:"🇳🇱", away:"Japan",         awayAr:"اليابان",       awayf:"🇯🇵", date:"2026-06-14", time:"16:00", stadium:"Dallas",            o1:1.70, ox:3.60, o2:4.80, o1x:1.20, ox2:2.70 },
+  { id:32, group:"F", home:"Sweden",       homeAr:"السويد",        homef:"🇸🇪", away:"Tunisia",       awayAr:"تونس",          awayf:"🇹🇳", date:"2026-06-14", time:"22:00", stadium:"Monterrey",         o1:1.90, ox:3.40, o2:4.00, o1x:1.25, ox2:2.20 },
+  { id:33, group:"F", home:"Netherlands",  homeAr:"هولندا",        homef:"🇳🇱", away:"Sweden",        awayAr:"السويد",        awayf:"🇸🇪", date:"2026-06-20", time:"13:00", stadium:"Houston",           o1:1.65, ox:3.70, o2:5.00, o1x:1.20, ox2:2.80 },
+  { id:34, group:"F", home:"Tunisia",      homeAr:"تونس",          homef:"🇹🇳", away:"Japan",         awayAr:"اليابان",       awayf:"🇯🇵", date:"2026-06-20", time:"00:00", stadium:"Monterrey",         o1:2.80, ox:3.00, o2:2.50, o1x:1.65, ox2:1.50 },
+  { id:35, group:"F", home:"Netherlands",  homeAr:"هولندا",        homef:"🇳🇱", away:"Tunisia",       awayAr:"تونس",          awayf:"🇹🇳", date:"2026-06-27", time:"15:00", stadium:"Miami",             o1:1.45, ox:4.50, o2:6.50, o1x:1.15, ox2:3.50 },
+  { id:36, group:"F", home:"Japan",        homeAr:"اليابان",       homef:"🇯🇵", away:"Sweden",        awayAr:"السويد",        awayf:"🇸🇪", date:"2026-06-27", time:"15:00", stadium:"Dallas",            o1:2.80, ox:3.20, o2:2.50, o1x:1.68, ox2:1.52 },
+  // ── Group G ──────────────────────────────────────────────────────────────
+  { id:37, group:"G", home:"Belgium",      homeAr:"بلجيكا",        homef:"🇧🇪", away:"Egypt",         awayAr:"مصر",           awayf:"🇪🇬", date:"2026-06-15", time:"15:00", stadium:"Vancouver",         o1:1.65, ox:3.70, o2:5.50, o1x:1.20, ox2:3.00 },
+  { id:38, group:"G", home:"Iran",         homeAr:"إيران",         homef:"🇮🇷", away:"New Zealand",   awayAr:"نيوزيلندا",     awayf:"🇳🇿", date:"2026-06-15", time:"21:00", stadium:"Los Angeles",       o1:2.10, ox:3.20, o2:3.50, o1x:1.35, ox2:2.00 },
+  { id:39, group:"G", home:"Belgium",      homeAr:"بلجيكا",        homef:"🇧🇪", away:"Iran",          awayAr:"إيران",         awayf:"🇮🇷", date:"2026-06-21", time:"15:00", stadium:"Los Angeles",       o1:1.50, ox:4.20, o2:6.00, o1x:1.16, ox2:3.20 },
+  { id:40, group:"G", home:"New Zealand",  homeAr:"نيوزيلندا",     homef:"🇳🇿", away:"Egypt",         awayAr:"مصر",           awayf:"🇪🇬", date:"2026-06-21", time:"21:00", stadium:"Vancouver",         o1:3.00, ox:3.00, o2:2.40, o1x:1.80, ox2:1.45 },
+  { id:41, group:"G", home:"Belgium",      homeAr:"بلجيكا",        homef:"🇧🇪", away:"New Zealand",   awayAr:"نيوزيلندا",     awayf:"🇳🇿", date:"2026-06-26", time:"15:00", stadium:"Atlanta",           o1:1.30, ox:5.50, o2:9.00, o1x:1.10, ox2:4.50 },
+  { id:42, group:"G", home:"Egypt",        homeAr:"مصر",           homef:"🇪🇬", away:"Iran",          awayAr:"إيران",         awayf:"🇮🇷", date:"2026-06-26", time:"15:00", stadium:"Kansas City",       o1:2.20, ox:3.10, o2:3.30, o1x:1.38, ox2:1.85 },
+  // ── Group H ──────────────────────────────────────────────────────────────
+  { id:43, group:"H", home:"Spain",        homeAr:"إسبانيا",       homef:"🇪🇸", away:"Cape Verde",    awayAr:"الرأس الأخضر",  awayf:"🇨🇻", date:"2026-06-15", time:"12:00", stadium:"Atlanta",           o1:1.20, ox:7.00, o2:12.0, o1x:1.06, ox2:5.50 },
+  { id:44, group:"H", home:"Saudi Arabia", homeAr:"السعودية",      homef:"🇸🇦", away:"Uruguay",       awayAr:"أوروغواي",      awayf:"🇺🇾", date:"2026-06-15", time:"18:00", stadium:"Miami",             o1:3.80, ox:3.20, o2:2.00, o1x:2.40, ox2:1.30 },
+  { id:45, group:"H", home:"Spain",        homeAr:"إسبانيا",       homef:"🇪🇸", away:"Saudi Arabia",  awayAr:"السعودية",      awayf:"🇸🇦", date:"2026-06-21", time:"12:00", stadium:"Atlanta",           o1:1.25, ox:6.50, o2:10.0, o1x:1.08, ox2:5.00 },
+  { id:46, group:"H", home:"Uruguay",      homeAr:"أوروغواي",      homef:"🇺🇾", away:"Cape Verde",    awayAr:"الرأس الأخضر",  awayf:"🇨🇻", date:"2026-06-21", time:"18:00", stadium:"Miami",             o1:1.50, ox:4.20, o2:6.00, o1x:1.16, ox2:3.20 },
+  { id:47, group:"H", home:"Spain",        homeAr:"إسبانيا",       homef:"🇪🇸", away:"Uruguay",       awayAr:"أوروغواي",      awayf:"🇺🇾", date:"2026-06-25", time:"12:00", stadium:"Dallas",            o1:1.60, ox:3.80, o2:5.50, o1x:1.20, ox2:2.90 },
+  { id:48, group:"H", home:"Cape Verde",   homeAr:"الرأس الأخضر",  homef:"🇨🇻", away:"Saudi Arabia",  awayAr:"السعودية",      awayf:"🇸🇦", date:"2026-06-25", time:"12:00", stadium:"Seattle",           o1:2.60, ox:3.10, o2:2.70, o1x:1.55, ox2:1.60 },
+  // ── Group I ──────────────────────────────────────────────────────────────
+  { id:49, group:"I", home:"France",       homeAr:"فرنسا",         homef:"🇫🇷", away:"Senegal",       awayAr:"السنغال",       awayf:"🇸🇳", date:"2026-06-16", time:"15:00", stadium:"New York/NJ",       o1:1.45, ox:4.50, o2:6.50, o1x:1.15, ox2:3.50 },
+  { id:50, group:"I", home:"Iraq",         homeAr:"العراق",        homef:"🇮🇶", away:"Norway",        awayAr:"النرويج",       awayf:"🇳🇴", date:"2026-06-16", time:"18:00", stadium:"Boston",            o1:4.00, ox:3.20, o2:1.90, o1x:2.50, ox2:1.25 },
+  { id:51, group:"I", home:"France",       homeAr:"فرنسا",         homef:"🇫🇷", away:"Iraq",          awayAr:"العراق",        awayf:"🇮🇶", date:"2026-06-22", time:"13:00", stadium:"Dallas",            o1:1.12, ox:8.50, o2:20.0, o1x:1.04, ox2:7.00 },
+  { id:52, group:"I", home:"Norway",       homeAr:"النرويج",       homef:"🇳🇴", away:"Senegal",       awayAr:"السنغال",       awayf:"🇸🇳", date:"2026-06-22", time:"20:00", stadium:"New York/NJ",       o1:1.90, ox:3.40, o2:4.00, o1x:1.25, ox2:2.20 },
+  { id:53, group:"I", home:"France",       homeAr:"فرنسا",         homef:"🇫🇷", away:"Norway",        awayAr:"النرويج",       awayf:"🇳🇴", date:"2026-06-27", time:"15:00", stadium:"Seattle",           o1:1.70, ox:3.60, o2:5.00, o1x:1.22, ox2:2.80 },
+  { id:54, group:"I", home:"Senegal",      homeAr:"السنغال",       homef:"🇸🇳", away:"Iraq",          awayAr:"العراق",        awayf:"🇮🇶", date:"2026-06-27", time:"15:00", stadium:"Los Angeles",       o1:1.65, ox:3.70, o2:5.50, o1x:1.20, ox2:3.00 },
+  // ── Group J ──────────────────────────────────────────────────────────────
+  { id:55, group:"J", home:"Argentina",    homeAr:"الأرجنتين",     homef:"🇦🇷", away:"Algeria",       awayAr:"الجزائر",       awayf:"🇩🇿", date:"2026-06-16", time:"21:00", stadium:"Kansas City",       o1:1.30, ox:5.50, o2:9.00, o1x:1.10, ox2:4.50 },
+  { id:56, group:"J", home:"Austria",      homeAr:"النمسا",        homef:"🇦🇹", away:"Jordan",        awayAr:"الأردن",        awayf:"🇯🇴", date:"2026-06-17", time:"00:00", stadium:"San Francisco",     o1:1.80, ox:3.40, o2:4.50, o1x:1.22, ox2:2.60 },
+  { id:57, group:"J", home:"Argentina",    homeAr:"الأرجنتين",     homef:"🇦🇷", away:"Austria",       awayAr:"النمسا",        awayf:"🇦🇹", date:"2026-06-22", time:"13:00", stadium:"Dallas",            o1:1.40, ox:4.80, o2:7.00, o1x:1.14, ox2:3.80 },
+  { id:58, group:"J", home:"Jordan",       homeAr:"الأردن",        homef:"🇯🇴", away:"Algeria",       awayAr:"الجزائر",       awayf:"🇩🇿", date:"2026-06-22", time:"23:00", stadium:"San Francisco",     o1:3.20, ox:3.00, o2:2.30, o1x:1.95, ox2:1.45 },
+  { id:59, group:"J", home:"Argentina",    homeAr:"الأرجنتين",     homef:"🇦🇷", away:"Jordan",        awayAr:"الأردن",        awayf:"🇯🇴", date:"2026-06-26", time:"15:00", stadium:"Miami",             o1:1.15, ox:8.00, o2:16.0, o1x:1.05, ox2:6.50 },
+  { id:60, group:"J", home:"Algeria",      homeAr:"الجزائر",       homef:"🇩🇿", away:"Austria",       awayAr:"النمسا",        awayf:"🇦🇹", date:"2026-06-26", time:"15:00", stadium:"New York/NJ",       o1:2.80, ox:3.10, o2:2.60, o1x:1.68, ox2:1.55 },
+  // ── Group K ──────────────────────────────────────────────────────────────
+  { id:61, group:"K", home:"Portugal",     homeAr:"البرتغال",      homef:"🇵🇹", away:"DR Congo",      awayAr:"الكونغو",       awayf:"🇨🇩", date:"2026-06-17", time:"13:00", stadium:"Houston",           o1:1.30, ox:5.50, o2:8.50, o1x:1.10, ox2:4.50 },
+  { id:62, group:"K", home:"Uzbekistan",   homeAr:"أوزبكستان",     homef:"🇺🇿", away:"Colombia",      awayAr:"كولومبيا",      awayf:"🇨🇴", date:"2026-06-17", time:"22:00", stadium:"Mexico City",       o1:4.50, ox:3.40, o2:1.80, o1x:2.80, ox2:1.22 },
+  { id:63, group:"K", home:"Portugal",     homeAr:"البرتغال",      homef:"🇵🇹", away:"Uzbekistan",    awayAr:"أوزبكستان",     awayf:"🇺🇿", date:"2026-06-23", time:"18:00", stadium:"Atlanta",           o1:1.15, ox:8.00, o2:18.0, o1x:1.05, ox2:6.50 },
+  { id:64, group:"K", home:"Colombia",     homeAr:"كولومبيا",      homef:"🇨🇴", away:"DR Congo",      awayAr:"الكونغو",       awayf:"🇨🇩", date:"2026-06-23", time:"21:00", stadium:"Boston",            o1:1.90, ox:3.40, o2:4.20, o1x:1.25, ox2:2.40 },
+  { id:65, group:"K", home:"Portugal",     homeAr:"البرتغال",      homef:"🇵🇹", away:"Colombia",      awayAr:"كولومبيا",      awayf:"🇨🇴", date:"2026-06-27", time:"15:00", stadium:"Kansas City",       o1:1.65, ox:3.70, o2:5.00, o1x:1.20, ox2:2.80 },
+  { id:66, group:"K", home:"DR Congo",     homeAr:"الكونغو",       homef:"🇨🇩", away:"Uzbekistan",    awayAr:"أوزبكستان",     awayf:"🇺🇿", date:"2026-06-27", time:"15:00", stadium:"Atlanta",           o1:2.00, ox:3.20, o2:3.80, o1x:1.28, ox2:2.10 },
+  // ── Group L ──────────────────────────────────────────────────────────────
+  { id:67, group:"L", home:"England",      homeAr:"إنجلترا",       homef:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", away:"Croatia",     awayAr:"كرواتيا",       awayf:"🇭🇷", date:"2026-06-17", time:"16:00", stadium:"Dallas",            o1:1.60, ox:3.80, o2:5.50, o1x:1.20, ox2:2.90 },
+  { id:68, group:"L", home:"Ghana",        homeAr:"غانا",          homef:"🇬🇭", away:"Panama",        awayAr:"بنما",          awayf:"🇵🇦", date:"2026-06-17", time:"19:00", stadium:"Toronto",           o1:1.80, ox:3.40, o2:4.50, o1x:1.22, ox2:2.60 },
+  { id:69, group:"L", home:"England",      homeAr:"إنجلترا",       homef:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", away:"Ghana",       awayAr:"غانا",          awayf:"🇬🇭", date:"2026-06-23", time:"21:00", stadium:"Boston",            o1:1.55, ox:4.00, o2:5.50, o1x:1.18, ox2:3.00 },
+  { id:70, group:"L", home:"Croatia",      homeAr:"كرواتيا",       homef:"🇭🇷", away:"Panama",        awayAr:"بنما",          awayf:"🇵🇦", date:"2026-06-23", time:"18:00", stadium:"Kansas City",       o1:1.70, ox:3.50, o2:5.00, o1x:1.22, ox2:2.80 },
+  { id:71, group:"L", home:"England",      homeAr:"إنجلترا",       homef:"🏴󠁧󠁢󠁥󠁮󠁧󠁿", away:"Panama",     awayAr:"بنما",          awayf:"🇵🇦", date:"2026-06-27", time:"22:00", stadium:"New York/NJ",       o1:1.25, ox:6.00, o2:10.0, o1x:1.08, ox2:5.00 },
+  { id:72, group:"L", home:"Croatia",      homeAr:"كرواتيا",       homef:"🇭🇷", away:"Ghana",         awayAr:"غانا",          awayf:"🇬🇭", date:"2026-06-27", time:"22:00", stadium:"Toronto",           o1:2.00, ox:3.30, o2:3.80, o1x:1.28, ox2:2.10 },
+];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function getDeadline(dateStr, timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  const d = new Date(dateStr);
+  d.setHours(h, m - 5, 0, 0);
+  return d;
+}
+function getCountdown(dateStr, timeStr) {
+  const diff = getDeadline(dateStr, timeStr) - Date.now();
+  if (diff <= 0) return null;
+  return {
+    d: Math.floor(diff / 86400000),
+    h: Math.floor((diff % 86400000) / 3600000),
+    m: Math.floor((diff % 3600000) / 60000),
+    s: Math.floor((diff % 60000) / 1000),
+  };
+}
+function loadData() {
+  try { return JSON.parse(localStorage.getItem("wc2026v2") || "null") || { bets:[], users:{} }; }
+  catch { return { bets:[], users:{} }; }
+}
+function saveData(d) {
+  try { localStorage.setItem("wc2026v2", JSON.stringify(d)); } catch {}
+}
+
+// ─── CSS ──────────────────────────────────────────────────────────────────────
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&family=Cairo:wght@400;600;700;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080d18;--s1:#0e1623;--s2:#162135;--s3:#1c2d47;
+  --gold:#f5a623;--green:#00e676;--red:#f44336;--blue:#448aff;
+  --text:#eef2ff;--muted:#64748b;--border:#1e3a5f;
+  --font-ar:'Cairo',sans-serif;--font-en:'Exo 2',sans-serif;
+}
+body{background:var(--bg);color:var(--text);min-height:100vh}
+.ar{direction:rtl;font-family:var(--font-ar)}
+.en{direction:ltr;font-family:var(--font-en)}
+.hdr{background:linear-gradient(90deg,#050a14 0%,#0e1e3a 50%,#050a14 100%);
+  border-bottom:2px solid var(--gold);padding:0 20px;height:60px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(245,166,35,.2)}
+.logo{font-size:22px;font-weight:900;color:var(--gold);letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.logo em{color:#fff;font-style:normal}
+.nav{display:flex;gap:4px}
+.ntab{padding:7px 14px;border-radius:5px;font-size:13px;font-weight:700;cursor:pointer;border:none;
+  background:transparent;color:var(--muted);transition:all .2s}
+.ntab.on{background:var(--gold);color:#050a14}
+.ntab:hover:not(.on){background:var(--s2);color:var(--text)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.uname{color:var(--gold);font-weight:700;font-size:14px}
+.pnl{background:var(--s2);border:1px solid var(--border);padding:5px 12px;border-radius:5px;font-weight:700;font-size:14px}
+.pnl.pos{color:var(--green)}.pnl.neg{color:var(--red)}.pnl.neu{color:var(--muted)}
+.lng-btn{background:var(--s3);border:1px solid var(--border);color:var(--text);padding:5px 10px;
+  border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s}
+.lng-btn:hover{border-color:var(--gold);color:var(--gold)}
+.wrap{max-width:1380px;margin:0 auto;padding:16px 14px;display:grid;grid-template-columns:1fr 340px;gap:16px}
+.col-main{min-width:0}
+.stats{display:flex;gap:10px;margin-bottom:16px}
+.sc{flex:1;background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:10px 14px;text-align:center}
+.sv{font-size:22px;font-weight:900;color:var(--gold);line-height:1}
+.sl{font-size:10px;color:var(--muted);margin-top:3px}
+.fbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.fbtn{padding:5px 12px;background:var(--s1);border:1px solid var(--border);border-radius:16px;
+  font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;font-weight:600}
+.fbtn.on{background:var(--gold);color:#050a14;border-color:var(--gold)}
+.stitle{font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+  padding:10px 14px;background:var(--s2);border-bottom:2px solid var(--gold);
+  border-radius:8px 8px 0 0;display:flex;align-items:center;gap:6px}
+.mc{background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.mc:hover{border-color:#2a4a70}
+.mc-head{background:var(--s2);padding:6px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.gbadge{background:var(--gold);color:#050a14;font-size:10px;font-weight:900;padding:2px 8px;border-radius:3px}
+.mc-meta{font-size:10px;color:var(--muted);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.cd{font-size:11px;color:var(--red);font-weight:700}
+.mc-body{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.team{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.flag{font-size:34px}
+.tname{font-size:16px;font-weight:800;text-transform:uppercase;text-align:center;line-height:1.2}
+.vs{font-size:18px;font-weight:900;color:var(--muted);min-width:36px;text-align:center}
+.odds-row{padding:0 14px 14px;display:flex;gap:6px;flex-wrap:wrap}
+.ob{flex:1;min-width:76px;background:var(--s3);border:1px solid var(--border);border-radius:6px;
+  padding:7px 5px;cursor:pointer;text-align:center;transition:all .15s}
+.ob:hover:not(.locked){background:#1b3a60;border-color:var(--blue)}
+.ob.sel{background:linear-gradient(135deg,#1a3a6e,#18487a);border-color:var(--blue);box-shadow:0 0 10px rgba(68,138,255,.3)}
+.ob.locked{opacity:.45;cursor:not-allowed;pointer-events:none}
+.ob.mybet-type{border:2px solid var(--green)!important}
+.olabel{font-size:9px;color:var(--muted);margin-bottom:3px;line-height:1.2}
+.oval{font-size:19px;font-weight:900;color:var(--gold)}
+.ob.sel .oval{color:#7eb3ff}
+.opotential{font-size:10px;color:var(--green);margin-top:2px}
+.bet-btn{margin:0 14px 14px;width:calc(100% - 28px);background:linear-gradient(135deg,#f5a623,#d4891a);
+  border:none;border-radius:6px;padding:10px;font-size:15px;font-weight:800;color:#050a14;
+  cursor:pointer;letter-spacing:.5px;transition:all .2s;font-family:inherit}
+.bet-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 4px 15px rgba(245,166,35,.5)}
+.bet-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.already-bet-bar{margin:0 14px 14px;padding:9px 12px;background:rgba(0,230,118,.08);
+  border:1px solid var(--green);border-radius:6px;font-size:12px;color:var(--green);font-weight:600;text-align:center}
+.locked-bar{margin:0 14px 14px;padding:9px 12px;background:rgba(244,67,54,.08);
+  border:1px solid var(--red);border-radius:6px;font-size:12px;color:var(--red);font-weight:600;text-align:center}
+.scard{background:var(--s1);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.ltable{width:100%;border-collapse:collapse}
+.ltable th{background:var(--s3);padding:8px 10px;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700;border-bottom:1px solid var(--border)}
+.ltable td{padding:9px 10px;font-size:12px;border-bottom:1px solid #0c1520}
+.ltable tr:last-child td{border-bottom:none}
+.ltable tr:hover td{background:rgba(255,255,255,.02)}
+.rb{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+.r1{background:var(--gold);color:#050a14}.r2{background:#9e9e9e;color:#050a14}.r3{background:#d4891a;color:#050a14}.ro{background:var(--s3);color:var(--muted)}
+.gn{color:var(--green);font-weight:700}.rd{color:var(--red);font-weight:700}.mn{color:var(--muted)}
+.bitem{padding:9px 13px;border-bottom:1px solid var(--border)}
+.bitem:last-child{border-bottom:none}
+.bm{font-size:10px;color:var(--muted);margin-bottom:2px}
+.bs{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.br{font-size:11px;font-weight:700}
+.br.pen{color:var(--gold)}.br.won{color:var(--green)}.br.los{color:var(--red)}
+.empty{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+.rules-body{padding:12px 14px;font-size:12px;color:var(--muted);line-height:2}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:999;display:flex;align-items:center;justify-content:center}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:32px;width:350px;text-align:center}
+.modal h2{font-size:26px;font-weight:900;color:var(--gold);margin-bottom:6px}
+.modal p{color:var(--muted);font-size:13px;margin-bottom:20px}
+.inp{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;
+  color:var(--text);font-size:14px;margin-bottom:10px;outline:none;font-family:inherit}
+.inp:focus{border-color:var(--gold)}
+.modal-btn{width:100%;background:linear-gradient(135deg,var(--gold),#d4891a);border:none;border-radius:7px;
+  padding:12px;font-size:17px;font-weight:900;color:#050a14;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+.plist{margin-top:12px;font-size:11px;color:var(--muted)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);
+  background:var(--green);color:#050a14;padding:10px 22px;border-radius:7px;
+  font-weight:700;font-size:13px;transition:transform .3s;z-index:1000;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red);color:#fff}
+@media(max-width:880px){
+  .wrap{grid-template-columns:1fr}
+  .col-side{order:-1}
+  .stats{flex-wrap:wrap}
+  .hdr{flex-wrap:wrap;height:auto;padding:8px 14px;gap:6px}
+  .nav{order:3;width:100%;justify-content:center}
+}
+`;
+
+const BET_DEFS = [
+  { key:"o1",  enLabel:"Home Win", arLabel:"فوز 1"  },
+  { key:"ox",  enLabel:"Draw",     arLabel:"تعادل"  },
+  { key:"o2",  enLabel:"Away Win", arLabel:"فوز 2"  },
+  { key:"o1x", enLabel:"1X",       arLabel:"1X"     },
+  { key:"ox2", enLabel:"X2",       arLabel:"X2"     },
+];
+
+function App() {
+  const [lang, setLang] = useState("ar");
+  const L = T[lang];
+  const isAr = lang === "ar";
+
+  const [tab, setTab] = useState("matches");
+  const [user, setUser] = useState(null);
+  const [uname, setUname] = useState("");
+  const [data, setData] = useState(loadData);
+  const [sel, setSel] = useState({});
+  const [gFilter, setGFilter] = useState("ALL");
+  const [, setTick] = useState(0);
+  const [toast, setToast] = useState({ show:false, msg:"", err:false });
+
+  useEffect(() => {
+    const t = setInterval(() => setTick(x => x+1), 1000);
+    return () => clearInterval(t);
+  }, []);
+  useEffect(() => {
+    const t = setInterval(() => setData(loadData()), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const notify = (msg, err=false) => {
+    setToast({ show:true, msg, err });
+    setTimeout(() => setToast({ show:false, msg:"", err:false }), 3000);
+  };
+
+  const doLogin = () => {
+    const n = uname.trim();
+    if (!n) return;
+    const d = { ...data };
+    if (!d.users[n]) d.users[n] = { name:n, joinedAt:Date.now() };
+    saveData(d); setData(d); setUser(n);
+    notify(`${L.welcome} ${n}! 🎉`);
+  };
+
+  const userBet = (matchId) => data.bets.find(b => b.user === user && b.matchId === matchId);
+  const myBets = user ? data.bets.filter(b => b.user === user) : [];
+
+  const placeBet = (match) => {
+    if (!user) return;
+    const betKey = sel[match.id];
+    if (!betKey) { notify(L.chooseBetFirst, true); return; }
+    if (!getCountdown(match.date, match.time)) { notify(L.betsClosed, true); return; }
+    if (userBet(match.id)) { notify(L.alreadyBetMsg, true); return; }
+    const def = BET_DEFS.find(b => b.key === betKey);
+    const odds = match[betKey];
+    const potential = parseFloat((100 * odds).toFixed(2));
+    const newBet = {
+      id: Date.now(), user, matchId: match.id,
+      matchName: isAr ? `${match.homeAr} vs ${match.awayAr}` : `${match.home} vs ${match.away}`,
+      betKey, betLabel: isAr ? def.arLabel : def.enLabel,
+      odds, amount:100, potential, result:"pending",
+      placedAt: Date.now(),
+    };
+    const d = { ...data, bets:[...data.bets, newBet] };
+    saveData(d); setData(d);
+    setSel(p => ({ ...p, [match.id]:null }));
+    notify(`${L.betPlaced} ${L.potentialWin}: $${potential}`);
+  };
+
+  const leaderboard = (() => {
+    const map = {};
+    data.bets.forEach(b => {
+      if (!map[b.user]) map[b.user] = { name:b.user, total:0, won:0, lost:0, pending:0, profit:0 };
+      map[b.user].total++;
+      if (b.result==="won") { map[b.user].won++; map[b.user].profit += b.potential - 100; }
+      else if (b.result==="lost") { map[b.user].lost++; map[b.user].profit -= 100; }
+      else map[b.user].pending++;
+    });
+    return Object.values(map).sort((a,b) => b.profit - a.profit);
+  })();
+
+  const myStats = user ? (() => {
+    const settled = myBets.filter(b => b.result !== "pending");
+    const won = myBets.filter(b => b.result === "won");
+    const profit = won.reduce((s,b) => s+b.potential,0) - settled.length*100;
+    return { total:myBets.length, pending:myBets.filter(b=>b.result==="pending").length, profit };
+  })() : null;
+
+  const groups = ["ALL","A","B","C","D","E","F","G","H","I","J","K","L"];
+  const shown = gFilter==="ALL" ? MATCHES : MATCHES.filter(m => m.group===gFilter);
+
+  const cdStr = (cd) => {
+    if (!cd) return null;
+    const parts = [];
+    if (cd.d) parts.push(`${cd.d}${L.days}`);
+    parts.push(`${cd.h}${L.hours}`, `${cd.m}${L.mins}`, `${cd.s}${L.secs}`);
+    return parts.join(" ");
+  };
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+
+      {!user && (
+        <div className="overlay">
+          <div className={`modal ${isAr?"ar":"en"}`}>
+            <div style={{fontSize:46,marginBottom:8}}>🏆</div>
+            <h2>WC 2026 BET</h2>
+            <p>{L.enterName}</p>
+            <input className="inp" placeholder={L.username} value={uname}
+              onChange={e=>setUname(e.target.value)} onKeyDown={e=>e.key==="Enter"&&doLogin()} autoFocus />
+            <button className="modal-btn" onClick={doLogin}>{L.enter}</button>
+            {Object.keys(data.users).length > 0 && (
+              <div className="plist">{L.participants}: {Object.keys(data.users).join(", ")}</div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <header className={`hdr ${isAr?"ar":"en"}`}>
+        <div className="logo">⚽ WC <em>2026</em> BET</div>
+        <nav className="nav">
+          {["matches","myBets","leaderboard"].map(t => (
+            <button key={t} className={`ntab ${tab===t?"on":""}`} onClick={()=>setTab(t)}>
+              {t==="matches"?L.matches:t==="myBets"?`${L.myBets} (${myBets.length})`:L.leaderboard}
+            </button>
+          ))}
+        </nav>
+        <div className="hdr-right">
+          <button className="lng-btn" onClick={()=>setLang(isAr?"en":"ar")}>
+            {isAr?"🇬🇧 EN":"🇸🇦 ع"}
+          </button>
+          {user && <span className="uname">👤 {user}</span>}
+          {myStats && (
+            <div className={`pnl ${myStats.profit>0?"pos":myStats.profit<0?"neg":"neu"}`}>
+              {myStats.profit>0?"+":""}${myStats.profit.toFixed(0)} {L.profit}
+            </div>
+          )}
+        </div>
+      </header>
+
+      <div className={`wrap ${isAr?"ar":"en"}`}>
+        <div className="col-main">
+          {user && myStats && (
+            <div className="stats">
+              <div className="sc"><div className="sv">{myStats.total}</div><div className="sl">{L.myBets}</div></div>
+              <div className="sc"><div className="sv" style={{color:"var(--gold)"}}>{myStats.pending}</div><div className="sl">{L.pending}</div></div>
+              <div className="sc">
+                <div className="sv" style={{color:myStats.profit>=0?"var(--green)":"var(--red)"}}>
+                  {myStats.profit>=0?"+":""}${myStats.profit.toFixed(0)}
+                </div>
+                <div className="sl">{L.myProfit}</div>
+              </div>
+              <div className="sc"><div className="sv">{data.bets.length}</div><div className="sl">{L.totalBets}</div></div>
+            </div>
+          )}
+
+          {tab==="matches" && (
+            <>
+              <div className="fbar">
+                {groups.map(g => (
+                  <button key={g} className={`fbtn ${gFilter===g?"on":""}`} onClick={()=>setGFilter(g)}>
+                    {g==="ALL"?L.allGroups:`${L.group} ${g}`}
+                  </button>
+                ))}
+              </div>
+              {shown.map(match => {
+                const cd = getCountdown(match.date, match.time);
+                const locked = !cd;
+                const ub = userBet(match.id);
+                const selected = sel[match.id];
+                const matchBets = data.bets.filter(b=>b.matchId===match.id).length;
+                const homeName = isAr ? match.homeAr : match.home;
+                const awayName = isAr ? match.awayAr : match.away;
+                return (
+                  <div key={match.id} className="mc">
+                    <div className="mc-head">
+                      <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+                        <span className="gbadge">{isAr?`المجموعة ${match.group}`:`Group ${match.group}`}</span>
+                        <span className="mc-meta">
+                          <span>📅 {match.date}</span>
+                          <span>⏰ {match.time} ET</span>
+                          <span>🏟 {match.stadium}</span>
+                          <span>👥 {matchBets}</span>
+                        </span>
+                      </div>
+                      <div>
+                        {locked
+                          ? <span className="cd">{L.betLocked}</span>
+                          : <span className="cd">⏱ {cdStr(cd)}</span>
+                        }
+                      </div>
+                    </div>
+                    <div className="mc-body">
+                      <div className="team">
+                        <div className="flag">{match.homef}</div>
+                        <div className="tname">{homeName}</div>
+                      </div>
+                      <div className="vs">VS</div>
+                      <div className="team">
+                        <div className="flag">{match.awayf}</div>
+                        <div className="tname">{awayName}</div>
+                      </div>
+                    </div>
+                    <div className="odds-row">
+                      {BET_DEFS.map(def => {
+                        const odds = match[def.key];
+                        const potential = (100*odds).toFixed(0);
+                        const isSel = selected===def.key;
+                        const isMyType = ub?.betKey===def.key;
+                        return (
+                          <div key={def.key}
+                            className={`ob ${isSel?"sel":""} ${locked||ub?"locked":""} ${isMyType?"mybet-type":""}`}
+                            onClick={()=> !locked && !ub && setSel(p=>({...p,[match.id]:p[match.id]===def.key?null:def.key}))}>
+                            <div className="olabel">{isAr?def.arLabel:def.enLabel}</div>
+                            <div className="oval" style={isSel?{color:"#7eb3ff"}:{}}>{odds.toFixed(2)}</div>
+                            <div className="opotential">${potential}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {ub ? (
+                      <div className="already-bet-bar">
+                        {L.alreadyBet}: {isAr?BET_DEFS.find(d=>d.key===ub.betKey)?.arLabel:BET_DEFS.find(d=>d.key===ub.betKey)?.enLabel} ×{ub.odds.toFixed(2)} → ${ub.potential}
+                      </div>
+                    ) : locked ? (
+                      <div className="locked-bar">{L.betLocked}</div>
+                    ) : (
+                      <button className="bet-btn" disabled={!selected} onClick={()=>placeBet(match)}>
+                        {selected
+                          ? `${L.placeBet} — ${L.potentialWin}: $${(100*match[selected]).toFixed(0)}`
+                          : L.chooseType}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </>
+          )}
+
+          {tab==="myBets" && (
+            <div>
+              <div className="stitle">🎯 {L.myBets}</div>
+              <div className="scard">
+                {myBets.length===0
+                  ? <div className="empty">{L.noMyBets}<br/><small>{L.noMyBetsHint}</small></div>
+                  : myBets.slice().reverse().map(b => (
+                    <div key={b.id} className="bitem">
+                      <div className="bm">⚽ {b.matchName}</div>
+                      <div className="bs">{b.betLabel} × {b.odds.toFixed(2)} → $100 → ${b.potential}</div>
+                      <div className={`br ${b.result==="pending"?"pen":b.result==="won"?"won":"los"}`}>
+                        {b.result==="pending"?L.resultPending:b.result==="won"?`${L.resultWon} +$${(b.potential-100).toFixed(2)}`:`${L.resultLost} -$100`}
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          )}
+
+          {tab==="leaderboard" && (
+            <div>
+              <div className="stitle">🏆 {L.leaderboard}</div>
+              <div className="scard">
+                <table className="ltable">
+                  <thead>
+                    <tr>
+                      <th>#</th><th>{L.rankPlayer}</th><th>{L.rankBets}</th>
+                      <th>{L.rankWon}</th><th>{L.rankLost}</th><th>{L.rankPending}</th><th>{L.rankProfit}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {leaderboard.length===0
+                      ? <tr><td colSpan={7} className="empty">{L.noParticipants}</td></tr>
+                      : leaderboard.map((u,i) => (
+                        <tr key={u.name} style={{background:u.name===user?"rgba(245,166,35,.05)":""}}>
+                          <td><span className={`rb ${i===0?"r1":i===1?"r2":i===2?"r3":"ro"}`}>{i+1}</span></td>
+                          <td style={{color:u.name===user?"var(--gold)":"",fontWeight:u.name===user?700:400}}>
+                            {u.name===user?"👤 ":""}{u.name}
+                          </td>
+                          <td className="mn">{u.total}</td>
+                          <td className="gn">{u.won}</td>
+                          <td className="rd">{u.lost}</td>
+                          <td style={{color:"var(--gold)"}}>{u.pending}</td>
+                          <td className={u.profit>0?"gn":u.profit<0?"rd":"mn"}>
+                            {u.profit>0?"+":""}${u.profit.toFixed(2)}
+                          </td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="col-side">
+          <div className="scard">
+            <div className="stitle">🏆 {L.leaderboard}</div>
+            <table className="ltable">
+              <thead><tr><th>#</th><th>{L.rankPlayer}</th><th>{L.rankProfit}</th></tr></thead>
+              <tbody>
+                {leaderboard.slice(0,8).map((u,i)=>(
+                  <tr key={u.name}>
+                    <td><span className={`rb ${i===0?"r1":i===1?"r2":i===2?"r3":"ro"}`}>{i+1}</span></td>
+                    <td style={{color:u.name===user?"var(--gold)":""}}>{u.name}</td>
+                    <td className={u.profit>0?"gn":u.profit<0?"rd":"mn"}>{u.profit>0?"+":""}${u.profit.toFixed(0)}</td>
+                  </tr>
+                ))}
+                {leaderboard.length===0&&<tr><td colSpan={3} className="empty">{L.noParticipants}</td></tr>}
+              </tbody>
+            </table>
+          </div>
+          <div className="scard">
+            <div className="stitle">{L.recentBets}</div>
+            {myBets.length===0
+              ? <div className="empty">{L.noBetsYet}</div>
+              : myBets.slice(-5).reverse().map(b=>(
+                <div key={b.id} className="bitem">
+                  <div className="bm">{b.matchName}</div>
+                  <div className="bs">{b.betLabel} × {b.odds.toFixed(2)}</div>
+                  <div className={`br ${b.result==="pending"?"pen":b.result==="won"?"won":"los"}`}>
+                    {b.result==="pending"?`⏳ $${b.potential}`:b.result==="won"?`✅ +$${(b.potential-100).toFixed(2)}`:`❌ -$100`}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+          <div className="scard">
+            <div className="stitle">{L.rules}</div>
+            <div className="rules-body">
+              <p>💰 {L.rule1}</p>
+              <p>⏰ {L.rule2}</p>
+              <p>🎯 {L.rule3}</p>
+              <p>📊 {L.rule4}</p>
+              <p>🏆 {L.rule5}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className={`toast ${toast.show?"show":""} ${toast.err?"err":""}`}>{toast.msg}</div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
