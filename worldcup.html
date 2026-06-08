@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>World Cup 2026 — Prediction Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --surface: #111811;
+    --surface2: #1a241a;
+    --border: #2a3a2a;
+    --green: #00c853;
+    --green-dim: #00963e;
+    --gold: #ffd600;
+    --gold-dim: #c8a800;
+    --red: #ff5252;
+    --blue: #40c4ff;
+    --text: #e8f5e9;
+    --text-dim: #9aaA9a;
+    --text-muted: #556655;
+    --correct: #00c853;
+    --wrong: #ff5252;
+    --partial: #ffd600;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #loginScreen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: radial-gradient(ellipse at center, #0d1f0d 0%, #0a0f0a 70%);
+  }
+  .login-trophy { font-size: 80px; margin-bottom: 12px; }
+  .login-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    line-height: 1;
+  }
+  .login-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    color: var(--green);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin: 8px 0 40px;
+  }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 32px rgba(0,200,83,0.08);
+  }
+  .login-card label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .login-card input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.1rem;
+    font-family: 'Barlow', sans-serif;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .login-card input:focus { border-color: var(--green); }
+  .btn-primary {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--green-dim), var(--green));
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity .2s;
+  }
+  .btn-primary:hover { opacity: .85; }
+  .existing-users {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .existing-users p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .user-chip {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    margin: 3px;
+    transition: border-color .2s, color .2s;
+  }
+  .user-chip:hover { border-color: var(--green); color: var(--text); }
+
+  /* ── APP SHELL ── */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .header-logo span { color: var(--green); }
+  .header-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .header-user strong { color: var(--text); }
+  .header-pts {
+    background: var(--gold);
+    color: #000;
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .btn-logout {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .btn-logout:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── TABS ── */
+  nav.tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 12px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color .2s, border-color .2s;
+  }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-btn:hover:not(.active) { color: var(--text-dim); }
+
+  /* ── MAIN CONTENT ── */
+  main { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── GROUP HEADER ── */
+  .group-header {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 16px 0 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .group-label {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    color: var(--gold);
+  }
+
+  /* ── MATCH CARD ── */
+  .match-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .match-card:hover { border-color: #3a4a3a; }
+  .match-card.locked { opacity: .75; }
+  .match-card.has-result { border-color: #2a3a2a; }
+  .match-card.correct { border-color: var(--correct); }
+  .match-card.partial { border-color: var(--partial); }
+  .match-card.wrong { border-color: #3a1a1a; }
+
+  .match-top {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    gap: 12px;
+  }
+  .team-block {
+    flex: 1;
+    text-align: center;
+  }
+  .team-flag { font-size: 2rem; line-height: 1; display: block; margin-bottom: 4px; }
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text);
+  }
+  .match-center { text-align: center; min-width: 100px; }
+  .match-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .vs-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-dim);
+  }
+  .actual-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .match-status {
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .status-upcoming { color: var(--blue); }
+  .status-live { color: var(--green); animation: pulse 1s infinite; }
+  .status-final { color: var(--text-muted); }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* ── PREDICTION FORM ── */
+  .prediction-form {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .prediction-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .score-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+  .score-input {
+    width: 52px;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    padding: 6px 8px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .score-input:focus { border-color: var(--green); }
+  .score-input:disabled { opacity: .4; cursor: not-allowed; }
+  .score-dash {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+  }
+  .btn-predict {
+    background: var(--green);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    cursor: pointer;
+    transition: opacity .2s;
+    flex-shrink: 0;
+  }
+  .btn-predict:hover { opacity: .8; }
+  .btn-predict:disabled { opacity: .3; cursor: not-allowed; }
+  .prediction-result-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+  .badge-correct { background: rgba(0,200,83,.2); color: var(--correct); border: 1px solid var(--correct); }
+  .badge-partial { background: rgba(255,214,0,.15); color: var(--gold); border: 1px solid var(--gold); }
+  .badge-wrong { background: rgba(255,82,82,.15); color: var(--red); border: 1px solid var(--red); }
+  .badge-pending { background: rgba(64,196,255,.1); color: var(--blue); border: 1px solid rgba(64,196,255,.3); }
+  .pts-earned {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--gold);
+  }
+  .locked-msg {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ── LEADERBOARD ── */
+  .leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .leaderboard-table thead th {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .leaderboard-table thead th:not(:first-child) { text-align: center; }
+  .leaderboard-row { border-bottom: 1px solid #1a241a; transition: background .15s; }
+  .leaderboard-row:hover { background: var(--surface2); }
+  .leaderboard-row td { padding: 12px 12px; vertical-align: middle; }
+  .lb-rank {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 40px;
+  }
+  .lb-rank.rank-1 { color: var(--gold); font-size: 1.3rem; }
+  .lb-rank.rank-2 { color: #c0c0c0; }
+  .lb-rank.rank-3 { color: #cd7f32; }
+  .lb-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .lb-name.is-me { color: var(--green); }
+  .lb-me-tag {
+    font-size: 0.65rem;
+    background: rgba(0,200,83,.15);
+    color: var(--green);
+    border: 1px solid rgba(0,200,83,.3);
+    border-radius: 8px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .lb-pts {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--gold);
+    text-align: center;
+  }
+  .lb-stat { text-align: center; font-size: 0.85rem; color: var(--text-dim); }
+  .medal { font-size: 1.3rem; }
+
+  /* ── POINTS INFO ── */
+  .points-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .points-info h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .pts-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .pts-rule:last-child { border-bottom: none; }
+  .pts-badge {
+    background: var(--gold);
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    border-radius: 8px;
+    padding: 2px 10px;
+    min-width: 44px;
+    text-align: center;
+  }
+  .pts-badge.partial { background: var(--green); }
+  .pts-rule p { font-size: 0.9rem; color: var(--text-dim); }
+  .pts-rule strong { color: var(--text); }
+
+  /* ── MY PREDICTIONS ── */
+  .my-pred-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .my-pred-teams {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    flex: 1;
+    min-width: 160px;
+  }
+  .my-pred-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 4px 14px;
+  }
+  .my-pred-actual {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  /* ── ADMIN PANEL ── */
+  .admin-gate {
+    max-width: 400px;
+    margin: 40px auto;
+    text-align: center;
+  }
+  .admin-gate h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+  }
+  .admin-gate input {
+    width: 100%;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 1.5rem;
+    letter-spacing: 6px;
+    padding: 14px;
+    outline: none;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .admin-gate input:focus { border-color: var(--gold); }
+  #adminPanel { display: none; }
+  .admin-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 24px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-match-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .admin-match-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    flex: 1;
+    min-width: 160px;
+  }
+  .admin-score-input {
+    width: 48px;
+    text-align: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 6px;
+    outline: none;
+  }
+  .admin-score-input:focus { border-color: var(--gold); }
+  .btn-save-result {
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-save-result:hover { opacity: .8; }
+  .btn-clear-result {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .btn-clear-result:hover { border-color: var(--red); color: var(--red); }
+
+  .add-match-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .form-field label {
+    display: block;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .form-field input, .form-field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.95rem;
+    padding: 9px 12px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-field input:focus, .form-field select:focus { border-color: var(--green); }
+  .form-field select option { background: #1a241a; }
+  .btn-add-match {
+    background: linear-gradient(135deg, var(--green-dim), var(--green));
+    border: none;
+    border-radius: 8px;
+    color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 11px 24px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .btn-add-match:hover { opacity: .85; }
+  .btn-danger {
+    background: none;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    color: var(--red);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .btn-danger:hover { background: rgba(255,82,82,.1); }
+  .btn-secondary {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .btn-secondary:hover { border-color: var(--green); color: var(--text); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.95rem; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    color: var(--text);
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    transition: transform .3s;
+    z-index: 9999;
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.success { border-color: var(--green); color: var(--green); }
+  #toast.error { border-color: var(--red); color: var(--red); }
+
+  /* ── COUNTDOWN ── */
+  .countdown {
+    font-size: 0.72rem;
+    color: var(--blue);
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+
+  /* ── STATS BANNER ── */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  @media(max-width:600px) { .stats-banner { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color .2s, color .2s;
+  }
+  .filter-chip.active { border-color: var(--green); color: var(--green); }
+  .filter-chip:hover:not(.active) { border-color: #3a4a3a; color: var(--text-dim); }
+
+  @media(max-width:600px) {
+    .match-top { padding: 12px 14px; }
+    .prediction-form { padding: 10px 14px; }
+    main { padding: 14px; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-row.three, .form-row.four { grid-template-columns: 1fr 1fr; }
+    .header-logo { font-size: 1rem; }
+    .stats-banner { margin-bottom: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ LOGIN SCREEN ═══════════════════════ -->
+<div id="loginScreen">
+  <div class="login-trophy">🏆</div>
+  <div class="login-title">World Cup 2026</div>
+  <div class="login-sub">Prediction Dashboard</div>
+  <div class="login-card">
+    <label for="loginName">Your Name</label>
+    <input type="text" id="loginName" placeholder="Enter your name..." maxlength="30" autocomplete="off">
+    <button class="btn-primary" onclick="login()">Enter Dashboard →</button>
+    <div class="existing-users" id="existingUsers" style="display:none">
+      <p>Returning player?</p>
+      <div id="userChips"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ APP ═══════════════════════ -->
+<div id="app">
+  <header>
+    <div class="header-logo">⚽ <span>WC</span> 2026</div>
+    <div class="header-user">
+      Signed in as <strong id="displayName"></strong>
+      <span class="header-pts" id="myPoints">0 pts</span>
+      <button class="btn-logout" onclick="logout()">Exit</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('predict', this)">Predict</button>
+    <button class="tab-btn" onclick="switchTab('leaderboard', this)">Leaderboard</button>
+    <button class="tab-btn" onclick="switchTab('mypredictions', this)">My Picks</button>
+    <button class="tab-btn" onclick="switchTab('admin', this)">Admin</button>
+  </nav>
+
+  <main>
+    <!-- ── PREDICT TAB ── -->
+    <div id="tab-predict" class="section active">
+      <div class="filter-bar" id="filterBar"></div>
+      <div id="matchList"></div>
+    </div>
+
+    <!-- ── LEADERBOARD TAB ── -->
+    <div id="tab-leaderboard" class="section">
+      <div class="stats-banner" id="lbStats"></div>
+      <div class="points-info">
+        <h3>How Points Work</h3>
+        <div class="pts-rule">
+          <div class="pts-badge">5 pts</div>
+          <p><strong>Exact score</strong> — Predict the correct scoreline (e.g. 2–1)</p>
+        </div>
+        <div class="pts-rule">
+          <div class="pts-badge partial">3 pts</div>
+          <p><strong>Correct result</strong> — Right winner or correctly predict a draw</p>
+        </div>
+        <div class="pts-rule">
+          <div class="pts-badge" style="background:var(--text-muted);color:#000">0 pts</div>
+          <p><strong>Wrong result</strong> — Incorrect prediction</p>
+        </div>
+      </div>
+      <table class="leaderboard-table" id="leaderboardTable">
+        <thead>
+          <tr>
+            <th style="width:40px">#</th>
+            <th>Player</th>
+            <th>Pts</th>
+            <th>Exact</th>
+            <th>Result</th>
+            <th>Played</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboardBody"></tbody>
+      </table>
+      <div id="leaderboardEmpty" class="empty-state" style="display:none">
+        <div class="icon">📊</div>
+        <p>No results posted yet. Check back soon!</p>
+      </div>
+    </div>
+
+    <!-- ── MY PREDICTIONS TAB ── -->
+    <div id="tab-mypredictions" class="section">
+      <div class="stats-banner" id="myStats"></div>
+      <div id="myPredList"></div>
+      <div id="myPredEmpty" class="empty-state" style="display:none">
+        <div class="icon">🎯</div>
+        <p>You haven't made any predictions yet.<br>Head to the Predict tab to get started!</p>
+      </div>
+    </div>
+
+    <!-- ── ADMIN TAB ── -->
+    <div id="tab-admin" class="section">
+      <div id="adminGate">
+        <div class="admin-gate">
+          <h2>Admin Access</h2>
+          <input type="password" id="adminPinInput" placeholder="PIN" maxlength="6" oninput="checkAdminPin()">
+          <p style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">Enter the admin PIN to manage matches and results.</p>
+        </div>
+      </div>
+      <div id="adminPanel">
+        <div class="admin-section-title">Set Match Results</div>
+        <div id="adminMatchList"></div>
+
+        <div class="admin-section-title">Add New Match</div>
+        <div class="add-match-form">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Home Team</label>
+              <input type="text" id="newHome" placeholder="e.g. Brazil" autocomplete="off">
+            </div>
+            <div class="form-field">
+              <label>Away Team</label>
+              <input type="text" id="newAway" placeholder="e.g. France" autocomplete="off">
+            </div>
+          </div>
+          <div class="form-row three">
+            <div class="form-field">
+              <label>Home Flag 🏳️</label>
+              <input type="text" id="newHomeFlag" placeholder="🇧🇷" maxlength="4">
+            </div>
+            <div class="form-field">
+              <label>Away Flag 🏳️</label>
+              <input type="text" id="newAwayFlag" placeholder="🇫🇷" maxlength="4">
+            </div>
+            <div class="form-field">
+              <label>Group</label>
+              <select id="newGroup">
+                <option>A</option><option>B</option><option>C</option>
+                <option>D</option><option>E</option><option>F</option>
+                <option>G</option><option>H</option><option>I</option>
+                <option>J</option><option>K</option><option>L</option>
+                <option>KO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Match Date</label>
+              <input type="date" id="newDate">
+            </div>
+            <div class="form-field">
+              <label>Kick-off Time (local)</label>
+              <input type="time" id="newTime" value="18:00">
+            </div>
+          </div>
+          <div class="form-field" style="margin-bottom:12px">
+            <label>Venue / Stage</label>
+            <input type="text" id="newVenue" placeholder="e.g. MetLife Stadium, New Jersey — Group Stage">
+          </div>
+          <button class="btn-add-match" onclick="addMatch()">+ Add Match</button>
+        </div>
+
+        <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-danger" onclick="clearAllData()">Reset All Data</button>
+          <button class="btn-secondary" onclick="exportData()">Export JSON</button>
+          <button class="btn-secondary" onclick="importDataPrompt()">Import JSON</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const ADMIN_PIN = '2026';
+const STORAGE_MATCHES = 'wc2026_matches';
+const STORAGE_PREDICTIONS = 'wc2026_predictions';
+const STORAGE_USERS = 'wc2026_users';
+const STORAGE_CURRENT_USER = 'wc2026_currentUser';
+
+const POINTS_EXACT = 5;
+const POINTS_RESULT = 3;
+
+const DEFAULT_MATCHES = [
+  { id:'m1', home:'USA', away:'Jamaica', homeFlag:'🇺🇸', awayFlag:'🇯🇲', group:'A', date:'2026-06-11', time:'19:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m2', home:'Panama', away:'Bolivia', homeFlag:'🇵🇦', awayFlag:'🇧🇴', group:'A', date:'2026-06-12', time:'12:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m3', home:'USA', away:'Bolivia', homeFlag:'🇺🇸', awayFlag:'🇧🇴', group:'A', date:'2026-06-16', time:'18:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m4', home:'Jamaica', away:'Panama', homeFlag:'🇯🇲', awayFlag:'🇵🇦', group:'A', date:'2026-06-16', time:'21:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m5', home:'Bolivia', away:'Jamaica', homeFlag:'🇧🇴', awayFlag:'🇯🇲', group:'A', date:'2026-06-20', time:'18:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m6', home:'Panama', away:'USA', homeFlag:'🇵🇦', awayFlag:'🇺🇸', group:'A', date:'2026-06-20', time:'18:00', venue:"Levi's Stadium, San Francisco" },
+  { id:'m7', home:'Argentina', away:'Canada', homeFlag:'🇦🇷', awayFlag:'🇨🇦', group:'B', date:'2026-06-12', time:'18:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m8', home:'Chile', away:'Peru', homeFlag:'🇨🇱', awayFlag:'🇵🇪', group:'B', date:'2026-06-12', time:'21:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m9', home:'Argentina', away:'Peru', homeFlag:'🇦🇷', awayFlag:'🇵🇪', group:'B', date:'2026-06-17', time:'18:00', venue:'Hard Rock Stadium, Miami' },
+  { id:'m10', home:'Canada', away:'Chile', homeFlag:'🇨🇦', awayFlag:'🇨🇱', group:'B', date:'2026-06-17', time:'21:00', venue:'Arrowhead Stadium, Kansas City' },
+  { id:'m11', home:'Peru', away:'Canada', homeFlag:'🇵🇪', awayFlag:'🇨🇦', group:'B', date:'2026-06-21', time:'18:00', venue:'BC Place, Vancouver' },
+  { id:'m12', home:'Chile', away:'Argentina', homeFlag:'🇨🇱', awayFlag:'🇦🇷', group:'B', date:'2026-06-21', time:'18:00', venue:'Estadio Azteca, Mexico City' },
+  { id:'m13', home:'Mexico', away:'Honduras', homeFlag:'🇲🇽', awayFlag:'🇭🇳', group:'C', date:'2026-06-13', time:'18:00', venue:'Estadio Azteca, Mexico City' },
+  { id:'m14', home:'Guatemala', away:'Costa Rica', homeFlag:'🇬🇹', awayFlag:'🇨🇷', group:'C', date:'2026-06-13', time:'21:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m15', home:'Mexico', away:'Costa Rica', homeFlag:'🇲🇽', awayFlag:'🇨🇷', group:'C', date:'2026-06-17', time:'18:00', venue:'Estadio BBVA, Monterrey' },
+  { id:'m16', home:'Honduras', away:'Guatemala', homeFlag:'🇭🇳', awayFlag:'🇬🇹', group:'C', date:'2026-06-17', time:'21:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m17', home:'Costa Rica', away:'Honduras', homeFlag:'🇨🇷', awayFlag:'🇭🇳', group:'C', date:'2026-06-21', time:'18:00', venue:'Estadio Akron, Guadalajara' },
+  { id:'m18', home:'Guatemala', away:'Mexico', homeFlag:'🇬🇹', awayFlag:'🇲🇽', group:'C', date:'2026-06-21', time:'18:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m19', home:'Brazil', away:'Colombia', homeFlag:'🇧🇷', awayFlag:'🇨🇴', group:'D', date:'2026-06-13', time:'18:00', venue:'Hard Rock Stadium, Miami' },
+  { id:'m20', home:'Ecuador', away:'Venezuela', homeFlag:'🇪🇨', awayFlag:'🇻🇪', group:'D', date:'2026-06-13', time:'21:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m21', home:'Brazil', away:'Venezuela', homeFlag:'🇧🇷', awayFlag:'🇻🇪', group:'D', date:'2026-06-18', time:'18:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m22', home:'Colombia', away:'Ecuador', homeFlag:'🇨🇴', awayFlag:'🇪🇨', group:'D', date:'2026-06-18', time:'21:00', venue:'Estadio Azteca, Mexico City' },
+  { id:'m23', home:'Venezuela', away:'Colombia', homeFlag:'🇻🇪', awayFlag:'🇨🇴', group:'D', date:'2026-06-22', time:'18:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m24', home:'Ecuador', away:'Brazil', homeFlag:'🇪🇨', awayFlag:'🇧🇷', group:'D', date:'2026-06-22', time:'18:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m25', home:'France', away:'Belgium', homeFlag:'🇫🇷', awayFlag:'🇧🇪', group:'E', date:'2026-06-14', time:'15:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m26', home:'Morocco', away:'Georgia', homeFlag:'🇲🇦', awayFlag:'🇬🇪', group:'E', date:'2026-06-14', time:'18:00', venue:'Arrowhead Stadium, Kansas City' },
+  { id:'m27', home:'France', away:'Georgia', homeFlag:'🇫🇷', awayFlag:'🇬🇪', group:'E', date:'2026-06-19', time:'18:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m28', home:'Belgium', away:'Morocco', homeFlag:'🇧🇪', awayFlag:'🇲🇦', group:'E', date:'2026-06-19', time:'21:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m29', home:'Georgia', away:'Belgium', homeFlag:'🇬🇪', awayFlag:'🇧🇪', group:'E', date:'2026-06-23', time:'18:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m30', home:'Morocco', away:'France', homeFlag:'🇲🇦', awayFlag:'🇫🇷', group:'E', date:'2026-06-23', time:'18:00', venue:'Hard Rock Stadium, Miami' },
+  { id:'m31', home:'Spain', away:'Portugal', homeFlag:'🇪🇸', awayFlag:'🇵🇹', group:'F', date:'2026-06-14', time:'18:00', venue:'Allegiant Stadium, Las Vegas' },
+  { id:'m32', home:'Germany', away:'Turkey', homeFlag:'🇩🇪', awayFlag:'🇹🇷', group:'F', date:'2026-06-14', time:'21:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m33', home:'Spain', away:'Turkey', homeFlag:'🇪🇸', awayFlag:'🇹🇷', group:'F', date:'2026-06-19', time:'18:00', venue:"Levi's Stadium, San Francisco" },
+  { id:'m34', home:'Portugal', away:'Germany', homeFlag:'🇵🇹', awayFlag:'🇩🇪', group:'F', date:'2026-06-19', time:'21:00', venue:'Allegiant Stadium, Las Vegas' },
+  { id:'m35', home:'Turkey', away:'Portugal', homeFlag:'🇹🇷', awayFlag:'🇵🇹', group:'F', date:'2026-06-23', time:'18:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m36', home:'Germany', away:'Spain', homeFlag:'🇩🇪', awayFlag:'🇪🇸', group:'F', date:'2026-06-23', time:'18:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m37', home:'England', away:'Serbia', homeFlag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', awayFlag:'🇷🇸', group:'G', date:'2026-06-15', time:'18:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m38', home:'Netherlands', away:'Czech Republic', homeFlag:'🇳🇱', awayFlag:'🇨🇿', group:'G', date:'2026-06-15', time:'21:00', venue:'Hard Rock Stadium, Miami' },
+  { id:'m39', home:'England', away:'Czech Republic', homeFlag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', awayFlag:'🇨🇿', group:'G', date:'2026-06-20', time:'18:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m40', home:'Serbia', away:'Netherlands', homeFlag:'🇷🇸', awayFlag:'🇳🇱', group:'G', date:'2026-06-20', time:'21:00', venue:'AT&T Stadium, Dallas' },
+  { id:'m41', home:'Czech Republic', away:'Serbia', homeFlag:'🇨🇿', awayFlag:'🇷🇸', group:'G', date:'2026-06-24', time:'18:00', venue:"Levi's Stadium, San Francisco" },
+  { id:'m42', home:'Netherlands', away:'England', homeFlag:'🇳🇱', awayFlag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', group:'G', date:'2026-06-24', time:'18:00', venue:'Allegiant Stadium, Las Vegas' },
+  { id:'m43', home:'Italy', away:'Japan', homeFlag:'🇮🇹', awayFlag:'🇯🇵', group:'H', date:'2026-06-15', time:'15:00', venue:'SoFi Stadium, Los Angeles' },
+  { id:'m44', home:'South Korea', away:'Saudi Arabia', homeFlag:'🇰🇷', awayFlag:'🇸🇦', group:'H', date:'2026-06-15', time:'21:00', venue:'MetLife Stadium, New Jersey' },
+  { id:'m45', home:'Italy', away:'Saudi Arabia', homeFlag:'🇮🇹', awayFlag:'🇸🇦', group:'H', date:'2026-06-20', time:'18:00', venue:'Arrowhead Stadium, Kansas City' },
+  { id:'m46', home:'Japan', away:'South Korea', homeFlag:'🇯🇵', awayFlag:'🇰🇷', group:'H', date:'2026-06-20', time:'21:00', venue:'Rose Bowl, Los Angeles' },
+  { id:'m47', home:'Saudi Arabia', away:'Japan', homeFlag:'🇸🇦', awayFlag:'🇯🇵', group:'H', date:'2026-06-24', time:'18:00', venue:'Hard Rock Stadium, Miami' },
+  { id:'m48', home:'South Korea', away:'Italy', homeFlag:'🇰🇷', awayFlag:'🇮🇹', group:'H', date:'2026-06-24', time:'18:00', venue:'AT&T Stadium, Dallas' },
+];
+
+let currentUser = null;
+let currentFilter = 'All';
+let countdownTimers = {};
+
+function loadMatches() {
+  const raw = localStorage.getItem(STORAGE_MATCHES);
+  if (!raw) {
+    const m = JSON.parse(JSON.stringify(DEFAULT_MATCHES));
+    localStorage.setItem(STORAGE_MATCHES, JSON.stringify(m));
+    return m;
+  }
+  return JSON.parse(raw);
+}
+function saveMatches(matches) { localStorage.setItem(STORAGE_MATCHES, JSON.stringify(matches)); }
+
+function loadPredictions() {
+  const raw = localStorage.getItem(STORAGE_PREDICTIONS);
+  return raw ? JSON.parse(raw) : {};
+}
+function savePredictions(p) { localStorage.setItem(STORAGE_PREDICTIONS, JSON.stringify(p)); }
+
+function loadUsers() {
+  const raw = localStorage.getItem(STORAGE_USERS);
+  return raw ? JSON.parse(raw) : {};
+}
+function saveUsers(u) { localStorage.setItem(STORAGE_USERS, JSON.stringify(u)); }
+
+function getResult(home, away) {
+  if (home > away) return 'H';
+  if (away > home) return 'A';
+  return 'D';
+}
+
+function scorePrediction(match, predHome, predAway) {
+  if (match.homeScore === null || match.homeScore === undefined) return null;
+  const actual = { h: match.homeScore, a: match.awayScore };
+  const exact = predHome === actual.h && predAway === actual.a;
+  const resultMatch = getResult(predHome, predAway) === getResult(actual.h, actual.a);
+  if (exact) return { pts: POINTS_EXACT, label: 'Exact Score', type: 'correct' };
+  if (resultMatch) return { pts: POINTS_RESULT, label: 'Correct Result', type: 'partial' };
+  return { pts: 0, label: 'Wrong', type: 'wrong' };
+}
+
+function recalcAllPoints() {
+  const matches = loadMatches();
+  const predictions = loadPredictions();
+  const users = loadUsers();
+  Object.keys(users).forEach(u => {
+    users[u].points = 0;
+    users[u].exactScores = 0;
+    users[u].correctResults = 0;
+    users[u].played = 0;
+  });
+  Object.keys(predictions).forEach(uid => {
+    Object.keys(predictions[uid]).forEach(mid => {
+      const match = matches.find(m => m.id === mid);
+      if (!match || match.homeScore === null || match.homeScore === undefined) return;
+      const pred = predictions[uid][mid];
+      const result = scorePrediction(match, pred.home, pred.away);
+      if (!result) return;
+      if (!users[uid]) users[uid] = { points: 0, exactScores: 0, correctResults: 0, played: 0 };
+      users[uid].points += result.pts;
+      users[uid].played += 1;
+      if (result.type === 'correct') users[uid].exactScores += 1;
+      if (result.type === 'partial') users[uid].correctResults += 1;
+    });
+  });
+  saveUsers(users);
+  return users;
+}
+
+function login() {
+  const name = document.getElementById('loginName').value.trim();
+  if (!name) { toast('Please enter your name', 'error'); return; }
+  const users = loadUsers();
+  if (!users[name]) { users[name] = { points: 0, exactScores: 0, correctResults: 0, played: 0 }; saveUsers(users); }
+  currentUser = name;
+  localStorage.setItem(STORAGE_CURRENT_USER, name);
+  showApp();
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem(STORAGE_CURRENT_USER);
+  clearCountdowns();
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('displayName').textContent = currentUser;
+  renderAll();
+}
+
+function initLogin() {
+  const saved = localStorage.getItem(STORAGE_CURRENT_USER);
+  if (saved) { currentUser = saved; showApp(); return; }
+  const users = loadUsers();
+  const names = Object.keys(users);
+  if (names.length > 0) {
+    document.getElementById('existingUsers').style.display = 'block';
+    document.getElementById('userChips').innerHTML = names.map(n =>
+      `<span class="user-chip" onclick="document.getElementById('loginName').value='${n.replace(/'/g,"\\'")}'.trim();login()">${n}</span>`
+    ).join('');
+  }
+  document.getElementById('loginName').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+}
+
+function switchTab(name, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'predict') renderMatchList();
+  if (name === 'leaderboard') renderLeaderboard();
+  if (name === 'mypredictions') renderMyPredictions();
+  if (name === 'admin') renderAdminPanel();
+}
+
+function renderAll() {
+  updateHeaderPoints();
+  renderMatchList();
+  renderLeaderboard();
+}
+
+function updateHeaderPoints() {
+  const users = loadUsers();
+  const u = users[currentUser];
+  const pts = u ? u.points : 0;
+  document.getElementById('myPoints').textContent = pts + ' pts';
+}
+
+function renderMatchList() {
+  const matches = loadMatches();
+  const predictions = loadPredictions();
+  const myPreds = predictions[currentUser] || {};
+  const groups = [...new Set(matches.map(m => m.group))].sort();
+  const filterBar = document.getElementById('filterBar');
+  filterBar.innerHTML = ['All', ...groups].map(g =>
+    `<span class="filter-chip ${currentFilter === g ? 'active' : ''}" onclick="setFilter('${g}')">${g === 'All' ? 'All Matches' : 'Group ' + g}</span>`
+  ).join('');
+  const filtered = currentFilter === 'All' ? matches : matches.filter(m => m.group === currentFilter);
+  const byGroup = {};
+  filtered.forEach(m => { if (!byGroup[m.group]) byGroup[m.group] = []; byGroup[m.group].push(m); });
+  clearCountdowns();
+  let html = '';
+  Object.keys(byGroup).sort().forEach(g => {
+    html += `<div class="group-header"><span class="group-label">Group ${g}</span></div>`;
+    byGroup[g].sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time)).forEach(m => {
+      html += buildMatchCard(m, myPreds[m.id]);
+    });
+  });
+  if (!html) html = `<div class="empty-state"><div class="icon">📅</div><p>No matches scheduled yet.</p></div>`;
+  document.getElementById('matchList').innerHTML = html;
+  startCountdowns(matches);
+}
+
+function setFilter(g) { currentFilter = g; renderMatchList(); }
+
+function isLocked(match) {
+  const now = new Date();
+  const matchDT = new Date(match.date + 'T' + match.time + ':00');
+  return now >= matchDT;
+}
+
+function buildMatchCard(match, pred) {
+  const locked = isLocked(match);
+  const hasResult = match.homeScore !== null && match.homeScore !== undefined;
+  let cardClass = 'match-card';
+  if (locked) cardClass += ' locked';
+  if (hasResult) cardClass += ' has-result';
+  let scoreResult = null;
+  if (hasResult && pred) {
+    scoreResult = scorePrediction(match, pred.home, pred.away);
+    if (scoreResult) cardClass += ' ' + (scoreResult.type === 'correct' ? 'correct' : scoreResult.type === 'partial' ? 'partial' : 'wrong');
+  }
+  const dateStr = new Date(match.date + 'T' + match.time).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  let centerContent;
+  if (hasResult) {
+    centerContent = `<div class="actual-score">${match.homeScore} – ${match.awayScore}</div><div class="match-status status-final">Full Time</div>`;
+  } else if (locked) {
+    centerContent = `<div class="vs-badge">VS</div><div class="match-status status-live">In Progress</div>`;
+  } else {
+    centerContent = `<div class="vs-badge">VS</div><div class="countdown" id="cd-${match.id}"></div>`;
+  }
+  let formContent;
+  if (locked && !hasResult) {
+    formContent = `<span class="locked-msg">🔒 Predictions locked — match in progress</span>`;
+  } else if (!hasResult && !locked) {
+    const homeVal = pred ? pred.home : '';
+    const awayVal = pred ? pred.away : '';
+    const hasPred = pred !== undefined;
+    formContent = `
+      <span class="prediction-label">Your Pick</span>
+      <div class="score-inputs">
+        <input class="score-input" type="number" min="0" max="20" id="h-${match.id}" value="${homeVal}" placeholder="0">
+        <span class="score-dash">–</span>
+        <input class="score-input" type="number" min="0" max="20" id="a-${match.id}" value="${awayVal}" placeholder="0">
+      </div>
+      ${hasPred ? `<span class="badge-pending prediction-result-badge">Submitted ✓</span>` : ''}
+      <button class="btn-predict" onclick="submitPrediction('${match.id}')">${hasPred ? 'Update' : 'Predict'}</button>
+    `;
+  } else if (hasResult) {
+    if (pred !== undefined) {
+      const r = scoreResult;
+      const badgeClass = r.type === 'correct' ? 'badge-correct' : r.type === 'partial' ? 'badge-partial' : 'badge-wrong';
+      const ptsText = r.pts > 0 ? `<span class="pts-earned">+${r.pts} pts</span>` : '';
+      formContent = `
+        <span class="prediction-label">Your Pick</span>
+        <span style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:4px 14px;font-family:'Barlow Condensed',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text-dim)">${pred.home} – ${pred.away}</span>
+        <span class="${badgeClass} prediction-result-badge">${r.label}</span>
+        ${ptsText}
+      `;
+    } else {
+      formContent = `<span class="locked-msg">No prediction submitted</span>`;
+    }
+  }
+  return `
+    <div class="${cardClass}" id="card-${match.id}">
+      <div class="match-top">
+        <div class="team-block"><span class="team-flag">${match.homeFlag||'🏳️'}</span><span class="team-name">${match.home}</span></div>
+        <div class="match-center">
+          <div class="match-date">${dateStr} · ${match.time}</div>
+          ${centerContent}
+          ${match.venue ? `<div style="font-size:.65rem;color:var(--text-muted);margin-top:2px">${match.venue}</div>` : ''}
+        </div>
+        <div class="team-block"><span class="team-flag">${match.awayFlag||'🏳️'}</span><span class="team-name">${match.away}</span></div>
+      </div>
+      <div class="prediction-form">${formContent}</div>
+    </div>
+  `;
+}
+
+function submitPrediction(matchId) {
+  const matches = loadMatches();
+  const match = matches.find(m => m.id === matchId);
+  if (!match || isLocked(match)) { toast('Predictions are locked for this match', 'error'); return; }
+  const hInput = document.getElementById('h-' + matchId);
+  const aInput = document.getElementById('a-' + matchId);
+  if (!hInput || !aInput) return;
+  const h = parseInt(hInput.value);
+  const a = parseInt(aInput.value);
+  if (isNaN(h) || isNaN(a) || h < 0 || a < 0) { toast('Please enter valid scores (0 or more)', 'error'); return; }
+  const predictions = loadPredictions();
+  if (!predictions[currentUser]) predictions[currentUser] = {};
+  predictions[currentUser][matchId] = { home: h, away: a, submittedAt: Date.now() };
+  savePredictions(predictions);
+  toast(`Prediction saved: ${match.home} ${h} – ${a} ${match.away}`, 'success');
+  renderMatchList();
+  updateHeaderPoints();
+}
+
+function clearCountdowns() { Object.values(countdownTimers).forEach(clearInterval); countdownTimers = {}; }
+
+function startCountdowns(matches) {
+  matches.forEach(match => {
+    const el = document.getElementById('cd-' + match.id);
+    if (!el) return;
+    const update = () => {
+      const now = new Date();
+      const dt = new Date(match.date + 'T' + match.time + ':00');
+      const diff = dt - now;
+      if (diff <= 0) { el.textContent = 'Kick-off!'; clearInterval(countdownTimers[match.id]); return; }
+      const d = Math.floor(diff/86400000);
+      const h = Math.floor((diff%86400000)/3600000);
+      const m = Math.floor((diff%3600000)/60000);
+      const s = Math.floor((diff%60000)/1000);
+      el.textContent = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m ${s}s`;
+    };
+    update();
+    countdownTimers[match.id] = setInterval(update, 1000);
+  });
+}
+
+function renderLeaderboard() {
+  const users = recalcAllPoints();
+  const matches = loadMatches();
+  const predictions = loadPredictions();
+  const totalMatches = matches.filter(m => m.homeScore !== null && m.homeScore !== undefined).length;
+  const totalPredictions = Object.values(predictions).reduce((s,u) => s + Object.keys(u).length, 0);
+  const totalUsers = Object.keys(users).length;
+  document.getElementById('lbStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value">${totalUsers}</div><div class="stat-label">Players</div></div>
+    <div class="stat-card"><div class="stat-value">${matches.length}</div><div class="stat-label">Matches</div></div>
+    <div class="stat-card"><div class="stat-value">${totalMatches}</div><div class="stat-label">Results In</div></div>
+    <div class="stat-card"><div class="stat-value">${totalPredictions}</div><div class="stat-label">Total Picks</div></div>
+  `;
+  const sorted = Object.entries(users).sort((a,b) => b[1].points - a[1].points);
+  if (sorted.length === 0) {
+    document.getElementById('leaderboardBody').innerHTML = '';
+    document.getElementById('leaderboardEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('leaderboardEmpty').style.display = 'none';
+  const medals = ['🥇','🥈','🥉'];
+  const rows = sorted.map(([name, data], i) => {
+    const rank = i + 1;
+    const rankClass = rank <= 3 ? `rank-${rank}` : '';
+    const medal = rank <= 3 ? medals[i] : '';
+    const isMe = name === currentUser;
+    return `<tr class="leaderboard-row">
+      <td class="lb-rank ${rankClass}">${medal || rank}</td>
+      <td><span class="lb-name ${isMe ? 'is-me' : ''}">${escHtml(name)}</span>${isMe ? '<span class="lb-me-tag">You</span>' : ''}</td>
+      <td class="lb-pts">${data.points}</td>
+      <td class="lb-stat">${data.exactScores || 0}</td>
+      <td class="lb-stat">${data.correctResults || 0}</td>
+      <td class="lb-stat">${data.played || 0}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('leaderboardBody').innerHTML = rows;
+  updateHeaderPoints();
+}
+
+function renderMyPredictions() {
+  const matches = loadMatches();
+  const predictions = loadPredictions();
+  const myPreds = predictions[currentUser] || {};
+  const users = loadUsers();
+  const me = users[currentUser] || {};
+  document.getElementById('myStats').innerHTML = `
+    <div class="stat-card"><div class="stat-value" style="color:var(--gold)">${me.points || 0}</div><div class="stat-label">Total Points</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--correct)">${me.exactScores || 0}</div><div class="stat-label">Exact Scores</div></div>
+    <div class="stat-card"><div class="stat-value" style="color:var(--partial)">${me.correctResults || 0}</div><div class="stat-label">Correct Results</div></div>
+    <div class="stat-card"><div class="stat-value">${Object.keys(myPreds).length}</div><div class="stat-label">Picks Made</div></div>
+  `;
+  const predEntries = Object.entries(myPreds);
+  if (predEntries.length === 0) {
+    document.getElementById('myPredList').innerHTML = '';
+    document.getElementById('myPredEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('myPredEmpty').style.display = 'none';
+  const sorted = predEntries.sort((a, b) => {
+    const ma = matches.find(m => m.id === a[0]);
+    const mb = matches.find(m => m.id === b[0]);
+    if (!ma || !mb) return 0;
+    return (ma.date + ma.time).localeCompare(mb.date + mb.time);
+  });
+  const html = sorted.map(([mid, pred]) => {
+    const match = matches.find(m => m.id === mid);
+    if (!match) return '';
+    const hasResult = match.homeScore !== null && match.homeScore !== undefined;
+    let badge = '';
+    let ptsText = '';
+    if (hasResult) {
+      const r = scorePrediction(match, pred.home, pred.away);
+      const cls = r.type === 'correct' ? 'badge-correct' : r.type === 'partial' ? 'badge-partial' : 'badge-wrong';
+      badge = `<span class="${cls} prediction-result-badge">${r.label}</span>`;
+      if (r.pts > 0) ptsText = `<span class="pts-earned">+${r.pts} pts</span>`;
+    } else {
+      badge = `<span class="badge-pending prediction-result-badge">Awaiting Result</span>`;
+    }
+    const actual = hasResult ? `<div class="my-pred-actual">Result: ${match.homeScore} – ${match.awayScore}</div>` : '';
+    const dateStr = new Date(match.date).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    return `<div class="my-pred-card">
+      <div class="my-pred-teams">${match.homeFlag||''} ${escHtml(match.home)} <span style="color:var(--text-muted)">vs</span> ${match.awayFlag||''} ${escHtml(match.away)}<div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">${dateStr} · Group ${match.group}</div>${actual}</div>
+      <div class="my-pred-score">${pred.home} – ${pred.away}</div>
+      ${badge}${ptsText}
+    </div>`;
+  }).join('');
+  document.getElementById('myPredList').innerHTML = html;
+}
+
+let adminUnlocked = false;
+
+function checkAdminPin() {
+  const val = document.getElementById('adminPinInput').value;
+  if (val === ADMIN_PIN) {
+    adminUnlocked = true;
+    document.getElementById('adminGate').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    renderAdminPanel();
+  }
+}
+
+function renderAdminPanel() {
+  if (!adminUnlocked) return;
+  const matches = loadMatches();
+  const rows = matches.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time)).map(m => {
+    const hasResult = m.homeScore !== null && m.homeScore !== undefined;
+    const hVal = hasResult ? m.homeScore : '';
+    const aVal = hasResult ? m.awayScore : '';
+    return `<div class="admin-match-row">
+      <div class="admin-match-label">${m.homeFlag||''} ${escHtml(m.home)} vs ${m.awayFlag||''} ${escHtml(m.away)}<div style="font-size:.72rem;color:var(--text-muted);margin-top:2px">${m.date} · Group ${m.group}</div></div>
+      <input class="admin-score-input" type="number" min="0" max="20" id="ar-h-${m.id}" value="${hVal}" placeholder="H">
+      <span class="score-dash">–</span>
+      <input class="admin-score-input" type="number" min="0" max="20" id="ar-a-${m.id}" value="${aVal}" placeholder="A">
+      <button class="btn-save-result" onclick="saveResult('${m.id}')">Save</button>
+      ${hasResult ? `<button class="btn-clear-result" onclick="clearResult('${m.id}')">Clear</button>` : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('adminMatchList').innerHTML = rows || `<p style="color:var(--text-muted);padding:12px">No matches yet.</p>`;
+  document.getElementById('newDate').value = new Date().toISOString().slice(0,10);
+}
+
+function saveResult(matchId) {
+  const matches = loadMatches();
+  const match = matches.find(m => m.id === matchId);
+  if (!match) return;
+  const h = parseInt(document.getElementById('ar-h-' + matchId).value);
+  const a = parseInt(document.getElementById('ar-a-' + matchId).value);
+  if (isNaN(h) || isNaN(a) || h < 0 || a < 0) { toast('Enter valid scores', 'error'); return; }
+  match.homeScore = h;
+  match.awayScore = a;
+  saveMatches(matches);
+  recalcAllPoints();
+  updateHeaderPoints();
+  toast(`Result saved: ${match.home} ${h} – ${a} ${match.away}`, 'success');
+  renderAdminPanel();
+  renderMatchList();
+}
+
+function clearResult(matchId) {
+  const matches = loadMatches();
+  const match = matches.find(m => m.id === matchId);
+  if (!match) return;
+  match.homeScore = null;
+  match.awayScore = null;
+  saveMatches(matches);
+  recalcAllPoints();
+  updateHeaderPoints();
+  toast('Result cleared', 'success');
+  renderAdminPanel();
+  renderMatchList();
+}
+
+function addMatch() {
+  const home = document.getElementById('newHome').value.trim();
+  const away = document.getElementById('newAway').value.trim();
+  const homeFlag = document.getElementById('newHomeFlag').value.trim();
+  const awayFlag = document.getElementById('newAwayFlag').value.trim();
+  const group = document.getElementById('newGroup').value;
+  const date = document.getElementById('newDate').value;
+  const time = document.getElementById('newTime').value;
+  const venue = document.getElementById('newVenue').value.trim();
+  if (!home || !away || !date) { toast('Home team, away team and date are required', 'error'); return; }
+  const matches = loadMatches();
+  const newId = 'm' + Date.now();
+  matches.push({ id: newId, home, away, homeFlag, awayFlag, group, date, time, venue, homeScore: null, awayScore: null });
+  saveMatches(matches);
+  toast(`Match added: ${home} vs ${away}`, 'success');
+  document.getElementById('newHome').value = '';
+  document.getElementById('newAway').value = '';
+  document.getElementById('newHomeFlag').value = '';
+  document.getElementById('newAwayFlag').value = '';
+  document.getElementById('newVenue').value = '';
+  renderAdminPanel();
+  renderMatchList();
+}
+
+function clearAllData() {
+  if (!confirm('This will delete all predictions and results. Are you sure?')) return;
+  localStorage.removeItem(STORAGE_MATCHES);
+  localStorage.removeItem(STORAGE_PREDICTIONS);
+  localStorage.removeItem(STORAGE_USERS);
+  toast('All data cleared', 'success');
+  renderAll();
+  renderAdminPanel();
+}
+
+function exportData() {
+  const data = { matches: loadMatches(), predictions: loadPredictions(), users: loadUsers(), exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'wc2026-data-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Data exported', 'success');
+}
+
+function importDataPrompt() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.matches) saveMatches(data.matches);
+        if (data.predictions) savePredictions(data.predictions);
+        if (data.users) saveUsers(data.users);
+        toast('Data imported successfully', 'success');
+        renderAll();
+        renderAdminPanel();
+      } catch { toast('Invalid JSON file', 'error'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadMatches();
+  initLogin();
+});
+</script>
+</body>
+</html>
