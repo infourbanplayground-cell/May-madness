@@ -27,7 +27,7 @@ const T = {
     resultPending:"⏳ قيد الانتظار",resultWon:"✅ فزت",resultLost:"❌ خسرت",rules:"📋 القواعد",
     rule1:"مبلغ الرهان: $100 لكل مباراة",rule2:"يغلق الرهان 5 دقائق قبل المباراة",rule3:"رهان واحد فقط لكل مباراة",
     rule4:"معاملات الرهان حقيقية",rule5:"الأرباح تُحتسب تلقائياً",recentBets:"🎯 آخر رهاناتي",noBetsYet:"لا توجد رهانات بعد",
-    days:"ي",hours:"س",mins:"د",secs:"ث",stadium:"الملعب",myStats:"إحصائياتي",totalMatches:"مباريات",groupStage:"دور المجموعات",
+    days:"d",hours:"h",mins:"m",secs:"s",stadium:"الملعب",myStats:"إحصائياتي",totalMatches:"مباريات",groupStage:"دور المجموعات",
   },
   en: {
     dir:"ltr",title:"WC 2026 BET",subtitle:"Official Prediction Platform",matches:"Matches",myBets:"My Bets",leaderboard:"Leaderboard",
@@ -121,7 +121,7 @@ const MATCHES = [
 ];
 
 const BANK=7200;
-function getDeadline(d,t){const[h,m]=t.split(":").map(Number);const dt=new Date(d);dt.setHours(h,m,0,0);return dt;}
+function getDeadline(d,t){const[h,m]=t.split(":").map(Number);const dt=new Date(d);dt.setHours(h,m-5,0,0);return dt;}
 function getCountdown(d,t){const diff=getDeadline(d,t)-Date.now();if(diff<=0)return null;return{d:Math.floor(diff/86400000),h:Math.floor((diff%86400000)/3600000),m:Math.floor((diff%3600000)/60000),s:Math.floor((diff%60000)/1000)};}
 function loadData(){try{return JSON.parse(localStorage.getItem("wc2026v2")||"null")||{bets:[],users:{}};}catch{return{bets:[],users:{}};}}
 function saveData(d){try{localStorage.setItem("wc2026v2",JSON.stringify(d));}catch{}}
