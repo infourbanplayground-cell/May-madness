@@ -1413,10 +1413,9 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
       {leaderboard.map((p,i)=>{
         const isMe=currentPlayer&&p.id===currentPlayer.id;
         const style=i<3?podiumColors[i]:null;
-        const profit=parseFloat(p.profit||0);
-        const display=Math.max(profit,0);
-        const profitColor=display>0?'var(--green)':'var(--muted)';
-        const profitStr=display>0?'+$'+display.toFixed(0):'$0';
+        const winnings=parseFloat(p.winnings||0);
+        const profitColor=winnings>0?'var(--green)':'var(--muted)';
+        const profitStr=winnings>0?'+$'+winnings.toFixed(0):'$0';
         return(
           <div key={p.id} className="match-card mb-2 px-4 py-3.5 relative overflow-hidden"
             style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>

@@ -416,10 +416,11 @@ app.get('/wc/leaderboard', async (req, res) => {
         ROUND(balance - $1, 2) as profit,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0) as wins,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true) as played,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as total
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as total,
+        COALESCE((SELECT SUM(payout - stake) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0),0) as winnings
       FROM wc_players pl
-      ORDER BY (balance - $2) DESC, name ASC
-    `, [startBal, startBal]);
+      ORDER BY winnings DESC, balance DESC, name ASC
+    `, [startBal]);
     res.json(rows);
   } catch (e) {
     res.status(500).json({ error: e.message });
