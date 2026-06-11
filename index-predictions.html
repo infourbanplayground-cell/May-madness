@@ -657,7 +657,7 @@ const TX = {
     potentialWin:'ربح محتمل', costs:'التكلفة',
     confirmTitle:'تأكيد التوقع', confirmBtn:'تأكيد الرهان', cancelBtn:'إلغاء',
     pick1:'فوز', pickX:'تعادل', pick2:'فوز',
-    balanceAfter:'رصيدك لو فزت', stake:'الرهان',
+    balanceAfter:'ربحك لو فزت', stake:'الرهان',
     enterGroup:'ادخل الجروب', enterPhone:'أدخل رقم هاتفك للمتابعة',
     phonePlaceholder:'مثال: 96891234567', enterBtn:'دخول',
     welcome:'مرحبا بك', firstTime:'أول مرة؟ أدخل اسمك عشان نضيفك',
@@ -696,7 +696,7 @@ const TX = {
     potentialWin:'Potential win', costs:'Cost',
     confirmTitle:'Confirm Bet', confirmBtn:'Place Bet', cancelBtn:'Cancel',
     pick1:'Win', pickX:'Draw', pick2:'Win',
-    balanceAfter:'Balance if win', stake:'Stake',
+    balanceAfter:'P&L if win', stake:'Stake',
     enterGroup:'Join the Group', enterPhone:'Enter your phone number to continue',
     phonePlaceholder:'e.g. 96891234567', enterBtn:'Continue',
     welcome:'Welcome back', firstTime:"First time? Enter your name to join",
@@ -913,14 +913,15 @@ function Countdown({kickoff,settled,lang}){
 }
 
 // ── Confirm Sheet ─────────────────────────────────────────────────────────────
-function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,lang}){
+function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,startBal,lang}){
   const T=TX[lang];
   if(!match||!pick) return null;
   const h=parseFloat(match.home_odds),d=parseFloat(match.draw_odds),a=parseFloat(match.away_odds);
   const allOdds={'1':h,'X':d,'2':a,'1X':(h*d)/(h+d),'X2':(d*a)/(d+a)};
   const odds=allOdds[pick]||h;
-  const potWin=(stake*odds).toFixed(2);
-  const balAfter=(parseFloat(balance)-stake+stake*odds).toFixed(2);
+  const netWin=(stake*(odds-1)).toFixed(2);
+  const currentProfit=parseFloat(balance)-(startBal||7200);
+  const plIfWin=(currentProfit+stake*(odds-1)).toFixed(2);
   // Pick label & team
   let pickLabel, team, pickColor;
   if(pick==='1'){team=match.home_team;pickLabel=match.home_team;pickColor='var(--blue)';}
@@ -966,9 +967,9 @@ function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,lang}){
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-2 mb-5">
             {[
-              {label:T.stake,val:`$${stake.toFixed(2)}`,c:'var(--text2)'},
-              {label:T.potentialWin,val:`$${potWin}`,c:'var(--green)'},
-              {label:T.balanceAfter,val:`$${balAfter}`,c:'var(--gold)'},
+              {label:T.stake,val:`$${stake.toFixed(0)}`,c:'var(--text2)'},
+              {label:T.potentialWin,val:`+$${netWin}`,c:'var(--green)'},
+              {label:T.balanceAfter,val:(parseFloat(plIfWin)>=0?'+':'')+`$${parseFloat(plIfWin).toFixed(0)}`,c:parseFloat(plIfWin)>=0?'var(--green)':'var(--red)'},
             ].map(s=>(
               <div key={s.label} className="rounded-2xl p-3 text-center" style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--border2)'}}>
                 <div className="mono" style={{fontSize:15,fontWeight:700,color:s.c}}>{s.val}</div>
@@ -2005,7 +2006,9 @@ function App(){
   }
 
   const bal=parseFloat(player.balance);
-  const balColor=bal>=100?'var(--green)':bal>=60?'var(--gold)':'var(--red)';
+  const startBal=parseFloat(settings?.starting_balance||7200);
+  const playerProfit=bal-startBal;
+  const balColor=playerProfit>0?'var(--green)':playerProfit<0?'var(--red)':'var(--muted)';
 
   const navTabs=[
     {id:'fixtures',Icon:IconBall,label:T.fixtures},
@@ -2075,7 +2078,7 @@ function App(){
       {toast&&<Toast key={toast.id} msg={toast.msg} type={toast.type} onDone={()=>setToastMsg(null)}/>}
       {confirmPick&&(
         <ConfirmSheet match={confirmPick.match} pick={confirmPick.pick}
-          stake={parseFloat(settings.stake_per_match||100)} balance={player.balance}
+          stake={parseFloat(settings.stake_per_match||100)} balance={player.balance} startBal={parseFloat(settings?.starting_balance||7200)}
           onConfirm={handleConfirm} onCancel={()=>setConfirmPick(null)} lang={lang}/>
       )}
       {/* PIN entry modal */}
@@ -2144,7 +2147,7 @@ function App(){
               {/* Balance */}
               <div className="text-right">
                 <div style={{fontSize:10,color:'var(--muted)',fontWeight:600,fontFamily:'Space Grotesk'}}>{player.name}</div>
-                <div className="mono bal-count" style={{fontSize:19,fontWeight:700,color:balColor,letterSpacing:-1,lineHeight:1}}>${bal.toFixed(2)}</div>
+                <div className="mono bal-count" style={{fontSize:19,fontWeight:700,color:balColor,letterSpacing:-1,lineHeight:1}}>{playerProfit>=0?'+':''}{playerProfit.toFixed(0)}</div>
               </div>
               {/* Sign out */}
               <button onClick={()=>{localStorage.removeItem('wc_token');localStorage.removeItem('wc_player');setPlayer(null);setIsAdmin(false);setShowAdmin(false);}}
