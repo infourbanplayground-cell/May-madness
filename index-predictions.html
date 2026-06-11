@@ -657,7 +657,7 @@ const TX = {
     potentialWin:'ربح محتمل', costs:'التكلفة',
     confirmTitle:'تأكيد التوقع', confirmBtn:'تأكيد الرهان', cancelBtn:'إلغاء',
     pick1:'فوز', pickX:'تعادل', pick2:'فوز',
-    balanceAfter:'ربحك لو فزت', stake:'الرهان',
+    balanceAfter:'رصيدك لو فزت', stake:'الرهان',
     enterGroup:'ادخل الجروب', enterPhone:'أدخل رقم هاتفك للمتابعة',
     phonePlaceholder:'مثال: 96891234567', enterBtn:'دخول',
     welcome:'مرحبا بك', firstTime:'أول مرة؟ أدخل اسمك عشان نضيفك',
@@ -696,7 +696,7 @@ const TX = {
     potentialWin:'Potential win', costs:'Cost',
     confirmTitle:'Confirm Bet', confirmBtn:'Place Bet', cancelBtn:'Cancel',
     pick1:'Win', pickX:'Draw', pick2:'Win',
-    balanceAfter:'P&L if win', stake:'Stake',
+    balanceAfter:'Balance if win', stake:'Stake',
     enterGroup:'Join the Group', enterPhone:'Enter your phone number to continue',
     phonePlaceholder:'e.g. 96891234567', enterBtn:'Continue',
     welcome:'Welcome back', firstTime:"First time? Enter your name to join",
@@ -920,8 +920,7 @@ function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,startBal,lang
   const allOdds={'1':h,'X':d,'2':a,'1X':(h*d)/(h+d),'X2':(d*a)/(d+a)};
   const odds=allOdds[pick]||h;
   const netWin=(stake*(odds-1)).toFixed(2);
-  const currentProfit=parseFloat(balance)-(startBal||7200);
-  const plIfWin=(currentProfit+stake*(odds-1)).toFixed(2);
+  const balAfter=(parseFloat(balance)-stake+stake*odds).toFixed(0);
   // Pick label & team
   let pickLabel, team, pickColor;
   if(pick==='1'){team=match.home_team;pickLabel=match.home_team;pickColor='var(--blue)';}
@@ -969,7 +968,7 @@ function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,startBal,lang
             {[
               {label:T.stake,val:`$${stake.toFixed(0)}`,c:'var(--text2)'},
               {label:T.potentialWin,val:`+$${netWin}`,c:'var(--green)'},
-              {label:T.balanceAfter,val:(parseFloat(plIfWin)>=0?'+':'')+`$${parseFloat(plIfWin).toFixed(0)}`,c:parseFloat(plIfWin)>=0?'var(--green)':'var(--red)'},
+              {label:T.balanceAfter,val:`$${balAfter}`,c:'var(--gold)'},
             ].map(s=>(
               <div key={s.label} className="rounded-2xl p-3 text-center" style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--border2)'}}>
                 <div className="mono" style={{fontSize:15,fontWeight:700,color:s.c}}>{s.val}</div>
@@ -1411,8 +1410,9 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
         const isMe=currentPlayer&&p.id===currentPlayer.id;
         const style=i<3?podiumColors[i]:null;
         const profit=parseFloat(p.profit||0);
-        const profitColor=profit>0?'var(--green)':profit<0?'var(--red)':'var(--muted)';
-        const profitStr=(profit>0?'+':'')+'\$'+profit.toFixed(0);
+        const display=Math.max(profit,0);
+        const profitColor=display>0?'var(--green)':'var(--muted)';
+        const profitStr=display>0?'+$'+display.toFixed(0):'$0';
         return(
           <div key={p.id} className="match-card mb-2 px-4 py-3.5 relative overflow-hidden"
             style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>
@@ -2006,9 +2006,7 @@ function App(){
   }
 
   const bal=parseFloat(player.balance);
-  const startBal=parseFloat(settings?.starting_balance||7200);
-  const playerProfit=bal-startBal;
-  const balColor=playerProfit>0?'var(--green)':playerProfit<0?'var(--red)':'var(--muted)';
+  const balColor='var(--gold)';
 
   const navTabs=[
     {id:'fixtures',Icon:IconBall,label:T.fixtures},
@@ -2147,7 +2145,7 @@ function App(){
               {/* Balance */}
               <div className="text-right">
                 <div style={{fontSize:10,color:'var(--muted)',fontWeight:600,fontFamily:'Space Grotesk'}}>{player.name}</div>
-                <div className="mono bal-count" style={{fontSize:19,fontWeight:700,color:balColor,letterSpacing:-1,lineHeight:1}}>{playerProfit>=0?'+':''}{playerProfit.toFixed(0)}</div>
+                <div className="mono bal-count" style={{fontSize:19,fontWeight:700,color:balColor,letterSpacing:-1,lineHeight:1}}>${bal.toFixed(0)}</div>
               </div>
               {/* Sign out */}
               <button onClick={()=>{localStorage.removeItem('wc_token');localStorage.removeItem('wc_player');setPlayer(null);setIsAdmin(false);setShowAdmin(false);}}
