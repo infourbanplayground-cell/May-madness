@@ -1409,8 +1409,9 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
       {leaderboard.map((p,i)=>{
         const isMe=currentPlayer&&p.id===currentPlayer.id;
         const style=i<3?podiumColors[i]:null;
-        const bal=parseFloat(p.balance);
-        const balColor=bal>=100?'var(--green)':bal>=70?'var(--gold)':'var(--red)';
+        const profit=parseFloat(p.profit||0);
+        const profitColor=profit>0?'var(--green)':profit<0?'var(--red)':'var(--muted)';
+        const profitStr=(profit>0?'+':'')+'\$'+profit.toFixed(0);
         return(
           <div key={p.id} className="match-card mb-2 px-4 py-3.5 relative overflow-hidden"
             style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>
@@ -1434,7 +1435,7 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
                 </div>
                 <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.total} {T.predTotal}</div>
               </div>
-              <div className="mono shrink-0" style={{fontSize:22,fontWeight:700,color:balColor,letterSpacing:-1}}>${parseFloat(p.balance).toFixed(0)}</div>
+              <div className="mono shrink-0" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
             </div>
           </div>
         );
