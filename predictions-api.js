@@ -415,6 +415,7 @@ app.get('/wc/leaderboard', async (req, res) => {
         ROUND(balance,2) as balance,
         ROUND(balance - $1, 2) as profit,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0) as wins,
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true) as played,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as total
       FROM wc_players pl
       ORDER BY (balance - $2) DESC, name ASC

@@ -684,7 +684,7 @@ const TX = {
     toastSettings:'تم حفظ الإعدادات', toastPlayer:'تم تحديث اللاعب',
     toastDeleted:'تم الحذف', toastUndo:'تم إلغاء النتيجة', toastUpdated:'تم التحديث',
     confirmDelete:'حذف', confirmUndo:'إلغاء النتيجة وإعادة الرصيد؟',
-    predTotal:'توقع', predWin:'فوز',
+    predTotal:'توقع', predWin:'فوز', predPlayed:'لُعبت',
     stage_group:'مجموعات', stage_r32:'دور 32', stage_r16:'دور 16',
     stage_qf:'ربع النهائي', stage_sf:'نصف النهائي', stage_3rd:'المركز الثالث', stage_final:'النهائي',
     grpPrefix:'مج.',
@@ -723,7 +723,7 @@ const TX = {
     toastSettings:'Settings saved', toastPlayer:'Player updated',
     toastDeleted:'Deleted', toastUndo:'Result undone', toastUpdated:'Updated',
     confirmDelete:'Delete', confirmUndo:'Undo result and refund balances?',
-    predTotal:'picks', predWin:'wins',
+    predTotal:'picks', predWin:'wins', predPlayed:'played',
     stage_group:'Groups', stage_r32:'Round of 32', stage_r16:'Round of 16',
     stage_qf:'Quarters', stage_sf:'Semis', stage_3rd:'3rd Place', stage_final:'FINAL',
     grpPrefix:'Grp.',
@@ -1438,7 +1438,7 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
                   {p.name}
                   {isMe&&<span style={{fontSize:9,fontWeight:800,color:'var(--gold)',background:'rgba(242,193,78,0.12)',border:'1px solid rgba(242,193,78,0.2)',borderRadius:999,padding:'1px 7px',fontFamily:'Space Grotesk',letterSpacing:.5}}>{T.youLabel}</span>}
                 </div>
-                <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.total} {T.predTotal}</div>
+                <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.played||0} {T.predPlayed} · {p.total||0} {T.predTotal}</div>
               </div>
               <div className="text-right shrink-0">
                 <div className="mono" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
@@ -1984,6 +1984,7 @@ function App(){
       setPredictions(prev=>[...prev.filter(p=>p.match_id!==match.id),{match_id:match.id,prediction:pick,settled:false,stake:parseFloat(settings.stake_per_match||100)}]);
       const team=pick==='1'?match.home_team:pick==='2'?match.away_team:pick==='X'?T.pickX:pick==='1X'?`${match.home_team}/X`:pick==='X2'?`X/${match.away_team}`:pick;
       showToast(`${team} ✓`,'success');
+      loadLeaderboard();
     }catch(e){showToast(e.message,'error');}
     setLoadingMatch(null);
   }
