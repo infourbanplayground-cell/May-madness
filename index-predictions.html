@@ -88,6 +88,8 @@ html.light .pred-btn.selected-X { background: rgba(201,147,22,0.1); border-color
 html.light .pred-btn.selected-2 { background: rgba(229,90,40,0.1); border-color: rgba(229,90,40,0.4); color: #C84A20; }
 html.light .pred-btn.correct { background: rgba(0,163,95,0.1); border-color: rgba(0,163,95,0.4); color: #008A50; }
 html.light .pred-btn.wrong { background: rgba(224,34,59,0.06); border-color: rgba(224,34,59,0.25); color: #B01828; }
+html.light .pred-btn.selected-1:disabled,html.light .pred-btn.selected-X:disabled,html.light .pred-btn.selected-2:disabled,html.light .pred-btn.selected-1X:disabled,html.light .pred-btn.selected-X2:disabled { opacity: .9; cursor: default; }
+html.light .pred-btn.correct:disabled,html.light .pred-btn.wrong:disabled { opacity: .9; cursor: default; }
 html.light .float-nav-pill {
   background: rgba(255,253,247,0.9);
   border: 1px solid rgba(40,30,10,0.1);
@@ -252,6 +254,8 @@ input { font-family: inherit; }
 .pred-btn.correct { background: rgba(0,201,123,0.12); border-color: rgba(0,201,123,0.45); color: #4DFFB2; box-shadow: 0 0 20px rgba(0,201,123,0.1), inset 0 1px 0 rgba(0,201,123,0.15); }
 .pred-btn.wrong { background: rgba(255,54,81,0.06); border-color: rgba(255,54,81,0.2); color: #FF7A8E; }
 .pred-btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+.pred-btn.selected-1:disabled,.pred-btn.selected-X:disabled,.pred-btn.selected-2:disabled,.pred-btn.selected-1X:disabled,.pred-btn.selected-X2:disabled { opacity: .9; cursor: default; }
+.pred-btn.correct:disabled,.pred-btn.wrong:disabled { opacity: .9; cursor: default; }
 .pred-btn.dc { font-size: 11px; }
 
 /* ── Odds ── */
