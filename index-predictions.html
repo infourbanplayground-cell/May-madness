@@ -1436,7 +1436,10 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
                 </div>
                 <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.total} {T.predTotal}</div>
               </div>
-              <div className="mono shrink-0" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
+              <div className="text-right shrink-0">
+                <div className="mono" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
+                <div className="mono" style={{fontSize:11,color:'var(--muted)',marginTop:2}}>${parseFloat(p.balance).toFixed(0)} {T.balance}</div>
+              </div>
             </div>
           </div>
         );
