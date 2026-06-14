@@ -21,4 +21,15 @@ export type Booking = {
   recurringUntil?: string  // YYYY-MM-DD
   status: BookingStatus
   createdAt: string
+  memberId?: string
+  priceTotal?: number
+  durationMinutes?: number
+  bookingSource?: string
+}
+
+export type Member = {
+  id: string
+  name: string
+  phone: string
+  createdAt: string
 }

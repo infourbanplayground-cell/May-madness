@@ -1,9 +1,33 @@
 import 'server-only'
 import { Pool } from 'pg'
-import { Booking } from './types'
+import { Booking, Member } from './types'
 export { COURTS, TIME_SLOTS } from './constants'
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+
+// ─── DB Init ──────────────────────────────────────────────────────────────────
+
+export async function initDB(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS members (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name TEXT NOT NULL,
+      phone TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT now()
+    );
+    CREATE TABLE IF NOT EXISTS court_prices (
+      court_id TEXT PRIMARY KEY,
+      price_per_hour NUMERIC(10,2) DEFAULT 0.00
+    );
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id UUID REFERENCES members(id);
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS price_total NUMERIC(10,2);
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS duration_minutes INT;
+    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS booking_source TEXT DEFAULT 'admin';
+  `)
+}
+
+// ─── Row mappers ──────────────────────────────────────────────────────────────
 
 function rowToBooking(row: Record<string, unknown>): Booking {
   const dateVal = row.date instanceof Date
@@ -28,8 +52,23 @@ function rowToBooking(row: Record<string, unknown>): Booking {
     recurringUntil: untilVal,
     status: row.status as 'confirmed' | 'cancelled',
     createdAt: String(row.created_at),
+    memberId: (row.member_id as string) ?? undefined,
+    priceTotal: row.price_total != null ? Number(row.price_total) : undefined,
+    durationMinutes: row.duration_minutes != null ? Number(row.duration_minutes) : undefined,
+    bookingSource: (row.booking_source as string) ?? 'admin',
   }
 }
+
+function rowToMember(row: Record<string, unknown>): Member {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    phone: row.phone as string,
+    createdAt: String(row.created_at),
+  }
+}
+
+// ─── Bookings ─────────────────────────────────────────────────────────────────
 
 export async function getBookings(): Promise<Booking[]> {
   const { rows } = await pool.query(
@@ -44,6 +83,20 @@ export async function getBookingsForDate(date: string): Promise<Booking[]> {
     [date]
   )
   return rows.map(rowToBooking)
+}
+
+export async function getBookingsForMember(memberId: string): Promise<Booking[]> {
+  const { rows } = await pool.query(
+    'SELECT * FROM bookings WHERE member_id=$1 ORDER BY date DESC, start_time DESC',
+    [memberId]
+  )
+  return rows.map(rowToBooking)
+}
+
+export async function getBookingById(id: string): Promise<Booking | null> {
+  const { rows } = await pool.query('SELECT * FROM bookings WHERE id=$1', [id])
+  if (!rows.length) return null
+  return rowToBooking(rows[0])
 }
 
 export async function addBooking(booking: Booking): Promise<void> {
@@ -66,13 +119,18 @@ export async function addBooking(booking: Booking): Promise<void> {
     await pool.query(
       `INSERT INTO bookings
         (id,court_id,date,start_time,end_time,player_name,player_phone,
-         notes,is_recurring,recurring_days,recurring_until,status,created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+         notes,is_recurring,recurring_days,recurring_until,status,created_at,
+         member_id,price_total,duration_minutes,booking_source)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
       [
         b.id, b.courtId, b.date, b.startTime, b.endTime,
         b.playerName, b.playerPhone, b.notes,
         b.isRecurring, b.recurringDays ?? null,
         b.recurringUntil ?? null, b.status, b.createdAt,
+        b.memberId ?? null,
+        b.priceTotal ?? null,
+        b.durationMinutes ?? null,
+        b.bookingSource ?? 'admin',
       ]
     )
   }
@@ -95,4 +153,50 @@ export async function updateBooking(id: string, patch: Partial<Booking>): Promis
   if (!fields.length) return
   vals.push(id)
   await pool.query(`UPDATE bookings SET ${fields.join(',')} WHERE id=$${i}`, vals)
+}
+
+// ─── Members ──────────────────────────────────────────────────────────────────
+
+export async function getMemberByPhone(phone: string): Promise<(Member & { passwordHash: string }) | null> {
+  const { rows } = await pool.query('SELECT * FROM members WHERE phone=$1', [phone])
+  if (!rows.length) return null
+  const row = rows[0] as Record<string, unknown>
+  return {
+    ...rowToMember(row),
+    passwordHash: row.password_hash as string,
+  }
+}
+
+export async function getMemberById(id: string): Promise<Member | null> {
+  const { rows } = await pool.query('SELECT * FROM members WHERE id=$1', [id])
+  if (!rows.length) return null
+  return rowToMember(rows[0] as Record<string, unknown>)
+}
+
+export async function createMember(name: string, phone: string, passwordHash: string): Promise<Member> {
+  const { rows } = await pool.query(
+    'INSERT INTO members (name, phone, password_hash) VALUES ($1, $2, $3) RETURNING *',
+    [name, phone, passwordHash]
+  )
+  return rowToMember(rows[0] as Record<string, unknown>)
+}
+
+// ─── Court prices ─────────────────────────────────────────────────────────────
+
+export async function getCourtPrices(): Promise<Record<string, number>> {
+  const { rows } = await pool.query('SELECT court_id, price_per_hour FROM court_prices')
+  const result: Record<string, number> = {}
+  for (const row of rows) {
+    result[row.court_id as string] = Number(row.price_per_hour)
+  }
+  return result
+}
+
+export async function setCourtPrice(courtId: string, pricePerHour: number): Promise<void> {
+  await pool.query(
+    `INSERT INTO court_prices (court_id, price_per_hour)
+     VALUES ($1, $2)
+     ON CONFLICT (court_id) DO UPDATE SET price_per_hour = EXCLUDED.price_per_hour`,
+    [courtId, pricePerHour]
+  )
 }

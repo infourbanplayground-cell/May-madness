@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { format, addDays, subDays, parseISO } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, X, Phone, User, FileText, RefreshCw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, Phone, User, FileText, RefreshCw, DollarSign } from 'lucide-react'
 import { Court, Booking } from '@/lib/types'
 import { TIME_SLOTS } from '@/lib/constants'
 
@@ -30,6 +30,7 @@ function addMinutes(t: string, mins: number) {
 type SlotSelection = { courtId: string; startTime: string } | null
 
 export default function BookingCalendar() {
+  const [activeTab, setActiveTab] = useState<'calendar' | 'pricing'>('calendar')
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [bookings, setBookings] = useState<Booking[]>([])
   const [slotSelection, setSlotSelection] = useState<SlotSelection>(null)
@@ -73,6 +74,37 @@ export default function BookingCalendar() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Tab bar */}
+      <div className="flex border-b border-gray-800 px-6 pt-3 gap-4">
+        <button
+          onClick={() => setActiveTab('calendar')}
+          className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === 'calendar'
+              ? 'border-indigo-500 text-white'
+              : 'border-transparent text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          Calendar
+        </button>
+        <button
+          onClick={() => setActiveTab('pricing')}
+          className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+            activeTab === 'pricing'
+              ? 'border-indigo-500 text-white'
+              : 'border-transparent text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          <DollarSign size={14} />
+          Pricing
+        </button>
+      </div>
+
+      {/* Pricing tab */}
+      {activeTab === 'pricing' && <PricingPanel />}
+
+      {/* Calendar tab */}
+      {activeTab === 'calendar' && <>
+
       {/* Date navigation */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
         <button
@@ -219,6 +251,116 @@ export default function BookingCalendar() {
           onCancel={handleCancel}
         />
       )}
+
+      </> /* end calendar tab */}
+    </div>
+  )
+}
+
+// ─── Pricing Panel ────────────────────────────────────────────────────────────
+
+function PricingPanel() {
+  const [prices, setPrices] = useState<Record<string, string>>({})
+  const [saving, setSaving] = useState<string | null>(null)
+  const [saved, setSaved] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/courts/prices')
+      .then((r) => r.json())
+      .then((data: Record<string, number>) => {
+        const strPrices: Record<string, string> = {}
+        for (const court of COURTS) {
+          strPrices[court.id] = data[court.id] !== undefined ? String(data[court.id]) : '0'
+        }
+        setPrices(strPrices)
+      })
+      .catch(() => {
+        const strPrices: Record<string, string> = {}
+        for (const court of COURTS) strPrices[court.id] = '0'
+        setPrices(strPrices)
+      })
+  }, [])
+
+  async function handleSave(courtId: string) {
+    const price = parseFloat(prices[courtId] ?? '0')
+    if (isNaN(price) || price < 0) {
+      setError('Price must be a non-negative number')
+      return
+    }
+    setSaving(courtId)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/prices', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courtId, pricePerHour: price }),
+      })
+      if (!res.ok) {
+        const d = await res.json()
+        setError(d.error || 'Failed to save')
+      } else {
+        setSaved(courtId)
+        setTimeout(() => setSaved(null), 2000)
+      }
+    } catch {
+      setError('Network error')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  return (
+    <div className="flex-1 overflow-auto p-6">
+      <div className="max-w-md">
+        <h2 className="text-lg font-bold text-white mb-1">Court Pricing</h2>
+        <p className="text-sm text-gray-400 mb-6">Set per-hour rates shown to members on the booking page.</p>
+
+        {error && (
+          <div className="mb-4 p-3 rounded-xl bg-red-900/30 border border-red-800 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {COURTS.map((court) => (
+            <div key={court.id} className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div
+                  className="w-3 h-3 rounded-full shrink-0"
+                  style={{ backgroundColor: court.color }}
+                />
+                <div>
+                  <p className="font-medium text-white text-sm">{court.name}</p>
+                  <p className="text-xs text-gray-400">{court.sport}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 flex-1 bg-gray-800 rounded-lg border border-gray-700 px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+                  <span className="text-gray-400 text-sm">OMR</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.25"
+                    value={prices[court.id] ?? ''}
+                    onChange={(e) => setPrices((p) => ({ ...p, [court.id]: e.target.value }))}
+                    placeholder="0.00"
+                    className="flex-1 bg-transparent text-white text-sm focus:outline-none"
+                  />
+                  <span className="text-gray-400 text-xs">/hr</span>
+                </div>
+                <button
+                  onClick={() => handleSave(court.id)}
+                  disabled={saving === court.id}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 bg-indigo-600 hover:bg-indigo-500 text-white"
+                >
+                  {saving === court.id ? 'Saving…' : saved === court.id ? 'Saved!' : 'Save'}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
