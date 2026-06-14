@@ -427,6 +427,25 @@ app.get('/wc/leaderboard', async (req, res) => {
   }
 });
 
+// Public: player's confirmed bets for past-deadline matches (transparency)
+app.get('/wc/player/:id/predictions', async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT p.match_id, p.prediction, p.settled, p.payout, p.stake,
+             m.home_team, m.away_team, m.kickoff, m.result,
+             m.home_score, m.away_score, m.stage
+      FROM wc_predictions p
+      JOIN wc_matches m ON m.id = p.match_id
+      WHERE p.player_id = $1
+        AND (m.settled = true OR m.kickoff <= NOW() + INTERVAL '5 minutes')
+      ORDER BY m.kickoff ASC
+    `, [req.params.id]);
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── ADMIN routes ──────────────────────────────────────────────────────────────
 function adminAuth(req, res, next) {
   const id = verifyToken(req.headers.authorization || '');

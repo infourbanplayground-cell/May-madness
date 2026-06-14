@@ -83,9 +83,11 @@ html.light .match-card:hover { box-shadow: 0 12px 40px rgba(120,90,30,0.12), 0 0
 html.light .match-card::after { background: linear-gradient(90deg, transparent, rgba(40,30,10,0.06), transparent); }
 html.light .pred-btn { background: rgba(40,30,10,0.025); border-color: rgba(40,30,10,0.08); color: var(--text2); }
 html.light .pred-btn:hover:not(:disabled) { background: rgba(201,147,22,0.08); border-color: rgba(201,147,22,0.4); color: var(--gold-bright); box-shadow: 0 6px 16px rgba(120,90,30,0.08); }
-html.light .pred-btn.selected-1 { background: rgba(46,123,224,0.1); border-color: rgba(46,123,224,0.4); color: #2E7BE0; }
-html.light .pred-btn.selected-X { background: rgba(201,147,22,0.1); border-color: rgba(201,147,22,0.4); color: var(--gold-bright); }
-html.light .pred-btn.selected-2 { background: rgba(229,90,40,0.1); border-color: rgba(229,90,40,0.4); color: #C84A20; }
+html.light .pred-btn.selected-1 { background: rgba(46,123,224,0.2); border-color: rgba(46,123,224,0.6); color: #1a5db3; font-weight:700; }
+html.light .pred-btn.selected-X { background: rgba(201,147,22,0.2); border-color: rgba(201,147,22,0.6); color: var(--gold-bright); font-weight:700; }
+html.light .pred-btn.selected-2 { background: rgba(229,90,40,0.2); border-color: rgba(229,90,40,0.6); color: #b84010; font-weight:700; }
+html.light .pred-btn.selected-1X { background: linear-gradient(135deg,rgba(46,123,224,0.17),rgba(201,147,22,0.14)); border-color: rgba(46,123,224,0.5); color: #1a5db3; font-weight:700; }
+html.light .pred-btn.selected-X2 { background: linear-gradient(135deg,rgba(201,147,22,0.14),rgba(229,90,40,0.17)); border-color: rgba(229,90,40,0.5); color: #b84010; font-weight:700; }
 html.light .pred-btn.correct { background: rgba(0,163,95,0.1); border-color: rgba(0,163,95,0.4); color: #008A50; }
 html.light .pred-btn.wrong { background: rgba(224,34,59,0.06); border-color: rgba(224,34,59,0.25); color: #B01828; }
 html.light .pred-btn.selected-1:disabled,html.light .pred-btn.selected-X:disabled,html.light .pred-btn.selected-2:disabled,html.light .pred-btn.selected-1X:disabled,html.light .pred-btn.selected-X2:disabled { opacity: .9; cursor: default; }
@@ -1235,25 +1237,47 @@ function MatchCard({match,prediction,onPickClick,loading,lang,stake}){
 function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang}){
   const T=TX[lang];
   const [filter,setFilter]=useState('all');
+  const [showFinished,setShowFinished]=useState(false);
   const predMap={};(predictions||[]).forEach(p=>predMap[p.match_id]=p);
   const now=Date.now();
   const deadline=(m)=>new Date(m.kickoff).getTime()-5*60*1000;
   let shown=matches;
   if(filter==='upcoming') shown=matches.filter(m=>!m.settled&&deadline(m)>now);
   if(filter==='my') shown=matches.filter(m=>predMap[m.id]);
-  const grouped={};
-  shown.forEach(m=>{
-    const dateKey=new Date(m.kickoff).toLocaleDateString('en-CA');
-    const key=m.stage+'_'+dateKey;
-    if(!grouped[key]) grouped[key]={stage:m.stage,date:dateKey,matches:[]};
-    grouped[key].matches.push(m);
-  });
-  const sortedGroups=Object.values(grouped).sort((a,b)=>a.date.localeCompare(b.date));
+  function groupAndSort(list){
+    const g={};
+    list.forEach(m=>{
+      const dk=new Date(m.kickoff).toLocaleDateString('en-CA');
+      const k=m.stage+'_'+dk;
+      if(!g[k]) g[k]={stage:m.stage,date:dk,matches:[]};
+      g[k].matches.push(m);
+    });
+    return Object.values(g).sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  const upcoming=shown.filter(m=>!m.settled);
+  const finished=filter==='upcoming'?[]:shown.filter(m=>m.settled);
+  const upcomingGroups=groupAndSort(upcoming);
+  const finishedGroups=groupAndSort(finished);
   const stake=parseFloat(settings?.stake_per_match||100);
+  function renderGroups(groups){
+    return groups.map(group=>(
+      <div key={group.stage+'_'+group.date} className="px-4 mb-1">
+        <div className="section-header mt-3">
+          <div className="section-header-bar"/>
+          <div><div className="section-date-label">{new Date(group.date+'T12:00:00Z').toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'long',month:'long',day:'numeric'})}</div></div>
+          <span className="section-stage-badge">{STAGE_EN[group.stage]||group.stage}</span>
+        </div>
+        {group.matches.map(m=>(
+          <MatchCard key={m.id} match={m} prediction={predMap[m.id]}
+            onPickClick={onPickClick} loading={loadingMatch===m.id}
+            lang={lang} stake={stake}/>
+        ))}
+      </div>
+    ));
+  }
   return(
     <div className="pb-32">
       <div className="pt-3"><NextMatchBanner matches={matches} lang={lang}/></div>
-
       {/* ── Filter + odds info row ── */}
       <div className="flex items-center gap-2 px-4 pb-3">
         <div className="flex gap-1.5" style={{flex:1}}>
@@ -1261,7 +1285,6 @@ function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang
             <button key={v} className={`pill-tab ${filter===v?'active':''}`} onClick={()=>setFilter(v)}>{l}</button>
           ))}
         </div>
-        {/* Odds source chip */}
         <div style={{display:'flex',alignItems:'center',gap:4,padding:'4px 9px',background:'rgba(0,201,123,0.06)',border:'1px solid rgba(0,201,123,0.12)',borderRadius:999,flexShrink:0}}>
           <div style={{width:5,height:5,borderRadius:'50%',background:'var(--green)',boxShadow:'0 0 4px rgba(0,201,123,0.6)'}}/>
           <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:800,color:'var(--green)',letterSpacing:.5,whiteSpace:'nowrap'}}>
@@ -1270,30 +1293,25 @@ function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang
           </span>
         </div>
       </div>
-
-      {sortedGroups.length===0&&(
+      {upcomingGroups.length===0&&finished.length===0&&(
         <div className="flex flex-col items-center justify-center py-20" style={{color:'var(--muted)'}}>
           <IconBall size={40} color="var(--muted)"/>
           <div className="mt-3 font-bold">{T.noMatches}</div>
         </div>
       )}
-      {sortedGroups.map(group=>(
-        <div key={group.stage+'_'+group.date} className="px-4 mb-1">
-          {/* ── Section header ── */}
-          <div className="section-header mt-3">
-            <div className="section-header-bar"/>
-            <div>
-              <div className="section-date-label">{new Date(group.date+'T12:00:00Z').toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'long',month:'long',day:'numeric'})}</div>
-            </div>
-            <span className="section-stage-badge">{STAGE_EN[group.stage]||group.stage}</span>
-          </div>
-          {group.matches.map(m=>(
-            <MatchCard key={m.id} match={m} prediction={predMap[m.id]}
-              onPickClick={onPickClick} loading={loadingMatch===m.id}
-              lang={lang} stake={stake}/>
-          ))}
+      {renderGroups(upcomingGroups)}
+      {finished.length>0&&(
+        <div className="px-4 mt-3 mb-2">
+          <button onClick={()=>setShowFinished(v=>!v)}
+            style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',background:'var(--glass)',border:'1px solid var(--border2)',borderRadius:14,backdropFilter:'blur(16px)',cursor:'pointer',color:'var(--muted)'}}>
+            <span style={{fontSize:12,fontWeight:700,fontFamily:'Space Grotesk',letterSpacing:.3}}>
+              {lang==='ar'?`المنتهية (${finished.length})`:`Finished (${finished.length})`}
+            </span>
+            <span style={{fontSize:9,display:'inline-block',transform:showFinished?'rotate(180deg)':'none',transition:'transform .2s'}}>▼</span>
+          </button>
+          {showFinished&&renderGroups(finishedGroups)}
         </div>
-      ))}
+      )}
     </div>
   );
 }
@@ -1402,11 +1420,34 @@ function MyBetsTab({matches,predictions,lang}){
 // ── Leaderboard ───────────────────────────────────────────────────────────────
 function LeaderboardTab({leaderboard,currentPlayer,lang}){
   const T=TX[lang];
+  const [expandedId,setExpandedId]=useState(null);
+  const [predCache,setPredCache]=useState({});
+  const [loadingId,setLoadingId]=useState(null);
   const podiumColors=[
     {rank:'#F2C14E',bg:'rgba(242,193,78,0.06)',border:'rgba(242,193,78,0.2)',num:'var(--gold)'},
     {rank:'#C0C0C0',bg:'rgba(192,192,192,0.05)',border:'rgba(192,192,192,0.15)',num:'#C0C0C0'},
     {rank:'#CD7F32',bg:'rgba(205,127,50,0.05)',border:'rgba(205,127,50,0.15)',num:'#CD7F32'},
   ];
+  async function togglePlayer(id){
+    if(expandedId===id){setExpandedId(null);return;}
+    setExpandedId(id);
+    if(!predCache[id]){
+      setLoadingId(id);
+      try{
+        const data=await apiFetch(`/wc/player/${id}/predictions`);
+        setPredCache(c=>({...c,[id]:data}));
+      }catch(e){setPredCache(c=>({...c,[id]:[]}))}
+      setLoadingId(null);
+    }
+  }
+  function fmtPick(pred,m){
+    if(pred==='1') return m.home_team;
+    if(pred==='2') return m.away_team;
+    if(pred==='X') return lang==='ar'?'تعادل':'Draw';
+    if(pred==='1X') return m.home_team+'/'+(lang==='ar'?'تعادل':'X');
+    if(pred==='X2') return (lang==='ar'?'تعادل':'X')+'/'+m.away_team;
+    return pred;
+  }
   return(
     <div className="pb-32 px-4 pt-3">
       <div className="section-date mb-4">{T.rank}</div>
@@ -1416,34 +1457,62 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
         const winnings=parseFloat(p.winnings||0);
         const profitColor=winnings>0?'var(--green)':'var(--muted)';
         const profitStr=winnings>0?'+$'+winnings.toFixed(0):'$0';
+        const isExp=expandedId===p.id;
+        const preds=predCache[p.id];
         return(
-          <div key={p.id} className="match-card mb-2 px-4 py-3.5 relative overflow-hidden"
+          <div key={p.id} className="match-card mb-2 overflow-hidden"
             style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>
-            {/* Giant rank number behind */}
-            <div className="mono" style={{
-              position:'absolute',right:lang==='ar'?'auto':'12px',left:lang==='ar'?'12px':'auto',
-              top:'50%',transform:'translateY(-50%)',
-              fontSize:64,fontWeight:900,
-              color:style?style.rank:'rgba(255,255,255,0.03)',
-              lineHeight:1,pointerEvents:'none',letterSpacing:-4,
-              userSelect:'none',
-            }}>{i+1}</div>
-            <div className="flex items-center gap-3 relative z-10">
-              <div className="mono shrink-0 text-center" style={{width:28,fontSize:i<3?20:14,fontWeight:900,color:style?.num||'var(--muted)'}}>
-                {i===0?'#1':i===1?'#2':i===2?'#3':`${i+1}`}
-              </div>
-              <div style={{flex:1,minWidth:0}}>
-                <div style={{fontWeight:700,fontSize:14,display:'flex',alignItems:'center',gap:6}}>
-                  {p.name}
-                  {isMe&&<span style={{fontSize:9,fontWeight:800,color:'var(--gold)',background:'rgba(242,193,78,0.12)',border:'1px solid rgba(242,193,78,0.2)',borderRadius:999,padding:'1px 7px',fontFamily:'Space Grotesk',letterSpacing:.5}}>{T.youLabel}</span>}
+            {/* ── Main row ── */}
+            <div className="px-4 py-3.5 relative" style={{cursor:'pointer'}} onClick={()=>togglePlayer(p.id)}>
+              <div className="mono" style={{position:'absolute',right:lang==='ar'?'auto':'12px',left:lang==='ar'?'12px':'auto',top:'50%',transform:'translateY(-50%)',fontSize:64,fontWeight:900,color:style?style.rank:'rgba(255,255,255,0.03)',lineHeight:1,pointerEvents:'none',letterSpacing:-4,userSelect:'none'}}>{i+1}</div>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="mono shrink-0 text-center" style={{width:28,fontSize:i<3?20:14,fontWeight:900,color:style?.num||'var(--muted)'}}>
+                  {i===0?'#1':i===1?'#2':i===2?'#3':`${i+1}`}
                 </div>
-                <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.played||0} {T.predPlayed} · {p.total||0} {T.predTotal}</div>
-              </div>
-              <div className="text-right shrink-0">
-                <div className="mono" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
-                <div className="mono" style={{fontSize:11,color:'var(--muted)',marginTop:2}}>${parseFloat(p.balance).toFixed(0)} {T.balance}</div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:700,fontSize:14,display:'flex',alignItems:'center',gap:6}}>
+                    {p.name}
+                    {isMe&&<span style={{fontSize:9,fontWeight:800,color:'var(--gold)',background:'rgba(242,193,78,0.12)',border:'1px solid rgba(242,193,78,0.2)',borderRadius:999,padding:'1px 7px',fontFamily:'Space Grotesk',letterSpacing:.5}}>{T.youLabel}</span>}
+                  </div>
+                  <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.played||0} {T.predPlayed} · {p.total||0} {T.predTotal}</div>
+                </div>
+                <div className="text-right shrink-0" style={{display:'flex',alignItems:'center',gap:6}}>
+                  <div>
+                    <div className="mono" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
+                    <div className="mono" style={{fontSize:11,color:'var(--muted)',marginTop:2}}>${parseFloat(p.balance).toFixed(0)} {T.balance}</div>
+                  </div>
+                  <div style={{fontSize:9,color:'var(--muted)',display:'inline-block',transform:isExp?'rotate(180deg)':'none',transition:'transform .2s',marginBottom:isExp?0:2}}>▼</div>
+                </div>
               </div>
             </div>
+            {/* ── Expanded bets ── */}
+            {isExp&&(
+              <div style={{borderTop:'1px solid var(--border2)',padding:'8px 16px 10px'}}>
+                {loadingId===p.id&&<div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>···</div>}
+                {preds&&preds.length===0&&(
+                  <div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>
+                    {lang==='ar'?'لا رهانات مؤكدة بعد':'No confirmed bets yet'}
+                  </div>
+                )}
+                {preds&&preds.map(pr=>{
+                  const won=pr.settled&&parseFloat(pr.payout)>0;
+                  const lost=pr.settled&&parseFloat(pr.payout)===0;
+                  const icon=!pr.settled?'·':won?'✓':'✗';
+                  const iconColor=!pr.settled?'var(--muted)':won?'var(--green)':'var(--red)';
+                  const payStr=won?`+$${(parseFloat(pr.payout)-parseFloat(pr.stake)).toFixed(0)}`:lost?`-$${parseFloat(pr.stake).toFixed(0)}`:'';
+                  return(
+                    <div key={pr.match_id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                      <div style={{fontSize:12,color:iconColor,fontWeight:700,width:14,flexShrink:0,textAlign:'center'}}>{icon}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pr.home_team} – {pr.away_team}</div>
+                        <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result?` · ${pr.home_score}–${pr.away_score}`:''}</div>
+                      </div>
+                      {payStr&&<div className="mono" style={{fontSize:11,fontWeight:700,color:won?'var(--green)':'var(--muted)',flexShrink:0}}>{payStr}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         );
       })}
