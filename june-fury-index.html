@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <script>
 (function(){
-  var V = "20260615_000003";
+  var V = "20260615_000004";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2124,59 +2124,63 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
   const finalTop = finalCenter - CARD_H / 2;
   const totalH = 4 * CARD_H + 3 * GAP;
 
-  const hasQF = b.qf?.length > 0;
-  const hasSF = b.sf?.length > 0;
-  const hasFinal = !!b.final;
+  // Always show all 3 columns — use placeholders until rounds are populated
+  const sfData = b.sf?.length > 0 ? b.sf : [
+    { id: "sfp1", slot: 1, team1Id: null, team2Id: null, winner: null },
+    { id: "sfp2", slot: 2, team1Id: null, team2Id: null, winner: null },
+  ];
+  const finalData = b.final || { id: "fp", team1Id: null, team2Id: null, winner: null };
 
-  let x = 0;
-  const colX = {};
-  if (hasQF) { colX.qf = x; x += COL_W + CONN_W; }
-  if (hasSF)  { colX.sf = x; x += COL_W + CONN_W; }
-  if (hasFinal) { colX.final = x; x += COL_W; } else { x -= CONN_W; }
-  const totalW = x;
+  const colX = { qf: 0, sf: COL_W + CONN_W, final: 2 * (COL_W + CONN_W) };
+  const totalW = colX.final + COL_W;
 
   const MiniCard = ({ m, round, top, left }) => {
     const w = m.winner;
     const isFinal = round === "final";
+    const isEmpty = !m.team1Id && !m.team2Id;
     const hasTbd = m.team1Id === "PLAYOFF_TBD" || m.team2Id === "PLAYOFF_TBD";
+    const isPlaceholder = isEmpty || hasTbd;
     const sides = [
       { key: "team1", id: m.team1Id, seed: m.s1 },
       { key: "team2", id: m.team2Id, seed: m.s2 },
     ];
+    const roundLabel = { sf: "SF Winner", final: "Finalist" };
     return (
       <button
-        onClick={() => canScore && !hasTbd && setEdit({ ...m, round })}
+        onClick={() => canScore && !isPlaceholder && setEdit({ ...m, round })}
         style={{
           position: "absolute", top, left, width: COL_W, height: CARD_H,
-          background: isFinal ? "rgba(251,191,36,0.08)" : w ? "rgba(16,185,129,0.06)" : "rgba(20,18,16,0.8)",
-          border: `1px solid ${isFinal ? "rgba(251,191,36,0.35)" : w ? "rgba(16,185,129,0.25)" : "rgba(68,64,60,0.45)"}`,
+          background: isFinal ? "rgba(251,191,36,0.06)" : isEmpty ? "rgba(10,8,7,0.5)" : w ? "rgba(16,185,129,0.06)" : "rgba(20,18,16,0.8)",
+          border: `1px solid ${isFinal ? "rgba(251,191,36,0.25)" : isEmpty ? "rgba(68,64,60,0.25)" : w ? "rgba(16,185,129,0.25)" : "rgba(68,64,60,0.45)"}`,
           borderRadius: "10px", padding: "7px 8px", textAlign: "left",
-          cursor: canScore && !hasTbd ? "pointer" : "default",
-          display: "flex", flexDirection: "column", justifyContent: "space-between",
+          cursor: canScore && !isPlaceholder ? "pointer" : "default",
+          display: "flex", flexDirection: "column", justifyContent: isEmpty ? "center" : "space-between",
           transition: "border-color 0.15s",
         }}
       >
-        {sides.map(({ key, id, seed }) => {
+        {isEmpty ? (
+          <div style={{ fontSize: "10px", color: "#44403c", textAlign: "center", fontStyle: "italic" }}>
+            {roundLabel[round] || "TBD"}
+          </div>
+        ) : sides.map(({ key, id, seed }) => {
           const won = w === key;
           const lost = w && w !== key;
           return (
             <div key={key} style={{
               display: "flex", alignItems: "center", gap: "3px",
               fontSize: "11px", lineHeight: "1.3",
-              color: won ? "#34d399" : lost ? "#57534e" : "#d6d3d1",
+              color: won ? "#34d399" : lost ? "#57534e" : id ? "#d6d3d1" : "#44403c",
               fontWeight: won ? "700" : "400",
             }}>
               {won && <I.trophy size={9} style={{ flexShrink: 0, color: "#34d399" }} />}
-              {seed && seed !== "Q" && (
-                <SeedBadge seed={seed} />
-              )}
-              {m.score && (
+              {seed && seed !== "Q" && <SeedBadge seed={seed} />}
+              {m.score && id && (
                 <span style={{ fontFamily: "monospace", fontSize: "10px", color: won ? "#34d399" : "#57534e", flexShrink: 0 }}>
                   {key === "team1" ? m.score.t1 : m.score.t2}
                 </span>
               )}
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-                {lbl(id)}
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, fontStyle: id ? "normal" : "italic" }}>
+                {id ? lbl(id) : "TBD"}
               </span>
             </div>
           );
@@ -2185,44 +2189,48 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
     );
   };
 
-  const connColor = (m) => m?.winner ? "rgba(52,211,153,0.3)" : "rgba(100,70,50,0.22)";
-  const finalConnColor = (m) => m?.winner ? "rgba(251,191,36,0.38)" : "rgba(100,70,50,0.22)";
+  const qfWon = (i) => b.qf[i]?.winner;
+  const sfWon = (i) => sfData[i]?.winner;
+  const qfConnColor = (i) => qfWon(i) ? "rgba(52,211,153,0.3)" : "rgba(68,64,60,0.2)";
+  const sfConnColor = (i) => sfWon(i) ? "rgba(251,191,36,0.38)" : "rgba(68,64,60,0.2)";
 
   return (
     <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--hairline)" }}>
       <div className="flex items-center justify-between px-3 pt-3 pb-2">
         <h3 className="font-display text-lg text-stone-200">BRACKET</h3>
         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
-          {hasQF && <span style={{ color: "var(--orange-br)" }}>QF</span>}
-          {hasSF && <><span className="text-stone-600">→</span><span className="text-red-400">SF</span></>}
-          {hasFinal && <><span className="text-stone-600">→</span><span className="text-amber-400">Final</span></>}
+          <span style={{ color: "var(--orange-br)" }}>QF</span>
+          <span className="text-stone-600">→</span>
+          <span className="text-red-400">SF</span>
+          <span className="text-stone-600">→</span>
+          <span className="text-amber-400">Final</span>
         </div>
       </div>
       <div style={{ overflowX: "auto", padding: "0 12px 12px" }}>
         <div style={{ position: "relative", width: totalW, height: totalH, minWidth: Math.min(totalW, 320) }}>
           {/* QF */}
-          {hasQF && b.qf.map((m, i) => <MiniCard key={m.id} m={m} round="qf" top={qfTops[i]} left={colX.qf} />)}
+          {b.qf.map((m, i) => <MiniCard key={m.id} m={m} round="qf" top={qfTops[i]} left={colX.qf} />)}
           {/* SF */}
-          {hasSF && b.sf.map((m, i) => <MiniCard key={m.id} m={m} round="sf" top={sfTops[i]} left={colX.sf} />)}
+          {sfData.map((m, i) => <MiniCard key={m.id} m={m} round="sf" top={sfTops[i]} left={colX.sf} />)}
           {/* Final */}
-          {hasFinal && <MiniCard m={b.final} round="final" top={finalTop} left={colX.final} />}
+          <MiniCard m={finalData} round="final" top={finalTop} left={colX.final} />
 
           {/* SVG connectors */}
           <svg style={{ position: "absolute", top: 0, left: 0, width: totalW, height: totalH, pointerEvents: "none", overflow: "visible" }}>
             {/* QF → SF */}
-            {hasQF && hasSF && b.qf.map((m, i) => {
+            {b.qf.map((m, i) => {
               const sfIdx = i < 2 ? 0 : 1;
               const sx = colX.qf + COL_W, sy = qfCenters[i];
               const ex = colX.sf, ey = sfCenters[sfIdx];
               const mx = sx + CONN_W / 2;
-              return <path key={m.id} d={`M${sx} ${sy} H${mx} V${ey} H${ex}`} fill="none" stroke={connColor(m)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />;
+              return <path key={m.id} d={`M${sx} ${sy} H${mx} V${ey} H${ex}`} fill="none" stroke={qfConnColor(i)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />;
             })}
             {/* SF → Final */}
-            {hasSF && hasFinal && b.sf.map((m, i) => {
+            {sfData.map((m, i) => {
               const sx = colX.sf + COL_W, sy = sfCenters[i];
               const ex = colX.final, ey = finalCenter;
               const mx = sx + CONN_W / 2;
-              return <path key={m.id} d={`M${sx} ${sy} H${mx} V${ey} H${ex}`} fill="none" stroke={finalConnColor(m)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />;
+              return <path key={m.id} d={`M${sx} ${sy} H${mx} V${ey} H${ex}`} fill="none" stroke={sfConnColor(i)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />;
             })}
           </svg>
         </div>
