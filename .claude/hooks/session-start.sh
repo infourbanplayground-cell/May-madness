@@ -20,14 +20,14 @@ mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 
 if [ ! -f "$KEY_PATH" ]; then
-  ZIP="/root/.claude/uploads/36ed82e5-2b0d-5c30-9ddd-aad5d04561ae/20008386-urbanpadelaccesskit.zip"
-  if [ -f "$ZIP" ]; then
-    echo "==> Extracting SSH key from kit zip..."
+  # Search all upload directories for the kit zip (path includes session ID which changes each session)
+  ZIP=$(find /root/.claude/uploads -name "*urbanpadel*access*kit*.zip" -o -name "*urbanpadelaccesskit*.zip" 2>/dev/null | head -1)
+  if [ -n "$ZIP" ] && [ -f "$ZIP" ]; then
+    echo "==> Extracting SSH key from kit zip: $ZIP"
     unzip -p "$ZIP" urbanpadel-owner-key > "$KEY_PATH"
     chmod 600 "$KEY_PATH"
   else
-    echo "ERROR: SSH key not found at $KEY_PATH and zip not found at $ZIP"
-    echo "Please re-upload urbanpadel-access-kit.zip to continue."
+    echo "ERROR: SSH key not found. Please upload urbanpadel-access-kit.zip in this session."
     exit 1
   fi
 fi

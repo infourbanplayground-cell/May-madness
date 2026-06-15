@@ -6,18 +6,22 @@ Use this skill for any deployment to the Urban Padel VPS — static sites, Node/
 
 ## Step 0 — Establish SSH tunnel (every new session)
 
-The session-start hook should have done this automatically. Verify:
+### First: upload the kit zip
+In a new session the SSH key doesn't exist yet. You MUST upload **`urbanpadel-access-kit.zip`** to this session before anything else works. Do this via the paperclip / attachment button in the Claude Code chat. Once uploaded, the session-start hook finds it automatically.
+
+### Verify the tunnel is up
+The session-start hook runs automatically on session start and sets everything up. Confirm it worked:
 ```bash
 ssh urbanpadel 'echo ok'
 ```
 
-If it fails (Connection refused), re-run the tunnel:
+### If the tunnel dropped mid-session (Connection refused)
 ```bash
 /tmp/chisel client --keepalive 25s --auth mouther:ca4ac97f11f618067ca6564606a226d8 https://sshws.urbanpadel.om 2200:127.0.0.1:22 > /tmp/chisel.log 2>&1 &
 sleep 5 && grep Connected /tmp/chisel.log
 ```
 
-SSH alias is pre-configured in `~/.ssh/config` as `urbanpadel` (root@127.0.0.1:2200 with the private key). All `ssh urbanpadel` and `scp`/`rsync` to `urbanpadel:` use it automatically.
+SSH alias `urbanpadel` = root@127.0.0.1:2200 with the private key. All `ssh urbanpadel`, `scp`, and `rsync` to `urbanpadel:` use it automatically.
 
 ---
 
