@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <script>
 (function(){
-  var V = "20260615_000001";
+  var V = "20260615_000002";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1473,9 +1473,9 @@ function CreateSessionModal({ onClose, onCreate, count }) {
   const [groupCount, setGroupCount] = useState(4);
   const [qualifyCount, setQualifyCount] = useState(1);
   const [thirdPlaceMode, setThirdPlaceMode] = useState("best2");
-  const totalQualifiers = groupCount * qualifyCount;
+  const is3Groups = groupCount === 3;
+  const totalQualifiers = is3Groups ? 8 : groupCount * qualifyCount; // 3-group always 6+2=8
   const bracketInfo = totalQualifiers >= 8 ? "QF → SF → Final" : totalQualifiers >= 4 ? "SF → Final" : "Final only";
-  const show3rdOption = groupCount === 3 && qualifyCount === 1;
   return <Modal open={true} onClose={onClose} title="NEW SESSION">
     <div className="space-y-3">
       <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Name</label><Input autoFocus value={n} onChange={setN} /></div>
@@ -1486,14 +1486,21 @@ function CreateSessionModal({ onClose, onCreate, count }) {
           {[2,3,4].map(g => <button key={g} type="button" onClick={() => setGroupCount(g)} className={`py-2 rounded-lg font-display text-xl ${groupCount===g ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>{g}</button>)}
         </div>
       </div>
-      <div>
-        <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Teams qualifying per group</label>
-        <div className="grid grid-cols-2 gap-2">
-          {[1,2].map(q => <button key={q} type="button" onClick={() => setQualifyCount(q)} className={`py-2 rounded-lg font-semibold text-sm ${qualifyCount===q ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>Top {q}</button>)}
+      {is3Groups ? (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,94,30,0.08)", border: "1px solid rgba(255,94,30,0.2)" }}>
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--orange-br)" }} />
+          <div className="text-[11px] font-semibold" style={{ color: "var(--orange-br)" }}>Top 2 per group + 2 best thirds → QF → SF → Final</div>
         </div>
-        <div className="text-[11px] text-orange-400 mt-2 font-semibold">{totalQualifiers} qualifiers → {bracketInfo}</div>
-      </div>
-      {show3rdOption && (
+      ) : (
+        <div>
+          <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Teams qualifying per group</label>
+          <div className="grid grid-cols-2 gap-2">
+            {[1,2].map(q => <button key={q} type="button" onClick={() => setQualifyCount(q)} className={`py-2 rounded-lg font-semibold text-sm ${qualifyCount===q ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>Top {q}</button>)}
+          </div>
+          <div className="text-[11px] text-orange-400 mt-2 font-semibold">{totalQualifiers} qualifiers → {bracketInfo}</div>
+        </div>
+      )}
+      {is3Groups && (
         <div>
           <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">3rd place qualification</label>
           <div className="grid grid-cols-2 gap-2">
