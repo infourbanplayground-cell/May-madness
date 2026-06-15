@@ -1,7 +1,12 @@
 import 'server-only'
-import { Pool } from 'pg'
+import { Pool, types } from 'pg'
 import { Booking, Member } from './types'
 export { COURTS, TIME_SLOTS } from './constants'
+
+// Return DATE columns as 'YYYY-MM-DD' strings, not Date objects.
+// Without this, pg converts the date to midnight local time before giving us a
+// Date object, so .toISOString() on a UTC+4 server rolls the date back one day.
+types.setTypeParser(types.builtins.DATE, (val: string) => val)
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 

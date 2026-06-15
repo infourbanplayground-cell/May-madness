@@ -43,11 +43,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid court' }, { status: 400 })
   }
 
-  // Validate date is within allowed range (today + 30 days)
-  const todayStr = new Date().toISOString().split('T')[0]
+  // Validate date is within allowed range (today + 30 days) — use local date
+  function localDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  }
+  const todayStr = localDateStr(new Date())
   const maxDate = new Date()
   maxDate.setDate(maxDate.getDate() + 30)
-  const maxDateStr = maxDate.toISOString().split('T')[0]
+  const maxDateStr = localDateStr(maxDate)
   if (date < todayStr || date > maxDateStr) {
     return NextResponse.json({ error: 'Date must be within the next 30 days' }, { status: 400 })
   }
