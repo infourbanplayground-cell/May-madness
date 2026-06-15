@@ -20,10 +20,6 @@ export async function initDB(): Promise<void> {
       court_id TEXT PRIMARY KEY,
       price_per_hour NUMERIC(10,2) DEFAULT 0.00
     );
-    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS member_id UUID REFERENCES members(id);
-    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS price_total NUMERIC(10,2);
-    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS duration_minutes INT;
-    ALTER TABLE bookings ADD COLUMN IF NOT EXISTS booking_source TEXT DEFAULT 'admin';
   `)
 }
 
