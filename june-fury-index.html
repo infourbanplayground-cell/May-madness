@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <script>
 (function(){
-  var V = "20260615_000002";
+  var V = "20260615_000003";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -489,8 +489,14 @@ function equalizeThirds(thirds, session) {
   return thirds.map(t => {
     const g = (session.teams || []).find(tm => tm.id === t.id)?.group;
     const missing = maxPerTeam - ((groupSizes[g] || maxPerTeam + 1) - 1);
-    return { ...t, pts: t.pts + missing * 3, wins: t.wins + missing, gd: (t.gd || 0) + missing * 3, ghostWins: missing };
+    // Ghost BYE win: +1 win, +6 games for (notional 6-0), +6 GD
+    return { ...t, wins: t.wins + missing, gd: (t.gd || 0) + missing * 6, gf: (t.gf || 0) + missing * 6, ghostWins: missing };
   });
+}
+
+// Compare two thirds entries: wins → GD → GF (padel tiebreaker order)
+function compareThirds(a, b) {
+  return b.wins - a.wins || b.gd - a.gd || b.gf - a.gf;
 }
 
 function calcStreak(idxs) {
@@ -1925,11 +1931,17 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
 
     if (N === 3) {
       // Tier 1 = winners, Tier 2 = runners-up, Tier 3 = thirds
-      const tier1 = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd || 0, tier: 1, seed: groups[gi] + "1" } : null).filter(Boolean);
-      const tier2 = standings.map((s, gi) => s[1]?.team?.id ? { id: s[1].team.id, pts: s[1].pts, wins: s[1].wins, gd: s[1].gd || 0, tier: 2, seed: groups[gi] + "2" } : null).filter(Boolean);
-      const rawThirds = standings.map((s, gi) => s[2]?.team?.id ? { id: s[2].team.id, pts: s[2].pts, wins: s[2].wins, gd: s[2].gd || 0, tier: 3, seed: groups[gi] + "3" } : null).filter(Boolean);
+      const tier1 = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd || 0, gf: s[0].gf || 0, tier: 1, seed: groups[gi] + "1" } : null).filter(Boolean);
+      const tier2 = standings.map((s, gi) => s[1]?.team?.id ? { id: s[1].team.id, pts: s[1].pts, wins: s[1].wins, gd: s[1].gd || 0, gf: s[1].gf || 0, tier: 2, seed: groups[gi] + "2" } : null).filter(Boolean);
+      const rawThirds = standings.map((s, gi) => s[2]?.team?.id ? { id: s[2].team.id, pts: s[2].pts, wins: s[2].wins, gd: s[2].gd || 0, gf: s[2].gf || 0, tier: 3, seed: groups[gi] + "3" } : null).filter(Boolean);
       const equalized = equalizeThirds(rawThirds, session);
-      const sortedThirds = [...equalized].sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
+      // Padel ranking for 3rds: wins → game difference → games scored
+      const sortedThirds = [...equalized].sort(compareThirds);
+      // Check for complete tie between 2nd and 3rd thirds (tiebreak match required)
+      if (sortedThirds.length >= 3 && thirdPlaceMode === "best2" && compareThirds(sortedThirds[1], sortedThirds[2]) === 0) {
+        alert(`Tie between ${lbl(sortedThirds[1].id)} and ${lbl(sortedThirds[2].id)} for the last 3rd-place spot!\n\nPlay a tiebreak match to determine who qualifies.`);
+        return;
+      }
       const t1sorted = tier1.sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
       const t2sorted = tier2.sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
 
