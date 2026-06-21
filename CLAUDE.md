@@ -32,26 +32,74 @@ sleep 4 && grep Connected /tmp/chisel.log
 
 ### June Fury (Americano tournament)
 - URL: https://americano.urbanpadel.om
-- Frontend: `/var/www/americano.urbanpadel.om/public/`
+- Frontend: `/var/www/americano.urbanpadel.om/public/` — local copy: `june-fury-index.html`
 - API: `/opt/june-fury-api/api.js` — systemd: `june-fury-api` — port 3001
-- Deploy frontend: `scp -r frontend/* urbanpadel:/var/www/americano.urbanpadel.om/public/`
+- Deploy frontend: `scp june-fury-index.html urbanpadel:/var/www/americano.urbanpadel.om/public/index.html`
 - Deploy API: `scp api.js urbanpadel:/opt/june-fury-api/ && ssh urbanpadel 'systemctl restart june-fury-api'`
 
 ### WC2026 Predictions
 - URL: https://predictions.urbanpadel.om
-- Frontend: `/var/www/predictions.urbanpadel.om/public/`
+- Frontend: `/var/www/predictions.urbanpadel.om/public/index.html` — no local copy (edit live or scp down first)
 - API: `/opt/wc-predictions-api/predictions-api.js` — systemd: `wc-predictions` — port 3002
-- Deploy same pattern as June Fury
+- Backup: `/opt/wc-predictions-api/predictions-api.js.bak`
+- Deploy: `scp predictions-api.js urbanpadel:/opt/wc-predictions-api/ && ssh urbanpadel 'systemctl restart wc-predictions'`
+- Deploy frontend: `scp index.html urbanpadel:/var/www/predictions.urbanpadel.om/public/index.html`
+
+#### WC Predictions DB Schema (PostgreSQL)
+Table `wc_matches`:
+```
+id, home_team, away_team, home_flag, away_flag,
+home_odds NUMERIC(6,3), draw_odds NUMERIC(6,3), away_odds NUMERIC(6,3),
+odds_1x NUMERIC(6,3),   -- double chance Home/Draw (optional, falls back to harmonic)
+odds_x2 NUMERIC(6,3),   -- double chance Draw/Away (optional, falls back to harmonic)
+kickoff TIMESTAMPTZ, venue TEXT, result TEXT, group_name TEXT, stage TEXT
+```
+
+Table `wc_predictions`:
+```
+id, player_id, match_id, prediction TEXT,  -- '1','X','2','1X','X2','12'
+odds_locked NUMERIC(10,4),  -- odds at bet placement time (locked forever)
+stake NUMERIC(10,2), payout NUMERIC(10,2), settled BOOLEAN
+```
+
+Key migrations (idempotent, run in initDB every restart):
+```sql
+ALTER TABLE wc_predictions ADD COLUMN IF NOT EXISTS odds_locked NUMERIC(10,4);
+ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_1x NUMERIC(6,3);
+ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_x2 NUMERIC(6,3);
+-- Backfill odds_locked for any bets placed before the column existed
+UPDATE wc_predictions p SET odds_locked = CASE p.prediction
+  WHEN '1'  THEN m.home_odds  WHEN 'X' THEN m.draw_odds  WHEN '2' THEN m.away_odds
+  WHEN '1X' THEN COALESCE(m.odds_1x, ROUND((m.home_odds*m.draw_odds)/NULLIF(m.home_odds+m.draw_odds,0),4))
+  WHEN 'X2' THEN COALESCE(m.odds_x2, ROUND((m.draw_odds*m.away_odds)/NULLIF(m.draw_odds+m.away_odds,0),4))
+  WHEN '12' THEN ROUND((m.home_odds*m.away_odds)/NULLIF(m.home_odds+m.away_odds,0),4)
+  ELSE m.home_odds END
+FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
+```
+
+#### WC Predictions Features
+- **Odds locking**: odds captured at bet placement (`/wc/predict`), stored in `odds_locked`, used for settlement and display forever
+- **Double chance**: `1X` (Home/Draw) and `X2` (Draw/Away) bet options; stored explicitly in `odds_1x`/`odds_x2`, fallback is harmonic mean: `(h*d)/(h+d)` and `(d*a)/(d+a)`
+- **Auto-recalculate on odds edit**: `PUT /wc/admin/match/:id` — if match is settled and has a result, diffs old vs new payout per prediction and adjusts player balance automatically; also updates `odds_locked` on each prediction to corrected odds
+- **Admin DC odds editing**: admin panel has two rows in odds form — row 1: 1/X/2, row 2: 1X/X2 (optional)
+- **My Picks auto-expand**: in Fixtures tab, switching to "My Picks" filter auto-shows finished matches
+
+### Booking App (Court reservations)
+- URL: https://bookings.urbanpadel.om
+- Source: `/home/user/May-madness/booking-app/`
+- App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
+- See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
 ## Common Commands
 
 ```bash
 # Health check all services
-ssh urbanpadel 'systemctl is-active nginx postfix dovecot cloudflared postgresql june-fury-api wc-predictions urbanpadel-sig chisel-ssh'
+ssh urbanpadel 'systemctl is-active nginx postfix dovecot cloudflared postgresql june-fury-api wc-predictions booking-app'
 
 # Logs
 ssh urbanpadel 'journalctl -u june-fury-api -n 50'
 ssh urbanpadel 'journalctl -u wc-predictions -n 50'
+ssh urbanpadel 'journalctl -u booking-app -n 50'
 
 # Disk / memory
 ssh urbanpadel 'df -h / ; free -h ; uptime'
@@ -80,3 +128,36 @@ ssh urbanpadel 'nginx -t && systemctl reload nginx'
 - Always `nginx -t` before `systemctl reload nginx`
 - Use `listen 443 ssl http2;` (nginx 1.24 — standalone `http2 on;` does not exist)
 - DNS is on Cloudflare under Ali's account — new subdomains need no DNS change (wildcard in place)
+
+## Critical Lessons (Learned the Hard Way)
+
+### Babel CDN — ALWAYS pin to @7
+`@babel/standalone` v8.0.0 was released and broke every page using `<script type="text/babel">` — unpkg served v8 automatically (no version pinned). **All three sites went blank simultaneously.**
+
+Fix applied to all sites:
+```html
+<!-- WRONG — will break when babel releases a new major -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- CORRECT — pin to @7 forever -->
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+```
+Sites affected: `urbanpadel.om`, `americano.urbanpadel.om`, `predictions.urbanpadel.om`, local `june-fury-index.html`.
+
+Diagnostic: `curl -sI https://unpkg.com/@babel/standalone/babel.min.js | grep location` — if it shows `@8` or higher, that's the culprit.
+
+### Dates on UTC+4 server
+Never use `new Date().toISOString().split('T')[0]` for date strings — UTC date is behind Oman local time (UTC+4). Use `getFullYear()/getMonth()/getDate()` (local methods). In `pg`, configure `types.setTypeParser(types.builtins.DATE, val => val)` so DATE columns return plain strings.
+
+### Shell heredoc + backtick SQL
+When patching API files via `ssh urbanpadel 'cat > file << EOF ... EOF'`, backtick template literals inside the heredoc cause shell variable expansion and break the patch. Workaround: write the patch as a Python script, `scp` it to the server, run with `python3`.
+
+### PostgreSQL table ownership
+`urbanpadel_app` is NOT the owner of `bookings` or other tables. Always run `ALTER TABLE` as superuser:
+```bash
+ssh urbanpadel "sudo -u postgres psql urbanpadel -c 'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS col TEXT'"
+```
+New tables need explicit grants:
+```bash
+ssh urbanpadel "sudo -u postgres psql urbanpadel -c 'GRANT SELECT,INSERT,UPDATE ON TABLE newtable TO urbanpadel_app'"
+```
