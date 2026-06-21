@@ -20,15 +20,22 @@ mkdir -p "$HOME/.ssh"
 chmod 700 "$HOME/.ssh"
 
 if [ ! -f "$KEY_PATH" ]; then
-  # Search all upload directories for the kit zip (path includes session ID which changes each session)
-  ZIP=$(find /root/.claude/uploads -name "*urbanpadel*access*kit*.zip" -o -name "*urbanpadelaccesskit*.zip" 2>/dev/null | head -1)
-  if [ -n "$ZIP" ] && [ -f "$ZIP" ]; then
-    echo "==> Extracting SSH key from kit zip: $ZIP"
-    unzip -p "$ZIP" urbanpadel-owner-key > "$KEY_PATH"
+  if [ -n "${URBANPADEL_SSH_KEY:-}" ]; then
+    # Key stored as base64 env var — no zip upload needed
+    echo "==> Installing SSH key from URBANPADEL_SSH_KEY env var..."
+    echo "$URBANPADEL_SSH_KEY" | base64 -d > "$KEY_PATH"
     chmod 600 "$KEY_PATH"
   else
-    echo "ERROR: SSH key not found. Please upload urbanpadel-access-kit.zip in this session."
-    exit 1
+    # Fall back: search all upload directories for the kit zip
+    ZIP=$(find /root/.claude/uploads -name "*urbanpadel*access*kit*.zip" -o -name "*urbanpadelaccesskit*.zip" 2>/dev/null | head -1)
+    if [ -n "$ZIP" ] && [ -f "$ZIP" ]; then
+      echo "==> Extracting SSH key from kit zip: $ZIP"
+      unzip -p "$ZIP" urbanpadel-owner-key > "$KEY_PATH"
+      chmod 600 "$KEY_PATH"
+    else
+      echo "ERROR: SSH key not found. Set URBANPADEL_SSH_KEY env var or upload urbanpadel-access-kit.zip."
+      exit 1
+    fi
   fi
 fi
 chmod 600 "$KEY_PATH"
