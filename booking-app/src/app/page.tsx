@@ -1,5 +1,6 @@
 import BookingCalendar from '@/components/BookingCalendar'
 import LogoutButton from '@/components/LogoutButton'
+import MatchPointSync from '@/components/MatchPointSync'
 
 export default function HomePage() {
   return (
@@ -15,7 +16,10 @@ export default function HomePage() {
           <span className="font-bold text-white">Urban Playground</span>
           <span className="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded-full font-medium">Admin</span>
         </div>
-        <LogoutButton />
+        <div className="flex items-center gap-2">
+          <MatchPointSync />
+          <LogoutButton />
+        </div>
       </header>
 
       {/* Calendar takes the rest */}
