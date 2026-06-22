@@ -4,53 +4,39 @@ import { addBooking, getBookings } from '@/lib/store'
 import { COURTS } from '@/lib/constants'
 import { Booking } from '@/lib/types'
 
-function extractDate(b: MpBooking): string {
-  const raw = b.date ?? b.startDate ?? b.start ?? ''
-  return typeof raw === 'string' ? raw.slice(0, 10) : ''
-}
-
-function extractTime(val: unknown): string {
-  const s = String(val ?? '').trim()
-  // Accept HH:MM or HH:MM:SS or ISO datetime
-  const m = s.match(/(\d{2}:\d{2})/)
-  return m ? m[1] : ''
-}
-
-function guessCourt(b: MpBooking): string {
-  const name = String(b.courtName ?? b.courtId ?? '').toLowerCase()
+function guessCourt(resourceName: string): string {
+  const lower = resourceName.toLowerCase()
   for (const c of COURTS) {
-    if (name.includes(c.id) || name.includes(c.name.toLowerCase())) return c.id
+    if (lower.includes(c.name.toLowerCase())) return c.id
   }
-  // Map by index if courtId is numeric
-  const idx = parseInt(String(b.courtId ?? '1'), 10)
-  if (idx >= 1 && idx <= COURTS.length) return `court-${idx}`
+  const m = lower.match(/\d+/)
+  if (m) {
+    const idx = parseInt(m[0], 10)
+    if (idx >= 1 && idx <= COURTS.length) return `court-${idx}`
+  }
   return COURTS[0].id
 }
 
 function mpBookingToLocal(b: MpBooking, existingIds: Set<string>): Booking | null {
-  const id = `mp-${b.id}`
+  const id = `mp-${b.Id}`
   if (existingIds.has(id)) return null
+  if (!b.Date || !b.StartTime || !b.EndTime) return null
 
-  const date = extractDate(b)
-  const startTime = extractTime(b.startTime ?? b.start)
-  const endTime = extractTime(b.endTime ?? b.end)
-
-  if (!date || !startTime || !endTime) return null
-
-  const customerName = String(b.customerName ?? b.name ?? 'MatchPoint Import').trim()
-  const customerPhone = String(b.customerPhone ?? b.phone ?? '').trim()
+  const firstParticipant = b.Participants?.[0]
+  const playerName = firstParticipant?.Name || b.Description || 'MatchPoint Import'
+  const playerPhone = firstParticipant?.Phone || ''
 
   return {
     id,
-    courtId: guessCourt(b),
-    date,
-    startTime,
-    endTime,
-    playerName: customerName,
-    playerPhone: customerPhone,
-    notes: String(b.notes ?? '').trim(),
+    courtId: guessCourt(b.ResourceName ?? ''),
+    date: b.Date,
+    startTime: b.StartTime,
+    endTime: b.EndTime,
+    playerName,
+    playerPhone,
+    notes: b.Description ?? '',
     isRecurring: false,
-    status: b.status === 'cancelled' ? 'cancelled' : 'confirmed',
+    status: b.Status === 'CANCELED' ? 'cancelled' : 'confirmed',
     createdAt: new Date().toISOString(),
     bookingSource: 'matchpoint',
   }

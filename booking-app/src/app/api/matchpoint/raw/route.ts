@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     else if (endpoint === 'sales') data = await fetchMpSales(dateFrom, dateTo)
     else return NextResponse.json({ error: 'Unknown endpoint' }, { status: 400 })
 
-    return NextResponse.json({ ok: true, endpoint, dateFrom, dateTo, data })
+    return NextResponse.json({ ok: true, endpoint, dateFrom, dateTo, data, count: (data as unknown[]).length })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     return NextResponse.json({ ok: false, error: message }, { status: 502 })

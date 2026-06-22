@@ -3,80 +3,151 @@ import 'server-only'
 const BASE_URL = 'https://urbanplayground.matchpoint.com.es/api/query'
 const API_KEY = process.env.MATCHPOINT_API_KEY ?? ''
 
-async function mpFetch(path: string): Promise<unknown> {
+type MpEnvelope = {
+  Ok: boolean
+  Error: string | null
+  Data: unknown[]
+  Offset: number
+  Limit: number
+  HasMore: boolean
+}
+
+async function mpFetch(path: string): Promise<unknown[]> {
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { Authorization: `Bearer ${API_KEY}` },
+    headers: { 'X-Api-Token': API_KEY },
     cache: 'no-store',
   })
   if (!res.ok) {
     throw new Error(`MatchPoint ${path} → ${res.status} ${res.statusText}`)
   }
-  return res.json()
+  const json = await res.json() as MpEnvelope
+  if (!json.Ok) {
+    throw new Error(json.Error ?? 'MatchPoint API error')
+  }
+  return json.Data ?? []
 }
 
 export type MpBooking = {
-  id: string | number
-  courtName?: string
-  courtId?: string | number
-  date?: string
-  startDate?: string
-  start?: string
-  end?: string
-  startTime?: string
-  endTime?: string
-  customerName?: string
-  customerPhone?: string
-  notes?: string
-  status?: string
-  [key: string]: unknown
+  Id: number
+  Venue: string
+  Date: string
+  StartTime: string
+  EndTime: string
+  ResourceName: string
+  Description: string
+  Locator: string
+  Status: string
+  Type: string
+  Billed: boolean
+  AccessCode: string
+  Lighting: Record<string, unknown>
+  Participants: MpParticipant[]
+  Payments: MpPayment[]
 }
 
-export type MpCustomer = {
-  id: string | number
-  name?: string
-  firstName?: string
-  lastName?: string
-  phone?: string
-  email?: string
-  [key: string]: unknown
+export type MpParticipant = {
+  Name: string
+  Email: string
+  Phone: string
+  TotalAmount: number
+  OwesMoney: boolean
+  Paid: boolean
+  Team?: string
+  Position?: string
+  Level?: string
+  Gender?: string
+}
+
+export type MpPayment = {
+  Date: string
+  PayMethod: string
+  Amount: number
 }
 
 export type MpMatch = {
-  id: string | number
-  [key: string]: unknown
+  Id: number
+  Venue: string
+  Date: string
+  StartTime: string
+  EndTime: string
+  Sport: string
+  ResourceName: string
+  CurrentPlayers: number
+  MaxPlayers: number
+  Status: string
+  Competitive: boolean
+  MinLevel: string
+  MaxLevel: string
+  Participants: MpParticipant[]
+  Payments: MpPayment[]
 }
 
 export type MpActivity = {
-  id: string | number
-  [key: string]: unknown
+  Id: number
+  Venue: string
+  Name: string
+  Group: string
+  Date: string
+  StartTime: string
+  EndTime: string
+  ResourceName: string
+  CurrentUsers: number
+  MaxUsers: number
+  Status: string
+  Description: string
+  Participants: MpParticipant[]
+}
+
+export type MpCustomer = {
+  Code: string
+  Name: string
+  Email: string
+  Mobile: string
+  MemberCode: string
+  EntryDate: string
+  Status: string
+  Type: string
+  Groups: string[]
 }
 
 export type MpSale = {
-  id: string | number
-  [key: string]: unknown
+  Id: number
+  Date: string
+  DocNumber: string
+  Type: string
+  IsCanceled: boolean
+  CancelDate: string
+  CustomerName: string
+  CustomerCode: string
+  CustomerIdent: string
+  IssuerName: string
+  IssuerVat: string
+  Description: string
+  Amount: number
+  Vat: number
+  Total: number
+  Paid: boolean
+  PayDate: string
+  Lines: unknown[]
+  Payments: MpPayment[]
 }
 
 export async function fetchMpBookings(dateFrom: string, dateTo: string): Promise<MpBooking[]> {
-  const data = await mpFetch(`/bookings?dateFrom=${dateFrom}&dateTo=${dateTo}`)
-  return (Array.isArray(data) ? data : (data as { data?: unknown[] }).data ?? []) as MpBooking[]
+  return mpFetch(`/bookings?dateFrom=${dateFrom}&dateTo=${dateTo}`) as Promise<MpBooking[]>
 }
 
 export async function fetchMpMatches(dateFrom: string, dateTo: string): Promise<MpMatch[]> {
-  const data = await mpFetch(`/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`)
-  return (Array.isArray(data) ? data : (data as { data?: unknown[] }).data ?? []) as MpMatch[]
+  return mpFetch(`/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`) as Promise<MpMatch[]>
 }
 
 export async function fetchMpActivities(dateFrom: string, dateTo: string): Promise<MpActivity[]> {
-  const data = await mpFetch(`/activities?dateFrom=${dateFrom}&dateTo=${dateTo}`)
-  return (Array.isArray(data) ? data : (data as { data?: unknown[] }).data ?? []) as MpActivity[]
+  return mpFetch(`/activities?dateFrom=${dateFrom}&dateTo=${dateTo}`) as Promise<MpActivity[]>
 }
 
 export async function fetchMpCustomers(): Promise<MpCustomer[]> {
-  const data = await mpFetch('/customers')
-  return (Array.isArray(data) ? data : (data as { data?: unknown[] }).data ?? []) as MpCustomer[]
+  return mpFetch('/customers') as Promise<MpCustomer[]>
 }
 
 export async function fetchMpSales(dateFrom: string, dateTo: string): Promise<MpSale[]> {
-  const data = await mpFetch(`/sales?dateFrom=${dateFrom}&dateTo=${dateTo}`)
-  return (Array.isArray(data) ? data : (data as { data?: unknown[] }).data ?? []) as MpSale[]
+  return mpFetch(`/sales?dateFrom=${dateFrom}&dateTo=${dateTo}`) as Promise<MpSale[]>
 }
