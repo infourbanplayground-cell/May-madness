@@ -8,10 +8,10 @@ fi
 
 echo "==> Urban Padel VPS: setting up SSH tunnel..."
 
-# 1. Install openssh-client if missing
-if ! command -v ssh &>/dev/null; then
-  echo "==> Installing openssh-client..."
-  apt-get install -y openssh-client -qq 2>&1
+# 1. Install openssh-client and unzip if missing
+if ! command -v ssh &>/dev/null || ! command -v unzip &>/dev/null; then
+  echo "==> Installing openssh-client and unzip..."
+  apt-get update -qq 2>&1 && apt-get install -y openssh-client unzip -qq 2>&1
 fi
 
 # 2. Install SSH key from uploaded zip (if available) or from ~/.ssh if already there
