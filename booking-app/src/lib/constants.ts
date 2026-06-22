@@ -7,7 +7,8 @@ export const COURTS: Court[] = [
   { id: 'court-4', name: 'Court 4', sport: 'Pickleball', color: '#ef4444' },
 ]
 
-export const TIME_SLOTS: string[] = Array.from({ length: 28 }, (_, i) => {
+// 06:00 → 23:30 in 30-minute increments (36 slots)
+export const TIME_SLOTS: string[] = Array.from({ length: 36 }, (_, i) => {
   const totalMinutes = 6 * 60 + i * 30
   const h = Math.floor(totalMinutes / 60).toString().padStart(2, '0')
   const m = (totalMinutes % 60).toString().padStart(2, '0')
