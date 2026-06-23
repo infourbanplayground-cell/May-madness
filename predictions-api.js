@@ -391,7 +391,7 @@ app.get('/wc/me', auth, async (req, res) => {
 // Submit prediction
 app.post('/wc/predict', auth, async (req, res) => {
   try {
-    const { matchId, prediction } = req.body;
+    const { matchId, prediction, stake: requestedStake } = req.body;
     const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
     const isKOMarket = KO_MARKETS.includes(prediction) || prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:');
     const validStandard = ['1','X','2','1X','X2','12'].includes(prediction);
@@ -401,13 +401,19 @@ app.post('/wc/predict', auth, async (req, res) => {
     if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
     const match = mRows[0];
 
+    // Block betting on TBD matches
+    if (match.home_team === 'TBD' || match.away_team === 'TBD') {
+      return res.status(400).json({ error: 'Betting opens when teams are confirmed' });
+    }
+
     // Deadline = 5 min before kickoff
     const deadline = new Date(match.kickoff).getTime() - 5 * 60 * 1000;
     if (Date.now() > deadline) return res.status(400).json({ error: 'Prediction deadline passed' });
 
-    const stake = parseFloat(await getSetting('stake_per_match', '5.00'));
+    const defaultStake = parseFloat(await getSetting('stake_per_match', '5.00'));
+    const stake = requestedStake ? Math.min(500, Math.max(1, parseFloat(requestedStake))) : defaultStake;
     const player = await getPlayer(req.playerId);
-    if (player.balance < stake) return res.status(400).json({ error: 'Insufficient balance' });
+    if (player.balance < stake) return res.status(400).json({ error: `Insufficient balance (have $${parseFloat(player.balance).toFixed(2)}, need $${stake})` });
 
     const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
     const oddsAtBet = {
