@@ -1122,7 +1122,7 @@ function NextMatchBanner({matches,lang}){
 }
 
 // ── Match Card ────────────────────────────────────────────────────────────────
-function MatchCard({match,predictions,onPickClick,loading,lang,stake}){
+function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stake}){
   const T=TX[lang];
   const ref=useRef(null);
   const isDeadlinePassed=Date.now()>new Date(match.kickoff).getTime()-5*60*1000;
@@ -1390,6 +1390,13 @@ function MatchCard({match,predictions,onPickClick,loading,lang,stake}){
               })()}
             </div>
           )}
+          {canPredict&&onBuildClick&&(
+            <button onClick={()=>onBuildClick(match)}
+              style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:5,padding:'7px 10px',background:'rgba(242,193,78,0.05)',border:'1px solid rgba(242,193,78,0.18)',borderRadius:10,cursor:'pointer',color:'var(--gold)',marginTop:4,fontFamily:'Space Grotesk',transition:'all .15s'}}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span style={{fontSize:11,fontWeight:700,letterSpacing:.3}}>{lang==='ar'?'بناء رهان':'Bet Builder'}</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -1406,8 +1413,223 @@ function MatchCard({match,predictions,onPickClick,loading,lang,stake}){
   );
 }
 
+// ── Bet Builder Sheet ─────────────────────────────────────────────────────────
+function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
+  const T=TX[lang];
+  const CHIPS=[10,25,50,100,200,500];
+  const [selectedLegs,setSelectedLegs]=useState([]);
+  const [chosenStake,setChosenStake]=useState(String(defaultStake||100));
+  const [scorers,setScorers]=useState(null);
+  const [loadingScorers,setLoadingScorers]=useState(false);
+  const bh=parseFloat(match.home_odds),bd=parseFloat(match.draw_odds),ba=parseFloat(match.away_odds);
+  function getOdds(pred){
+    if(pred==='1') return bh;
+    if(pred==='X') return bd;
+    if(pred==='2') return ba;
+    if(pred==='1X') return parseFloat(match.odds_1x)||(bh*bd)/(bh+bd);
+    if(pred==='X2') return parseFloat(match.odds_x2)||(bd*ba)/(bd+ba);
+    if(pred==='BTTS-Y') return parseFloat(match.odds_btts_yes);
+    if(pred==='BTTS-N') return parseFloat(match.odds_btts_no);
+    if(pred==='OVER2.5') return parseFloat(match.odds_over25);
+    if(pred==='UNDER2.5') return parseFloat(match.odds_under25);
+    if(pred==='DNB1') return parseFloat(match.odds_dnb_home)||bh;
+    if(pred==='DNB2') return parseFloat(match.odds_dnb_away)||ba;
+    if(pred.startsWith('ANYTIME:')||pred.startsWith('FIRST:')){
+      const pn=pred.split(':').slice(1).join(':');
+      const mkt=pred.startsWith('ANYTIME:')?'anytime':'first';
+      const s=scorers?.find(sc=>sc.player_name===pn&&sc.market===mkt);
+      return s?parseFloat(s.odds):5.0;
+    }
+    return 1;
+  }
+  function mktGrp(pred){
+    if(['1','X','2','1X','X2'].includes(pred)) return '1x2';
+    if(['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
+    if(['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
+    if(['DNB1','DNB2'].includes(pred)) return 'dnb';
+    return pred;
+  }
+  function toggleLeg(pred){
+    const grp=mktGrp(pred);
+    const isUnique=pred.startsWith('ANYTIME:')||pred.startsWith('FIRST:');
+    if(selectedLegs.includes(pred)){
+      setSelectedLegs(prev=>prev.filter(p=>p!==pred));
+    } else if(!isUnique){
+      setSelectedLegs(prev=>{
+        const filtered=prev.filter(p=>mktGrp(p)!==grp);
+        if(filtered.length>=8) return prev;
+        return [...filtered,pred];
+      });
+    } else {
+      setSelectedLegs(prev=>prev.length>=8?prev:[...prev,pred]);
+    }
+  }
+  function legLabel(pred){
+    if(pred==='1') return match.home_team;
+    if(pred==='X') return lang==='ar'?'تعادل':'Draw';
+    if(pred==='2') return match.away_team;
+    if(pred==='1X') return match.home_team+'/Draw';
+    if(pred==='X2') return 'Draw/'+match.away_team;
+    if(pred==='BTTS-Y') return 'BTTS Yes';
+    if(pred==='BTTS-N') return 'BTTS No';
+    if(pred==='OVER2.5') return 'Over 2.5';
+    if(pred==='UNDER2.5') return 'Under 2.5';
+    if(pred==='DNB1') return 'DNB '+match.home_team;
+    if(pred==='DNB2') return 'DNB '+match.away_team;
+    if(pred.startsWith('ANYTIME:')) return pred.slice(8);
+    if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
+    return pred;
+  }
+  const combinedOdds=selectedLegs.reduce((acc,p)=>acc*(getOdds(p)||1),1);
+  const stakeAmt=Math.min(500,Math.max(1,parseFloat(chosenStake)||defaultStake||100));
+  const potWin=(stakeAmt*combinedOdds).toFixed(2);
+  const canSubmit=selectedLegs.length>=2&&stakeAmt>=1;
+  async function loadScorers(){
+    setLoadingScorers(true);
+    try{const data=await apiFetch(`/wc/matches/${match.id}/players`);setScorers(data);}
+    catch(e){}
+    setLoadingScorers(false);
+  }
+  function LegBtn({pred,label}){
+    const on=selectedLegs.includes(pred);
+    const o=getOdds(pred);
+    const atMax=selectedLegs.length>=8&&!on;
+    return(
+      <button onClick={()=>!atMax&&toggleLeg(pred)} disabled={atMax}
+        style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 10px',
+          borderRadius:10,border:`1px solid ${on?'var(--gold)':'var(--border2)'}`,
+          background:on?'rgba(242,193,78,0.08)':'var(--glass)',
+          cursor:atMax?'not-allowed':'pointer',width:'100%',marginBottom:4,transition:'all .12s',opacity:atMax?0.4:1}}>
+        <span style={{fontSize:12,fontWeight:700,color:on?'var(--gold)':'var(--text)',textAlign:'left',flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{label}</span>
+        {o&&<span className="mono" style={{fontSize:11,color:on?'var(--gold)':'var(--muted)',fontWeight:700,flexShrink:0,marginLeft:8}}>{o.toFixed(2)}</span>}
+      </button>
+    );
+  }
+  const secHdr={fontSize:9,fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:1.2,color:'var(--muted)',marginBottom:6,textTransform:'uppercase'};
+  return(
+    <div className="sheet-overlay" onClick={onCancel}>
+      <div className="sheet-panel" style={{maxHeight:'92dvh',overflowY:'auto',paddingBottom:'env(safe-area-inset-bottom,20px)'}} onClick={e=>e.stopPropagation()}>
+        <div className="sheet-handle"/>
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',padding:'4px 16px 12px'}}>
+          <div>
+            <div style={{fontSize:14,fontWeight:800,fontFamily:'Space Grotesk',color:'var(--gold)',letterSpacing:.3}}>{lang==='ar'?'بناء رهان':'Bet Builder'}</div>
+            <div style={{fontSize:11,color:'var(--muted)',marginTop:2,fontWeight:600}}>{match.home_flag} {match.home_team} vs {match.away_team} {match.away_flag}</div>
+          </div>
+          <button onClick={onCancel} style={{width:28,height:28,borderRadius:8,background:'var(--glass)',border:'1px solid var(--border2)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted)',cursor:'pointer',fontSize:13,flexShrink:0}}>✕</button>
+        </div>
+        <div style={{padding:'0 16px',display:'flex',flexDirection:'column',gap:12}}>
+          <div>
+            <div style={secHdr}>{lang==='ar'?'نتيجة المباراة':'Match Result'}</div>
+            <LegBtn pred="1" label={`1 · ${match.home_team}`}/>
+            <LegBtn pred="X" label={lang==='ar'?'X · تعادل':'X · Draw'}/>
+            <LegBtn pred="2" label={`2 · ${match.away_team}`}/>
+          </div>
+          <div>
+            <div style={secHdr}>{lang==='ar'?'فرصة مزدوجة':'Double Chance'}</div>
+            <LegBtn pred="1X" label={`1X · ${match.home_team}/Draw`}/>
+            <LegBtn pred="X2" label={`X2 · Draw/${match.away_team}`}/>
+          </div>
+          {(parseFloat(match.odds_btts_yes)||parseFloat(match.odds_btts_no))&&(
+            <div>
+              <div style={secHdr}>{lang==='ar'?'كلا الفريقين يسجل':'Both Teams to Score'}</div>
+              <LegBtn pred="BTTS-Y" label={lang==='ar'?'BTTS نعم':'BTTS Yes'}/>
+              <LegBtn pred="BTTS-N" label={lang==='ar'?'BTTS لا':'BTTS No'}/>
+            </div>
+          )}
+          {(parseFloat(match.odds_over25)||parseFloat(match.odds_under25))&&(
+            <div>
+              <div style={secHdr}>{lang==='ar'?'أهداف Over/Under 2.5':'Goals Over/Under 2.5'}</div>
+              <LegBtn pred="OVER2.5" label={lang==='ar'?'أكثر من 2.5':'Over 2.5'}/>
+              <LegBtn pred="UNDER2.5" label={lang==='ar'?'أقل من 2.5':'Under 2.5'}/>
+            </div>
+          )}
+          {(parseFloat(match.odds_dnb_home)||parseFloat(match.odds_dnb_away))&&(
+            <div>
+              <div style={secHdr}>{lang==='ar'?'بدون تعادل':'Draw No Bet'}</div>
+              <LegBtn pred="DNB1" label={`DNB · ${match.home_team}`}/>
+              <LegBtn pred="DNB2" label={`DNB · ${match.away_team}`}/>
+            </div>
+          )}
+          <div>
+            <div style={secHdr}>{lang==='ar'?'هداف الأهداف':'Goal Scorers'}</div>
+            {!scorers&&(
+              <button onClick={loadScorers} disabled={loadingScorers}
+                style={{display:'flex',alignItems:'center',gap:6,padding:'8px 12px',borderRadius:10,border:'1px dashed var(--border2)',background:'transparent',color:'var(--muted)',cursor:loadingScorers?'wait':'pointer',fontSize:11,fontWeight:600,width:'100%',justifyContent:'center'}}>
+                {loadingScorers?'Loading...':(lang==='ar'?'تحميل هداف الأهداف':'Load Goal Scorer Markets')}
+              </button>
+            )}
+            {scorers&&(()=>{
+              const anytime=scorers.filter(s=>s.market==='anytime').sort((a,b)=>parseFloat(a.odds)-parseFloat(b.odds)).slice(0,12);
+              const first=scorers.filter(s=>s.market==='first').sort((a,b)=>parseFloat(a.odds)-parseFloat(b.odds)).slice(0,8);
+              return(<>
+                {anytime.length>0&&(<div style={{marginBottom:8}}>
+                  <div style={{fontSize:8,color:'var(--muted)',fontWeight:700,letterSpacing:.8,marginBottom:4,fontFamily:'Space Grotesk'}}>ANYTIME SCORER</div>
+                  {anytime.map(s=>(<LegBtn key={'A:'+s.player_name} pred={'ANYTIME:'+s.player_name} label={s.player_name}/>))}
+                </div>)}
+                {first.length>0&&(<div>
+                  <div style={{fontSize:8,color:'var(--muted)',fontWeight:700,letterSpacing:.8,marginBottom:4,fontFamily:'Space Grotesk'}}>FIRST SCORER</div>
+                  {first.map(s=>(<LegBtn key={'F:'+s.player_name} pred={'FIRST:'+s.player_name} label={'1st: '+s.player_name}/>))}
+                </div>)}
+                {anytime.length===0&&first.length===0&&(
+                  <div style={{fontSize:11,color:'var(--muted)',textAlign:'center',padding:'8px 0'}}>No scorer markets available</div>
+                )}
+              </>);
+            })()}
+          </div>
+        </div>
+        {selectedLegs.length>0&&(
+          <div style={{margin:'12px 16px 0',padding:'10px 12px',background:'rgba(242,193,78,0.05)',border:'1px solid rgba(242,193,78,0.12)',borderRadius:12}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+              <span style={{fontSize:10,color:'var(--muted)',fontWeight:700,fontFamily:'Space Grotesk',textTransform:'uppercase',letterSpacing:.5}}>{selectedLegs.length} {lang==='ar'?'تحديدات':'legs'}</span>
+              <span className="mono" style={{fontSize:17,fontWeight:800,color:'var(--gold)'}}>{combinedOdds.toFixed(2)}×</span>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+              {selectedLegs.map(pred=>(
+                <span key={pred} onClick={()=>toggleLeg(pred)}
+                  style={{display:'inline-flex',alignItems:'center',gap:3,fontSize:10,padding:'3px 8px',borderRadius:99,background:'rgba(242,193,78,0.1)',border:'1px solid rgba(242,193,78,0.2)',color:'var(--gold)',fontWeight:700,cursor:'pointer'}}>
+                  {legLabel(pred)} <span style={{opacity:.6}}>×</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div style={{padding:'12px 16px 0'}}>
+          <div style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:1.2,color:'var(--muted)',marginBottom:6,textTransform:'uppercase'}}>{lang==='ar'?'الرهان':'Stake'}</div>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:8}}>
+            {CHIPS.map(c=>(
+              <button key={c} onClick={()=>setChosenStake(String(c))}
+                style={{padding:'5px 11px',borderRadius:8,border:`1px solid ${chosenStake===String(c)?'var(--gold)':'var(--border2)'}`,background:chosenStake===String(c)?'rgba(242,193,78,0.1)':'var(--glass)',fontSize:11,fontWeight:700,color:chosenStake===String(c)?'var(--gold)':'var(--text2)',cursor:'pointer',fontFamily:'Space Grotesk',transition:'all .12s'}}>
+                ${c}
+              </button>
+            ))}
+          </div>
+          <input type="number" min="1" max="500" value={chosenStake} onChange={e=>setChosenStake(e.target.value)}
+            style={{width:'100%',padding:'9px 12px',borderRadius:10,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:13,fontFamily:'Space Grotesk',outline:'none',boxSizing:'border-box'}}
+            placeholder="Custom amount..."/>
+        </div>
+        <div style={{padding:'10px 16px 16px'}}>
+          {canSubmit&&(
+            <div style={{textAlign:'center',fontSize:11,color:'var(--green)',fontWeight:700,marginBottom:6}}>
+              {lang==='ar'?'الربح المحتمل':'Potential Win'}: <span className="mono">${potWin}</span>
+            </div>
+          )}
+          {selectedLegs.length===1&&(
+            <div style={{textAlign:'center',fontSize:10,color:'var(--muted)',marginBottom:6}}>
+              {lang==='ar'?'أضف تحديدًا آخر على الأقل':'Add at least 1 more selection'}
+            </div>
+          )}
+          <button onClick={()=>canSubmit&&onConfirm(selectedLegs,stakeAmt)} disabled={!canSubmit}
+            style={{width:'100%',padding:'13px',borderRadius:12,background:canSubmit?'var(--gold)':'rgba(255,255,255,0.06)',color:canSubmit?'#0A0600':'var(--muted)',fontWeight:800,fontSize:14,border:`1px solid ${canSubmit?'var(--gold)':'var(--border2)'}`,cursor:canSubmit?'pointer':'not-allowed',fontFamily:'Space Grotesk',transition:'all .15s',letterSpacing:.3}}>
+            {lang==='ar'?'تأكيد الرهان المركب':'Confirm Bet Builder'}{selectedLegs.length>=2?` · ${selectedLegs.length} legs`:''}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Fixtures Tab ──────────────────────────────────────────────────────────────
-function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang}){
+function FixturesTab({matches,predictions,onPickClick,onBuildClick,loadingMatch,settings,lang}){
   const T=TX[lang];
   const [filter,setFilter]=useState('all');
   const [showFinished,setShowFinished]=useState(false);
@@ -1442,7 +1664,7 @@ function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang
         </div>
         {group.matches.map(m=>(
           <MatchCard key={m.id} match={m} predictions={predMap[m.id]||[]}
-            onPickClick={onPickClick} loading={loadingMatch===m.id}
+            onPickClick={onPickClick} onBuildClick={onBuildClick} loading={loadingMatch===m.id}
             lang={lang} stake={stake}/>
         ))}
       </div>
@@ -1490,7 +1712,7 @@ function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang
 }
 
 // ── My Bets Tab ───────────────────────────────────────────────────────────────
-function MyBetsTab({matches,predictions,lang}){
+function MyBetsTab({matches,predictions,builders,lang}){
   const T=TX[lang];
   const matchMap={};matches.forEach(m=>matchMap[m.id]=m);
   const preds=[...(predictions||[])].sort((a,b)=>{
@@ -1503,6 +1725,31 @@ function MyBetsTab({matches,predictions,lang}){
   const totalStaked=settled.reduce((s,p)=>s+parseFloat(p.stake),0);
   const wins=settled.filter(p=>p.payout>0).length;
   const pl=totalWon-totalStaked;
+  const bldrs=[...(builders||[])].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const bldrPending=bldrs.filter(b=>!b.settled);
+  const bldrSettled=bldrs.filter(b=>b.settled);
+  function bldrLegLabel(pred,m){
+    if(pred==='1') return m?.home_team||'Home';
+    if(pred==='X') return lang==='ar'?'تعادل':'Draw';
+    if(pred==='2') return m?.away_team||'Away';
+    if(pred==='1X') return (m?.home_team||'Home')+'/Draw';
+    if(pred==='X2') return 'Draw/'+(m?.away_team||'Away');
+    if(pred==='BTTS-Y') return 'BTTS Yes';
+    if(pred==='BTTS-N') return 'BTTS No';
+    if(pred==='OVER2.5') return 'Over 2.5';
+    if(pred==='UNDER2.5') return 'Under 2.5';
+    if(pred==='DNB1') return 'DNB '+(m?.home_team||'Home');
+    if(pred==='DNB2') return 'DNB '+(m?.away_team||'Away');
+    if(pred.startsWith('ANYTIME:')) return pred.slice(8);
+    if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
+    return pred;
+  }
+  function legResultColor(r){
+    if(r==='won') return 'var(--green)';
+    if(r==='lost') return 'var(--red)';
+    if(r==='refund') return 'var(--gold)';
+    return 'var(--muted)';
+  }
 
   return(
     <div className="pb-32 px-4 pt-3">
@@ -1580,7 +1827,83 @@ function MyBetsTab({matches,predictions,lang}){
           })}
         </>
       )}
-      {preds.length===0&&(
+      {/* Builder bets pending */}
+      {bldrPending.length>0&&(
+        <>
+          <div className="section-date mt-5 mb-3">{lang==='ar'?'بناء الرهانات · قيد الانتظار':'Builder Bets · Pending'} · {bldrPending.length}</div>
+          {bldrPending.map(b=>{
+            const m=matchMap[b.match_id];
+            return(
+              <div key={b.id} className="match-card mb-2 px-4 py-3" style={{direction:'ltr',borderColor:'rgba(242,193,78,0.15)'}}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Flag team={m?.home_team||''} size={20}/><span style={{fontSize:9,color:'var(--muted)',padding:'0 2px',fontFamily:'Space Grotesk'}}>v</span><Flag team={m?.away_team||''} size={20}/>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m?.home_team||b.match_id} vs {m?.away_team||''}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{m&&new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'})+' · '+new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
+                  </div>
+                  <div style={{textAlign:'right',flexShrink:0}}>
+                    <div style={{fontSize:9,color:'var(--gold)',fontFamily:'Space Grotesk',fontWeight:700}}>BUILDER</div>
+                    <div className="mono" style={{fontSize:14,fontWeight:800,color:'var(--gold)'}}>{parseFloat(b.combined_odds).toFixed(2)}×</div>
+                  </div>
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                  {(b.legs||[]).map(l=>(
+                    <span key={l.id} style={{fontSize:9,padding:'2px 7px',borderRadius:99,background:'rgba(242,193,78,0.07)',border:'1px solid rgba(242,193,78,0.15)',color:'var(--gold)',fontWeight:600}}>
+                      {bldrLegLabel(l.prediction,m)} <span className="mono" style={{opacity:.7}}>{parseFloat(l.odds_locked).toFixed(2)}</span>
+                    </span>
+                  ))}
+                </div>
+                <div style={{marginTop:6,fontSize:10,color:'var(--muted)',display:'flex',justifyContent:'space-between'}}>
+                  <span>{lang==='ar'?'الرهان':'Stake'}: <span className="mono" style={{fontWeight:700,color:'var(--text)'}}>${parseFloat(b.stake).toFixed(2)}</span></span>
+                  <span>{lang==='ar'?'محتمل':'Potential'}: <span className="mono" style={{fontWeight:700,color:'var(--green)'}}>${(parseFloat(b.stake)*parseFloat(b.combined_odds)).toFixed(2)}</span></span>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+      {/* Builder bets settled */}
+      {bldrSettled.length>0&&(
+        <>
+          <div className="section-date mt-5 mb-3">{lang==='ar'?'بناء الرهانات · المنتهية':'Builder Bets · Settled'} · {bldrSettled.length}</div>
+          {bldrSettled.map(b=>{
+            const m=matchMap[b.match_id];
+            const won=parseFloat(b.payout)>parseFloat(b.stake);
+            const refund=parseFloat(b.payout)>0&&parseFloat(b.payout)===parseFloat(b.stake);
+            return(
+              <div key={b.id} className="match-card mb-2 px-4 py-3" style={{direction:'ltr',borderColor:won?'rgba(0,201,123,0.15)':refund?'rgba(242,193,78,0.15)':'rgba(255,54,81,0.1)'}}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Flag team={m?.home_team||''} size={20}/><span style={{fontSize:9,color:'var(--muted)',padding:'0 2px',fontFamily:'Space Grotesk'}}>v</span><Flag team={m?.away_team||''} size={20}/>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m?.home_team||b.match_id} vs {m?.away_team||''}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{m&&`${m.home_score}–${m.away_score}`}</div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div style={{textAlign:'right'}}>
+                      <div style={{fontSize:9,color:'var(--gold)',fontFamily:'Space Grotesk',fontWeight:700}}>BUILDER</div>
+                      <div className="mono" style={{fontSize:17,fontWeight:700,color:won?'var(--green)':refund?'var(--gold)':'var(--red)',letterSpacing:-0.5}}>
+                        {won?`+$${(parseFloat(b.payout)-parseFloat(b.stake)).toFixed(2)}`:refund?'PUSH':`-$${parseFloat(b.stake).toFixed(2)}`}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:4}}>
+                  {(b.legs||[]).map(l=>(
+                    <span key={l.id} style={{fontSize:9,padding:'2px 7px',borderRadius:99,background:`rgba(${l.leg_result==='won'?'0,201,123':l.leg_result==='lost'?'255,54,81':l.leg_result==='refund'?'242,193,78':'128,128,128'},.1)`,border:`1px solid rgba(${l.leg_result==='won'?'0,201,123':l.leg_result==='lost'?'255,54,81':l.leg_result==='refund'?'242,193,78':'128,128,128'},.2)`,color:legResultColor(l.leg_result),fontWeight:600}}>
+                      {bldrLegLabel(l.prediction,m)} <span className="mono" style={{opacity:.7}}>{parseFloat(l.odds_locked).toFixed(2)}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+      {preds.length===0&&bldrs.length===0&&(
         <div className="flex flex-col items-center justify-center py-24" style={{color:'var(--muted)'}}>
           <IconTarget size={44} color="var(--muted)"/>
           <div className="mt-3 font-bold text-base">{T.noBets}</div>
@@ -2184,6 +2507,8 @@ function App(){
   const [loadingMatch,setLoadingMatch]=useState(null);
   const [toast,setToastMsg]=useState(null);
   const [confirmPick,setConfirmPick]=useState(null);
+  const [builderMatch,setBuilderMatch]=useState(null);
+  const [builders,setBuilders]=useState([]);
   const [lang,setLang]=useState(()=>localStorage.getItem('wc_lang')||'ar');
   const [theme,setTheme]=useState(()=>localStorage.getItem('wc_theme')||'light');
   const [logoTaps,setLogoTaps]=useState(0);
@@ -2220,15 +2545,16 @@ function App(){
   async function loadLeaderboard(){try{setLeaderboard(await apiFetch('/wc/leaderboard'));}catch(e){}}
   async function loadSettings(){try{const st=await apiFetch('/wc/settings');setSettings(s=>({...s,...st}));}catch(e){}}
   async function loadAdminData(){try{const[pl,st]=await Promise.all([apiFetch('/wc/admin/players'),apiFetch('/wc/admin/settings')]);setAdminPlayers(pl);setSettings(st);}catch(e){}}
+  async function loadBuilders(){try{setBuilders(await apiFetch('/wc/my-builders'));}catch(e){}}
   async function refresh(){
-    await Promise.all([loadMatches(),loadMe(),loadLeaderboard()]);
+    await Promise.all([loadMatches(),loadMe(),loadLeaderboard(),loadBuilders()]);
     if(isAdmin) loadAdminData();
   }
 
   useEffect(()=>{
     const token=localStorage.getItem('wc_token'),cached=localStorage.getItem('wc_player');
     if(token&&cached){try{setPlayer(JSON.parse(cached));}catch(e){}}
-    Promise.all([loadMatches(),token?loadMe():Promise.resolve(),loadLeaderboard(),loadSettings()]).finally(()=>setLoading(false));
+    Promise.all([loadMatches(),token?loadMe():Promise.resolve(),loadLeaderboard(),loadSettings(),token?loadBuilders():Promise.resolve()]).finally(()=>setLoading(false));
   },[]);
 
   useEffect(()=>{
@@ -2256,6 +2582,21 @@ function App(){
   }
 
   function handlePickClick(match,pick,extraOdds=null){setConfirmPick({match,pick,extraOdds});}
+
+  function handleBuildClick(match){setBuilderMatch(match);}
+
+  async function handleBuilderConfirm(legs,stake){
+    if(!builderMatch||!player) return;
+    const match=builderMatch;
+    setBuilderMatch(null);
+    try{
+      const data=await apiFetch('/wc/bet-builder',{method:'POST',body:JSON.stringify({matchId:match.id,legs,stake})});
+      setPlayer(p=>({...p,balance:data.newBalance}));
+      loadBuilders();
+      loadLeaderboard();
+      showToast(lang==='ar'?`رهان مركب ✓ ${data.combinedOdds.toFixed(2)}×`:`Builder bet placed ✓ ${data.combinedOdds.toFixed(2)}×`,'success');
+    }catch(e){showToast(e.message,'error');}
+  }
 
   async function handleConfirm(chosenStake){
     if(!confirmPick||!player) return;
@@ -2401,6 +2742,10 @@ function App(){
         <AdminPanel matches={matches} players={adminPlayers} settings={settings}
           onRefresh={refresh} showToast={showToast} lang={lang} onClose={()=>setShowAdmin(false)}/>
       )}
+      {builderMatch&&(
+        <BuilderSheet match={builderMatch} onConfirm={handleBuilderConfirm} onCancel={()=>setBuilderMatch(null)}
+          lang={lang} defaultStake={parseFloat(settings.stake_per_match||100)}/>
+      )}
 
       {/* Header */}
       <div style={{position:'sticky',top:0,zIndex:10,paddingTop:'env(safe-area-inset-top,0px)'}}>
@@ -2464,8 +2809,8 @@ function App(){
 
       {/* Content */}
       <div style={{position:'relative',zIndex:1}}>
-        {tab==='fixtures'&&<FixturesTab matches={matches} predictions={predictions} onPickClick={handlePickClick} loadingMatch={loadingMatch} settings={settings} lang={lang}/>}
-        {tab==='mybets'&&<MyBetsTab matches={matches} predictions={predictions} lang={lang}/>}
+        {tab==='fixtures'&&<FixturesTab matches={matches} predictions={predictions} onPickClick={handlePickClick} onBuildClick={player?handleBuildClick:null} loadingMatch={loadingMatch} settings={settings} lang={lang}/>}
+        {tab==='mybets'&&<MyBetsTab matches={matches} predictions={predictions} builders={builders} lang={lang}/>}
         {tab==='leaderboard'&&<LeaderboardTab leaderboard={leaderboard} currentPlayer={player} lang={lang}/>}
       </div>
 

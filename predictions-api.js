@@ -277,11 +277,32 @@ async function initDB() {
       is_own_goal BOOLEAN DEFAULT FALSE,
       is_penalty BOOLEAN DEFAULT FALSE
     );
+    CREATE TABLE IF NOT EXISTS wc_bet_builders (
+      id SERIAL PRIMARY KEY,
+      player_id INTEGER NOT NULL REFERENCES wc_players(id) ON DELETE CASCADE,
+      match_id TEXT NOT NULL REFERENCES wc_matches(id) ON DELETE CASCADE,
+      stake NUMERIC(10,2) NOT NULL,
+      combined_odds NUMERIC(10,4) NOT NULL,
+      payout NUMERIC(10,2) DEFAULT 0,
+      settled BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS wc_bet_builder_legs (
+      id SERIAL PRIMARY KEY,
+      builder_id INTEGER NOT NULL REFERENCES wc_bet_builders(id) ON DELETE CASCADE,
+      prediction TEXT NOT NULL,
+      odds_locked NUMERIC(10,4) NOT NULL,
+      leg_result TEXT
+    );
   `);
 
   await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_player_odds TO urbanpadel_app`);
   await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_match_goals TO urbanpadel_app`);
   await pool.query(`GRANT USAGE, SELECT ON SEQUENCE wc_match_goals_id_seq TO urbanpadel_app`);
+  await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_bet_builders TO urbanpadel_app`);
+  await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_bet_builder_legs TO urbanpadel_app`);
+  await pool.query(`GRANT USAGE, SELECT ON SEQUENCE wc_bet_builders_id_seq TO urbanpadel_app`);
+  await pool.query(`GRANT USAGE, SELECT ON SEQUENCE wc_bet_builder_legs_id_seq TO urbanpadel_app`);
 
   const { rows } = await pool.query('SELECT COUNT(*) FROM wc_matches');
   if (rows[0].count === '0') {
@@ -468,6 +489,137 @@ app.post('/wc/predict', auth, async (req, res) => {
   }
 });
 
+// Submit Bet Builder (KO same-match multi-leg)
+app.post('/wc/bet-builder', auth, async (req, res) => {
+  try {
+    const { matchId, legs, stake: requestedStake } = req.body;
+    if (!Array.isArray(legs) || legs.length < 2) return res.status(400).json({ error: 'Bet builder requires at least 2 selections' });
+    if (legs.length > 8) return res.status(400).json({ error: 'Max 8 legs per bet builder' });
+
+    const { rows: mRows } = await pool.query('SELECT * FROM wc_matches WHERE id=$1', [matchId]);
+    if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
+    const match = mRows[0];
+
+    if (match.home_team === 'TBD' || match.away_team === 'TBD')
+      return res.status(400).json({ error: 'Betting opens when teams are confirmed' });
+    if (match.stage === 'group')
+      return res.status(400).json({ error: 'Bet builder is only available for knockout stage matches' });
+
+    const deadline = new Date(match.kickoff).getTime() - 5 * 60 * 1000;
+    if (Date.now() > deadline) return res.status(400).json({ error: 'Prediction deadline passed' });
+    if (match.settled) return res.status(400).json({ error: 'Match already settled' });
+
+    const defaultStake = parseFloat(await getSetting('stake_per_match', '5.00'));
+    const stake = requestedStake ? Math.min(500, Math.max(1, parseFloat(requestedStake))) : defaultStake;
+
+    // Validate predictions and get odds for each leg
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+    const validStandard = ['1','X','2','1X','X2','12'];
+    const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
+    const baseOddsMap = {
+      '1': bh, 'X': bd, '2': ba,
+      '1X': parseFloat(match.odds_1x) || (bh*bd)/(bh+bd),
+      'X2': parseFloat(match.odds_x2) || (bd*ba)/(bd+ba),
+      '12': (bh*ba)/(bh+ba),
+      'BTTS-Y': parseFloat(match.odds_btts_yes) || 1.85,
+      'BTTS-N': parseFloat(match.odds_btts_no) || 1.85,
+      'OVER2.5': parseFloat(match.odds_over25) || 1.85,
+      'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
+      'DNB1': parseFloat(match.odds_dnb_home) || bh,
+      'DNB2': parseFloat(match.odds_dnb_away) || ba,
+    };
+
+    // Market group conflict check: can't combine selections from the same market
+    const marketGroup = pred => {
+      if (['1','X','2','1X','X2','12'].includes(pred)) return '1x2';
+      if (['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
+      if (['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
+      if (['DNB1','DNB2'].includes(pred)) return 'dnb';
+      return pred; // player scorer bets are unique per prediction string
+    };
+    const seenGroups = new Set();
+    const seenPreds = new Set();
+    const legOdds = [];
+
+    for (const pred of legs) {
+      const isValid = validStandard.includes(pred) || KO_MARKETS.includes(pred) ||
+                      pred.startsWith('ANYTIME:') || pred.startsWith('FIRST:');
+      if (!isValid) return res.status(400).json({ error: `Invalid selection: ${pred}` });
+      if (seenPreds.has(pred)) return res.status(400).json({ error: `Duplicate selection: ${pred}` });
+      const grp = marketGroup(pred);
+      if (seenGroups.has(grp)) return res.status(400).json({ error: `Conflicting selections in same market` });
+      seenPreds.add(pred);
+      seenGroups.add(grp);
+
+      let odds = baseOddsMap[pred];
+      if (odds == null && (pred.startsWith('ANYTIME:') || pred.startsWith('FIRST:'))) {
+        const market = pred.startsWith('ANYTIME:') ? 'anytime' : 'first';
+        const playerName = pred.split(':').slice(1).join(':');
+        const { rows: poRows } = await pool.query(
+          'SELECT odds FROM wc_player_odds WHERE match_id=$1 AND player_name=$2 AND market=$3',
+          [matchId, playerName, market]
+        );
+        odds = poRows.length ? parseFloat(poRows[0].odds) : 5.0;
+      }
+      if (!odds) odds = 1.85;
+      legOdds.push(parseFloat(odds));
+    }
+
+    const combinedOdds = legOdds.reduce((acc, o) => acc * o, 1);
+
+    const player = await getPlayer(req.playerId);
+    if (player.balance < stake)
+      return res.status(400).json({ error: `Insufficient balance (have ${parseFloat(player.balance).toFixed(2)}, need ${stake})` });
+
+    await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [stake, req.playerId]);
+    const { rows: bRows } = await pool.query(
+      'INSERT INTO wc_bet_builders (player_id,match_id,stake,combined_odds) VALUES ($1,$2,$3,$4) RETURNING id',
+      [req.playerId, matchId, stake, combinedOdds]
+    );
+    const builderId = bRows[0].id;
+    for (let i = 0; i < legs.length; i++) {
+      await pool.query(
+        'INSERT INTO wc_bet_builder_legs (builder_id,prediction,odds_locked) VALUES ($1,$2,$3)',
+        [builderId, legs[i], legOdds[i]]
+      );
+    }
+
+    const { rows: updatedBal } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [req.playerId]);
+    res.json({ ok: true, builderId, combinedOdds, newBalance: updatedBal[0].balance });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Get my bet builders
+app.get('/wc/my-builders', auth, async (req, res) => {
+  try {
+    const { rows: builders } = await pool.query(
+      `SELECT b.*, m.home_team, m.away_team, m.home_flag, m.away_flag, m.kickoff, m.stage, m.settled as match_settled
+       FROM wc_bet_builders b
+       JOIN wc_matches m ON m.id=b.match_id
+       WHERE b.player_id=$1
+       ORDER BY b.created_at DESC`,
+      [req.playerId]
+    );
+    const builderIds = builders.map(b => b.id);
+    let legMap = {};
+    if (builderIds.length) {
+      const { rows: legs } = await pool.query(
+        `SELECT * FROM wc_bet_builder_legs WHERE builder_id=ANY($1)`, [builderIds]
+      );
+      legs.forEach(l => {
+        if (!legMap[l.builder_id]) legMap[l.builder_id] = [];
+        legMap[l.builder_id].push(l);
+      });
+    }
+    res.json(builders.map(b => ({ ...b, legs: legMap[b.id] || [] })));
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Leaderboard
 app.get('/wc/leaderboard', async (req, res) => {
   try {
@@ -480,7 +632,8 @@ app.get('/wc/leaderboard', async (req, res) => {
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0) as wins,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true) as played,
         (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as total,
-        COALESCE((SELECT SUM(payout - stake) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0),0) as winnings
+        COALESCE((SELECT SUM(payout - stake) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0),0) +
+        COALESCE((SELECT SUM(payout - stake) FROM wc_bet_builders b WHERE b.player_id=pl.id AND b.settled=true AND b.payout>0),0) as winnings
       FROM wc_players pl
       ORDER BY winnings DESC, balance DESC, name ASC
     `, [startBal]);
@@ -666,6 +819,20 @@ app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
       }
       await pool.query('UPDATE wc_predictions SET settled=false, payout=null WHERE id=$1', [p.id]);
     }
+    // Refund settled bet builders
+    const { rows: bldrs } = await pool.query(
+      'SELECT * FROM wc_bet_builders WHERE match_id=$1 AND settled=true', [matchId]
+    );
+    for (const b of bldrs) {
+      if (b.payout > 0) {
+        await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [b.payout, b.player_id]);
+      } else {
+        await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [b.stake, b.player_id]);
+      }
+      await pool.query('UPDATE wc_bet_builder_legs SET leg_result=null WHERE builder_id=$1', [b.id]);
+      await pool.query('UPDATE wc_bet_builders SET settled=false, payout=0 WHERE id=$1', [b.id]);
+    }
+
     await pool.query(
       'UPDATE wc_matches SET settled=false, result=null, home_score=null, away_score=null WHERE id=$1',
       [matchId]
@@ -740,6 +907,17 @@ function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = []) 
   return null;
 }
 
+// Unified settlement helper — returns {won, refund} for any prediction type
+function settleAnyPrediction(prediction, homeScore, awayScore, result, goalScorers = []) {
+  if (prediction === '1')  return { won: result === '1', refund: false };
+  if (prediction === 'X')  return { won: result === 'X', refund: false };
+  if (prediction === '2')  return { won: result === '2', refund: false };
+  if (prediction === '1X') return { won: result === '1' || result === 'X', refund: false };
+  if (prediction === 'X2') return { won: result === 'X' || result === '2', refund: false };
+  if (prediction === '12') return { won: result === '1' || result === '2', refund: false };
+  return settleKOPrediction(prediction, homeScore, awayScore, goalScorers);
+}
+
 // Extracted settle logic (shared by admin route + auto-fetch)
 async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam) {
   const result = homeScore > awayScore ? '1' : awayScore > homeScore ? '2' : 'X';
@@ -797,6 +975,52 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
       }
     }
   }
+  // ── Settle bet builders for this match ──────────────────────────────────────
+  const { rows: builders } = await pool.query(
+    'SELECT * FROM wc_bet_builders WHERE match_id=$1 AND settled=false', [matchId]
+  );
+  for (const b of builders) {
+    const { rows: legs } = await pool.query(
+      'SELECT * FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]
+    );
+    let allWon = true;
+    let anyRefund = false;
+    let anyLoss = false;
+    const legUpdates = [];
+    for (const leg of legs) {
+      const r = settleAnyPrediction(leg.prediction, homeScore, awayScore, result, goals);
+      if (!r) { allWon = false; anyLoss = true; legUpdates.push({ id: leg.id, res: 'unsettled' }); continue; }
+      if (r.refund) { anyRefund = true; legUpdates.push({ id: leg.id, res: 'refund' }); }
+      else if (r.won) { legUpdates.push({ id: leg.id, res: 'won' }); }
+      else { allWon = false; anyLoss = true; legUpdates.push({ id: leg.id, res: 'lost' }); }
+    }
+    for (const lu of legUpdates) {
+      await pool.query('UPDATE wc_bet_builder_legs SET leg_result=$1 WHERE id=$2', [lu.res, lu.id]);
+    }
+    // A refund leg removes itself from the combination (push bet)
+    // The builder wins only if all non-refund legs won
+    const activeLegResults = legUpdates.filter(lu => lu.res !== 'refund');
+    const builderWon = activeLegResults.length > 0 && activeLegResults.every(lu => lu.res === 'won');
+    const fullRefund = activeLegResults.length === 0; // all legs were pushes
+
+    let payout;
+    if (fullRefund) {
+      payout = parseFloat(b.stake);
+    } else if (builderWon) {
+      // Recompute combined odds from non-refund legs only
+      const activeLegOdds = legs
+        .filter((_, i) => legUpdates[i].res !== 'refund')
+        .reduce((acc, leg) => acc * parseFloat(leg.odds_locked), 1);
+      payout = parseFloat(b.stake) * activeLegOdds;
+    } else {
+      payout = 0;
+    }
+    await pool.query('UPDATE wc_bet_builders SET settled=true, payout=$1 WHERE id=$2', [payout, b.id]);
+    if (payout > 0) {
+      await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, b.player_id]);
+    }
+  }
+
   return { result, settled: preds.length };
 }
 
