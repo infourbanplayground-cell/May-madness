@@ -219,7 +219,9 @@ async function initDB() {
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_home NUMERIC(6,3);
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_away NUMERIC(6,3);
     ALTER TABLE wc_predictions DROP CONSTRAINT IF EXISTS wc_predictions_player_id_match_id_key;
-    ALTER TABLE wc_predictions ADD CONSTRAINT wc_predictions_player_match_pred_key UNIQUE (player_id, match_id, prediction);
+    DO $$ BEGIN
+      ALTER TABLE wc_predictions ADD CONSTRAINT wc_predictions_player_match_pred_key UNIQUE (player_id, match_id, prediction);
+    EXCEPTION WHEN duplicate_table THEN NULL; END $$;
     CREATE TABLE IF NOT EXISTS wc_matches (
       id TEXT PRIMARY KEY,
       stage TEXT NOT NULL,
@@ -531,16 +533,23 @@ app.post('/wc/admin/result', adminAuth, async (req, res) => {
 // Update match (teams, odds, kickoff)
 app.put('/wc/admin/match/:id', adminAuth, async (req, res) => {
   try {
-    const { homeTeam, awayTeam, homeFlag, awayFlag, homeOdds, drawOdds, awayOdds, kickoff, venue } = req.body;
+    const { homeTeam, awayTeam, homeFlag, awayFlag, homeOdds, drawOdds, awayOdds, kickoff, venue,
+            odds1X, oddsX2, oddsBttsYes, oddsBttsNo, oddsOver25, oddsUnder25, oddsDnbHome, oddsDnbAway } = req.body;
     await pool.query(
       `UPDATE wc_matches SET
         home_team=COALESCE($1,home_team), away_team=COALESCE($2,away_team),
         home_flag=COALESCE($3,home_flag), away_flag=COALESCE($4,away_flag),
         home_odds=COALESCE($5,home_odds), draw_odds=COALESCE($6,draw_odds), away_odds=COALESCE($7,away_odds),
-        kickoff=COALESCE($8::timestamptz,kickoff), venue=COALESCE($9,venue)
+        kickoff=COALESCE($8::timestamptz,kickoff), venue=COALESCE($9,venue),
+        odds_1x=COALESCE($11,odds_1x), odds_x2=COALESCE($12,odds_x2),
+        odds_btts_yes=COALESCE($13,odds_btts_yes), odds_btts_no=COALESCE($14,odds_btts_no),
+        odds_over25=COALESCE($15,odds_over25), odds_under25=COALESCE($16,odds_under25),
+        odds_dnb_home=COALESCE($17,odds_dnb_home), odds_dnb_away=COALESCE($18,odds_dnb_away)
        WHERE id=$10`,
       [homeTeam||null, awayTeam||null, homeFlag||null, awayFlag||null,
-       homeOdds||null, drawOdds||null, awayOdds||null, kickoff||null, venue||null, req.params.id]
+       homeOdds||null, drawOdds||null, awayOdds||null, kickoff||null, venue||null, req.params.id,
+       odds1X||null, oddsX2||null, oddsBttsYes||null, oddsBttsNo||null,
+       oddsOver25||null, oddsUnder25||null, oddsDnbHome||null, oddsDnbAway||null]
     );
     res.json({ ok: true });
   } catch (e) {
