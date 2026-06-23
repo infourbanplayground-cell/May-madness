@@ -564,6 +564,16 @@ app.put('/wc/admin/match/:id', adminAuth, async (req, res) => {
 });
 
 // Get all players (admin)
+// Manual odds refresh (admin)
+app.post('/wc/admin/refresh-odds', adminAuth, async (req, res) => {
+  try {
+    autoFetchOdds();
+    res.json({ ok: true, message: 'Odds refresh triggered' });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get('/wc/admin/players', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
