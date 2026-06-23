@@ -1,0 +1,2429 @@
+<!doctype html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+<script>(function(){try{var t=localStorage.getItem('wc_theme')||'light';if(t==='light')document.getElementById('html-root').classList.add('light');}catch(e){}})();</script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
+<title>جروب الشباب — كأس العالم 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Outfit:wght@400;500;600;700;800&family=Cairo:wght@400;600;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<style>
+:root {
+  --gold: #F2C14E;
+  --gold-bright: #FFD866;
+  --gold-dim: #A88320;
+  --gold-glow: rgba(242,193,78,0.18);
+  --green: #00C97B;
+  --green-glow: rgba(0,201,123,0.15);
+  --red: #FF3651;
+  --blue: #4A9EFF;
+  --or: #FF7240;
+  --bg: #020C1E;
+  --bg2: #03111F;
+  --surface: rgba(7, 20, 44, 0.75);
+  --surface2: rgba(10, 26, 56, 0.6);
+  --glass: rgba(14, 30, 64, 0.5);
+  --border: rgba(242,193,78,0.1);
+  --border2: rgba(255,255,255,0.06);
+  --border-hover: rgba(242,193,78,0.28);
+  --text: #E8EEFF;
+  --text2: #A0B0D0;
+  --muted: #4D6085;
+  --pitch: rgba(0,201,123,0.04);
+  --header-bg: rgba(2,10,26,0.85);
+  --on-gold: #0A0600;
+  --card-grad: linear-gradient(160deg, rgba(10,22,50,0.9) 0%, rgba(6,15,36,0.85) 100%);
+  --next-hero-grad: linear-gradient(135deg, rgba(8,20,48,0.95) 0%, rgba(5,15,36,0.9) 100%);
+  --bg-grid-dot: rgba(255,255,255,0.018);
+  --vs-orb-bg: rgba(255,255,255,0.04);
+  --score-color: var(--gold-bright);
+}
+
+/* ── LIGHT THEME ── */
+html.light {
+  --gold: #C99316;
+  --gold-bright: #B47B05;
+  --gold-dim: #7A5A0A;
+  --gold-glow: rgba(201,147,22,0.14);
+  --green: #00A35F;
+  --red: #E0223B;
+  --blue: #2E7BE0;
+  --or: #E55A28;
+  --bg: #F4F0E6;
+  --bg2: #EDE6D3;
+  --surface: rgba(255,253,247,0.75);
+  --surface2: rgba(255,253,247,0.55);
+  --glass: rgba(255,255,255,0.7);
+  --border: rgba(180,123,5,0.18);
+  --border2: rgba(40,30,10,0.08);
+  --border-hover: rgba(201,147,22,0.4);
+  --text: #1A1408;
+  --text2: #5A4E32;
+  --muted: #8A7A55;
+  --pitch: rgba(0,163,95,0.04);
+  --header-bg: rgba(255,251,240,0.85);
+  --on-gold: #fff;
+  --card-grad: linear-gradient(160deg, rgba(255,253,247,0.95) 0%, rgba(248,242,228,0.9) 100%);
+  --next-hero-grad: linear-gradient(135deg, rgba(255,253,247,0.95) 0%, rgba(248,240,220,0.92) 100%);
+  --bg-grid-dot: rgba(60,40,10,0.05);
+  --vs-orb-bg: rgba(40,30,10,0.04);
+  --score-color: #B47B05;
+}
+html.light .bg-orb { opacity: 0.6 !important; }
+html.light .orb-gold { background: radial-gradient(circle, rgba(242,193,78,0.18) 0%, transparent 70%); }
+html.light .orb-green { background: radial-gradient(circle, rgba(0,201,123,0.12) 0%, transparent 70%); }
+html.light .orb-blue { background: radial-gradient(circle, rgba(74,158,255,0.1) 0%, transparent 70%); }
+html.light .match-card { box-shadow: 0 4px 24px rgba(120,90,30,0.08), inset 0 1px 0 rgba(255,255,255,0.5); }
+html.light .match-card:hover { box-shadow: 0 12px 40px rgba(120,90,30,0.12), 0 0 0 1px rgba(201,147,22,0.12); }
+html.light .match-card::after { background: linear-gradient(90deg, transparent, rgba(40,30,10,0.06), transparent); }
+html.light .pred-btn { background: rgba(40,30,10,0.025); border-color: rgba(40,30,10,0.08); color: var(--text2); }
+html.light .pred-btn:hover:not(:disabled) { background: rgba(201,147,22,0.08); border-color: rgba(201,147,22,0.4); color: var(--gold-bright); box-shadow: 0 6px 16px rgba(120,90,30,0.08); }
+html.light .pred-btn.selected-1 { background: rgba(46,123,224,0.2); border-color: rgba(46,123,224,0.6); color: #1a5db3; font-weight:700; }
+html.light .pred-btn.selected-X { background: rgba(201,147,22,0.2); border-color: rgba(201,147,22,0.6); color: var(--gold-bright); font-weight:700; }
+html.light .pred-btn.selected-2 { background: rgba(229,90,40,0.2); border-color: rgba(229,90,40,0.6); color: #b84010; font-weight:700; }
+html.light .pred-btn.selected-1X { background: linear-gradient(135deg,rgba(46,123,224,0.17),rgba(201,147,22,0.14)); border-color: rgba(46,123,224,0.5); color: #1a5db3; font-weight:700; }
+html.light .pred-btn.selected-X2 { background: linear-gradient(135deg,rgba(201,147,22,0.14),rgba(229,90,40,0.17)); border-color: rgba(229,90,40,0.5); color: #b84010; font-weight:700; }
+html.light .pred-btn.correct { background: rgba(0,163,95,0.1); border-color: rgba(0,163,95,0.4); color: #008A50; }
+html.light .pred-btn.wrong { background: rgba(224,34,59,0.06); border-color: rgba(224,34,59,0.25); color: #B01828; }
+html.light .pred-btn.selected-1:disabled,html.light .pred-btn.selected-X:disabled,html.light .pred-btn.selected-2:disabled,html.light .pred-btn.selected-1X:disabled,html.light .pred-btn.selected-X2:disabled { opacity: .9; cursor: default; }
+html.light .pred-btn.correct:disabled,html.light .pred-btn.wrong:disabled { opacity: .9; cursor: default; }
+html.light .float-nav-pill {
+  background: rgba(255,253,247,0.9);
+  border: 1px solid rgba(40,30,10,0.1);
+  box-shadow: 0 8px 32px rgba(120,90,30,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+html.light .nav-item.active { background: linear-gradient(135deg, #C99316, #9E7308); color: #fff; box-shadow: 0 4px 12px rgba(201,147,22,0.35); }
+html.light .btn-primary { background: linear-gradient(135deg, #C99316, #9E7308); color: #fff; box-shadow: 0 4px 20px rgba(201,147,22,0.3); }
+html.light .glass-gold { background: rgba(255,253,247,0.92); border-color: rgba(201,147,22,0.2); box-shadow: 0 20px 48px rgba(120,90,30,0.12), inset 0 1px 0 rgba(255,255,255,0.6); }
+html.light .glass { background: rgba(255,253,247,0.7); border-color: rgba(40,30,10,0.08); box-shadow: 0 4px 24px rgba(120,90,30,0.06), inset 0 1px 0 rgba(255,255,255,0.4); }
+html.light .next-hero { box-shadow: 0 8px 32px rgba(120,90,30,0.12), inset 0 1px 0 rgba(255,255,255,0.5); border-color: rgba(201,147,22,0.18); }
+html.light .badge-group { background: rgba(201,147,22,0.12); color: #9E7308; border-color: rgba(201,147,22,0.2); }
+html.light .vs-orb { background: rgba(40,30,10,0.04); border-color: rgba(40,30,10,0.1); color: var(--muted); }
+html.light .inp { background: rgba(40,30,10,0.03); border-color: rgba(40,30,10,0.1); color: var(--text); }
+html.light .inp:focus { border-color: var(--gold); background: rgba(201,147,22,0.05); }
+html.light .admin-inp { background: rgba(40,30,10,0.03); border-color: rgba(40,30,10,0.1); color: var(--text); }
+html.light .lang-btn { border-color: rgba(40,30,10,0.1); }
+html.light .lang-btn.active-lang { background: var(--gold); color: #fff; border-color: var(--gold); }
+html.light .pill-tab.active { background: var(--gold); color: #fff; }
+html.light .pill-tab:not(.active) { background: rgba(40,30,10,0.04); color: var(--muted); border-color: rgba(40,30,10,0.08); }
+html.light ::-webkit-scrollbar-thumb { background: rgba(201,147,22,0.3); }
+html.light .bg-grid { background-image: radial-gradient(circle at 1px 1px, rgba(60,40,10,0.05) 1px, transparent 0) !important; }
+html.light .vs-orb { background: rgba(40,30,10,0.05); border-color: rgba(40,30,10,0.12); color: var(--text2); }
+
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0; padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+html.en, html.en body { font-family: 'Outfit', sans-serif; }
+html.en .syne { font-family: 'Syne', sans-serif; }
+.syne { font-family: 'Syne', sans-serif; }
+.mono { font-family: 'Space Grotesk', monospace; font-variant-numeric: tabular-nums; }
+
+#root { min-height: 100dvh; position: relative; z-index: 1; }
+button { cursor: pointer; font-family: inherit; }
+input { font-family: inherit; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(242,193,78,0.2); border-radius: 2px; }
+
+/* ── Animated background mesh ── */
+.bg-mesh {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.bg-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(100px);
+}
+.orb-gold {
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(242,193,78,0.09) 0%, transparent 70%);
+  top: -200px; left: -150px;
+  animation: orbDrift1 28s ease-in-out infinite;
+}
+.orb-green {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(0,201,123,0.08) 0%, transparent 70%);
+  bottom: -100px; right: -100px;
+  animation: orbDrift2 35s ease-in-out infinite;
+}
+.orb-blue {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(74,158,255,0.07) 0%, transparent 70%);
+  top: 40%; left: 60%;
+  animation: orbDrift3 22s ease-in-out infinite;
+}
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.018) 1px, transparent 0);
+  background-size: 44px 44px;
+}
+@keyframes orbDrift1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.08)} 66%{transform:translate(-30px,50px) scale(0.94)} }
+@keyframes orbDrift2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-50px,30px) scale(1.12)} 66%{transform:translate(40px,-60px) scale(0.9)} }
+@keyframes orbDrift3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-80px,-40px)} }
+
+/* ── Glass surface ── */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--border2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 20px 40px rgba(0,0,0,0.4);
+}
+.glass-gold {
+  background: rgba(12, 26, 56, 0.6);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--border);
+  box-shadow: inset 0 1px 0 rgba(242,193,78,0.08), 0 20px 48px rgba(0,0,0,0.5);
+}
+
+/* ── Spotlight card ── */
+.spotlight-card { position: relative; overflow: hidden; }
+.spotlight-card::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(380px circle at var(--mx,50%) var(--my,50%), rgba(242,193,78,0.05), transparent 60%);
+  opacity: 0; transition: opacity .3s;
+}
+.spotlight-card:hover::before { opacity: 1; }
+
+/* ── Match card ── */
+.match-card {
+  background: var(--card-grad);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  overflow: hidden;
+  transition: border-color .3s, transform .22s, box-shadow .3s;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.match-card:hover {
+  border-color: rgba(242,193,78,0.22);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(242,193,78,0.08), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+/* top shimmer line */
+.match-card::after {
+  content: '';
+  position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+  pointer-events: none;
+}
+
+/* ── Bet buttons ── */
+.pred-btn {
+  flex: 1; padding: 12px 4px 10px; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.025);
+  color: var(--text2); font-family: inherit;
+  transition: all .2s cubic-bezier(.16,1,.3,1);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  position: relative; overflow: hidden;
+}
+.pred-btn::before {
+  content: ''; position: absolute; inset: 0; border-radius: 16px;
+  background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.06), transparent 60%);
+  opacity: 0; transition: opacity .2s;
+}
+.pred-btn:hover:not(:disabled)::before { opacity: 1; }
+.pred-btn:hover:not(:disabled) {
+  border-color: rgba(242,193,78,0.4);
+  background: rgba(242,193,78,0.07);
+  color: var(--gold-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.pred-btn:active:not(:disabled) { transform: translateY(0) scale(0.97); }
+.pred-btn.selected-1 { background: rgba(74,158,255,0.12); border-color: rgba(74,158,255,0.45); color: #7EC3FF; box-shadow: 0 0 20px rgba(74,158,255,0.12), inset 0 1px 0 rgba(74,158,255,0.15); }
+.pred-btn.selected-X { background: rgba(242,193,78,0.1); border-color: rgba(242,193,78,0.45); color: var(--gold-bright); box-shadow: 0 0 20px rgba(242,193,78,0.1), inset 0 1px 0 rgba(242,193,78,0.15); }
+.pred-btn.selected-2 { background: rgba(255,114,64,0.12); border-color: rgba(255,114,64,0.45); color: #FFA07A; box-shadow: 0 0 20px rgba(255,114,64,0.12), inset 0 1px 0 rgba(255,114,64,0.15); }
+.pred-btn.selected-1X { background: linear-gradient(135deg,rgba(74,158,255,0.1),rgba(242,193,78,0.06)); border-color: rgba(74,158,255,0.4); color: #7EC3FF; box-shadow: 0 0 16px rgba(74,158,255,0.1); }
+.pred-btn.selected-X2 { background: linear-gradient(135deg,rgba(242,193,78,0.06),rgba(255,114,64,0.1)); border-color: rgba(255,114,64,0.4); color: #FFA07A; box-shadow: 0 0 16px rgba(255,114,64,0.1); }
+.pred-btn.correct { background: rgba(0,201,123,0.12); border-color: rgba(0,201,123,0.45); color: #4DFFB2; box-shadow: 0 0 20px rgba(0,201,123,0.1), inset 0 1px 0 rgba(0,201,123,0.15); }
+.pred-btn.wrong { background: rgba(255,54,81,0.06); border-color: rgba(255,54,81,0.2); color: #FF7A8E; }
+.pred-btn:disabled { opacity: .38; cursor: not-allowed; transform: none; }
+.pred-btn.selected-1:disabled,.pred-btn.selected-X:disabled,.pred-btn.selected-2:disabled,.pred-btn.selected-1X:disabled,.pred-btn.selected-X2:disabled { opacity: .9; cursor: default; }
+.pred-btn.correct:disabled,.pred-btn.wrong:disabled { opacity: .9; cursor: default; }
+.pred-btn.dc { font-size: 11px; }
+
+/* ── Odds ── */
+.odds-val { font-family: 'Space Grotesk', monospace; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+.odds-label { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; opacity: .55; }
+.odds-val-dc { font-family: 'Space Grotesk', monospace; font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+
+/* ── Next match hero ── */
+.next-hero {
+  background: var(--next-hero-grad);
+  border: 1px solid rgba(242,193,78,0.14);
+  border-radius: 24px; overflow: hidden; position: relative;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.next-hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(242,193,78,0.5) 30%, rgba(0,201,123,0.4) 70%, transparent 100%);
+}
+@keyframes heroShimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
+.live-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,54,81,0.12); border: 1px solid rgba(255,54,81,0.25);
+  font-size: 9px; font-weight: 800; color: var(--red);
+  font-family: 'Space Grotesk'; letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── Section date header ── */
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0 10px;
+}
+.section-header-bar {
+  width: 3px; height: 32px; border-radius: 2px; flex-shrink: 0;
+  background: linear-gradient(180deg, var(--gold), rgba(242,193,78,0.1));
+}
+.section-date-label {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
+  color: var(--text); letter-spacing: -.2px;
+}
+.section-stage-badge {
+  margin-left: auto; font-family: 'Space Grotesk'; font-size: 9px;
+  font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--muted); opacity: .7;
+}
+
+/* ── Pill filter ── */
+.pill-tab {
+  padding: 8px 18px; border-radius: 999px;
+  font-weight: 700; font-size: 12px; border: none;
+  transition: all .18s; letter-spacing: .2px;
+}
+.pill-tab.active { background: var(--gold); color: #0A0600; box-shadow: 0 3px 12px rgba(242,193,78,0.3); }
+.pill-tab:not(.active) { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.06); }
+
+/* ── Stage badges ── */
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+.badge-group { background: rgba(242,193,78,0.1); color: var(--gold); border: 1px solid rgba(242,193,78,0.15); }
+.badge-r32 { background: rgba(74,158,255,0.1); color: #7EC3FF; border: 1px solid rgba(74,158,255,0.15); }
+.badge-r16 { background: rgba(255,114,64,0.1); color: #FFA07A; border: 1px solid rgba(255,114,64,0.15); }
+.badge-qf { background: rgba(167,51,234,0.1); color: #D09FFF; border: 1px solid rgba(167,51,234,0.15); }
+.badge-sf { background: rgba(236,72,153,0.1); color: #F9A8D4; border: 1px solid rgba(236,72,153,0.15); }
+.badge-final { background: linear-gradient(135deg,rgba(242,193,78,0.2),rgba(255,114,64,0.15)); color: var(--gold-bright); border: 1px solid rgba(242,193,78,0.3); }
+
+/* ── Countdown ── */
+.ct-urgent { color: var(--red); }
+.ct-soon { color: var(--or); }
+.ct-ok { color: var(--muted); }
+@keyframes livePulse { 0%,100%{opacity:1}50%{opacity:.4} }
+.ct-live { animation: livePulse .9s ease infinite; color: var(--red); }
+
+/* ── Inputs ── */
+.inp {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 14px 18px;
+  color: var(--text); font-size: 16px; font-family: inherit;
+  outline: none; transition: border-color .2s, background .2s;
+  direction: auto;
+}
+.inp:focus { border-color: var(--gold); background: rgba(242,193,78,0.04); }
+.inp::placeholder { color: var(--muted); }
+
+/* ── Primary button ── */
+.btn-primary {
+  width: 100%; padding: 15px;
+  border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #F2C14E, #D4950D);
+  color: #0A0600; font-size: 17px; font-weight: 900; font-family: inherit;
+  letter-spacing: .3px;
+  transition: all .22s cubic-bezier(.16,1,.3,1);
+  box-shadow: 0 4px 20px rgba(242,193,78,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+  position: relative; overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.btn-primary:hover::after { opacity: 1; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(242,193,78,0.4); }
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+/* ── Admin inputs ── */
+.admin-inp {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 8px 12px;
+  color: var(--text); font-size: 13px; font-family: inherit;
+  outline: none; transition: border-color .15s;
+}
+.admin-inp:focus { border-color: var(--gold); }
+
+/* ── Nav ── */
+.float-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: center;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-top: 8px;
+  z-index: 30;
+  pointer-events: none;
+}
+.float-nav-pill {
+  display: flex; align-items: center;
+  background: rgba(6, 15, 36, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 6px 6px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  pointer-events: all;
+  gap: 2px;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; padding: 8px 20px; border-radius: 999px;
+  color: var(--muted); font-size: 10px; font-weight: 800;
+  border: none; background: transparent;
+  transition: all .2s cubic-bezier(.16,1,.3,1);
+  position: relative; letter-spacing: .3px;
+}
+.nav-item.active {
+  color: #0A0600;
+  background: linear-gradient(135deg, #F2C14E, #D4950D);
+  box-shadow: 0 4px 12px rgba(242,193,78,0.35);
+}
+.nav-item:not(.active):hover { color: var(--text2); }
+
+/* ── Toast ── */
+@keyframes toastIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }
+.toast { animation: toastIn .22s cubic-bezier(.16,1,.3,1); }
+
+/* ── Section label ── */
+.section-date {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold); opacity: .8;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── Confirm sheet ── */
+@keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+.confirm-sheet { animation: slideUp .28s cubic-bezier(.32,1,.64,1); }
+
+/* ── Language button ── */
+.lang-btn {
+  padding: 4px 12px; border-radius: 999px;
+  font-size: 11px; font-weight: 800;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent; transition: all .15s; letter-spacing: .5px;
+}
+.lang-btn.active-lang { background: var(--gold); color: #0A0600; border-color: var(--gold); box-shadow: 0 2px 10px rgba(242,193,78,0.3); }
+.lang-btn:not(.active-lang) { color: var(--muted); }
+
+/* ── Pill tab ── */
+.pill-tab {
+  padding: 7px 16px; border-radius: 999px;
+  font-weight: 700; font-size: 12px; border: none;
+  transition: all .18s; letter-spacing: .2px;
+}
+.pill-tab.active { background: var(--gold); color: #0A0600; box-shadow: 0 2px 10px rgba(242,193,78,0.25); }
+.pill-tab:not(.active) { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+/* ── Flag ── */
+.flag-img { border-radius: 3px; object-fit: cover; display: inline-block; box-shadow: 0 1px 6px rgba(0,0,0,0.5); }
+
+/* ── VS orb ── */
+.vs-orb {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(242,193,78,0.06);
+  border: 1px solid rgba(242,193,78,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: var(--muted);
+  font-family: 'Space Grotesk', sans-serif; letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+/* ── Score display ── */
+.score-display {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 22px; font-weight: 700;
+  color: var(--gold-bright);
+  letter-spacing: -1px;
+}
+
+/* ── Leaderboard ── */
+.podium-1 { background: linear-gradient(135deg, rgba(242,193,78,0.12), rgba(242,193,78,0.04)); border-color: rgba(242,193,78,0.25); }
+.podium-2 { background: linear-gradient(135deg, rgba(192,192,192,0.08), transparent); border-color: rgba(192,192,192,0.2); }
+.podium-3 { background: linear-gradient(135deg, rgba(205,127,50,0.08), transparent); border-color: rgba(205,127,50,0.2); }
+
+/* ── Loading skeleton ── */
+@keyframes skeletonShimmer { 0%{background-position:-400px 0}100%{background-position:400px 0} }
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.03) 75%);
+  background-size: 400px 100%;
+  animation: skeletonShimmer 1.8s ease infinite;
+  border-radius: 10px;
+}
+
+/* ── Admin drawer ── */
+@keyframes slideRight { from{transform:translateX(100%)} to{transform:translateX(0)} }
+.admin-drawer { animation: slideRight .28s cubic-bezier(.32,1,.64,1); }
+
+/* ── Login hero shapes ── */
+@keyframes floatBall { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-20px) rotate(180deg)} }
+.login-ball {
+  position: absolute; width: 120px; height: 120px;
+  border-radius: 50%;
+  animation: floatBall var(--dur,14s) ease-in-out infinite;
+  animation-delay: var(--delay,0s);
+  opacity: .06;
+}
+@keyframes loginFadeIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.login-fade { animation: loginFadeIn .6s cubic-bezier(.16,1,.3,1) both; }
+
+/* ── Next match banner ── */
+.next-banner {
+  background: linear-gradient(135deg, rgba(242,193,78,0.06), rgba(0,201,123,0.04));
+  border: 1px solid rgba(242,193,78,0.12);
+  border-radius: 18px; overflow: hidden;
+}
+.next-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(242,193,78,0.3), transparent);
+}
+
+/* ── Balance count ── */
+@keyframes countUp { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+.bal-count { animation: countUp .4s cubic-bezier(.16,1,.3,1); }
+
+/* ── Pitch texture on match cards ── */
+.pitch-texture {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: repeating-linear-gradient(0deg, rgba(0,201,123,0.02) 0px, rgba(0,201,123,0.02) 1px, transparent 1px, transparent 40px);
+  opacity: .5;
+}
+
+/* ── Star cards ── */
+@keyframes starFloat {
+  0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}
+  50%{transform:translateY(var(--dy,-14px)) rotate(var(--rot2,2deg))}
+}
+.star-card { animation: starFloat var(--dur,18s) ease-in-out infinite; animation-delay: var(--delay,0s); }
+@keyframes ballSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.ball-spin { animation: ballSpin var(--spd,40s) linear infinite; transform-origin: center; }
+
+/* ── Double-chance bet buttons ── */
+.pred-btn.selected-1X {
+  background: linear-gradient(135deg, rgba(74,158,255,0.12), rgba(242,193,78,0.08));
+  border-color: rgba(74,158,255,0.45); color: #7EC3FF;
+  box-shadow: 0 0 16px rgba(74,158,255,0.15);
+}
+.pred-btn.selected-X2 {
+  background: linear-gradient(135deg, rgba(242,193,78,0.08), rgba(255,114,64,0.12));
+  border-color: rgba(255,114,64,0.45); color: #FFA07A;
+  box-shadow: 0 0 16px rgba(255,114,64,0.15);
+}
+.pred-btn.dc { flex: 1; font-size: 11px; }
+.pred-btn.dc .odds-label { font-size: 8px; }
+.pred-btn.ko { flex: 1; font-size: 11px; }
+.pred-btn.selected-ko { background: rgba(242,193,78,0.08); border-color: rgba(242,193,78,0.45); color: var(--gold); box-shadow: 0 0 16px rgba(242,193,78,0.15); }
+
+/* ── Match card upgraded ── */
+.match-card-inner {
+  background: linear-gradient(135deg, rgba(74,158,255,0.025) 0%, transparent 45%, rgba(255,114,64,0.025) 100%);
+  position: absolute; inset: 0; pointer-events: none; border-radius: 20px;
+}
+.team-glow-left {
+  position: absolute; bottom: 0; left: 0; width: 45%; height: 70%;
+  background: radial-gradient(ellipse at bottom left, rgba(74,158,255,0.055) 0%, transparent 70%);
+  pointer-events: none;
+}
+.team-glow-right {
+  position: absolute; bottom: 0; right: 0; width: 45%; height: 70%;
+  background: radial-gradient(ellipse at bottom right, rgba(255,114,64,0.055) 0%, transparent 70%);
+  pointer-events: none;
+}
+.match-divider {
+  height: 1px; margin: 0 12px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), rgba(242,193,78,0.08), rgba(255,255,255,0.04), transparent);
+}
+
+/* ── Player stage — fixed bg layers ── */
+.player-layer {
+  position: fixed; bottom: 0; pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.player-layer img {
+  height: 100%; width: auto; object-fit: contain; object-position: bottom center;
+  display: block;
+}
+
+/* ── Mobile safe ── */
+@media(max-width:768px){
+  .nav-item { padding: 8px 16px; font-size: 9px; }
+  .player-layer { opacity: .55 !important; }
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+const API = '/api';
+
+// ── SVG Icons ─────────────────────────────────────────────────────────────────
+const IconBall = ({size=20,color='currentColor'}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10"/>
+    <path d="M12 2c0 0 3 4 3 10s-3 10-3 10"/>
+    <path d="M12 2c0 0-3 4-3 10s3 10 3 10"/>
+    <path d="M2.5 9h19M2.5 15h19"/>
+  </svg>
+);
+const IconTarget = ({size=20,color='currentColor'}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round">
+    <circle cx="12" cy="12" r="10"/>
+    <circle cx="12" cy="12" r="6"/>
+    <circle cx="12" cy="12" r="2" fill={color} stroke="none"/>
+  </svg>
+);
+const IconTrophy = ({size=20,color='currentColor'}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 9H3.5a2 2 0 010-4H6M18 9h2.5a2 2 0 000-4H18"/>
+    <path d="M6 5h12v5a6 6 0 01-12 0V5z"/>
+    <path d="M12 16v4M8 20h8"/>
+  </svg>
+);
+const IconGear = ({size=18,color='currentColor'}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M12 1v3M12 20v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M1 12h3M20 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+  </svg>
+);
+const IconClose = ({size=16,color='currentColor'}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round">
+    <path d="M18 6L6 18M6 6l12 12"/>
+  </svg>
+);
+
+// ── Team flags ────────────────────────────────────────────────────────────────
+const TEAM_FLAGS = {
+  'Mexico':'mx','South Africa':'za','South Korea':'kr','Czechia':'cz',
+  'Canada':'ca','Bosnia & Herz.':'ba','Qatar':'qa','Switzerland':'ch',
+  'Brazil':'br','Haiti':'ht','Morocco':'ma','Scotland':'gb-sct',
+  'USA':'us','Paraguay':'py','Australia':'au','Türkiye':'tr',
+  'Germany':'de','Curaçao':'cw','Ivory Coast':'ci','Ecuador':'ec',
+  'Netherlands':'nl','Japan':'jp','Sweden':'se','Tunisia':'tn',
+  'Belgium':'be','Egypt':'eg','Iran':'ir','New Zealand':'nz',
+  'Spain':'es','Cape Verde':'cv','Saudi Arabia':'sa','Uruguay':'uy',
+  'France':'fr','Senegal':'sn','Iraq':'iq','Norway':'no',
+  'Argentina':'ar','Algeria':'dz','Austria':'at','Jordan':'jo',
+  'Portugal':'pt','DR Congo':'cd','Uzbekistan':'uz','Colombia':'co',
+  'England':'gb-eng','Croatia':'hr','Ghana':'gh','Panama':'pa',
+};
+function Flag({team,size=28}){
+  const code = TEAM_FLAGS[team];
+  if(!code) return(
+    <div style={{width:size,height:Math.round(size*.67),borderRadius:3,background:'rgba(255,255,255,0.06)',display:'inline-flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+      <span style={{fontSize:8,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700}}>?</span>
+    </div>
+  );
+  return(
+    <img className="flag-img"
+      src={`https://flagcdn.com/w40/${code}.png`}
+      srcSet={`https://flagcdn.com/w80/${code}.png 2x`}
+      alt={team}
+      style={{width:size,height:Math.round(size*.67),flexShrink:0}}
+      onError={e=>{e.target.style.opacity='.2';}}
+    />
+  );
+}
+
+// ── Translations ──────────────────────────────────────────────────────────────
+const TX = {
+  ar:{
+    appName:'جروب الشباب', appSub:'كأس العالم 2026',
+    fixtures:'المباريات', mybets:'رهاناتي', leaderboard:'الترتيب',
+    all:'الكل', upcoming:'القادمة', myPicks:'توقعاتي',
+    noMatches:'لا توجد مباريات', deadlinePassed:'أُغلق التوقع', ended:'انتهت',
+    potentialWin:'ربح محتمل', costs:'التكلفة',
+    confirmTitle:'تأكيد التوقع', confirmBtn:'تأكيد الرهان', cancelBtn:'إلغاء',
+    pick1:'فوز', pickX:'تعادل', pick2:'فوز',
+    balanceAfter:'رصيدك لو فزت', stake:'الرهان',
+    enterGroup:'ادخل الجروب', enterPhone:'أدخل رقم هاتفك للمتابعة',
+    phonePlaceholder:'مثال: 96891234567', enterBtn:'دخول',
+    welcome:'مرحبا بك', firstTime:'أول مرة؟ أدخل اسمك عشان نضيفك',
+    namePlaceholder:'اسمك', joinBtn:'انضم للجروب',
+    friendly:'رهان ودي بين الأصحاب',
+    matches:'مباريات', wins:'فوز', profitLoss:'ربح/خسارة',
+    pending:'معلقة', settled:'منتهية',
+    noBets:'لم تتوقع بعد', noBetsSub:'توقّع المباريات واربح',
+    noPlayers:'لا يوجد لاعبون', rank:'الترتيب', youLabel:'أنت',
+    nextMatch:'المباراة القادمة', liveNow:'مباشر الآن', predDeadline:'آخر موعد للتوقع',
+    days:'ي', hours:'س', mins:'د', secs:'ث',
+    oddsNote:'أوفر حية من The Odds API',
+    adminTitle:'لوحة التحكم', results:'النتائج', odds:'الأوفر',
+    teams:'الفرق', players:'اللاعبون', settings:'الإعدادات',
+    enterResult:'إدخال نتيجة', saveBtn:'حفظ', cancelEdit:'إلغاء',
+    stakeLabel:'مبلغ الرهان لكل مباراة ($)', startingBal:'الرصيد الابتدائي ($)',
+    saveSettings:'حفظ الإعدادات', settingsNote:'تغيير الرصيد لا يؤثر على اللاعبين الحاليين',
+    editBtn:'تعديل', deleteBtn:'حذف', undoBtn:'↩',
+    toastResult:'تم حفظ النتيجة', toastOdds:'تم تحديث الأوفر',
+    toastSettings:'تم حفظ الإعدادات', toastPlayer:'تم تحديث اللاعب',
+    toastDeleted:'تم الحذف', toastUndo:'تم إلغاء النتيجة', toastUpdated:'تم التحديث',
+    confirmDelete:'حذف', confirmUndo:'إلغاء النتيجة وإعادة الرصيد؟',
+    predTotal:'توقع', predWin:'فوز', predPlayed:'لُعبت',
+    stage_group:'مجموعات', stage_r32:'دور 32', stage_r16:'دور 16',
+    stage_qf:'ربع النهائي', stage_sf:'نصف النهائي', stage_3rd:'المركز الثالث', stage_final:'النهائي',
+    grpPrefix:'مج.',
+    loading:'جاري التحميل',
+    admin:'تحكم',
+    balance:'الرصيد',
+  },
+  en:{
+    appName:'The Boys Group', appSub:'World Cup 2026',
+    fixtures:'Matches', mybets:'My Bets', leaderboard:'Standings',
+    all:'All', upcoming:'Upcoming', myPicks:'My Picks',
+    noMatches:'No matches', deadlinePassed:'Betting Closed', ended:'Ended',
+    potentialWin:'Potential win', costs:'Cost',
+    confirmTitle:'Confirm Bet', confirmBtn:'Place Bet', cancelBtn:'Cancel',
+    pick1:'Win', pickX:'Draw', pick2:'Win',
+    balanceAfter:'Balance if win', stake:'Stake',
+    enterGroup:'Join the Group', enterPhone:'Enter your phone number to continue',
+    phonePlaceholder:'e.g. 96891234567', enterBtn:'Continue',
+    welcome:'Welcome back', firstTime:"First time? Enter your name to join",
+    namePlaceholder:'Your name', joinBtn:'Join the Group',
+    friendly:'Friendly bet between friends',
+    matches:'Matches', wins:'Wins', profitLoss:'Profit/Loss',
+    pending:'Pending', settled:'Settled',
+    noBets:'No predictions yet', noBetsSub:'Predict match results and win',
+    noPlayers:'No players yet', rank:'Standings', youLabel:'You',
+    nextMatch:'Next Match', liveNow:'Live Now', predDeadline:'Prediction deadline',
+    days:'d', hours:'h', mins:'m', secs:'s',
+    oddsNote:'Live odds via The Odds API',
+    adminTitle:'Admin Panel', results:'Results', odds:'Odds',
+    teams:'Teams', players:'Players', settings:'Settings',
+    enterResult:'Enter Result', saveBtn:'Save', cancelEdit:'Cancel',
+    stakeLabel:'Stake per match ($)', startingBal:'Starting balance ($)',
+    saveSettings:'Save Settings', settingsNote:'Changing starting balance does not affect existing players',
+    editBtn:'Edit', deleteBtn:'Delete', undoBtn:'Undo',
+    toastResult:'Result saved', toastOdds:'Odds updated',
+    toastSettings:'Settings saved', toastPlayer:'Player updated',
+    toastDeleted:'Deleted', toastUndo:'Result undone', toastUpdated:'Updated',
+    confirmDelete:'Delete', confirmUndo:'Undo result and refund balances?',
+    predTotal:'picks', predWin:'wins', predPlayed:'played',
+    stage_group:'Groups', stage_r32:'Round of 32', stage_r16:'Round of 16',
+    stage_qf:'Quarters', stage_sf:'Semis', stage_3rd:'3rd Place', stage_final:'FINAL',
+    grpPrefix:'Grp.',
+    loading:'Loading',
+    admin:'Admin',
+    balance:'Balance',
+  }
+};
+
+const STAGE_EN={group:'Group',r32:'R32',r16:'R16',qf:'QF',sf:'SF','3rd':'3rd',final:'FINAL'};
+const STAGE_FULL={group:'Group Stage',r32:'Round of 32',r16:'Round of 16',qf:'Quarter Finals',sf:'Semi Finals','3rd':'3rd Place',final:'FINAL'};
+
+// ── API ───────────────────────────────────────────────────────────────────────
+async function apiFetch(path,opts={}){
+  const token=localStorage.getItem('wc_token');
+  const res=await fetch(API+path,{headers:{'Content-Type':'application/json',...(token?{Authorization:token}:{}),...(opts.headers||{})},...opts});
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error||'Error');
+  return data;
+}
+
+// ── Countdown hook ────────────────────────────────────────────────────────────
+function useCountdown(kickoff){
+  const [ms,setMs]=useState(()=>new Date(kickoff)-Date.now()-5*60*1000);
+  useEffect(()=>{const t=setInterval(()=>setMs(new Date(kickoff)-Date.now()-5*60*1000),1000);return()=>clearInterval(t);},[kickoff]);
+  return ms;
+}
+
+// ── Spotlight card HOC ────────────────────────────────────────────────────────
+function SpotlightCard({children,style,className=''}){
+  const ref=useRef(null);
+  function onMove(e){
+    if(!ref.current) return;
+    const r=ref.current.getBoundingClientRect();
+    ref.current.style.setProperty('--mx',`${e.clientX-r.left}px`);
+    ref.current.style.setProperty('--my',`${e.clientY-r.top}px`);
+  }
+  return(
+    <div ref={ref} className={`spotlight-card ${className}`} style={style} onMouseMove={onMove}>
+      {children}
+    </div>
+  );
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function Toast({msg,type,onDone}){
+  useEffect(()=>{const t=setTimeout(onDone,2800);return()=>clearTimeout(t);},[]);
+  const cfg={
+    success:{bg:'linear-gradient(135deg,rgba(0,201,123,0.95),rgba(0,160,95,0.95))',color:'#002916'},
+    error:{bg:'linear-gradient(135deg,rgba(255,54,81,0.95),rgba(200,20,50,0.95))',color:'#fff'},
+    info:{bg:'linear-gradient(135deg,rgba(242,193,78,0.95),rgba(180,130,20,0.95))',color:'#0A0600'},
+    warn:{bg:'linear-gradient(135deg,rgba(255,114,64,0.95),rgba(200,70,20,0.95))',color:'#fff'},
+  }[type]||{bg:'linear-gradient(135deg,rgba(242,193,78,0.95),rgba(180,130,20,0.95))',color:'#0A0600'};
+  return(
+    <div className="toast fixed top-4 left-4 right-4 z-50 rounded-2xl px-5 py-3 text-sm font-bold text-center"
+      style={{background:cfg.bg,color:cfg.color,maxWidth:380,margin:'0 auto',backdropFilter:'blur(20px)',boxShadow:'0 8px 32px rgba(0,0,0,0.4)'}}>
+      {msg}
+    </div>
+  );
+}
+
+// ── WC Logo — tries official sources, falls back to inline SVG ───────────────
+function Logo26SVG({size=80}){
+  const s=size;
+  return(
+    <svg width={s} height={s*1.25} viewBox="0 0 200 250" fill="none" xmlns="http://www.w3.org/2000/svg" style={{filter:'drop-shadow(0 4px 20px rgba(242,193,78,0.35))'}}>
+      {/* "2" */}
+      <text x="6" y="168" fontFamily="Syne,sans-serif" fontWeight="900" fontSize="178" fill="white" opacity=".97">2</text>
+      {/* "6" */}
+      <text x="94" y="168" fontFamily="Syne,sans-serif" fontWeight="900" fontSize="178" fill="white" opacity=".97">6</text>
+      {/* Trophy cup bowl */}
+      <path d="M76 42 Q66 88 72 116 L128 116 Q134 88 124 42 Z" fill="#C9960C"/>
+      <path d="M76 42 Q66 88 72 116 L128 116 Q134 88 124 42 Z" fill="url(#tg)"/>
+      {/* Cup sheen */}
+      <path d="M80 46 Q74 82 78 110 L96 110 Q90 82 86 46 Z" fill="rgba(255,240,180,0.22)"/>
+      {/* Handles */}
+      <path d="M76 52 Q56 52 56 74 Q56 96 76 96" stroke="#C9960C" strokeWidth="9" fill="none" strokeLinecap="round"/>
+      <path d="M124 52 Q144 52 144 74 Q144 96 124 96" stroke="#C9960C" strokeWidth="9" fill="none" strokeLinecap="round"/>
+      {/* Stem */}
+      <rect x="90" y="116" width="20" height="28" rx="3" fill="#C9960C"/>
+      {/* Green band */}
+      <rect x="80" y="140" width="40" height="12" rx="3" fill="#1a5c2a"/>
+      {/* "FIFA" tiny text on band */}
+      <text x="100" y="150" fontFamily="Syne,sans-serif" fontWeight="900" fontSize="7" fill="white" textAnchor="middle" letterSpacing="2">FIFA</text>
+      {/* Base */}
+      <rect x="76" y="152" width="48" height="9" rx="4" fill="#C9960C"/>
+      {/* FIFA text bottom */}
+      <text x="100" y="190" fontFamily="Syne,sans-serif" fontWeight="900" fontSize="18" fill="white" textAnchor="middle" letterSpacing="3.5" opacity=".9">FIFA</text>
+      <text x="100" y="204" fontFamily="Syne,sans-serif" fontWeight="700" fontSize="9" fill="rgba(255,255,255,0.5)" textAnchor="middle" letterSpacing="2">WORLD CUP™</text>
+      <defs>
+        <linearGradient id="tg" x1="76" y1="42" x2="128" y2="116" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#FFE066"/>
+          <stop offset="50%" stopColor="#C9960C"/>
+          <stop offset="100%" stopColor="#8B6200"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function WCLogo({size=80}){
+  // Local copy first, then remote CDN, then inline SVG
+  const URLS=['/players/wc-logo.png'];
+  const [idx,setIdx]=useState(0);
+  if(idx>=URLS.length) return <Logo26SVG size={size}/>;
+  return(
+    <img src={URLS[idx]} alt="FIFA World Cup 2026"
+      style={{width:size,height:size,objectFit:'contain',filter:'drop-shadow(0 6px 24px rgba(242,193,78,0.35))'}}
+      onError={()=>setIdx(i=>i+1)}/>
+  );
+}
+
+// ── Soccer ball SVG motif ─────────────────────────────────────────────────────
+function SoccerBall({size=60,opacity=0.06}){
+  return(
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" style={{opacity}}>
+      <circle cx="50" cy="50" r="46" stroke="white" strokeWidth="2.5"/>
+      {/* Pentagon center */}
+      <polygon points="50,28 63,37 58,53 42,53 37,37" fill="white" opacity=".5"/>
+      {/* Surrounding patches */}
+      <polygon points="50,4 63,14 63,37 50,28 37,37 37,14" fill="none" stroke="white" strokeWidth="1.5" opacity=".5"/>
+      <polygon points="81,27 94,38 88,55 75,55 68,37 81,27" fill="none" stroke="white" strokeWidth="1.5" opacity=".5"/>
+      <polygon points="76,70 82,86 65,94 53,82 58,65 76,70" fill="none" stroke="white" strokeWidth="1.5" opacity=".5"/>
+      <polygon points="24,70 42,65 47,82 35,94 18,86" fill="none" stroke="white" strokeWidth="1.5" opacity=".5"/>
+      <polygon points="19,27 32,37 25,55 12,55 6,38" fill="none" stroke="white" strokeWidth="1.5" opacity=".5"/>
+    </svg>
+  );
+}
+
+// ── Player figure — real PNG render with overlay-fade (mobile compatible) ─────
+function PlayerFigure({src,side,height='78%',opacity=0.72,glow='rgba(0,0,0,0)',float=true,style={},theme='dark'}){
+  const fadeDir=side==='left'?'to right':'to left';
+  const FC = theme==='light' ? '244,240,230' : '2,12,30';
+  const sideGrad=`linear-gradient(${fadeDir}, rgba(${FC},0.88) 0%, rgba(${FC},0.3) 28%, transparent 58%)`;
+  const bottomGrad=`linear-gradient(to top, rgba(${FC},1) 0%, rgba(${FC},0.5) 22%, transparent 50%)`;
+  const imgFilter = theme==='light' ? `sepia(0.45) saturate(0.85) brightness(0.95) contrast(1.05) drop-shadow(0 0 30px ${glow})` : `drop-shadow(0 0 40px ${glow})`;
+  return(
+    <div style={{
+      position:'absolute',bottom:0,[side]:0,height,maxHeight:580,
+      pointerEvents:'none',zIndex:1,overflow:'hidden',
+      animation: float ? `starFloat 22s ease-in-out infinite` : 'none',
+      '--rot': side==='left'?'-2deg':'2deg','--rot2':side==='left'?'-1deg':'1deg','--dy':'-8px',
+      ...style}}>
+      <img src={src} alt=""
+        style={{
+          height:'100%',width:'auto',display:'block',
+          objectFit:'contain',objectPosition:`bottom ${side}`,
+          opacity,
+          filter:imgFilter,
+        }}/>
+      {/* Side edge fade overlay */}
+      <div style={{position:'absolute',inset:0,background:sideGrad,pointerEvents:'none'}}/>
+      {/* Bottom fade overlay */}
+      <div style={{position:'absolute',inset:0,background:bottomGrad,pointerEvents:'none'}}/>
+    </div>
+  );
+}
+
+// Small floating name badge that pairs with a player figure
+function PlayerBadge({name,num,code,accent,side,style={}}){
+  return(
+    <div style={{position:'absolute',pointerEvents:'none',...style,
+      animation:'starFloat 18s ease-in-out infinite','--rot':side==='left'?'4deg':'-4deg','--rot2':side==='left'?'2deg':'-2deg','--dy':'-10px'}}>
+      <div style={{display:'flex',alignItems:'center',gap:6,padding:'5px 10px 5px 6px',
+        background:'rgba(2,10,26,0.8)',backdropFilter:'blur(12px)',
+        border:`1px solid ${accent}35`,borderRadius:999,
+        boxShadow:`0 4px 16px rgba(0,0,0,0.5), 0 0 12px ${accent}15`}}>
+        <img src={`https://flagcdn.com/w20/${code}.png`} style={{width:20,height:14,borderRadius:2,objectFit:'cover'}} alt=""/>
+        <span style={{fontFamily:'Space Grotesk',fontWeight:900,fontSize:13,color:accent,letterSpacing:-0.5}}>#{num}</span>
+        <span style={{fontFamily:'Syne,sans-serif',fontWeight:800,fontSize:11,color:'rgba(255,255,255,0.85)',letterSpacing:.3}}>{name}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Countdown display ─────────────────────────────────────────────────────────
+function Countdown({kickoff,settled,lang}){
+  const T=TX[lang];
+  const ms=useCountdown(kickoff);
+  if(settled) return <span style={{color:'var(--muted)',fontSize:11,fontFamily:'Space Grotesk',fontWeight:500}}>{T.ended}</span>;
+  if(ms<=0) return(
+    <span style={{color:'var(--red)',fontSize:10,fontWeight:800,fontFamily:'Space Grotesk',letterSpacing:.5,padding:'2px 8px',background:'rgba(255,54,81,0.1)',borderRadius:999,border:'1px solid rgba(255,54,81,0.2)'}}>
+      {T.deadlinePassed}
+    </span>
+  );
+  const totalSec=Math.floor(ms/1000);
+  const d=Math.floor(totalSec/86400),h=Math.floor((totalSec%86400)/3600),m=Math.floor((totalSec%3600)/60),s=totalSec%60;
+  const cls=ms<3600000?'ct-urgent':ms<86400000?'ct-soon':'ct-ok';
+  const txt=d>0?`${d}${T.days} ${h}${T.hours}`:h>0?`${h}${T.hours} ${String(m).padStart(2,'0')}${T.mins}`:`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return <span className={`${cls} mono`} style={{fontSize:12,fontWeight:700}}>{txt}</span>;
+}
+
+// ── Confirm Sheet ─────────────────────────────────────────────────────────────
+function ConfirmSheet({match,pick,stake,onConfirm,onCancel,balance,startBal,lang,extraOdds}){
+  const T=TX[lang];
+  if(!match||!pick) return null;
+  const h=parseFloat(match.home_odds),d=parseFloat(match.draw_odds),a=parseFloat(match.away_odds);
+  const allOdds={'1':h,'X':d,'2':a,'1X':parseFloat(match.odds_1x)||(h*d)/(h+d),'X2':parseFloat(match.odds_x2)||(d*a)/(d+a),
+    'BTTS-Y':parseFloat(match.odds_btts_yes),'BTTS-N':parseFloat(match.odds_btts_no),
+    'OVER2.5':parseFloat(match.odds_over25),'UNDER2.5':parseFloat(match.odds_under25),
+    'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away)};
+  const odds=extraOdds||allOdds[pick]||h;
+  const netWin=(stake*(odds-1)).toFixed(2);
+  const balAfter=(parseFloat(balance)-stake+stake*odds).toFixed(0);
+  // Pick label & team
+  let pickLabel, team, pickColor, pickBadge='';
+  if(pick==='1'){team=match.home_team;pickLabel=match.home_team;pickColor='var(--blue)';}
+  else if(pick==='X'){team=null;pickLabel=T.pickX;pickColor='var(--gold)';}
+  else if(pick==='2'){team=match.away_team;pickLabel=match.away_team;pickColor='var(--or)';}
+  else if(pick==='1X'){team=null;pickLabel=lang==='ar'?`${match.home_team} أو تعادل`:`${match.home_team} or Draw`;pickColor='#7EC3FF';pickBadge='DOUBLE CHANCE';}
+  else if(pick==='X2'){team=null;pickLabel=lang==='ar'?`تعادل أو ${match.away_team}`:`Draw or ${match.away_team}`;pickColor='#FFA07A';pickBadge='DOUBLE CHANCE';}
+  else if(pick==='BTTS-Y'){team=null;pickLabel='Both Teams Score — Yes';pickColor='var(--green)';pickBadge='BTTS';}
+  else if(pick==='BTTS-N'){team=null;pickLabel='Both Teams Score — No';pickColor='var(--red)';pickBadge='BTTS';}
+  else if(pick==='OVER2.5'){team=null;pickLabel='Over 2.5 Goals';pickColor='var(--green)';pickBadge='GOALS';}
+  else if(pick==='UNDER2.5'){team=null;pickLabel='Under 2.5 Goals';pickColor='var(--red)';pickBadge='GOALS';}
+  else if(pick==='DNB1'){team=match.home_team;pickLabel=`Draw No Bet — ${match.home_team}`;pickColor='var(--blue)';pickBadge='DNB';}
+  else if(pick==='DNB2'){team=match.away_team;pickLabel=`Draw No Bet — ${match.away_team}`;pickColor='var(--or)';pickBadge='DNB';}
+  else if(pick.startsWith('ANYTIME:')){team=null;pickLabel=pick.slice(8);pickColor='var(--gold)';pickBadge='ANYTIME SCORER';}
+  else if(pick.startsWith('FIRST:')){team=null;pickLabel=pick.slice(6);pickColor='var(--gold)';pickBadge='FIRST SCORER';}
+  else{team=null;pickLabel=pick;pickColor='var(--gold)';}
+  return(
+    <div className="fixed inset-0 z-40" style={{background:'rgba(0,0,0,.7)',backdropFilter:'blur(8px)'}} onClick={onCancel}>
+      <div className="confirm-sheet fixed bottom-0 left-0 right-0 rounded-t-[28px] overflow-hidden"
+        style={{background:'rgba(6,15,36,0.98)',border:'1px solid var(--border)',borderBottom:'none',maxWidth:480,margin:'0 auto',backdropFilter:'blur(32px)'}}
+        onClick={e=>e.stopPropagation()}>
+        <div style={{height:3,width:36,background:'rgba(255,255,255,0.12)',borderRadius:2,margin:'14px auto 0'}}/>
+        <div className="px-6 py-5">
+          <div style={{fontSize:11,color:'var(--muted)',fontWeight:800,letterSpacing:1,marginBottom:16,fontFamily:'Space Grotesk',textTransform:'uppercase'}}>{T.confirmTitle}</div>
+          {/* Teams */}
+          <div className="flex items-center justify-between gap-3 mb-5" style={{direction:'ltr'}}>
+            <div className="flex items-center gap-2 flex-1">
+              <Flag team={match.home_team} size={32}/>
+              <span style={{fontSize:13,fontWeight:700,lineHeight:1.2}}>{match.home_team}</span>
+            </div>
+            <div className="vs-orb"><span>VS</span></div>
+            <div className="flex items-center gap-2 flex-1 justify-end">
+              <span style={{fontSize:13,fontWeight:700,lineHeight:1.2,textAlign:'right'}}>{match.away_team}</span>
+              <Flag team={match.away_team} size={32}/>
+            </div>
+          </div>
+          {/* Pick */}
+          <div className="rounded-2xl p-4 mb-5 text-center" style={{background:`${pickColor}18`,border:`1px solid ${pickColor}40`}}>
+            <div style={{fontSize:10,color:'var(--muted)',marginBottom:4,fontFamily:'Space Grotesk',fontWeight:600,letterSpacing:.5,textTransform:'uppercase'}}>
+              {lang==='ar'?'توقعك':'Your Pick'}
+            </div>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {pick==='1X'&&<><Flag team={match.home_team} size={20}/><span style={{fontSize:12,color:'var(--muted)'}}>+</span><span style={{fontSize:13,color:'var(--muted)'}}>X</span></>}
+              {pick==='X2'&&<><span style={{fontSize:13,color:'var(--muted)'}}>X</span><span style={{fontSize:12,color:'var(--muted)'}}>+</span><Flag team={match.away_team} size={20}/></>}
+              {!['1X','X2'].includes(pick)&&team&&<Flag team={team} size={22}/>}
+              <span style={{fontSize:pick.length>8?12:pick.length>2?14:17,fontWeight:900,color:pickColor,textAlign:'center'}}>{pickLabel}</span>
+            </div>
+            <div className="mono" style={{fontSize:28,fontWeight:700,color:'var(--text)',marginTop:6,letterSpacing:-1}}>{odds.toFixed(2)}<span style={{fontSize:14,color:'var(--muted)',marginLeft:2}}>×</span></div>
+            {pickBadge&&<div style={{fontSize:9,color:'var(--muted)',marginTop:4,fontFamily:'Space Grotesk',fontWeight:600,letterSpacing:.5}}>{pickBadge}</div>}
+          </div>
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            {[
+              {label:T.stake,val:`$${stake.toFixed(0)}`,c:'var(--text2)'},
+              {label:T.potentialWin,val:`+$${netWin}`,c:'var(--green)'},
+              {label:T.balanceAfter,val:`$${balAfter}`,c:'var(--gold)'},
+            ].map(s=>(
+              <div key={s.label} className="rounded-2xl p-3 text-center" style={{background:'rgba(255,255,255,0.03)',border:'1px solid var(--border2)'}}>
+                <div className="mono" style={{fontSize:15,fontWeight:700,color:s.c}}>{s.val}</div>
+                <div style={{fontSize:9,color:'var(--muted)',marginTop:2,lineHeight:1.3,fontWeight:600}}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+          <button className="btn-primary mb-3" onClick={onConfirm}>{T.confirmBtn}</button>
+          <button onClick={onCancel} style={{width:'100%',padding:'10px',background:'none',border:'none',color:'var(--muted)',fontSize:13,fontWeight:700,fontFamily:'inherit'}}>{T.cancelBtn}</button>
+        </div>
+        <div style={{height:'env(safe-area-inset-bottom,0px)'}}/>
+      </div>
+    </div>
+  );
+}
+
+// ── Next Match Banner — hero style ───────────────────────────────────────────
+function NextMatchBanner({matches,lang}){
+  const T=TX[lang];
+  const nowTs=Date.now();
+  const next=useMemo(()=>
+    matches.filter(m=>!m.settled&&new Date(m.kickoff).getTime()>nowTs-120*60*1000)
+      .sort((a,b)=>new Date(a.kickoff)-new Date(b.kickoff))[0]||null
+  ,[matches]);
+  const [ms,setMs]=useState(()=>next?new Date(next.kickoff)-Date.now():0);
+  useEffect(()=>{if(!next)return;const t=setInterval(()=>setMs(new Date(next.kickoff)-Date.now()),1000);return()=>clearInterval(t);},[next]);
+  if(!next) return null;
+
+  const isLive=ms<0&&ms>-120*60*1000;
+  const deadlinePassed=new Date(next.kickoff).getTime()-5*60*1000-Date.now()<=0;
+  const totalSec=Math.max(0,Math.floor(Math.abs(ms)/1000));
+  const dd=Math.floor(totalSec/86400),hh=Math.floor((totalSec%86400)/3600),mm=Math.floor((totalSec%3600)/60),ss=totalSec%60;
+
+  const urgency=ms<3600000?'var(--red)':ms<86400000?'var(--or)':'var(--gold)';
+
+  // Countdown segments
+  const segs = isLive ? null : dd>0
+    ? [{v:dd,l:T.days},{v:hh,l:T.hours}]
+    : hh>0
+    ? [{v:hh,l:T.hours},{v:mm,l:T.mins},{v:ss,l:T.secs}]
+    : [{v:mm,l:T.mins},{v:ss,l:T.secs}];
+
+  const kickoffTime=new Date(next.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'});
+  const kickoffDate=new Date(next.kickoff).toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'short',month:'short',day:'numeric'});
+
+  return(
+    <div className="next-hero mx-4 mb-4">
+      <div className="px-5 py-4" style={{direction:'ltr'}}>
+        {/* Label row */}
+        <div className="flex items-center justify-between mb-3">
+          <div style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:2,textTransform:'uppercase',color:'var(--muted)',opacity:.7}}>
+            {isLive?'':(T.nextMatch||'Next Match')}
+          </div>
+          {isLive?(
+            <div className="live-badge">
+              <div className="ct-live" style={{width:5,height:5,borderRadius:'50%',background:'var(--red)'}}/>
+              LIVE
+            </div>
+          ):(
+            <div style={{fontSize:9,fontFamily:'Space Grotesk',color:'var(--muted)',fontWeight:600}}>
+              {kickoffDate} · {kickoffTime} · {next.venue}
+            </div>
+          )}
+        </div>
+
+        {/* Teams duel */}
+        <div className="flex items-center gap-3">
+          {/* Home */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'flex-start',gap:4}}>
+            <Flag team={next.home_team} size={38}/>
+            <span className="syne" style={{fontSize:13,fontWeight:800,color:'var(--text)',lineHeight:1.1,letterSpacing:-.2}}>{next.home_team}</span>
+          </div>
+
+          {/* Countdown center */}
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,flex:'0 0 auto'}}>
+            {isLive?(
+              <div className="ct-live mono" style={{fontSize:28,fontWeight:900,letterSpacing:1,color:'var(--red)'}}>LIVE</div>
+            ):(
+              <div style={{display:'flex',alignItems:'flex-end',gap:6}}>
+                {(segs||[]).map(({v,l},i)=>(
+                  <div key={i} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:0}}>
+                    <span className="mono" style={{fontSize:26,fontWeight:900,color:urgency,letterSpacing:-1,lineHeight:1}}>{String(v).padStart(2,'0')}</span>
+                    <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,color:'var(--muted)',letterSpacing:.5,textTransform:'uppercase'}}>{l}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isLive&&!deadlinePassed&&(
+              <div style={{fontSize:8,color:'var(--muted)',fontFamily:'Space Grotesk',marginTop:2,whiteSpace:'nowrap',fontWeight:600,opacity:.7}}>{T.predDeadline}</div>
+            )}
+            {!isLive&&deadlinePassed&&(
+              <div style={{fontSize:8,color:'var(--red)',fontFamily:'Space Grotesk',marginTop:2,fontWeight:700,opacity:.8}}>{T.deadlinePassed}</div>
+            )}
+          </div>
+
+          {/* Away */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4}}>
+            <Flag team={next.away_team} size={38}/>
+            <span className="syne" style={{fontSize:13,fontWeight:800,color:'var(--text)',lineHeight:1.1,letterSpacing:-.2,textAlign:'right'}}>{next.away_team}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Match Card ────────────────────────────────────────────────────────────────
+function MatchCard({match,predictions,onPickClick,loading,lang,stake}){
+  const T=TX[lang];
+  const ref=useRef(null);
+  const isDeadlinePassed=Date.now()>new Date(match.kickoff).getTime()-5*60*1000;
+  const canPredict=!isDeadlinePassed&&!match.settled;
+  const preds=predictions||[];
+  const predSet=new Set(preds.map(p=>p.prediction));
+  const pred=preds.find(p=>['1','X','2','1X','X2'].includes(p.prediction))?.prediction;
+  const isKO=match.stage&&match.stage!=='group';
+  const [scorers,setScorers]=useState(null);
+  const [showScorers,setShowScorers]=useState(false);
+  const [loadingScorers,setLoadingScorers]=useState(false);
+  async function toggleScorers(){
+    if(showScorers){setShowScorers(false);return;}
+    setShowScorers(true);
+    if(!scorers){
+      setLoadingScorers(true);
+      try{const sd=await apiFetch(`/wc/matches/${match.id}/players`);setScorers(sd);}catch(e){setScorers([]);}
+      setLoadingScorers(false);
+    }
+  }
+
+  // Computed double-chance odds
+  const h=parseFloat(match.home_odds),d=parseFloat(match.draw_odds),a=parseFloat(match.away_odds);
+  const odds1X=(parseFloat(match.odds_1x)||(h*d)/(h+d)).toFixed(2);
+  const oddsX2=(parseFloat(match.odds_x2)||(d*a)/(d+a)).toFixed(2);
+
+  function onMove(e){
+    if(!ref.current)return;
+    const r=ref.current.getBoundingClientRect();
+    ref.current.style.setProperty('--mx',`${e.clientX-r.left}px`);
+    ref.current.style.setProperty('--my',`${e.clientY-r.top}px`);
+  }
+
+  function btnClass(type){
+    if(match.settled&&match.result){
+      const res=match.result;
+      const dcWins={'1X':res==='1'||res==='X','X2':res==='X'||res==='2','12':res==='1'||res==='2','1':res==='1','X':res==='X','2':res==='2'};
+      if(['1','X','2','1X','X2'].includes(type)){
+        if(predSet.has(type)) return dcWins[type]?'correct':'wrong';
+        if(['1','X','2'].includes(type)&&type===res) return 'correct';
+        return '';
+      }
+      const pEntry=preds.find(p=>p.prediction===type);
+      if(pEntry) return parseFloat(pEntry.payout||0)>0?'correct':'wrong';
+      return '';
+    }
+    if(predSet.has(type)) return ['1','X','2','1X','X2'].includes(type)?`selected-${type}`:'selected-ko';
+    return '';
+  }
+
+  const stageKey=match.stage;
+  const badgeClass=stageKey==='group'?'badge-group':stageKey==='r32'?'badge-r32':stageKey==='r16'?'badge-r16':stageKey==='qf'?'badge-qf':stageKey==='sf'?'badge-sf':'badge-final';
+  const stageLabel=stageKey==='group'?`${T.grpPrefix} ${match.grp}`:(T[`stage_${stageKey}`]||stageKey);
+  const allOdds={'1':h,'X':d,'2':a,'1X':parseFloat(odds1X),'X2':parseFloat(oddsX2)};
+  const potWin=preds.length>0?preds.reduce((s,p)=>s+(stake*(parseFloat(p.odds_locked)||allOdds[p.prediction]||1)),0).toFixed(2):null;
+
+  const kickoffTime=new Date(match.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'});
+  const kickoffDate=new Date(match.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'});
+
+  return(
+    <div ref={ref} className="match-card spotlight-card mb-3 relative" onMouseMove={onMove}>
+      <div className="pitch-texture"/>
+      <div className="team-glow-left"/>
+      <div className="team-glow-right"/>
+
+      {/* ── Top bar: stage + countdown ── */}
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-0 relative z-10">
+        <span className={`badge ${badgeClass}`}>{stageLabel}</span>
+        <Countdown kickoff={match.kickoff} settled={match.settled} lang={lang}/>
+      </div>
+
+      {/* ── Teams duel — centered layout ── */}
+      <div className="flex items-center gap-2 px-4 pt-3 pb-2 relative z-10" style={{direction:'ltr'}}>
+        {/* Home */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:5}}>
+          <Flag team={match.home_team} size={42}/>
+          <span className="syne" style={{fontSize:12,fontWeight:800,textAlign:'center',lineHeight:1.2,letterSpacing:-.2,color:'var(--text)',maxWidth:90,wordBreak:'break-word'}}>{match.home_team}</span>
+        </div>
+
+        {/* Center — score or time */}
+        <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3,flex:'0 0 auto',minWidth:64}}>
+          {match.settled&&match.home_score!=null?(
+            <div className="mono" style={{fontSize:24,fontWeight:900,color:'var(--gold-bright)',letterSpacing:-2,lineHeight:1}}>
+              {match.home_score}<span style={{color:'var(--muted)',margin:'0 2px',fontSize:16}}>–</span>{match.away_score}
+            </div>
+          ):(
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+              <div style={{width:28,height:28,borderRadius:'50%',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                <span style={{fontSize:7,fontWeight:900,color:'var(--muted)',fontFamily:'Space Grotesk',letterSpacing:1}}>VS</span>
+              </div>
+            </div>
+          )}
+          <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:600,textAlign:'center',lineHeight:1.4,whiteSpace:'nowrap'}}>
+            {kickoffDate}<br/>{kickoffTime}
+          </div>
+        </div>
+
+        {/* Away */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:5}}>
+          <Flag team={match.away_team} size={42}/>
+          <span className="syne" style={{fontSize:12,fontWeight:800,textAlign:'center',lineHeight:1.2,letterSpacing:-.2,color:'var(--text)',maxWidth:90,wordBreak:'break-word'}}>{match.away_team}</span>
+        </div>
+      </div>
+
+      {/* Venue */}
+      <div className="text-center pb-2 relative z-10">
+        <span style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:500,opacity:.7}}>{match.venue}</span>
+      </div>
+
+      {/* ── Divider ── */}
+      <div style={{height:1,margin:'0 16px',background:'linear-gradient(90deg,transparent,rgba(255,255,255,0.06),rgba(242,193,78,0.1),rgba(255,255,255,0.06),transparent)'}}/>
+
+      {/* ── Row 1: 1 X 2 ── */}
+      <div className="flex gap-1.5 px-3 pt-2.5 relative z-10" style={{direction:'ltr'}}>
+        {[
+          {type:'1',team:match.home_team,odds:match.home_odds,label:'1'},
+          {type:'X',team:null,odds:match.draw_odds,label:'X'},
+          {type:'2',team:match.away_team,odds:match.away_odds,label:'2'},
+        ].map(({type,team,odds,label})=>(
+          <button key={type}
+            className={`pred-btn ${btnClass(type)}`}
+            disabled={!canPredict||loading}
+            onClick={()=>canPredict&&onPickClick(match,type)}>
+            <span className="odds-label">{label}</span>
+            <span className="odds-val">{parseFloat(odds).toFixed(2)}</span>
+            {team?<Flag team={team} size={14}/>:<span style={{height:10,fontSize:9,opacity:.4}}>—</span>}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Row 2: Double Chance ── */}
+      <div className="flex gap-1.5 px-3 pt-1.5 pb-3 relative z-10" style={{direction:'ltr'}}>
+        {[
+          {type:'1X',odds:odds1X,label:'1X',desc:lang==='ar'?`${match.home_team} أو تعادل`:`${match.home_team} or Draw`},
+          {type:'X2',odds:oddsX2,label:'X2',desc:lang==='ar'?`تعادل أو ${match.away_team}`:`Draw or ${match.away_team}`},
+        ].map(({type,odds,label,desc})=>(
+          <button key={type}
+            className={`pred-btn dc ${btnClass(type)}`}
+            disabled={!canPredict||loading}
+            onClick={()=>canPredict&&onPickClick(match,type)}
+            style={{flexDirection:'row',justifyContent:'space-between',padding:'9px 12px',gap:0}}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+              <span className="odds-label" style={{fontSize:8}}>{label}</span>
+              <span style={{fontSize:9,color:'var(--muted)',fontWeight:600,lineHeight:1.2,maxWidth:100,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{desc}</span>
+            </div>
+            <span className="odds-val-dc">{odds}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── KO Markets ── */}
+      {isKO&&(match.odds_dnb_home||match.odds_btts_yes||match.odds_over25)&&(
+        <div className="px-3 pb-1 relative z-10" style={{borderTop:'1px solid rgba(255,255,255,0.04)',paddingTop:6}}>
+          {/* DNB row */}
+          {match.odds_dnb_home&&(
+            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
+              {[
+                {type:'DNB1',label:'DNB',desc:match.home_team,odds:match.odds_dnb_home,team:match.home_team},
+                {type:'DNB2',label:'DNB',desc:match.away_team,odds:match.odds_dnb_away,team:match.away_team},
+              ].map(({type,label,desc,odds,team})=>(
+                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
+                  disabled={!canPredict||loading}
+                  onClick={()=>canPredict&&onPickClick(match,type)}
+                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:3}}><Flag team={team} size={12}/><span style={{fontSize:9,color:'var(--muted)',fontWeight:600,maxWidth:80,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{desc}</span></div>
+                  </div>
+                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* BTTS row */}
+          {match.odds_btts_yes&&(
+            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
+              {[
+                {type:'BTTS-Y',label:'BTTS',desc:'Yes',odds:match.odds_btts_yes},
+                {type:'BTTS-N',label:'BTTS',desc:'No',odds:match.odds_btts_no},
+              ].map(({type,label,desc,odds})=>(
+                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
+                  disabled={!canPredict||loading}
+                  onClick={()=>canPredict&&onPickClick(match,type)}
+                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
+                    <span style={{fontSize:9,color:'var(--muted)',fontWeight:600}}>{desc}</span>
+                  </div>
+                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Over/Under row */}
+          {match.odds_over25&&(
+            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
+              {[
+                {type:'OVER2.5',label:'Goals',desc:'Over 2.5',odds:match.odds_over25},
+                {type:'UNDER2.5',label:'Goals',desc:'Under 2.5',odds:match.odds_under25},
+              ].map(({type,label,desc,odds})=>(
+                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
+                  disabled={!canPredict||loading}
+                  onClick={()=>canPredict&&onPickClick(match,type)}
+                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
+                    <span style={{fontSize:9,color:'var(--muted)',fontWeight:600}}>{desc}</span>
+                  </div>
+                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Goal Scorers toggle */}
+          <button onClick={toggleScorers}
+            style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,cursor:'pointer',color:'var(--muted)',marginBottom:6}}>
+            <span style={{fontSize:10,fontWeight:700,fontFamily:'Space Grotesk',letterSpacing:.3}}>Goal Scorers</span>
+            <span style={{fontSize:8,display:'inline-block',transform:showScorers?'rotate(180deg)':'none',transition:'transform .2s'}}>▼</span>
+          </button>
+          {showScorers&&(
+            <div className="mb-2">
+              {loadingScorers&&<div style={{textAlign:'center',padding:'8px',fontSize:10,color:'var(--muted)'}}>Loading...</div>}
+              {scorers&&scorers.length===0&&<div style={{textAlign:'center',padding:'8px',fontSize:10,color:'var(--muted)'}}>No scorer odds available yet</div>}
+              {scorers&&scorers.length>0&&(()=>{
+                const anytime=scorers.filter(s=>s.market==='anytime');
+                const first=scorers.filter(s=>s.market==='first');
+                return(
+                  <div style={{display:'flex',gap:6}}>
+                    {anytime.length>0&&(
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:8,fontWeight:800,color:'var(--muted)',letterSpacing:.5,marginBottom:4,fontFamily:'Space Grotesk',textTransform:'uppercase'}}>Anytime Scorer</div>
+                        {anytime.map(s=>(
+                          <button key={s.player_name} className={`pred-btn ${btnClass('ANYTIME:'+s.player_name)}`}
+                            disabled={!canPredict||loading}
+                            onClick={()=>canPredict&&onPickClick(match,'ANYTIME:'+s.player_name,parseFloat(s.odds))}
+                            style={{width:'100%',marginBottom:3,flexDirection:'row',justifyContent:'space-between',padding:'6px 8px'}}>
+                            <span style={{fontSize:10,fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:100}}>{s.player_name}</span>
+                            <span className="odds-val" style={{fontSize:11}}>{parseFloat(s.odds).toFixed(2)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {first.length>0&&(
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:8,fontWeight:800,color:'var(--muted)',letterSpacing:.5,marginBottom:4,fontFamily:'Space Grotesk',textTransform:'uppercase'}}>First Scorer</div>
+                        {first.map(s=>(
+                          <button key={s.player_name} className={`pred-btn ${btnClass('FIRST:'+s.player_name)}`}
+                            disabled={!canPredict||loading}
+                            onClick={()=>canPredict&&onPickClick(match,'FIRST:'+s.player_name,parseFloat(s.odds))}
+                            style={{width:'100%',marginBottom:3,flexDirection:'row',justifyContent:'space-between',padding:'6px 8px'}}>
+                            <span style={{fontSize:10,fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:100}}>{s.player_name}</span>
+                            <span className="odds-val" style={{fontSize:11}}>{parseFloat(s.odds).toFixed(2)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Potential win ── */}
+      {!match.settled&&preds.length>0&&(
+        <div className="pb-3 relative z-10" style={{marginTop:-4,textAlign:'center'}}>
+          <span style={{display:'inline-flex',alignItems:'center',gap:6,padding:'4px 12px',background:'rgba(0,201,123,0.07)',border:'1px solid rgba(0,201,123,0.15)',borderRadius:999}}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--green)" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span style={{fontSize:11,color:'var(--green)',fontWeight:700,fontFamily:'Space Grotesk'}}>{T.potentialWin} <span className="mono" style={{fontWeight:900,fontSize:12}}>${potWin}</span></span>
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Fixtures Tab ──────────────────────────────────────────────────────────────
+function FixturesTab({matches,predictions,onPickClick,loadingMatch,settings,lang}){
+  const T=TX[lang];
+  const [filter,setFilter]=useState('all');
+  const [showFinished,setShowFinished]=useState(false);
+  const predMap={};(predictions||[]).forEach(p=>{if(!predMap[p.match_id])predMap[p.match_id]=[];predMap[p.match_id].push(p);});
+  const now=Date.now();
+  const deadline=(m)=>new Date(m.kickoff).getTime()-5*60*1000;
+  let shown=matches;
+  if(filter==='upcoming') shown=matches.filter(m=>!m.settled&&deadline(m)>now);
+  if(filter==='my') shown=matches.filter(m=>predMap[m.id]);
+  function groupAndSort(list){
+    const g={};
+    list.forEach(m=>{
+      const dk=new Date(m.kickoff).toLocaleDateString('en-CA');
+      const k=m.stage+'_'+dk;
+      if(!g[k]) g[k]={stage:m.stage,date:dk,matches:[]};
+      g[k].matches.push(m);
+    });
+    return Object.values(g).sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  const upcoming=shown.filter(m=>!m.settled);
+  const finished=filter==='upcoming'?[]:shown.filter(m=>m.settled);
+  const upcomingGroups=groupAndSort(upcoming);
+  const finishedGroups=groupAndSort(finished);
+  const stake=parseFloat(settings?.stake_per_match||100);
+  function renderGroups(groups){
+    return groups.map(group=>(
+      <div key={group.stage+'_'+group.date} className="px-4 mb-1">
+        <div className="section-header mt-3">
+          <div className="section-header-bar"/>
+          <div><div className="section-date-label">{new Date(group.date+'T12:00:00Z').toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'long',month:'long',day:'numeric'})}</div></div>
+          <span className="section-stage-badge">{STAGE_EN[group.stage]||group.stage}</span>
+        </div>
+        {group.matches.map(m=>(
+          <MatchCard key={m.id} match={m} predictions={predMap[m.id]||[]}
+            onPickClick={onPickClick} loading={loadingMatch===m.id}
+            lang={lang} stake={stake}/>
+        ))}
+      </div>
+    ));
+  }
+  return(
+    <div className="pb-32">
+      <div className="pt-3"><NextMatchBanner matches={matches} lang={lang}/></div>
+      {/* ── Filter + odds info row ── */}
+      <div className="flex items-center gap-2 px-4 pb-3">
+        <div className="flex gap-1.5" style={{flex:1}}>
+          {[['all',T.all],['upcoming',T.upcoming],['my',T.myPicks]].map(([v,l])=>(
+            <button key={v} className={`pill-tab ${filter===v?'active':''}`} onClick={()=>setFilter(v)}>{l}</button>
+          ))}
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:4,padding:'4px 9px',background:'rgba(0,201,123,0.06)',border:'1px solid rgba(0,201,123,0.12)',borderRadius:999,flexShrink:0}}>
+          <div style={{width:5,height:5,borderRadius:'50%',background:'var(--green)',boxShadow:'0 0 4px rgba(0,201,123,0.6)'}}/>
+          <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:800,color:'var(--green)',letterSpacing:.5,whiteSpace:'nowrap'}}>
+            LIVE ODDS
+            {settings?.odds_last_updated&&(()=>{const diff=Date.now()-new Date(settings.odds_last_updated).getTime();const m=Math.floor(diff/60000);const h=Math.floor(m/60);return ` · ${h>0?`${h}h`:`${m}m`}`;})()}
+          </span>
+        </div>
+      </div>
+      {upcomingGroups.length===0&&finished.length===0&&(
+        <div className="flex flex-col items-center justify-center py-20" style={{color:'var(--muted)'}}>
+          <IconBall size={40} color="var(--muted)"/>
+          <div className="mt-3 font-bold">{T.noMatches}</div>
+        </div>
+      )}
+      {renderGroups(upcomingGroups)}
+      {finished.length>0&&(
+        <div className="px-4 mt-3 mb-2">
+          <button onClick={()=>setShowFinished(v=>!v)}
+            style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'10px 14px',background:'var(--glass)',border:'1px solid var(--border2)',borderRadius:14,backdropFilter:'blur(16px)',cursor:'pointer',color:'var(--muted)'}}>
+            <span style={{fontSize:12,fontWeight:700,fontFamily:'Space Grotesk',letterSpacing:.3}}>
+              {lang==='ar'?`المنتهية (${finished.length})`:`Finished (${finished.length})`}
+            </span>
+            <span style={{fontSize:9,display:'inline-block',transform:showFinished?'rotate(180deg)':'none',transition:'transform .2s'}}>▼</span>
+          </button>
+          {(showFinished||filter==='my')&&renderGroups(finishedGroups)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── My Bets Tab ───────────────────────────────────────────────────────────────
+function MyBetsTab({matches,predictions,lang}){
+  const T=TX[lang];
+  const matchMap={};matches.forEach(m=>matchMap[m.id]=m);
+  const preds=[...(predictions||[])].sort((a,b)=>{
+    const ma=matchMap[a.match_id],mb=matchMap[b.match_id];
+    if(!ma||!mb) return 0;
+    return new Date(ma.kickoff)-new Date(mb.kickoff);
+  });
+  const settled=preds.filter(p=>p.settled),pending=preds.filter(p=>!p.settled);
+  const totalWon=settled.reduce((s,p)=>s+(parseFloat(p.payout)||0),0);
+  const totalStaked=settled.reduce((s,p)=>s+parseFloat(p.stake),0);
+  const wins=settled.filter(p=>p.payout>0).length;
+  const pl=totalWon-totalStaked;
+
+  return(
+    <div className="pb-32 px-4 pt-3">
+      {/* Stats */}
+      {settled.length>0&&(
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          {[
+            {label:T.matches,val:preds.length,c:'var(--text)'},
+            {label:T.wins,val:wins,c:'var(--green)'},
+            {label:T.profitLoss,val:`$${pl.toFixed(1)}`,c:pl>=0?'var(--green)':'var(--red)'},
+          ].map(s=>(
+            <div key={s.label} className="rounded-2xl text-center py-4" style={{background:'var(--glass)',border:'1px solid var(--border2)',backdropFilter:'blur(16px)'}}>
+              <div className="mono" style={{fontSize:22,fontWeight:700,color:s.c,letterSpacing:-1}}>{s.val}</div>
+              <div style={{fontSize:10,color:'var(--muted)',marginTop:2,fontWeight:600}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {pending.length>0&&(
+        <>
+          <div className="section-date mt-2 mb-3">{T.pending} · {pending.length}</div>
+          {pending.map(p=>{
+            const m=matchMap[p.match_id];if(!m)return null;
+            const h=parseFloat(m.home_odds),d=parseFloat(m.draw_odds),a=parseFloat(m.away_odds);
+            const odds=parseFloat(p.odds_locked)||({'1':h,'X':d,'2':a,'1X':(h*d)/(h+d),'X2':(d*a)/(d+a)}[p.prediction]||h);
+            const pickTeam=p.prediction==='1'?m.home_team:p.prediction==='2'?m.away_team:p.prediction==='DNB1'?m.home_team:p.prediction==='DNB2'?m.away_team:null;
+            const pickLabel=p.prediction==='X'?T.pickX:p.prediction==='1X'?(m.home_team+'/X'):p.prediction==='X2'?('X/'+m.away_team):p.prediction==='BTTS-Y'?'BTTS Yes':p.prediction==='BTTS-N'?'BTTS No':p.prediction==='OVER2.5'?'Over 2.5':p.prediction==='UNDER2.5'?'Under 2.5':p.prediction==='DNB1'?('DNB '+m.home_team):p.prediction==='DNB2'?('DNB '+m.away_team):p.prediction.startsWith('ANYTIME:')?p.prediction.slice(8):p.prediction.startsWith('FIRST:')?('1st: '+p.prediction.slice(6)):pickTeam;
+            return(
+              <div key={p.id} className="match-card mb-2 px-4 py-3" style={{direction:'ltr'}}>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Flag team={m.home_team} size={22}/><span style={{fontSize:9,color:'var(--muted)',padding:'0 2px',fontFamily:'Space Grotesk'}}>v</span><Flag team={m.away_team} size={22}/>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.home_team} vs {m.away_team}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'})} · {new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {pickTeam&&<Flag team={pickTeam} size={18}/>}
+                    <div>
+                      <div style={{fontSize:11,fontWeight:800,color:'var(--gold)',textAlign:'right'}}>{pickLabel}</div>
+                      <div className="mono" style={{fontSize:10,color:'var(--muted)',textAlign:'right'}}>{odds.toFixed(2)}×</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+      {settled.length>0&&(
+        <>
+          <div className="section-date mt-5 mb-3">{T.settled} · {settled.length}</div>
+          {settled.map(p=>{
+            const m=matchMap[p.match_id];if(!m)return null;
+            const won=p.payout>0;
+            const pickTeam=p.prediction==='1'?m.home_team:p.prediction==='2'?m.away_team:p.prediction==='DNB1'?m.home_team:p.prediction==='DNB2'?m.away_team:null;
+            const pickLabel=p.prediction==='X'?T.pickX:p.prediction==='1X'?(m.home_team+'/X'):p.prediction==='X2'?('X/'+m.away_team):p.prediction==='BTTS-Y'?'BTTS Yes':p.prediction==='BTTS-N'?'BTTS No':p.prediction==='OVER2.5'?'Over 2.5':p.prediction==='UNDER2.5'?'Under 2.5':p.prediction==='DNB1'?('DNB '+m.home_team):p.prediction==='DNB2'?('DNB '+m.away_team):p.prediction.startsWith('ANYTIME:')?p.prediction.slice(8):p.prediction.startsWith('FIRST:')?('1st: '+p.prediction.slice(6)):pickTeam;
+            return(
+              <div key={p.id} className="match-card mb-2 px-4 py-3" style={{direction:'ltr',borderColor:won?'rgba(0,201,123,0.15)':'rgba(255,54,81,0.1)'}}>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Flag team={m.home_team} size={22}/><span style={{fontSize:9,color:'var(--muted)',padding:'0 2px',fontFamily:'Space Grotesk'}}>v</span><Flag team={m.away_team} size={22}/>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.home_team} vs {m.away_team}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{m.home_score}–{m.away_score} · {pickLabel}</div>
+                  </div>
+                  <div className="mono shrink-0" style={{fontSize:17,fontWeight:700,color:won?'var(--green)':'var(--red)',letterSpacing:-0.5}}>
+                    {won?`+$${parseFloat(p.payout).toFixed(2)}`:`-$${parseFloat(p.stake).toFixed(2)}`}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </>
+      )}
+      {preds.length===0&&(
+        <div className="flex flex-col items-center justify-center py-24" style={{color:'var(--muted)'}}>
+          <IconTarget size={44} color="var(--muted)"/>
+          <div className="mt-3 font-bold text-base">{T.noBets}</div>
+          <div style={{fontSize:13,marginTop:4}}>{T.noBetsSub}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Leaderboard ───────────────────────────────────────────────────────────────
+function LeaderboardTab({leaderboard,currentPlayer,lang}){
+  const T=TX[lang];
+  const [expandedId,setExpandedId]=useState(null);
+  const [predCache,setPredCache]=useState({});
+  const [loadingId,setLoadingId]=useState(null);
+  const podiumColors=[
+    {rank:'#F2C14E',bg:'rgba(242,193,78,0.06)',border:'rgba(242,193,78,0.2)',num:'var(--gold)'},
+    {rank:'#C0C0C0',bg:'rgba(192,192,192,0.05)',border:'rgba(192,192,192,0.15)',num:'#C0C0C0'},
+    {rank:'#CD7F32',bg:'rgba(205,127,50,0.05)',border:'rgba(205,127,50,0.15)',num:'#CD7F32'},
+  ];
+  async function togglePlayer(id){
+    if(expandedId===id){setExpandedId(null);return;}
+    setExpandedId(id);
+    if(!predCache[id]){
+      setLoadingId(id);
+      try{
+        const data=await apiFetch(`/wc/player/${id}/predictions`);
+        setPredCache(c=>({...c,[id]:data}));
+      }catch(e){setPredCache(c=>({...c,[id]:[]}))}
+      setLoadingId(null);
+    }
+  }
+  function fmtPick(pred,m){
+    if(pred==='1') return m.home_team;
+    if(pred==='2') return m.away_team;
+    if(pred==='X') return lang==='ar'?'تعادل':'Draw';
+    if(pred==='1X') return m.home_team+'/'+(lang==='ar'?'تعادل':'X');
+    if(pred==='X2') return (lang==='ar'?'تعادل':'X')+'/'+m.away_team;
+    if(pred==='BTTS-Y') return 'BTTS Yes';
+    if(pred==='BTTS-N') return 'BTTS No';
+    if(pred==='OVER2.5') return 'Over 2.5';
+    if(pred==='UNDER2.5') return 'Under 2.5';
+    if(pred==='DNB1') return 'DNB '+m.home_team;
+    if(pred==='DNB2') return 'DNB '+m.away_team;
+    if(pred.startsWith('ANYTIME:')) return pred.slice(8);
+    if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
+    return pred;
+  }
+  return(
+    <div className="pb-32 px-4 pt-3">
+      <div className="section-date mb-4">{T.rank}</div>
+      {leaderboard.map((p,i)=>{
+        const isMe=currentPlayer&&p.id===currentPlayer.id;
+        const style=i<3?podiumColors[i]:null;
+        const winnings=parseFloat(p.winnings||0);
+        const profitColor=winnings>0?'var(--green)':'var(--muted)';
+        const profitStr=winnings>0?'+$'+winnings.toFixed(0):'$0';
+        const isExp=expandedId===p.id;
+        const preds=predCache[p.id];
+        return(
+          <div key={p.id} className="match-card mb-2 overflow-hidden"
+            style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>
+            {/* ── Main row ── */}
+            <div className="px-4 py-3.5 relative" style={{cursor:'pointer'}} onClick={()=>togglePlayer(p.id)}>
+              <div className="mono" style={{position:'absolute',right:lang==='ar'?'auto':'12px',left:lang==='ar'?'12px':'auto',top:'50%',transform:'translateY(-50%)',fontSize:64,fontWeight:900,color:style?style.rank:'rgba(255,255,255,0.03)',lineHeight:1,pointerEvents:'none',letterSpacing:-4,userSelect:'none'}}>{i+1}</div>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="mono shrink-0 text-center" style={{width:28,fontSize:i<3?20:14,fontWeight:900,color:style?.num||'var(--muted)'}}>
+                  {i===0?'#1':i===1?'#2':i===2?'#3':`${i+1}`}
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontWeight:700,fontSize:14,display:'flex',alignItems:'center',gap:6}}>
+                    {p.name}
+                    {isMe&&<span style={{fontSize:9,fontWeight:800,color:'var(--gold)',background:'rgba(242,193,78,0.12)',border:'1px solid rgba(242,193,78,0.2)',borderRadius:999,padding:'1px 7px',fontFamily:'Space Grotesk',letterSpacing:.5}}>{T.youLabel}</span>}
+                  </div>
+                  <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.wins} {T.predWin} / {p.played||0} {T.predPlayed} · {p.total||0} {T.predTotal}</div>
+                </div>
+                <div className="text-right shrink-0" style={{display:'flex',alignItems:'center',gap:6}}>
+                  <div>
+                    <div className="mono" style={{fontSize:22,fontWeight:700,color:profitColor,letterSpacing:-1}}>{profitStr}</div>
+                    <div className="mono" style={{fontSize:11,color:'var(--muted)',marginTop:2}}>${parseFloat(p.balance).toFixed(0)} {T.balance}</div>
+                  </div>
+                  <div style={{fontSize:9,color:'var(--muted)',display:'inline-block',transform:isExp?'rotate(180deg)':'none',transition:'transform .2s',marginBottom:isExp?0:2}}>▼</div>
+                </div>
+              </div>
+            </div>
+            {/* ── Expanded bets ── */}
+            {isExp&&(
+              <div style={{borderTop:'1px solid var(--border2)',padding:'8px 16px 10px'}}>
+                {loadingId===p.id&&<div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>···</div>}
+                {preds&&preds.length===0&&(
+                  <div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>
+                    {lang==='ar'?'لا رهانات مؤكدة بعد':'No confirmed bets yet'}
+                  </div>
+                )}
+                {preds&&preds.map(pr=>{
+                  const won=pr.settled&&parseFloat(pr.payout)>0;
+                  const lost=pr.settled&&parseFloat(pr.payout)===0;
+                  const icon=!pr.settled?'·':won?'✓':'✗';
+                  const iconColor=!pr.settled?'var(--muted)':won?'var(--green)':'var(--red)';
+                  const payStr=won?`+$${(parseFloat(pr.payout)-parseFloat(pr.stake)).toFixed(0)}`:lost?`-$${parseFloat(pr.stake).toFixed(0)}`:'';
+                  return(
+                    <div key={pr.match_id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                      <div style={{fontSize:12,color:iconColor,fontWeight:700,width:14,flexShrink:0,textAlign:'center'}}>{icon}</div>
+                      <div style={{flex:1,minWidth:0}}>
+                        <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pr.home_team} – {pr.away_team}</div>
+                        <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result?` · ${pr.home_score}–${pr.away_score}`:''}</div>
+                      </div>
+                      {payStr&&<div className="mono" style={{fontSize:11,fontWeight:700,color:won?'var(--green)':'var(--muted)',flexShrink:0}}>{payStr}</div>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {leaderboard.length===0&&(
+        <div className="flex flex-col items-center justify-center py-24" style={{color:'var(--muted)'}}>
+          <IconTrophy size={44} color="var(--muted)"/>
+          <div className="mt-3 font-bold">{T.noPlayers}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Admin Panel ───────────────────────────────────────────────────────────────
+function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose}){
+  const T=TX[lang];
+  const [tab,setTab]=useState('results');
+  const [selectedMatch,setSelectedMatch]=useState(null);
+  const [hs,setHs]=useState('');const [as_,setAs]=useState('');
+  const [saving,setSaving]=useState(false);
+  const [editOdds,setEditOdds]=useState(null);
+  const [oh,setOh]=useState('');const [od,setOd]=useState('');const [oa,setOa]=useState('');
+  const [o1x,setO1x]=useState('');const [ox2,setOx2]=useState('');
+  const [stakeInput,setStakeInput]=useState(settings?.stake_per_match||'100');
+  const [balInput,setBalInput]=useState(settings?.starting_balance||'100');
+  const [editPlayer,setEditPlayer]=useState(null);
+  const [epBal,setEpBal]=useState('');const [epName,setEpName]=useState('');const [epPin,setEpPin]=useState('');
+  const [filterStage,setFilterStage]=useState('group');
+
+  async function submitResult(){if(!selectedMatch||hs===''||as_==='')return;setSaving(true);try{await apiFetch('/wc/admin/result',{method:'POST',body:JSON.stringify({matchId:selectedMatch.id,homeScore:parseInt(hs),awayScore:parseInt(as_)})});showToast(T.toastResult,'success');setSelectedMatch(null);setHs('');setAs('');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
+  async function submitOdds(matchId){setSaving(true);try{await apiFetch(`/wc/admin/match/${matchId}`,{method:'PUT',body:JSON.stringify({homeOdds:parseFloat(oh)||undefined,drawOdds:parseFloat(od)||undefined,awayOdds:parseFloat(oa)||undefined,odds1X:parseFloat(o1x)||undefined,oddsX2:parseFloat(ox2)||undefined})});showToast(T.toastOdds,'success');setEditOdds(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
+  async function saveSettings(){setSaving(true);try{await apiFetch('/wc/admin/settings',{method:'PUT',body:JSON.stringify({stake_per_match:stakeInput,starting_balance:balInput})});showToast(T.toastSettings,'success');}catch(e){showToast(e.message,'error');}setSaving(false);}
+  async function savePlayer(){if(!editPlayer)return;setSaving(true);try{await apiFetch(`/wc/admin/player/${editPlayer.id}`,{method:'PUT',body:JSON.stringify({balance:parseFloat(epBal),name:epName||undefined})});showToast(T.toastPlayer,'success');setEditPlayer(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
+  async function deletePlayer(p){if(!confirm(`${T.confirmDelete} ${p.name}?`))return;try{await apiFetch(`/wc/admin/player/${p.id}`,{method:'DELETE'});showToast(T.toastDeleted,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
+  async function undoResult(matchId){if(!confirm(T.confirmUndo))return;try{await apiFetch(`/wc/admin/result/${matchId}`,{method:'DELETE'});showToast(T.toastUndo,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
+
+  const stageMatches=matches.filter(m=>m.stage===filterStage);
+
+  return(
+    <div className="fixed inset-0 z-30 admin-drawer" style={{background:'rgba(2,12,30,0.98)',maxWidth:480,margin:'0 auto',overflowY:'auto',backdropFilter:'blur(32px)'}}>
+      {/* Header */}
+      <div style={{background:'rgba(3,15,38,0.9)',borderBottom:'1px solid var(--border2)',position:'sticky',top:0,zIndex:10,paddingTop:'env(safe-area-inset-top,0px)',backdropFilter:'blur(20px)'}}>
+        <div className="flex items-center justify-between px-4 py-3">
+          <div>
+            <div style={{fontSize:9,color:'var(--gold)',fontWeight:800,letterSpacing:2,fontFamily:'Space Grotesk',textTransform:'uppercase',marginBottom:2}}>Control</div>
+            <div className="syne" style={{fontSize:20,fontWeight:800,color:'var(--text)'}}>{T.adminTitle}</div>
+          </div>
+          <button onClick={onClose} style={{background:'rgba(255,255,255,0.06)',border:'1px solid var(--border2)',borderRadius:12,width:36,height:36,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted)'}}>
+            <IconClose size={14}/>
+          </button>
+        </div>
+        {/* Sub-tabs */}
+        <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto" style={{scrollbarWidth:'none'}}>
+          {[['results',T.results],['odds',T.odds],['teams',T.teams],['players',T.players],['settings',T.settings]].map(([v,l])=>(
+            <button key={v} className={`pill-tab shrink-0 ${tab===v?'active':''}`} onClick={()=>setTab(v)}>{l}</button>
+          ))}
+        </div>
+        {/* Stage filter */}
+        {['results','odds','teams'].includes(tab)&&(
+          <div className="flex gap-1.5 px-4 pb-3 overflow-x-auto" style={{scrollbarWidth:'none',direction:'ltr'}}>
+            {['group','r32','r16','qf','sf','3rd','final'].map(s=>(
+              <button key={s} onClick={()=>setFilterStage(s)} style={{padding:'4px 12px',borderRadius:999,fontSize:10,fontWeight:800,border:'none',letterSpacing:.5,background:filterStage===s?'var(--gold)':' rgba(255,255,255,0.05)',color:filterStage===s?'#0A0600':'var(--muted)',flexShrink:0,fontFamily:'Space Grotesk',textTransform:'uppercase',transition:'all .15s'}}>
+                {STAGE_EN[s]||s}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pb-12">
+        {tab==='results'&&(
+          <div className="px-4 pt-3 space-y-2">
+            {stageMatches.map(m=>(
+              <div key={m.id} className="match-card p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0" style={{direction:'ltr'}}>
+                    <Flag team={m.home_team} size={18}/>
+                    <span style={{fontSize:12,fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{m.home_team} vs {m.away_team}</span>
+                    <Flag team={m.away_team} size={18}/>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {m.settled&&<span className="score-display" style={{fontSize:15}}>{m.home_score}–{m.away_score}</span>}
+                    {m.settled&&<button onClick={()=>undoResult(m.id)} style={{fontSize:10,color:'var(--muted)',background:'rgba(255,255,255,0.05)',border:'1px solid var(--border2)',borderRadius:8,padding:'3px 8px'}}>{T.undoBtn}</button>}
+                    {!m.settled&&<button onClick={()=>{setSelectedMatch(m===selectedMatch?null:m);setHs('');setAs('');}} style={{fontSize:10,background:selectedMatch?.id===m.id?'rgba(255,255,255,0.06)':'var(--gold)',color:selectedMatch?.id===m.id?'var(--muted)':'#0A0600',border:'none',borderRadius:10,padding:'5px 12px',fontWeight:800,fontFamily:'Space Grotesk'}}>{selectedMatch?.id===m.id?T.cancelEdit:T.enterResult}</button>}
+                  </div>
+                </div>
+                {selectedMatch?.id===m.id&&(
+                  <div className="mt-3 flex gap-2 items-center" style={{direction:'ltr'}}>
+                    <input className="admin-inp w-16 text-center" placeholder="0" value={hs} onChange={e=>setHs(e.target.value)} type="number" min="0"/>
+                    <span style={{color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700}}>–</span>
+                    <input className="admin-inp w-16 text-center" placeholder="0" value={as_} onChange={e=>setAs(e.target.value)} type="number" min="0"/>
+                    <button onClick={submitResult} disabled={saving||hs===''||as_===''} style={{background:'var(--green)',color:'#002916',border:'none',borderRadius:10,padding:'7px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk'}}>{T.saveBtn}</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==='odds'&&(
+          <div className="px-4 pt-3 space-y-2">
+            <div style={{fontSize:11,color:'var(--muted)',marginBottom:10,padding:'10px 14px',background:'rgba(242,193,78,0.04)',borderRadius:12,border:'1px solid var(--border)',fontFamily:'Space Grotesk'}}>
+              i  {lang==='ar'?'الأوفر الحالية تقديرية مبنية على توقعات ما قبل البطولة. حدّثها هنا حسب السوق الفعلي.':'Current odds are pre-tournament estimates. Update here to reflect live market.'}
+            </div>
+            {stageMatches.map(m=>(
+              <div key={m.id} className="match-card p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0" style={{direction:'ltr'}}>
+                    <Flag team={m.home_team} size={18}/>
+                    <span style={{fontSize:12,fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',flex:1}}>{m.home_team} vs {m.away_team}</span>
+                    <Flag team={m.away_team} size={18}/>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="mono" style={{fontSize:10,color:'var(--muted)'}}>{parseFloat(m.home_odds).toFixed(2)}/{parseFloat(m.draw_odds).toFixed(2)}/{parseFloat(m.away_odds).toFixed(2)}</span>
+                    <button onClick={()=>{setEditOdds(editOdds===m.id?null:m.id);setOh(parseFloat(m.home_odds).toFixed(2));setOd(parseFloat(m.draw_odds).toFixed(2));setOa(parseFloat(m.away_odds).toFixed(2));setO1x(m.odds_1x?parseFloat(m.odds_1x).toFixed(2):'');setOx2(m.odds_x2?parseFloat(m.odds_x2).toFixed(2):'');}} style={{fontSize:10,background:'rgba(255,255,255,0.05)',border:'1px solid var(--border)',color:'var(--gold)',borderRadius:8,padding:'3px 8px',fontFamily:'Space Grotesk'}}>{T.editBtn}</button>
+                  </div>
+                </div>
+                {editOdds===m.id&&(
+                  <div className="mt-2" style={{direction:'ltr'}}>
+                    <div className="flex gap-2 mb-2">
+                      <input className="admin-inp flex-1 text-center" value={oh} onChange={e=>setOh(e.target.value)} type="number" step="0.01" placeholder="1"/>
+                      <input className="admin-inp flex-1 text-center" value={od} onChange={e=>setOd(e.target.value)} type="number" step="0.01" placeholder="X"/>
+                      <input className="admin-inp flex-1 text-center" value={oa} onChange={e=>setOa(e.target.value)} type="number" step="0.01" placeholder="2"/>
+                    </div>
+                    <div className="flex gap-2 mb-2">
+                      <input className="admin-inp flex-1 text-center" value={o1x} onChange={e=>setO1x(e.target.value)} type="number" step="0.01" placeholder="1X (optional)"/>
+                      <input className="admin-inp flex-1 text-center" value={ox2} onChange={e=>setOx2(e.target.value)} type="number" step="0.01" placeholder="X2 (optional)"/>
+                    </div>
+                    <button onClick={()=>submitOdds(m.id)} disabled={saving} style={{width:'100%',background:'var(--gold)',color:'#0A0600',border:'none',borderRadius:10,padding:'8px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk'}}>{T.saveBtn}</button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==='teams'&&(
+          <div className="px-4 pt-3 space-y-2">
+            {stageMatches.map(m=>(
+              <div key={m.id} className="match-card p-3">
+                <div className="mono" style={{fontSize:9,color:'var(--muted)',marginBottom:8,letterSpacing:1,textTransform:'uppercase'}}>{STAGE_FULL[m.stage]||m.stage} · {m.id}</div>
+                <div className="flex gap-2" style={{direction:'ltr'}}>
+                  <input className="admin-inp flex-1" placeholder={m.home_team||'Home'} defaultValue={m.home_team==='TBD'?'':m.home_team}
+                    onBlur={async e=>{if(e.target.value&&e.target.value!==m.home_team){try{await apiFetch(`/wc/admin/match/${m.id}`,{method:'PUT',body:JSON.stringify({homeTeam:e.target.value})});showToast(T.toastUpdated,'success');onRefresh();}catch(err){showToast(err.message,'error');}}}}/>
+                  <span style={{alignSelf:'center',color:'var(--muted)',fontFamily:'Space Grotesk',fontSize:11}}>vs</span>
+                  <input className="admin-inp flex-1" placeholder={m.away_team||'Away'} defaultValue={m.away_team==='TBD'?'':m.away_team}
+                    onBlur={async e=>{if(e.target.value&&e.target.value!==m.away_team){try{await apiFetch(`/wc/admin/match/${m.id}`,{method:'PUT',body:JSON.stringify({awayTeam:e.target.value})});showToast(T.toastUpdated,'success');onRefresh();}catch(err){showToast(err.message,'error');}}}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==='players'&&(
+          <div className="px-4 pt-3 space-y-2">
+            {players.map(p=>(
+              <div key={p.id} className="match-card p-3.5">
+                <div className="flex items-center justify-between">
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontWeight:700,fontSize:14}}>{p.name}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)',marginTop:1}}>{p.phone} · {p.pred_count} {T.predTotal} · {p.wins} {T.predWin}</div>
+                    <div style={{marginTop:4,display:'flex',alignItems:'center',gap:6}}>
+                      <span style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:700,color:'var(--muted)',textTransform:'uppercase',letterSpacing:.5}}>PIN:</span>
+                      <span className="mono" style={{fontSize:12,fontWeight:700,color:p.pin?'var(--gold)':'var(--red)',letterSpacing:2}}>{p.pin||'—'}</span>
+                      {!p.pin&&<span style={{fontSize:9,color:'var(--red)',fontFamily:'Space Grotesk'}}>not set</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="mono" style={{fontSize:20,fontWeight:700,color:parseFloat(p.balance)>=100?'var(--green)':'var(--red)',letterSpacing:-1}}>${parseFloat(p.balance).toFixed(0)}</span>
+                    <button onClick={()=>{setEditPlayer(editPlayer?.id===p.id?null:p);setEpBal(parseFloat(p.balance).toFixed(2));setEpName(p.name);setEpPin('');}} style={{fontSize:10,background:'rgba(255,255,255,0.05)',border:'1px solid var(--border)',color:'var(--gold)',borderRadius:8,padding:'4px 10px',fontFamily:'Space Grotesk'}}>{T.editBtn}</button>
+                    <button onClick={()=>deletePlayer(p)} style={{fontSize:10,background:'rgba(255,54,81,0.08)',border:'none',color:'var(--red)',borderRadius:8,padding:'4px 10px',fontFamily:'Space Grotesk'}}>{T.deleteBtn}</button>
+                  </div>
+                </div>
+                {editPlayer?.id===p.id&&(
+                  <div className="mt-2 space-y-2" style={{direction:'ltr'}}>
+                    <div className="flex gap-2">
+                      <input className="admin-inp flex-1" value={epName} onChange={e=>setEpName(e.target.value)} placeholder="Name"/>
+                      <input className="admin-inp w-24 text-center" value={epBal} onChange={e=>setEpBal(e.target.value)} type="number" step="0.01" placeholder="Balance"/>
+                      <button onClick={savePlayer} disabled={saving} style={{background:'var(--gold)',color:'#0A0600',border:'none',borderRadius:10,padding:'6px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk'}}>{T.saveBtn}</button>
+                    </div>
+                    <div className="flex gap-2 items-center">
+                      <span style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,flexShrink:0}}>Reset PIN:</span>
+                      <input className="admin-inp w-28 text-center mono" placeholder="new pin" maxLength={6} value={epPin} onChange={e=>setEpPin(e.target.value.replace(/\D/g,''))} style={{fontSize:14,letterSpacing:3}}/>
+                      <button onClick={async()=>{if(!epPin)return;setSaving(true);try{await apiFetch(`/wc/admin/player/${p.id}`,{method:'PUT',body:JSON.stringify({pin:epPin})});showToast(lang==='ar'?'تم تغيير الرمز':'PIN updated','success');setEpPin('');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}}
+                        disabled={!epPin||saving}
+                        style={{background:'rgba(255,255,255,0.06)',border:'1px solid var(--border2)',color:'var(--text)',borderRadius:10,padding:'5px 12px',fontSize:11,fontFamily:'Space Grotesk',fontWeight:700}}>
+                        {lang==='ar'?'تغيير':'Set'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {tab==='settings'&&(
+          <div className="px-4 pt-3">
+            <div className="match-card p-5 space-y-4">
+              <div className="syne" style={{fontSize:15,fontWeight:700,color:'var(--text)'}}>{T.settings}</div>
+              <div>
+                <div style={{fontSize:11,color:'var(--muted)',marginBottom:8,fontWeight:600}}>{T.stakeLabel}</div>
+                <input className="admin-inp w-full" type="number" step="0.5" value={stakeInput} onChange={e=>setStakeInput(e.target.value)}/>
+              </div>
+              <div>
+                <div style={{fontSize:11,color:'var(--muted)',marginBottom:8,fontWeight:600}}>{T.startingBal}</div>
+                <input className="admin-inp w-full" type="number" step="1" value={balInput} onChange={e=>setBalInput(e.target.value)}/>
+              </div>
+              <button onClick={saveSettings} disabled={saving} className="btn-primary" style={{fontSize:14,padding:'11px'}}>{T.saveSettings}</button>
+              <div style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk'}}>{T.settingsNote}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── PIN Keypad (shared by Login + Admin unlock) ───────────────────────────────
+function PinKeypad({value,onChange,onDelete,error}){
+  return(
+    <div>
+      {/* Dots */}
+      <div style={{display:'flex',justifyContent:'center',gap:14,marginBottom:28}}>
+        {[0,1,2,3].map(i=>(
+          <div key={i} style={{
+            width:16,height:16,borderRadius:'50%',
+            transition:'all .2s cubic-bezier(.16,1,.3,1)',
+            background: error?'var(--red)':i<value.length?'var(--gold)':'rgba(255,255,255,0.1)',
+            border:`1.5px solid ${error?'var(--red)':i<value.length?'var(--gold)':'rgba(255,255,255,0.15)'}`,
+            transform: error?'scale(1.2)':'scale(1)',
+            boxShadow: i<value.length&&!error?'0 0 10px rgba(242,193,78,0.45)':'none',
+          }}/>
+        ))}
+      </div>
+      {/* Keypad */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+        {[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map((d,i)=>(
+          <button key={i}
+            onClick={()=>{if(d==='⌫')onDelete();else if(d!==''&&value.length<4)onChange(String(d));}}
+            style={{
+              padding:'15px 0',borderRadius:14,
+              background:d===''?'transparent':'rgba(255,255,255,0.05)',
+              border:d===''?'none':'1px solid rgba(255,255,255,0.08)',
+              color:d==='⌫'?'var(--muted)':'var(--text)',
+              fontSize:d==='⌫'?18:22, fontWeight:700, fontFamily:'Space Grotesk',
+              transition:'all .12s',
+              cursor:d===''?'default':'pointer',
+              pointerEvents:d===''?'none':'all',
+            }}
+            onMouseDown={e=>e.currentTarget.style.transform='scale(0.92)'}
+            onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}
+            onTouchStart={e=>e.currentTarget.style.transform='scale(0.92)'}
+            onTouchEnd={e=>e.currentTarget.style.transform='scale(1)'}
+          >{d}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Login Screen ──────────────────────────────────────────────────────────────
+function LoginScreen({onLogin,lang,setLang,theme,setTheme}){
+  const T=TX[lang];
+  const [phone,setPhone]=useState('');
+  const [name,setName]=useState('');
+  const [step,setStep]=useState('phone'); // phone | name | pin
+  const [setupPin,setSetupPin]=useState(false); // true = create new PIN, false = verify
+  const [pinVal,setPinVal]=useState('');
+  const [pinErr,setPinErr]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const [err,setErr]=useState('');
+
+  async function checkPhone(e){
+    e.preventDefault();setErr('');
+    if(!phone.trim()) return setErr(lang==='ar'?'أدخل رقم الهاتف':'Enter your phone number');
+    setLoading(true);
+    try{
+      const res=await fetch(API+'/wc/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone.trim()})});
+      const data=await res.json();
+      if(data.needsName){setStep('name');setLoading(false);return;}
+      if(data.needsPin){setSetupPin(!!data.setupPin);setStep('pin');setLoading(false);return;}
+      if(!res.ok) throw new Error(data.error||'Error');
+      localStorage.setItem('wc_token',data.token);localStorage.setItem('wc_player',JSON.stringify(data.player));
+      onLogin(data.player,data.isAdmin);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+  async function submitName(e){
+    e.preventDefault();setErr('');
+    if(!name.trim()) return setErr(lang==='ar'?'أدخل اسمك':'Enter your name');
+    setLoading(true);
+    try{
+      const res=await fetch(API+'/wc/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:phone.trim(),name:name.trim()})});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||'Error');
+      if(data.needsPin){setSetupPin(true);setStep('pin');setLoading(false);return;}
+      // legacy fallback — token returned immediately
+      localStorage.setItem('wc_token',data.token);localStorage.setItem('wc_player',JSON.stringify(data.player));
+      onLogin(data.player,data.isAdmin);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+
+  function handlePinDigit(d){
+    const next=pinVal+d;
+    setPinVal(next);setPinErr(false);
+    if(next.length===4) submitPin(next);
+  }
+  function handlePinDelete(){setPinVal(v=>v.slice(0,-1));setPinErr(false);}
+
+  async function submitPin(pin4){
+    setLoading(true);
+    try{
+      const body=setupPin?{phone:phone.trim(),name:name.trim()||undefined,pin:pin4}:{phone:phone.trim(),pin:pin4};
+      const res=await fetch(API+'/wc/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+      const data=await res.json();
+      if(!res.ok){setPinErr(true);setTimeout(()=>{setPinVal('');setPinErr(false);},700);setLoading(false);setErr(data.error||'Wrong PIN');return;}
+      localStorage.setItem('wc_token',data.token);localStorage.setItem('wc_player',JSON.stringify(data.player));
+      onLogin(data.player,data.isAdmin);
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  }
+
+  const LoginBg=()=>(
+    <div style={{position:'absolute',inset:0,overflow:'hidden',pointerEvents:'none'}}>
+      <div style={{position:'absolute',width:700,height:700,borderRadius:'50%',background:'radial-gradient(circle,rgba(242,193,78,0.07),transparent 70%)',top:'-15%',left:'10%',filter:'blur(40px)'}}/>
+      <div style={{position:'absolute',width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(0,201,123,0.05),transparent 70%)',bottom:'-10%',right:'5%',filter:'blur(40px)'}}/>
+      <div style={{position:'absolute',inset:0,backgroundImage:'radial-gradient(circle at 1px 1px,var(--bg-grid-dot) 1px,transparent 0)',backgroundSize:'36px 36px'}}/>
+      <PlayerFigure theme={theme} src="/players/messi.png" side="left" height="82%" opacity={theme==='light'?0.55:0.82} glow={theme==='light'?'rgba(116,172,223,0.15)':'rgba(116,172,223,0.25)'} style={{'--delay':'-2s'}}/>
+      <PlayerBadge name="Messi" num="10" code="ar" accent="#74ACDF" side="left" style={{bottom:'26%',left:'3%','--delay':'-2s'}}/>
+      <PlayerFigure theme={theme} src="/players/mbappe.png" side="right" height="78%" opacity={theme==='light'?0.55:0.78} glow={theme==='light'?'rgba(0,85,180,0.18)':'rgba(0,85,180,0.28)'} style={{'--delay':'-5s'}}/>
+      <PlayerBadge name="Mbappé" num="10" code="fr" accent="#4169E1" side="right" style={{bottom:'28%',right:'3%','--delay':'-5s'}}/>
+      <PlayerFigure theme={theme} src="/players/vinicius.png" side="left" height="50%" opacity={theme==='light'?0.32:0.45} glow={theme==='light'?'rgba(255,223,0,0.1)':'rgba(255,223,0,0.15)'} float={false} style={{left:'0',bottom:0,zIndex:0}}/>
+      <PlayerFigure theme={theme} src="/players/yamal.png" side="right" height="44%" opacity={theme==='light'?0.28:0.38} glow={theme==='light'?'rgba(170,21,27,0.08)':'rgba(170,21,27,0.12)'} float={false} style={{right:'0',bottom:0,zIndex:0}}/>
+      <div style={{position:'absolute',top:'6%',right:'22%'}}>
+        <div style={{animation:'starFloat 30s ease-in-out infinite','--rot':'10deg','--rot2':'7deg','--dy':'-18px'}}>
+          <SoccerBall size={70} opacity={0.06}/>
+        </div>
+      </div>
+      {theme==='dark'?<>
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 55% 60% at 50% 48%, transparent 30%, rgba(2,12,30,0.6) 70%, rgba(2,12,30,0.92) 100%)'}}/>
+        <div style={{position:'absolute',bottom:0,left:0,right:0,height:'38%',background:'linear-gradient(0deg,rgba(2,12,30,1) 0%,transparent 100%)'}}/>
+        <div style={{position:'absolute',top:0,left:0,right:0,height:'28%',background:'linear-gradient(180deg,rgba(2,12,30,0.85) 0%,transparent 100%)'}}/>
+      </>:<>
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 55% 60% at 50% 48%, transparent 30%, rgba(244,240,230,0.6) 70%, rgba(244,240,230,0.92) 100%)'}}/>
+        <div style={{position:'absolute',bottom:0,left:0,right:0,height:'38%',background:'linear-gradient(0deg,rgba(244,240,230,1) 0%,transparent 100%)'}}/>
+        <div style={{position:'absolute',top:0,left:0,right:0,height:'28%',background:'linear-gradient(180deg,rgba(244,240,230,0.85) 0%,transparent 100%)'}}/>
+      </>}
+    </div>
+  );
+
+  return(
+    <div className="min-h-dvh flex flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
+      <LoginBg/>
+
+      {/* Lang + theme toggle */}
+      <div className="flex gap-2 mb-6 login-fade items-center" style={{animationDelay:'.05s',zIndex:1}}>
+        <button className={`lang-btn ${lang==='ar'?'active-lang':''}`} onClick={()=>setLang('ar')}>عربي</button>
+        <button className={`lang-btn ${lang==='en'?'active-lang':''}`} onClick={()=>setLang('en')}>English</button>
+        <button onClick={()=>setTheme(t=>t==='light'?'dark':'light')}
+          style={{width:30,height:30,borderRadius:999,background:'rgba(255,255,255,0.04)',border:'1px solid var(--border2)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)'}}>
+          {theme==='dark'?(
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          ):(
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          )}
+        </button>
+      </div>
+
+      {/* Logo + title */}
+      <div className="text-center mb-6 login-fade" style={{animationDelay:'.1s',zIndex:1}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',marginBottom:4}}>
+          <WCLogo size={110}/>
+        </div>
+        <div className="syne" style={{fontSize:lang==='ar'?30:24,fontWeight:900,color:'var(--text)',lineHeight:1.1,marginTop:4}}>{T.appName}</div>
+        <div style={{fontSize:12,color:'var(--muted)',marginTop:6,fontFamily:'Space Grotesk',fontWeight:500,letterSpacing:.5}}>{T.appSub}</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,marginTop:12}}>
+          {[['us','USA'],['ca','Canada'],['mx','Mexico']].map(([code,nm])=>(
+            <div key={code} style={{display:'flex',alignItems:'center',gap:4,padding:'3px 8px',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:999}}>
+              <img src={`https://flagcdn.com/w20/${code}.png`} style={{width:16,height:11,borderRadius:2,objectFit:'cover'}} alt=""/>
+              <span style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:700,color:'rgba(255,255,255,0.4)',letterSpacing:.5}}>{nm}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Card */}
+      <div className="glass-gold rounded-3xl p-6 w-full login-fade" style={{maxWidth:380,animationDelay:'.18s',zIndex:1}}>
+
+        {/* ── Step: phone ── */}
+        {step==='phone'&&(
+          <>
+            <div className="syne" style={{fontWeight:800,fontSize:18,marginBottom:4,color:'var(--text)'}}>{T.enterGroup}</div>
+            <div style={{fontSize:13,color:'var(--muted)',marginBottom:20,fontWeight:500}}>{T.enterPhone}</div>
+            <form onSubmit={checkPhone}>
+              <input className="inp" type="tel" placeholder={T.phonePlaceholder} value={phone} onChange={e=>setPhone(e.target.value)} style={{direction:'ltr',textAlign:'left',marginBottom:16}} inputMode="tel"/>
+              {err&&<div style={{color:'var(--red)',fontSize:12,marginBottom:12,fontFamily:'Space Grotesk'}}>{err}</div>}
+              <button type="submit" className="btn-primary" disabled={loading}>{loading?T.loading+'…':T.enterBtn+' →'}</button>
+            </form>
+          </>
+        )}
+
+        {/* ── Step: name (new user) ── */}
+        {step==='name'&&(
+          <>
+            <div style={{marginBottom:16}}>
+              <button onClick={()=>setStep('phone')} style={{fontSize:11,color:'var(--muted)',background:'none',border:'none',fontFamily:'Space Grotesk',fontWeight:700,padding:0,marginBottom:12,display:'flex',alignItems:'center',gap:4}}>
+                ← {lang==='ar'?'رجوع':'Back'}
+              </button>
+              <div className="syne" style={{fontWeight:800,fontSize:18,marginBottom:4,color:'var(--text)'}}>{T.welcome}</div>
+              <div style={{fontSize:13,color:'var(--muted)',fontWeight:500}}>{T.firstTime}</div>
+            </div>
+            <form onSubmit={submitName}>
+              <input className="inp" placeholder={T.namePlaceholder} value={name} onChange={e=>setName(e.target.value)} style={{marginBottom:16}} autoFocus/>
+              {err&&<div style={{color:'var(--red)',fontSize:12,marginBottom:12,fontFamily:'Space Grotesk'}}>{err}</div>}
+              <button type="submit" className="btn-primary" disabled={loading||!name.trim()}>{loading?T.loading+'…':lang==='ar'?'التالي →':'Next →'}</button>
+            </form>
+          </>
+        )}
+
+        {/* ── Step: PIN ── */}
+        {step==='pin'&&(
+          <>
+            <div style={{marginBottom:20}}>
+              <button onClick={()=>{setStep(setupPin&&name?'name':'phone');setPinVal('');setPinErr(false);}} style={{fontSize:11,color:'var(--muted)',background:'none',border:'none',fontFamily:'Space Grotesk',fontWeight:700,padding:0,marginBottom:12,display:'flex',alignItems:'center',gap:4}}>
+                ← {lang==='ar'?'رجوع':'Back'}
+              </button>
+              <div className="syne" style={{fontWeight:800,fontSize:16,marginBottom:4,color:'var(--text)',textAlign:'center'}}>
+                {setupPin?(lang==='ar'?'اختر رمز PIN (4 أرقام)':'Create your 4-digit PIN'):(lang==='ar'?'أدخل رمز PIN':'Enter your PIN')}
+              </div>
+              {setupPin&&<div style={{fontSize:11,color:'var(--muted)',textAlign:'center',fontFamily:'Space Grotesk',fontWeight:500,marginTop:4}}>
+                {lang==='ar'?'ستحتاجه عند الدخول من جهاز آخر':'You\'ll need this to log in from other devices'}
+              </div>}
+              {!setupPin&&<div style={{fontSize:11,color:'var(--muted)',textAlign:'center',fontFamily:'Space Grotesk',fontWeight:500,marginTop:4}}>
+                {lang==='ar'?`مرحباً ${name||''}!`:`Welcome back!`}
+              </div>}
+              {err&&!pinErr&&<div style={{color:'var(--red)',fontSize:12,marginTop:8,textAlign:'center',fontFamily:'Space Grotesk'}}>{err}</div>}
+            </div>
+            <PinKeypad value={pinVal} onChange={handlePinDigit} onDelete={handlePinDelete} error={pinErr}/>
+            {loading&&<div style={{textAlign:'center',marginTop:14,fontSize:12,color:'var(--muted)',fontFamily:'Space Grotesk'}}>{T.loading}…</div>}
+          </>
+        )}
+      </div>
+      <div style={{fontSize:11,color:'var(--muted)',marginTop:16,textAlign:'center',fontFamily:'Space Grotesk',zIndex:1}} className="login-fade">
+        {T.friendly}
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+function App(){
+  const [player,setPlayer]=useState(null);
+  const [isAdmin,setIsAdmin]=useState(false);
+  const [loading,setLoading]=useState(true);
+  const [tab,setTab]=useState('fixtures');
+  const [showAdmin,setShowAdmin]=useState(false);
+  const [matches,setMatches]=useState([]);
+  const [predictions,setPredictions]=useState([]);
+  const [leaderboard,setLeaderboard]=useState([]);
+  const [adminPlayers,setAdminPlayers]=useState([]);
+  const [settings,setSettings]=useState({});
+  const [loadingMatch,setLoadingMatch]=useState(null);
+  const [toast,setToastMsg]=useState(null);
+  const [confirmPick,setConfirmPick]=useState(null);
+  const [lang,setLang]=useState(()=>localStorage.getItem('wc_lang')||'ar');
+  const [theme,setTheme]=useState(()=>localStorage.getItem('wc_theme')||'light');
+  const [logoTaps,setLogoTaps]=useState(0);
+  const [showPin,setShowPin]=useState(false);
+  const [pinVal,setPinVal]=useState('');
+  const [pinErr,setPinErr]=useState(false);
+  const tapTimer=useRef(null);
+  const refreshTimer=useRef(null);
+  const T=TX[lang];
+
+  useEffect(()=>{
+    const h=document.getElementById('html-root');
+    h.lang=lang;h.dir=lang==='ar'?'rtl':'ltr';
+    if(lang==='en') h.classList.add('en'); else h.classList.remove('en');
+    localStorage.setItem('wc_lang',lang);
+  },[lang]);
+
+  useEffect(()=>{
+    const h=document.getElementById('html-root');
+    if(theme==='light') h.classList.add('light'); else h.classList.remove('light');
+    localStorage.setItem('wc_theme',theme);
+  },[theme]);
+
+  function showToast(msg,type='success'){setToastMsg({msg,type,id:Date.now()});}
+
+  async function loadMatches(){try{setMatches(await apiFetch('/wc/matches'));}catch(e){}}
+  async function loadMe(){
+    try{
+      const data=await apiFetch('/wc/me');
+      setPlayer(data.player);setPredictions(data.predictions||[]);setIsAdmin(data.isAdmin||false);
+      localStorage.setItem('wc_player',JSON.stringify(data.player));
+    }catch(e){if(e.message==='Unauthorized'){localStorage.removeItem('wc_token');localStorage.removeItem('wc_player');setPlayer(null);}}
+  }
+  async function loadLeaderboard(){try{setLeaderboard(await apiFetch('/wc/leaderboard'));}catch(e){}}
+  async function loadSettings(){try{const st=await apiFetch('/wc/settings');setSettings(s=>({...s,...st}));}catch(e){}}
+  async function loadAdminData(){try{const[pl,st]=await Promise.all([apiFetch('/wc/admin/players'),apiFetch('/wc/admin/settings')]);setAdminPlayers(pl);setSettings(st);}catch(e){}}
+  async function refresh(){
+    await Promise.all([loadMatches(),loadMe(),loadLeaderboard()]);
+    if(isAdmin) loadAdminData();
+  }
+
+  useEffect(()=>{
+    const token=localStorage.getItem('wc_token'),cached=localStorage.getItem('wc_player');
+    if(token&&cached){try{setPlayer(JSON.parse(cached));}catch(e){}}
+    Promise.all([loadMatches(),token?loadMe():Promise.resolve(),loadLeaderboard(),loadSettings()]).finally(()=>setLoading(false));
+  },[]);
+
+  useEffect(()=>{
+    refreshTimer.current=setInterval(()=>{loadMatches();loadLeaderboard();if(player)loadMe();},60000);
+    return()=>clearInterval(refreshTimer.current);
+  },[player]);
+
+  useEffect(()=>{if(isAdmin&&showAdmin) loadAdminData();},[isAdmin,showAdmin]);
+
+  function handleLogoTap(){
+    clearTimeout(tapTimer.current);
+    const next=logoTaps+1;
+    if(next>=3){setLogoTaps(0);setShowPin(true);setPinVal('');setPinErr(false);return;}
+    setLogoTaps(next);
+    tapTimer.current=setTimeout(()=>setLogoTaps(0),1800);
+  }
+  function handlePinKey(d){
+    const next=pinVal+d;
+    setPinVal(next);
+    setPinErr(false);
+    if(next.length===4){
+      if(next==='1212'){setShowPin(false);setPinVal('');setShowAdmin(true);loadAdminData();}
+      else{setPinErr(true);setTimeout(()=>setPinVal(''),600);}
+    }
+  }
+
+  function handlePickClick(match,pick,extraOdds=null){setConfirmPick({match,pick,extraOdds});}
+
+  async function handleConfirm(){
+    if(!confirmPick||!player) return;
+    const{match,pick,extraOdds}=confirmPick;
+    setConfirmPick(null);
+    setLoadingMatch(match.id);
+    try{
+      const data=await apiFetch('/wc/predict',{method:'POST',body:JSON.stringify({matchId:match.id,prediction:pick})});
+      setPlayer(p=>({...p,balance:data.newBalance}));
+      const _h=parseFloat(match.home_odds),_d=parseFloat(match.draw_odds),_a=parseFloat(match.away_odds);
+      const _dc={'1X':parseFloat(match.odds_1x)||(_h*_d)/(_h+_d),'X2':parseFloat(match.odds_x2)||(_d*_a)/(_d+_a)};
+      const _stdOdds={'1':_h,'X':_d,'2':_a,'BTTS-Y':parseFloat(match.odds_btts_yes),'BTTS-N':parseFloat(match.odds_btts_no),'OVER2.5':parseFloat(match.odds_over25),'UNDER2.5':parseFloat(match.odds_under25),'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away),..._dc};
+      const _lockedOdds=extraOdds||_stdOdds[pick]||_h;
+      const MG={'1':'1x2','X':'1x2','2':'1x2','1X':'1x2','X2':'1x2','BTTS-Y':'btts','BTTS-N':'btts','OVER2.5':'ou','UNDER2.5':'ou','DNB1':'dnb','DNB2':'dnb'};
+      const pickGroup=MG[pick]||pick;
+      setPredictions(prev=>[...prev.filter(p=>p.match_id!==match.id||(MG[p.prediction]||p.prediction)!==pickGroup),{match_id:match.id,prediction:pick,settled:false,stake:parseFloat(settings.stake_per_match||100),odds_locked:_lockedOdds}]);
+      const team=pick==='1'?match.home_team:pick==='2'?match.away_team:pick==='X'?T.pickX:pick==='1X'?`${match.home_team}/X`:pick==='X2'?`X/${match.away_team}`:pick.startsWith('ANYTIME:')?pick.slice(8):pick.startsWith('FIRST:')?pick.slice(6):pick;
+      showToast(`${team} ✓`,'success');
+      loadLeaderboard();
+    }catch(e){showToast(e.message,'error');}
+    setLoadingMatch(null);
+  }
+
+  if(loading){
+    return(
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-5">
+        {/* Bg mesh */}
+        <div className="bg-mesh"><div className="bg-grid"/><div className="bg-orb orb-gold"/><div className="bg-orb orb-green"/></div>
+        <WCLogo size={72}/>
+        <div className="flex gap-1.5">
+          {[0,1,2].map(i=>(
+            <div key={i} className="skeleton" style={{width:8,height:8,borderRadius:'50%',animationDelay:`${i*.15}s`}}/>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if(!player){
+    return(
+      <>
+        <div className="bg-mesh"><div className="bg-grid"/><div className="bg-orb orb-gold"/><div className="bg-orb orb-green"/><div className="bg-orb orb-blue"/></div>
+        <LoginScreen onLogin={(p,admin)=>{setPlayer(p);setIsAdmin(admin||false);}} lang={lang} setLang={setLang} theme={theme} setTheme={setTheme}/>
+      </>
+    );
+  }
+
+  const bal=parseFloat(player.balance);
+  const balColor='var(--gold)';
+
+  const navTabs=[
+    {id:'fixtures',Icon:IconBall,label:T.fixtures},
+    {id:'mybets',Icon:IconTarget,label:T.mybets},
+    {id:'leaderboard',Icon:IconTrophy,label:T.leaderboard},
+  ];
+
+  return(
+    <div style={{maxWidth:480,margin:'0 auto',minHeight:'100dvh',position:'relative'}}>
+      {/* Mesh background + motifs */}
+      <div className="bg-mesh">
+        <div className="bg-grid"/>
+        <div className="bg-orb orb-gold"/><div className="bg-orb orb-green"/><div className="bg-orb orb-blue"/>
+        {/* Subtle "26" watermark */}
+        <div style={{position:'absolute',top:'28%',left:'50%',transform:'translateX(-50%)',opacity:.018,pointerEvents:'none'}}>
+          <Logo26SVG size={340}/>
+        </div>
+      </div>
+
+      {/* ── Player figures — fixed, full-viewport, all 5 ── */}
+      {(()=>{
+        // Theme-aware fade colors
+        const FC = theme==='light' ? '244,240,230' : '2,12,30';
+        const fadeR = (s,m,e)=>`linear-gradient(to right,rgba(${FC},${s}) 0%,rgba(${FC},${m}) ${35}%,transparent ${e}%)`;
+        const fadeL = (s,m,e)=>`linear-gradient(to left,rgba(${FC},${s}) 0%,rgba(${FC},${m}) ${35}%,transparent ${e}%)`;
+        const fadeT = (s,m,e)=>`linear-gradient(to top,rgba(${FC},${s}) 0%,rgba(${FC},${m}) ${25}%,transparent ${e}%)`;
+        const imgFilter = theme==='light' ? 'sepia(0.45) saturate(0.85) brightness(0.95) contrast(1.05)' : '';
+        // Opacity tuned per theme
+        const op = (light,dark)=>theme==='light'?light:dark;
+        return(<>
+        {/* Messi — far left, tall */}
+        <div style={{position:'fixed',bottom:72,left:0,height:'46%',maxHeight:420,opacity:op(0.22,0.18),pointerEvents:'none',zIndex:0,overflow:'hidden',
+          animation:'starFloat 26s ease-in-out infinite','--rot':'-2deg','--rot2':'-1deg','--dy':'-6px'}}>
+          <img src="/players/messi.png" alt="" style={{height:'100%',width:'auto',objectFit:'contain',objectPosition:'bottom left',filter:imgFilter||'drop-shadow(0 0 24px rgba(116,172,223,0.4))'}}/>
+          <div style={{position:'absolute',inset:0,background:fadeR(0.8,0.3,65)}}/>
+          <div style={{position:'absolute',inset:0,background:fadeT(1,0.4,55)}}/>
+        </div>
+        {/* Mbappe — right side */}
+        <div style={{position:'fixed',bottom:72,right:0,height:'44%',maxHeight:400,opacity:op(0.2,0.16),pointerEvents:'none',zIndex:0,overflow:'hidden',
+          animation:'starFloat 30s ease-in-out infinite','--rot':'2deg','--rot2':'1deg','--dy':'-7px',animationDelay:'-8s'}}>
+          <img src="/players/mbappe.png" alt="" style={{height:'100%',width:'auto',objectFit:'contain',objectPosition:'bottom right',filter:imgFilter||'drop-shadow(0 0 24px rgba(0,35,149,0.35))'}}/>
+          <div style={{position:'absolute',inset:0,background:fadeL(0.8,0.3,65)}}/>
+          <div style={{position:'absolute',inset:0,background:fadeT(1,0.4,55)}}/>
+        </div>
+        {/* Vinicius — left, lower */}
+        <div style={{position:'fixed',bottom:72,left:0,height:'28%',maxHeight:260,opacity:op(0.13,0.1),pointerEvents:'none',zIndex:0,overflow:'hidden',animationDelay:'-14s'}}>
+          <img src="/players/vinicius.png" alt="" style={{height:'100%',width:'auto',objectFit:'contain',objectPosition:'bottom left',filter:imgFilter||'drop-shadow(0 0 16px rgba(255,223,0,0.2))'}}/>
+          <div style={{position:'absolute',inset:0,background:fadeR(0.9,0.5,60)}}/>
+          <div style={{position:'absolute',inset:0,background:fadeT(1,0.5,45)}}/>
+        </div>
+        {/* Ronaldo — right */}
+        <div style={{position:'fixed',bottom:72,right:0,height:'30%',maxHeight:280,opacity:op(0.15,0.12),pointerEvents:'none',zIndex:0,overflow:'hidden',
+          animation:'starFloat 20s ease-in-out infinite','--rot':'3deg','--rot2':'2deg','--dy':'-5px',animationDelay:'-5s'}}>
+          <img src="/players/ronaldo.png" alt="" style={{height:'100%',width:'auto',objectFit:'contain',objectPosition:'bottom right',filter:imgFilter||'drop-shadow(0 0 20px rgba(255,255,255,0.12))'}}/>
+          <div style={{position:'absolute',inset:0,background:fadeL(0.85,0.3,60)}}/>
+          <div style={{position:'absolute',inset:0,background:fadeT(1,0.5,45)}}/>
+        </div>
+        {/* Yamal — center-right */}
+        <div style={{position:'fixed',bottom:72,right:'8%',height:'22%',maxHeight:200,opacity:op(0.11,0.09),pointerEvents:'none',zIndex:0,overflow:'hidden',animationDelay:'-20s'}}>
+          <img src="/players/yamal.png" alt="" style={{height:'100%',width:'auto',objectFit:'contain',objectPosition:'bottom center',filter:imgFilter||'drop-shadow(0 0 12px rgba(170,21,27,0.2))'}}/>
+          <div style={{position:'absolute',inset:0,background:fadeT(1,0.5,60)}}/>
+          <div style={{position:'absolute',inset:0,background:`linear-gradient(to left,rgba(${FC},0.5) 0%,transparent 50%)`}}/>
+        </div>
+        </>);
+      })()}
+
+      {toast&&<Toast key={toast.id} msg={toast.msg} type={toast.type} onDone={()=>setToastMsg(null)}/>}
+      {confirmPick&&(
+        <ConfirmSheet match={confirmPick.match} pick={confirmPick.pick} extraOdds={confirmPick.extraOdds}
+          stake={parseFloat(settings.stake_per_match||100)} balance={player.balance} startBal={parseFloat(settings?.starting_balance||7200)}
+          onConfirm={handleConfirm} onCancel={()=>setConfirmPick(null)} lang={lang}/>
+      )}
+      {/* PIN entry modal */}
+      {showPin&&(
+        <div className="fixed inset-0 z-50" style={{background:'rgba(0,0,0,.75)',backdropFilter:'blur(12px)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}} onClick={()=>{setShowPin(false);setPinVal('');}}>
+          <div className="glass-gold rounded-3xl p-7 w-full" style={{maxWidth:320}} onClick={e=>e.stopPropagation()}>
+            <div style={{textAlign:'center',marginBottom:24}}>
+              <WCLogo size={48}/>
+              <div className="syne" style={{fontSize:16,fontWeight:800,color:'var(--text)',marginTop:12}}>{lang==='ar'?'رمز الإدارة':'Admin PIN'}</div>
+            </div>
+            <PinKeypad
+              value={pinVal}
+              onChange={handlePinKey}
+              onDelete={()=>{setPinVal(v=>v.slice(0,-1));setPinErr(false);}}
+              error={pinErr}
+            />
+            <button onClick={()=>{setShowPin(false);setPinVal('');}} style={{width:'100%',marginTop:14,padding:'10px',background:'none',border:'none',color:'var(--muted)',fontSize:13,fontFamily:'inherit',fontWeight:700}}>{lang==='ar'?'إلغاء':'Cancel'}</button>
+          </div>
+        </div>
+      )}
+
+      {showAdmin&&(
+        <AdminPanel matches={matches} players={adminPlayers} settings={settings}
+          onRefresh={refresh} showToast={showToast} lang={lang} onClose={()=>setShowAdmin(false)}/>
+      )}
+
+      {/* Header */}
+      <div style={{position:'sticky',top:0,zIndex:10,paddingTop:'env(safe-area-inset-top,0px)'}}>
+        <div style={{background:'var(--header-bg)',backdropFilter:'blur(24px) saturate(180%)',WebkitBackdropFilter:'blur(24px) saturate(180%)',borderBottom:'1px solid var(--border2)',boxShadow:'0 1px 0 rgba(242,193,78,0.04)'}}>
+          <div className="flex items-center gap-3 px-4 py-3">
+            {/* Logo — tap 3× to unlock admin */}
+            <div onClick={handleLogoTap} style={{cursor:'default',userSelect:'none',position:'relative'}}>
+              <WCLogo size={36}/>
+              {logoTaps>0&&(
+                <div style={{position:'absolute',top:-4,right:-4,width:14,height:14,borderRadius:'50%',background:'var(--gold)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:900,color:'#0A0600',fontFamily:'Space Grotesk',boxShadow:'0 0 6px rgba(242,193,78,0.5)'}}>
+                  {3-logoTaps}
+                </div>
+              )}
+            </div>
+            {/* Title */}
+            <div style={{flex:1,minWidth:0}}>
+              <div className="syne" style={{fontSize:lang==='ar'?16:13,fontWeight:800,color:'var(--text)',lineHeight:1,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{T.appName}</div>
+              <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:500,letterSpacing:.5,marginTop:1}}>{T.appSub}</div>
+            </div>
+            {/* Right side */}
+            <div className="flex items-center gap-2">
+              {/* Theme */}
+              <button onClick={()=>setTheme(t=>t==='light'?'dark':'light')}
+                style={{width:30,height:30,borderRadius:10,background:'rgba(255,255,255,0.04)',border:'1px solid var(--border2)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text2)',flexShrink:0,transition:'all .15s'}}>
+                {theme==='dark'?(
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                  </svg>
+                ):(
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                  </svg>
+                )}
+              </button>
+              {/* Lang */}
+              <div className="flex gap-1">
+                <button className={`lang-btn ${lang==='ar'?'active-lang':''}`} onClick={()=>setLang('ar')}>ع</button>
+                <button className={`lang-btn ${lang==='en'?'active-lang':''}`} onClick={()=>setLang('en')}>EN</button>
+              </div>
+              {/* Balance */}
+              <div className="text-right">
+                <div style={{fontSize:10,color:'var(--muted)',fontWeight:600,fontFamily:'Space Grotesk'}}>{player.name}</div>
+                <div className="mono bal-count" style={{fontSize:19,fontWeight:700,color:balColor,letterSpacing:-1,lineHeight:1}}>${bal.toFixed(0)}</div>
+              </div>
+              {/* Sign out */}
+              <button onClick={()=>{localStorage.removeItem('wc_token');localStorage.removeItem('wc_player');setPlayer(null);setIsAdmin(false);setShowAdmin(false);}}
+                style={{width:32,height:32,borderRadius:10,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--muted)',flexShrink:0,transition:'all .15s'}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(255,54,81,0.35)';e.currentTarget.style.color='var(--red)';}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(255,255,255,0.07)';e.currentTarget.style.color='var(--muted)';}}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{position:'relative',zIndex:1}}>
+        {tab==='fixtures'&&<FixturesTab matches={matches} predictions={predictions} onPickClick={handlePickClick} loadingMatch={loadingMatch} settings={settings} lang={lang}/>}
+        {tab==='mybets'&&<MyBetsTab matches={matches} predictions={predictions} lang={lang}/>}
+        {tab==='leaderboard'&&<LeaderboardTab leaderboard={leaderboard} currentPlayer={player} lang={lang}/>}
+      </div>
+
+      {/* Floating pill nav */}
+      <div className="float-nav">
+        <div className="float-nav-pill">
+          {navTabs.map(({id,Icon,label})=>(
+            <button key={id} className={`nav-item ${tab===id?'active':''}`} onClick={()=>setTab(id)}>
+              <Icon size={18} color="currentColor"/>
+              <span style={{marginTop:1}}>{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

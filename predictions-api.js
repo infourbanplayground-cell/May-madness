@@ -212,6 +212,14 @@ async function initDB() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
     ALTER TABLE wc_players ADD COLUMN IF NOT EXISTS pin VARCHAR(6);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_btts_yes NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_btts_no NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_over25 NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_under25 NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_home NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_away NUMERIC(6,3);
+    ALTER TABLE wc_predictions DROP CONSTRAINT IF EXISTS wc_predictions_player_id_match_id_key;
+    ALTER TABLE wc_predictions ADD CONSTRAINT wc_predictions_player_match_pred_key UNIQUE (player_id, match_id, prediction);
     CREATE TABLE IF NOT EXISTS wc_matches (
       id TEXT PRIMARY KEY,
       stage TEXT NOT NULL,
@@ -250,7 +258,28 @@ async function initDB() {
       ('starting_balance','100.00'),
       ('group_name','جروب الشباب')
     ON CONFLICT (key) DO NOTHING;
+    CREATE TABLE IF NOT EXISTS wc_player_odds (
+      match_id TEXT NOT NULL REFERENCES wc_matches(id) ON DELETE CASCADE,
+      player_name TEXT NOT NULL,
+      market TEXT NOT NULL,
+      odds NUMERIC(6,3) NOT NULL,
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      PRIMARY KEY (match_id, player_name, market)
+    );
+    CREATE TABLE IF NOT EXISTS wc_match_goals (
+      id SERIAL PRIMARY KEY,
+      match_id TEXT NOT NULL REFERENCES wc_matches(id) ON DELETE CASCADE,
+      minute INTEGER,
+      scorer_name TEXT NOT NULL,
+      team TEXT,
+      is_own_goal BOOLEAN DEFAULT FALSE,
+      is_penalty BOOLEAN DEFAULT FALSE
+    );
   `);
+
+  await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_player_odds TO urbanpadel_app`);
+  await pool.query(`GRANT SELECT, INSERT, UPDATE ON TABLE wc_match_goals TO urbanpadel_app`);
+  await pool.query(`GRANT USAGE, SELECT ON SEQUENCE wc_match_goals_id_seq TO urbanpadel_app`);
 
   const { rows } = await pool.query('SELECT COUNT(*) FROM wc_matches');
   if (rows[0].count === '0') {
@@ -361,7 +390,10 @@ app.get('/wc/me', auth, async (req, res) => {
 app.post('/wc/predict', auth, async (req, res) => {
   try {
     const { matchId, prediction } = req.body;
-    if (!['1','X','2','1X','X2','12'].includes(prediction)) return res.status(400).json({ error: 'Invalid prediction' });
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+    const isKOMarket = KO_MARKETS.includes(prediction) || prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:');
+    const validStandard = ['1','X','2','1X','X2','12'].includes(prediction);
+    if (!validStandard && !isKOMarket) return res.status(400).json({ error: 'Invalid prediction' });
 
     const { rows: mRows } = await pool.query('SELECT * FROM wc_matches WHERE id=$1', [matchId]);
     if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
@@ -375,25 +407,48 @@ app.post('/wc/predict', auth, async (req, res) => {
     const player = await getPlayer(req.playerId);
     if (player.balance < stake) return res.status(400).json({ error: 'Insufficient balance' });
 
-    // Upsert prediction (change allowed before deadline)
+    const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
+    const oddsAtBet = {
+      '1': bh, 'X': bd, '2': ba,
+      '1X': parseFloat(match.odds_1x) || (bh*bd)/(bh+bd),
+      'X2': parseFloat(match.odds_x2) || (bd*ba)/(bd+ba),
+      '12': (bh*ba)/(bh+ba),
+      'BTTS-Y': parseFloat(match.odds_btts_yes) || 1.85,
+      'BTTS-N': parseFloat(match.odds_btts_no) || 1.85,
+      'OVER2.5': parseFloat(match.odds_over25) || 1.85,
+      'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
+      'DNB1': parseFloat(match.odds_dnb_home) || bh,
+      'DNB2': parseFloat(match.odds_dnb_away) || ba,
+    };
+    let oddsLocked = oddsAtBet[prediction];
+    if (oddsLocked == null && (prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:'))) {
+      const market = prediction.startsWith('ANYTIME:') ? 'anytime' : 'first';
+      const playerName = prediction.split(':').slice(1).join(':');
+      const { rows: poRows } = await pool.query(
+        'SELECT odds FROM wc_player_odds WHERE match_id=$1 AND player_name=$2 AND market=$3',
+        [matchId, playerName, market]
+      );
+      oddsLocked = poRows.length ? parseFloat(poRows[0].odds) : 5.0;
+    }
+    if (!oddsLocked) oddsLocked = bh;
+
+    // For KO markets, upsert by (player_id, match_id, prediction)
     const existing = await pool.query(
-      'SELECT * FROM wc_predictions WHERE player_id=$1 AND match_id=$2',
-      [req.playerId, matchId]
+      'SELECT * FROM wc_predictions WHERE player_id=$1 AND match_id=$2 AND prediction=$3',
+      [req.playerId, matchId, prediction]
     );
 
     if (existing.rows.length > 0) {
-      // Update existing prediction (refund old stake first if already deducted... handled by settled flag)
       if (existing.rows[0].settled) return res.status(400).json({ error: 'Match already settled' });
       await pool.query(
-        'UPDATE wc_predictions SET prediction=$1 WHERE player_id=$2 AND match_id=$3',
-        [prediction, req.playerId, matchId]
+        'UPDATE wc_predictions SET odds_locked=$1 WHERE player_id=$2 AND match_id=$3 AND prediction=$4',
+        [oddsLocked, req.playerId, matchId, prediction]
       );
     } else {
-      // New prediction — deduct stake
       await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [stake, req.playerId]);
       await pool.query(
-        'INSERT INTO wc_predictions (player_id,match_id,prediction,stake) VALUES ($1,$2,$3,$4)',
-        [req.playerId, matchId, prediction, stake]
+        'INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked) VALUES ($1,$2,$3,$4,$5)',
+        [req.playerId, matchId, prediction, stake, oddsLocked]
       );
     }
 
@@ -629,6 +684,37 @@ function fetchJSON(url, headers = {}) {
   });
 }
 
+// ── KO market settlement helper ───────────────────────────────────────────────
+function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = []) {
+  const total = homeScore + awayScore;
+  const homeScoredAny = homeScore > 0;
+  const awayScoredAny = awayScore > 0;
+  if (prediction === 'BTTS-Y') return { won: homeScoredAny && awayScoredAny, refund: false };
+  if (prediction === 'BTTS-N') return { won: !(homeScoredAny && awayScoredAny), refund: false };
+  if (prediction === 'OVER2.5') return { won: total > 2, refund: false };
+  if (prediction === 'UNDER2.5') return { won: total < 3, refund: false };
+  if (prediction === 'DNB1') {
+    if (homeScore > awayScore) return { won: true, refund: false };
+    if (homeScore === awayScore) return { won: false, refund: true };
+    return { won: false, refund: false };
+  }
+  if (prediction === 'DNB2') {
+    if (awayScore > homeScore) return { won: true, refund: false };
+    if (homeScore === awayScore) return { won: false, refund: true };
+    return { won: false, refund: false };
+  }
+  if (prediction.startsWith('ANYTIME:')) {
+    const name = prediction.slice(8).toLowerCase().trim();
+    return { won: goalScorers.some(g => !g.is_own_goal && g.scorer_name.toLowerCase().trim() === name), refund: false };
+  }
+  if (prediction.startsWith('FIRST:')) {
+    const name = prediction.slice(6).toLowerCase().trim();
+    const nonOG = goalScorers.filter(g => !g.is_own_goal).sort((a,b) => (a.minute||999)-(b.minute||999));
+    return { won: nonOG.length > 0 && nonOG[0].scorer_name.toLowerCase().trim() === name, refund: false };
+  }
+  return null;
+}
+
 // Extracted settle logic (shared by admin route + auto-fetch)
 async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam) {
   const result = homeScore > awayScore ? '1' : awayScore > homeScore ? '2' : 'X';
@@ -658,13 +744,32 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
   const { rows: preds } = await pool.query(
     'SELECT * FROM wc_predictions WHERE match_id=$1 AND settled=false', [matchId]
   );
+  const KO_MARKETS_SET = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+  const { rows: goals } = await pool.query('SELECT * FROM wc_match_goals WHERE match_id=$1 ORDER BY minute ASC', [matchId]);
   for (const p of preds) {
-    const won = isWon(p.prediction, result);
-    const betOdds = oddsMap[p.prediction] || oddsMap[result];
-    const payout = won ? parseFloat(p.stake) * betOdds : 0;
-    await pool.query('UPDATE wc_predictions SET settled=true, payout=$1 WHERE id=$2', [payout, p.id]);
-    if (won) {
-      await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, p.player_id]);
+    const isPKOMarket = KO_MARKETS_SET.includes(p.prediction) || p.prediction.startsWith('ANYTIME:') || p.prediction.startsWith('FIRST:');
+    if (isPKOMarket) {
+      const koResult = settleKOPrediction(p.prediction, homeScore, awayScore, goals);
+      if (!koResult) continue;
+      const betOdds = parseFloat(p.odds_locked) || 1.85;
+      let payout;
+      if (koResult.refund) {
+        payout = parseFloat(p.stake);
+      } else {
+        payout = koResult.won ? parseFloat(p.stake) * betOdds : 0;
+      }
+      await pool.query('UPDATE wc_predictions SET settled=true, payout=$1 WHERE id=$2', [payout, p.id]);
+      if (payout > 0) {
+        await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, p.player_id]);
+      }
+    } else {
+      const won = isWon(p.prediction, result);
+      const betOdds = parseFloat(p.odds_locked) || oddsMap[p.prediction] || oddsMap[result];
+      const payout = won ? parseFloat(p.stake) * betOdds : 0;
+      await pool.query('UPDATE wc_predictions SET settled=true, payout=$1 WHERE id=$2', [payout, p.id]);
+      if (won) {
+        await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, p.player_id]);
+      }
     }
   }
   return { result, settled: preds.length };
@@ -718,6 +823,24 @@ async function autoFetchResults() {
 
       const info = await settleMatchById(pm.id, hs, as_, pm.home_team, pm.away_team);
       console.log(`[auto-fetch] Settled ${pm.id} (${pm.home_team} ${hs}-${as_} ${pm.away_team}) → ${info.result}, ${info.settled} predictions`);
+
+      // If KO match, fetch goal events from football-data.org
+      if (pm.stage !== 'group' && FDO_KEY) {
+        try {
+          const detail = await fetchJSON(`https://api.football-data.org/v4/matches/${fdoMatch.id}`, {'X-Auth-Token': FDO_KEY});
+          if (detail.status === 200 && detail.body.goals) {
+            await pool.query('DELETE FROM wc_match_goals WHERE match_id=$1', [pm.id]);
+            for (const g of detail.body.goals) {
+              await pool.query(
+                'INSERT INTO wc_match_goals (match_id, minute, scorer_name, team, is_own_goal, is_penalty) VALUES ($1,$2,$3,$4,$5,$6)',
+                [pm.id, g.minute, g.scorer?.name || 'Unknown', g.team?.name || '', g.type === 'OWN', g.type === 'PENALTY']
+              );
+            }
+          }
+        } catch (goalErr) {
+          console.warn(`[auto-fetch] Goal fetch failed for ${pm.id}:`, goalErr.message);
+        }
+      }
     }
   } catch (e) {
     console.error('[auto-fetch] Error:', e.message);
@@ -809,6 +932,120 @@ async function autoFetchOdds() {
         [avg(homeArr), avg(drawArr), avg(awayArr), match.id]
       );
       updated++;
+
+      // For KO matches, also fetch event-specific markets
+      if (match.stage !== 'group' && event.id) {
+        try {
+          const evUrl = `https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/events/${event.id}/odds/?apiKey=${ODDS_KEY}&regions=eu,uk&markets=btts,totals,draw_no_bet,double_chance,player_goal_scorer_anytime,player_first_goal_scorer&oddsFormat=decimal`;
+          const evRes = await fetchJSON(evUrl, {});
+          if (evRes.status === 200 && evRes.body.bookmakers) {
+            const bms = evRes.body.bookmakers;
+            // BTTS
+            const bttsY = [], bttsN = [];
+            // Totals 2.5
+            const over25 = [], under25 = [];
+            // DNB
+            const dnbHome = [], dnbAway = [];
+            // Player markets
+            const playerAnytime = {}, playerFirst = {};
+
+            for (const bm of bms) {
+              for (const mkt of (bm.markets || [])) {
+                if (mkt.key === 'btts') {
+                  for (const o of mkt.outcomes) {
+                    if (o.name === 'Yes') bttsY.push(o.price);
+                    else if (o.name === 'No') bttsN.push(o.price);
+                  }
+                } else if (mkt.key === 'totals') {
+                  // Find outcomes closest to 2.5
+                  const line25 = mkt.outcomes.filter(o => Math.abs((o.point||0) - 2.5) < 0.01);
+                  for (const o of line25) {
+                    if (o.name === 'Over') over25.push(o.price);
+                    else if (o.name === 'Under') under25.push(o.price);
+                  }
+                  // fallback: if no exact 2.5, find closest
+                  if (!line25.length) {
+                    const points = [...new Set(mkt.outcomes.map(o => o.point||0))];
+                    const closest = points.reduce((a, b) => Math.abs(b-2.5) < Math.abs(a-2.5) ? b : a, points[0]);
+                    for (const o of mkt.outcomes.filter(o => (o.point||0) === closest)) {
+                      if (o.name === 'Over') over25.push(o.price);
+                      else if (o.name === 'Under') under25.push(o.price);
+                    }
+                  }
+                } else if (mkt.key === 'draw_no_bet') {
+                  for (const o of mkt.outcomes) {
+                    if (teamsMatch(flipped ? match.away_team : match.home_team, o.name)) dnbHome.push(o.price);
+                    else if (teamsMatch(flipped ? match.home_team : match.away_team, o.name)) dnbAway.push(o.price);
+                  }
+                } else if (mkt.key === 'player_goal_scorer_anytime') {
+                  for (const o of mkt.outcomes) {
+                    const pname = o.description || o.name;
+                    if (!playerAnytime[pname]) playerAnytime[pname] = [];
+                    playerAnytime[pname].push(o.price);
+                  }
+                } else if (mkt.key === 'player_first_goal_scorer') {
+                  for (const o of mkt.outcomes) {
+                    const pname = o.description || o.name;
+                    if (!playerFirst[pname]) playerFirst[pname] = [];
+                    playerFirst[pname].push(o.price);
+                  }
+                }
+              }
+            }
+
+            const avg = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+            const avgBttsY = avg(bttsY), avgBttsN = avg(bttsN);
+            const avgOver = avg(over25), avgUnder = avg(under25);
+            const avgDnbH = avg(dnbHome), avgDnbA = avg(dnbAway);
+
+            // Update match odds columns
+            await pool.query(
+              `UPDATE wc_matches SET
+                odds_btts_yes=COALESCE($1,odds_btts_yes),
+                odds_btts_no=COALESCE($2,odds_btts_no),
+                odds_over25=COALESCE($3,odds_over25),
+                odds_under25=COALESCE($4,odds_under25),
+                odds_dnb_home=COALESCE($5,odds_dnb_home),
+                odds_dnb_away=COALESCE($6,odds_dnb_away)
+              WHERE id=$7`,
+              [
+                avgBttsY ? avgBttsY.toFixed(3) : null,
+                avgBttsN ? avgBttsN.toFixed(3) : null,
+                avgOver ? avgOver.toFixed(3) : null,
+                avgUnder ? avgUnder.toFixed(3) : null,
+                avgDnbH ? avgDnbH.toFixed(3) : null,
+                avgDnbA ? avgDnbA.toFixed(3) : null,
+                match.id
+              ]
+            );
+
+            // Upsert player odds — delete old then insert new
+            if (Object.keys(playerAnytime).length || Object.keys(playerFirst).length) {
+              await pool.query('DELETE FROM wc_player_odds WHERE match_id=$1', [match.id]);
+              for (const [pname, prices] of Object.entries(playerAnytime)) {
+                const avgPrice = avg(prices);
+                if (avgPrice) {
+                  await pool.query(
+                    'INSERT INTO wc_player_odds (match_id, player_name, market, odds) VALUES ($1,$2,$3,$4) ON CONFLICT (match_id,player_name,market) DO UPDATE SET odds=$4, updated_at=NOW()',
+                    [match.id, pname, 'anytime', avgPrice.toFixed(3)]
+                  );
+                }
+              }
+              for (const [pname, prices] of Object.entries(playerFirst)) {
+                const avgPrice = avg(prices);
+                if (avgPrice) {
+                  await pool.query(
+                    'INSERT INTO wc_player_odds (match_id, player_name, market, odds) VALUES ($1,$2,$3,$4) ON CONFLICT (match_id,player_name,market) DO UPDATE SET odds=$4, updated_at=NOW()',
+                    [match.id, pname, 'first', avgPrice.toFixed(3)]
+                  );
+                }
+              }
+            }
+          }
+        } catch (evErr) {
+          console.warn(`[odds-fetch] Event odds failed for ${match.id}:`, evErr.message);
+        }
+      }
     }
 
     // Store last update timestamp
@@ -821,6 +1058,17 @@ async function autoFetchOdds() {
     console.error('[odds-fetch] Error:', e.message);
   }
 }
+
+// Get player scorer odds for a match
+app.get('/wc/matches/:id/players', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT player_name, market, odds FROM wc_player_odds WHERE match_id=$1 ORDER BY market, odds ASC',
+      [req.params.id]
+    );
+    res.json(rows);
+  } catch(e) { res.status(500).json({error:e.message}); }
+});
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 initDB().then(() => {
