@@ -1480,8 +1480,9 @@ function CreateSessionModal({ onClose, onCreate, count }) {
   const [qualifyCount, setQualifyCount] = useState(1);
   const [thirdPlaceMode, setThirdPlaceMode] = useState("best2");
   const is3Groups = groupCount === 3;
-  const totalQualifiers = is3Groups ? 8 : groupCount * qualifyCount; // 3-group always 6+2=8
-  const bracketInfo = totalQualifiers >= 8 ? "QF → SF → Final" : totalQualifiers >= 4 ? "SF → Final" : "Final only";
+  const is4GroupsAll3rds = groupCount === 4 && thirdPlaceMode === "all4r16";
+  const totalQualifiers = is3Groups ? 8 : is4GroupsAll3rds ? 12 : groupCount * qualifyCount; // 3-group always 6+2=8
+  const bracketInfo = is4GroupsAll3rds ? "R16 → QF → SF → Final" : totalQualifiers >= 8 ? "QF → SF → Final" : totalQualifiers >= 4 ? "SF → Final" : "Final only";
   return <Modal open={true} onClose={onClose} title="NEW SESSION">
     <div className="space-y-3">
       <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Name</label><Input autoFocus value={n} onChange={setN} /></div>
@@ -1499,10 +1500,10 @@ function CreateSessionModal({ onClose, onCreate, count }) {
         </div>
       ) : (
         <div>
-          <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Teams qualifying per group</label>
+          {!is4GroupsAll3rds && <><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Teams qualifying per group</label>
           <div className="grid grid-cols-2 gap-2">
             {[1,2].map(q => <button key={q} type="button" onClick={() => setQualifyCount(q)} className={`py-2 rounded-lg font-semibold text-sm ${qualifyCount===q ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>Top {q}</button>)}
-          </div>
+          </div></>}
           <div className="text-[11px] text-orange-400 mt-2 font-semibold">{totalQualifiers} qualifiers → {bracketInfo}</div>
         </div>
       )}
@@ -1519,6 +1520,20 @@ function CreateSessionModal({ onClose, onCreate, count }) {
               <div className={`text-[10px] mt-0.5 ${thirdPlaceMode==="playoff" ? "text-orange-200" : "text-stone-500"}`}>Best bye, other two play off</div>
             </button>
           </div>
+        </div>
+      )}
+      {groupCount === 4 && (
+        <div>
+          <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">3rd place qualification</label>
+          <button type="button"
+            onClick={() => setThirdPlaceMode(thirdPlaceMode === "all4r16" ? "best2" : "all4r16")}
+            className={`w-full py-2.5 px-3 rounded-lg text-left ${thirdPlaceMode === "all4r16" ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>
+            <div className="text-xs font-bold">All Thirds Qualify — R16</div>
+            <div className={`text-[10px] mt-0.5 ${thirdPlaceMode === "all4r16" ? "text-orange-200" : "text-stone-500"}`}>
+              All 4 thirds + runners-up play R16 · Winners join group leaders in QF · Ghost BYE equalization for seeding only
+            </div>
+          </button>
+          {is4GroupsAll3rds && <div className="text-[11px] text-orange-400 mt-2 font-semibold">12 qualifiers → R16 → QF → SF → Final</div>}
         </div>
       )}
       <div className="flex gap-2 pt-2"><Btn variant="ghost" onClick={onClose}>Cancel</Btn><Btn onClick={() => { if (n) { onCreate(n, d, groupCount, qualifyCount, thirdPlaceMode); onClose(); } }}>Create</Btn></div>
@@ -1929,6 +1944,41 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     });
     const N = groups.length;
 
+    if (N === 4 && thirdPlaceMode === "all4r16") {
+      const winners   = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd||0, gf: s[0].gf||0, seed: groups[gi]+"1" } : null).filter(Boolean);
+      const runnersUp = standings.map((s, gi) => s[1]?.team?.id ? { id: s[1].team.id, pts: s[1].pts, wins: s[1].wins, gd: s[1].gd||0, gf: s[1].gf||0, seed: groups[gi]+"2" } : null).filter(Boolean);
+      const rawThirds = standings.map((s, gi) => s[2]?.team?.id ? { id: s[2].team.id, pts: s[2].pts, wins: s[2].wins, gd: s[2].gd||0, gf: s[2].gf||0, seed: groups[gi]+"3" } : null).filter(Boolean);
+      if (winners.length < 4) { alert("Need results for all 4 group winners first"); return; }
+      if (runnersUp.length < 4) { alert("Need results for all 4 runners-up first"); return; }
+      if (rawThirds.length < 4) { alert("Need results for all 4 third-place teams first"); return; }
+
+      // Equalize for cross-group seeding: ghost BYE wins for smaller groups — does NOT change group points
+      const eqWinners   = [...equalizeThirds(winners,   session)].sort(compareThirds);
+      const eqRunners   = [...equalizeThirds(runnersUp, session)].sort(compareThirds);
+      const eqThirds    = [...equalizeThirds(rawThirds, session)].sort(compareThirds);
+
+      // R16: seeds 5-12 (runners-up then thirds)
+      // Match 1: seed5 vs seed12, Match 2: seed6 vs seed11, Match 3: seed7 vs seed10, Match 4: seed8 vs seed9
+      const r16p = [...eqRunners, ...eqThirds]; // 8 teams, indices 0–7
+      const r16 = [1,2,3,4].map((slot, i) => ({
+        id: uid("r16"), slot,
+        team1Id: r16p[i].id,     s1: r16p[i].seed,
+        team2Id: r16p[7-i].id,   s2: r16p[7-i].seed,
+        winner: null
+      }));
+
+      // QF: seed1 gets bye and faces R16M4 winner (weakest), seed4 faces R16M1 winner (strongest)
+      const qf = eqWinners.map((w, i) => ({
+        id: uid("qf"), slot: i+1,
+        team1Id: w.id,              s1: w.seed,
+        team2Id: `R16_TBD_${4-i}`, s2: `R16W${4-i}`,
+        winner: null, r16Slot: 4-i,
+      }));
+
+      updateSession(s => ({ ...s, bracket: { r16, qf, sf: [], final: null } }));
+      return;
+    }
+
     if (N === 3) {
       // Tier 1 = winners, Tier 2 = runners-up, Tier 3 = thirds
       const tier1 = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd || 0, gf: s[0].gf || 0, tier: 1, seed: groups[gi] + "1" } : null).filter(Boolean);
@@ -2019,12 +2069,28 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
 
   const lbl = (id) => {
     if (id === "PLAYOFF_TBD") return "Qualifier TBD";
+    if (id?.startsWith?.("R16_TBD_")) return `R16 M${id.slice(8)} Winner`;
     const t = teams.find(t => t.id === id);
     if (!t) return "—";
     return `${state.players.find(p => p.id === t.p1Id)?.name?.split(" ")[0] || "?"} & ${state.players.find(p => p.id === t.p2Id)?.name?.split(" ")[0] || "?"}`;
   };
 
   useEffect(() => {
+    // R16 → QF (all4r16 mode)
+    if (b.r16?.length > 0) {
+      let updatedQF = [...b.qf];
+      let changed = false;
+      for (const r16m of b.r16) {
+        if (!r16m.winner) continue;
+        const winnerId = r16m.winner === "team1" ? r16m.team1Id : r16m.team2Id;
+        updatedQF = updatedQF.map(qfm => {
+          if (qfm.r16Slot !== r16m.slot || qfm.winner) return qfm;
+          if (qfm.team2Id !== winnerId) { changed = true; return { ...qfm, team2Id: winnerId }; }
+          return qfm;
+        });
+      }
+      if (changed) updateSession(s => ({ ...s, bracket: { ...s.bracket, qf: updatedQF } }));
+    }
     // Thirds playoff winner → fill PLAYOFF_TBD slot in QF
     if (b.thirdsPlayoff?.winner && b.qf.some(m => m.team1Id === "PLAYOFF_TBD" || m.team2Id === "PLAYOFF_TBD")) {
       const winner = b.thirdsPlayoff.winner === "team1" ? b.thirdsPlayoff.team1Id : b.thirdsPlayoff.team2Id;
@@ -2049,7 +2115,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     }
   }, [JSON.stringify(b)]);
 
-  if (!b.qf || b.qf.length === 0) {
+  if ((!b.qf || b.qf.length === 0) && (!b.r16 || b.r16.length === 0)) {
     return <Card className="p-6 text-center border-dashed">
       <I.swords className="mx-auto mb-3 text-stone-600" size={36} />
       <div className="text-stone-300 font-semibold mb-1">No bracket yet</div>
@@ -2066,6 +2132,22 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         <div className="text-xs uppercase tracking-[0.3em] text-amber-400 font-bold mb-1">Champion</div>
         <div className="font-display text-3xl text-stone-50">{lbl(champId)}</div>
       </Card>}
+
+      {/* R16 round (all4r16 mode) */}
+      {b.r16?.length > 0 && (
+        <Card className="p-3" style={{ borderColor: "rgba(167,139,250,0.35)" }}>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-display text-base" style={{ color: "#a78bfa" }}>ROUND OF 16</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#a78bfa" }}>All thirds qualify</span>
+          </div>
+          <div className="space-y-1.5">
+            {b.r16.map(m => (
+              <BracketRow key={m.id} match={m} lbl={lbl}
+                onClick={() => canScore && setEdit({ ...m, round: "r16" })} />
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* Thirds qualifier (playoff mode) */}
       {b.thirdsPlayoff && !b.thirdsPlayoff.winner && (
@@ -2101,13 +2183,14 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       {edit && <BracketEditModal match={edit} teams={teams} state={state} isAdmin={isAdmin} onClose={() => setEdit(null)}
         onSave={(d) => updateSession(s => {
           const nb = { ...s.bracket };
-          if (edit.round === "qf") nb.qf = nb.qf.map(m => m.id === edit.id ? { ...m, ...d } : m);
+          if (edit.round === "r16") nb.r16 = (nb.r16||[]).map(m => m.id === edit.id ? { ...m, ...d } : m);
+          else if (edit.round === "qf") nb.qf = nb.qf.map(m => m.id === edit.id ? { ...m, ...d } : m);
           else if (edit.round === "sf") nb.sf = nb.sf.map(m => m.id === edit.id ? { ...m, ...d } : m);
           else if (edit.round === "final") nb.final = { ...nb.final, ...d };
           else if (edit.round === "thirdsPlayoff") nb.thirdsPlayoff = { ...nb.thirdsPlayoff, ...d };
           return { ...s, bracket: nb };
         })}
-        onReset={() => updateSession(s => ({ ...s, bracket: { qf: s.bracket.qf, sf: [], final: null, thirdsPlayoff: s.bracket.thirdsPlayoff } }))}
+        onReset={() => updateSession(s => ({ ...s, bracket: { r16: s.bracket.r16, qf: s.bracket.qf, sf: [], final: null, thirdsPlayoff: s.bracket.thirdsPlayoff } }))}
       />}
     </div>
   );
@@ -2138,7 +2221,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
     const w = m.winner;
     const isFinal = round === "final";
     const isEmpty = !m.team1Id && !m.team2Id;
-    const hasTbd = m.team1Id === "PLAYOFF_TBD" || m.team2Id === "PLAYOFF_TBD";
+    const hasTbd = m.team1Id === "PLAYOFF_TBD" || m.team2Id === "PLAYOFF_TBD" || m.team1Id?.startsWith?.("R16_TBD_") || m.team2Id?.startsWith?.("R16_TBD_");
     const isPlaceholder = isEmpty || hasTbd;
     const sides = [
       { key: "team1", id: m.team1Id, seed: m.s1 },
@@ -2280,7 +2363,7 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
   const [s2, setS2] = useState(initS2);
   const [confirmed, setConfirmed] = useState(false);
   const lbl = (id) => { const t = teams.find(t => t.id === id); if (!t) return "?"; const p1 = state.players.find(p => p.id === t.p1Id)?.name?.split(" ")[0] || "?"; const p2 = state.players.find(p => p.id === t.p2Id)?.name?.split(" ")[0] || "?"; return `${p1} & ${p2}`; };
-  const titles = { qf: "QUARTERFINAL", sf: "SEMIFINAL", final: "FINAL", thirdsPlayoff: "3RDS QUALIFIER" };
+  const titles = { r16: "ROUND OF 16", qf: "QUARTERFINAL", sf: "SEMIFINAL", final: "FINAL", thirdsPlayoff: "3RDS QUALIFIER" };
   const maxScore = match.round === "final" ? 9 : 7;
   const derived = (s1 !== null && s2 !== null && s1 !== s2) ? scoreToResult(s1, s2) : null;
   const canConfirm = t1 && t2 && derived;
