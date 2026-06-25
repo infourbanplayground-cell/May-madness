@@ -878,12 +878,12 @@ app.delete('/wc/admin/prediction/:predId', adminAuth, async (req, res) => {
 app.get('/wc/admin/match/:id/bets', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
-      SELECT p.id, p.prediction, p.stake, p.odds_locked, p.payout, p.settled,
+      SELECT p.id, p.prediction, p.stake, p.odds_locked, p.payout, p.settled, p.created_at,
              pl.name AS player_name, pl.id AS player_id
       FROM wc_predictions p
       JOIN wc_players pl ON pl.id = p.player_id
       WHERE p.match_id = $1
-      ORDER BY pl.name, p.created_at
+      ORDER BY p.created_at ASC
     `, [req.params.id]);
     res.json(rows);
   } catch (e) {

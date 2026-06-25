@@ -2155,6 +2155,7 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                           <span style={{fontSize:12,fontWeight:700,color:'var(--text)'}}>{bet.player_name}</span>
                           <span style={{fontSize:10,color:'var(--muted)',marginLeft:6,fontFamily:'Space Grotesk'}}>{bet.prediction}</span>
                           <span style={{fontSize:10,color:'var(--muted)',marginLeft:4,fontFamily:'Space Grotesk'}}>@ {parseFloat(bet.odds_locked).toFixed(2)}</span>
+                          <span style={{fontSize:9,color:'var(--muted)',marginLeft:6,fontFamily:'Space Grotesk',opacity:.7}}>{new Date(bet.created_at).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</span>
                         </div>
                         <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
                           {bet.settled?(
