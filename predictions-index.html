@@ -688,6 +688,7 @@ const TX = {
     toastSettings:'تم حفظ الإعدادات', toastPlayer:'تم تحديث اللاعب',
     toastDeleted:'تم الحذف', toastUndo:'تم إلغاء النتيجة', toastUpdated:'تم التحديث',
     confirmDelete:'حذف', confirmUndo:'إلغاء النتيجة وإعادة الرصيد؟',
+    betsBtn:'الرهانات', voidBtn:'إلغاء', confirmVoid:'إلغاء هذا الرهان وإعادة الرصيد؟', toastVoided:'تم إلغاء الرهان',
     predTotal:'توقع', predWin:'فوز', predPlayed:'لُعبت',
     stage_group:'مجموعات', stage_r32:'دور 32', stage_r16:'دور 16',
     stage_qf:'ربع النهائي', stage_sf:'نصف النهائي', stage_3rd:'المركز الثالث', stage_final:'النهائي',
@@ -727,6 +728,7 @@ const TX = {
     toastSettings:'Settings saved', toastPlayer:'Player updated',
     toastDeleted:'Deleted', toastUndo:'Result undone', toastUpdated:'Updated',
     confirmDelete:'Delete', confirmUndo:'Undo result and refund balances?',
+    betsBtn:'Bets', voidBtn:'Void', confirmVoid:'Void this bet and refund the player?', toastVoided:'Bet voided',
     predTotal:'picks', predWin:'wins', predPlayed:'played',
     stage_group:'Groups', stage_r32:'Round of 32', stage_r16:'Round of 16',
     stage_qf:'Quarters', stage_sf:'Semis', stage_3rd:'3rd Place', stage_final:'FINAL',
@@ -2059,6 +2061,26 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   const [editPlayer,setEditPlayer]=useState(null);
   const [epBal,setEpBal]=useState('');const [epName,setEpName]=useState('');const [epPin,setEpPin]=useState('');
   const [filterStage,setFilterStage]=useState('group');
+  const [expandedBetsId,setExpandedBetsId]=useState(null);
+  const [matchBets,setMatchBets]=useState([]);
+  const [betsLoading,setBetsLoading]=useState(false);
+
+  async function loadBets(matchId){
+    if(expandedBetsId===matchId){setExpandedBetsId(null);setMatchBets([]);return;}
+    setBetsLoading(true);setExpandedBetsId(matchId);
+    try{const data=await apiFetch(`/wc/admin/match/${matchId}/bets`);setMatchBets(data);}
+    catch(e){showToast(e.message,'error');setExpandedBetsId(null);}
+    setBetsLoading(false);
+  }
+  async function voidBet(pred){
+    if(!confirm(T.confirmVoid))return;
+    try{
+      await apiFetch(`/wc/admin/prediction/${pred.id}`,{method:'DELETE'});
+      showToast(T.toastVoided,'success');
+      setMatchBets(mb=>mb.filter(b=>b.id!==pred.id));
+      onRefresh();
+    }catch(e){showToast(e.message,'error');}
+  }
 
   async function submitResult(){if(!selectedMatch||hs===''||as_==='')return;setSaving(true);try{await apiFetch('/wc/admin/result',{method:'POST',body:JSON.stringify({matchId:selectedMatch.id,homeScore:parseInt(hs),awayScore:parseInt(as_)})});showToast(T.toastResult,'success');setSelectedMatch(null);setHs('');setAs('');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function submitOdds(matchId){setSaving(true);try{await apiFetch(`/wc/admin/match/${matchId}`,{method:'PUT',body:JSON.stringify({homeOdds:parseFloat(oh)||undefined,drawOdds:parseFloat(od)||undefined,awayOdds:parseFloat(oa)||undefined,odds1X:parseFloat(o1x)||undefined,oddsX2:parseFloat(ox2)||undefined,oddsBttsYes:parseFloat(oby)||undefined,oddsBttsNo:parseFloat(obn)||undefined,oddsOver25:parseFloat(oov)||undefined,oddsUnder25:parseFloat(oun)||undefined,oddsDnbHome:parseFloat(odnbh)||undefined,oddsDnbAway:parseFloat(odnba)||undefined})});showToast(T.toastOdds,'success');setEditOdds(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
@@ -2117,6 +2139,37 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                     {!m.settled&&<button onClick={()=>{setSelectedMatch(m===selectedMatch?null:m);setHs('');setAs('');}} style={{fontSize:10,background:selectedMatch?.id===m.id?'rgba(255,255,255,0.06)':'var(--gold)',color:selectedMatch?.id===m.id?'var(--muted)':'#0A0600',border:'none',borderRadius:10,padding:'5px 12px',fontWeight:800,fontFamily:'Space Grotesk'}}>{selectedMatch?.id===m.id?T.cancelEdit:T.enterResult}</button>}
                   </div>
                 </div>
+                {/* Bets toggle button */}
+                <div className="mt-2 flex items-center gap-2">
+                  <button onClick={()=>loadBets(m.id)} style={{fontSize:10,color:expandedBetsId===m.id?'var(--gold)':'var(--muted)',background:expandedBetsId===m.id?'rgba(242,193,78,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${expandedBetsId===m.id?'rgba(242,193,78,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
+                    {T.betsBtn} {expandedBetsId===m.id&&!betsLoading?`(${matchBets.length})`:''}
+                  </button>
+                </div>
+                {expandedBetsId===m.id&&(
+                  <div className="mt-2 space-y-1.5" style={{direction:'ltr'}}>
+                    {betsLoading&&<div style={{fontSize:11,color:'var(--muted)',fontFamily:'Space Grotesk',padding:'6px 0'}}>Loading…</div>}
+                    {!betsLoading&&matchBets.length===0&&<div style={{fontSize:11,color:'var(--muted)',fontFamily:'Space Grotesk',padding:'6px 0'}}>No bets yet</div>}
+                    {!betsLoading&&matchBets.map(bet=>(
+                      <div key={bet.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'6px 10px',background:'rgba(255,255,255,0.03)',borderRadius:8,border:'1px solid var(--border)'}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <span style={{fontSize:12,fontWeight:700,color:'var(--text)'}}>{bet.player_name}</span>
+                          <span style={{fontSize:10,color:'var(--muted)',marginLeft:6,fontFamily:'Space Grotesk'}}>{bet.prediction}</span>
+                          <span style={{fontSize:10,color:'var(--muted)',marginLeft:4,fontFamily:'Space Grotesk'}}>@ {parseFloat(bet.odds_locked).toFixed(2)}</span>
+                        </div>
+                        <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
+                          {bet.settled?(
+                            <span style={{fontSize:10,fontFamily:'Space Grotesk',fontWeight:700,color:parseFloat(bet.payout)>0?'var(--green)':'var(--red)'}}>
+                              {parseFloat(bet.payout)>0?`+$${(parseFloat(bet.payout)-parseFloat(bet.stake)).toFixed(0)}`:`-$${parseFloat(bet.stake).toFixed(0)}`}
+                            </span>
+                          ):(
+                            <span style={{fontSize:10,fontFamily:'Space Grotesk',color:'var(--muted)'}}>$&nbsp;{parseFloat(bet.stake).toFixed(0)}</span>
+                          )}
+                          <button onClick={()=>voidBet(bet)} style={{fontSize:10,color:'var(--red)',background:'rgba(255,54,81,0.08)',border:'none',borderRadius:6,padding:'3px 8px',fontFamily:'Space Grotesk',fontWeight:700}}>{T.voidBtn}</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {selectedMatch?.id===m.id&&(
                   <div className="mt-3 flex gap-2 items-center" style={{direction:'ltr'}}>
                     <input className="admin-inp w-16 text-center" placeholder="0" value={hs} onChange={e=>setHs(e.target.value)} type="number" min="0"/>

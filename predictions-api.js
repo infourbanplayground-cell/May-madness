@@ -461,26 +461,36 @@ app.post('/wc/predict', auth, async (req, res) => {
     }
     if (!oddsLocked) oddsLocked = bh;
 
-    // For KO markets, upsert by (player_id, match_id, prediction)
-    const existing = await pool.query(
-      'SELECT * FROM wc_predictions WHERE player_id=$1 AND match_id=$2 AND prediction=$3',
-      [req.playerId, matchId, prediction]
-    );
-
-    if (existing.rows.length > 0) {
-      if (existing.rows[0].settled) return res.status(400).json({ error: 'Match already settled' });
-      await pool.query(
-        'UPDATE wc_predictions SET odds_locked=$1 WHERE player_id=$2 AND match_id=$3 AND prediction=$4',
-        [oddsLocked, req.playerId, matchId, prediction]
+    if (isKOMarket) {
+      // KO markets: allow re-selecting same prediction (updates locked odds); block if settled
+      const existing = await pool.query(
+        'SELECT * FROM wc_predictions WHERE player_id=$1 AND match_id=$2 AND prediction=$3',
+        [req.playerId, matchId, prediction]
       );
+      if (existing.rows.length > 0) {
+        if (existing.rows[0].settled) return res.status(400).json({ error: 'Match already settled' });
+        await pool.query(
+          'UPDATE wc_predictions SET odds_locked=$1 WHERE player_id=$2 AND match_id=$3 AND prediction=$4',
+          [oddsLocked, req.playerId, matchId, prediction]
+        );
+        const { rows: updated } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [req.playerId]);
+        return res.json({ ok: true, newBalance: updated[0].balance });
+      }
     } else {
-      await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [stake, req.playerId]);
-      await pool.query(
-        'INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked) VALUES ($1,$2,$3,$4,$5)',
-        [req.playerId, matchId, prediction, stake, oddsLocked]
+      // Group stage (standard 1X2/DC): one bet per player per match
+      const { rows: existGroup } = await pool.query(
+        'SELECT id FROM wc_predictions WHERE player_id=$1 AND match_id=$2',
+        [req.playerId, matchId]
       );
+      if (existGroup.length > 0) return res.status(400).json({ error: 'You already have a bet on this match' });
     }
 
+    // New bet: deduct stake and insert
+    await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [stake, req.playerId]);
+    await pool.query(
+      'INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked) VALUES ($1,$2,$3,$4,$5)',
+      [req.playerId, matchId, prediction, stake, oddsLocked]
+    );
     const { rows: updated } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [req.playerId]);
     res.json({ ok: true, newBalance: updated[0].balance });
   } catch (e) {
@@ -838,6 +848,44 @@ app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
       [matchId]
     );
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Void individual prediction (admin) ───────────────────────────────────────
+app.delete('/wc/admin/prediction/:predId', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM wc_predictions WHERE id=$1', [req.params.predId]);
+    if (!rows.length) return res.status(404).json({ error: 'Prediction not found' });
+    const pred = rows[0];
+    // If settled and won: clawback payout then restore stake; otherwise just restore stake
+    if (pred.settled && parseFloat(pred.payout) > 0) {
+      await pool.query('UPDATE wc_players SET balance=balance-$1+$2 WHERE id=$3',
+        [pred.payout, pred.stake, pred.player_id]);
+    } else {
+      await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2',
+        [pred.stake, pred.player_id]);
+    }
+    await pool.query('DELETE FROM wc_predictions WHERE id=$1', [req.params.predId]);
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── List bets for a match (admin) ─────────────────────────────────────────────
+app.get('/wc/admin/match/:id/bets', adminAuth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT p.id, p.prediction, p.stake, p.odds_locked, p.payout, p.settled,
+             pl.name AS player_name, pl.id AS player_id
+      FROM wc_predictions p
+      JOIN wc_players pl ON pl.id = p.player_id
+      WHERE p.match_id = $1
+      ORDER BY pl.name, p.created_at
+    `, [req.params.id]);
+    res.json(rows);
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
