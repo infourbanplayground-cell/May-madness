@@ -923,7 +923,7 @@ function Countdown({kickoff,settled,lang}){
 }
 
 // ── Confirm Sheet ─────────────────────────────────────────────────────────────
-function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startBal,lang,extraOdds,isKO}){
+function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startBal,lang,extraOdds,isKO,existingPred}){
   const T=TX[lang];
   const CHIPS=[10,25,50,100,200,500];
   const [chosenStake,setChosenStake]=useState(()=>{
@@ -966,7 +966,7 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
         onClick={e=>e.stopPropagation()}>
         <div style={{height:3,width:36,background:'rgba(255,255,255,0.12)',borderRadius:2,margin:'14px auto 0'}}/>
         <div className="px-6 py-5">
-          <div style={{fontSize:11,color:'var(--muted)',fontWeight:800,letterSpacing:1,marginBottom:16,fontFamily:'Space Grotesk',textTransform:'uppercase'}}>{T.confirmTitle}</div>
+          <div style={{fontSize:11,color:'var(--muted)',fontWeight:800,letterSpacing:1,marginBottom:16,fontFamily:'Space Grotesk',textTransform:'uppercase'}}>{existingPred?lang==='ar'?'تغيير الرهان':'Change Bet':T.confirmTitle}</div>
           {/* Teams */}
           <div className="flex items-center justify-between gap-3 mb-5" style={{direction:'ltr'}}>
             <div className="flex items-center gap-2 flex-1">
@@ -1034,7 +1034,15 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
               </div>
             ))}
           </div>
-          <button className="btn-primary mb-3" disabled={stakeUsed>bal} onClick={()=>onConfirm(stakeUsed)}>{T.confirmBtn}</button>
+          {existingPred&&(
+            <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,marginBottom:12,padding:'8px 14px',background:'rgba(255,255,255,0.04)',border:'1px solid var(--border2)',borderRadius:12}}>
+              <span style={{fontSize:11,fontFamily:'Space Grotesk',fontWeight:800,color:'var(--red)',letterSpacing:.5}}>{existingPred}</span>
+              <span style={{fontSize:12,color:'var(--muted)'}}>→</span>
+              <span style={{fontSize:11,fontFamily:'Space Grotesk',fontWeight:800,color:'var(--green)',letterSpacing:.5}}>{pick}</span>
+              <span style={{fontSize:10,color:'var(--muted)',marginLeft:4,fontFamily:'Space Grotesk'}}>{lang==='ar'?'(بدون تغيير في الرصيد)':'(no balance change)'}</span>
+            </div>
+          )}
+          <button className="btn-primary mb-3" disabled={stakeUsed>bal} onClick={()=>onConfirm(stakeUsed)}>{existingPred?lang==='ar'?'تأكيد التغيير':'Confirm Change':T.confirmBtn}</button>
           <button onClick={onCancel} style={{width:'100%',padding:'10px',background:'none',border:'none',color:'var(--muted)',fontSize:13,fontWeight:700,fontFamily:'inherit'}}>{T.cancelBtn}</button>
         </div>
         <div style={{height:'env(safe-area-inset-bottom,0px)'}}/>
@@ -2645,7 +2653,11 @@ function App(){
     }
   }
 
-  function handlePickClick(match,pick,extraOdds=null){setConfirmPick({match,pick,extraOdds});}
+  function handlePickClick(match,pick,extraOdds=null){
+    const isGroupStage=!match.stage||match.stage==='group';
+    const existingPred=isGroupStage?predictions.find(p=>p.match_id===match.id&&['1','X','2','1X','X2','12'].includes(p.prediction)):null;
+    setConfirmPick({match,pick,extraOdds,existingPred:existingPred?.prediction||null});
+  }
 
   function handleBuildClick(match){setBuilderMatch(match);}
 
@@ -2679,7 +2691,7 @@ function App(){
       const pickGroup=MG[pick]||pick;
       setPredictions(prev=>[...prev.filter(p=>p.match_id!==match.id||(MG[p.prediction]||p.prediction)!==pickGroup),{match_id:match.id,prediction:pick,settled:false,stake:stakeAmt,odds_locked:_lockedOdds}]);
       const team=pick==='1'?match.home_team:pick==='2'?match.away_team:pick==='X'?T.pickX:pick==='1X'?`${match.home_team}/X`:pick==='X2'?`X/${match.away_team}`:pick.startsWith('ANYTIME:')?pick.slice(8):pick.startsWith('FIRST:')?pick.slice(6):pick;
-      showToast(`${team} ✓`,'success');
+      showToast(data.changed?`→ ${team} ✓`:`${team} ✓`,'success');
       loadLeaderboard();
     }catch(e){showToast(e.message,'error');}
     setLoadingMatch(null);
@@ -2782,6 +2794,7 @@ function App(){
         <ConfirmSheet match={confirmPick.match} pick={confirmPick.pick} extraOdds={confirmPick.extraOdds}
           defaultStake={parseFloat(settings.stake_per_match||100)} balance={player.balance} startBal={parseFloat(settings?.starting_balance||7200)}
           isKO={confirmPick.match?.stage&&confirmPick.match.stage!=='group'}
+          existingPred={confirmPick.existingPred}
           onConfirm={handleConfirm} onCancel={()=>setConfirmPick(null)} lang={lang}/>
       )}
       {/* PIN entry modal */}

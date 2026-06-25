@@ -477,12 +477,20 @@ app.post('/wc/predict', auth, async (req, res) => {
         return res.json({ ok: true, newBalance: updated[0].balance });
       }
     } else {
-      // Group stage (standard 1X2/DC): one bet per player per match
+      // Group stage (standard 1X2/DC): allow swapping before deadline (no balance change, same stake)
       const { rows: existGroup } = await pool.query(
-        'SELECT id FROM wc_predictions WHERE player_id=$1 AND match_id=$2',
+        'SELECT id, settled FROM wc_predictions WHERE player_id=$1 AND match_id=$2',
         [req.playerId, matchId]
       );
-      if (existGroup.length > 0) return res.status(400).json({ error: 'You already have a bet on this match' });
+      if (existGroup.length > 0) {
+        if (existGroup[0].settled) return res.status(400).json({ error: 'Match already settled' });
+        await pool.query(
+          'UPDATE wc_predictions SET prediction=$1, odds_locked=$2 WHERE id=$3',
+          [prediction, oddsLocked, existGroup[0].id]
+        );
+        const { rows: updated } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [req.playerId]);
+        return res.json({ ok: true, newBalance: updated[0].balance, changed: true });
+      }
     }
 
     // New bet: deduct stake and insert
