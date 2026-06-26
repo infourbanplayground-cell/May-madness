@@ -647,9 +647,9 @@ app.get('/wc/leaderboard', async (req, res) => {
       SELECT id, name,
         ROUND(balance,2) as balance,
         ROUND(balance - $1, 2) as profit,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0) as wins,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true) as played,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as total,
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0 AND p.prediction!='MISS') as wins,
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.prediction!='MISS') as played,
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.prediction!='MISS') as total,
         COALESCE((SELECT SUM(payout - stake) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0),0) +
         COALESCE((SELECT SUM(payout - stake) FROM wc_bet_builders b WHERE b.player_id=pl.id AND b.settled=true AND b.payout>0),0) as winnings
       FROM wc_players pl
@@ -749,8 +749,8 @@ app.get('/wc/admin/players', adminAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
       SELECT pl.*,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id) as pred_count,
-        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0) as wins
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.prediction!='MISS') as pred_count,
+        (SELECT COUNT(*) FROM wc_predictions p WHERE p.player_id=pl.id AND p.settled=true AND p.payout>0 AND p.prediction!='MISS') as wins
       FROM wc_players pl ORDER BY balance DESC
     `);
     res.json(rows);
@@ -823,19 +823,26 @@ app.put('/wc/admin/settings', adminAuth, async (req, res) => {
 app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
   try {
     const { matchId } = req.params;
-    // Refund all settled predictions
+    // Refund all settled predictions (skip MISS — handled separately below)
     const { rows: preds } = await pool.query(
-      'SELECT * FROM wc_predictions WHERE match_id=$1 AND settled=true', [matchId]
+      "SELECT * FROM wc_predictions WHERE match_id=$1 AND settled=true AND prediction!='MISS'", [matchId]
     );
     for (const p of preds) {
       if (p.payout > 0) {
         await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [p.payout, p.player_id]);
       }
-      // Refund original stake for losses
       if (!p.payout || p.payout === 0) {
         await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [p.stake, p.player_id]);
       }
       await pool.query('UPDATE wc_predictions SET settled=false, payout=null WHERE id=$1', [p.id]);
+    }
+    // Refund and delete MISS penalties (re-applied when match is re-settled)
+    const { rows: missPreds } = await pool.query(
+      "SELECT * FROM wc_predictions WHERE match_id=$1 AND prediction='MISS'", [matchId]
+    );
+    for (const mp of missPreds) {
+      await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [mp.stake, mp.player_id]);
+      await pool.query('DELETE FROM wc_predictions WHERE id=$1', [mp.id]);
     }
     // Refund settled bet builders
     const { rows: bldrs } = await pool.query(
@@ -872,6 +879,35 @@ app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
       }
     }
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Retroactive missed-bet penalty (admin) ────────────────────────────────────
+app.post('/wc/admin/apply-missed-penalties', adminAuth, async (req, res) => {
+  try {
+    const missStake = parseFloat(await getSetting('stake_per_match', '100'));
+    const { rows: settledMatches } = await pool.query(
+      "SELECT id FROM wc_matches WHERE stage='group' AND settled=true"
+    );
+    const { rows: allPlayers } = await pool.query('SELECT id FROM wc_players');
+    let applied = 0;
+    for (const m of settledMatches) {
+      for (const { id: pid } of allPlayers) {
+        const r = await pool.query(
+          `INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked,payout,settled)
+           VALUES ($1,$2,'MISS',$3,1.0,0,true)
+           ON CONFLICT (player_id,match_id,prediction) DO NOTHING`,
+          [pid, m.id, missStake]
+        );
+        if (r.rowCount > 0) {
+          await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [missStake, pid]);
+          applied++;
+        }
+      }
+    }
+    res.json({ ok: true, applied });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
@@ -1203,6 +1239,23 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
     await pool.query('UPDATE wc_bet_builders SET settled=true, payout=$1 WHERE id=$2', [payout, b.id]);
     if (payout > 0) {
       await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, b.player_id]);
+    }
+  }
+
+  // ── Missed-bet penalty: charge all players who skipped this group match ──────
+  if (match.stage === 'group') {
+    const missStake = parseFloat(await getSetting('stake_per_match', '100'));
+    const { rows: allPlayers } = await pool.query('SELECT id FROM wc_players');
+    for (const { id: pid } of allPlayers) {
+      const res = await pool.query(
+        `INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked,payout,settled)
+         VALUES ($1,$2,'MISS',$3,1.0,0,true)
+         ON CONFLICT (player_id,match_id,prediction) DO NOTHING`,
+        [pid, matchId, missStake]
+      );
+      if (res.rowCount > 0) {
+        await pool.query('UPDATE wc_players SET balance=balance-$1 WHERE id=$2', [missStake, pid]);
+      }
     }
   }
 
