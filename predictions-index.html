@@ -2133,6 +2133,22 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
       <div className="pb-12">
         {tab==='results'&&(
           <div className="px-4 pt-3 space-y-2">
+            {filterStage==='r32'&&stageMatches.every(m=>m.home_team==='TBD')&&(
+              <div style={{padding:'14px',background:'rgba(242,193,78,0.06)',border:'1px solid rgba(242,193,78,0.25)',borderRadius:14}}>
+                <div style={{fontSize:12,fontWeight:700,color:'var(--gold)',marginBottom:6,fontFamily:'Space Grotesk'}}>{lang==='ar'?'جدول الدور 32 لم يُحدَّد بعد':'R32 bracket not seeded yet'}</div>
+                <div style={{fontSize:11,color:'var(--muted)',marginBottom:10,fontFamily:'Space Grotesk'}}>{lang==='ar'?'يتم توليده تلقائياً عند اكتمال جميع مباريات دور المجموعات، أو اضغط لتوليده الآن.':'Generated automatically when all group matches are settled, or seed manually now.'}</div>
+                <button onClick={async()=>{setSaving(true);try{const d=await apiFetch('/wc/admin/seed-r32',{method:'POST'});showToast(lang==='ar'?`تم توليد ${d.seeded.length} مباراة`:`Seeded ${d.seeded.length} R32 matches`,'success');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}}
+                  disabled={saving}
+                  style={{background:'var(--gold)',color:'#0A0600',border:'none',borderRadius:10,padding:'8px 18px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',cursor:'pointer'}}>
+                  {saving?'…':lang==='ar'?'توليد الدور 32':'Seed R32'}
+                </button>
+              </div>
+            )}
+            {filterStage==='r32'&&stageMatches.some(m=>m.home_team!=='TBD')&&stageMatches.some(m=>m.home_team==='TBD')&&(
+              <div style={{padding:'10px 14px',background:'rgba(255,255,255,0.03)',border:'1px solid var(--border)',borderRadius:10,fontSize:11,color:'var(--muted)',fontFamily:'Space Grotesk'}}>
+                {lang==='ar'?'⚠ بعض مباريات دور 32 لم تُحدَّد بعد':'⚠ Some R32 slots still TBD'}
+              </div>
+            )}
             {stageMatches.map(m=>(
               <div key={m.id} className="match-card p-3">
                 <div className="flex items-center justify-between gap-2">

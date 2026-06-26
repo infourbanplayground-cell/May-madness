@@ -855,8 +855,36 @@ app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
       'UPDATE wc_matches SET settled=false, result=null, home_score=null, away_score=null WHERE id=$1',
       [matchId]
     );
+    // Reset next-round bracket slot back to TBD when a KO result is undone
+    const prog = BRACKET_NEXT[matchId];
+    if (prog) {
+      if (prog.slot === 'home') {
+        await pool.query("UPDATE wc_matches SET home_team='TBD',home_flag='🏳️' WHERE id=$1", [prog.nextId]);
+      } else {
+        await pool.query("UPDATE wc_matches SET away_team='TBD',away_flag='🏳️' WHERE id=$1", [prog.nextId]);
+      }
+      if (prog.loserNextId) {
+        if (prog.loserSlot === 'home') {
+          await pool.query("UPDATE wc_matches SET home_team='TBD',home_flag='🏳️' WHERE id=$1", [prog.loserNextId]);
+        } else {
+          await pool.query("UPDATE wc_matches SET away_team='TBD',away_flag='🏳️' WHERE id=$1", [prog.loserNextId]);
+        }
+      }
+    }
     res.json({ ok: true });
   } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Manual R32 bracket seeding (admin) ───────────────────────────────────────
+app.post('/wc/admin/seed-r32', adminAuth, async (req, res) => {
+  try {
+    const result = await seedR32();
+    if (!result.ok) return res.status(400).json({ error: `Incomplete: ${result.incomplete.join(', ')}` });
+    res.json(result);
+  } catch (e) {
+    console.error(e);
     res.status(500).json({ error: e.message });
   }
 });
@@ -930,6 +958,107 @@ function fetchJSON(url, headers = {}) {
     req.on('error', reject);
     req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
   });
+}
+
+// ── Group standings helper ────────────────────────────────────────────────────
+function computeGroupStandings(matches) {
+  const t = {};
+  for (const m of matches) {
+    if (!m.settled) continue;
+    if (!t[m.home_team]) t[m.home_team] = { name: m.home_team, flag: m.home_flag, pts: 0, gf: 0, ga: 0 };
+    if (!t[m.away_team]) t[m.away_team] = { name: m.away_team, flag: m.away_flag, pts: 0, gf: 0, ga: 0 };
+    const hs = +m.home_score, as_ = +m.away_score;
+    t[m.home_team].gf += hs; t[m.home_team].ga += as_;
+    t[m.away_team].gf += as_; t[m.away_team].ga += hs;
+    if (hs > as_) t[m.home_team].pts += 3;
+    else if (hs === as_) { t[m.home_team].pts++; t[m.away_team].pts++; }
+    else t[m.away_team].pts += 3;
+  }
+  return Object.values(t).sort((a, b) =>
+    (b.pts - a.pts) || ((b.gf - b.ga) - (a.gf - a.ga)) || (b.gf - a.gf)
+  );
+}
+
+// ── R32 bracket seeding (WC2026 official bracket) ────────────────────────────
+// Seed codes: 'A1'=Group A winner, 'B2'=Group B runner-up, '3rd1'=best 3rd place etc.
+const R32_BRACKET = [
+  {id:'R32_1',  home:'A1',   away:'B2'   },
+  {id:'R32_2',  home:'B1',   away:'A2'   },
+  {id:'R32_3',  home:'C1',   away:'D2'   },
+  {id:'R32_4',  home:'D1',   away:'C2'   },
+  {id:'R32_5',  home:'E1',   away:'F2'   },
+  {id:'R32_6',  home:'F1',   away:'E2'   },
+  {id:'R32_7',  home:'G1',   away:'H2'   },
+  {id:'R32_8',  home:'H1',   away:'G2'   },
+  {id:'R32_9',  home:'I1',   away:'J2'   },
+  {id:'R32_10', home:'J1',   away:'I2'   },
+  {id:'R32_11', home:'K1',   away:'L2'   },
+  {id:'R32_12', home:'L1',   away:'K2'   },
+  {id:'R32_13', home:'3rd1', away:'3rd8' },
+  {id:'R32_14', home:'3rd2', away:'3rd7' },
+  {id:'R32_15', home:'3rd3', away:'3rd6' },
+  {id:'R32_16', home:'3rd4', away:'3rd5' },
+];
+
+// ── Bracket winner progression table ─────────────────────────────────────────
+const BRACKET_NEXT = {
+  R32_1:  {nextId:'R16_1', slot:'home'},   R32_2:  {nextId:'R16_1', slot:'away'},
+  R32_3:  {nextId:'R16_2', slot:'home'},   R32_4:  {nextId:'R16_2', slot:'away'},
+  R32_5:  {nextId:'R16_3', slot:'home'},   R32_6:  {nextId:'R16_3', slot:'away'},
+  R32_7:  {nextId:'R16_4', slot:'home'},   R32_8:  {nextId:'R16_4', slot:'away'},
+  R32_9:  {nextId:'R16_5', slot:'home'},   R32_10: {nextId:'R16_5', slot:'away'},
+  R32_11: {nextId:'R16_6', slot:'home'},   R32_12: {nextId:'R16_6', slot:'away'},
+  R32_13: {nextId:'R16_7', slot:'home'},   R32_14: {nextId:'R16_7', slot:'away'},
+  R32_15: {nextId:'R16_8', slot:'home'},   R32_16: {nextId:'R16_8', slot:'away'},
+  R16_1:  {nextId:'QF1',   slot:'home'},   R16_2:  {nextId:'QF1',   slot:'away'},
+  R16_3:  {nextId:'QF2',   slot:'home'},   R16_4:  {nextId:'QF2',   slot:'away'},
+  R16_5:  {nextId:'QF3',   slot:'home'},   R16_6:  {nextId:'QF3',   slot:'away'},
+  R16_7:  {nextId:'QF4',   slot:'home'},   R16_8:  {nextId:'QF4',   slot:'away'},
+  QF1:    {nextId:'SF1',   slot:'home'},   QF2:    {nextId:'SF1',   slot:'away'},
+  QF3:    {nextId:'SF2',   slot:'home'},   QF4:    {nextId:'SF2',   slot:'away'},
+  SF1:    {nextId:'FINAL', slot:'home', loserNextId:'3RD', loserSlot:'home'},
+  SF2:    {nextId:'FINAL', slot:'away', loserNextId:'3RD', loserSlot:'away'},
+};
+
+async function seedR32() {
+  const { rows: groupMatches } = await pool.query("SELECT * FROM wc_matches WHERE stage='group'");
+  const groups = {};
+  for (const m of groupMatches) {
+    const letter = m.id[1]; // 'GA1' → 'A'
+    if (!groups[letter]) groups[letter] = [];
+    groups[letter].push(m);
+  }
+  const incomplete = Object.entries(groups)
+    .filter(([, ms]) => ms.some(m => !m.settled))
+    .map(([l]) => `Group ${l}`);
+  if (incomplete.length) return { ok: false, incomplete };
+
+  const standings = {};
+  for (const [letter, ms] of Object.entries(groups))
+    standings[letter] = computeGroupStandings(ms);
+
+  const thirds = Object.entries(standings)
+    .map(([g, s]) => ({ ...s[2], group: g }))
+    .sort((a, b) => (b.pts - a.pts) || ((b.gf - b.ga) - (a.gf - a.ga)) || (b.gf - a.gf));
+
+  const seedMap = {};
+  for (const [letter, s] of Object.entries(standings)) {
+    seedMap[`${letter}1`] = s[0];
+    seedMap[`${letter}2`] = s[1];
+  }
+  thirds.slice(0, 8).forEach((t, i) => { seedMap[`3rd${i + 1}`] = t; });
+
+  const seeded = [];
+  for (const slot of R32_BRACKET) {
+    const home = seedMap[slot.home], away = seedMap[slot.away];
+    if (!home || !away) continue;
+    await pool.query(
+      'UPDATE wc_matches SET home_team=$1,away_team=$2,home_flag=$3,away_flag=$4 WHERE id=$5',
+      [home.name, away.name, home.flag, away.flag, slot.id]
+    );
+    seeded.push({ match: slot.id, home: home.name, away: away.name });
+  }
+  return { ok: true, seeded };
 }
 
 // ── KO market settlement helper ───────────────────────────────────────────────
@@ -1074,6 +1203,43 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
     await pool.query('UPDATE wc_bet_builders SET settled=true, payout=$1 WHERE id=$2', [payout, b.id]);
     if (payout > 0) {
       await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [payout, b.player_id]);
+    }
+  }
+
+  // ── Auto-advance KO bracket winner to next round ──────────────────────────
+  const prog = BRACKET_NEXT[matchId];
+  if (prog) {
+    const winner = homeScore > awayScore ? match.home_team : match.away_team;
+    const winnerFlag = homeScore > awayScore ? match.home_flag : match.away_flag;
+    if (prog.slot === 'home') {
+      await pool.query('UPDATE wc_matches SET home_team=$1,home_flag=$2 WHERE id=$3', [winner, winnerFlag, prog.nextId]);
+    } else {
+      await pool.query('UPDATE wc_matches SET away_team=$1,away_flag=$2 WHERE id=$3', [winner, winnerFlag, prog.nextId]);
+    }
+    if (prog.loserNextId) {
+      const loser = homeScore > awayScore ? match.away_team : match.home_team;
+      const loserFlag = homeScore > awayScore ? match.away_flag : match.home_flag;
+      if (prog.loserSlot === 'home') {
+        await pool.query('UPDATE wc_matches SET home_team=$1,home_flag=$2 WHERE id=$3', [loser, loserFlag, prog.loserNextId]);
+      } else {
+        await pool.query('UPDATE wc_matches SET away_team=$1,away_flag=$2 WHERE id=$3', [loser, loserFlag, prog.loserNextId]);
+      }
+    }
+  }
+
+  // ── Auto-seed R32 when all group matches are complete ─────────────────────
+  if (match.stage === 'group') {
+    const { rows: [{ cnt }] } = await pool.query(
+      "SELECT COUNT(*) AS cnt FROM wc_matches WHERE stage='group' AND NOT settled"
+    );
+    if (parseInt(cnt) === 0) {
+      const { rows: [{ tbd }] } = await pool.query(
+        "SELECT COUNT(*) AS tbd FROM wc_matches WHERE stage='r32' AND home_team='TBD'"
+      );
+      if (parseInt(tbd) > 0) {
+        const sr = await seedR32();
+        console.log('[bracket] All group matches settled — R32 auto-seeded:', sr.seeded?.length, 'matches');
+      }
     }
   }
 
