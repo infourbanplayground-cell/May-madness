@@ -895,6 +895,12 @@ app.post('/wc/admin/apply-missed-penalties', adminAuth, async (req, res) => {
     let applied = 0;
     for (const m of settledMatches) {
       for (const { id: pid } of allPlayers) {
+        // Only charge players who did NOT place a real bet on this match
+        const { rows: alreadyBet } = await pool.query(
+          "SELECT id FROM wc_predictions WHERE player_id=$1 AND match_id=$2 AND prediction!='MISS'",
+          [pid, m.id]
+        );
+        if (alreadyBet.length > 0) continue;
         const r = await pool.query(
           `INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked,payout,settled)
            VALUES ($1,$2,'MISS',$3,1.0,0,true)
@@ -1242,11 +1248,17 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
     }
   }
 
-  // ── Missed-bet penalty: charge all players who skipped this group match ──────
+  // ── Missed-bet penalty: charge players who skipped this group match ──────────
   if (match.stage === 'group') {
     const missStake = parseFloat(await getSetting('stake_per_match', '100'));
     const { rows: allPlayers } = await pool.query('SELECT id FROM wc_players');
     for (const { id: pid } of allPlayers) {
+      // Only charge players who did NOT place a real bet on this match
+      const { rows: alreadyBet } = await pool.query(
+        "SELECT id FROM wc_predictions WHERE player_id=$1 AND match_id=$2 AND prediction!='MISS'",
+        [pid, matchId]
+      );
+      if (alreadyBet.length > 0) continue;
       const res = await pool.query(
         `INSERT INTO wc_predictions (player_id,match_id,prediction,stake,odds_locked,payout,settled)
          VALUES ($1,$2,'MISS',$3,1.0,0,true)
