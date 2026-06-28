@@ -218,6 +218,7 @@ async function initDB() {
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_under25 NUMERIC(6,3);
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_home NUMERIC(6,3);
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_away NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS qualifier TEXT;
     ALTER TABLE wc_predictions DROP CONSTRAINT IF EXISTS wc_predictions_player_id_match_id_key;
     DO $$ BEGIN
       ALTER TABLE wc_predictions ADD CONSTRAINT wc_predictions_player_match_pred_key UNIQUE (player_id, match_id, prediction);
@@ -413,7 +414,7 @@ app.get('/wc/me', auth, async (req, res) => {
 app.post('/wc/predict', auth, async (req, res) => {
   try {
     const { matchId, prediction, stake: requestedStake } = req.body;
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
     const isKOMarket = KO_MARKETS.includes(prediction) || prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:');
     const validStandard = ['1','X','2','1X','X2','12'].includes(prediction);
     if (!validStandard && !isKOMarket) return res.status(400).json({ error: 'Invalid prediction' });
@@ -448,6 +449,8 @@ app.post('/wc/predict', auth, async (req, res) => {
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
       'DNB1': parseFloat(match.odds_dnb_home) || bh,
       'DNB2': parseFloat(match.odds_dnb_away) || ba,
+      'QUALIFY1': bh,
+      'QUALIFY2': ba,
     };
     let oddsLocked = oddsAtBet[prediction];
     if (oddsLocked == null && (prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:'))) {
@@ -531,7 +534,7 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
     const stake = requestedStake ? Math.min(500, Math.max(1, parseFloat(requestedStake))) : defaultStake;
 
     // Validate predictions and get odds for each leg
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
     const validStandard = ['1','X','2','1X','X2','12'];
     const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
     const baseOddsMap = {
@@ -545,6 +548,8 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
       'DNB1': parseFloat(match.odds_dnb_home) || bh,
       'DNB2': parseFloat(match.odds_dnb_away) || ba,
+      'QUALIFY1': bh,
+      'QUALIFY2': ba,
     };
 
     // Market group conflict check: can't combine selections from the same market
@@ -553,6 +558,7 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
       if (['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
       if (['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
       if (['DNB1','DNB2'].includes(pred)) return 'dnb';
+      if (['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
       return pred; // player scorer bets are unique per prediction string
     };
     const seenGroups = new Set();
@@ -697,9 +703,9 @@ function adminAuth(req, res, next) {
 // Set match result & settle predictions
 app.post('/wc/admin/result', adminAuth, async (req, res) => {
   try {
-    const { matchId, homeScore, awayScore, homeTeam, awayTeam } = req.body;
+    const { matchId, homeScore, awayScore, homeTeam, awayTeam, qualifier } = req.body;
     if (homeScore == null || awayScore == null) return res.status(400).json({ error: 'Scores required' });
-    const info = await settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam);
+    const info = await settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam, qualifier || null);
     res.json({ ok: true, ...info });
   } catch (e) {
     console.error(e);
@@ -859,7 +865,7 @@ app.delete('/wc/admin/result/:matchId', adminAuth, async (req, res) => {
     }
 
     await pool.query(
-      'UPDATE wc_matches SET settled=false, result=null, home_score=null, away_score=null WHERE id=$1',
+      'UPDATE wc_matches SET settled=false, result=null, home_score=null, away_score=null, qualifier=null WHERE id=$1',
       [matchId]
     );
     // Reset next-round bracket slot back to TBD when a KO result is undone
@@ -1104,7 +1110,7 @@ async function seedR32() {
 }
 
 // ── KO market settlement helper ───────────────────────────────────────────────
-function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = []) {
+function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = [], qualifier = null) {
   const total = homeScore + awayScore;
   const homeScoredAny = homeScore > 0;
   const awayScoredAny = awayScore > 0;
@@ -1122,6 +1128,12 @@ function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = []) 
     if (homeScore === awayScore) return { won: false, refund: true };
     return { won: false, refund: false };
   }
+  if (prediction === 'QUALIFY1' || prediction === 'QUALIFY2') {
+    // Effective qualifier: explicit admin value OR inferred from 90-min result
+    const eff = qualifier || (homeScore > awayScore ? 'home' : awayScore > homeScore ? 'away' : null);
+    if (eff === null) return null; // draw at 90 mins, qualifier not yet set — leave unsettled
+    return { won: prediction === 'QUALIFY1' ? eff === 'home' : eff === 'away', refund: false };
+  }
   if (prediction.startsWith('ANYTIME:')) {
     const name = prediction.slice(8).toLowerCase().trim();
     return { won: goalScorers.some(g => !g.is_own_goal && g.scorer_name.toLowerCase().trim() === name), refund: false };
@@ -1135,24 +1147,27 @@ function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = []) 
 }
 
 // Unified settlement helper — returns {won, refund} for any prediction type
-function settleAnyPrediction(prediction, homeScore, awayScore, result, goalScorers = []) {
+function settleAnyPrediction(prediction, homeScore, awayScore, result, goalScorers = [], qualifier = null) {
   if (prediction === '1')  return { won: result === '1', refund: false };
   if (prediction === 'X')  return { won: result === 'X', refund: false };
   if (prediction === '2')  return { won: result === '2', refund: false };
   if (prediction === '1X') return { won: result === '1' || result === 'X', refund: false };
   if (prediction === 'X2') return { won: result === 'X' || result === '2', refund: false };
   if (prediction === '12') return { won: result === '1' || result === '2', refund: false };
-  return settleKOPrediction(prediction, homeScore, awayScore, goalScorers);
+  return settleKOPrediction(prediction, homeScore, awayScore, goalScorers, qualifier);
 }
 
 // Extracted settle logic (shared by admin route + auto-fetch)
-async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam) {
+async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam, qualifier = null) {
   const result = homeScore > awayScore ? '1' : awayScore > homeScore ? '2' : 'X';
+  // Effective qualifier: explicit value, or infer from 90-min result
+  const effectiveQualifier = qualifier || (homeScore > awayScore ? 'home' : awayScore > homeScore ? 'away' : null);
   await pool.query(
     `UPDATE wc_matches SET home_score=$1, away_score=$2, result=$3, settled=true,
-     home_team=COALESCE($4, home_team), away_team=COALESCE($5, away_team)
-     WHERE id=$6`,
-    [homeScore, awayScore, result, homeTeam || null, awayTeam || null, matchId]
+     home_team=COALESCE($4, home_team), away_team=COALESCE($5, away_team),
+     qualifier=COALESCE($6, qualifier)
+     WHERE id=$7`,
+    [homeScore, awayScore, result, homeTeam || null, awayTeam || null, effectiveQualifier, matchId]
   );
   const { rows: mRows } = await pool.query('SELECT * FROM wc_matches WHERE id=$1', [matchId]);
   const match = mRows[0];
@@ -1174,12 +1189,12 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
   const { rows: preds } = await pool.query(
     'SELECT * FROM wc_predictions WHERE match_id=$1 AND settled=false', [matchId]
   );
-  const KO_MARKETS_SET = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2'];
+  const KO_MARKETS_SET = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
   const { rows: goals } = await pool.query('SELECT * FROM wc_match_goals WHERE match_id=$1 ORDER BY minute ASC', [matchId]);
   for (const p of preds) {
     const isPKOMarket = KO_MARKETS_SET.includes(p.prediction) || p.prediction.startsWith('ANYTIME:') || p.prediction.startsWith('FIRST:');
     if (isPKOMarket) {
-      const koResult = settleKOPrediction(p.prediction, homeScore, awayScore, goals);
+      const koResult = settleKOPrediction(p.prediction, homeScore, awayScore, goals, effectiveQualifier);
       if (!koResult) continue;
       const betOdds = parseFloat(p.odds_locked) || 1.85;
       let payout;
@@ -1215,7 +1230,7 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
     let anyLoss = false;
     const legUpdates = [];
     for (const leg of legs) {
-      const r = settleAnyPrediction(leg.prediction, homeScore, awayScore, result, goals);
+      const r = settleAnyPrediction(leg.prediction, homeScore, awayScore, result, goals, effectiveQualifier);
       if (!r) { allWon = false; anyLoss = true; legUpdates.push({ id: leg.id, res: 'unsettled' }); continue; }
       if (r.refund) { anyRefund = true; legUpdates.push({ id: leg.id, res: 'refund' }); }
       else if (r.won) { legUpdates.push({ id: leg.id, res: 'won' }); }

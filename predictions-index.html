@@ -937,7 +937,8 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
   const allOdds={'1':h,'X':d,'2':a,'1X':parseFloat(match.odds_1x)||(h*d)/(h+d),'X2':parseFloat(match.odds_x2)||(d*a)/(d+a),
     'BTTS-Y':parseFloat(match.odds_btts_yes),'BTTS-N':parseFloat(match.odds_btts_no),
     'OVER2.5':parseFloat(match.odds_over25),'UNDER2.5':parseFloat(match.odds_under25),
-    'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away)};
+    'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away),
+    'QUALIFY1':h,'QUALIFY2':a};
   const odds=extraOdds||allOdds[pick]||h;
   const bal=parseFloat(balance);
   const maxStake=Math.min(500,bal);
@@ -956,6 +957,8 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
   else if(pick==='UNDER2.5'){team=null;pickLabel='Under 2.5 Goals';pickColor='var(--red)';pickBadge='GOALS';}
   else if(pick==='DNB1'){team=match.home_team;pickLabel=`Draw No Bet — ${match.home_team}`;pickColor='var(--blue)';pickBadge='DNB';}
   else if(pick==='DNB2'){team=match.away_team;pickLabel=`Draw No Bet — ${match.away_team}`;pickColor='var(--or)';pickBadge='DNB';}
+  else if(pick==='QUALIFY1'){team=match.home_team;pickLabel=`${match.home_team} to Qualify`;pickColor='var(--green)';pickBadge='TO QUALIFY';}
+  else if(pick==='QUALIFY2'){team=match.away_team;pickLabel=`${match.away_team} to Qualify`;pickColor='var(--green)';pickBadge='TO QUALIFY';}
   else if(pick.startsWith('ANYTIME:')){team=null;pickLabel=pick.slice(8);pickColor='var(--gold)';pickBadge='ANYTIME SCORER';}
   else if(pick.startsWith('FIRST:')){team=null;pickLabel=pick.slice(6);pickColor='var(--gold)';pickBadge='FIRST SCORER';}
   else{team=null;pickLabel=pick;pickColor='var(--gold)';}
@@ -1164,7 +1167,7 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
   const BCHIPS=[10,25,50,100,200,500];
   function bGetOdds(pred){
     const bh=parseFloat(match.home_odds),bd=parseFloat(match.draw_odds),ba=parseFloat(match.away_odds);
-    if(pred==='1') return bh; if(pred==='X') return bd; if(pred==='2') return ba;
+    if(pred==='1') return bh; if(pred==='X') return bd; if(pred==='2') return ba; if(pred==='QUALIFY1') return bh; if(pred==='QUALIFY2') return ba;
     if(pred==='1X') return parseFloat(match.odds_1x)||(bh*bd)/(bh+bd);
     if(pred==='X2') return parseFloat(match.odds_x2)||(bd*ba)/(bd+ba);
     if(pred==='BTTS-Y') return parseFloat(match.odds_btts_yes);
@@ -1186,6 +1189,7 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
     if(['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
     if(['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
     if(['DNB1','DNB2'].includes(pred)) return 'dnb';
+    if(['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
     return pred;
   }
   function bToggleLeg(pred){
@@ -1202,6 +1206,8 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
     if(pred==='BTTS-N') return 'BTTS No'; if(pred==='OVER2.5') return 'Over 2.5';
     if(pred==='UNDER2.5') return 'Under 2.5'; if(pred==='DNB1') return 'DNB '+match.home_team;
     if(pred==='DNB2') return 'DNB '+match.away_team;
+    if(pred==='QUALIFY1') return match.home_team+' to Qualify';
+    if(pred==='QUALIFY2') return match.away_team+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
     if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
     return pred;
@@ -1399,6 +1405,26 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
               ))}
             </div>
           )}
+          {/* To Qualify row — KO only, settles on who actually advances (incl. ET/pens) */}
+          {!isTBD&&(
+            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
+              {[
+                {type:'QUALIFY1',label:'Qualify',desc:match.home_team,odds:parseFloat(match.home_odds),team:match.home_team},
+                {type:'QUALIFY2',label:'Qualify',desc:match.away_team,odds:parseFloat(match.away_odds),team:match.away_team},
+              ].map(({type,label,desc,odds,team})=>(
+                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
+                  disabled={!canPredict||loading}
+                  onClick={()=>canPredict&&onPickClick(match,type)}
+                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
+                    <div style={{display:'flex',alignItems:'center',gap:3}}><Flag team={team} size={12}/><span style={{fontSize:9,color:'var(--muted)',fontWeight:600,maxWidth:80,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{desc}</span></div>
+                  </div>
+                  <span className="odds-val-dc">{odds.toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {/* BTTS row */}
           {match.odds_btts_yes&&(
             <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
@@ -1533,6 +1559,11 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
                 </div>
               )}
               <div style={{marginBottom:8}}>
+                <div style={bSecHdr}>{lang==='ar'?'من يتأهل؟':'To Qualify'}</div>
+                <BlLegBtn pred="QUALIFY1" label={`${match.home_team} · Qualify`}/>
+                <BlLegBtn pred="QUALIFY2" label={`${match.away_team} · Qualify`}/>
+              </div>
+              <div style={{marginBottom:8}}>
                 <div style={bSecHdr}>{lang==='ar'?'هداف الأهداف':'Goal Scorers'}</div>
                 {!blScorers&&(
                   <button onClick={loadBlScorers} disabled={blLoadingScorers}
@@ -1633,6 +1664,8 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(pred==='UNDER2.5') return parseFloat(match.odds_under25);
     if(pred==='DNB1') return parseFloat(match.odds_dnb_home)||bh;
     if(pred==='DNB2') return parseFloat(match.odds_dnb_away)||ba;
+    if(pred==='QUALIFY1') return bh;
+    if(pred==='QUALIFY2') return ba;
     if(pred.startsWith('ANYTIME:')||pred.startsWith('FIRST:')){
       const pn=pred.split(':').slice(1).join(':');
       const mkt=pred.startsWith('ANYTIME:')?'anytime':'first';
@@ -1646,6 +1679,7 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
     if(['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
     if(['DNB1','DNB2'].includes(pred)) return 'dnb';
+    if(['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
     return pred;
   }
   function toggleLeg(pred){
@@ -1675,6 +1709,8 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(pred==='UNDER2.5') return 'Under 2.5';
     if(pred==='DNB1') return 'DNB '+match.home_team;
     if(pred==='DNB2') return 'DNB '+match.away_team;
+    if(pred==='QUALIFY1') return match.home_team+' to Qualify';
+    if(pred==='QUALIFY2') return match.away_team+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
     if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
     return pred;
@@ -1749,6 +1785,11 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
               <LegBtn pred="DNB2" label={`DNB · ${match.away_team}`}/>
             </div>
           )}
+          <div>
+            <div style={secHdr}>{lang==='ar'?'من يتأهل؟':'To Qualify'}</div>
+            <LegBtn pred="QUALIFY1" label={`${match.home_team} to Qualify`}/>
+            <LegBtn pred="QUALIFY2" label={`${match.away_team} to Qualify`}/>
+          </div>
           <div>
             <div style={secHdr}>{lang==='ar'?'هداف الأهداف':'Goal Scorers'}</div>
             {!scorers&&(
@@ -1939,6 +1980,8 @@ function MyBetsTab({matches,predictions,builders,lang}){
     if(pred==='UNDER2.5') return 'Under 2.5';
     if(pred==='DNB1') return 'DNB '+(m?.home_team||'Home');
     if(pred==='DNB2') return 'DNB '+(m?.away_team||'Away');
+    if(pred==='QUALIFY1') return (m?.home_team||'Home')+' to Qualify';
+    if(pred==='QUALIFY2') return (m?.away_team||'Away')+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
     if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
     return pred;
@@ -2235,7 +2278,7 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   const T=TX[lang];
   const [tab,setTab]=useState('results');
   const [selectedMatch,setSelectedMatch]=useState(null);
-  const [hs,setHs]=useState('');const [as_,setAs]=useState('');
+  const [hs,setHs]=useState('');const [as_,setAs]=useState('');const [qualifier,setQualifier]=useState('');
   const [saving,setSaving]=useState(false);
   const [editOdds,setEditOdds]=useState(null);
   const [oh,setOh]=useState('');const [od,setOd]=useState('');const [oa,setOa]=useState('');
@@ -2269,7 +2312,7 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
     }catch(e){showToast(e.message,'error');}
   }
 
-  async function submitResult(){if(!selectedMatch||hs===''||as_==='')return;setSaving(true);try{await apiFetch('/wc/admin/result',{method:'POST',body:JSON.stringify({matchId:selectedMatch.id,homeScore:parseInt(hs),awayScore:parseInt(as_)})});showToast(T.toastResult,'success');setSelectedMatch(null);setHs('');setAs('');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
+  async function submitResult(){if(!selectedMatch||hs===''||as_==='')return;setSaving(true);try{const body={matchId:selectedMatch.id,homeScore:parseInt(hs),awayScore:parseInt(as_)};if(selectedMatch.stage!=='group'&&qualifier)body.qualifier=qualifier;await apiFetch('/wc/admin/result',{method:'POST',body:JSON.stringify(body)});showToast(T.toastResult,'success');setSelectedMatch(null);setHs('');setAs('');setQualifier('');onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function submitOdds(matchId){setSaving(true);try{await apiFetch(`/wc/admin/match/${matchId}`,{method:'PUT',body:JSON.stringify({homeOdds:parseFloat(oh)||undefined,drawOdds:parseFloat(od)||undefined,awayOdds:parseFloat(oa)||undefined,odds1X:parseFloat(o1x)||undefined,oddsX2:parseFloat(ox2)||undefined,oddsBttsYes:parseFloat(oby)||undefined,oddsBttsNo:parseFloat(obn)||undefined,oddsOver25:parseFloat(oov)||undefined,oddsUnder25:parseFloat(oun)||undefined,oddsDnbHome:parseFloat(odnbh)||undefined,oddsDnbAway:parseFloat(odnba)||undefined})});showToast(T.toastOdds,'success');setEditOdds(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function saveSettings(){setSaving(true);try{await apiFetch('/wc/admin/settings',{method:'PUT',body:JSON.stringify({stake_per_match:stakeInput,starting_balance:balInput})});showToast(T.toastSettings,'success');}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function savePlayer(){if(!editPlayer)return;setSaving(true);try{await apiFetch(`/wc/admin/player/${editPlayer.id}`,{method:'PUT',body:JSON.stringify({balance:parseFloat(epBal),name:epName||undefined})});showToast(T.toastPlayer,'success');setEditPlayer(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
@@ -2339,7 +2382,7 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                   <div className="flex items-center gap-2 shrink-0">
                     {m.settled&&<span className="score-display" style={{fontSize:15}}>{m.home_score}–{m.away_score}</span>}
                     {m.settled&&<button onClick={()=>undoResult(m.id)} style={{fontSize:10,color:'var(--muted)',background:'rgba(255,255,255,0.05)',border:'1px solid var(--border2)',borderRadius:8,padding:'3px 8px'}}>{T.undoBtn}</button>}
-                    {!m.settled&&<button onClick={()=>{setSelectedMatch(m===selectedMatch?null:m);setHs('');setAs('');}} style={{fontSize:10,background:selectedMatch?.id===m.id?'rgba(255,255,255,0.06)':'var(--gold)',color:selectedMatch?.id===m.id?'var(--muted)':'#0A0600',border:'none',borderRadius:10,padding:'5px 12px',fontWeight:800,fontFamily:'Space Grotesk'}}>{selectedMatch?.id===m.id?T.cancelEdit:T.enterResult}</button>}
+                    {!m.settled&&<button onClick={()=>{setSelectedMatch(m===selectedMatch?null:m);setHs('');setAs('');setQualifier('');}} style={{fontSize:10,background:selectedMatch?.id===m.id?'rgba(255,255,255,0.06)':'var(--gold)',color:selectedMatch?.id===m.id?'var(--muted)':'#0A0600',border:'none',borderRadius:10,padding:'5px 12px',fontWeight:800,fontFamily:'Space Grotesk'}}>{selectedMatch?.id===m.id?T.cancelEdit:T.enterResult}</button>}
                   </div>
                 </div>
                 {/* Bets toggle button */}
@@ -2375,11 +2418,25 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                   </div>
                 )}
                 {selectedMatch?.id===m.id&&(
-                  <div className="mt-3 flex gap-2 items-center" style={{direction:'ltr'}}>
-                    <input className="admin-inp w-16 text-center" placeholder="0" value={hs} onChange={e=>setHs(e.target.value)} type="number" min="0"/>
-                    <span style={{color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700}}>–</span>
-                    <input className="admin-inp w-16 text-center" placeholder="0" value={as_} onChange={e=>setAs(e.target.value)} type="number" min="0"/>
-                    <button onClick={submitResult} disabled={saving||hs===''||as_===''} style={{background:'var(--green)',color:'#002916',border:'none',borderRadius:10,padding:'7px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk'}}>{T.saveBtn}</button>
+                  <div className="mt-3" style={{direction:'ltr'}}>
+                    <div className="flex gap-2 items-center">
+                      <input className="admin-inp w-16 text-center" placeholder="0" value={hs} onChange={e=>setHs(e.target.value)} type="number" min="0"/>
+                      <span style={{color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700}}>–</span>
+                      <input className="admin-inp w-16 text-center" placeholder="0" value={as_} onChange={e=>setAs(e.target.value)} type="number" min="0"/>
+                      <button onClick={submitResult} disabled={saving||hs===''||as_===''} style={{background:'var(--green)',color:'#002916',border:'none',borderRadius:10,padding:'7px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk'}}>{T.saveBtn}</button>
+                    </div>
+                    {m.stage!=='group'&&(
+                      <div className="flex gap-2 mt-2 items-center">
+                        <span style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,whiteSpace:'nowrap'}}>Who Qualified?</span>
+                        {[['home',m.home_team],['away',m.away_team]].map(([v,label])=>(
+                          <button key={v} onClick={()=>setQualifier(qualifier===v?'':v)}
+                            style={{padding:'4px 10px',borderRadius:8,fontSize:10,fontWeight:800,fontFamily:'Space Grotesk',border:'1px solid',borderColor:qualifier===v?'var(--green)':'var(--border2)',background:qualifier===v?'rgba(0,201,123,0.15)':'transparent',color:qualifier===v?'var(--green)':'var(--muted)',transition:'all .15s'}}>
+                            {label}
+                          </button>
+                        ))}
+                        <span style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',opacity:.7}}>(for draw/ET/pens)</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
