@@ -647,6 +647,28 @@ app.get('/wc/my-builders', auth, async (req, res) => {
   }
 });
 
+// Cancel a pending bet builder (player, before kickoff deadline)
+app.delete('/wc/bet-builder/:id', auth, async (req, res) => {
+  try {
+    const { rows: bRows } = await pool.query(
+      'SELECT b.*, m.kickoff FROM wc_bet_builders b JOIN wc_matches m ON m.id=b.match_id WHERE b.id=$1 AND b.player_id=$2',
+      [req.params.id, req.playerId]
+    );
+    if (!bRows.length) return res.status(404).json({ error: 'Builder not found' });
+    const b = bRows[0];
+    if (b.settled) return res.status(400).json({ error: 'Already settled' });
+    const deadline = new Date(b.kickoff).getTime() - 5 * 60 * 1000;
+    if (Date.now() > deadline) return res.status(400).json({ error: 'Deadline passed — cannot cancel' });
+    await pool.query('DELETE FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]);
+    await pool.query('DELETE FROM wc_bet_builders WHERE id=$1', [b.id]);
+    await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [b.stake, req.playerId]);
+    const { rows: updated } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [req.playerId]);
+    res.json({ ok: true, newBalance: updated[0].balance });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Leaderboard
 app.get('/wc/leaderboard', async (req, res) => {
   try {
