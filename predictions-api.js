@@ -414,7 +414,7 @@ app.get('/wc/me', auth, async (req, res) => {
 app.post('/wc/predict', auth, async (req, res) => {
   try {
     const { matchId, prediction, stake: requestedStake } = req.body;
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2'];
     const isKOMarket = KO_MARKETS.includes(prediction) || prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:');
     const validStandard = ['1','X','2','1X','X2','12'].includes(prediction);
     if (!validStandard && !isKOMarket) return res.status(400).json({ error: 'Invalid prediction' });
@@ -449,9 +449,11 @@ app.post('/wc/predict', auth, async (req, res) => {
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
       'DNB1': parseFloat(match.odds_dnb_home) || bh,
       'DNB2': parseFloat(match.odds_dnb_away) || ba,
-      'QUALIFY1': bh,
-      'QUALIFY2': ba,
     };
+    // Qualify odds: inferred from 1X2 assuming 50/50 on ET/pens if drawn
+    const _p1=1/bh, _px=1/bd, _p2=1/ba, _tot=_p1+_px+_p2;
+    oddsAtBet['QUALIFY1'] = Math.round(100/(((_p1+0.5*_px)/_tot)))/100;
+    oddsAtBet['QUALIFY2'] = Math.round(100/(((_p2+0.5*_px)/_tot)))/100;
     let oddsLocked = oddsAtBet[prediction];
     if (oddsLocked == null && (prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:'))) {
       const market = prediction.startsWith('ANYTIME:') ? 'anytime' : 'first';
@@ -534,7 +536,7 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
     const stake = requestedStake ? Math.min(500, Math.max(1, parseFloat(requestedStake))) : defaultStake;
 
     // Validate predictions and get odds for each leg
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2'];
     const validStandard = ['1','X','2','1X','X2','12'];
     const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
     const baseOddsMap = {
@@ -548,9 +550,10 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
       'DNB1': parseFloat(match.odds_dnb_home) || bh,
       'DNB2': parseFloat(match.odds_dnb_away) || ba,
-      'QUALIFY1': bh,
-      'QUALIFY2': ba,
     };
+    const _p1b=1/bh, _pxb=1/bd, _p2b=1/ba, _totb=_p1b+_pxb+_p2b;
+    baseOddsMap['QUALIFY1'] = Math.round(100/(((_p1b+0.5*_pxb)/_totb)))/100;
+    baseOddsMap['QUALIFY2'] = Math.round(100/(((_p2b+0.5*_pxb)/_totb)))/100;
 
     // Market group conflict check: can't combine selections from the same market
     const marketGroup = pred => {

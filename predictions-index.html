@@ -937,8 +937,10 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
   const allOdds={'1':h,'X':d,'2':a,'1X':parseFloat(match.odds_1x)||(h*d)/(h+d),'X2':parseFloat(match.odds_x2)||(d*a)/(d+a),
     'BTTS-Y':parseFloat(match.odds_btts_yes),'BTTS-N':parseFloat(match.odds_btts_no),
     'OVER2.5':parseFloat(match.odds_over25),'UNDER2.5':parseFloat(match.odds_under25),
-    'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away),
-    'QUALIFY1':h,'QUALIFY2':a};
+    'DNB1':parseFloat(match.odds_dnb_home),'DNB2':parseFloat(match.odds_dnb_away)};
+  const _p1=1/h,_px=1/d,_p2=1/a,_tot=_p1+_px+_p2;
+  allOdds['QUALIFY1']=Math.round(100/((_p1+0.5*_px)/_tot))/100;
+  allOdds['QUALIFY2']=Math.round(100/((_p2+0.5*_px)/_tot))/100;
   const odds=extraOdds||allOdds[pick]||h;
   const bal=parseFloat(balance);
   const maxStake=Math.min(500,bal);
@@ -1167,7 +1169,8 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
   const BCHIPS=[10,25,50,100,200,500];
   function bGetOdds(pred){
     const bh=parseFloat(match.home_odds),bd=parseFloat(match.draw_odds),ba=parseFloat(match.away_odds);
-    if(pred==='1') return bh; if(pred==='X') return bd; if(pred==='2') return ba; if(pred==='QUALIFY1') return bh; if(pred==='QUALIFY2') return ba;
+    if(pred==='1') return bh; if(pred==='X') return bd; if(pred==='2') return ba;
+    if(pred==='QUALIFY1'||pred==='QUALIFY2'){const p1=1/bh,px=1/bd,p2=1/ba,tot=p1+px+p2;return pred==='QUALIFY1'?Math.round(100/((p1+0.5*px)/tot))/100:Math.round(100/((p2+0.5*px)/tot))/100;}
     if(pred==='1X') return parseFloat(match.odds_1x)||(bh*bd)/(bh+bd);
     if(pred==='X2') return parseFloat(match.odds_x2)||(bd*ba)/(bd+ba);
     if(pred==='BTTS-Y') return parseFloat(match.odds_btts_yes);
@@ -1385,32 +1388,17 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
               Betting opens when teams are confirmed
             </div>
           )}
-          {/* DNB row */}
-          {match.odds_dnb_home&&(
+          {/* To Qualify row — settles on who actually advances (incl. ET/pens) */}
+          {!isTBD&&(()=>{
+            const _bh=parseFloat(match.home_odds),_bd=parseFloat(match.draw_odds),_ba=parseFloat(match.away_odds);
+            const _p1=1/_bh,_px=1/_bd,_p2=1/_ba,_tot=_p1+_px+_p2;
+            const q1=Math.round(100/((_p1+0.5*_px)/_tot))/100;
+            const q2=Math.round(100/((_p2+0.5*_px)/_tot))/100;
+            return(
             <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
               {[
-                {type:'DNB1',label:'DNB',desc:match.home_team,odds:match.odds_dnb_home,team:match.home_team},
-                {type:'DNB2',label:'DNB',desc:match.away_team,odds:match.odds_dnb_away,team:match.away_team},
-              ].map(({type,label,desc,odds,team})=>(
-                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
-                  disabled={!canPredict||loading}
-                  onClick={()=>canPredict&&onPickClick(match,type)}
-                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
-                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
-                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
-                    <div style={{display:'flex',alignItems:'center',gap:3}}><Flag team={team} size={12}/><span style={{fontSize:9,color:'var(--muted)',fontWeight:600,maxWidth:80,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{desc}</span></div>
-                  </div>
-                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
-                </button>
-              ))}
-            </div>
-          )}
-          {/* To Qualify row — KO only, settles on who actually advances (incl. ET/pens) */}
-          {!isTBD&&(
-            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
-              {[
-                {type:'QUALIFY1',label:'Qualify',desc:match.home_team,odds:parseFloat(match.home_odds),team:match.home_team},
-                {type:'QUALIFY2',label:'Qualify',desc:match.away_team,odds:parseFloat(match.away_odds),team:match.away_team},
+                {type:'QUALIFY1',label:'Qualify',desc:match.home_team,odds:q1,team:match.home_team},
+                {type:'QUALIFY2',label:'Qualify',desc:match.away_team,odds:q2,team:match.away_team},
               ].map(({type,label,desc,odds,team})=>(
                 <button key={type} className={`pred-btn ko ${btnClass(type)}`}
                   disabled={!canPredict||loading}
@@ -1424,7 +1412,8 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
                 </button>
               ))}
             </div>
-          )}
+            );
+          })()}
           {/* BTTS row */}
           {match.odds_btts_yes&&(
             <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
@@ -1465,6 +1454,11 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
               ))}
             </div>
           )}
+          {/* Settlement note */}
+          <div style={{display:'flex',gap:6,marginBottom:6,direction:'ltr'}}>
+            <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',color:'var(--muted)',whiteSpace:'nowrap'}}>⏱ 1X2 · DC · BTTS · Goals — 90 min</span>
+            <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(0,201,123,0.07)',border:'1px solid rgba(0,201,123,0.2)',color:'var(--green)',whiteSpace:'nowrap'}}>🏆 To Qualify — incl. ET &amp; pens</span>
+          </div>
           {/* Goal Scorers toggle */}
           <button onClick={toggleScorers}
             style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'7px 10px',background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)',borderRadius:10,cursor:'pointer',color:'var(--muted)',marginBottom:6}}>
@@ -1549,13 +1543,6 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
                   <div style={bSecHdr}>{lang==='ar'?'أهداف':'Goals Over/Under 2.5'}</div>
                   <BlLegBtn pred="OVER2.5" label={lang==='ar'?'أكثر من 2.5':'Over 2.5'}/>
                   <BlLegBtn pred="UNDER2.5" label={lang==='ar'?'أقل من 2.5':'Under 2.5'}/>
-                </div>
-              )}
-              {(parseFloat(match.odds_dnb_home)||parseFloat(match.odds_dnb_away))&&(
-                <div style={{marginBottom:8}}>
-                  <div style={bSecHdr}>{lang==='ar'?'بدون تعادل':'Draw No Bet'}</div>
-                  <BlLegBtn pred="DNB1" label={`DNB · ${match.home_team}`}/>
-                  <BlLegBtn pred="DNB2" label={`DNB · ${match.away_team}`}/>
                 </div>
               )}
               <div style={{marginBottom:8}}>
@@ -1664,8 +1651,7 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(pred==='UNDER2.5') return parseFloat(match.odds_under25);
     if(pred==='DNB1') return parseFloat(match.odds_dnb_home)||bh;
     if(pred==='DNB2') return parseFloat(match.odds_dnb_away)||ba;
-    if(pred==='QUALIFY1') return bh;
-    if(pred==='QUALIFY2') return ba;
+    if(pred==='QUALIFY1'||pred==='QUALIFY2'){const p1=1/bh,px=1/bd,p2=1/ba,tot=p1+px+p2;return pred==='QUALIFY1'?Math.round(100/((p1+0.5*px)/tot))/100:Math.round(100/((p2+0.5*px)/tot))/100;}
     if(pred.startsWith('ANYTIME:')||pred.startsWith('FIRST:')){
       const pn=pred.split(':').slice(1).join(':');
       const mkt=pred.startsWith('ANYTIME:')?'anytime':'first';
@@ -1776,13 +1762,6 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
               <div style={secHdr}>{lang==='ar'?'أهداف Over/Under 2.5':'Goals Over/Under 2.5'}</div>
               <LegBtn pred="OVER2.5" label={lang==='ar'?'أكثر من 2.5':'Over 2.5'}/>
               <LegBtn pred="UNDER2.5" label={lang==='ar'?'أقل من 2.5':'Under 2.5'}/>
-            </div>
-          )}
-          {(parseFloat(match.odds_dnb_home)||parseFloat(match.odds_dnb_away))&&(
-            <div>
-              <div style={secHdr}>{lang==='ar'?'بدون تعادل':'Draw No Bet'}</div>
-              <LegBtn pred="DNB1" label={`DNB · ${match.home_team}`}/>
-              <LegBtn pred="DNB2" label={`DNB · ${match.away_team}`}/>
             </div>
           )}
           <div>
