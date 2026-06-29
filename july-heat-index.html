@@ -1396,13 +1396,15 @@ function PlayerPicker({ players, value, onChange, exclude = [], placeholder = "P
 function Avatar({ player, size = 40, className = "" }) {
   const initials = (player.name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const [imgErr, setImgErr] = useState(false);
+  const border = Math.max(2, Math.round(size * 0.07));
+  const commonStyle = { width: size, height: size, flexShrink: 0, border: `${border}px solid var(--ink)`, boxShadow: `${border}px ${border}px 0 var(--ink)`, borderRadius: 0 };
   if (player.photoUrl && !imgErr) {
     return <img src={player.photoUrl} alt={player.name} onError={() => setImgErr(true)}
-      className={`rounded-full object-cover shrink-0 ${className}`} style={{ width: size, height: size }} />;
+      className={`object-cover shrink-0 ${className}`} style={{ ...commonStyle }} />;
   }
   return (
-    <div className={`rounded-full flex items-center justify-center shrink-0 font-bold text-stone-100 ${className}`}
-      style={{ width: size, height: size, background: "linear-gradient(135deg,#44403c,#292524)", fontSize: size * 0.35 }}>
+    <div className={`flex items-center justify-center shrink-0 font-bold ${className}`}
+      style={{ ...commonStyle, background: "var(--ink)", color: "var(--cream)", fontSize: size * 0.35, fontFamily: "'Bangers',cursive", letterSpacing: "1px" }}>
       {initials}
     </div>
   );
@@ -3171,37 +3173,40 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
           ))}
         </div>
       )}
-      {active.length === 0 ? <Card className="p-8 text-center border-dashed"><I.trophy className="mx-auto mb-3 text-stone-600" size={32} /><div className="text-stone-300 font-semibold">Ranking locked</div><div className="text-stone-500 text-sm mt-1">Standings appear after the first match is played</div></Card>
-        : <div className="space-y-1.5">{active.map((e, i) => {
+      {active.length === 0 && mode === "season" ? <Card className="p-8 text-center border-dashed"><I.trophy className="mx-auto mb-3 text-stone-600" size={32} /><div className="text-stone-300 font-semibold">Ranking locked</div><div className="text-stone-500 text-sm mt-1">Standings appear after the first match is played</div></Card>
+        : <div className="space-y-1.5">{(mode === "lifetime" ? sorted : active).map((e, i) => {
           const pts = mode === "lifetime" ? e.lifetimePts : e.totalPts;
           const playerSeriesPts = e.player.prevSeriesPts || {};
           const legacyPrev = e.player.prevSeriesPoints || 0;
+          const played = hasPlayed(e);
           return (
             <div key={e.player.id} className="rounded-xl p-3 cursor-pointer transition-all active:scale-[0.99]"
-              style={{ background: "var(--surface)", border: `1px solid ${i < 3 ? rankColors[i] + "33" : "rgba(68,64,60,0.5)"}` }}
+              style={{ background: "var(--surface)", border: `1px solid ${i < 3 ? rankColors[i] + "33" : "rgba(68,64,60,0.5)"}`, opacity: mode === "lifetime" && !played && pts === 0 ? 0.55 : 1 }}
               onClick={() => setOpenPlayerId(e.player.id)}>
               <div className="flex items-center gap-3">
                 <div className="jh-rank" style={{background:i>=3?"rgba(240,233,216,.8)":"",color:i>=3?"rgba(11,8,20,.35)":""}}>{i+1}</div>
                 <Avatar player={e.player} size={38} />
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate" style={{ color: i === 0 ? "#FFC24B" : "#f5f5f4" }}>{e.player.name}</div>
-                  <div className="text-[10px] text-stone-500 mt-0.5 flex items-center gap-2 flex-wrap">
-                    <span>{e.stats.sessionsPlayed}sess</span>
-                    <span>·</span>
-                    <span className="text-stone-300 font-semibold">{e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W</span>
-                    {e.stats.qfReached > 0 && <><span>·</span><span>QF×{e.stats.qfReached}</span></>}
-                    {e.stats.sfReached > 0 && <><span>·</span><span>SF×{e.stats.sfReached}</span></>}
-                    {e.stats.finalsWon > 0 && <><span>·</span><span className="text-amber-400 font-semibold">🏆×{e.stats.finalsWon}</span></>}
-                    {(e.stats.finalsReached - e.stats.finalsWon) > 0 && <><span>·</span><span className="text-stone-400">🥈×{e.stats.finalsReached - e.stats.finalsWon}</span></>}
+                  <div className="font-semibold truncate" style={{ color: "var(--ink)", fontFamily: "'Bangers',cursive", fontSize: 17, letterSpacing: ".5px" }}>{e.player.name}</div>
+                  <div className="text-[10px] mt-0.5 flex items-center gap-2 flex-wrap" style={{color:"rgba(11,8,20,.5)"}}>
+                    {played ? <>
+                      <span>{e.stats.sessionsPlayed}sess</span>
+                      <span>·</span>
+                      <span style={{color:"rgba(11,8,20,.7)",fontWeight:700}}>{e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W</span>
+                      {e.stats.qfReached > 0 && <><span>·</span><span>QF×{e.stats.qfReached}</span></>}
+                      {e.stats.sfReached > 0 && <><span>·</span><span>SF×{e.stats.sfReached}</span></>}
+                      {e.stats.finalsWon > 0 && <><span>·</span><span style={{color:"var(--orange)",fontWeight:600}}>🏆×{e.stats.finalsWon}</span></>}
+                      {(e.stats.finalsReached - e.stats.finalsWon) > 0 && <><span>·</span><span>🥈×{e.stats.finalsReached - e.stats.finalsWon}</span></>}
+                    </> : <span>Not yet played</span>}
                   </div>
                   {mode === "lifetime" && seriesNames.length > 0 && (
                     <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                       {seriesNames.map(sn => {
                         const v = playerSeriesPts[sn] || 0;
-                        return <span key={sn} className="text-[9px] text-stone-500">{sn}: <span className="text-stone-400 font-mono">{v}</span></span>;
+                        return <span key={sn} style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>{sn}: <span style={{color:"rgba(11,8,20,.6)",fontFamily:"'JetBrains Mono',monospace"}}>{v}</span></span>;
                       })}
-                      {legacyPrev > 0 && <span className="text-[9px] text-stone-500">Legacy: <span className="text-stone-400 font-mono">{legacyPrev}</span></span>}
-                      <span className="text-[9px] text-stone-500">{state.seasonName}: <span className="text-blue-400 font-mono">{e.totalPts}</span></span>
+                      {legacyPrev > 0 && <span style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>Legacy: <span style={{color:"rgba(11,8,20,.6)",fontFamily:"'JetBrains Mono',monospace"}}>{legacyPrev}</span></span>}
+                      <span style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>{state.seasonName}: <span style={{color:"var(--blue)",fontFamily:"'JetBrains Mono',monospace"}}>{e.totalPts}</span></span>
                     </div>
                   )}
                 </div>
