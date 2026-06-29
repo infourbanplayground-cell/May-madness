@@ -196,7 +196,7 @@
   .bg-stone-900\/60 .text-stone-400,
   .bg-stone-900\/60 .text-stone-500,
   .bg-stone-900\/50 .text-stone-400 {
-    color: rgba(11,8,20,.5) !important;
+    color: rgba(11,8,20,.72) !important;
   }
 
   /* ── Leaderboard rows: cream + ink borders + neon shadow ── */
@@ -267,7 +267,7 @@ nav.fixed button,nav.fixed a{
   font-family:'Bangers',cursive !important;
   letter-spacing:2px !important;
   font-size:13px !important;
-  color:rgba(255,247,232,.3) !important;
+  color:rgba(255,247,232,.55) !important;
 }
 nav.fixed button[style*="color: var(--orange-br)"],
 nav.fixed button[style*="color:var(--orange-br)"]{
@@ -304,11 +304,11 @@ header.sticky{
 }
 [class*="bg-stone-9"] .text-stone-300,
 [class*="bg-stone-9"] .text-stone-400{
-  color:rgba(11,8,20,.55) !important;
+  color:rgba(11,8,20,.7) !important;
 }
 [class*="bg-stone-9"] .text-stone-500,
 [class*="bg-stone-9"] .text-stone-600{
-  color:rgba(11,8,20,.4) !important;
+  color:rgba(11,8,20,.62) !important;
 }
 
 /* ── LEADERBOARD ROWS ── */
@@ -384,7 +384,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
   box-shadow:10px 10px 0 var(--ink) !important;
 }
 .bg-stone-950 .text-stone-100,.bg-stone-950 h2{color:var(--ink) !important;}
-.bg-stone-950 .text-stone-400{color:rgba(11,8,20,.5) !important;}
+.bg-stone-950 .text-stone-400{color:rgba(11,8,20,.72) !important;}
 .bg-stone-950/95{background:rgba(240,233,216,.98) !important;}
 .bg-stone-950 .border-b{border-color:var(--ink) !important;border-width:3px !important;}
 
@@ -427,7 +427,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 [style*="background: var(--surface)"] .text-stone-200,
 [style*="background: var(--surface)"] .text-stone-100{color:var(--ink) !important;}
 [style*="background: var(--surface)"] .text-stone-400,
-[style*="background: var(--surface)"] .text-stone-500{color:rgba(11,8,20,.45) !important;}
+[style*="background: var(--surface)"] .text-stone-500{color:rgba(11,8,20,.7) !important;}
 
 /* ── HERO SECTION ── */
 .heat-grad{
@@ -627,7 +627,7 @@ body::before{
   width:56px;height:56px;flex:0 0 auto;display:grid;place-items:center;padding-top:5px;}
 .jh-srow.done .sx{background:var(--blue);}
 .jh-srow.active .sx{background:var(--red);}
-.jh-srow.upcoming .sx{background:rgba(255,255,255,.1);color:rgba(255,247,232,.35);}
+.jh-srow.upcoming .sx{background:rgba(11,8,20,.12);color:rgba(11,8,20,.4);}
 .jh-srow .sd small{display:block;font-size:10px;font-weight:900;letter-spacing:.16em;
   text-transform:uppercase;color:var(--red);}
 .jh-srow .sd b{font-family:'Bangers',cursive;font-size:26px;letter-spacing:1px;
@@ -653,14 +653,14 @@ body::before{
 .jh-rank{font-family:'Bangers',cursive;font-size:22px;width:40px;height:40px;
   display:grid;place-items:center;border:3px solid var(--ink);flex:0 0 auto;}
 .jh-lbrow.r1 .jh-rank{background:var(--yellow);color:var(--ink);}
-.jh-lbrow.r2 .jh-rank{background:rgba(200,200,200,.9);color:var(--ink);}
+.jh-lbrow.r2 .jh-rank{background:#a0a0a0;color:var(--ink);}
 .jh-lbrow.r3 .jh-rank{background:#cd7f32;color:var(--cream);}
 .jh-lbname{font-family:'Bangers',cursive;font-size:20px;letter-spacing:.5px;color:var(--ink);}
-.jh-lbsub{font-size:11px;font-weight:700;color:rgba(11,8,20,.45);margin-top:1px;}
+.jh-lbsub{font-size:11px;font-weight:700;color:rgba(11,8,20,.68);margin-top:1px;}
 .jh-pts{font-family:'Bangers',cursive;font-size:32px;-webkit-text-stroke:1.5px var(--ink);}
 .jh-lbrow.r1 .jh-pts{color:var(--orange);font-size:38px;}
-.jh-lbrow.r2 .jh-pts{color:rgba(200,200,200,.9);}
-.jh-lbrow.r3 .jh-pts{color:#cd7f32;}
+.jh-lbrow.r2 .jh-pts{color:#6e6e6e;}
+.jh-lbrow.r3 .jh-pts{color:#8B5E00;}
 
 /* page section title */
 .jh-sec-kicker{display:inline-block;background:var(--blue);color:var(--ink);
@@ -1634,7 +1634,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
           </div>
           <div style={{margin:"14px auto 18px",maxWidth:340}}>
             <div style={{display:"inline-block",background:"#FFE03D",border:"4px solid #0B0814",boxShadow:"6px 6px 0 #0B0814",padding:"14px 18px",transform:"rotate(-1.1deg)",textAlign:"left",position:"relative",zIndex:10}}>
-              <p style={{fontWeight:800,fontSize:15,lineHeight:1.35,color:"#0B0814"}}>Eight sessions, <b style={{fontWeight:900,color:"#FF2E9A"}}>Mon &amp; Wed all July</b> — points stack, partners can't repeat, only one team survives! 🔥</p>
+              <p style={{fontWeight:800,fontSize:15,lineHeight:1.35,color:"#0B0814"}}>Nine sessions, <b style={{fontWeight:900,color:"#FF2E9A"}}>Mon &amp; Wed all July</b> — points stack, partners can't repeat, only one team survives! 🔥</p>
             </div>
           </div>
           <div className="jh-chips">
@@ -1645,7 +1645,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
           </div>
           <div className="jh-pool">
             <div className="jh-burst" style={{width:130,height:130,background:"var(--orange)",color:"var(--cream)",transform:"rotate(-4deg)",filter:"drop-shadow(5px 6px 0 rgba(0,0,0,.85))"}}>
-              <div><div style={{fontWeight:900,fontSize:10,letterSpacing:".14em",textTransform:"uppercase"}}>Prize Pool</div><div style={{fontFamily:"'Bangers',cursive",fontSize:52,lineHeight:.78,WebkitTextStroke:"2px var(--ink)"}}>374</div><div style={{fontFamily:"'Bangers',cursive",fontSize:22,color:"var(--yellow)",WebkitTextStroke:"1.5px var(--ink)"}}>OMR</div></div>
+              <div><div style={{fontWeight:900,fontSize:10,letterSpacing:".14em",textTransform:"uppercase"}}>Prize Pool</div><div style={{fontFamily:"'Bangers',cursive",fontSize:52,lineHeight:.78,WebkitTextStroke:"2px var(--ink)"}}>402</div><div style={{fontFamily:"'Bangers',cursive",fontSize:22,color:"var(--yellow)",WebkitTextStroke:"1.5px var(--ink)"}}>OMR</div></div>
             </div>
             <div className="jh-pool-note">
               <div className="big">Total pot up for <em>grabs!</em></div>
@@ -1668,7 +1668,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
         ].map(({ value, label, color, shadow, border }) => (
           <div key={label} style={{ background:"var(--cream)", border:"5px solid var(--ink)", boxShadow:`6px 6px 0 ${border}`, borderRadius:0, padding:"14px 10px", textAlign:"center" }}>
             <div style={{ fontFamily:"'Bangers',cursive", fontSize:"52px", lineHeight:.8, color, WebkitTextStroke:"2px var(--ink)" }}>{value}</div>
-            <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"11px", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(11,8,20,.5)", marginTop:6 }}>{label}</div>
+            <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"11px", letterSpacing:".18em", textTransform:"uppercase", color:"rgba(11,8,20,.72)", marginTop:6 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -1707,11 +1707,11 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
       {latest ? (
         <div style={{ background:"var(--cream)", border:"5px solid var(--ink)", boxShadow:"7px 7px 0 var(--orange)", borderRadius:0, padding:"20px", cursor:"pointer" }} onClick={() => setOpenSessionId(latest.id)} onMouseEnter={e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow="9px 9px 0 var(--orange)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="7px 7px 0 var(--orange)";}}>
           <div className="flex items-center justify-between mb-2">
-            <span style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"rgba(11,8,20,.45)" }}>Latest Session</span>
+            <span style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"rgba(11,8,20,.7)" }}>Latest Session</span>
             <Pill color={latest.completed ? "green" : "orange"}>{latest.completed ? "Complete" : "Active"}</Pill>
           </div>
           <h3 style={{ fontFamily:"'Bangers',cursive", fontSize:"34px", letterSpacing:"1.5px", color:"var(--ink)", marginBottom:4 }}>{latest.name}</h3>
-          <div style={{ fontSize:"14px", fontWeight:700, color:"rgba(11,8,20,.5)" }}>{latest.teams?.length || 0} teams · {latest.date ? new Date(latest.date).toLocaleDateString() : "No date"}</div>
+          <div style={{ fontSize:"14px", fontWeight:700, color:"rgba(11,8,20,.72)" }}>{latest.teams?.length || 0} teams · {latest.date ? new Date(latest.date).toLocaleDateString() : "No date"}</div>
           <div style={{ marginTop:12, display:"flex", alignItems:"center", gap:6, fontFamily:"'Bangers',cursive", fontSize:"20px", letterSpacing:"1px", color:"var(--red)" }}>
             Open Session <I.chev size={16} />
           </div>
@@ -1749,7 +1749,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
                 { label: "WIN", pts: "+3", color: "#1FD9C4", bg: "var(--cream)", border: "var(--ink)", icon: <Icon d='<path d="M20 6L9 17l-5-5"/>' size={13} /> },
                 { label: "TIEBREAK LOSS", pts: "+2", color: "var(--gold)", bg: "var(--cream)", border: "var(--ink)", icon: <Icon d='<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' size={13} /> },
                 { label: "COMPETITIVE LOSS", pts: "+1", color: "var(--orange)", bg: "var(--cream)", border: "var(--ink)", icon: <Icon d='<path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' size={13} /> },
-                { label: "6-0 / 6-1 LOSS", pts: "0", color: "rgba(11,8,20,.3)", bg: "var(--cream)", border: "var(--ink)", icon: <Icon d='<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' size={13} /> },
+                { label: "6-0 / 6-1 LOSS", pts: "0", color: "rgba(11,8,20,.55)", bg: "var(--cream)", border: "var(--ink)", icon: <Icon d='<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' size={13} /> },
               ].map(({ label, pts, color, bg, border, icon }) => (
                 <div key={label} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:bg, border:`4px solid ${border}`, boxShadow:`4px 4px 0 ${border}`, marginBottom:8 }}>
                   <span style={{ color, flexShrink:0 }}>{icon}</span>
@@ -1803,7 +1803,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
               {[{n:1,pts:"0",lbl:"1ST"},{n:2,pts:"+1",lbl:"2ND"},{n:3,pts:"+1",lbl:"3RD"},{n:4,pts:"+3",lbl:"4TH 🔥"}].map(({n,pts,lbl}) => (
                 <div key={n} style={{ flex:1, padding:"10px 6px", textAlign:"center", background: n===4?"var(--orange)":n===1?"rgba(240,233,216,.6)":"var(--cream)", border:"4px solid var(--ink)", boxShadow: n===4?"4px 4px 0 var(--ink)":"3px 3px 0 var(--ink)", marginRight: n<4?6:0 }}>
                   <div style={{ fontFamily:"'Bangers',cursive", fontSize:"26px", letterSpacing:"1px", color: n===4?"var(--cream)":n===1?"rgba(11,8,20,.3)":"var(--ink)", WebkitTextStroke: n===4?"1px var(--ink)":"none" }}>{pts}</div>
-                  <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"9px", letterSpacing:".14em", textTransform:"uppercase", color: n===4?"rgba(255,247,232,.8)":"rgba(11,8,20,.4)", marginTop:3 }}>{lbl}</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"9px", letterSpacing:".14em", textTransform:"uppercase", color: n===4?"rgba(255,247,232,.85)":"rgba(11,8,20,.65)", marginTop:3 }}>{lbl}</div>
                 </div>
               ))}
             </div>
@@ -3188,11 +3188,11 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                 <Avatar player={e.player} size={38} />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold truncate" style={{ color: "var(--ink)", fontFamily: "'Bangers',cursive", fontSize: 17, letterSpacing: ".5px" }}>{e.player.name}</div>
-                  <div className="text-[10px] mt-0.5 flex items-center gap-2 flex-wrap" style={{color:"rgba(11,8,20,.5)"}}>
+                  <div className="text-[10px] mt-0.5 flex items-center gap-2 flex-wrap" style={{color:"rgba(11,8,20,.72)"}}>
                     {played ? <>
                       <span>{e.stats.sessionsPlayed}sess</span>
                       <span>·</span>
-                      <span style={{color:"rgba(11,8,20,.7)",fontWeight:700}}>{e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W</span>
+                      <span style={{color:"var(--ink)",fontWeight:700}}>{e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W</span>
                       {e.stats.qfReached > 0 && <><span>·</span><span>QF×{e.stats.qfReached}</span></>}
                       {e.stats.sfReached > 0 && <><span>·</span><span>SF×{e.stats.sfReached}</span></>}
                       {e.stats.finalsWon > 0 && <><span>·</span><span style={{color:"var(--orange)",fontWeight:600}}>🏆×{e.stats.finalsWon}</span></>}
@@ -3203,16 +3203,16 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                     <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
                       {seriesNames.map(sn => {
                         const v = playerSeriesPts[sn] || 0;
-                        return <span key={sn} style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>{sn}: <span style={{color:"rgba(11,8,20,.6)",fontFamily:"'JetBrains Mono',monospace"}}>{v}</span></span>;
+                        return <span key={sn} style={{fontSize:9,color:"rgba(11,8,20,.65)"}}>{sn}: <span style={{color:"rgba(11,8,20,.82)",fontFamily:"'JetBrains Mono',monospace"}}>{v}</span></span>;
                       })}
-                      {legacyPrev > 0 && <span style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>Legacy: <span style={{color:"rgba(11,8,20,.6)",fontFamily:"'JetBrains Mono',monospace"}}>{legacyPrev}</span></span>}
-                      <span style={{fontSize:9,color:"rgba(11,8,20,.45)"}}>{state.seasonName}: <span style={{color:"var(--blue)",fontFamily:"'JetBrains Mono',monospace"}}>{e.totalPts}</span></span>
+                      {legacyPrev > 0 && <span style={{fontSize:9,color:"rgba(11,8,20,.65)"}}>Legacy: <span style={{color:"rgba(11,8,20,.82)",fontFamily:"'JetBrains Mono',monospace"}}>{legacyPrev}</span></span>}
+                      <span style={{fontSize:9,color:"rgba(11,8,20,.65)"}}>{state.seasonName}: <span style={{color:"var(--blue)",fontFamily:"'JetBrains Mono',monospace"}}>{e.totalPts}</span></span>
                     </div>
                   )}
                 </div>
                 <div className="text-right shrink-0">
                   <div className="jh-pts" style={{color:i>=3?"var(--ink)":"",WebkitTextStroke:i>=3?"none":""}}>{pts}</div>
-                  <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"9px", letterSpacing:".16em", textTransform:"uppercase", color:"rgba(11,8,20,.45)", marginTop:3 }}>{mode === "lifetime" ? "total" : "pts"}</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"9px", letterSpacing:".16em", textTransform:"uppercase", color:"rgba(11,8,20,.68)", marginTop:3 }}>{mode === "lifetime" ? "total" : "pts"}</div>
                 </div>
               </div>
             </div>
@@ -3376,6 +3376,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 .bg-stone-900\/60 *,.bg-stone-900\/50 *,[class*="bg-stone-9"] *{
   color: var(--ink) !important;
 }
+/* Secondary/tertiary text stays readable on cream */
+[class*="bg-stone-9"] .text-stone-400,[class*="bg-stone-9"] .text-xs.text-stone-400,
+[class*="bg-stone-9"] .text-stone-500,[class*="bg-stone-9"] .text-xs.text-stone-500{
+  color:rgba(11,8,20,.7) !important;
+}
+[class*="bg-stone-9"] .text-stone-600{color:rgba(11,8,20,.62) !important;}
 /* But keep neon colors for stats */
 [class*="bg-stone-9"] .text-orange-400,[class*="bg-stone-9"] .text-orange-500{color:var(--orange) !important;}
 [class*="bg-stone-9"] .text-emerald-400,[class*="bg-stone-9"] .text-emerald-300{color:#1FD9C4 !important;}
