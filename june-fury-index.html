@@ -1489,7 +1489,14 @@ function CreateSessionModal({ onClose, onCreate, count }) {
       <div>
         <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Number of Groups</label>
         <div className="grid grid-cols-3 gap-2">
-          {[2,3,4].map(g => <button key={g} type="button" onClick={() => setGroupCount(g)} className={`py-2 rounded-lg font-display text-xl ${groupCount===g ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>{g}</button>)}
+          {[{g:2,hint:"≤10 teams"},{g:3,hint:"~12 teams"},{g:4,hint:"16 teams"}].map(({g,hint}) => (
+            <button key={g} type="button"
+              onClick={() => { setGroupCount(g); if (g === 2) setQualifyCount(2); else if (g === 4) setQualifyCount(1); }}
+              className={`py-1.5 rounded-lg font-display leading-tight ${groupCount===g ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>
+              <div className="text-xl">{g}</div>
+              <div className={`text-[9px] font-sans font-semibold tracking-wide ${groupCount===g ? "text-orange-200" : "text-stone-500"}`}>{hint}</div>
+            </button>
+          ))}
         </div>
       </div>
       {is3Groups ? (
@@ -1504,6 +1511,7 @@ function CreateSessionModal({ onClose, onCreate, count }) {
             {[1,2].map(q => <button key={q} type="button" onClick={() => setQualifyCount(q)} className={`py-2 rounded-lg font-semibold text-sm ${qualifyCount===q ? "bg-gradient-to-b from-orange-500 to-red-600 text-white" : "bg-stone-900 text-stone-300 border border-stone-700"}`}>Top {q}</button>)}
           </div>
           <div className="text-[11px] text-orange-400 mt-2 font-semibold">{totalQualifiers} qualifiers → {bracketInfo}</div>
+          {groupCount === 2 && qualifyCount === 2 && <div className="flex items-center gap-2 px-3 py-2 rounded-lg mt-2" style={{ background: "rgba(255,94,30,0.08)", border: "1px solid rgba(255,94,30,0.2)" }}><div className="w-2 h-2 rounded-full shrink-0" style={{ background: "var(--orange-br)" }} /><div className="text-[11px] font-semibold" style={{ color: "var(--orange-br)" }}>Small field format — A1 vs B2 · B1 vs A2 → SF → Final</div></div>}
         </div>
       )}
       {is3Groups && (
