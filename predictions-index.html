@@ -2529,6 +2529,8 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   const [newScorerName,setNewScorerName]=useState('');
   const [newScorerMin,setNewScorerMin]=useState('');
   const [loadingGoalPlayers,setLoadingGoalPlayers]=useState(false);
+  const scorerSelectRef=useRef(null);
+  const scorerKeyCounter=useRef(0);
   const [creditPlayer,setCreditPlayer]=useState(null);
   const [creditAmount,setCreditAmount]=useState('');
 
@@ -2557,7 +2559,9 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   async function undoResult(matchId){if(!confirm(T.confirmUndo))return;try{await apiFetch(`/wc/admin/result/${matchId}`,{method:'DELETE'});showToast(T.toastUndo,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
   async function openGoals(matchId){
     if(goalsMatchId===matchId){setGoalsMatchId(null);return;}
-    setGoalsMatchId(matchId);setGoalScorers([]);setNewScorerName('');setNewScorerMin('');
+    const isSwitch=goalsMatchId!==null&&goalsMatchId!==matchId;
+    setGoalsMatchId(matchId);
+    if(isSwitch){setGoalScorers([]);setNewScorerName('');setNewScorerMin('');}
     setLoadingGoalPlayers(true);
     try{const data=await apiFetch(`/wc/matches/${matchId}/players`);
     const seen=new Set();
@@ -2566,9 +2570,11 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
     setLoadingGoalPlayers(false);
   }
   function addScorer(team){
-    if(!newScorerName)return;
-    setGoalScorers(prev=>[...prev,{key:Date.now()+Math.random(),name:newScorerName,team,minute:newScorerMin||''}]);
+    const name=scorerSelectRef.current?.value||newScorerName;
+    if(!name)return;
+    setGoalScorers(prev=>[...prev,{key:++scorerKeyCounter.current,name,team,minute:newScorerMin||''}]);
     setNewScorerName('');setNewScorerMin('');
+    showToast(`✓ ${name}`,'success');
   }
   async function submitGoals(matchId,homeTeam,awayTeam){
     const goals=goalScorers.map((s,i)=>({scorer:s.name,minute:parseInt(s.minute)||50+i,team:s.team==='home'?homeTeam:awayTeam,isOwnGoal:false,isPenalty:false}));
@@ -2674,18 +2680,18 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                     {!loadingGoalPlayers&&(
                       <div>
                         <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:8}}>
-                          <select value={newScorerName} onChange={e=>setNewScorerName(e.target.value)}
+                          <select ref={scorerSelectRef} value={newScorerName} onChange={e=>setNewScorerName(e.target.value)}
                             style={{flex:'2 1 120px',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',outline:'none'}}>
                             <option value="">Select scorer…</option>
                             {goalPlayers.map(pl=><option key={pl.player_name} value={pl.player_name}>{pl.player_name} ({parseFloat(pl.odds).toFixed(1)})</option>)}
                           </select>
                           <input type="number" min="1" max="120" placeholder="Min" value={newScorerMin} onChange={e=>setNewScorerMin(e.target.value)}
                             style={{width:52,padding:'6px 5px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',outline:'none',textAlign:'center'}}/>
-                          <button onClick={()=>addScorer('home')} disabled={!newScorerName}
+                          <button type="button" onClick={()=>addScorer('home')}
                             style={{padding:'5px 9px',borderRadius:8,border:'1px solid rgba(74,158,255,0.3)',background:'rgba(74,158,255,0.1)',color:'var(--blue)',fontSize:10,fontFamily:'Space Grotesk',fontWeight:800,cursor:'pointer',opacity:newScorerName?1:.4}}>
                             +{m.home_team.split(' ').slice(-1)[0]}
                           </button>
-                          <button onClick={()=>addScorer('away')} disabled={!newScorerName}
+                          <button type="button" onClick={()=>addScorer('away')}
                             style={{padding:'5px 9px',borderRadius:8,border:'1px solid rgba(255,114,64,0.3)',background:'rgba(255,114,64,0.1)',color:'var(--or)',fontSize:10,fontFamily:'Space Grotesk',fontWeight:800,cursor:'pointer',opacity:newScorerName?1:.4}}>
                             +{m.away_team.split(' ').slice(-1)[0]}
                           </button>
