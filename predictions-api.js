@@ -1646,14 +1646,13 @@ app.get('/wc/matches/:id/players', async (req, res) => {
   } catch(e) { res.status(500).json({error:e.message}); }
 });
 
-// All players' picks for a match (auth required; hidden until deadline passes)
-app.get('/wc/matches/:id/picks', auth, async (req, res) => {
+// All players' picks for a match (public; hidden until kickoff to prevent copying)
+app.get('/wc/matches/:id/picks', async (req, res) => {
   try {
     const { rows: mRows } = await pool.query('SELECT kickoff, settled FROM wc_matches WHERE id=$1', [req.params.id]);
     if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
     const m = mRows[0];
-    const deadline = new Date(m.kickoff).getTime() - 5 * 60 * 1000;
-    if (Date.now() < deadline && !m.settled) return res.json({ predictions: [], builders: [] });
+    if (Date.now() < new Date(m.kickoff).getTime() && !m.settled) return res.json({ predictions: [], builders: [] });
 
     const { rows: preds } = await pool.query(`
       SELECT p.player_id, pl.name AS player_name, p.prediction, p.odds_locked, p.stake, p.payout, p.settled
@@ -1685,6 +1684,109 @@ app.get('/wc/matches/:id/picks', auth, async (req, res) => {
       predictions: preds,
       builders: bldrs.map(b => ({ ...b, legs: legMap[b.id] || [] }))
     });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Enter/update goal scorers for a match and re-settle scorer bets
+app.post('/wc/admin/match/:id/goals', adminAuth, async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const goals = req.body.goals || []; // [{scorer, minute, team:'home'|'away', isOwnGoal, isPenalty}]
+
+    await pool.query('DELETE FROM wc_match_goals WHERE match_id=$1', [matchId]);
+    for (const g of goals) {
+      await pool.query(
+        'INSERT INTO wc_match_goals (match_id, minute, scorer_name, team, is_own_goal, is_penalty) VALUES ($1,$2,$3,$4,$5,$6)',
+        [matchId, g.minute || 50, g.scorer, g.team || '', g.isOwnGoal || false, g.isPenalty || false]
+      );
+    }
+
+    const { rows: mRows } = await pool.query('SELECT * FROM wc_matches WHERE id=$1', [matchId]);
+    if (!mRows.length || !mRows[0].settled) return res.json({ ok: true, resettled: 0 });
+    const match = mRows[0];
+    const hs = parseInt(match.home_score), as_ = parseInt(match.away_score);
+    const { rows: goalRows } = await pool.query('SELECT * FROM wc_match_goals WHERE match_id=$1 ORDER BY minute ASC', [matchId]);
+    const qualifier = match.qualifier;
+
+    // Re-settle scorer predictions
+    const { rows: scorerPreds } = await pool.query(
+      "SELECT * FROM wc_predictions WHERE match_id=$1 AND (prediction LIKE 'ANYTIME:%' OR prediction LIKE 'FIRST:%')",
+      [matchId]
+    );
+    let resettled = 0;
+    for (const p of scorerPreds) {
+      const r = settleKOPrediction(p.prediction, hs, as_, goalRows, qualifier);
+      if (!r) continue;
+      const oldPayout = parseFloat(p.payout) || 0;
+      const newPayout = r.refund ? parseFloat(p.stake) : r.won ? parseFloat(p.stake) * parseFloat(p.odds_locked) : 0;
+      const diff = newPayout - oldPayout;
+      if (Math.abs(diff) > 0.001) {
+        await pool.query('UPDATE wc_predictions SET settled=true, payout=$1 WHERE id=$2', [newPayout, p.id]);
+        await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [diff, p.player_id]);
+        resettled++;
+      }
+    }
+
+    // Re-settle builder legs that are scorer predictions
+    const { rows: builders } = await pool.query('SELECT * FROM wc_bet_builders WHERE match_id=$1 AND settled=true', [matchId]);
+    for (const b of builders) {
+      const { rows: legs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]);
+      const hasScorerLeg = legs.some(l => l.prediction.startsWith('ANYTIME:') || l.prediction.startsWith('FIRST:'));
+      if (!hasScorerLeg) continue;
+      // Re-settle each scorer leg
+      let changed = false;
+      const result = hs > as_ ? '1' : as_ > hs ? '2' : 'X';
+      for (const leg of legs) {
+        if (!leg.prediction.startsWith('ANYTIME:') && !leg.prediction.startsWith('FIRST:')) continue;
+        const r = settleKOPrediction(leg.prediction, hs, as_, goalRows, qualifier);
+        if (!r) continue;
+        const newRes = r.refund ? 'refund' : r.won ? 'won' : 'lost';
+        if (newRes !== leg.leg_result) {
+          await pool.query('UPDATE wc_bet_builder_legs SET leg_result=$1 WHERE id=$2', [newRes, leg.id]);
+          changed = true;
+        }
+      }
+      if (!changed) continue;
+      // Recompute builder outcome
+      const { rows: updatedLegs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]);
+      const active = updatedLegs.filter(l => l.leg_result !== 'refund');
+      const builderWon = active.length > 0 && active.every(l => l.leg_result === 'won');
+      const fullRefund = active.length === 0;
+      const oldPayout = parseFloat(b.payout) || 0;
+      let newPayout;
+      if (fullRefund) {
+        newPayout = parseFloat(b.stake);
+      } else if (builderWon) {
+        newPayout = updatedLegs.filter(l => l.leg_result !== 'refund')
+          .reduce((acc, l) => acc * parseFloat(l.odds_locked), parseFloat(b.stake));
+      } else {
+        newPayout = 0;
+      }
+      const diff = newPayout - oldPayout;
+      if (Math.abs(diff) > 0.001) {
+        await pool.query('UPDATE wc_bet_builders SET payout=$1 WHERE id=$2', [newPayout, b.id]);
+        await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [diff, b.player_id]);
+        resettled++;
+      }
+    }
+
+    res.json({ ok: true, resettled });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Manual balance adjustment (admin)
+app.post('/wc/admin/credit', adminAuth, async (req, res) => {
+  try {
+    const { playerId, amount } = req.body;
+    if (!playerId || amount == null) return res.status(400).json({ error: 'playerId and amount required' });
+    await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [amount, playerId]);
+    const { rows } = await pool.query('SELECT balance FROM wc_players WHERE id=$1', [playerId]);
+    res.json({ ok: true, newBalance: rows[0]?.balance });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

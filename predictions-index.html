@@ -1151,6 +1151,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
   const T=TX[lang];
   const ref=useRef(null);
   const isDeadlinePassed=Date.now()>new Date(match.kickoff).getTime()-5*60*1000;
+  const isAfterKickoff=Date.now()>new Date(match.kickoff).getTime();
   const isTBD=match.home_team==='TBD'||match.away_team==='TBD';
   const canPredict=!isDeadlinePassed&&!match.settled&&!isTBD;
   const preds=predictions||[];
@@ -1702,7 +1703,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
         </div>
       )}
       {/* ── All Picks drawdown ── */}
-      {isDeadlinePassed&&(()=>{
+      {isAfterKickoff&&(()=>{
         function pLabel(pred){
           if(pred==='1') return match.home_team;
           if(pred==='X') return lang==='ar'?'تعادل':'Draw';
@@ -2410,7 +2411,7 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
                       <div style={{fontSize:12,color:iconColor,fontWeight:700,width:14,flexShrink:0,textAlign:'center'}}>{icon}</div>
                       <div style={{flex:1,minWidth:0}}>
                         <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pr.home_team} – {pr.away_team}</div>
-                        <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result?` · ${pr.home_score}–${pr.away_score}`:''}</div>
+                        <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result&&pr.stage!=='group'?` · ${pr.home_score}–${pr.away_score}`:''}</div>
                       </div>
                       {payStr&&<div className="mono" style={{fontSize:11,fontWeight:700,color:won?'var(--green)':'var(--muted)',flexShrink:0}}>{payStr}</div>}
                     </div>
@@ -2452,6 +2453,11 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   const [expandedBetsId,setExpandedBetsId]=useState(null);
   const [matchBets,setMatchBets]=useState([]);
   const [betsLoading,setBetsLoading]=useState(false);
+  const [goalsMatchId,setGoalsMatchId]=useState(null);
+  const [homeGoals,setHomeGoals]=useState('');
+  const [awayGoals,setAwayGoals]=useState('');
+  const [creditPlayer,setCreditPlayer]=useState(null);
+  const [creditAmount,setCreditAmount]=useState('');
 
   async function loadBets(matchId){
     if(expandedBetsId===matchId){setExpandedBetsId(null);setMatchBets([]);return;}
@@ -2476,6 +2482,27 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   async function savePlayer(){if(!editPlayer)return;setSaving(true);try{await apiFetch(`/wc/admin/player/${editPlayer.id}`,{method:'PUT',body:JSON.stringify({balance:parseFloat(epBal),name:epName||undefined})});showToast(T.toastPlayer,'success');setEditPlayer(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function deletePlayer(p){if(!confirm(`${T.confirmDelete} ${p.name}?`))return;try{await apiFetch(`/wc/admin/player/${p.id}`,{method:'DELETE'});showToast(T.toastDeleted,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
   async function undoResult(matchId){if(!confirm(T.confirmUndo))return;try{await apiFetch(`/wc/admin/result/${matchId}`,{method:'DELETE'});showToast(T.toastUndo,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
+  async function submitGoals(matchId,homeTeam,awayTeam){
+    const parse=(text,team)=>text.split('\n').map((l,i)=>{const[nm,min]=l.trim().split(':');return nm.trim()?{scorer:nm.trim(),minute:parseInt(min)||50+i,team}:null;}).filter(Boolean);
+    const goals=[...parse(homeGoals,homeTeam),...parse(awayGoals,awayTeam)];
+    setSaving(true);
+    try{const d=await apiFetch(`/wc/admin/match/${matchId}/goals`,{method:'POST',body:JSON.stringify({goals})});
+    showToast(`⚽ Goals saved · ${d.resettled} bet(s) re-settled`,'success');
+    setGoalsMatchId(null);setHomeGoals('');setAwayGoals('');onRefresh();}
+    catch(e){showToast(e.message,'error');}
+    setSaving(false);
+  }
+  async function submitCredit(){
+    if(!creditPlayer||!creditAmount)return;
+    const amt=parseFloat(creditAmount);
+    if(isNaN(amt))return;
+    setSaving(true);
+    try{await apiFetch('/wc/admin/credit',{method:'POST',body:JSON.stringify({playerId:creditPlayer.id,amount:amt})});
+    showToast(`${amt>=0?'+':''}$${amt.toFixed(0)} → ${creditPlayer.name}`,'success');
+    setCreditPlayer(null);setCreditAmount('');onRefresh();}
+    catch(e){showToast(e.message,'error');}
+    setSaving(false);
+  }
 
   const stageMatches=matches.filter(m=>m.stage===filterStage);
 
@@ -2543,12 +2570,37 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                     {!m.settled&&<button onClick={()=>{setSelectedMatch(m===selectedMatch?null:m);setHs('');setAs('');setQualifier('');}} style={{fontSize:10,background:selectedMatch?.id===m.id?'rgba(255,255,255,0.06)':'var(--gold)',color:selectedMatch?.id===m.id?'var(--muted)':'#0A0600',border:'none',borderRadius:10,padding:'5px 12px',fontWeight:800,fontFamily:'Space Grotesk'}}>{selectedMatch?.id===m.id?T.cancelEdit:T.enterResult}</button>}
                   </div>
                 </div>
-                {/* Bets toggle button */}
+                {/* Bets + Goals buttons */}
                 <div className="mt-2 flex items-center gap-2">
                   <button onClick={()=>loadBets(m.id)} style={{fontSize:10,color:expandedBetsId===m.id?'var(--gold)':'var(--muted)',background:expandedBetsId===m.id?'rgba(242,193,78,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${expandedBetsId===m.id?'rgba(242,193,78,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                     {T.betsBtn} {expandedBetsId===m.id&&!betsLoading?`(${matchBets.length})`:''}
                   </button>
+                  <button onClick={()=>{setGoalsMatchId(goalsMatchId===m.id?null:m.id);setHomeGoals('');setAwayGoals('');}}
+                    style={{fontSize:10,color:goalsMatchId===m.id?'var(--green)':'var(--muted)',background:goalsMatchId===m.id?'rgba(0,201,123,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${goalsMatchId===m.id?'rgba(0,201,123,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
+                    ⚽ Goals
+                  </button>
                 </div>
+                {goalsMatchId===m.id&&(
+                  <div className="mt-2" style={{direction:'ltr',background:'rgba(0,201,123,0.04)',border:'1px solid rgba(0,201,123,0.12)',borderRadius:10,padding:'10px'}}>
+                    <div style={{fontSize:10,color:'var(--green)',fontFamily:'Space Grotesk',fontWeight:800,marginBottom:6}}>⚽ Goal Scorers — one name per line (Name:Minute optional)</div>
+                    <div className="flex gap-2">
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>{m.home_team}</div>
+                        <textarea value={homeGoals} onChange={e=>setHomeGoals(e.target.value)} placeholder={'Cody Gakpo:23\nMemphis Depay:67'} rows={3}
+                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',resize:'none',outline:'none'}}/>
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>{m.away_team}</div>
+                        <textarea value={awayGoals} onChange={e=>setAwayGoals(e.target.value)} placeholder={'Ismael Saibari:45'} rows={3}
+                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',resize:'none',outline:'none'}}/>
+                      </div>
+                    </div>
+                    <button onClick={()=>submitGoals(m.id,m.home_team,m.away_team)} disabled={saving}
+                      style={{marginTop:8,width:'100%',padding:'7px',borderRadius:9,background:'var(--green)',color:'#002916',border:'none',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',cursor:'pointer'}}>
+                      {saving?'…':'Save & Re-settle Scorer Bets'}
+                    </button>
+                  </div>
+                )}
                 {expandedBetsId===m.id&&(
                   <div className="mt-2 space-y-1.5" style={{direction:'ltr'}}>
                     {betsLoading&&<div style={{fontSize:11,color:'var(--muted)',fontFamily:'Space Grotesk',padding:'6px 0'}}>Loading…</div>}
@@ -2693,10 +2745,21 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="mono" style={{fontSize:20,fontWeight:700,color:parseFloat(p.balance)>=100?'var(--green)':'var(--red)',letterSpacing:-1}}>${parseFloat(p.balance).toFixed(0)}</span>
-                    <button onClick={()=>{setEditPlayer(editPlayer?.id===p.id?null:p);setEpBal(parseFloat(p.balance).toFixed(2));setEpName(p.name);setEpPin('');}} style={{fontSize:10,background:'rgba(255,255,255,0.05)',border:'1px solid var(--border)',color:'var(--gold)',borderRadius:8,padding:'4px 10px',fontFamily:'Space Grotesk'}}>{T.editBtn}</button>
+                    <button onClick={()=>{setCreditPlayer(creditPlayer?.id===p.id?null:p);setCreditAmount('');setEditPlayer(null);}} style={{fontSize:10,background:creditPlayer?.id===p.id?'rgba(0,201,123,0.1)':'rgba(255,255,255,0.05)',border:`1px solid ${creditPlayer?.id===p.id?'rgba(0,201,123,0.3)':'var(--border)'}`,color:creditPlayer?.id===p.id?'var(--green)':'var(--muted)',borderRadius:8,padding:'4px 8px',fontFamily:'Space Grotesk',fontWeight:700}}>+/-</button>
+                    <button onClick={()=>{setEditPlayer(editPlayer?.id===p.id?null:p);setEpBal(parseFloat(p.balance).toFixed(2));setEpName(p.name);setEpPin('');setCreditPlayer(null);}} style={{fontSize:10,background:'rgba(255,255,255,0.05)',border:'1px solid var(--border)',color:'var(--gold)',borderRadius:8,padding:'4px 10px',fontFamily:'Space Grotesk'}}>{T.editBtn}</button>
                     <button onClick={()=>deletePlayer(p)} style={{fontSize:10,background:'rgba(255,54,81,0.08)',border:'none',color:'var(--red)',borderRadius:8,padding:'4px 10px',fontFamily:'Space Grotesk'}}>{T.deleteBtn}</button>
                   </div>
                 </div>
+                {creditPlayer?.id===p.id&&(
+                  <div className="mt-2 flex gap-2 items-center" style={{direction:'ltr'}}>
+                    <span style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,flexShrink:0}}>Adjust:</span>
+                    <input className="admin-inp flex-1 text-center" type="number" step="0.01" value={creditAmount} onChange={e=>setCreditAmount(e.target.value)} placeholder="+1000 or -50"/>
+                    <button onClick={submitCredit} disabled={saving||!creditAmount}
+                      style={{background:'var(--green)',color:'#002916',border:'none',borderRadius:10,padding:'6px 14px',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',flexShrink:0}}>
+                      {saving?'…':'Apply'}
+                    </button>
+                  </div>
+                )}
                 {editPlayer?.id===p.id&&(
                   <div className="mt-2 space-y-2" style={{direction:'ltr'}}>
                     <div className="flex gap-2">
