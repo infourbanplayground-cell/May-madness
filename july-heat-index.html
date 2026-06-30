@@ -554,15 +554,25 @@ body::before{
 .jh-caption b{color:var(--red) !important;}
 
 /* JULY HEAT lockup */
+@keyframes heat-pulse{
+  0%,100%{text-shadow:10px 10px 0 var(--red),0 0 30px rgba(255,94,30,.55),0 0 70px rgba(255,46,154,.2);}
+  50%{text-shadow:10px 10px 0 var(--red),0 0 55px rgba(255,94,30,.9),0 0 110px rgba(255,46,154,.45);}
+}
+@keyframes emblem-glow{
+  0%,100%{filter:drop-shadow(0 0 18px rgba(41,224,255,.8)) drop-shadow(0 0 50px rgba(255,46,154,.35));}
+  50%{filter:drop-shadow(0 0 32px rgba(41,224,255,1)) drop-shadow(0 0 80px rgba(255,46,154,.6)) drop-shadow(0 0 120px rgba(255,224,61,.25));}
+}
 .jh-lockup{margin:0 0 20px;}
-.jh-lockup .jh-emblem{height:64px;width:auto;display:block;margin:0 auto 4px;opacity:1 !important;
-  filter:drop-shadow(0 0 16px rgba(41,224,255,.7)) drop-shadow(0 0 40px rgba(255,46,154,.3));}
-.jh-lockup .jh-july{display:block;font-family:'Bangers',cursive;font-size:clamp(34px,10vw,56px);
-  letter-spacing:10px;color:var(--cream);-webkit-text-stroke:3px var(--ink);
+.jh-lockup .jh-emblem{height:96px;width:auto;display:block;margin:0 auto 6px;opacity:1 !important;
+  animation:emblem-glow 3s ease-in-out infinite;}
+.jh-lockup .jh-july{display:block;font-family:'Bangers',cursive;font-size:clamp(40px,12vw,66px);
+  letter-spacing:14px;color:var(--cream);-webkit-text-stroke:3px var(--ink);
   text-shadow:5px 5px 0 var(--ink);opacity:1 !important;}
-.jh-lockup .jh-heat{display:block;font-family:'Bangers',cursive;font-size:clamp(90px,28vw,180px);
-  line-height:.72;letter-spacing:4px;color:var(--yellow);
-  -webkit-text-stroke:5px var(--ink);text-shadow:9px 9px 0 var(--red);opacity:1 !important;}
+.jh-lockup .jh-heat{display:block;font-family:'Bangers',cursive;font-size:clamp(104px,32vw,210px);
+  line-height:.72;letter-spacing:5px;color:var(--yellow);
+  -webkit-text-stroke:5px var(--ink);
+  animation:heat-pulse 2.8s ease-in-out infinite;opacity:1 !important;}
+.jh-heat-flames{display:flex;justify-content:center;gap:2px;margin:-6px 0 6px;font-size:clamp(22px,6vw,36px);line-height:1;filter:drop-shadow(0 0 8px rgba(255,94,30,.7));}
 .jh-vol{display:inline-block;margin-top:8px;font-family:'Bangers',cursive;font-size:22px;
   letter-spacing:1px;color:var(--cream);background:var(--blue);
   border:4px solid var(--ink);box-shadow:5px 5px 0 var(--ink);
@@ -760,7 +770,8 @@ html.light .jh-hero .frame{
 /* HEAT lockup in light */
 html.light .jh-lockup .jh-july{color:var(--ink) !important;text-shadow:4px 4px 0 rgba(16,19,26,.25) !important;-webkit-text-stroke:3px var(--ink) !important;}
 html.light .jh-lockup .jh-heat{color:var(--orange) !important;text-shadow:8px 8px 0 var(--red) !important;-webkit-text-stroke:5px var(--ink) !important;}
-html.light .jh-lockup .jh-emblem{filter:none !important;}
+html.light .jh-lockup .jh-emblem{filter:none !important;animation:none !important;}
+html.light .jh-lockup .jh-heat{animation:none !important;}
 html.light .jh-vol{background:var(--blue) !important;color:var(--ink) !important;border-color:var(--ink) !important;box-shadow:5px 5px 0 var(--ink) !important;}
 
 /* FEEL THE HEAT flag light */
@@ -1714,14 +1725,15 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
         <div className="halftone"></div>
         <div className="frame"></div>
         <div className="jh-hero-inner">
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-            <UPLogo size={72} />
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+            <UPLogo size={108} />
             <span className="jh-flag red">☀️ FEEL THE HEAT</span>
           </div>
           <div className="jh-lockup">
             <img className="jh-emblem" src="assets/up-logo.png" alt="Urban Playground" />
             <span className="jh-july">JULY</span>
             <span className="jh-heat">HEAT</span>
+            <div className="jh-heat-flames">🔥🔥🔥🔥🔥</div>
             <div><span className="jh-vol">VOL. 5</span></div>
           </div>
           <div style={{margin:"14px auto 18px",maxWidth:340}}>
