@@ -2411,9 +2411,12 @@ function generateReminderText(session, state, leaderboard) {
   const dateStr = session.date
     ? new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
     : "";
-  const filledCount = slots.filter(s => s.trim()).length;
   const seriesName = state.seasonName || "JULY HEAT";
   const vol = state.seasonSubtitle?.match(/VOL\.\s*\d+/i)?.[0] || "Vol. 5";
+  const sessionsTotal = (state.sessions || []).length;
+  const sessionsLeft = Math.max(0, 9 - sessionsTotal);
+  const top5 = [...(leaderboard || [])].filter(e => e.stats.groupPlayed > 0 || e.stats.qfReached > 0).slice(0, 5);
+  const rankEmoji = ["🥇","🥈","🥉","4️⃣","5️⃣"];
 
   let text = `🔥 *${seriesName} · ${session.name}* 🔥\n`;
   text += `_Urban Social Series · ${vol}_\n\n`;
@@ -2425,11 +2428,16 @@ function generateReminderText(session, state, leaderboard) {
   text += `💸 7 OMR\n\n`;
   if (session.doublePoints) {
     text += `🏆 Win = 28 OMR voucher per player\n`;
-    text += `🔥🔥 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* 🔥🔥\n\n`;
+    text += `🔥🔥 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* 🔥🔥\n`;
   } else {
-    text += `🏆 Win = 14 OMR voucher per player\n\n`;
+    text += `🏆 Win = 14 OMR voucher per player\n`;
   }
-  text += `Drop name + partner below 👇\n\n`;
+  if (sessionsLeft > 0) text += `📊 ${sessionsLeft} session${sessionsLeft !== 1 ? "s" : ""} left · this is where champions are made\n`;
+  if (top5.length > 0) {
+    text += `\n*📈 Current Standings:*\n`;
+    top5.forEach((e, i) => { text += `${rankEmoji[i]} ${e.player.name} — ${e.totalPts} pts\n`; });
+  }
+  text += `\nDrop name + partner below 👇\n\n`;
   slots.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
   text += `\n⏳ Waitlist\n`;
   waitlist.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
