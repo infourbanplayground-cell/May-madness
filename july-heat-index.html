@@ -1419,6 +1419,48 @@ function Avatar({ player, size = 40, className = "" }) {
 // ═══════════════════════════════════════════════════════════════
 // 🎯 MAIN APP
 // ═══════════════════════════════════════════════════════════════
+function PublicLeaderboardPage({ state, leaderboard }) {
+  const top = leaderboard.filter(e => e.stats.groupPlayed > 0 || e.stats.qfReached > 0);
+  const rankColors = ["#FFC24B", "#c0c0c0", "#cd7f32"];
+  return (
+    <div className="min-h-screen" style={{ background: "var(--ink)" }}>
+      <div className="court-motif" />
+      <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
+        <div className="text-center mb-6">
+          <div className="font-display text-4xl heat-grad" style={{ fontFamily: "'Bangers',cursive", letterSpacing: 3 }}>JULY HEAT</div>
+          <div className="text-xs uppercase tracking-widest font-bold mt-1" style={{ color: "var(--blue)" }}>Vol. 5 · Series Standings</div>
+        </div>
+        {top.length === 0
+          ? <div className="text-center text-stone-500 py-12">No standings yet</div>
+          : <div className="space-y-2">
+              {top.map((e, i) => {
+                const badges = getMilestones(e).slice(0, 3);
+                return (
+                  <div key={e.player.id} style={{ background: "var(--cream)", border: "4px solid var(--ink)", boxShadow: `5px 5px 0 ${i < 3 ? rankColors[i] : "rgba(11,8,20,.35)"}`, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                    <div style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: i < 3 ? rankColors[i] : "#e5e0d8", border: "3px solid var(--ink)", fontFamily: "'Bangers',cursive", fontSize: 15, color: "var(--ink)" }}>
+                      {i + 1}
+                    </div>
+                    <Avatar player={e.player} size={36} />
+                    <div className="flex-1 min-w-0">
+                      <div style={{ fontFamily: "'Bangers',cursive", fontSize: 18, color: "var(--ink)", letterSpacing: ".5px" }}>{e.player.name}</div>
+                      <div style={{ fontSize: 10, color: "rgba(11,8,20,.6)", marginTop: 2 }}>
+                        {e.stats.sessionsPlayed}s · {e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W
+                        {e.stats.finalsWon > 0 && ` · 🏆×${e.stats.finalsWon}`}
+                        {badges.length > 0 && <span className="ml-1">{badges.map(b => b.icon).join("")}</span>}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 26, fontWeight: 700, color: i < 3 ? rankColors[i] : "var(--ink)" }}>{e.totalPts}</div>
+                  </div>
+                );
+              })}
+            </div>
+        }
+        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">heat.urbanpadel.om · Urban Playground Oman</div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [state, setState] = useState(null);
   const [tab, setTab] = useState("dashboard");
@@ -1508,6 +1550,7 @@ function App() {
 
   if (!state) return null;
 
+  const isPublicMode = new URLSearchParams(window.location.search).has("public");
   const update = (fn) => setState(s => fn({ ...s }));
   const updateSession = (sid, fn) => setState(s => ({ ...s, sessions: s.sessions.map(ss => ss.id === sid ? fn({ ...ss }) : ss) }));
   const leaderboard = state.players.map(p => {
@@ -1516,6 +1559,8 @@ function App() {
     return { player: p, ...s, lifetimePts: s.totalPts + prevSum };
   }).sort((a, b) => b.totalPts - a.totalPts);
   const currentSession = state.sessions.find(s => s.id === openSessionId);
+
+  if (isPublicMode) return <PublicLeaderboardPage state={state} leaderboard={leaderboard} />;
 
   const navTabs = [
     { id: "dashboard", icon: I.flame, label: "HOME" },
@@ -2269,6 +2314,72 @@ function CreateSessionModal({ onClose, onCreate, count }) {
   </Modal>;
 }
 
+// ── Milestone Badges ──────────────────────────────────────────
+const MILESTONES = [
+  { id: "champion",   icon: "🏆", label: "Champion",    desc: "Won a session final",       check: e => e.stats.finalsWon >= 1 },
+  { id: "finalist",   icon: "🥈", label: "Finalist",    desc: "Reached a session final",   check: e => e.stats.finalsReached >= 1 },
+  { id: "semis",      icon: "⚔️",  label: "Semifinalist",desc: "Reached a semifinal",       check: e => e.stats.sfReached >= 1 },
+  { id: "first_win",  icon: "🎯", label: "First Blood", desc: "First win ever",            check: e => (e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon) >= 1 },
+  { id: "hot_streak", icon: "🔥", label: "On Fire",     desc: "Max streak bonus (5 pts)",  check: e => e.breakdown.streakPts >= 5 },
+  { id: "comeback",   icon: "↩️",  label: "Phoenix",    desc: "Earned a comeback bonus",   check: e => e.breakdown.comebackPts > 0 },
+  { id: "regular",    icon: "📅", label: "Regular",     desc: "Played 5+ sessions",        check: e => e.stats.sessionsPlayed >= 5 },
+  { id: "die_hard",   icon: "💪", label: "Die-Hard",    desc: "Played 10+ sessions",       check: e => e.stats.sessionsPlayed >= 10 },
+  { id: "gunslinger", icon: "🎱", label: "Gunslinger",  desc: "25+ match wins",            check: e => (e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon) >= 25 },
+  { id: "century",    icon: "💯", label: "Century",     desc: "100+ series points",        check: e => e.totalPts >= 100 },
+];
+function getMilestones(entry) {
+  return MILESTONES.filter(m => m.check(entry));
+}
+
+// ── H2H Rivals ────────────────────────────────────────────────
+function calcRivals(pid, sessions) {
+  const map = {};
+  sessions.forEach(s => {
+    const myTeam = getPlayerTeam(s, pid); if (!myTeam) return;
+    const matches = [...(s.groupMatches || []),
+      ...(s.bracket?.qf || []),
+      ...(s.bracket?.sf || []),
+      s.bracket?.final
+    ].filter(Boolean);
+    matches.forEach(m => {
+      if (!m.winner) return;
+      const isTeam1 = m.team1Id === myTeam.id;
+      const isTeam2 = m.team2Id === myTeam.id;
+      if (!isTeam1 && !isTeam2) return;
+      const oppTeamId = isTeam1 ? m.team2Id : m.team1Id;
+      const oppTeam = (s.teams || []).find(t => t.id === oppTeamId); if (!oppTeam) return;
+      const opponents = [oppTeam.p1Id, oppTeam.p2Id].filter(Boolean);
+      const won = teamWon(m, myTeam.id);
+      opponents.forEach(oid => {
+        if (!map[oid]) map[oid] = { wins: 0, losses: 0 };
+        if (won) map[oid].wins++; else map[oid].losses++;
+      });
+    });
+  });
+  return Object.entries(map)
+    .map(([id, r]) => ({ id, ...r, total: r.wins + r.losses }))
+    .filter(r => r.total >= 1)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+}
+
+// ── Session Reminder ──────────────────────────────────────────
+function generateReminderText(session, state, leaderboard) {
+  const top5 = [...leaderboard].sort((a, b) => b.totalPts - a.totalPts).slice(0, 5);
+  const dateStr = session.date
+    ? new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
+    : "tonight";
+  let text = `🔥 *JULY HEAT Vol.5 — ${session.name}*\n`;
+  text += `📅 ${dateStr} · 5:30 PM\n`;
+  text += `📍 Urban Playground, Oman\n`;
+  if (session.doublePoints) text += `\n⚡⚡ *DOUBLE POINTS TONIGHT — 2× EVERYTHING!* ⚡⚡\n`;
+  text += `\n🏆 *Current Top 5:*\n`;
+  top5.forEach((e, i) => { text += `${["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣"][i]} ${e.player.name} — ${e.totalPts} pts\n`; });
+  text += `\nCan you knock them off the top? 👀\n`;
+  text += `\n🎾 *Confirm your spot: heat.urbanpadel.om*`;
+  return text;
+}
+
 function generateSessionShareText(session, state, leaderboard) {
   const pName = (id) => state.players.find(p => p.id === id)?.name?.split(" ")[0] || "?";
   const tLabel = (t) => t ? `${pName(t.p1Id)} & ${pName(t.p2Id)}` : "TBD";
@@ -2376,6 +2487,7 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
   const [showDel, setShowDel] = useState(false);
   const [showDraw, setShowDraw] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showRemind, setShowRemind] = useState(false);
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto screen-bg">
       <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 flex items-center justify-between gap-3" style={{ background: "rgba(10, 8, 7, 0.92)" }}>
@@ -2397,6 +2509,7 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
             </button>
           ))}
           {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-stone-400">🎲 Draw</button>}
+          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-blue-400">📣 Remind</button>}
           {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-emerald-400">📤 Share</button>}
         </div>
       </div>
@@ -2427,6 +2540,10 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
               <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform ${session.doublePoints ? "translate-x-5" : "translate-x-0.5"}`} />
             </button>
           </div>
+          {session.doublePoints && <Btn variant="secondary" className="w-full" onClick={() => {
+            const txt = `🔥⚡ *SURPRISE ALERT* ⚡🔥\n\nTONIGHT is a *DOUBLE POINTS* session!\n2× everything — group wins, KOs, streak, all of it.\n\n📅 ${session.name}${session.date ? " · " + new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" }) : ""}\n📍 Urban Playground\n\nDon't miss this one 👀\n🎾 heat.urbanpadel.om`;
+            navigator.clipboard?.writeText(txt);
+          }}>📣 Copy 2X Announcement</Btn>}
           <Btn variant="danger" className="w-full" onClick={() => setShowDel(true)}><I.trash size={14} /> Delete Session</Btn>
         </div>
       </Modal>}
@@ -2434,6 +2551,16 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
         <div className="space-y-3">
           <div className="text-sm text-stone-300">Permanently delete <b>{session.name}</b>?</div>
           <div className="flex gap-2"><Btn variant="ghost" onClick={() => setShowDel(false)}>Cancel</Btn><Btn variant="danger" onClick={deleteSession}>Delete</Btn></div>
+        </div>
+      </Modal>}
+      {showRemind && <Modal open={true} onClose={() => setShowRemind(false)} title="SESSION REMINDER">
+        <div className="space-y-3">
+          <div className="text-xs text-stone-400">Copy this to your WhatsApp group to hype up the session.</div>
+          <textarea readOnly rows={12} value={generateReminderText(session, state, leaderboard || [])}
+            className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
+          <Btn className="w-full" onClick={() => navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard || []))}>
+            📋 Copy for WhatsApp
+          </Btn>
         </div>
       </Modal>}
       {showDraw && <PartnerDrawModal onClose={() => setShowDraw(false)} state={state} session={session}
@@ -3329,6 +3456,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                       {e.stats.sfReached > 0 && <><span>·</span><span>SF×{e.stats.sfReached}</span></>}
                       {e.stats.finalsWon > 0 && <><span>·</span><span style={{color:"var(--orange)",fontWeight:600}}>🏆×{e.stats.finalsWon}</span></>}
                       {(e.stats.finalsReached - e.stats.finalsWon) > 0 && <><span>·</span><span>🥈×{e.stats.finalsReached - e.stats.finalsWon}</span></>}
+                      {getMilestones(e).slice(0, 3).map(m => <span key={m.id} title={m.label + ": " + m.desc} className="ml-0.5">{m.icon}</span>)}
                     </> : <span>Not yet played</span>}
                   </div>
                   {mode === "lifetime" && seriesNames.length > 0 && (
@@ -3428,6 +3556,47 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, update, onClose 
         <div className="text-xs text-stone-400 mb-2">Won with — can't pair again:</div>
         <div className="flex flex-wrap gap-1">{lockedNames.map(n => <Pill key={n} color="red">{n}</Pill>)}</div>
       </Card>}
+      {(() => {
+        const rivals = calcRivals(playerId, state.sessions);
+        if (rivals.length === 0) return null;
+        return (
+          <Card className="p-3">
+            <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold mb-2">⚔️ Rivalries</div>
+            <div className="space-y-1.5">
+              {rivals.map(r => {
+                const opp = state.players.find(p => p.id === r.id);
+                if (!opp) return null;
+                const rate = Math.round((r.wins / r.total) * 100);
+                return (
+                  <div key={r.id} className="flex items-center gap-2 text-sm">
+                    <span className="flex-1 text-stone-300 truncate">{opp.name}</span>
+                    <span className="font-mono text-emerald-400">{r.wins}W</span>
+                    <span className="text-stone-600">/</span>
+                    <span className="font-mono text-red-400">{r.losses}L</span>
+                    <span className="text-[10px] text-stone-500 w-8 text-right">{rate}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        );
+      })()}
+      {(() => {
+        const earned = getMilestones(entry);
+        if (earned.length === 0) return null;
+        return (
+          <Card className="p-3">
+            <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold mb-2">🏅 Badges</div>
+            <div className="flex flex-wrap gap-2">
+              {earned.map(m => (
+                <div key={m.id} title={m.desc} className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold border border-stone-700 bg-stone-900/40 text-stone-300">
+                  <span>{m.icon}</span><span>{m.label}</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })()}
     </div>
   </Modal>;
 }
@@ -3508,6 +3677,15 @@ function SettingsView({ state, update, setTab, logout }) {
           {syncing ? "Syncing…" : "⚡ Sync June Fury Points"}
         </Btn>
         {syncMsg && <div className={`text-xs mt-2 font-semibold ${syncMsg.startsWith("Error") ? "text-red-400" : "text-emerald-400"}`}>{syncMsg}</div>}
+      </Card>
+      <Card className="p-4">
+        <h3 className="font-display text-lg text-stone-200 mb-3">PUBLIC LINK</h3>
+        <div className="text-xs text-stone-500 mb-3">Share a read-only leaderboard — no login required. Works on any device.</div>
+        <Btn variant="secondary" className="w-full" onClick={() => {
+          const url = window.location.origin + window.location.pathname + "?public";
+          navigator.clipboard?.writeText(url);
+          alert("Copied: " + url);
+        }}>🔗 Copy Public Leaderboard URL</Btn>
       </Card>
       <Card className="p-4">
         <h3 className="font-display text-lg text-stone-200 mb-3">DATA</h3>
