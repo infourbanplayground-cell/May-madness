@@ -2406,30 +2406,35 @@ function calcRivals(pid, sessions) {
 
 // ── Session Reminder ──────────────────────────────────────────
 function generateReminderText(session, state, leaderboard) {
-  const top5 = [...leaderboard].sort((a, b) => b.totalPts - a.totalPts).slice(0, 5);
+  const slots = session.signupSlots || Array(16).fill("");
+  const waitlist = session.signupWaitlist || Array(3).fill("");
   const dateStr = session.date
-    ? new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" })
-    : "tonight";
-  let text = `🔥 *JULY HEAT Vol.5 — ${session.name}*\n`;
-  text += `📅 ${dateStr} · 5:30 PM\n`;
-  text += `📍 Urban Playground, Oman\n`;
-  if (session.doublePoints) text += `\n⚡⚡ *DOUBLE POINTS TONIGHT — 2× EVERYTHING!* ⚡⚡\n`;
-  const signups = session.signups || [];
-  const maxPlayers = 32;
-  const spotsLeft = Math.max(0, maxPlayers - signups.length);
-  if (signups.length > 0) {
-    text += `\n✅ *${signups.length}/${maxPlayers} players confirmed* (${spotsLeft > 0 ? spotsLeft + " spots left" : "FULL — waitlist open"})\n`;
-    if (signups.length <= 12) {
-      const names = signups.map(id => state.players.find(p => p.id === id)?.name?.split(" ")[0]).filter(Boolean);
-      text += names.map(n => `  · ${n}`).join("\n") + "\n";
-    }
-  } else {
-    text += `\n📋 *Sign-up open — 32 spots available*\n`;
+    ? new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+    : "";
+  const filledCount = slots.filter(s => s.trim()).length;
+  const seriesName = state.seasonName || "JULY HEAT";
+  const vol = state.seasonSubtitle?.match(/VOL\.\s*\d+/i)?.[0] || "Vol. 5";
+
+  let text = `🔥 *${seriesName} · ${session.name}* 🔥\n`;
+  text += `_Urban Social Series · ${vol}_\n\n`;
+  if (session.doublePoints) {
+    text += `*⚡ DOUBLE POINTS ⚡ DOUBLE POINTS ⚡ DOUBLE POINTS*\n\n`;
   }
-  text += `\n🏆 *Current Top 5:*\n`;
-  top5.forEach((e, i) => { text += `${["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣"][i]} ${e.player.name} — ${e.totalPts} pts\n`; });
-  text += `\nCan you knock them off the top? 👀\n`;
-  text += `\n🎾 *Confirm your spot: heat.urbanpadel.om*`;
+  text += `📍 Urban Playground\n`;
+  if (dateStr) text += `🗓️ ${dateStr} · 5:30 PM\n`;
+  text += `💸 7 OMR\n\n`;
+  if (session.doublePoints) {
+    text += `🏆 Win = 28 OMR voucher per player\n`;
+    text += `🔥🔥 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* 🔥🔥\n\n`;
+  } else {
+    text += `🏆 Win = 14 OMR voucher per player\n\n`;
+  }
+  text += `Drop name + partner below 👇\n\n`;
+  slots.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
+  text += `\n⏳ Waitlist\n`;
+  waitlist.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
+  text += `\n⚠️ *16 teams max* · first come, first served\n`;
+  text += `💥 *Feel the Heat — secure your spot* 👑`;
   return text;
 }
 
@@ -2534,131 +2539,91 @@ function PartnerDrawModal({ onClose, state, session, onAddTeams }) {
   </Modal>;
 }
 
-const MAX_PLAYERS = 32; // 16 teams × 2
+const MAX_TEAMS = 16;
+const WL_SIZE = 5;
 
-function SignupsTab({ session, state, updateSession, isAdmin }) {
-  const [showAdd, setShowAdd] = useState(false);
-  const signups = session.signups || [];
-  const waitlist = session.waitlist || [];
-  const confirmed = signups.slice(0, MAX_PLAYERS);
-  const overflow = [...signups.slice(MAX_PLAYERS), ...waitlist];
-  const spotsLeft = Math.max(0, MAX_PLAYERS - confirmed.length);
-  const isFull = spotsLeft === 0;
-  const teams = Math.floor(confirmed.length / 2);
-  const teamsLeft = Math.max(0, 16 - teams);
-  const notSignedUp = (state.players || []).filter(p => !signups.includes(p.id) && !waitlist.includes(p.id));
+function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
+  const slots = session.signupSlots || Array(MAX_TEAMS).fill("");
+  const waitlist = session.signupWaitlist || Array(WL_SIZE).fill("");
+  const filledSlots = slots.filter(s => s.trim()).length;
+  const filledWl = waitlist.filter(s => s.trim()).length;
+  const isFull = filledSlots >= MAX_TEAMS;
 
-  const removePlayer = (pid) => updateSession(s => ({
-    ...s,
-    signups: (s.signups || []).filter(id => id !== pid),
-    waitlist: (s.waitlist || []).filter(id => id !== pid),
-  }));
-  const addPlayer = (pid) => {
-    updateSession(s => {
-      const cur = s.signups || [];
-      if (cur.includes(pid)) return s;
-      if (cur.length < MAX_PLAYERS) return { ...s, signups: [...cur, pid] };
-      const wl = s.waitlist || [];
-      return { ...s, waitlist: [...wl, pid] };
-    });
-  };
-  const moveFromWaitlist = (pid) => {
-    updateSession(s => {
-      const cur = s.signups || [];
-      if (cur.length >= MAX_PLAYERS) return s;
-      return { ...s, signups: [...cur, pid], waitlist: (s.waitlist||[]).filter(id=>id!==pid) };
-    });
-  };
+  const setSlot = (i, v) => updateSession(s => {
+    const arr = [...(s.signupSlots || Array(MAX_TEAMS).fill(""))];
+    arr[i] = v;
+    return { ...s, signupSlots: arr };
+  });
+  const setWl = (i, v) => updateSession(s => {
+    const arr = [...(s.signupWaitlist || Array(WL_SIZE).fill(""))];
+    arr[i] = v;
+    return { ...s, signupWaitlist: arr };
+  });
+  const clearSlot = (i) => setSlot(i, "");
+  const clearWl = (i) => setWl(i, "");
 
   return (
     <div className="space-y-4">
-      {/* Counter */}
-      <div style={{ background: "var(--cream)", border: "5px solid var(--ink)", boxShadow: isFull ? "6px 6px 0 #ef4444" : "6px 6px 0 var(--orange)", padding: "16px 20px" }}>
-        <div className="flex items-center justify-between">
+      {/* Counter bar */}
+      <div style={{ background:"var(--cream)", border:"5px solid var(--ink)", boxShadow: isFull ? "6px 6px 0 #ef4444" : "6px 6px 0 var(--orange)", padding:"14px 18px" }}>
+        <div className="flex items-center justify-between mb-3">
           <div>
-            <div style={{ fontFamily: "'Bangers',cursive", fontSize: 48, lineHeight: 1, color: isFull ? "#ef4444" : "var(--ink)", WebkitTextStroke: "2px var(--ink)" }}>
-              {confirmed.length}<span style={{ fontSize: 28, color: "rgba(11,8,20,.4)" }}>/{MAX_PLAYERS}</span>
+            <div style={{ fontFamily:"'Bangers',cursive", fontSize:46, lineHeight:1, color: isFull ? "#ef4444" : "var(--ink)", WebkitTextStroke:"2px var(--ink)" }}>
+              {filledSlots}<span style={{ fontSize:26, color:"rgba(11,8,20,.4)" }}>/{MAX_TEAMS}</span>
             </div>
-            <div style={{ fontWeight: 900, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(11,8,20,.6)", marginTop: 2 }}>
-              Players · {teams} team{teams !== 1 ? "s" : ""} · {isFull ? "FULL" : `${teamsLeft} team${teamsLeft !== 1 ? "s" : ""} left`}
+            <div style={{ fontWeight:900, fontSize:10, letterSpacing:".18em", textTransform:"uppercase", color:"rgba(11,8,20,.6)", marginTop:2 }}>
+              Teams · {isFull ? "FULL" : `${MAX_TEAMS - filledSlots} spot${MAX_TEAMS - filledSlots !== 1 ? "s" : ""} left`}
+              {filledWl > 0 && ` · ${filledWl} waitlisted`}
             </div>
           </div>
-          <div style={{ textAlign: "right" }}>
+          <div style={{ display:"flex", flexDirection:"column", gap:6, alignItems:"flex-end" }}>
             {isFull
-              ? <div style={{ fontFamily:"'Bangers',cursive", fontSize:22, color:"#ef4444", border:"3px solid #ef4444", padding:"4px 12px" }}>🔒 FULL</div>
-              : <div style={{ fontFamily:"'Bangers',cursive", fontSize:22, color:"var(--orange)", border:"3px solid var(--ink)", padding:"4px 12px", boxShadow:"3px 3px 0 var(--ink)" }}>{spotsLeft} OPEN</div>
+              ? <div style={{ fontFamily:"'Bangers',cursive", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>🔒 FULL</div>
+              : <div style={{ fontFamily:"'Bangers',cursive", fontSize:20, color:"var(--orange)", border:"3px solid var(--ink)", padding:"3px 10px", boxShadow:"3px 3px 0 var(--ink)" }}>{MAX_TEAMS - filledSlots} OPEN</div>
             }
+            <button onClick={onRemind} style={{ fontFamily:"'Bangers',cursive", fontSize:15, color:"var(--ink)", background:"var(--gold)", border:"2px solid var(--ink)", boxShadow:"2px 2px 0 var(--ink)", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
           </div>
         </div>
-        {/* Progress bar */}
-        <div style={{ marginTop: 12, height: 8, background: "rgba(11,8,20,.12)", border: "2px solid var(--ink)" }}>
-          <div style={{ height: "100%", width: `${(confirmed.length / MAX_PLAYERS) * 100}%`, background: isFull ? "#ef4444" : "linear-gradient(90deg, var(--orange), var(--red))", transition: "width .3s" }} />
+        <div style={{ height:7, background:"rgba(11,8,20,.12)", border:"2px solid var(--ink)" }}>
+          <div style={{ height:"100%", width:`${(filledSlots/MAX_TEAMS)*100}%`, background: isFull ? "#ef4444" : "linear-gradient(90deg, var(--orange), var(--red))", transition:"width .3s" }} />
         </div>
       </div>
 
-      {/* Confirmed list */}
-      {confirmed.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-xs text-stone-500 uppercase tracking-widest font-bold flex items-center justify-between">
-            <span>✅ Confirmed ({confirmed.length})</span>
-            <span className="text-stone-600">{teams} / 16 teams</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {confirmed.map((pid, i) => {
-              const pl = state.players.find(p => p.id === pid);
-              return (
-                <div key={pid} style={{ background:"var(--cream)", border:"3px solid var(--ink)", boxShadow:"3px 3px 0 var(--ink)", padding:"8px 10px", display:"flex", alignItems:"center", gap:8 }}>
-                  <div style={{ fontFamily:"'Bangers',cursive", fontSize:13, color:"rgba(11,8,20,.4)", width:18, textAlign:"right", flexShrink:0 }}>{i+1}</div>
-                  <Avatar player={pl || { name: "?" }} size={24} />
-                  <span style={{ flex:1, fontSize:13, fontWeight:700, color:"var(--ink)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{pl?.name || "Unknown"}</span>
-                  {isAdmin && <button onClick={() => removePlayer(pid)} className="text-stone-400 hover:text-red-500 text-xs shrink-0">✕</button>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Waitlist */}
-      {overflow.length > 0 && (
-        <div className="space-y-2">
-          <div className="text-xs text-stone-500 uppercase tracking-widest font-bold">⏳ Waitlist ({overflow.length})</div>
-          <div className="space-y-1">
-            {overflow.map((pid, i) => {
-              const pl = state.players.find(p => p.id === pid);
-              return (
-                <div key={pid} style={{ background:"rgba(255,247,232,.5)", border:"2px solid rgba(11,8,20,.3)", padding:"8px 10px", display:"flex", alignItems:"center", gap:8, opacity:.8 }}>
-                  <span style={{ fontSize:11, fontWeight:700, color:"rgba(11,8,20,.4)", width:18, textAlign:"right" }}>W{i+1}</span>
-                  <Avatar player={pl || { name: "?" }} size={22} />
-                  <span style={{ flex:1, fontSize:13, fontWeight:700, color:"var(--ink)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{pl?.name || "Unknown"}</span>
-                  {isAdmin && <>
-                    {!isFull && <button onClick={() => moveFromWaitlist(pid)} className="text-xs font-bold text-emerald-600 mr-1">↑ Move up</button>}
-                    <button onClick={() => removePlayer(pid)} className="text-stone-400 hover:text-red-500 text-xs">✕</button>
-                  </>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Empty state */}
-      {confirmed.length === 0 && <div className="text-center text-stone-500 py-10">{isAdmin ? "No sign-ups yet — tap Add to start the list" : "No sign-ups recorded yet"}</div>}
-
-      {/* Admin: add player */}
-      {isAdmin && notSignedUp.length > 0 && <Btn className="w-full" onClick={() => setShowAdd(true)}><I.plus size={14} /> Add Player ({notSignedUp.length} left)</Btn>}
-
-      {showAdd && <Modal open={true} onClose={() => setShowAdd(false)} title="ADD TO LIST">
-        <div className="space-y-2 max-h-80 overflow-y-auto">
-          {notSignedUp.map(p => (
-            <button key={p.id} onClick={() => { addPlayer(p.id); }} className="w-full flex items-center gap-3 p-2.5 rounded-lg bg-stone-900/60 hover:bg-stone-800 text-left">
-              <Avatar player={p} size={30} />
-              <span className="font-semibold text-stone-200">{p.name}</span>
-              {(session.signups||[]).length >= MAX_PLAYERS && <span className="ml-auto text-xs text-amber-400">→ Waitlist</span>}
-            </button>
+      {/* 16 team slots */}
+      <div>
+        <div className="text-xs text-stone-500 uppercase tracking-widest font-bold mb-2">✅ Team Slots</div>
+        <div className="space-y-1.5">
+          {slots.map((val, i) => (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background: val.trim() ? "var(--cream)" : "rgba(255,247,232,.35)", border: val.trim() ? "3px solid var(--ink)" : "2px dashed rgba(11,8,20,.25)", boxShadow: val.trim() ? "3px 3px 0 var(--ink)" : "none", padding:"6px 10px" }}>
+              <span style={{ fontFamily:"'Bangers',cursive", fontSize:16, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.3)", width:22, flexShrink:0 }}>{i + 1}-</span>
+              {isAdmin
+                ? <input value={val} onChange={e => setSlot(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:700, color:"var(--ink)", minWidth:0 }} />
+                : <span style={{ flex:1, fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.25)" }}>{val.trim() || "—"}</span>
+              }
+              {isAdmin && val.trim() && <button onClick={() => clearSlot(i)} style={{ color:"rgba(11,8,20,.35)", fontSize:13, background:"none", border:"none", cursor:"pointer", padding:2 }}>✕</button>}
+            </div>
           ))}
         </div>
-      </Modal>}
+      </div>
+
+      {/* Waitlist */}
+      <div>
+        <div className="text-xs text-stone-500 uppercase tracking-widest font-bold mb-2">⏳ Waitlist</div>
+        <div className="space-y-1.5">
+          {waitlist.map((val, i) => (
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(255,247,232,.25)", border:"2px dashed rgba(11,8,20,.2)", padding:"6px 10px", opacity: val.trim() ? 1 : 0.6 }}>
+              <span style={{ fontFamily:"'Bangers',cursive", fontSize:14, color:"rgba(11,8,20,.4)", width:22, flexShrink:0 }}>{i + 1}-</span>
+              {isAdmin
+                ? <input value={val} onChange={e => setWl(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:13, fontWeight:700, color:"var(--ink)", minWidth:0 }} />
+                : <span style={{ flex:1, fontSize:13, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.25)" }}>{val.trim() || "—"}</span>
+              }
+              {isAdmin && val.trim() && <button onClick={() => clearWl(i)} style={{ color:"rgba(11,8,20,.35)", fontSize:13, background:"none", border:"none", cursor:"pointer", padding:2 }}>✕</button>}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="text-[10px] text-stone-600 text-center">⚠️ 16 teams max · first come, first served</div>
     </div>
   );
 }
@@ -2697,10 +2662,10 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
             </button>
           ))}
           {(() => {
-            const cnt = (session.signups||[]).length;
-            const isFull = cnt >= MAX_PLAYERS;
+            const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
+            const isFull = cnt >= MAX_TEAMS;
             return <button onClick={() => setTab("signups")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "signups" ? "border-transparent text-white" : isFull ? "text-red-400 border-transparent" : "text-stone-400 border-transparent"}`} style={tab === "signups" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}>
-              📋 List{cnt > 0 ? ` ${cnt}/${MAX_PLAYERS}` : ""}
+              📋 List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
             </button>;
           })()}
           {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-stone-400">🎲 Draw</button>}
@@ -2711,7 +2676,7 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
         {tab === "teams" && <TeamsTab session={session} state={state} updateSession={updateSession} update={update} isAdmin={isAdmin} leaderboard={leaderboard || []} />}
-        {tab === "signups" && <SignupsTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} />}
+        {tab === "signups" && <SignupsTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} onRemind={() => { navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard||[])); alert("Copied! Paste in WhatsApp."); }} />}
         {tab === "groups" && <GroupsTab session={session} state={state} updateSession={updateSession} isAdmin={canScore} />}
         {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "photos" && <div className="space-y-4">
