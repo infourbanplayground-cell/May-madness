@@ -2273,15 +2273,43 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
   </Modal>;
 }
 
+const SEASON_ANNOUNCEMENT = `🔥🔥🔥 *IT'S BACK* 🔥🔥🔥
+
+*JULY HEAT · Urban Social Series Vol. 5*
+_The heat is ON — and so are the points_ ☀️
+
+After the dust settled on June Fury, we're kicking off a brand new season with bigger nights, bigger drama, and the same relentless competition you love 🏆
+
+📅 *FIRST SESSION:*
+*This Thursday* — mark it, block it, don't miss it
+
+📍 Urban Playground
+🕠 5:30 PM
+💸 7 OMR per player
+
+📆 *From next week:*
+Back to *Monday & Wednesday* all month long — 9 sessions total, and Sessions 8 & 9 pay *DOUBLE POINTS* 🔥
+
+💰 *402 OMR prize pool* up for grabs
+
+New season. New partners. New rivalries.
+Your June Fury points carry over — but the throne is wide open 👑
+
+Drop your name + partner below to lock your spot 👇
+
+⚠️ *16 teams max · first come, first served*`;
+
 function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard }) {
   const [show, setShow] = useState(false);
   const [showDraft, setShowDraft] = useState(false);
+  const [showAnnounce, setShowAnnounce] = useState(false);
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-3xl text-stone-100">SESSIONS</h2>
         <div className="flex gap-2">
-          <Btn size="sm" variant="secondary" onClick={() => setShowDraft(true)}>📣 Draft Post</Btn>
+          <Btn size="sm" variant="secondary" onClick={() => setShowAnnounce(true)}>📢 Announce</Btn>
+          <Btn size="sm" variant="secondary" onClick={() => setShowDraft(true)}>📣 Signup</Btn>
           {isAdmin && <Btn size="sm" onClick={() => setShow(true)}><I.plus size={14} /> New</Btn>}
         </div>
       </div>
@@ -2310,6 +2338,12 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard })
       </div>
       {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||1, thirdPlaceMode: thirdPlaceMode||"best2", teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
       {showDraft && <DraftReminderModal onClose={() => setShowDraft(false)} state={state} leaderboard={leaderboard} />}
+      {showAnnounce && <Modal open={true} onClose={() => setShowAnnounce(false)} title="SEASON ANNOUNCEMENT">
+        <div className="space-y-3">
+          <textarea readOnly rows={18} value={SEASON_ANNOUNCEMENT} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
+          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(SEASON_ANNOUNCEMENT); setShowAnnounce(false); }}>📋 Copy for WhatsApp</Btn>
+        </div>
+      </Modal>}
     </div>
   );
 }
