@@ -2319,8 +2319,9 @@ function MyBetsTab({matches,predictions,builders,lang,onCancelBuilder}){
 function LeaderboardTab({leaderboard,currentPlayer,lang}){
   const T=TX[lang];
   const [expandedId,setExpandedId]=useState(null);
-  const [predCache,setPredCache]=useState({});
+  const [betsCache,setBetsCache]=useState({});
   const [loadingId,setLoadingId]=useState(null);
+  const [expandedBuilders,setExpandedBuilders]=useState(new Set());
   const podiumColors=[
     {rank:'#F2C14E',bg:'rgba(242,193,78,0.06)',border:'rgba(242,193,78,0.2)',num:'var(--gold)'},
     {rank:'#C0C0C0',bg:'rgba(192,192,192,0.05)',border:'rgba(192,192,192,0.15)',num:'#C0C0C0'},
@@ -2329,14 +2330,15 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
   async function togglePlayer(id){
     if(expandedId===id){setExpandedId(null);return;}
     setExpandedId(id);
-    if(!predCache[id]){
+    if(!betsCache[id]){
       setLoadingId(id);
-      try{
-        const data=await apiFetch(`/wc/player/${id}/predictions`);
-        setPredCache(c=>({...c,[id]:data}));
-      }catch(e){setPredCache(c=>({...c,[id]:[]}))}
+      try{const data=await apiFetch(`/wc/player/${id}/bets`);setBetsCache(c=>({...c,[id]:data}));}
+      catch(e){setBetsCache(c=>({...c,[id]:{predictions:[],builders:[]}}))}
       setLoadingId(null);
     }
+  }
+  function toggleBuilder(bid){
+    setExpandedBuilders(prev=>{const n=new Set(prev);n.has(bid)?n.delete(bid):n.add(bid);return n;});
   }
   function fmtPick(pred,m){
     if(pred==='1') return m.home_team;
@@ -2348,11 +2350,17 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
     if(pred==='BTTS-N') return 'BTTS No';
     if(pred==='OVER2.5') return 'Over 2.5';
     if(pred==='UNDER2.5') return 'Under 2.5';
-    if(pred==='DNB1') return 'DNB '+m.home_team;
-    if(pred==='DNB2') return 'DNB '+m.away_team;
+    if(pred==='QUALIFY1') return (m.home_team||'Home')+' to Qualify';
+    if(pred==='QUALIFY2') return (m.away_team||'Away')+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
     if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
     return pred;
+  }
+  function legColor(res){
+    if(res==='won') return {c:'var(--green)',bg:'rgba(0,201,123,0.08)',brd:'rgba(0,201,123,0.2)'};
+    if(res==='lost') return {c:'var(--red)',bg:'rgba(255,54,81,0.07)',brd:'rgba(255,54,81,0.15)'};
+    if(res==='refund') return {c:'var(--gold)',bg:'rgba(242,193,78,0.08)',brd:'rgba(242,193,78,0.2)'};
+    return {c:'var(--or)',bg:'rgba(255,114,64,0.06)',brd:'rgba(255,114,64,0.18)'};
   }
   return(
     <div className="pb-32 px-4 pt-3">
@@ -2364,7 +2372,9 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
         const profitColor=winnings>0?'var(--green)':'var(--muted)';
         const profitStr=winnings>0?'+$'+winnings.toFixed(0):'$0';
         const isExp=expandedId===p.id;
-        const preds=predCache[p.id];
+        const bets=betsCache[p.id];
+        const koPreds=bets?.predictions||[];
+        const builders=bets?.builders||[];
         return(
           <div key={p.id} className="match-card mb-2 overflow-hidden"
             style={{borderColor:style?.border||'var(--border2)',background:style?.bg||'var(--glass)',backdropFilter:'blur(16px)'}}>
@@ -2391,32 +2401,92 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
                 </div>
               </div>
             </div>
-            {/* ── Expanded bets ── */}
+            {/* ── Expanded section ── */}
             {isExp&&(
-              <div style={{borderTop:'1px solid var(--border2)',padding:'8px 16px 10px'}}>
-                {loadingId===p.id&&<div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>···</div>}
-                {preds&&preds.length===0&&(
-                  <div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'6px 0'}}>
-                    {lang==='ar'?'لا رهانات مؤكدة بعد':'No confirmed bets yet'}
+              <div style={{borderTop:'1px solid var(--border2)',padding:'8px 16px 12px',direction:'ltr'}}>
+                {loadingId===p.id&&<div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'8px 0'}}>···</div>}
+                {!loadingId&&bets&&koPreds.length===0&&builders.length===0&&(
+                  <div style={{textAlign:'center',color:'var(--muted)',fontSize:11,padding:'8px 0'}}>
+                    {lang==='ar'?'لا رهانات في أدوار الحذف':'No KO bets yet'}
                   </div>
                 )}
-                {preds&&preds.map(pr=>{
-                  const won=pr.settled&&parseFloat(pr.payout)>0;
-                  const lost=pr.settled&&parseFloat(pr.payout)===0;
-                  const icon=!pr.settled?'·':won?'✓':'✗';
-                  const iconColor=!pr.settled?'var(--muted)':won?'var(--green)':'var(--red)';
-                  const payStr=won?`+$${(parseFloat(pr.payout)-parseFloat(pr.stake)).toFixed(0)}`:lost?`-$${parseFloat(pr.stake).toFixed(0)}`:'';
-                  return(
-                    <div key={pr.match_id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
-                      <div style={{fontSize:12,color:iconColor,fontWeight:700,width:14,flexShrink:0,textAlign:'center'}}>{icon}</div>
-                      <div style={{flex:1,minWidth:0}}>
-                        <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pr.home_team} – {pr.away_team}</div>
-                        <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result&&pr.stage!=='group'?` · ${pr.home_score}–${pr.away_score}`:''}</div>
-                      </div>
-                      {payStr&&<div className="mono" style={{fontSize:11,fontWeight:700,color:won?'var(--green)':'var(--muted)',flexShrink:0}}>{payStr}</div>}
+                {/* KO predictions */}
+                {koPreds.length>0&&(
+                  <div style={{marginBottom:builders.length?10:0}}>
+                    <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:.6,textTransform:'uppercase',marginBottom:5}}>
+                      {lang==='ar'?'رهانات أدوار الحذف':'KO Bets'}
                     </div>
-                  );
-                })}
+                    {koPreds.map(pr=>{
+                      const won=pr.settled&&parseFloat(pr.payout)>parseFloat(pr.stake);
+                      const lost=pr.settled&&parseFloat(pr.payout)===0;
+                      const icon=!pr.settled?'·':won?'✓':'✗';
+                      const iconColor=!pr.settled?'var(--gold)':won?'var(--green)':'var(--red)';
+                      const payStr=won?`+$${(parseFloat(pr.payout)-parseFloat(pr.stake)).toFixed(0)}`:lost?`-$${parseFloat(pr.stake).toFixed(0)}`:'';
+                      return(
+                        <div key={pr.id} style={{display:'flex',alignItems:'center',gap:8,padding:'5px 0',borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                          <div style={{fontSize:12,color:iconColor,fontWeight:700,width:14,flexShrink:0,textAlign:'center'}}>{icon}</div>
+                          <div style={{flex:1,minWidth:0}}>
+                            <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{pr.home_team} – {pr.away_team}</div>
+                            <div style={{fontSize:10,color:'var(--muted)'}}>{fmtPick(pr.prediction,pr)}{pr.result?` · ${pr.home_score}–${pr.away_score}`:''}</div>
+                          </div>
+                          {payStr&&<div className="mono" style={{fontSize:11,fontWeight:700,color:won?'var(--green)':'var(--muted)',flexShrink:0}}>{payStr}</div>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Builders */}
+                {builders.length>0&&(
+                  <div>
+                    <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:.6,textTransform:'uppercase',marginBottom:5}}>
+                      {lang==='ar'?'الرهانات المركبة':'Builders'}
+                    </div>
+                    {builders.map(b=>{
+                      const bWon=b.settled&&parseFloat(b.payout)>parseFloat(b.stake);
+                      const bLost=b.settled&&parseFloat(b.payout)===0;
+                      const bPush=b.settled&&parseFloat(b.payout)>0&&parseFloat(b.payout)<=parseFloat(b.stake)*1.001;
+                      const bc=!b.settled?'var(--or)':bWon?'var(--green)':bLost?'var(--red)':'var(--gold)';
+                      const bbg=!b.settled?'rgba(255,114,64,0.05)':bWon?'rgba(0,201,123,0.05)':bLost?'rgba(255,54,81,0.04)':'rgba(242,193,78,0.04)';
+                      const bbrd=!b.settled?'rgba(255,114,64,0.18)':bWon?'rgba(0,201,123,0.18)':bLost?'rgba(255,54,81,0.13)':'rgba(242,193,78,0.18)';
+                      const bPay=bWon?`+$${(parseFloat(b.payout)-parseFloat(b.stake)).toFixed(0)}`:bLost?`-$${parseFloat(b.stake).toFixed(0)}`:bPush?'PUSH':'';
+                      const isExpB=expandedBuilders.has(b.id);
+                      return(
+                        <div key={b.id} onClick={()=>toggleBuilder(b.id)}
+                          style={{cursor:'pointer',padding:'7px 8px',borderRadius:9,marginBottom:5,border:`1px solid ${bbrd}`,background:bbg,transition:'all .1s'}}>
+                          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:6}}>
+                            <div style={{flex:1,minWidth:0}}>
+                              <div style={{fontSize:11,color:'var(--text)',fontWeight:600,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{b.home_team} – {b.away_team}</div>
+                              <div style={{display:'flex',alignItems:'center',gap:5,marginTop:2}}>
+                                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{color:bc,flexShrink:0}}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                <span style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk'}}>{(b.legs||[]).length} legs</span>
+                                <span className="mono" style={{fontSize:10,color:bc,fontWeight:700}}>{parseFloat(b.combined_odds).toFixed(2)}×</span>
+                                <span style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk'}}>${parseFloat(b.stake).toFixed(0)}</span>
+                              </div>
+                            </div>
+                            <div style={{display:'flex',alignItems:'center',gap:6,flexShrink:0}}>
+                              {bPay&&<span className="mono" style={{fontSize:12,fontWeight:800,color:bc}}>{bPay}</span>}
+                              <span style={{fontSize:8,color:'var(--muted)',transition:'transform .15s',transform:isExpB?'rotate(180deg)':'none',display:'inline-block'}}>▼</span>
+                            </div>
+                          </div>
+                          {isExpB&&(
+                            <div style={{marginTop:6,paddingTop:6,borderTop:'1px solid rgba(255,255,255,0.05)',display:'flex',flexWrap:'wrap',gap:3}} onClick={e=>e.stopPropagation()}>
+                              {(b.legs||[]).map(l=>{
+                                const lc=legColor(l.leg_result);
+                                return(
+                                  <span key={l.id} style={{fontSize:9,padding:'2px 7px',borderRadius:99,background:lc.bg,border:`1px solid ${lc.brd}`,color:lc.c,fontWeight:600,fontFamily:'Space Grotesk',display:'inline-flex',alignItems:'center',gap:2}}>
+                                    {fmtPick(l.prediction,b)}
+                                    <span className="mono" style={{opacity:.6,fontSize:8}}>{parseFloat(l.odds_locked).toFixed(2)}</span>
+                                    {l.leg_result&&<span style={{fontSize:7}}>{l.leg_result==='won'?'✓':l.leg_result==='lost'?'✗':l.leg_result==='refund'?'↩':'·'}</span>}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -2454,8 +2524,11 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   const [matchBets,setMatchBets]=useState([]);
   const [betsLoading,setBetsLoading]=useState(false);
   const [goalsMatchId,setGoalsMatchId]=useState(null);
-  const [homeGoals,setHomeGoals]=useState('');
-  const [awayGoals,setAwayGoals]=useState('');
+  const [goalScorers,setGoalScorers]=useState([]);
+  const [goalPlayers,setGoalPlayers]=useState([]);
+  const [newScorerName,setNewScorerName]=useState('');
+  const [newScorerMin,setNewScorerMin]=useState('');
+  const [loadingGoalPlayers,setLoadingGoalPlayers]=useState(false);
   const [creditPlayer,setCreditPlayer]=useState(null);
   const [creditAmount,setCreditAmount]=useState('');
 
@@ -2482,13 +2555,27 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
   async function savePlayer(){if(!editPlayer)return;setSaving(true);try{await apiFetch(`/wc/admin/player/${editPlayer.id}`,{method:'PUT',body:JSON.stringify({balance:parseFloat(epBal),name:epName||undefined})});showToast(T.toastPlayer,'success');setEditPlayer(null);onRefresh();}catch(e){showToast(e.message,'error');}setSaving(false);}
   async function deletePlayer(p){if(!confirm(`${T.confirmDelete} ${p.name}?`))return;try{await apiFetch(`/wc/admin/player/${p.id}`,{method:'DELETE'});showToast(T.toastDeleted,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
   async function undoResult(matchId){if(!confirm(T.confirmUndo))return;try{await apiFetch(`/wc/admin/result/${matchId}`,{method:'DELETE'});showToast(T.toastUndo,'success');onRefresh();}catch(e){showToast(e.message,'error');}}
+  async function openGoals(matchId){
+    if(goalsMatchId===matchId){setGoalsMatchId(null);return;}
+    setGoalsMatchId(matchId);setGoalScorers([]);setNewScorerName('');setNewScorerMin('');
+    setLoadingGoalPlayers(true);
+    try{const data=await apiFetch(`/wc/matches/${matchId}/players`);
+    const seen=new Set();
+    setGoalPlayers(data.filter(p=>{if(p.market!=='anytime'||seen.has(p.player_name))return false;seen.add(p.player_name);return true;}).sort((a,b)=>parseFloat(a.odds)-parseFloat(b.odds)));}
+    catch(e){setGoalPlayers([]);}
+    setLoadingGoalPlayers(false);
+  }
+  function addScorer(team){
+    if(!newScorerName)return;
+    setGoalScorers(prev=>[...prev,{key:Date.now()+Math.random(),name:newScorerName,team,minute:newScorerMin||''}]);
+    setNewScorerName('');setNewScorerMin('');
+  }
   async function submitGoals(matchId,homeTeam,awayTeam){
-    const parse=(text,team)=>text.split('\n').map((l,i)=>{const[nm,min]=l.trim().split(':');return nm.trim()?{scorer:nm.trim(),minute:parseInt(min)||50+i,team}:null;}).filter(Boolean);
-    const goals=[...parse(homeGoals,homeTeam),...parse(awayGoals,awayTeam)];
+    const goals=goalScorers.map((s,i)=>({scorer:s.name,minute:parseInt(s.minute)||50+i,team:s.team==='home'?homeTeam:awayTeam,isOwnGoal:false,isPenalty:false}));
     setSaving(true);
     try{const d=await apiFetch(`/wc/admin/match/${matchId}/goals`,{method:'POST',body:JSON.stringify({goals})});
     showToast(`⚽ Goals saved · ${d.resettled} bet(s) re-settled`,'success');
-    setGoalsMatchId(null);setHomeGoals('');setAwayGoals('');onRefresh();}
+    setGoalsMatchId(null);setGoalScorers([]);onRefresh();}
     catch(e){showToast(e.message,'error');}
     setSaving(false);
   }
@@ -2575,30 +2662,52 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                   <button onClick={()=>loadBets(m.id)} style={{fontSize:10,color:expandedBetsId===m.id?'var(--gold)':'var(--muted)',background:expandedBetsId===m.id?'rgba(242,193,78,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${expandedBetsId===m.id?'rgba(242,193,78,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                     {T.betsBtn} {expandedBetsId===m.id&&!betsLoading?`(${matchBets.length})`:''}
                   </button>
-                  <button onClick={()=>{setGoalsMatchId(goalsMatchId===m.id?null:m.id);setHomeGoals('');setAwayGoals('');}}
+                  <button onClick={()=>openGoals(m.id)}
                     style={{fontSize:10,color:goalsMatchId===m.id?'var(--green)':'var(--muted)',background:goalsMatchId===m.id?'rgba(0,201,123,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${goalsMatchId===m.id?'rgba(0,201,123,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                     ⚽ Goals
                   </button>
                 </div>
                 {goalsMatchId===m.id&&(
                   <div className="mt-2" style={{direction:'ltr',background:'rgba(0,201,123,0.04)',border:'1px solid rgba(0,201,123,0.12)',borderRadius:10,padding:'10px'}}>
-                    <div style={{fontSize:10,color:'var(--green)',fontFamily:'Space Grotesk',fontWeight:800,marginBottom:6}}>⚽ Goal Scorers — one name per line (Name:Minute optional)</div>
-                    <div className="flex gap-2">
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>{m.home_team}</div>
-                        <textarea value={homeGoals} onChange={e=>setHomeGoals(e.target.value)} placeholder={'Cody Gakpo:23\nMemphis Depay:67'} rows={3}
-                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',resize:'none',outline:'none'}}/>
+                    <div style={{fontSize:10,color:'var(--green)',fontFamily:'Space Grotesk',fontWeight:800,marginBottom:8}}>⚽ Goal Scorers</div>
+                    {loadingGoalPlayers&&<div style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',padding:'8px 0',textAlign:'center'}}>Loading players…</div>}
+                    {!loadingGoalPlayers&&(
+                      <div>
+                        <div style={{display:'flex',gap:5,flexWrap:'wrap',marginBottom:8}}>
+                          <select value={newScorerName} onChange={e=>setNewScorerName(e.target.value)}
+                            style={{flex:'2 1 120px',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',outline:'none'}}>
+                            <option value="">Select scorer…</option>
+                            {goalPlayers.map(pl=><option key={pl.player_name} value={pl.player_name}>{pl.player_name} ({parseFloat(pl.odds).toFixed(1)})</option>)}
+                          </select>
+                          <input type="number" min="1" max="120" placeholder="Min" value={newScorerMin} onChange={e=>setNewScorerMin(e.target.value)}
+                            style={{width:52,padding:'6px 5px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',outline:'none',textAlign:'center'}}/>
+                          <button onClick={()=>addScorer('home')} disabled={!newScorerName}
+                            style={{padding:'5px 9px',borderRadius:8,border:'1px solid rgba(74,158,255,0.3)',background:'rgba(74,158,255,0.1)',color:'var(--blue)',fontSize:10,fontFamily:'Space Grotesk',fontWeight:800,cursor:'pointer',opacity:newScorerName?1:.4}}>
+                            +{m.home_team.split(' ').slice(-1)[0]}
+                          </button>
+                          <button onClick={()=>addScorer('away')} disabled={!newScorerName}
+                            style={{padding:'5px 9px',borderRadius:8,border:'1px solid rgba(255,114,64,0.3)',background:'rgba(255,114,64,0.1)',color:'var(--or)',fontSize:10,fontFamily:'Space Grotesk',fontWeight:800,cursor:'pointer',opacity:newScorerName?1:.4}}>
+                            +{m.away_team.split(' ').slice(-1)[0]}
+                          </button>
+                        </div>
+                        {goalScorers.length===0&&<div style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',textAlign:'center',padding:'4px 0',opacity:.6}}>No scorers added yet</div>}
+                        <div style={{display:'flex',flexDirection:'column',gap:4,marginBottom:goalScorers.length?8:0}}>
+                          {goalScorers.map(s=>(
+                            <div key={s.key} style={{display:'flex',alignItems:'center',gap:6,padding:'4px 8px',borderRadius:8,background:s.team==='home'?'rgba(74,158,255,0.08)':'rgba(255,114,64,0.08)',border:`1px solid ${s.team==='home'?'rgba(74,158,255,0.2)':'rgba(255,114,64,0.2)'}`}}>
+                              <span style={{fontSize:9,fontWeight:800,color:s.team==='home'?'var(--blue)':'var(--or)',fontFamily:'Space Grotesk',minWidth:24,textTransform:'uppercase'}}>{s.team==='home'?m.home_team.split(' ').slice(-1)[0]:m.away_team.split(' ').slice(-1)[0]}</span>
+                              <span style={{flex:1,fontSize:11,color:'var(--text)',fontFamily:'Space Grotesk',fontWeight:600}}>{s.name}</span>
+                              <input type="number" min="1" max="120" value={s.minute} onChange={e=>setGoalScorers(prev=>prev.map(g=>g.key===s.key?{...g,minute:e.target.value}:g))}
+                                placeholder="Min" style={{width:44,padding:'2px 4px',borderRadius:6,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:10,fontFamily:'Space Grotesk',textAlign:'center',outline:'none'}}/>
+                              <button onClick={()=>setGoalScorers(prev=>prev.filter(g=>g.key!==s.key))} style={{background:'none',border:'none',color:'var(--red)',cursor:'pointer',fontSize:13,padding:'0 2px',lineHeight:1}}>✕</button>
+                            </div>
+                          ))}
+                        </div>
+                        <button onClick={()=>submitGoals(m.id,m.home_team,m.away_team)} disabled={saving}
+                          style={{width:'100%',padding:'7px',borderRadius:9,background:'var(--green)',color:'#002916',border:'none',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',cursor:'pointer'}}>
+                          {saving?'…':`Save ${goalScorers.length} scorer(s) & Re-settle`}
+                        </button>
                       </div>
-                      <div style={{flex:1}}>
-                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>{m.away_team}</div>
-                        <textarea value={awayGoals} onChange={e=>setAwayGoals(e.target.value)} placeholder={'Ismael Saibari:45'} rows={3}
-                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:11,fontFamily:'Space Grotesk',resize:'none',outline:'none'}}/>
-                      </div>
-                    </div>
-                    <button onClick={()=>submitGoals(m.id,m.home_team,m.away_team)} disabled={saving}
-                      style={{marginTop:8,width:'100%',padding:'7px',borderRadius:9,background:'var(--green)',color:'#002916',border:'none',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',cursor:'pointer'}}>
-                      {saving?'…':'Save & Re-settle Scorer Bets'}
-                    </button>
+                    )}
                   </div>
                 )}
                 {expandedBetsId===m.id&&(

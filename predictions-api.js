@@ -1646,6 +1646,50 @@ app.get('/wc/matches/:id/players', async (req, res) => {
   } catch(e) { res.status(500).json({error:e.message}); }
 });
 
+// Player's KO predictions + all builders with legs (public, for leaderboard)
+app.get('/wc/player/:id/bets', async (req, res) => {
+  try {
+    const { rows: preds } = await pool.query(`
+      SELECT p.id, p.match_id, p.prediction, p.settled, p.payout, p.stake, p.odds_locked,
+             m.home_team, m.away_team, m.kickoff, m.result,
+             m.home_score, m.away_score, m.stage
+      FROM wc_predictions p
+      JOIN wc_matches m ON m.id = p.match_id
+      WHERE p.player_id = $1
+        AND m.stage != 'group'
+        AND (m.settled = true OR m.kickoff <= NOW() + INTERVAL '5 minutes')
+      ORDER BY m.kickoff ASC
+    `, [req.params.id]);
+
+    const { rows: bldrs } = await pool.query(`
+      SELECT b.id, b.match_id, b.combined_odds, b.stake, b.payout, b.settled, b.created_at,
+             m.home_team, m.away_team, m.kickoff, m.stage
+      FROM wc_bet_builders b
+      JOIN wc_matches m ON m.id = b.match_id
+      WHERE b.player_id = $1
+        AND (m.settled = true OR m.kickoff <= NOW() + INTERVAL '5 minutes')
+      ORDER BY b.created_at DESC
+    `, [req.params.id]);
+
+    const bIds = bldrs.map(b => b.id);
+    const legMap = {};
+    if (bIds.length) {
+      const { rows: legs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id = ANY($1)', [bIds]);
+      legs.forEach(l => {
+        if (!legMap[l.builder_id]) legMap[l.builder_id] = [];
+        legMap[l.builder_id].push(l);
+      });
+    }
+
+    res.json({
+      predictions: preds,
+      builders: bldrs.map(b => ({ ...b, legs: legMap[b.id] || [] }))
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // All players' picks for a match (public; hidden until kickoff to prevent copying)
 app.get('/wc/matches/:id/picks', async (req, res) => {
   try {
