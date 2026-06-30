@@ -1646,6 +1646,50 @@ app.get('/wc/matches/:id/players', async (req, res) => {
   } catch(e) { res.status(500).json({error:e.message}); }
 });
 
+// All players' picks for a match (auth required; hidden until deadline passes)
+app.get('/wc/matches/:id/picks', auth, async (req, res) => {
+  try {
+    const { rows: mRows } = await pool.query('SELECT kickoff, settled FROM wc_matches WHERE id=$1', [req.params.id]);
+    if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
+    const m = mRows[0];
+    const deadline = new Date(m.kickoff).getTime() - 5 * 60 * 1000;
+    if (Date.now() < deadline && !m.settled) return res.json({ predictions: [], builders: [] });
+
+    const { rows: preds } = await pool.query(`
+      SELECT p.player_id, pl.name AS player_name, p.prediction, p.odds_locked, p.stake, p.payout, p.settled
+      FROM wc_predictions p
+      JOIN wc_players pl ON pl.id = p.player_id
+      WHERE p.match_id = $1
+      ORDER BY pl.name, p.prediction
+    `, [req.params.id]);
+
+    const { rows: bldrs } = await pool.query(`
+      SELECT b.id, b.player_id, pl.name AS player_name, b.combined_odds, b.stake, b.payout, b.settled
+      FROM wc_bet_builders b
+      JOIN wc_players pl ON pl.id = b.player_id
+      WHERE b.match_id = $1
+      ORDER BY pl.name
+    `, [req.params.id]);
+
+    const bIds = bldrs.map(b => b.id);
+    const legMap = {};
+    if (bIds.length) {
+      const { rows: legs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id = ANY($1)', [bIds]);
+      legs.forEach(l => {
+        if (!legMap[l.builder_id]) legMap[l.builder_id] = [];
+        legMap[l.builder_id].push(l);
+      });
+    }
+
+    res.json({
+      predictions: preds,
+      builders: bldrs.map(b => ({ ...b, legs: legMap[b.id] || [] }))
+    });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 initDB().then(() => {
   const PORT = 3002;
