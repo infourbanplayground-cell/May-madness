@@ -1147,7 +1147,7 @@ function NextMatchBanner({matches,lang}){
 }
 
 // ── Match Card ────────────────────────────────────────────────────────────────
-function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stake}){
+function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,lang,stake}){
   const T=TX[lang];
   const ref=useRef(null);
   const isDeadlinePassed=Date.now()>new Date(match.kickoff).getTime()-5*60*1000;
@@ -1617,6 +1617,70 @@ function MatchCard({match,predictions,onPickClick,onBuildClick,loading,lang,stak
         </div>
       )}
 
+      {/* ── Placed Builders ── */}
+      {(builders||[]).filter(b=>!b.settled).map(b=>{
+        const won=null; // pending
+        const potB=(parseFloat(b.stake)*parseFloat(b.combined_odds)).toFixed(2);
+        return(
+          <div key={b.id} style={{margin:'0 12px 6px',padding:'8px 10px',background:'rgba(242,193,78,0.04)',border:'1px solid rgba(242,193,78,0.18)',borderRadius:12,direction:'ltr'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:5}}>
+              <div style={{display:'flex',alignItems:'center',gap:5}}>
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2.5" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:800,color:'var(--gold)',letterSpacing:1,textTransform:'uppercase'}}>Builder</span>
+                <span style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:700,color:'var(--muted)',opacity:.7}}>{(b.legs||[]).length} legs</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <span style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk'}}>
+                  <span className="mono" style={{color:'var(--text)',fontWeight:700}}>${parseFloat(b.stake).toFixed(0)}</span> → <span className="mono" style={{color:'var(--green)',fontWeight:800}}>${potB}</span>
+                </span>
+                <span className="mono" style={{fontSize:14,fontWeight:800,color:'var(--gold)',letterSpacing:-0.5}}>{parseFloat(b.combined_odds).toFixed(2)}<span style={{fontSize:10,color:'var(--muted)',fontWeight:500}}>×</span></span>
+              </div>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:3}}>
+              {(b.legs||[]).map(l=>(
+                <span key={l.id} style={{fontSize:9,padding:'2px 7px',borderRadius:99,background:'rgba(242,193,78,0.08)',border:'1px solid rgba(242,193,78,0.2)',color:'var(--gold)',fontWeight:600,fontFamily:'Space Grotesk'}}>
+                  {bLegLabel(l.prediction)} <span className="mono" style={{opacity:.65,fontSize:8}}>{parseFloat(l.odds_locked).toFixed(2)}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      {/* ── Settled Builders on this match ── */}
+      {(builders||[]).filter(b=>b.settled).map(b=>{
+        const won=parseFloat(b.payout)>parseFloat(b.stake);
+        const refund=parseFloat(b.payout)>0&&parseFloat(b.payout)===parseFloat(b.stake);
+        const result=refund?'PUSH':won?`+$${(parseFloat(b.payout)-parseFloat(b.stake)).toFixed(0)}`:`-$${parseFloat(b.stake).toFixed(0)}`;
+        const rc=refund?'var(--gold)':won?'var(--green)':'var(--red)';
+        const bc=refund?'rgba(242,193,78,0.1)':won?'rgba(0,201,123,0.08)':'rgba(255,54,81,0.06)';
+        const bord=refund?'rgba(242,193,78,0.2)':won?'rgba(0,201,123,0.18)':'rgba(255,54,81,0.12)';
+        return(
+          <div key={b.id} style={{margin:'0 12px 6px',padding:'8px 10px',background:bc,border:`1px solid ${bord}`,borderRadius:12,direction:'ltr'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:5}}>
+              <div style={{display:'flex',alignItems:'center',gap:5}}>
+                <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:800,color:rc,letterSpacing:1,textTransform:'uppercase'}}>Builder</span>
+                <span style={{fontSize:9,fontFamily:'Space Grotesk',fontWeight:700,color:'var(--muted)',opacity:.7}}>{(b.legs||[]).length} legs</span>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <span className="mono" style={{fontSize:13,fontWeight:800,color:rc,letterSpacing:-0.5}}>{result}</span>
+                <span className="mono" style={{fontSize:11,fontWeight:700,color:'var(--muted)'}}>{parseFloat(b.combined_odds).toFixed(2)}×</span>
+              </div>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:3}}>
+              {(b.legs||[]).map(l=>{
+                const lc=l.leg_result==='won'?'var(--green)':l.leg_result==='lost'?'var(--red)':l.leg_result==='refund'?'var(--gold)':'var(--muted)';
+                const lb=l.leg_result==='won'?'rgba(0,201,123,.1)':l.leg_result==='lost'?'rgba(255,54,81,.08)':l.leg_result==='refund'?'rgba(242,193,78,.1)':'rgba(255,255,255,.04)';
+                return(
+                  <span key={l.id} style={{fontSize:9,padding:'2px 7px',borderRadius:99,background:lb,border:`1px solid ${lc}40`,color:lc,fontWeight:600,fontFamily:'Space Grotesk',display:'inline-flex',alignItems:'center',gap:3}}>
+                    {bLegLabel(l.prediction)}
+                    {l.leg_result&&<span style={{fontSize:7}}>{l.leg_result==='won'?'✓':l.leg_result==='lost'?'✗':l.leg_result==='refund'?'↩':'?'}</span>}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
       {/* ── Potential win ── */}
       {!match.settled&&preds.length>0&&(
         <div className="pb-3 relative z-10" style={{marginTop:-4,textAlign:'center'}}>
@@ -1848,11 +1912,12 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
 }
 
 // ── Fixtures Tab ──────────────────────────────────────────────────────────────
-function FixturesTab({matches,predictions,onPickClick,onBuildClick,loadingMatch,settings,lang}){
+function FixturesTab({matches,predictions,builders,onPickClick,onBuildClick,loadingMatch,settings,lang}){
   const T=TX[lang];
   const [filter,setFilter]=useState('all');
   const [showFinished,setShowFinished]=useState(false);
   const predMap={};(predictions||[]).forEach(p=>{if(!predMap[p.match_id])predMap[p.match_id]=[];predMap[p.match_id].push(p);});
+  const builderMap={};(builders||[]).forEach(b=>{if(!builderMap[b.match_id])builderMap[b.match_id]=[];builderMap[b.match_id].push(b);});
   const now=Date.now();
   const deadline=(m)=>new Date(m.kickoff).getTime()-5*60*1000;
   let shown=matches;
@@ -1882,7 +1947,7 @@ function FixturesTab({matches,predictions,onPickClick,onBuildClick,loadingMatch,
           <span className="section-stage-badge">{STAGE_EN[group.stage]||group.stage}</span>
         </div>
         {group.matches.map(m=>(
-          <MatchCard key={m.id} match={m} predictions={predMap[m.id]||[]}
+          <MatchCard key={m.id} match={m} predictions={predMap[m.id]||[]} builders={builderMap[m.id]||[]}
             onPickClick={onPickClick} onBuildClick={onBuildClick} loading={loadingMatch===m.id}
             lang={lang} stake={stake}/>
         ))}
@@ -3124,7 +3189,7 @@ function App(){
 
       {/* Content */}
       <div style={{position:'relative',zIndex:1}}>
-        {tab==='fixtures'&&<FixturesTab matches={matches} predictions={predictions} onPickClick={handlePickClick} onBuildClick={player?handleBuildClick:null} loadingMatch={loadingMatch} settings={settings} lang={lang}/>}
+        {tab==='fixtures'&&<FixturesTab matches={matches} predictions={predictions} builders={builders} onPickClick={handlePickClick} onBuildClick={player?handleBuildClick:null} loadingMatch={loadingMatch} settings={settings} lang={lang}/>}
         {tab==='mybets'&&<MyBetsTab matches={matches} predictions={predictions} builders={builders} lang={lang} onCancelBuilder={async(b)=>{try{const d=await apiFetch(`/wc/bet-builder/${b.id}`,{method:'DELETE'});setPlayer(p=>({...p,balance:d.newBalance}));loadBuilders();showToast(lang==='ar'?'تم إلغاء الرهان':'Builder cancelled','success');}catch(e){showToast(e.message,'error');}}}/>}
         {tab==='leaderboard'&&<LeaderboardTab leaderboard={leaderboard} currentPlayer={player} lang={lang}/>}
       </div>
