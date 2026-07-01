@@ -218,6 +218,20 @@ async function initDB() {
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_under25 NUMERIC(6,3);
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_home NUMERIC(6,3);
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_dnb_away NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS corners_line NUMERIC(5,1);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS cards_line NUMERIC(5,1);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_corners_over NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_corners_under NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_cards_over NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_cards_under NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_btts_card_yes NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_btts_card_no NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_firstcorner_home NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS odds_firstcorner_away NUMERIC(6,3);
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS total_corners INT;
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS total_cards INT;
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS first_corner TEXT;
+    ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS btts_card BOOLEAN;
     ALTER TABLE wc_matches ADD COLUMN IF NOT EXISTS qualifier TEXT;
     ALTER TABLE wc_predictions DROP CONSTRAINT IF EXISTS wc_predictions_player_id_match_id_key;
     DO $$ BEGIN
@@ -414,7 +428,7 @@ app.get('/wc/me', auth, async (req, res) => {
 app.post('/wc/predict', auth, async (req, res) => {
   try {
     const { matchId, prediction, stake: requestedStake } = req.body;
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2','CORNERS-OVER','CORNERS-UNDER','CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'];
     const isKOMarket = KO_MARKETS.includes(prediction) || prediction.startsWith('ANYTIME:') || prediction.startsWith('FIRST:');
     const validStandard = ['1','X','2','1X','X2','12'].includes(prediction);
     if (!validStandard && !isKOMarket) return res.status(400).json({ error: 'Invalid prediction' });
@@ -449,6 +463,14 @@ app.post('/wc/predict', auth, async (req, res) => {
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
       'DNB1': parseFloat(match.odds_dnb_home) || bh,
       'DNB2': parseFloat(match.odds_dnb_away) || ba,
+      'CORNERS-OVER': parseFloat(match.odds_corners_over)||0,
+      'CORNERS-UNDER': parseFloat(match.odds_corners_under)||0,
+      'CARDS-OVER': parseFloat(match.odds_cards_over)||0,
+      'CARDS-UNDER': parseFloat(match.odds_cards_under)||0,
+      'BTTS-CARD-Y': parseFloat(match.odds_btts_card_yes)||0,
+      'BTTS-CARD-N': parseFloat(match.odds_btts_card_no)||0,
+      'FIRSTCORNER-1': parseFloat(match.odds_firstcorner_home)||0,
+      'FIRSTCORNER-2': parseFloat(match.odds_firstcorner_away)||0,
     };
     // Qualify odds: inferred from 1X2 assuming 50/50 on ET/pens if drawn
     const _p1=1/bh, _px=1/bd, _p2=1/ba, _tot=_p1+_px+_p2;
@@ -742,7 +764,9 @@ app.post('/wc/admin/result', adminAuth, async (req, res) => {
 app.put('/wc/admin/match/:id', adminAuth, async (req, res) => {
   try {
     const { homeTeam, awayTeam, homeFlag, awayFlag, homeOdds, drawOdds, awayOdds, kickoff, venue,
-            odds1X, oddsX2, oddsBttsYes, oddsBttsNo, oddsOver25, oddsUnder25, oddsDnbHome, oddsDnbAway } = req.body;
+            odds1X, oddsX2, oddsBttsYes, oddsBttsNo, oddsOver25, oddsUnder25, oddsDnbHome, oddsDnbAway,
+            cornersLine, cardsLine, oddsCornersOver, oddsCornersUnder, oddsCardsOver, oddsCardsUnder,
+            oddsBttsCardYes, oddsBttsCardNo, oddsFirstcornerHome, oddsFirstcornerAway } = req.body;
     await pool.query(
       `UPDATE wc_matches SET
         home_team=COALESCE($1,home_team), away_team=COALESCE($2,away_team),
@@ -752,17 +776,86 @@ app.put('/wc/admin/match/:id', adminAuth, async (req, res) => {
         odds_1x=COALESCE($11,odds_1x), odds_x2=COALESCE($12,odds_x2),
         odds_btts_yes=COALESCE($13,odds_btts_yes), odds_btts_no=COALESCE($14,odds_btts_no),
         odds_over25=COALESCE($15,odds_over25), odds_under25=COALESCE($16,odds_under25),
-        odds_dnb_home=COALESCE($17,odds_dnb_home), odds_dnb_away=COALESCE($18,odds_dnb_away)
+        odds_dnb_home=COALESCE($17,odds_dnb_home), odds_dnb_away=COALESCE($18,odds_dnb_away),
+        corners_line=COALESCE($19,corners_line), cards_line=COALESCE($20,cards_line),
+        odds_corners_over=COALESCE($21,odds_corners_over), odds_corners_under=COALESCE($22,odds_corners_under),
+        odds_cards_over=COALESCE($23,odds_cards_over), odds_cards_under=COALESCE($24,odds_cards_under),
+        odds_btts_card_yes=COALESCE($25,odds_btts_card_yes), odds_btts_card_no=COALESCE($26,odds_btts_card_no),
+        odds_firstcorner_home=COALESCE($27,odds_firstcorner_home), odds_firstcorner_away=COALESCE($28,odds_firstcorner_away)
        WHERE id=$10`,
       [homeTeam||null, awayTeam||null, homeFlag||null, awayFlag||null,
        homeOdds||null, drawOdds||null, awayOdds||null, kickoff||null, venue||null, req.params.id,
        odds1X||null, oddsX2||null, oddsBttsYes||null, oddsBttsNo||null,
-       oddsOver25||null, oddsUnder25||null, oddsDnbHome||null, oddsDnbAway||null]
+       oddsOver25||null, oddsUnder25||null, oddsDnbHome||null, oddsDnbAway||null,
+       cornersLine||null, cardsLine||null,
+       oddsCornersOver||null, oddsCornersUnder||null, oddsCardsOver||null, oddsCardsUnder||null,
+       oddsBttsCardYes||null, oddsBttsCardNo||null, oddsFirstcornerHome||null, oddsFirstcornerAway||null]
     );
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// Enter corners/cards result and settle bets
+app.post('/wc/admin/match/:id/corncards', adminAuth, async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const { totalCorners, totalCards, firstCorner, bttsCard } = req.body;
+    await pool.query(
+      `UPDATE wc_matches SET
+       total_corners=COALESCE($1,total_corners), total_cards=COALESCE($2,total_cards),
+       first_corner=COALESCE($3,first_corner), btts_card=COALESCE($4::boolean,btts_card)
+       WHERE id=$5`,
+      [totalCorners??null, totalCards??null, firstCorner||null, bttsCard??null, matchId]
+    );
+    const { rows: mRows } = await pool.query('SELECT * FROM wc_matches WHERE id=$1', [matchId]);
+    if (!mRows.length) return res.status(404).json({ error: 'Match not found' });
+    const match = mRows[0];
+    const CC = ['CORNERS-OVER','CORNERS-UNDER','CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'];
+    const { rows: preds } = await pool.query('SELECT * FROM wc_predictions WHERE match_id=$1 AND prediction=ANY($2)', [matchId, CC]);
+    let resettled = 0;
+    for (const p of preds) {
+      const r = settleCornCardsPred(p.prediction, match);
+      if (!r) continue;
+      const betOdds = parseFloat(p.odds_locked)||1.85;
+      const oldPayout = parseFloat(p.payout||0);
+      const newPayout = r.refund ? parseFloat(p.stake) : (r.won ? parseFloat(p.stake)*betOdds : 0);
+      await pool.query('UPDATE wc_predictions SET settled=true, payout=$1 WHERE id=$2', [newPayout, p.id]);
+      const diff = newPayout - oldPayout;
+      if (diff !== 0) await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [diff, p.player_id]);
+      resettled++;
+    }
+    // Settle builder legs
+    const { rows: builders } = await pool.query(
+      `SELECT DISTINCT b.* FROM wc_bet_builders b JOIN wc_bet_builder_legs l ON l.builder_id=b.id WHERE b.match_id=$1 AND l.prediction=ANY($2)`,
+      [matchId, CC]
+    );
+    for (const b of builders) {
+      const { rows: legs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]);
+      const updates = [];
+      for (const leg of legs) {
+        if (CC.includes(leg.prediction)) {
+          const r = settleCornCardsPred(leg.prediction, match);
+          if (r) updates.push({ id: leg.id, res: r.refund ? 'refund' : r.won ? 'won' : 'lost' });
+        }
+      }
+      for (const u of updates) await pool.query('UPDATE wc_bet_builder_legs SET leg_result=$1 WHERE id=$2', [u.res, u.id]);
+      const { rows: updLegs } = await pool.query('SELECT * FROM wc_bet_builder_legs WHERE builder_id=$1', [b.id]);
+      if (!updLegs.every(l => ['won','lost','refund'].includes(l.leg_result))) continue;
+      const active = updLegs.filter(l => l.leg_result !== 'refund');
+      const builderWon = active.length > 0 && active.every(l => l.leg_result === 'won');
+      const fullRefund = active.length === 0;
+      let newPayout;
+      if (fullRefund) { newPayout = parseFloat(b.stake); }
+      else if (builderWon) { newPayout = parseFloat(b.stake) * active.reduce((acc,l) => acc*parseFloat(l.odds_locked), 1); }
+      else { newPayout = 0; }
+      const diff = newPayout - parseFloat(b.payout||0);
+      await pool.query('UPDATE wc_bet_builders SET settled=true, payout=$1 WHERE id=$2', [newPayout, b.id]);
+      if (diff !== 0) await pool.query('UPDATE wc_players SET balance=balance+$1 WHERE id=$2', [diff, b.player_id]);
+    }
+    res.json({ ok: true, resettled });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 // Get all players (admin)
@@ -1168,6 +1261,41 @@ function settleKOPrediction(prediction, homeScore, awayScore, goalScorers = [], 
     const nonOG = goalScorers.filter(g => !g.is_own_goal).sort((a,b) => (a.minute||999)-(b.minute||999));
     return { won: nonOG.length > 0 && nonOG[0].scorer_name.toLowerCase().trim() === name, refund: false };
   }
+  return null;
+}
+
+// ── Corners & Cards settlement helper ─────────────────────────────────────────
+function settleCornCardsPred(prediction, match) {
+  const cl = parseFloat(match.corners_line);
+  const cardl = parseFloat(match.cards_line);
+  const tc = parseInt(match.total_corners);
+  const tcard = parseInt(match.total_cards);
+  const fc = match.first_corner;
+  const btts = match.btts_card;
+  if (prediction === 'CORNERS-OVER') {
+    if (isNaN(tc)||isNaN(cl)) return null;
+    if (tc === cl) return { won: false, refund: true };
+    return { won: tc > cl, refund: false };
+  }
+  if (prediction === 'CORNERS-UNDER') {
+    if (isNaN(tc)||isNaN(cl)) return null;
+    if (tc === cl) return { won: false, refund: true };
+    return { won: tc < cl, refund: false };
+  }
+  if (prediction === 'CARDS-OVER') {
+    if (isNaN(tcard)||isNaN(cardl)) return null;
+    if (tcard === cardl) return { won: false, refund: true };
+    return { won: tcard > cardl, refund: false };
+  }
+  if (prediction === 'CARDS-UNDER') {
+    if (isNaN(tcard)||isNaN(cardl)) return null;
+    if (tcard === cardl) return { won: false, refund: true };
+    return { won: tcard < cardl, refund: false };
+  }
+  if (prediction === 'BTTS-CARD-Y') { if (btts==null) return null; return { won: btts===true, refund: false }; }
+  if (prediction === 'BTTS-CARD-N') { if (btts==null) return null; return { won: btts===false, refund: false }; }
+  if (prediction === 'FIRSTCORNER-1') { if (!fc) return null; return { won: fc==='home', refund: false }; }
+  if (prediction === 'FIRSTCORNER-2') { if (!fc) return null; return { won: fc==='away', refund: false }; }
   return null;
 }
 
