@@ -2467,6 +2467,14 @@ function LeaderboardTab({leaderboard,currentPlayer,lang}){
     if(pred==='QUALIFY2') return (m.away_team||'Away')+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
     if(pred.startsWith('FIRST:')) return '1st: '+pred.slice(6);
+    if(pred==='CORNERS-OVER') return `Over ${parseFloat(m.corners_line)||'?'} Corners`;
+    if(pred==='CORNERS-UNDER') return `Under ${parseFloat(m.corners_line)||'?'} Corners`;
+    if(pred==='CARDS-OVER') return `Over ${parseFloat(m.cards_line)||'?'} Cards`;
+    if(pred==='CARDS-UNDER') return `Under ${parseFloat(m.cards_line)||'?'} Cards`;
+    if(pred==='BTTS-CARD-Y') return 'Both Carded';
+    if(pred==='BTTS-CARD-N') return 'Not Both Carded';
+    if(pred==='FIRSTCORNER-1') return (m.home_team||'Home')+' 1st Corner';
+    if(pred==='FIRSTCORNER-2') return (m.away_team||'Away')+' 1st Corner';
     return pred;
   }
   function legColor(res){
@@ -2809,7 +2817,56 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                     style={{fontSize:10,color:goalsMatchId===m.id?'var(--green)':'var(--muted)',background:goalsMatchId===m.id?'rgba(0,201,123,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${goalsMatchId===m.id?'rgba(0,201,123,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                     ⚽ Goals
                   </button>
+                  {m.stage==='r16'&&(
+                    <button type="button" onClick={()=>{setCcMatchId(ccMatchId===m.id?null:m.id);if(ccMatchId!==m.id){setCcCorners('');setCcCards('');setCcFirstCorner('');setCcBttsCard(null);}}}
+                      style={{fontSize:10,color:ccMatchId===m.id?'var(--blue)':'var(--muted)',background:ccMatchId===m.id?'rgba(74,158,255,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${ccMatchId===m.id?'rgba(74,158,255,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
+                      📐 C&amp;C
+                    </button>
+                  )}
                 </div>
+                {ccMatchId===m.id&&(
+                  <div className="mt-2" style={{direction:'ltr',background:'rgba(74,158,255,0.04)',border:'1px solid rgba(74,158,255,0.12)',borderRadius:10,padding:'10px'}}>
+                    <div style={{fontSize:10,color:'var(--blue)',fontFamily:'Space Grotesk',fontWeight:800,marginBottom:8}}>📐 Corners &amp; Cards Result</div>
+                    <div className="flex gap-2 mb-3">
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>Total Corners</div>
+                        <input type="number" min="0" max="30" value={ccCorners} onChange={e=>setCcCorners(e.target.value)} placeholder="0"
+                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:13,fontFamily:'Space Grotesk',fontWeight:700,outline:'none',textAlign:'center'}}/>
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:3}}>Total Cards</div>
+                        <input type="number" min="0" max="20" value={ccCards} onChange={e=>setCcCards(e.target.value)} placeholder="0"
+                          style={{width:'100%',boxSizing:'border-box',padding:'6px 8px',borderRadius:8,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:13,fontFamily:'Space Grotesk',fontWeight:700,outline:'none',textAlign:'center'}}/>
+                      </div>
+                    </div>
+                    {m.odds_btts_card_yes&&(
+                      <div style={{marginBottom:10}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:4}}>Both Teams Carded?</div>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={()=>setCcBttsCard(true)}
+                            style={{flex:1,padding:'6px',borderRadius:8,border:`1px solid ${ccBttsCard===true?'rgba(255,54,81,0.4)':'var(--border2)'}`,background:ccBttsCard===true?'rgba(255,54,81,0.1)':'transparent',color:ccBttsCard===true?'var(--red)':'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:11,cursor:'pointer'}}>Yes</button>
+                          <button type="button" onClick={()=>setCcBttsCard(false)}
+                            style={{flex:1,padding:'6px',borderRadius:8,border:`1px solid ${ccBttsCard===false?'rgba(0,201,123,0.4)':'var(--border2)'}`,background:ccBttsCard===false?'rgba(0,201,123,0.1)':'transparent',color:ccBttsCard===false?'var(--green)':'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:11,cursor:'pointer'}}>No</button>
+                        </div>
+                      </div>
+                    )}
+                    {m.odds_firstcorner_home&&(
+                      <div style={{marginBottom:10}}>
+                        <div style={{fontSize:9,color:'var(--muted)',fontFamily:'Space Grotesk',marginBottom:4}}>First Corner</div>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={()=>setCcFirstCorner('home')}
+                            style={{flex:1,padding:'6px',borderRadius:8,border:`1px solid ${ccFirstCorner==='home'?'rgba(74,158,255,0.4)':'var(--border2)'}`,background:ccFirstCorner==='home'?'rgba(74,158,255,0.1)':'transparent',color:ccFirstCorner==='home'?'var(--blue)':'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:10,cursor:'pointer'}}>{m.home_team}</button>
+                          <button type="button" onClick={()=>setCcFirstCorner('away')}
+                            style={{flex:1,padding:'6px',borderRadius:8,border:`1px solid ${ccFirstCorner==='away'?'rgba(255,114,64,0.4)':'var(--border2)'}`,background:ccFirstCorner==='away'?'rgba(255,114,64,0.1)':'transparent',color:ccFirstCorner==='away'?'var(--or)':'var(--muted)',fontFamily:'Space Grotesk',fontWeight:700,fontSize:10,cursor:'pointer'}}>{m.away_team}</button>
+                        </div>
+                      </div>
+                    )}
+                    <button type="button" onClick={()=>submitCornCards(m.id)} disabled={saving}
+                      style={{width:'100%',padding:'7px',borderRadius:9,background:'var(--blue)',color:'#fff',border:'none',fontWeight:900,fontSize:12,fontFamily:'Space Grotesk',cursor:'pointer'}}>
+                      {saving?'…':'Save & Re-settle'}
+                    </button>
+                  </div>
+                )}
                 {goalsMatchId===m.id&&(
                   <div className="mt-2" style={{direction:'ltr',background:'rgba(0,201,123,0.04)',border:'1px solid rgba(0,201,123,0.12)',borderRadius:10,padding:'10px'}}>
                     <div style={{fontSize:10,color:'var(--green)',fontFamily:'Space Grotesk',fontWeight:800,marginBottom:8}}>⚽ Goal Scorers</div>
