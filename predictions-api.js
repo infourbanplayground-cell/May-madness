@@ -558,7 +558,7 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
     const stake = requestedStake ? Math.min(500, Math.max(1, parseFloat(requestedStake))) : defaultStake;
 
     // Validate predictions and get odds for each leg
-    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2'];
+    const KO_MARKETS = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2','CORNERS-OVER','CORNERS-UNDER','CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'];
     const validStandard = ['1','X','2','1X','X2','12'];
     const bh = parseFloat(match.home_odds), bd = parseFloat(match.draw_odds), ba = parseFloat(match.away_odds);
     const baseOddsMap = {
@@ -570,8 +570,14 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
       'BTTS-N': parseFloat(match.odds_btts_no) || 1.85,
       'OVER2.5': parseFloat(match.odds_over25) || 1.85,
       'UNDER2.5': parseFloat(match.odds_under25) || 1.85,
-      'DNB1': parseFloat(match.odds_dnb_home) || bh,
-      'DNB2': parseFloat(match.odds_dnb_away) || ba,
+      'CORNERS-OVER': parseFloat(match.odds_corners_over) || 1.90,
+      'CORNERS-UNDER': parseFloat(match.odds_corners_under) || 1.90,
+      'CARDS-OVER': parseFloat(match.odds_cards_over) || 1.90,
+      'CARDS-UNDER': parseFloat(match.odds_cards_under) || 1.90,
+      'BTTS-CARD-Y': parseFloat(match.odds_btts_card_yes) || 1.90,
+      'BTTS-CARD-N': parseFloat(match.odds_btts_card_no) || 1.90,
+      'FIRSTCORNER-1': parseFloat(match.odds_firstcorner_home) || 1.90,
+      'FIRSTCORNER-2': parseFloat(match.odds_firstcorner_away) || 1.90,
     };
     const _p1b=1/bh, _pxb=1/bd, _p2b=1/ba, _totb=_p1b+_pxb+_p2b;
     baseOddsMap['QUALIFY1'] = Math.round(100/(((_p1b+0.5*_pxb)/_totb)))/100;
@@ -582,7 +588,8 @@ app.post('/wc/bet-builder', auth, async (req, res) => {
       if (['1','X','2','1X','X2','12'].includes(pred)) return '1x2';
       if (['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
       if (['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
-      if (['DNB1','DNB2'].includes(pred)) return 'dnb';
+      if (['CORNERS-OVER','CORNERS-UNDER'].includes(pred)) return 'corners';
+      if (['CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'].includes(pred)) return 'cards';
       if (['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
       return pred; // player scorer bets are unique per prediction string
     };
@@ -1342,7 +1349,7 @@ async function settleMatchById(matchId, homeScore, awayScore, homeTeam, awayTeam
   const { rows: preds } = await pool.query(
     'SELECT * FROM wc_predictions WHERE match_id=$1 AND settled=false', [matchId]
   );
-  const KO_MARKETS_SET = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','DNB1','DNB2','QUALIFY1','QUALIFY2'];
+  const KO_MARKETS_SET = ['BTTS-Y','BTTS-N','OVER2.5','UNDER2.5','QUALIFY1','QUALIFY2','CORNERS-OVER','CORNERS-UNDER','CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'];
   const { rows: goals } = await pool.query('SELECT * FROM wc_match_goals WHERE match_id=$1 ORDER BY minute ASC', [matchId]);
   for (const p of preds) {
     const isPKOMarket = KO_MARKETS_SET.includes(p.prediction) || p.prediction.startsWith('ANYTIME:') || p.prediction.startsWith('FIRST:');

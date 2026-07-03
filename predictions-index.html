@@ -1201,8 +1201,6 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
     if(pred==='BTTS-N') return parseFloat(match.odds_btts_no);
     if(pred==='OVER2.5') return parseFloat(match.odds_over25);
     if(pred==='UNDER2.5') return parseFloat(match.odds_under25);
-    if(pred==='DNB1') return parseFloat(match.odds_dnb_home)||bh;
-    if(pred==='DNB2') return parseFloat(match.odds_dnb_away)||ba;
     if(pred==='CORNERS-OVER') return parseFloat(match.odds_corners_over);
     if(pred==='CORNERS-UNDER') return parseFloat(match.odds_corners_under);
     if(pred==='CARDS-OVER') return parseFloat(match.odds_cards_over);
@@ -1225,7 +1223,6 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
     if(['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
     if(['CORNERS-OVER','CORNERS-UNDER'].includes(pred)) return 'corners';
     if(['CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'].includes(pred)) return 'cards';
-    if(['DNB1','DNB2'].includes(pred)) return 'dnb';
     if(['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
     return pred;
   }
@@ -1241,8 +1238,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
     if(pred==='2') return match.away_team; if(pred==='1X') return match.home_team+'/Draw';
     if(pred==='X2') return 'Draw/'+match.away_team; if(pred==='BTTS-Y') return 'BTTS Yes';
     if(pred==='BTTS-N') return 'BTTS No'; if(pred==='OVER2.5') return 'Over 2.5';
-    if(pred==='UNDER2.5') return 'Under 2.5'; if(pred==='DNB1') return 'DNB '+match.home_team;
-    if(pred==='DNB2') return 'DNB '+match.away_team;
+    if(pred==='UNDER2.5') return 'Under 2.5';
     if(pred==='QUALIFY1') return match.home_team+' to Qualify';
     if(pred==='QUALIFY2') return match.away_team+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
@@ -1670,6 +1666,27 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
                   <BlLegBtn pred="UNDER2.5" label={lang==='ar'?'أقل من 2.5':'Under 2.5'}/>
                 </div>
               )}
+              {match.stage==='r16'&&(parseFloat(match.odds_corners_over)||parseFloat(match.odds_corners_under))&&(
+                <div style={{marginBottom:8}}>
+                  <div style={bSecHdr}>Corners O/U {match.corners_line||'?'}</div>
+                  <BlLegBtn pred="CORNERS-OVER" label={`Over ${parseFloat(match.corners_line)||'?'} Corners`}/>
+                  <BlLegBtn pred="CORNERS-UNDER" label={`Under ${parseFloat(match.corners_line)||'?'} Corners`}/>
+                </div>
+              )}
+              {match.stage==='r16'&&(parseFloat(match.odds_cards_over)||parseFloat(match.odds_cards_under))&&(
+                <div style={{marginBottom:8}}>
+                  <div style={bSecHdr}>Cards O/U {match.cards_line||'?'}</div>
+                  <BlLegBtn pred="CARDS-OVER" label={`Over ${parseFloat(match.cards_line)||'?'} Cards`}/>
+                  <BlLegBtn pred="CARDS-UNDER" label={`Under ${parseFloat(match.cards_line)||'?'} Cards`}/>
+                </div>
+              )}
+              {match.stage==='r16'&&(parseFloat(match.odds_btts_card_yes)||parseFloat(match.odds_firstcorner_home))&&(
+                <div style={{marginBottom:8}}>
+                  <div style={bSecHdr}>Cards Specials</div>
+                  {!!parseFloat(match.odds_btts_card_yes)&&<><BlLegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><BlLegBtn pred="BTTS-CARD-N" label="Not Both Carded"/></>}
+                  {!!parseFloat(match.odds_firstcorner_home)&&<><BlLegBtn pred="FIRSTCORNER-1" label={match.home_team+' 1st Corner'}/><BlLegBtn pred="FIRSTCORNER-2" label={match.away_team+' 1st Corner'}/></>}
+                </div>
+              )}
               <div style={{marginBottom:8}}>
                 <div style={bSecHdr}>{lang==='ar'?'من يتأهل؟':'To Qualify'}</div>
                 <BlLegBtn pred="QUALIFY1" label={`${match.home_team} · Qualify`}/>
@@ -1925,8 +1942,14 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(pred==='BTTS-N') return parseFloat(match.odds_btts_no);
     if(pred==='OVER2.5') return parseFloat(match.odds_over25);
     if(pred==='UNDER2.5') return parseFloat(match.odds_under25);
-    if(pred==='DNB1') return parseFloat(match.odds_dnb_home)||bh;
-    if(pred==='DNB2') return parseFloat(match.odds_dnb_away)||ba;
+    if(pred==='CORNERS-OVER') return parseFloat(match.odds_corners_over);
+    if(pred==='CORNERS-UNDER') return parseFloat(match.odds_corners_under);
+    if(pred==='CARDS-OVER') return parseFloat(match.odds_cards_over);
+    if(pred==='CARDS-UNDER') return parseFloat(match.odds_cards_under);
+    if(pred==='BTTS-CARD-Y') return parseFloat(match.odds_btts_card_yes);
+    if(pred==='BTTS-CARD-N') return parseFloat(match.odds_btts_card_no);
+    if(pred==='FIRSTCORNER-1') return parseFloat(match.odds_firstcorner_home);
+    if(pred==='FIRSTCORNER-2') return parseFloat(match.odds_firstcorner_away);
     if(pred==='QUALIFY1'||pred==='QUALIFY2'){const p1=1/bh,px=1/bd,p2=1/ba,tot=p1+px+p2;return pred==='QUALIFY1'?Math.round(100/((p1+0.5*px)/tot))/100:Math.round(100/((p2+0.5*px)/tot))/100;}
     if(pred.startsWith('ANYTIME:')||pred.startsWith('FIRST:')){
       const pn=pred.split(':').slice(1).join(':');
@@ -1940,7 +1963,8 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(['1','X','2','1X','X2'].includes(pred)) return '1x2';
     if(['BTTS-Y','BTTS-N'].includes(pred)) return 'btts';
     if(['OVER2.5','UNDER2.5'].includes(pred)) return 'ou';
-    if(['DNB1','DNB2'].includes(pred)) return 'dnb';
+    if(['CORNERS-OVER','CORNERS-UNDER'].includes(pred)) return 'corners';
+    if(['CARDS-OVER','CARDS-UNDER','BTTS-CARD-Y','BTTS-CARD-N','FIRSTCORNER-1','FIRSTCORNER-2'].includes(pred)) return 'cards';
     if(['QUALIFY1','QUALIFY2'].includes(pred)) return 'qualify';
     return pred;
   }
@@ -1969,8 +1993,14 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     if(pred==='BTTS-N') return 'BTTS No';
     if(pred==='OVER2.5') return 'Over 2.5';
     if(pred==='UNDER2.5') return 'Under 2.5';
-    if(pred==='DNB1') return 'DNB '+match.home_team;
-    if(pred==='DNB2') return 'DNB '+match.away_team;
+    if(pred==='CORNERS-OVER') return `Over ${parseFloat(match.corners_line)||'?'} Corners`;
+    if(pred==='CORNERS-UNDER') return `Under ${parseFloat(match.corners_line)||'?'} Corners`;
+    if(pred==='CARDS-OVER') return `Over ${parseFloat(match.cards_line)||'?'} Cards`;
+    if(pred==='CARDS-UNDER') return `Under ${parseFloat(match.cards_line)||'?'} Cards`;
+    if(pred==='BTTS-CARD-Y') return 'Both Teams Carded';
+    if(pred==='BTTS-CARD-N') return 'Not Both Carded';
+    if(pred==='FIRSTCORNER-1') return match.home_team+' 1st Corner';
+    if(pred==='FIRSTCORNER-2') return match.away_team+' 1st Corner';
     if(pred==='QUALIFY1') return match.home_team+' to Qualify';
     if(pred==='QUALIFY2') return match.away_team+' to Qualify';
     if(pred.startsWith('ANYTIME:')) return pred.slice(8);
@@ -2038,6 +2068,27 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
               <div style={secHdr}>{lang==='ar'?'أهداف Over/Under 2.5':'Goals Over/Under 2.5'}</div>
               <LegBtn pred="OVER2.5" label={lang==='ar'?'أكثر من 2.5':'Over 2.5'}/>
               <LegBtn pred="UNDER2.5" label={lang==='ar'?'أقل من 2.5':'Under 2.5'}/>
+            </div>
+          )}
+          {match.stage==='r16'&&(parseFloat(match.odds_corners_over)||parseFloat(match.odds_corners_under))&&(
+            <div>
+              <div style={secHdr}>Corners O/U {match.corners_line||'?'}</div>
+              <LegBtn pred="CORNERS-OVER" label={`Over ${parseFloat(match.corners_line)||'?'} Corners`}/>
+              <LegBtn pred="CORNERS-UNDER" label={`Under ${parseFloat(match.corners_line)||'?'} Corners`}/>
+            </div>
+          )}
+          {match.stage==='r16'&&(parseFloat(match.odds_cards_over)||parseFloat(match.odds_cards_under))&&(
+            <div>
+              <div style={secHdr}>Cards O/U {match.cards_line||'?'}</div>
+              <LegBtn pred="CARDS-OVER" label={`Over ${parseFloat(match.cards_line)||'?'} Cards`}/>
+              <LegBtn pred="CARDS-UNDER" label={`Under ${parseFloat(match.cards_line)||'?'} Cards`}/>
+            </div>
+          )}
+          {match.stage==='r16'&&(parseFloat(match.odds_btts_card_yes)||parseFloat(match.odds_firstcorner_home))&&(
+            <div>
+              <div style={secHdr}>Cards Specials</div>
+              {!!parseFloat(match.odds_btts_card_yes)&&<><LegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><LegBtn pred="BTTS-CARD-N" label="Not Both Carded"/></>}
+              {!!parseFloat(match.odds_firstcorner_home)&&<><LegBtn pred="FIRSTCORNER-1" label={match.home_team+' 1st Corner'}/><LegBtn pred="FIRSTCORNER-2" label={match.away_team+' 1st Corner'}/></>}
             </div>
           )}
           <div>
