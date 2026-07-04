@@ -1095,7 +1095,7 @@ function NextMatchBanner({matches,lang}){
     : [{v:mm,l:T.mins},{v:ss,l:T.secs}];
 
   const kickoffTime=new Date(next.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'});
-  const kickoffDate=new Date(next.kickoff).toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'short',month:'short',day:'numeric'});
+  const kickoffDate=new Date(next.kickoff).toLocaleDateString(lang==='ar'?'ar-OM':'en-GB',{weekday:'short',month:'short',day:'numeric',timeZone:'Asia/Muscat'});
 
   return(
     <div className="next-hero mx-4 mb-4">
@@ -1325,7 +1325,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
   const potWin=preds.length>0?preds.reduce((s,p)=>s+(stake*(parseFloat(p.odds_locked)||allOdds[p.prediction]||1)),0).toFixed(2):null;
 
   const kickoffTime=new Date(match.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'});
-  const kickoffDate=new Date(match.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'});
+  const kickoffDate=new Date(match.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric',timeZone:'Asia/Muscat'});
 
   return(
     <div ref={ref} className="match-card spotlight-card mb-3 relative" onMouseMove={onMove}>
@@ -2189,7 +2189,7 @@ function FixturesTab({matches,predictions,builders,onPickClick,onBuildClick,load
   function groupAndSort(list){
     const g={};
     list.forEach(m=>{
-      const dk=new Date(m.kickoff).toLocaleDateString('en-CA');
+      const dk=new Date(m.kickoff).toLocaleDateString('en-CA',{timeZone:'Asia/Muscat'});
       const k=m.stage+'_'+dk;
       if(!g[k]) g[k]={stage:m.stage,date:dk,matches:[]};
       g[k].matches.push(m);
@@ -2336,7 +2336,7 @@ function MyBetsTab({matches,predictions,builders,lang,onCancelBuilder}){
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m.home_team} vs {m.away_team}</div>
-                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'})} · {new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric',timeZone:'Asia/Muscat'})} · {new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {pickTeam&&<Flag team={pickTeam} size={18}/>}
@@ -2395,7 +2395,7 @@ function MyBetsTab({matches,predictions,builders,lang,onCancelBuilder}){
                   </div>
                   <div style={{flex:1,minWidth:0}}>
                     <div style={{fontSize:12,fontWeight:700,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{m?.home_team||b.match_id} vs {m?.away_team||''}</div>
-                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{m&&new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric'})+' · '+new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
+                    <div className="mono" style={{fontSize:10,color:'var(--muted)'}}>{m&&new Date(m.kickoff).toLocaleDateString('en-GB',{month:'short',day:'numeric',timeZone:'Asia/Muscat'})+' · '+new Date(m.kickoff).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Muscat'})}</div>
                   </div>
                   <div style={{textAlign:'right',flexShrink:0}}>
                     <div style={{fontSize:9,color:'var(--gold)',fontFamily:'Space Grotesk',fontWeight:700}}>BUILDER</div>
