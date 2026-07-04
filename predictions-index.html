@@ -757,6 +757,12 @@ function useCountdown(kickoff){
   useEffect(()=>{const t=setInterval(()=>setMs(new Date(kickoff)-Date.now()-5*60*1000),1000);return()=>clearInterval(t);},[kickoff]);
   return ms;
 }
+// Ticks every 10s — use for deadline/canPredict checks without re-rendering every second
+function useNow(){
+  const [now,setNow]=useState(Date.now);
+  useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),10000);return()=>clearInterval(t);},[]);
+  return now;
+}
 
 // ── Spotlight card HOC ────────────────────────────────────────────────────────
 function SpotlightCard({children,style,className=''}){
@@ -1169,8 +1175,9 @@ function NextMatchBanner({matches,lang}){
 function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,lang,stake,playerId}){
   const T=TX[lang];
   const ref=useRef(null);
-  const isDeadlinePassed=Date.now()>new Date(match.kickoff).getTime()-5*60*1000;
-  const isAfterKickoff=Date.now()>new Date(match.kickoff).getTime();
+  const now=useNow();
+  const isDeadlinePassed=now>new Date(match.kickoff).getTime()-5*60*1000;
+  const isAfterKickoff=now>new Date(match.kickoff).getTime();
   const isTBD=match.home_team==='TBD'||match.away_team==='TBD';
   const canPredict=!isDeadlinePassed&&!match.settled&&!isTBD;
   const preds=predictions||[];
@@ -2188,7 +2195,7 @@ function FixturesTab({matches,predictions,builders,onPickClick,onBuildClick,load
   const [showFinished,setShowFinished]=useState(false);
   const predMap={};(predictions||[]).forEach(p=>{if(!predMap[p.match_id])predMap[p.match_id]=[];predMap[p.match_id].push(p);});
   const builderMap={};(builders||[]).forEach(b=>{if(!builderMap[b.match_id])builderMap[b.match_id]=[];builderMap[b.match_id].push(b);});
-  const now=Date.now();
+  const now=useNow();
   const deadline=(m)=>new Date(m.kickoff).getTime()-5*60*1000;
   let shown=matches;
   if(filter==='upcoming') shown=matches.filter(m=>!m.settled&&deadline(m)>now);
