@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FFCF00">
+<title>Urban Playground · Social Series</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Archivo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #131313;
+    --paper: #EFE4CC;
+    --cream: #FFF6E0;
+    --red: #D91C1C;
+    --blue: #1B8EE0;
+    --blue-deep: #1467A8;
+    --orange: #E85800;
+    --pink: #EC1E8C;
+    --yellow: #FFCF00;
+    --green: #3FA33C;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { min-height: 100vh; }
+  body {
+    font-family: 'Bangers', Impact, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: var(--ink);
+    background:
+      radial-gradient(rgba(0,0,0,.05) 18%, transparent 20%) 0 0/8px 8px,
+      var(--paper);
+    background-attachment: fixed;
+  }
+  /* paper grain */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 40;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: .12; mix-blend-mode: multiply;
+  }
+
+  .wrap {
+    position: relative; z-index: 1;
+    max-width: 760px; margin: 0 auto;
+    padding: 18px 16px 60px;
+    display: flex; flex-direction: column;
+  }
+
+  /* ── COMIC MASTHEAD ── */
+  .masthead {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 5px solid var(--ink); background: var(--yellow);
+    background-image: radial-gradient(rgba(0,0,0,.06) 20%, transparent 22%);
+    background-size: 7px 7px;
+    box-shadow: 4px 4px 0 rgba(19,19,19,.9);
+    padding: 10px 16px; margin-bottom: 20px; transform: rotate(-.4deg);
+  }
+  .mast-issue {
+    font-size: 15px; letter-spacing: 1px; background: var(--ink); color: var(--cream);
+    padding: 4px 10px 2px; transform: rotate(-2deg);
+  }
+  .mast-name { font-size: clamp(22px, 5.5vw, 32px); letter-spacing: 2px; }
+  .mast-stamp {
+    font-size: 13px; letter-spacing: 1px;
+    border: 3px solid var(--ink); border-radius: 50%;
+    width: 50px; height: 50px; display: grid; place-items: center; text-align: center;
+    background: var(--cream); transform: rotate(6deg); line-height: .9;
+  }
+
+  /* ── HERO INTRO ── */
+  .hero-head { text-align: center; margin-bottom: 22px; }
+  .logo-img {
+    height: 76px; width: auto;
+    filter: drop-shadow(3px 3px 0 rgba(19,19,19,.4));
+    margin-bottom: 12px;
+  }
+  .hub-title {
+    font-size: clamp(46px, 10vw, 76px);
+    letter-spacing: 3px; text-transform: uppercase; line-height: .85;
+    color: var(--ink);
+    text-shadow: 4px 4px 0 var(--yellow), 8px 8px 0 rgba(19,19,19,.85);
+    transform: rotate(-1deg);
+  }
+  .hub-sub {
+    display: inline-block; margin-top: 14px;
+    background: #fff; border: 3px solid var(--ink); border-radius: 18px;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-family: 'Archivo', sans-serif; font-weight: 900;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 8px 18px 7px; transform: rotate(-1.4deg);
+  }
+
+  /* ── PANELS ── */
+  .panels { display: flex; flex-direction: column; gap: 22px; width: 100%; }
+
+  .panel {
+    position: relative; display: block; overflow: hidden;
+    text-decoration: none; color: inherit;
+    border: 6px solid var(--ink);
+    box-shadow: 8px 8px 0 rgba(19,19,19,.9);
+    transition: transform .14s, box-shadow .14s;
+  }
+  .panel:hover { transform: translate(-3px,-3px) rotate(var(--tilt, 0deg)); box-shadow: 11px 11px 0 rgba(19,19,19,.9); }
+  .panel:active { transform: translate(3px,3px) rotate(var(--tilt, 0deg)); box-shadow: 4px 4px 0 rgba(19,19,19,.9); }
+  .panel.tilt-l { --tilt: -.6deg; transform: rotate(-.6deg); }
+  .panel.tilt-r { --tilt: .5deg; transform: rotate(.5deg); }
+
+  .dots::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(0,0,0,.22) 22%, transparent 24%);
+    background-size: 9px 9px; mix-blend-mode: multiply; opacity: .45;
+  }
+
+  .narrate {
+    position: absolute; top: 0; left: 0; z-index: 5;
+    background: var(--cream); border: 4px solid var(--ink); border-top: none; border-left: none;
+    font-size: 13px; letter-spacing: 1.5px; color: var(--ink);
+    padding: 5px 12px 3px;
+  }
+
+  /* ── JULY HEAT hero panel ── */
+  .panel.heat {
+    background:
+      repeating-conic-gradient(from 0deg at 50% 42%, rgba(27,142,224,.18) 0deg 4deg, transparent 4deg 11deg),
+      radial-gradient(circle at 50% 42%, rgba(232,88,0,.3), transparent 62%),
+      #0A0A0A;
+    text-align: center; padding: 36px 16px 24px;
+  }
+  .panel.heat img.heat-logo { width: 84%; max-width: 380px; display: block; margin: 0 auto; }
+  .heat-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+  .flag {
+    display: inline-block; font-size: 15px; letter-spacing: 1.5px;
+    border: 4px solid var(--ink); box-shadow: 3px 3px 0 rgba(0,0,0,.75);
+    padding: 5px 13px 3px;
+  }
+  .flag.org { background: var(--orange); color: var(--cream); transform: rotate(-1deg); }
+  .flag.red { background: var(--red); color: var(--cream); transform: rotate(1.4deg); }
+  .flag.blu { background: var(--blue); color: var(--cream); transform: rotate(-1.4deg); }
+  .heat-cta {
+    display: inline-block; margin-top: 18px;
+    font-size: 26px; letter-spacing: 2px; color: var(--ink);
+    background: var(--yellow); border: 4px solid var(--ink);
+    box-shadow: 5px 5px 0 rgba(0,0,0,.8);
+    padding: 9px 26px 5px; transform: rotate(-1.2deg);
+  }
+  .live-stamp {
+    position: absolute; top: 14px; right: -6px; z-index: 6;
+    width: 92px; height: 92px; display: grid; place-items: center; text-align: center;
+    background: var(--yellow); border: 4px solid var(--ink);
+    clip-path: polygon(50% 0,61% 18%,82% 9%,79% 32%,100% 38%,84% 53%,98% 72%,73% 70%,72% 95%,53% 79%,33% 96%,32% 70%,7% 71%,22% 53%,4% 39%,25% 33%,21% 9%,42% 18%);
+    font-size: 24px; line-height: .85; color: var(--red);
+    -webkit-text-stroke: 1px var(--ink);
+    transform: rotate(9deg);
+    filter: drop-shadow(3px 3px 0 rgba(0,0,0,.7));
+  }
+
+  /* ── ARCHIVE panel ── */
+  .panel.archive {
+    background:
+      repeating-conic-gradient(from 0deg at 50% 50%, var(--blue-deep) 0deg 5deg, var(--blue) 5deg 12deg);
+    padding: 44px 14px 16px;
+  }
+  .arch-title {
+    display: inline-block; position: relative; z-index: 2;
+    font-size: 30px; letter-spacing: 2px; color: var(--yellow);
+    -webkit-text-stroke: 1.5px var(--ink);
+    text-shadow: 3px 3px 0 var(--ink);
+    background: var(--red); border: 4px solid var(--ink);
+    box-shadow: 4px 4px 0 rgba(0,0,0,.8);
+    padding: 7px 16px 3px; transform: rotate(-2deg);
+    margin: 0 0 14px 2px;
+  }
+  .arch-row {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--cream); border: 4px solid var(--ink);
+    box-shadow: 3px 3px 0 rgba(0,0,0,.85);
+    padding: 12px 14px; margin-bottom: 10px;
+    text-decoration: none; color: inherit;
+    transition: transform .12s;
+  }
+  .arch-row:hover { transform: translate(-2px,-2px); }
+  .arch-row:nth-child(odd) { transform: rotate(.4deg); }
+  .arch-row:nth-child(even) { transform: rotate(-.4deg); }
+  .arch-vol {
+    flex: 0 0 auto; width: 48px; height: 48px; display: grid; place-items: center;
+    font-size: 20px; border: 3px solid var(--ink);
+    background: var(--yellow); color: var(--ink);
+  }
+  .arch-name { font-size: 26px; letter-spacing: 1px; line-height: .9; flex: 1; }
+  .arch-name small {
+    display: block; font-family: 'Archivo', sans-serif; font-weight: 800;
+    font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(19,19,19,.55); margin-top: 4px;
+  }
+  .arch-cta {
+    font-size: 16px; letter-spacing: 1px; color: var(--cream);
+    background: var(--ink); padding: 5px 12px 3px; white-space: nowrap;
+  }
+
+  /* ── FOOTER STRIP ── */
+  .foot-strip {
+    margin-top: 26px; width: 100%;
+    background: var(--ink); border: 5px solid var(--ink);
+    padding: 13px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    transform: rotate(-.3deg);
+    box-shadow: 4px 4px 0 rgba(19,19,19,.4);
+  }
+  .foot-l { font-size: 22px; letter-spacing: 2px; color: var(--yellow); }
+  .foot-r { font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 900; letter-spacing: .16em; color: rgba(255,246,224,.5); text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- MASTHEAD -->
+  <div class="masthead">
+    <span class="mast-issue">EST. 2026</span>
+    <span class="mast-name">URBAN PLAYGROUND</span>
+    <span class="mast-stamp">OMAN<br>🎾</span>
+  </div>
+
+  <!-- INTRO -->
+  <div class="hero-head">
+    <img class="logo-img" src="assets/up-logo.png" alt="Urban Playground">
+    <h1 class="hub-title">SOCIAL SERIES</h1>
+    <div class="hub-sub">Pick a series · Step on court · Stack the points</div>
+  </div>
+
+  <div class="panels">
+
+    <!-- JULY HEAT — current -->
+    <a href="https://heat.urbanpadel.om" class="panel heat tilt-l">
+      <div class="narrate">NOW SHOWING · VOL. 5</div>
+      <div class="live-stamp">LIVE!</div>
+      <img class="heat-logo" src="assets/july-heat-logo.png" alt="July Heat">
+      <div class="heat-badges">
+        <span class="flag org">📅 MON &amp; WED · 5:30 PM</span>
+        <span class="flag red">💸 7 OMR</span>
+        <span class="flag blu">🏆 402 OMR POOL</span>
+      </div>
+      <span class="heat-cta">PLAY NOW →</span>
+    </a>
+
+    <!-- ARCHIVE -->
+    <div class="panel archive dots tilt-r">
+      <div class="narrate">FROM THE VAULT...</div>
+      <div class="arch-title">BACK ISSUES!</div>
+      <a class="arch-row" href="https://june.urbanpadel.om">
+        <span class="arch-vol">V.4</span>
+        <span class="arch-name">JUNE FURY<small>June 2026 · Knockout brackets · Archived</small></span>
+        <span class="arch-cta">RESULTS →</span>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <div class="foot-strip">
+    <span class="foot-l">URBANPADEL.OM</span>
+    <span class="foot-r">Social Series · Oman · 2026</span>
+  </div>
+
+</div>
+</body>
+</html>
