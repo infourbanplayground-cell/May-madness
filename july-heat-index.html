@@ -971,6 +971,7 @@ function loadJHWatermark() {
 }
 async function watermarkPhotoToBase64(file, maxW = 1080) {
   const wm = await loadJHWatermark();
+  try { await document.fonts.load("27px 'Bangers'"); } catch (e) {}
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
@@ -982,15 +983,67 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, w, h);
+
+      // ── comic frame drawn to fit any aspect ratio ──
+      const s = Math.min(w, h) / 1080;
+      const ink = "#131313", yellow = "#FFCF00", cream = "#FFF6E0";
+      const oB = 14 * s, band = 26 * s, iB = 8 * s;
+      const ring = (off, wd, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(off, off, w - 2 * off, wd);
+        ctx.fillRect(off, h - off - wd, w - 2 * off, wd);
+        ctx.fillRect(off, off, wd, h - 2 * off);
+        ctx.fillRect(w - off - wd, off, wd, h - 2 * off);
+      };
+      ring(0, oB, ink);
+      ring(oB, band, yellow);
+      // halftone dots on the yellow band
+      ctx.fillStyle = "rgba(0,0,0,.28)";
+      const stepD = 11 * s, inEdge = oB + band;
+      for (let y = oB; y < h - oB; y += stepD)
+        for (let x = oB; x < w - oB; x += stepD) {
+          if (x > inEdge && x < w - inEdge && y > inEdge && y < h - inEdge) continue;
+          ctx.beginPath(); ctx.arc(x, y, 2.2 * s, 0, 7); ctx.fill();
+        }
+      ring(inEdge, iB, ink);
+
+      ctx.textBaseline = "middle"; ctx.textAlign = "center";
+
+      // narration box top center
+      const nLabel = "MEANWHILE, AT URBAN PLAYGROUND...";
+      ctx.font = `${24 * s}px 'Bangers', Impact, sans-serif`;
+      const ntw = ctx.measureText(nLabel).width;
+      const nw2 = ntw + 34 * s, nh2 = 42 * s;
+      const nx = Math.max(inEdge + iB + 6 * s, (w - nw2) / 2), ny = 42 * s;
+      ctx.fillStyle = "rgba(0,0,0,.65)"; ctx.fillRect(nx + 4 * s, ny + 4 * s, nw2, nh2);
+      ctx.fillStyle = cream; ctx.fillRect(nx, ny, nw2, nh2);
+      ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.strokeRect(nx, ny, nw2, nh2);
+      ctx.fillStyle = ink;
+      ctx.fillText(nLabel, nx + nw2 / 2, ny + nh2 / 2 + 2 * s);
+
+      // logo sticker top-left
       if (wm) {
-        const ww = Math.round(w * 0.24);
-        const wh = Math.round(ww * (wm.height / wm.width));
-        const pad = Math.round(w * 0.02);
-        ctx.globalAlpha = 0.92;
-        ctx.drawImage(wm, w - ww - pad, h - wh - pad, ww, wh);
-        ctx.globalAlpha = 1;
+        const lw = 250 * s, lh = lw * (wm.height / wm.width);
+        ctx.save();
+        ctx.translate(-14 * s + lw / 2, 60 * s + lh / 2);
+        ctx.rotate(-7 * Math.PI / 180);
+        ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowOffsetX = 5 * s; ctx.shadowOffsetY = 5 * s;
+        ctx.drawImage(wm, -lw / 2, -lh / 2, lw, lh);
+        ctx.restore();
       }
-      resolve(canvas.toDataURL("image/jpeg", 0.8));
+
+      // URL strip bottom center
+      const label = "HEAT.URBANPADEL.OM";
+      ctx.font = `${27 * s}px 'Bangers', Impact, sans-serif`;
+      const tw = ctx.measureText(label).width;
+      const sw2 = tw + 60 * s, sh2 = 48 * s;
+      const sx = (w - sw2) / 2, sy = h - oB - sh2 - 8 * s;
+      ctx.fillStyle = yellow; ctx.fillRect(sx - 4 * s, sy - 4 * s, sw2 + 8 * s, sh2 + 8 * s);
+      ctx.fillStyle = ink; ctx.fillRect(sx, sy, sw2, sh2);
+      ctx.fillStyle = yellow;
+      ctx.fillText(label, w / 2, sy + sh2 / 2 + 2 * s);
+
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.onerror = reject;
     img.src = url;
