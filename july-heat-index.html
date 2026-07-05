@@ -77,57 +77,25 @@
     opacity: .55; mix-blend-mode: overlay; background-image: var(--grain);
   }
   /* ── LIGHT THEME ─────────────────────────────────────── */
-  html.light { color-scheme: light; }
-  html.light, html.light body { background: var(--cream); color: #2b1d16; }
-  html.light body {
-    background:
-      radial-gradient(95% 60% at 4% 2%, rgba(51,161,255,.12), transparent 52%),
-      radial-gradient(120% 80% at 82% 10%, rgba(255,94,30,.14), transparent 55%),
-      radial-gradient(130% 90% at 18% 108%, rgba(255,138,61,.18), transparent 60%),
-      linear-gradient(180deg,#FFFDFB 0%, #FFF4EC 60%, #FFEAD9 100%);
-    background-attachment: fixed;
-  }
-  html.light body::after { opacity: .14; }
-  html.light { --surface: rgba(255,255,255,.82); --surface-2: rgba(255,255,255,.7); --hairline: rgba(120,80,50,0.18); --line: rgba(80,40,20,.12); --muted: #7a5c4d; --muted2: #9c8073; }
   /* remap dark stone utilities for light mode */
-  html.light .text-stone-100, html.light .text-stone-200 { color:#2b1d16 !important; }
-  html.light .text-stone-300, html.light .text-stone-400 { color:#5c463a !important; }
-  html.light .text-stone-500, html.light .text-stone-600 { color:#8a7264 !important; }
-  html.light .bg-stone-900\/60, html.light .bg-stone-900\/50, html.light .bg-stone-900\/40, html.light .bg-stone-900, html.light .bg-stone-950 { background: rgba(255,255,255,.78) !important; }
-  html.light .bg-stone-800, html.light .bg-stone-800\/70, html.light .bg-stone-800\/80 { background: rgba(255,255,255,.9) !important; }
-  html.light .border-stone-800, html.light .border-stone-700, html.light .border-stone-800\/80, html.light .border-stone-800\/60, html.light .border-stone-800\/40, html.light .border-stone-800\/50 { border-color: rgba(120,80,50,0.18) !important; }
-  html.light .backdrop-blur-xl, html.light .backdrop-blur { background: rgba(255,247,240,.85) !important; }
 
   /* ── LIGHT MODE EXTENDED FIXES ───────────────────────── */
   /* Logos with white elements: multiply blends white into the cream bg,
      keeps orange/coloured parts visible */
-  html.light .light-logo { mix-blend-mode: multiply; }
 
   /* Scrollbars */
-  html.light ::-webkit-scrollbar-track { background: #f0e6de; }
-  html.light ::-webkit-scrollbar-thumb { background: #c8a090; border-radius: 3px; }
 
   /* Placeholder text */
-  html.light ::placeholder { color: #a07868 !important; opacity: 1; }
 
   /* Input / textarea / select */
-  html.light input:not([type=range]), html.light textarea, html.light select {
-    background: rgba(255,255,255,.9) !important;
-    border-color: rgba(120,80,50,.25) !important;
-    color: #2b1d16 !important;
-  }
 
   /* Tab nav active indicator inherits orange — fine. Inactive tabs need contrast. */
-  html.light nav button { color: #8a7264; }
 
   /* Sync / status badges that use stone-600/700 bg */
-  html.light .bg-stone-700, html.light .bg-stone-700\/60 { background: rgba(200,160,140,.25) !important; }
 
   /* Card section headings that may be stone-400 */
-  html.light .text-stone-400 { color: #5c463a !important; }
 
   /* Bottom safe-area / nav border */
-  html.light .border-t { border-top-color: rgba(120,80,50,.2) !important; }
   #root { position: relative; z-index: 1; }
   .font-display { font-family: 'Bangers', cursive; letter-spacing: 0.05em; }
   .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -142,10 +110,6 @@
       radial-gradient(ellipse 90% 55% at 10% 8%, rgba(27,142,224,.14), transparent),
       radial-gradient(ellipse 70% 55% at 88% 12%, rgba(232,88,0,.11), transparent),
       linear-gradient(180deg, #080808 0%, #0a0a0a 60%, #060606 100%); }
-  html.light .screen-bg { background:
-      radial-gradient(95% 60% at 4% 2%, rgba(51,161,255,.12), transparent 52%),
-      radial-gradient(120% 80% at 82% 10%, rgba(255,94,30,.14), transparent 55%),
-      linear-gradient(180deg,#FFFDFB 0%, #FFF4EC 60%, #FFEAD9 100%); }
   .splash { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; z-index: 999;
     background:
       repeating-conic-gradient(from 0deg at 50% 45%, rgba(19,19,19,.05) 0deg 4deg, transparent 4deg 12deg),
@@ -685,168 +649,48 @@ body::before{
 /* ══════════════════════════════════════════════════
    LIGHT MODE — HEATWAVE POP (v2) palette
    ══════════════════════════════════════════════════ */
-html.light{
-  --ink:#10131A;
-  --paper:#E6FBF5;
-  --orange:#E85800;
-  --orange-br:#FF7D5C;
-  --red:#FF2D87;
-  --yellow:#FFE14D;
-  --blue:#10C6B0;
-  --blue-soft:#5DDDD0;
-  --blue-deep:#0A9384;
-  --gold:#FFE14D;
-  --cream:#FFFFFF;
-  --muted:#0A9384;
-  --muted2:rgba(16,19,26,.5);
-  --surface:rgba(255,255,255,.9);
-  --hairline:rgba(16,19,26,.15);
-  --line:rgba(16,19,26,.12);
-}
 
 /* page bg — mint paper */
-html.light body{
-  background:
-    radial-gradient(ellipse 90% 55% at 15% 5%, rgba(16,198,176,.18), transparent),
-    radial-gradient(ellipse 70% 55% at 85% 10%, rgba(255,45,135,.12), transparent),
-    radial-gradient(ellipse 60% 60% at 50% 95%, rgba(255,225,77,.12), transparent),
-    linear-gradient(180deg,#d8f7ef 0%,#E6FBF5 50%,#e0faf2 100%) !important;
-}
 
 /* halftone — dark ink dots on light paper */
-html.light body::before{
-  background-image:radial-gradient(rgba(16,19,26,.12) 20%,transparent 22%) !important;
-  background-size:22px 22px !important;
-}
 
 /* header */
-html.light header.sticky{
-  background:rgba(230,251,245,.95) !important;
-  border-bottom:3px solid rgba(16,19,26,.15) !important;
-}
-html.light header .heat-grad{
-  background:linear-gradient(135deg,#10C6B0 0%,#FF2D87 50%,#FFE14D 100%) !important;
-  -webkit-background-clip:text !important;
-  -webkit-text-fill-color:transparent !important;
-}
-html.light header .font-display{color:var(--ink) !important;-webkit-text-fill-color:var(--ink) !important;}
 
 /* bottom nav — light */
-html.light nav.fixed{
-  background:rgba(230,251,245,.97) !important;
-  border-top:5px solid var(--ink) !important;
-  box-shadow:0 -3px 0 rgba(16,19,26,.08) !important;
-}
-html.light nav.fixed *{color:rgba(16,19,26,.35) !important;}
-html.light nav.fixed a.active,html.light nav.fixed button[style*="color: var(--orange-br)"]{color:var(--orange) !important;}
 
 /* HERO section light — dark speed lines on mint */
-html.light .jh-hero{
-  background:var(--paper) !important;
-  border-bottom:5px solid var(--ink) !important;
-}
-html.light .jh-hero .rays{
-  background:repeating-conic-gradient(from 0deg at 50% 42%,
-    rgba(16,19,26,.09) 0deg 4deg,transparent 4deg 11deg) !important;
-}
-html.light .jh-hero .halftone{
-  background-image:radial-gradient(rgba(16,19,26,.10) 20%,transparent 22%) !important;
-}
-html.light .jh-hero .frame{
-  border:4px solid var(--ink) !important;
-  box-shadow:0 0 0 4px var(--paper),0 0 0 8px var(--ink) !important;
-}
 
 /* HEAT lockup in light */
-html.light .jh-logo-img{animation:none !important;filter:none !important;}
-html.light .jh-vol{background:var(--blue) !important;color:var(--ink) !important;border-color:var(--ink) !important;box-shadow:5px 5px 0 var(--ink) !important;}
 
 /* FEEL THE HEAT flag light */
-html.light .jh-flag.red{background:var(--red) !important;color:#fff !important;box-shadow:4px 4px 0 var(--ink) !important;}
 
 /* info chips light */
-html.light .jh-chip{background:#fff !important;border-color:var(--ink) !important;box-shadow:5px 5px 0 var(--ink) !important;}
-html.light .jh-chip .jc-ico{background:var(--yellow) !important;border-color:var(--ink) !important;}
-html.light .jh-chip .jc-lab{color:var(--orange) !important;}
-html.light .jh-chip .jc-val{color:var(--ink) !important;}
 
 /* prize burst light */
-html.light .jh-burst{filter:drop-shadow(5px 6px 0 rgba(16,19,26,.8)) !important;}
 
 /* footer strip light */
-html.light .jh-strip{background:var(--ink) !important;border-color:var(--blue) !important;box-shadow:0 0 18px rgba(16,198,176,.25) !important;}
 
 /* CARDS light */
-html.light .bg-stone-900\/60,
-html.light .bg-stone-900\/50,
-html.light .bg-stone-900\/40,
-html.light [class*="bg-stone-9"]:not(nav):not(header){
-  background:#fff !important;border-color:var(--ink) !important;
-}
-html.light [class*="bg-stone-9"] *{color:var(--ink) !important;}
-html.light [class*="bg-stone-9"] .text-orange-400{color:var(--orange) !important;}
-html.light [class*="bg-stone-9"] .text-emerald-400{color:var(--blue) !important;}
-html.light [class*="bg-stone-9"] .text-amber-400{color:var(--yellow) !important;}
-html.light [class*="bg-stone-9"] .text-red-400{color:var(--red) !important;}
-html.light [class*="bg-stone-9"] .text-blue-400{color:var(--blue) !important;}
 
 /* STAT GRID light */
-html.light .jh-sec-title{color:var(--ink) !important;text-shadow:4px 4px 0 var(--orange) !important;}
-html.light .jh-sec-title em{color:var(--red) !important;text-shadow:4px 4px 0 var(--yellow) !important;-webkit-text-stroke:2px var(--ink) !important;}
-html.light .jh-sec-kicker{background:var(--blue) !important;color:var(--ink) !important;}
 
 /* LEADERBOARD rows light */
-html.light .jh-lbrow{background:#fff !important;border-color:var(--ink) !important;}
-html.light .jh-lbrow.r1{box-shadow:6px 6px 0 var(--yellow) !important;border-color:var(--orange) !important;}
-html.light .jh-lbrow.r2{box-shadow:6px 6px 0 rgba(120,120,120,.5) !important;}
-html.light .jh-lbrow.r3{box-shadow:6px 6px 0 #cd7f32 !important;}
-html.light .jh-lbname{color:var(--ink) !important;}
-html.light .jh-pts{-webkit-text-stroke:1.5px var(--ink) !important;}
-html.light .jh-rank{border-color:var(--ink) !important;}
 
 /* SESSION rows light */
-html.light .jh-srow{background:#fff !important;border-color:var(--ink) !important;box-shadow:6px 6px 0 var(--ink) !important;}
-html.light .jh-srow .sx{border-color:var(--ink) !important;}
-html.light .jh-srow.done .sx{background:var(--blue) !important;color:var(--ink) !important;}
-html.light .jh-srow.active .sx{background:var(--red) !important;color:#fff !important;}
-html.light .jh-srow .sd small{color:var(--red) !important;}
-html.light .jh-srow .sd b{color:var(--ink) !important;}
 
 /* POINT STRUCTURE rows light */
-html.light .rounded-lg[style*="rgba"]{border-color:var(--ink) !important;}
-html.light .rounded-lg *{color:var(--ink) !important;}
 
 /* BUTTONS light */
-html.light button[style*="background:var(--red)"],
-html.light button[style*="background: var(--red)"]{
-  background:var(--orange) !important;
-  color:#fff !important;
-  box-shadow:5px 5px 0 var(--ink) !important;
-}
 
 /* MODAL light */
-html.light .bg-stone-950{background:#fff !important;border-color:var(--ink) !important;color:var(--ink) !important;}
-html.light .bg-stone-950 *{color:var(--ink) !important;}
-html.light .bg-stone-950\/95{background:rgba(255,255,255,.97) !important;}
 
 /* INPUT light */
-html.light input,html.light textarea,html.light select{
-  background:#fff !important;border-color:var(--ink) !important;color:var(--ink) !important;
-}
 
 /* SECTION dividers light */
-html.light [style*="background:var(--blue)"],html.light [style*="background: var(--blue)"]{color:var(--ink) !important;}
 
 /* kicker line light */
-html.light .kicker{color:var(--blue) !important;}
-html.light .kicker::before{background:var(--blue) !important;box-shadow:none !important;}
 
 /* LEADERBOARD header light */
-html.light .heat-grad{
-  background:linear-gradient(135deg,#10C6B0 0%,#FF2D87 50%,#FFE14D 100%) !important;
-  -webkit-background-clip:text !important;
-  -webkit-text-fill-color:transparent !important;
-}
 </style>
 </head>
 <body>
@@ -1674,7 +1518,7 @@ function App() {
           </div>
           <div className="flex items-center gap-1 shrink-0">
             {canScore && <SyncIndicator status={sync} errMsg={syncErr} />}
-            <button onClick={() => setTheme(t => t === "light" ? "dark" : "light")} className="text-stone-400 hover:text-orange-500 p-2" aria-label="Toggle theme">{theme === "light" ? <I.moon size={18} /> : <I.sun size={18} />}</button>
+            
             {canScore && (
               <button onClick={() => isAdmin ? setTab("settings") : logout()} className="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-lg" style={{ background: isAdmin ? "rgba(255,94,30,.14)" : "rgba(51,161,255,.14)", border: `1px solid ${isAdmin ? "rgba(255,94,30,.3)" : "rgba(51,161,255,.3)"}` }} aria-label={isAdmin ? "Settings" : "Sign out scorer"}>
                 {isAdmin ? <I.shield size={14} className="text-orange-400" /> : <I.whistle size={14} className="text-blue-400" />}
@@ -1796,7 +1640,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
             <div className="jh-burst2">LEADERBOARD!</div>
             {top3.map((e, i) => (
               <div key={e.player.id} className="jh-mock-row" style={{transform:`rotate(${i % 2 ? ".5" : "-.5"}deg)`}} onClick={() => setTab("leaderboard")}>
-                {i === 0 && <span className="jh-crown">👑</span>}
+                {i === 0 && <span className="jh-crown"><CIc.crown size={26} /></span>}
                 <div className="jh-mock-rank" style={{background: i === 0 ? "var(--gold)" : i === 1 ? "#C9C9C9" : "#D08A3E"}}>{i + 1}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontFamily:"'Bangers',cursive",fontSize:22,letterSpacing:1,color:"#131313",lineHeight:1}}>{e.player.name.toUpperCase()}</div>
@@ -1847,7 +1691,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
           <div className="jh-star"><div><div style={{fontFamily:"'Bangers',cursive",fontSize:34,lineHeight:.8,color:"#D91C1C",WebkitTextStroke:"1.2px #131313"}}>402</div><div style={{fontFamily:"'Bangers',cursive",fontSize:15,color:"#131313"}}>OMR</div></div></div>
           <div>
             <div style={{fontFamily:"'Bangers',cursive",fontSize:30,letterSpacing:1,color:"#FFF6E0",WebkitTextStroke:"1.5px #131313",textShadow:"3px 3px 0 rgba(0,0,0,.75)",lineHeight:.95}}>PRIZE POOL<br/>UP FOR GRABS!</div>
-            <div style={{display:"inline-block",marginTop:8,fontFamily:"'Bangers',cursive",fontSize:14,letterSpacing:1.5,background:"#131313",color:"var(--gold)",padding:"4px 10px 2px",transform:"rotate(-1deg)"}}>SESSIONS 8 &amp; 9 = 2X POINTS 🔥</div>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,marginTop:8,fontFamily:"'Bangers',cursive",fontSize:14,letterSpacing:1.5,background:"#131313",color:"var(--gold)",padding:"4px 10px 2px",transform:"rotate(-1deg)"}}>SESSIONS 8 &amp; 9 = 2X POINTS <CIc.flame size={11} /></div>
           </div>
         </div>
       </div>
@@ -2348,9 +2192,9 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard })
       <div className="flex items-center justify-between" style={{paddingTop:8}}>
         <div className="jh-burst2" style={{margin:0}}>SESSIONS!</div>
         <div className="flex gap-2">
-          <Btn size="sm" variant="secondary" onClick={() => setShowAnnounce(true)}>📢 Announce</Btn>
-          <Btn size="sm" variant="secondary" onClick={() => setShowDraft(true)}>📣 Signup</Btn>
-          {isAdmin && <Btn size="sm" onClick={() => setShow(true)}><I.plus size={14} /> New</Btn>}
+          <button className="jh-chipbtn" onClick={() => setShowAnnounce(true)}><CIc.megaphone size={12} /> ANNOUNCE</button>
+          <button className="jh-chipbtn" onClick={() => setShowDraft(true)}><CIc.clipboard size={12} /> SIGNUP</button>
+          {isAdmin && <button className="jh-chipbtn red" onClick={() => setShow(true)}>+ NEW</button>}
         </div>
       </div>
       <div className="jh-panel jh-fill-blue jh-dots" style={{transform:"rotate(.4deg)"}}>
@@ -2361,21 +2205,21 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard })
             <div className="text-stone-300 font-semibold mb-1">No sessions yet</div>
             {isAdmin && <><div className="text-stone-500 text-sm mb-4">Start the series by creating Session 1</div><Btn onClick={() => setShow(true)}><I.plus size={14} /> Create Session</Btn></>}
           </Card>
-        ) : state.sessions.slice().reverse().map(s => (
-          <div key={s.id} style={{ background:"var(--cream)", border:"5px solid var(--ink)", boxShadow:s.completed?"5px 5px 0 rgba(0,0,0,.85)":"5px 5px 0 #D91C1C", borderRadius:0, padding:"16px 20px", cursor:"pointer", marginBottom:12, transition:"transform .1s" }} onClick={() => setOpenSessionId(s.id)} onMouseEnter={e=>{e.currentTarget.style.transform="translate(-2px,-2px)";}} onMouseLeave={e=>{e.currentTarget.style.transform="";}}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 style={{ fontFamily:"'Bangers',cursive", fontSize:"24px", letterSpacing:"1px", color:"var(--ink)" }}>{s.name}</h3>
-                  <Pill color={s.completed ? "green" : "orange"}>{s.completed ? "Done" : "Active"}</Pill>
-                  {s.doublePoints && <div className="px-2 py-0.5 rounded font-display text-stone-950 text-xs font-bold" style={{ background: "var(--gold)", color: "#2b1d16" }}>2X</div>}
-                </div>
-                <div className="text-xs text-stone-500">{s.date ? new Date(s.date).toLocaleDateString("en-GB", { weekday: "short", month: "short", day: "numeric" }) : "No date"} · {s.teams?.length || 0} teams · {(s.groupMatches || []).filter(m => m.winner).length} matches</div>
-              </div>
-              <I.chev className="text-stone-600 shrink-0" />
+        ) : state.sessions.slice().reverse().map((s, ridx) => {
+          const num = state.sessions.length - ridx;
+          return (
+          <div key={s.id} className="jh-mock-row" style={{transform:`rotate(${ridx % 2 ? ".4" : "-.4"}deg)`,padding:"12px 14px"}} onClick={() => setOpenSessionId(s.id)}>
+            <div style={{width:52,height:52,flex:"0 0 auto",display:"grid",placeItems:"center",fontFamily:"'Bangers',cursive",fontSize:30,paddingTop:3,color:"#FFF6E0",WebkitTextStroke:"1.5px #131313",textShadow:"2px 2px 0 rgba(0,0,0,.6)",background:s.completed?"#1B8EE0":"#D91C1C",border:"3px solid #131313"}}>{num}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:"'Bangers',cursive",fontSize:24,letterSpacing:1,color:"#131313",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name.toUpperCase()}</div>
+              <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".08em",color:"rgba(19,19,19,.55)",marginTop:4,textTransform:"uppercase"}}>{s.date ? new Date(s.date).toLocaleDateString("en-GB", { weekday: "short", month: "short", day: "numeric" }).toUpperCase() : "NO DATE"} · {s.teams?.length || 0} TEAMS · {(s.groupMatches || []).filter(m => m.winner).length} MATCHES</div>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flex:"0 0 auto"}}>
+              <span style={{fontFamily:"'Bangers',cursive",fontSize:13,letterSpacing:1,color:"#FFF6E0",background:s.completed?"#131313":"#D91C1C",border:"3px solid #131313",boxShadow:"2px 2px 0 rgba(0,0,0,.6)",padding:"2px 8px 1px",transform:"rotate(2deg)"}}>{s.completed ? "DONE!" : "LIVE!"}</span>
+              {s.doublePoints && <span style={{fontFamily:"'Bangers',cursive",fontSize:12,letterSpacing:1,color:"#131313",background:"var(--gold)",border:"3px solid #131313",padding:"2px 7px 1px",transform:"rotate(-2deg)"}}>2X PTS</span>}
             </div>
           </div>
-        ))}
+        );})}
       </div>
       </div>
       {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||1, thirdPlaceMode: thirdPlaceMode||"best2", teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
@@ -2468,6 +2312,47 @@ function CreateSessionModal({ onClose, onCreate, count }) {
 }
 
 // ── Milestone Badges ──────────────────────────────────────────
+// ── Comic SVG icons (replace emojis) ──
+const CIc = {
+  crown: ({ size = 26, style }) => (
+    <svg width={size} height={size * 0.85} viewBox="0 0 24 20" style={style}>
+      <path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#FFCF00" stroke="#131313" strokeWidth="1.8" strokeLinejoin="round"/>
+      <rect x="4.8" y="15.8" width="14.4" height="2.6" fill="#FFCF00" stroke="#131313" strokeWidth="1.5"/>
+    </svg>
+  ),
+  flame: ({ size = 14, style }) => (
+    <svg width={size} height={size * 1.25} viewBox="0 0 20 25" style={style}>
+      <path d="M10 1.5C6.5 7 4 8.5 5.2 14c.8 3.6 3.4 6.5 4.8 8 1.4-1.5 4-4.4 4.8-8C16 8.5 13.5 7 10 1.5Z" fill="#E85800" stroke="#131313" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M10 9c-1.6 3-2.2 4.5-1.4 7.2.5 1.7 1 2.8 1.4 3.5.4-.7.9-1.8 1.4-3.5.8-2.7.2-4.2-1.4-7.2Z" fill="#FFCF00"/>
+    </svg>
+  ),
+  clipboard: ({ size = 13 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+      <rect x="4" y="4" width="16" height="18"/><path d="M9 4V2h6v4H9z" fill="currentColor"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="16" y2="15"/>
+    </svg>
+  ),
+  dice: ({ size = 13 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+      <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8.5" r="1.6" fill="currentColor" stroke="none"/><circle cx="8.5" cy="15.5" r="1.6" fill="currentColor" stroke="none"/>
+    </svg>
+  ),
+  megaphone: ({ size = 13 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+      <path d="M3 10v4l12 5V5L3 10z"/><path d="M15 8a4 4 0 010 8M7 15v5h3v-4"/>
+    </svg>
+  ),
+  camera: ({ size = 13 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+      <path d="M3 7h4l2-3h6l2 3h4v13H3z"/><circle cx="12" cy="13" r="3.5"/>
+    </svg>
+  ),
+  share: ({ size = 12 }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6">
+      <path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v8h14v-8"/>
+    </svg>
+  ),
+};
+
 const MILESTONES = [
   { id: "champion",   icon: "🏆", label: "Champion",    desc: "Won a session final",       check: e => e.stats.finalsWon >= 1 },
   { id: "finalist",   icon: "🥈", label: "Finalist",    desc: "Reached a session final",   check: e => e.stats.finalsReached >= 1 },
@@ -2785,13 +2670,13 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
             const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
             const isFull = cnt >= MAX_TEAMS;
             return <button onClick={() => setTab("signups")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "signups" ? "border-transparent text-white" : isFull ? "text-red-400 border-transparent" : "text-stone-400 border-transparent"}`} style={tab === "signups" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}>
-              📋 List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
+              <CIc.clipboard size={13} /> List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
             </button>;
           })()}
-          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-stone-400">🎲 Draw</button>}
-          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-blue-400">📣 Remind</button>}
-          <button onClick={() => setTab("photos")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "photos" ? "border-transparent text-white" : "text-stone-400 border-transparent"}`} style={tab === "photos" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}>📷 {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
-          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-emerald-400">📤 Share</button>}
+          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-stone-400"><CIc.dice size={13} /> Draw</button>}
+          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-blue-400"><CIc.megaphone size={13} /> Remind</button>}
+          <button onClick={() => setTab("photos")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "photos" ? "border-transparent text-white" : "text-stone-400 border-transparent"}`} style={tab === "photos" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}><CIc.camera size={13} /> {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
+          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-emerald-400"><CIc.share size={13} /> Share</button>}
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
@@ -2801,7 +2686,7 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
         {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "photos" && <div className="space-y-4">
           {isAdmin && <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-stone-700 rounded-xl cursor-pointer text-stone-400 hover:border-orange-500 hover:text-orange-400 transition-colors ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
-            {uploadingPhoto ? "Uploading…" : "📷 Add Photo"}
+            {uploadingPhoto ? "Uploading…" : <><CIc.camera size={14} /> Add Photo</>}
             <input type="file" accept="image/*" multiple className="hidden" onChange={async (e) => {
               setUploadingPhoto(true);
               const files = Array.from(e.target.files || []);
@@ -2816,7 +2701,7 @@ function SessionDetail({ session, state, isAdmin, canScore, onClose, updateSessi
                 {sessionPhotos.map((src, i) => (
                   <div key={i} className="relative group">
                     <img src={src} alt={`Photo ${i+1}`} className="w-full rounded-lg object-cover cursor-pointer" style={{ aspectRatio: "4/3" }} onClick={() => sharePhoto(src, i)} />
-                    <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1 pointer-events-none" style={{ background: "rgba(0,0,0,.55)" }}>📤 Share</div>
+                    <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1 pointer-events-none" style={{ background: "rgba(0,0,0,.55)" }}><CIc.share size={11} /> Share</div>
                     {isAdmin && <button onClick={() => updateSession(s => ({ ...s, photos: (s.photos||[]).filter((_,j)=>j!==i) }))}
                       className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>}
                   </div>
@@ -3768,7 +3653,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
           <div style={{display:"grid",gridTemplateColumns:"1fr 1.18fr 1fr",gap:10,alignItems:"end",paddingTop:28}}>
             {[{e:podium[1],rank:2,rot:".6deg",pad:"16px 6px 10px"},{e:podium[0],rank:1,rot:"-.6deg",pad:"24px 6px 12px"},{e:podium[2],rank:3,rot:".8deg",pad:"14px 6px 10px"}].map(({e,rank,rot,pad}) => e ? (
               <div key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)} style={{position:"relative",background:PODIUM_CFG[rank].fill,border:"5px solid #131313",boxShadow:"4px 4px 0 rgba(19,19,19,.9)",textAlign:"center",padding:pad,cursor:"pointer",transform:`rotate(${rot})`}}>
-                {rank === 1 && <div style={{position:"absolute",top:-26,left:"50%",transform:"translateX(-50%) rotate(-10deg)",fontSize:32,filter:"drop-shadow(2px 2px 0 rgba(0,0,0,.6))",zIndex:5}}>👑</div>}
+                {rank === 1 && <div style={{position:"absolute",top:-26,left:"50%",transform:"translateX(-50%) rotate(-10deg)",filter:"drop-shadow(2px 2px 0 rgba(0,0,0,.6))",zIndex:5}}><CIc.crown size={36} /></div>}
                 <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(0,0,0,.16) 22%,transparent 24%)",backgroundSize:"9px 9px",mixBlendMode:"multiply",pointerEvents:"none"}} />
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginBottom:8}}><Avatar player={e.player} size={rank===1?56:44} /></div>
                 <div style={{position:"relative",fontFamily:"'Bangers',cursive",fontSize:rank===1?20:16,letterSpacing:.5,color:"#131313",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>{e.player.name.toUpperCase()}</div>
@@ -4383,6 +4268,11 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
   color:var(--cream) !important;
   text-shadow:2px 2px 0 rgba(0,0,0,.5);
 }
+
+/* comic chip buttons */
+.jh-chipbtn{display:inline-flex;align-items:center;gap:5px;font-family:'Bangers',cursive;font-size:15px;letter-spacing:1.5px;background:var(--cream);color:#131313;border:3px solid #131313;box-shadow:3px 3px 0 rgba(19,19,19,.85);padding:6px 12px 4px;cursor:pointer;}
+.jh-chipbtn.red{background:#D91C1C;color:#FFF6E0;text-shadow:1px 1px 0 rgba(0,0,0,.5);}
+.jh-chipbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(19,19,19,.85);}
 </style>
 
 </body>
