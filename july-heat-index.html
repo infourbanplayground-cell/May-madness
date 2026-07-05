@@ -4110,5 +4110,101 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 })();
 </script>
 
+
+<style id="jh-pop-art">
+/* ═══════════════════════════════════════════════
+   POP ART COMIC THEME — layered over logo palette
+   ═══════════════════════════════════════════════ */
+
+/* page bg: ray burst from top + deep ink */
+html:not(.light) body{
+  background:
+    repeating-conic-gradient(from 0deg at 50% -25%, rgba(232,88,0,.13) 0deg 5deg, transparent 5deg 13deg),
+    radial-gradient(ellipse 90% 55% at 8% 6%, rgba(27,142,224,.15), transparent),
+    radial-gradient(ellipse 55% 45% at 90% 12%, rgba(255,27,141,.10), transparent),
+    linear-gradient(180deg,#080808 0%,#0a0a0a 60%,#060606 100%) !important;
+  background-attachment: fixed !important;
+}
+
+/* two-tone halftone dots (blue + orange offset grids) */
+html:not(.light) body::before{
+  background-image:
+    radial-gradient(rgba(27,142,224,.15) 22%, transparent 24%),
+    radial-gradient(rgba(232,88,0,.10) 22%, transparent 24%) !important;
+  background-size: 22px 22px, 22px 22px !important;
+  background-position: 0 0, 11px 11px !important;
+}
+
+/* hero: speed-line rays + warm burst behind the logo */
+html:not(.light) .jh-hero{
+  background:
+    repeating-conic-gradient(from 0deg at 50% 44%, rgba(27,142,224,.16) 0deg 4deg, transparent 4deg 11deg),
+    radial-gradient(circle at 50% 44%, rgba(232,88,0,.25), transparent 62%),
+    #0A0A0A !important;
+}
+
+/* cards: comic-panel tilt + rotating colored drop shadows */
+.jh-lbrow, .jh-srow { border-radius:0 !important; }
+.jh-lbrow:nth-child(odd){ transform:rotate(-.5deg); }
+.jh-lbrow:nth-child(even){ transform:rotate(.5deg); }
+.jh-lbrow:nth-child(odd):hover{ transform:rotate(-.5deg) translate(-2px,-2px); }
+.jh-lbrow:nth-child(even):hover{ transform:rotate(.5deg) translate(-2px,-2px); }
+.jh-srow:nth-child(3n+1){ box-shadow:7px 7px 0 var(--red) !important; }
+.jh-srow:nth-child(3n+2){ box-shadow:7px 7px 0 var(--blue) !important; }
+.jh-srow:nth-child(3n){ box-shadow:7px 7px 0 var(--gold) !important; }
+.jh-srow:nth-child(odd){ transform:rotate(-.35deg); }
+.jh-srow:nth-child(even){ transform:rotate(.35deg); }
+.jh-srow:hover{ transform:translate(-2px,-2px) !important; }
+
+/* section titles: KABOOM-style triple-layer slam */
+.jh-sec-title{
+  color:var(--gold) !important;
+  -webkit-text-stroke:2px var(--ink);
+  text-shadow: 4px 4px 0 var(--red), 9px 9px 0 rgba(0,0,0,.85) !important;
+  transform:rotate(-1.5deg);
+}
+.jh-sec-title em{
+  color:var(--cream) !important;
+  text-shadow: 4px 4px 0 var(--blue), 9px 9px 0 rgba(0,0,0,.85) !important;
+  -webkit-text-stroke:2px var(--ink) !important;
+}
+
+/* kicker → white speech bubble */
+.jh-sec-kicker{
+  background:#fff !important; color:var(--ink) !important;
+  border:3px solid var(--ink) !important;
+  border-radius:18px !important;
+  box-shadow:3px 3px 0 var(--ink) !important;
+  transform:rotate(-2deg) !important;
+}
+
+/* primary buttons: pressed-panel style */
+button[class*="from-orange"]{
+  border:3px solid var(--ink) !important;
+  box-shadow:4px 4px 0 var(--ink) !important;
+  border-radius:0 !important;
+}
+button[class*="from-orange"]:active{
+  transform:translate(3px,3px);
+  box-shadow:1px 1px 0 var(--ink) !important;
+}
+
+/* pills get a wiggle */
+.jh-pill.live{ transform:rotate(2deg); }
+.jh-pill.done{ transform:rotate(-1.5deg); }
+
+/* bottom nav: halftone strip */
+html:not(.light) nav.fixed{
+  background:
+    radial-gradient(rgba(232,88,0,.13) 20%, transparent 22%) 0 0/16px 16px,
+    #0A0A0A !important;
+}
+
+/* VOL / flag badges pop harder */
+.jh-flag{ transform:rotate(-1deg); }
+.jh-flag.red{ transform:rotate(1.5deg); }
+.jh-flag.blue{ transform:rotate(-1.5deg); }
+</style>
+
 </body>
 </html>
