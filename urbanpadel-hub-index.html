@@ -69,11 +69,16 @@
 
   /* ── HERO INTRO ── */
   .hero-head { text-align: center; margin-bottom: 22px; }
-  .logo-img {
-    height: 76px; width: auto;
-    filter: drop-shadow(3px 3px 0 rgba(19,19,19,.4));
-    margin-bottom: 12px;
+  .logo-badge {
+    display: inline-block;
+    background: #0A0A0A;
+    border: 5px solid var(--ink);
+    box-shadow: 5px 5px 0 rgba(19,19,19,.35);
+    padding: 6px 26px;
+    margin-bottom: 14px;
+    transform: rotate(-.8deg);
   }
+  .logo-img { height: 88px; width: auto; display: block; }
   .hub-title {
     font-size: clamp(46px, 10vw, 76px);
     letter-spacing: 3px; text-transform: uppercase; line-height: .85;
@@ -121,9 +126,9 @@
   /* ── JULY HEAT hero panel ── */
   .panel.heat {
     background:
-      repeating-conic-gradient(from 0deg at 50% 42%, rgba(19,19,19,.06) 0deg 4deg, transparent 4deg 11deg),
-      radial-gradient(circle at 50% 42%, rgba(255,207,0,.28), transparent 62%),
-      var(--cream);
+      repeating-conic-gradient(from 0deg at 50% 42%, rgba(27,142,224,.18) 0deg 4deg, transparent 4deg 11deg),
+      radial-gradient(circle at 50% 42%, rgba(232,88,0,.3), transparent 62%),
+      #0A0A0A;
     text-align: center; padding: 34px 10px 24px;
   }
   .panel.heat img.heat-logo { width: 98%; max-width: 500px; display: block; margin: 0 auto; }
@@ -223,7 +228,7 @@
 
   <!-- INTRO -->
   <div class="hero-head">
-    <img class="logo-img" src="assets/up-logo.png" alt="Urban Playground">
+    <span class="logo-badge"><img class="logo-img" src="assets/up-logo.png" alt="Urban Playground"></span>
     <h1 class="hub-title">SOCIAL SERIES</h1>
     <div class="hub-sub">Pick a series · Step on court · Stack the points</div>
   </div>
@@ -234,7 +239,7 @@
     <a href="https://heat.urbanpadel.om" class="panel heat tilt-l">
       <div class="narrate">NOW SHOWING · VOL. 5</div>
       <div class="live-stamp">LIVE!</div>
-      <img class="heat-logo" src="assets/july-heat-logo-black.png" alt="July Heat">
+      <img class="heat-logo" src="assets/july-heat-logo.png" alt="July Heat">
       <div class="heat-badges">
         <span class="flag org"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="5" width="18" height="16"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="7"/><line x1="16" y1="2" x2="16" y2="7"/></svg> MON &amp; WED · 5:30 PM</span>
         <span class="flag red"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.8 1.8 0 010 3.6h-3a1.8 1.8 0 000 3.6h4.5"/></svg> 7 OMR</span>
