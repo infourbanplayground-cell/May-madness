@@ -1510,6 +1510,12 @@ function PublicLeaderboardPage({ state, leaderboard }) {
               })}
             </div>
         }
+        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">heat.urbanpadel.om · Urban Playground Oman</div>
+      </div>
+    </div>
+  );
+}
+
 function PublicPhotosPage({ state }) {
   const sessions = [...(state.sessions || [])].reverse().filter(s => (s.photos || []).length > 0);
   const totalPhotos = sessions.reduce((a, s) => a + (s.photos || []).length, 0);
