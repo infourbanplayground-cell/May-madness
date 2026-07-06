@@ -744,6 +744,16 @@ function mergeSessionPhotos(sessions, sessionPhotos) {
   return (sessions || []).map(s => ({ ...s, photos: sessionPhotos[s.id] || s.photos || [] }));
 }
 
+// Strip heavy base64 photo data before caching to localStorage (avoids QuotaExceededError)
+function stateForLocalCache(state) {
+  if (!state) return state;
+  return {
+    ...state,
+    players: (state.players || []).map(p => p.photoUrl?.startsWith("data:") ? { ...p, photoUrl: "" } : p),
+    sessions: (state.sessions || []).map(s => (s.photos && s.photos.length > 0) ? { ...s, photos: [] } : s),
+  };
+}
+
 // Extract session photo arrays that need saving (only non-empty)
 function extractSessionPhotos(sessions) {
   const out = {};
@@ -1628,7 +1638,7 @@ function App() {
         const res = await apiGet("getState");
         if (res?.ok && res.state) {
           setState(res.state);
-          localStorage.setItem(LOCAL_KEY, JSON.stringify(res.state));
+          try { localStorage.setItem(LOCAL_KEY, JSON.stringify(stateForLocalCache(res.state))); } catch (lsErr) {}
           setSync("idle");
           initialLoaded.current = true;
           document.getElementById("splash")?.remove();
@@ -1646,7 +1656,7 @@ function App() {
 
   useEffect(() => {
     if (!state || !initialLoaded.current) return;
-    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)); } catch (e) {}
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(stateForLocalCache(state))); } catch (e) {}
     if (!canScore) return;
     clearTimeout(saveTimer.current);
     setSync("syncing");
