@@ -969,6 +969,133 @@ function loadJHWatermark() {
     img.src = "assets/jh-watermark.png";
   });
 }
+function drawComicPhotoFrame(ctx, img, w, h, wm) {
+  const s = Math.min(w, h) / 1080;
+  const ink = "#131313", yellow = "#FFCF00", cream = "#FFF6E0", red = "#D91C1C";
+
+  // ── aged paper background ──
+  ctx.fillStyle = "#EFE4CC";
+  ctx.fillRect(0, 0, w, h);
+  // subtle rays from center
+  const cx = w / 2, cy = h / 2, R = Math.sqrt(w * w + h * h);
+  for (let i = 0; i < 36; i++) {
+    if (i % 2) continue;
+    const a1 = (i / 36) * Math.PI * 2, a2 = ((i + 1) / 36) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R, a1, a2);
+    ctx.closePath();
+    ctx.fillStyle = "rgba(19,19,19,.045)";
+    ctx.fill();
+  }
+  // print dot grid
+  ctx.fillStyle = "rgba(0,0,0,.07)";
+  const stepD = 12 * s;
+  for (let y = 0; y < h; y += stepD)
+    for (let x = (y / stepD % 2) * stepD / 2; x < w; x += stepD) {
+      ctx.beginPath(); ctx.arc(x, y, 1.7 * s, 0, 7); ctx.fill();
+    }
+
+  // ── photo as tilted comic panel ──
+  const pad = 64 * s;
+  const pw = w - 2 * pad, ph = h - 2 * pad;
+  const rot = -1.4 * Math.PI / 180;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  // offset shadow
+  ctx.fillStyle = "rgba(19,19,19,.9)";
+  ctx.fillRect(-pw / 2 + 14 * s, -ph / 2 + 14 * s, pw, ph);
+  // photo
+  ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
+  // halftone vignette on photo corners
+  ctx.save();
+  ctx.beginPath(); ctx.rect(-pw / 2, -ph / 2, pw, ph); ctx.clip();
+  ctx.fillStyle = "rgba(19,19,19,.5)";
+  const dS = 10 * s, reach = 150 * s;
+  for (let yy = -ph / 2; yy < ph / 2; yy += dS)
+    for (let xx = -pw / 2; xx < pw / 2; xx += dS) {
+      const dx = Math.min(xx + pw / 2, pw / 2 - xx), dy = Math.min(yy + ph / 2, ph / 2 - yy);
+      const d = Math.min(dx, dy);
+      if (d > reach) continue;
+      const r = 2.6 * s * (1 - d / reach);
+      if (r < .4) continue;
+      ctx.beginPath(); ctx.arc(xx, yy, r, 0, 7); ctx.fill();
+    }
+  ctx.restore();
+  // ink border
+  ctx.lineWidth = 9 * s; ctx.strokeStyle = ink;
+  ctx.strokeRect(-pw / 2, -ph / 2, pw, ph);
+  ctx.restore();
+
+  ctx.textBaseline = "middle"; ctx.textAlign = "center";
+
+  // ── narration box (top-left, overlapping panel edge) ──
+  const nLabel = "MEANWHILE, AT URBAN PLAYGROUND...";
+  ctx.font = `${23 * s}px 'Bangers', Impact, sans-serif`;
+  const ntw = ctx.measureText(nLabel).width;
+  const nw2 = ntw + 32 * s, nh2 = 44 * s;
+  const nx = pad - 20 * s, ny = pad - 22 * s;
+  ctx.save();
+  ctx.translate(nx + nw2 / 2, ny + nh2 / 2);
+  ctx.rotate(-1.2 * Math.PI / 180);
+  ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(-nw2 / 2 + 5 * s, -nh2 / 2 + 5 * s, nw2, nh2);
+  ctx.fillStyle = cream; ctx.fillRect(-nw2 / 2, -nh2 / 2, nw2, nh2);
+  ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.strokeRect(-nw2 / 2, -nh2 / 2, nw2, nh2);
+  ctx.fillStyle = ink;
+  ctx.fillText(nLabel, 0, 2 * s);
+  ctx.restore();
+
+  // ── logo sticker (top-right, bursting over panel corner) ──
+  if (wm) {
+    const lw = 300 * s, lh = lw * (wm.height / wm.width);
+    ctx.save();
+    ctx.translate(w - pad - 60 * s, pad + 40 * s);
+    ctx.rotate(8 * Math.PI / 180);
+    ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowOffsetX = 6 * s; ctx.shadowOffsetY = 6 * s;
+    ctx.drawImage(wm, -lw / 2, -lh / 2, lw, lh);
+    ctx.restore();
+  }
+
+  // ── SNAP! star (bottom-left) ──
+  const starPts = [[50,0],[61,18],[82,9],[79,32],[100,38],[84,53],[98,72],[73,70],[72,95],[53,79],[33,96],[32,70],[7,71],[22,53],[4,39],[25,33],[21,9],[42,18]];
+  const sr = 170 * s, sx0 = pad + 30 * s, sy0 = h - pad - 60 * s;
+  ctx.save();
+  ctx.translate(sx0, sy0);
+  ctx.rotate(-9 * Math.PI / 180);
+  ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowOffsetX = 5 * s; ctx.shadowOffsetY = 5 * s;
+  ctx.beginPath();
+  starPts.forEach(([px, py], i) => {
+    const X = (px - 50) / 100 * sr, Y = (py - 50) / 100 * sr;
+    i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = yellow; ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.stroke();
+  ctx.font = `${34 * s}px 'Bangers', Impact, sans-serif`;
+  ctx.lineWidth = 3 * s; ctx.strokeStyle = ink;
+  ctx.strokeText("SNAP!", 0, 3 * s);
+  ctx.fillStyle = red;
+  ctx.fillText("SNAP!", 0, 3 * s);
+  ctx.restore();
+
+  // ── URL strip (bottom-right, overlapping panel edge) ──
+  const label = "HEAT.URBANPADEL.OM";
+  ctx.font = `${25 * s}px 'Bangers', Impact, sans-serif`;
+  const tw = ctx.measureText(label).width;
+  const sw2 = tw + 52 * s, sh2 = 46 * s;
+  const ux = w - pad - sw2 + 24 * s, uy = h - pad - sh2 / 2;
+  ctx.save();
+  ctx.translate(ux + sw2 / 2, uy + sh2 / 2);
+  ctx.rotate(1 * Math.PI / 180);
+  ctx.fillStyle = yellow; ctx.fillRect(-sw2 / 2 - 4 * s, -sh2 / 2 - 4 * s, sw2 + 8 * s, sh2 + 8 * s);
+  ctx.fillStyle = ink; ctx.fillRect(-sw2 / 2, -sh2 / 2, sw2, sh2);
+  ctx.fillStyle = yellow;
+  ctx.fillText(label, 0, 2 * s);
+  ctx.restore();
+}
+
 async function watermarkPhotoToBase64(file, maxW = 1080) {
   const wm = await loadJHWatermark();
   try { await document.fonts.load("27px 'Bangers'"); } catch (e) {}
@@ -981,68 +1108,7 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
       const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
       const canvas = document.createElement("canvas");
       canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, w, h);
-
-      // ── comic frame drawn to fit any aspect ratio ──
-      const s = Math.min(w, h) / 1080;
-      const ink = "#131313", yellow = "#FFCF00", cream = "#FFF6E0";
-      const oB = 14 * s, band = 26 * s, iB = 8 * s;
-      const ring = (off, wd, color) => {
-        ctx.fillStyle = color;
-        ctx.fillRect(off, off, w - 2 * off, wd);
-        ctx.fillRect(off, h - off - wd, w - 2 * off, wd);
-        ctx.fillRect(off, off, wd, h - 2 * off);
-        ctx.fillRect(w - off - wd, off, wd, h - 2 * off);
-      };
-      ring(0, oB, ink);
-      ring(oB, band, yellow);
-      // halftone dots on the yellow band
-      ctx.fillStyle = "rgba(0,0,0,.28)";
-      const stepD = 11 * s, inEdge = oB + band;
-      for (let y = oB; y < h - oB; y += stepD)
-        for (let x = oB; x < w - oB; x += stepD) {
-          if (x > inEdge && x < w - inEdge && y > inEdge && y < h - inEdge) continue;
-          ctx.beginPath(); ctx.arc(x, y, 2.2 * s, 0, 7); ctx.fill();
-        }
-      ring(inEdge, iB, ink);
-
-      ctx.textBaseline = "middle"; ctx.textAlign = "center";
-
-      // narration box top center
-      const nLabel = "MEANWHILE, AT URBAN PLAYGROUND...";
-      ctx.font = `${24 * s}px 'Bangers', Impact, sans-serif`;
-      const ntw = ctx.measureText(nLabel).width;
-      const nw2 = ntw + 34 * s, nh2 = 42 * s;
-      const nx = Math.max(inEdge + iB + 6 * s, (w - nw2) / 2), ny = 42 * s;
-      ctx.fillStyle = "rgba(0,0,0,.65)"; ctx.fillRect(nx + 4 * s, ny + 4 * s, nw2, nh2);
-      ctx.fillStyle = cream; ctx.fillRect(nx, ny, nw2, nh2);
-      ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.strokeRect(nx, ny, nw2, nh2);
-      ctx.fillStyle = ink;
-      ctx.fillText(nLabel, nx + nw2 / 2, ny + nh2 / 2 + 2 * s);
-
-      // logo sticker top-left
-      if (wm) {
-        const lw = 250 * s, lh = lw * (wm.height / wm.width);
-        ctx.save();
-        ctx.translate(-14 * s + lw / 2, 60 * s + lh / 2);
-        ctx.rotate(-7 * Math.PI / 180);
-        ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowOffsetX = 5 * s; ctx.shadowOffsetY = 5 * s;
-        ctx.drawImage(wm, -lw / 2, -lh / 2, lw, lh);
-        ctx.restore();
-      }
-
-      // URL strip bottom center
-      const label = "HEAT.URBANPADEL.OM";
-      ctx.font = `${27 * s}px 'Bangers', Impact, sans-serif`;
-      const tw = ctx.measureText(label).width;
-      const sw2 = tw + 60 * s, sh2 = 48 * s;
-      const sx = (w - sw2) / 2, sy = h - oB - sh2 - 8 * s;
-      ctx.fillStyle = yellow; ctx.fillRect(sx - 4 * s, sy - 4 * s, sw2 + 8 * s, sh2 + 8 * s);
-      ctx.fillStyle = ink; ctx.fillRect(sx, sy, sw2, sh2);
-      ctx.fillStyle = yellow;
-      ctx.fillText(label, w / 2, sy + sh2 / 2 + 2 * s);
-
+      drawComicPhotoFrame(canvas.getContext("2d"), img, w, h, wm);
       resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.onerror = reject;
