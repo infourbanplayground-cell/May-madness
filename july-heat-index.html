@@ -736,6 +736,7 @@ async function uploadPhotoToServer(playerId, dataUrl) {
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ photos: { [playerId]: dataUrl } }),
     });
+    _lastSyncedPlayerPhotosJSON = "";  // force a fresh diff next debounced save (this player's entry is now current server-side, but the cheap way to stay correct is to re-check next time)
   } catch {}
 }
 
@@ -771,6 +772,7 @@ async function uploadSessionPhotosToServer(sessionId, photosArr) {
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ photos: { [sessionId]: photosArr } }),
     });
+    _lastSyncedSessionPhotosJSON = "";  // force a fresh diff next debounced save
   } catch {}
 }
 
@@ -810,6 +812,9 @@ async function apiGet(action, params = {}) {
 }
 
 // Write state and photos to the server (requires a valid token).
+let _lastSyncedPlayerPhotosJSON = "";
+let _lastSyncedSessionPhotosJSON = "";
+
 async function apiPost(body) {
   if (body.action !== "saveState") return { ok: true };
   const token = getToken();
@@ -827,24 +832,28 @@ async function apiPost(body) {
     throw new Error(errData.error || "Save failed (" + saveRes.status + ")");
   }
 
-  // Save any base64 photos separately
+  // Save any base64 photos separately — only re-upload if they actually changed
   const photos = extractPhotos(body.state?.players);
-  if (Object.keys(photos).length > 0) {
+  const photosJSON = JSON.stringify(photos);
+  if (Object.keys(photos).length > 0 && photosJSON !== _lastSyncedPlayerPhotosJSON) {
+    _lastSyncedPlayerPhotosJSON = photosJSON;
     fetch(WORKER_URL + "/photos", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-      body: JSON.stringify({ photos }),
-    }).catch(() => {});  // fire-and-forget, non-blocking
+      body: photosJSON,
+    }).then(r => { if (!r.ok) _lastSyncedPlayerPhotosJSON = ""; }).catch(() => { _lastSyncedPlayerPhotosJSON = ""; });
   }
 
-  // Save session photo arrays separately
+  // Save session photo arrays separately — only re-upload if they actually changed
   const sessionPhotos = extractSessionPhotos(body.state?.sessions);
-  if (Object.keys(sessionPhotos).length > 0) {
+  const sessionPhotosJSON = JSON.stringify(sessionPhotos);
+  if (Object.keys(sessionPhotos).length > 0 && sessionPhotosJSON !== _lastSyncedSessionPhotosJSON) {
+    _lastSyncedSessionPhotosJSON = sessionPhotosJSON;
     fetch(WORKER_URL + "/session-photos", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ photos: sessionPhotos }),
-    }).catch(() => {});  // fire-and-forget, non-blocking
+    }).then(r => { if (!r.ok) _lastSyncedSessionPhotosJSON = ""; }).catch(() => { _lastSyncedSessionPhotosJSON = ""; });
   }
 
   return { ok: true };
