@@ -1894,6 +1894,16 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
             <div className="text-[11px] text-stone-500 italic px-1">Builds from 2nd session in a row · Max +5 · Miss a session → streak resets</div>
           </div>
 
+          {/* Comeback Bonus */}
+          <div style={{ padding:"14px 16px", background:"var(--cream)", border:"5px solid var(--ink)", boxShadow:"6px 6px 0 var(--blue)" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
+              <span style={{ fontFamily:"'Bangers',cursive", fontSize:"20px", flexShrink:0 }}>↩️</span>
+              <span style={{ fontFamily:"'Bangers',cursive", fontSize:"22px", letterSpacing:"1px", color:"var(--ink)" }}>COMEBACK BONUS</span>
+              <span style={{ marginLeft:"auto", fontFamily:"'Bangers',cursive", fontSize:"28px", color:"var(--blue)", WebkitTextStroke:"1px var(--ink)", letterSpacing:"1px" }}>+2</span>
+            </div>
+            <div style={{ fontSize:"14px", fontWeight:700, color:"rgba(11,8,20,.6)", lineHeight:1.4 }}>Missed <b style={{color:"var(--ink)"}}>2+ sessions in a row</b>? Show up again and earn a one-time +2 for coming back.</div>
+          </div>
+
           {/* Double Points */}
           <div style={{ padding:"14px 16px", background:"var(--cream)", border:"5px solid var(--ink)", boxShadow:"6px 6px 0 var(--red)" }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
