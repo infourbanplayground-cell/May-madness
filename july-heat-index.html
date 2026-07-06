@@ -4441,17 +4441,18 @@ html:not(.light) .text-stone-100, html:not(.light) .text-stone-200 { color:var(-
 html:not(.light) .text-stone-300, html:not(.light) .text-stone-400 { color:#4a3f33 !important; }
 html:not(.light) .text-stone-500, html:not(.light) .text-stone-600 { color:#6b5c4a !important; }
 
-/* sticky bars (header + session sub-nav) → yellow masthead */
+/* sticky bars (header + session sub-nav) → black, matching the hero */
 html:not(.light) header.sticky,
 html:not(.light) [style*="rgba(10,10,10"]{
   background:
-    radial-gradient(rgba(0,0,0,.06) 20%, transparent 22%) 0 0/7px 7px,
-    var(--gold) !important;
+    repeating-conic-gradient(from 0deg at 50% 44%, rgba(27,142,224,.16) 0deg 4deg, transparent 4deg 11deg),
+    radial-gradient(circle at 50% 44%, rgba(232,88,0,.22), transparent 62%),
+    #0A0A0A !important;
   border-color:var(--page-ink) !important;
   backdrop-filter:none !important;
 }
-html:not(.light) header.sticky{ border-bottom:5px solid var(--page-ink) !important; box-shadow:0 3px 0 rgba(19,19,19,.25) !important; }
-html:not(.light) header.sticky button, html:not(.light) header.sticky svg { color:var(--page-ink); }
+html:not(.light) header.sticky{ border-bottom:5px solid var(--orange) !important; box-shadow:0 3px 0 rgba(19,19,19,.25) !important; }
+html:not(.light) header.sticky button, html:not(.light) header.sticky svg { color:var(--cream); }
 
 /* bottom nav → comic strip cells */
 html:not(.light) nav.fixed{
