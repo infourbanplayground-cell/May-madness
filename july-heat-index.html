@@ -2913,7 +2913,7 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
         {tab === "signups" && <SignupsTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} onRemind={() => { navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard||[])); alert("Copied! Paste in WhatsApp."); }} />}
         {tab === "groups" && <GroupsTab session={session} state={state} updateSession={updateSession} isAdmin={canScore} />}
         {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
-        {tab === "mvp" && <MvpVoteTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} />}
+        {tab === "mvp" && <MvpVoteTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "photos" && <div className="space-y-4">
           <button onClick={() => { navigator.clipboard?.writeText(location.origin + "/?photos"); alert("Photo Wall link copied! Paste in WhatsApp."); }} className="jh-chipbtn" style={{width:"100%",justifyContent:"center"}}><CIc.share size={13} /> Copy Photo Wall Link</button>
           {isAdmin && <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-stone-700 rounded-xl cursor-pointer text-stone-400 hover:border-orange-500 hover:text-orange-400 transition-colors ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
@@ -3014,7 +3014,7 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
   );
 }
 
-function MvpVoteTab({ session, state, updateSession, isAdmin }) {
+function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
   const [voterPick, setVoterPick] = useState("");
   const [pick, setPick] = useState("");
   const [justVoted, setJustVoted] = useState("");
@@ -3076,7 +3076,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin }) {
           {!session.mvpVotingOpen && !session.mvpId && (
             <div style={{ background: "var(--cream)", border: "5px solid #131313", boxShadow: "5px 5px 0 rgba(0,0,0,.8)", padding: "22px 18px", textAlign: "center" }}>
               <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: "#131313", marginBottom: 10 }}>VOTING HASN'T STARTED</div>
-              {isAdmin
+              {canScore
                 ? <>
                     <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(19,19,19,.6)", marginBottom: 14 }}>Hand the device around the courts once you open voting.</div>
                     <button className="jh-chipbtn red" style={{ fontSize: 20, width: "100%", justifyContent: "center" }} onClick={startVoting}>▶ START VOTING</button>
@@ -3133,11 +3133,11 @@ function MvpVoteTab({ session, state, updateSession, isAdmin }) {
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><CIc.crown size={40} /></div>
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color: "#131313", textTransform: "uppercase" }}>MVP of the Night</div>
               <div style={{ fontFamily: "'Bangers',cursive", fontSize: 40, color: "#131313", marginTop: 4 }}>{mvpPlayer.name}</div>
-              {isAdmin && <button className="jh-chipbtn" style={{ marginTop: 14 }} onClick={reopenVoting}>🔄 Reopen Voting</button>}
+              {canScore && <button className="jh-chipbtn" style={{ marginTop: 14 }} onClick={reopenVoting}>🔄 Reopen Voting</button>}
             </div>
           )}
 
-          {isAdmin && session.mvpVotingOpen && (
+          {canScore && session.mvpVotingOpen && (
             <div style={{ marginTop: 14 }}>
               <button className="jh-chipbtn" onClick={() => setShowTally(v => !v)}>{showTally ? "🙈 Hide Tally" : "📊 View Tally"}</button>
               {showTally && (
