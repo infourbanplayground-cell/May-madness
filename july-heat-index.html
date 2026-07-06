@@ -3015,13 +3015,19 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
 }
 
 function MvpVoteTab({ session, state, updateSession, isAdmin }) {
+  const [voterPick, setVoterPick] = useState("");
   const [pick, setPick] = useState("");
   const [justVoted, setJustVoted] = useState("");
   const [showTally, setShowTally] = useState(false);
+  const [blocked, setBlocked] = useState(false);
 
   const eligible = (session.teams || []).flatMap(t => [t.p1Id, t.p2Id]).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i)
     .map(pid => state.players.find(p => p.id === pid)).filter(Boolean)
     .sort((a, b) => a.name.localeCompare(b.name));
+  const votable = eligible.filter(p => p.id !== voterPick);
+
+  const votedIds = session.mvpVotedIds || [];
+  const alreadyVoted = voterPick && votedIds.includes(voterPick);
 
   const votes = session.mvpVotes || {};
   const totalVotes = Object.values(votes).reduce((a, b) => a + b, 0);
@@ -3031,16 +3037,24 @@ function MvpVoteTab({ session, state, updateSession, isAdmin }) {
     .sort((a, b) => b.count - a.count);
   const mvpPlayer = state.players.find(p => p.id === session.mvpId);
 
-  const startVoting = () => updateSession(s => ({ ...s, mvpVotingOpen: true, mvpVotes: {} }));
+  const startVoting = () => updateSession(s => ({ ...s, mvpVotingOpen: true, mvpVotes: {}, mvpVotedIds: [] }));
+  const chooseVoter = (pid) => {
+    setVoterPick(pid);
+    if (pick === pid) setPick("");
+    setBlocked(false);
+  };
   const castVote = () => {
-    if (!pick) return;
+    if (!pick || !voterPick) return;
+    if ((session.mvpVotedIds || []).includes(voterPick)) { setBlocked(true); return; }
     const name = state.players.find(p => p.id === pick)?.name || "";
     updateSession(s => {
       const v = { ...(s.mvpVotes || {}) };
       v[pick] = (v[pick] || 0) + 1;
-      return { ...s, mvpVotes: v };
+      const votedIds = [...(s.mvpVotedIds || []), voterPick];
+      return { ...s, mvpVotes: v, mvpVotedIds: votedIds };
     });
     setJustVoted(name);
+    setVoterPick("");
     setPick("");
     setTimeout(() => setJustVoted(""), 1800);
   };
@@ -3051,7 +3065,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin }) {
   };
   const closeVoting = () => updateSession(s => ({ ...s, mvpVotingOpen: false }));
   const reopenVoting = () => updateSession(s => ({ ...s, mvpVotingOpen: true }));
-  const resetVotes = () => updateSession(s => ({ ...s, mvpVotes: {} }));
+  const resetVotes = () => updateSession(s => ({ ...s, mvpVotes: {}, mvpVotedIds: [] }));
 
   return (
     <div className="space-y-4">
@@ -3082,14 +3096,32 @@ function MvpVoteTab({ session, state, updateSession, isAdmin }) {
                 </div>
               ) : (
                 <>
-                  <div style={{ fontFamily: "'Bangers',cursive", fontSize: 24, color: "#131313", marginBottom: 4 }}>WHO'S YOUR MVP TONIGHT?</div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(19,19,19,.5)", marginBottom: 14, textTransform: "uppercase", letterSpacing: 1 }}>One tap, one vote — pick and confirm</div>
-                  <select value={pick} onChange={e => setPick(e.target.value)}
+                  <div style={{ fontFamily: "'Bangers',cursive", fontSize: 13, letterSpacing: 1, color: "rgba(19,19,19,.55)", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 1</div>
+                  <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: "#131313", marginBottom: 10 }}>WHO ARE YOU?</div>
+                  <select value={voterPick} onChange={e => chooseVoter(e.target.value)}
                     style={{ width: "100%", background: "#fff", border: "4px solid #131313", padding: "14px 12px", fontFamily: "'Bangers',cursive", fontSize: 20, color: "#131313", marginBottom: 14 }}>
-                    <option value="">— Select a player —</option>
+                    <option value="">— Select your name —</option>
                     {eligible.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
-                  <button className="jh-chipbtn red" disabled={!pick} style={{ fontSize: 22, width: "100%", justifyContent: "center", opacity: pick ? 1 : 0.4, cursor: pick ? "pointer" : "default" }} onClick={castVote}>VOTE! 🔥</button>
+
+                  {voterPick && alreadyVoted && (
+                    <div style={{ background: "#FFCF00", border: "4px solid #131313", padding: "14px", marginBottom: 14, fontFamily: "'Bangers',cursive", fontSize: 17, color: "#131313" }}>
+                      🚫 {state.players.find(p => p.id === voterPick)?.name} already voted tonight!
+                    </div>
+                  )}
+
+                  {voterPick && !alreadyVoted && (
+                    <>
+                      <div style={{ fontFamily: "'Bangers',cursive", fontSize: 13, letterSpacing: 1, color: "rgba(19,19,19,.55)", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 2</div>
+                      <div style={{ fontFamily: "'Bangers',cursive", fontSize: 22, color: "#131313", marginBottom: 10 }}>WHO'S YOUR MVP?</div>
+                      <select value={pick} onChange={e => setPick(e.target.value)}
+                        style={{ width: "100%", background: "#fff", border: "4px solid #131313", padding: "14px 12px", fontFamily: "'Bangers',cursive", fontSize: 20, color: "#131313", marginBottom: 14 }}>
+                        <option value="">— Select a player —</option>
+                        {votable.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                      </select>
+                      <button className="jh-chipbtn red" disabled={!pick} style={{ fontSize: 22, width: "100%", justifyContent: "center", opacity: pick ? 1 : 0.4, cursor: pick ? "pointer" : "default" }} onClick={castVote}>VOTE! 🔥</button>
+                    </>
+                  )}
                 </>
               )}
               <div style={{ marginTop: 16, fontSize: 11, fontWeight: 700, color: "rgba(19,19,19,.45)", textTransform: "uppercase", letterSpacing: 1 }}>{totalVotes} vote{totalVotes !== 1 ? "s" : ""} cast tonight</div>
