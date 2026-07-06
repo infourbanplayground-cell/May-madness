@@ -739,6 +739,31 @@ async function uploadPhotoToServer(playerId, dataUrl) {
   } catch {}
 }
 
+// Merge session photo arrays (fetched separately) back onto sessions
+function mergeSessionPhotos(sessions, sessionPhotos) {
+  return (sessions || []).map(s => ({ ...s, photos: sessionPhotos[s.id] || s.photos || [] }));
+}
+
+// Extract session photo arrays that need saving (only non-empty)
+function extractSessionPhotos(sessions) {
+  const out = {};
+  (sessions || []).forEach(s => { if (Array.isArray(s.photos) && s.photos.length > 0) out[s.id] = s.photos; });
+  return out;
+}
+
+// Immediately save a session's full photo array to the server (fire-and-forget safe)
+async function uploadSessionPhotosToServer(sessionId, photosArr) {
+  const token = getToken();
+  if (!token) return;
+  try {
+    await fetch(WORKER_URL + "/session-photos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ photos: { [sessionId]: photosArr } }),
+    });
+  } catch {}
+}
+
 // Read latest state. Returns { ok, state } shape for existing callers.
 async function apiGet(action, params = {}) {
   if (action === "unlock") {
@@ -754,19 +779,23 @@ async function apiGet(action, params = {}) {
   }
   if (action === "ping") return { ok: true };
   // Load state and photos in parallel
-  const [stateRes, photosRes] = await Promise.all([
+  const [stateRes, photosRes, sessionPhotosRes] = await Promise.all([
     fetch(WORKER_URL + "/state", { method: "GET" }),
     fetch(WORKER_URL + "/photos", { method: "GET" }),
+    fetch(WORKER_URL + "/session-photos", { method: "GET" }),
   ]);
   if (!stateRes.ok) throw new Error("Load failed (" + stateRes.status + ")");
   const data = await stateRes.json();
   if (!data.ok) throw new Error(data.error || "Load failed");
   const photosData = photosRes.ok ? await photosRes.json().catch(() => ({})) : {};
   const photos = photosData.photos || {};
+  const sessionPhotosData = sessionPhotosRes.ok ? await sessionPhotosRes.json().catch(() => ({})) : {};
+  const sessionPhotos = sessionPhotosData.photos || {};
   const base = initState();
   const raw = data.state;
   const loaded = (raw && raw.players) ? { ...base, ...raw } : base;
   loaded.players = mergePhotos(loaded.players, photos);
+  loaded.sessions = mergeSessionPhotos(loaded.sessions, sessionPhotos);
   return { ok: true, state: loaded };
 }
 
@@ -795,6 +824,16 @@ async function apiPost(body) {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       body: JSON.stringify({ photos }),
+    }).catch(() => {});  // fire-and-forget, non-blocking
+  }
+
+  // Save session photo arrays separately
+  const sessionPhotos = extractSessionPhotos(body.state?.sessions);
+  if (Object.keys(sessionPhotos).length > 0) {
+    fetch(WORKER_URL + "/session-photos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ photos: sessionPhotos }),
     }).catch(() => {});  // fire-and-forget, non-blocking
   }
 
@@ -2864,7 +2903,9 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
               setUploadingPhoto(true);
               const files = Array.from(e.target.files || []);
               const b64s = await Promise.all(files.map(f => watermarkPhotoToBase64(f)));
-              updateSession(s => ({ ...s, photos: [...(s.photos || []), ...b64s] }));
+              const newPhotos = [...(session.photos || []), ...b64s];
+              updateSession(s => ({ ...s, photos: newPhotos }));
+              uploadSessionPhotosToServer(session.id, newPhotos);
               setUploadingPhoto(false);
             }} />
           </label>}
@@ -2875,7 +2916,7 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
                   <div key={i} className="relative group">
                     <img src={src} alt={`Photo ${i+1}`} className="w-full rounded-lg object-cover cursor-pointer" style={{ aspectRatio: "4/3" }} onClick={() => sharePhoto(src, i)} />
                     <div className="absolute bottom-1 right-1 px-2 py-0.5 rounded text-[10px] font-bold text-white flex items-center gap-1 pointer-events-none" style={{ background: "rgba(0,0,0,.55)" }}><CIc.share size={11} /> Share</div>
-                    {isAdmin && <button onClick={() => updateSession(s => ({ ...s, photos: (s.photos||[]).filter((_,j)=>j!==i) }))}
+                    {isAdmin && <button onClick={() => { const newPhotos = (session.photos||[]).filter((_,j)=>j!==i); updateSession(s => ({ ...s, photos: newPhotos })); uploadSessionPhotosToServer(session.id, newPhotos); }}
                       className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 text-white text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>}
                   </div>
                 ))}
