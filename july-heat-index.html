@@ -2790,25 +2790,25 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
           {isAdmin ? <button onClick={() => setShowEdit(true)} className="text-stone-400 hover:text-orange-500 p-1"><I.dots size={20} /></button> : <div className="w-7" />}
         </div>
       </div>
-      <div className="sticky top-[57px] z-10 px-4 py-2 backdrop-blur-xl border-b border-stone-800/40" style={{ background: "rgba(10,10,10,0.92)" }}>
+      <div className="sticky top-[57px] z-10 px-4 py-2" style={{ background: "var(--gold)", borderBottom: "4px solid #131313", backgroundImage: "radial-gradient(rgba(0,0,0,.07) 20%, transparent 22%)", backgroundSize: "7px 7px" }}>
         <div className="max-w-3xl mx-auto flex gap-2 overflow-x-auto">
           {[{id:"teams",label:"Teams",Ic:I.users},{id:"groups",label:"Groups",Ic:I.bar},{id:"bracket",label:"Knockouts",Ic:I.swords}].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === t.id ? "border-transparent text-white" : "text-stone-400 border-transparent"}`} style={tab === t.id ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}>
+            <button key={t.id} onClick={() => setTab(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === t.id ? { background: "#D91C1C", color: "#FFF6E0", borderColor: "#131313", boxShadow: "2px 2px 0 rgba(0,0,0,.5)" } : { background: "var(--cream)", color: "#131313", borderColor: "#131313" }}>
               <t.Ic size={14} /> {t.label}
             </button>
           ))}
           {(() => {
             const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
             const isFull = cnt >= MAX_TEAMS;
-            return <button onClick={() => setTab("signups")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "signups" ? "border-transparent text-white" : isFull ? "text-red-400 border-transparent" : "text-stone-400 border-transparent"}`} style={tab === "signups" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}>
+            return <button onClick={() => setTab("signups")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "signups" ? { background: "#D91C1C", color: "#FFF6E0", borderColor: "#131313", boxShadow: "2px 2px 0 rgba(0,0,0,.5)" } : isFull ? { background: "var(--cream)", color: "#D91C1C", borderColor: "#131313" } : { background: "var(--cream)", color: "#131313", borderColor: "#131313" }}>
               <CIc.clipboard size={13} /> List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
             </button>;
           })()}
-          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-stone-400"><CIc.dice size={13} /> Draw</button>}
-          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-blue-400"><CIc.megaphone size={13} /> Remind</button>}
-          <button onClick={() => setTab("photos")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "photos" ? "border-transparent text-white" : "text-stone-400 border-transparent"}`} style={tab === "photos" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}><CIc.camera size={13} /> {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
-          {canScore && <button onClick={() => setTab("mvp")} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border transition-all ${tab === "mvp" ? "border-transparent text-white" : "text-amber-400 border-transparent"}`} style={tab === "mvp" ? { background: "linear-gradient(135deg, var(--orange), var(--red))" } : {}}><CIc.crown size={13} /> MVP{session.mvpVotingOpen ? ` ${Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0)}` : ""}</button>}
-          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap border border-transparent text-emerald-400"><CIc.share size={13} /> Share</button>}
+          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background: "var(--cream)", color: "#131313", borderColor: "#131313" }}><CIc.dice size={13} /> Draw</button>}
+          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background: "var(--cream)", color: "#1467A8", borderColor: "#131313" }}><CIc.megaphone size={13} /> Remind</button>}
+          <button onClick={() => setTab("photos")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "photos" ? { background: "#D91C1C", color: "#FFF6E0", borderColor: "#131313", boxShadow: "2px 2px 0 rgba(0,0,0,.5)" } : { background: "var(--cream)", color: "#131313", borderColor: "#131313" }}><CIc.camera size={13} /> {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
+          {canScore && <button onClick={() => setTab("mvp")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "mvp" ? { background: "#D91C1C", color: "#FFF6E0", borderColor: "#131313", boxShadow: "2px 2px 0 rgba(0,0,0,.5)" } : { background: "var(--cream)", color: "#131313", borderColor: "#131313" }}><CIc.crown size={13} /> MVP{session.mvpVotingOpen ? ` ${Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0)}` : ""}</button>}
+          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background: "var(--cream)", color: "#1F8A24", borderColor: "#131313" }}><CIc.share size={13} /> Share</button>}
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
