@@ -1027,6 +1027,41 @@ function loadJHWatermark() {
     img.src = "assets/jh-watermark.png";
   });
 }
+// Sample the photo to measure brightness/contrast, then build a CSS filter
+// string that punches up flat, dull, or under-lit court photos automatically.
+function computeAutoEnhanceFilter(img) {
+  try {
+    const sw = 64, sh = 64;
+    const c = document.createElement("canvas");
+    c.width = sw; c.height = sh;
+    const cx = c.getContext("2d", { willReadFrequently: true });
+    cx.drawImage(img, 0, 0, sw, sh);
+    const data = cx.getImageData(0, 0, sw, sh).data;
+    let sum = 0, min = 255, max = 0, sumSat = 0, n = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      sum += lum; if (lum < min) min = lum; if (lum > max) max = lum;
+      const cmax = Math.max(r, g, b), cmin = Math.min(r, g, b);
+      sumSat += cmax === 0 ? 0 : (cmax - cmin) / cmax;
+      n++;
+    }
+    const avgLum = sum / n, avgSat = sumSat / n, range = Math.max(1, max - min);
+
+    // Dim/flat court photos (evening floodlights) get a bigger brightness lift;
+    // already-bright shots get less, to avoid blowing out highlights.
+    const brightness = avgLum < 90 ? 1.16 : avgLum < 140 ? 1.08 : 1.0;
+    // Low tonal range (hazy/flat) gets more contrast punch.
+    const contrast = range < 120 ? 1.22 : 1.12;
+    // Washed-out color gets a bigger saturation boost.
+    const saturate = avgSat < 0.25 ? 1.45 : 1.22;
+
+    return `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`;
+  } catch (e) {
+    return "contrast(1.12) saturate(1.25) brightness(1.03)"; // safe fallback
+  }
+}
+
 function drawComicPhotoFrame(ctx, img, w, h, wm) {
   const s = Math.min(w, h) / 1080;
   const ink = "#131313", yellow = "#FFCF00", cream = "#FFF6E0", red = "#D91C1C";
@@ -1064,8 +1099,10 @@ function drawComicPhotoFrame(ctx, img, w, h, wm) {
   // offset shadow
   ctx.fillStyle = "rgba(19,19,19,.9)";
   ctx.fillRect(-pw / 2 + 14 * s, -ph / 2 + 14 * s, pw, ph);
-  // photo
+  // photo — auto-enhanced (brightness/contrast/saturation) before the comic treatment
+  ctx.filter = computeAutoEnhanceFilter(img);
   ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
+  ctx.filter = "none";
   // halftone vignette on photo corners
   ctx.save();
   ctx.beginPath(); ctx.rect(-pw / 2, -ph / 2, pw, ph); ctx.clip();
