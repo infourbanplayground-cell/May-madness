@@ -33,3 +33,21 @@ export type Member = {
   phone: string
   createdAt: string
 }
+
+export type RecordingStatus = 'pending' | 'recording' | 'uploading' | 'ready' | 'failed'
+
+export type Recording = {
+  id: string
+  courtId: string
+  phone: string
+  durationMinutes: number
+  status: RecordingStatus
+  requestedAt: string
+  startedAt?: string
+  finishedAt?: string
+  filePath?: string
+  fileSizeBytes?: number
+  downloadToken?: string
+  expiresAt?: string
+  error?: string
+}

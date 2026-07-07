@@ -1,6 +1,7 @@
 import 'server-only'
 import { Pool, types } from 'pg'
-import { Booking, Member } from './types'
+import { randomUUID } from 'crypto'
+import { Booking, Member, Recording } from './types'
 export { COURTS, TIME_SLOTS } from './constants'
 
 // Return DATE columns as 'YYYY-MM-DD' strings, not Date objects.
@@ -24,6 +25,21 @@ export async function initDB(): Promise<void> {
     CREATE TABLE IF NOT EXISTS court_prices (
       court_id TEXT PRIMARY KEY,
       price_per_hour NUMERIC(10,2) DEFAULT 0.00
+    );
+    CREATE TABLE IF NOT EXISTS recordings (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      court_id TEXT NOT NULL,
+      phone TEXT NOT NULL,
+      duration_minutes INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      requested_at TIMESTAMPTZ DEFAULT now(),
+      started_at TIMESTAMPTZ,
+      finished_at TIMESTAMPTZ,
+      file_path TEXT,
+      file_size_bytes BIGINT,
+      download_token TEXT UNIQUE,
+      expires_at TIMESTAMPTZ,
+      error TEXT
     );
   `)
 }
@@ -199,5 +215,89 @@ export async function setCourtPrice(courtId: string, pricePerHour: number): Prom
      VALUES ($1, $2)
      ON CONFLICT (court_id) DO UPDATE SET price_per_hour = EXCLUDED.price_per_hour`,
     [courtId, pricePerHour]
+  )
+}
+
+// ─── Recordings ───────────────────────────────────────────────────────────────
+
+function rowToRecording(row: Record<string, unknown>): Recording {
+  return {
+    id: row.id as string,
+    courtId: row.court_id as string,
+    phone: row.phone as string,
+    durationMinutes: Number(row.duration_minutes),
+    status: row.status as Recording['status'],
+    requestedAt: String(row.requested_at),
+    startedAt: row.started_at ? String(row.started_at) : undefined,
+    finishedAt: row.finished_at ? String(row.finished_at) : undefined,
+    filePath: (row.file_path as string) ?? undefined,
+    fileSizeBytes: row.file_size_bytes != null ? Number(row.file_size_bytes) : undefined,
+    downloadToken: (row.download_token as string) ?? undefined,
+    expiresAt: row.expires_at ? String(row.expires_at) : undefined,
+    error: (row.error as string) ?? undefined,
+  }
+}
+
+export async function createRecordingJob(
+  courtId: string,
+  phone: string,
+  durationMinutes: number
+): Promise<Recording> {
+  const { rows } = await pool.query(
+    `INSERT INTO recordings (court_id, phone, duration_minutes)
+     VALUES ($1, $2, $3) RETURNING *`,
+    [courtId, phone, durationMinutes]
+  )
+  return rowToRecording(rows[0])
+}
+
+export async function getRecordingById(id: string): Promise<Recording | null> {
+  const { rows } = await pool.query('SELECT * FROM recordings WHERE id=$1', [id])
+  if (!rows.length) return null
+  return rowToRecording(rows[0])
+}
+
+export async function getRecordingByToken(token: string): Promise<Recording | null> {
+  const { rows } = await pool.query('SELECT * FROM recordings WHERE download_token=$1', [token])
+  if (!rows.length) return null
+  return rowToRecording(rows[0])
+}
+
+// Claims and marks as 'recording' any pending jobs, atomically, so multiple
+// agent poll requests can never grab the same job.
+export async function claimPendingRecordingJobs(limit = 5): Promise<Recording[]> {
+  const { rows } = await pool.query(
+    `UPDATE recordings SET status='recording', started_at=now()
+     WHERE id IN (
+       SELECT id FROM recordings WHERE status='pending'
+       ORDER BY requested_at LIMIT $1 FOR UPDATE SKIP LOCKED
+     )
+     RETURNING *`,
+    [limit]
+  )
+  return rows.map(rowToRecording)
+}
+
+export async function completeRecordingJob(
+  id: string,
+  filePath: string,
+  fileSizeBytes: number,
+  expiresInHours = 48
+): Promise<Recording> {
+  const token = randomUUID()
+  const { rows } = await pool.query(
+    `UPDATE recordings
+     SET status='ready', finished_at=now(), file_path=$2, file_size_bytes=$3,
+         download_token=$4, expires_at=now() + ($5 || ' hours')::interval
+     WHERE id=$1 RETURNING *`,
+    [id, filePath, fileSizeBytes, token, expiresInHours]
+  )
+  return rowToRecording(rows[0])
+}
+
+export async function failRecordingJob(id: string, error: string): Promise<void> {
+  await pool.query(
+    `UPDATE recordings SET status='failed', error=$2, finished_at=now() WHERE id=$1`,
+    [id, error]
   )
 }

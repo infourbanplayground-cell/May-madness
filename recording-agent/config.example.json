@@ -1,0 +1,12 @@
+{
+  "apiBaseUrl": "https://bookings.urbanpadel.om",
+  "agentSecret": "REPLACE_WITH_RECORDING_AGENT_SECRET",
+  "pollIntervalMs": 5000,
+  "tmpDir": "./tmp",
+  "cameras": {
+    "court-1": "rtsp://user:pass@192.168.1.101:554/stream1",
+    "court-2": "rtsp://user:pass@192.168.1.102:554/stream1",
+    "court-3": "rtsp://user:pass@192.168.1.103:554/stream1",
+    "court-4": "rtsp://user:pass@192.168.1.104:554/stream1"
+  }
+}

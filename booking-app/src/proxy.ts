@@ -11,7 +11,9 @@ export function proxy(request: NextRequest) {
     pathname === '/account/register' ||
     pathname.startsWith('/api/account/') ||
     pathname.startsWith('/api/courts/') ||
-    pathname.startsWith('/api/auth/')
+    pathname.startsWith('/api/auth/') ||
+    pathname.startsWith('/record') ||
+    pathname.startsWith('/api/record/')
   ) {
     return NextResponse.next()
   }

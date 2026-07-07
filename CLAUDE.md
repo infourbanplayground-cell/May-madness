@@ -90,6 +90,14 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
+### Court Recording (QR-scan camera recording)
+- Scan page: `https://bookings.urbanpadel.om/record?court=<court-id>` — lives inside booking-app (same Next.js app/port/deploy as above), not a separate service
+- Flow: player scans court's QR sticker → enters phone + duration → `POST /api/record/start` creates a `recordings` row → a local agent (running on a machine at the club, NOT the VPS) polls `GET /api/record/jobs`, records that court's camera via `ffmpeg`, uploads the file to `POST /api/record/jobs/:id/complete` → scan page polls `GET /api/record/status/:id` and shows a download link (`GET /api/record/download/:token`, expires 48h)
+- Local agent source: `/home/user/May-madness/recording-agent/` — see its README for setup (Node ≥20, ffmpeg, RTSP camera URLs, systemd service). Not deployed to the VPS; runs on club-local hardware since it needs LAN access to the cameras.
+- VPS env additions needed in `/opt/booking-app/.env.local`: `RECORDING_AGENT_SECRET` (shared secret the local agent sends as `x-agent-secret` header — generate with `openssl rand -hex 32`), optionally `RECORDINGS_DIR` (defaults to `/opt/booking-app/recordings`)
+- Videos are NOT committed/backed up automatically — add a cron job on the VPS to delete expired files: `find /opt/booking-app/recordings -type f -mtime +2 -delete`
+- No cameras are installed yet as of writing — this is software-only until hardware is purchased and the agent is set up at the club
+
 ## Common Commands
 
 ```bash

@@ -1,0 +1,15 @@
+[Unit]
+Description=Urban Padel court recording agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/court-recording-agent
+ExecStart=/usr/bin/node /opt/court-recording-agent/agent.js
+Restart=always
+RestartSec=5
+User=recorder
+
+[Install]
+WantedBy=multi-user.target
