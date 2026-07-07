@@ -1048,17 +1048,19 @@ function computeAutoEnhanceFilter(img) {
     }
     const avgLum = sum / n, avgSat = sumSat / n, range = Math.max(1, max - min);
 
-    // Dim/flat court photos (evening floodlights) get a bigger brightness lift;
-    // already-bright shots get less, to avoid blowing out highlights.
-    const brightness = avgLum < 90 ? 1.16 : avgLum < 140 ? 1.08 : 1.0;
-    // Low tonal range (hazy/flat) gets more contrast punch.
-    const contrast = range < 120 ? 1.22 : 1.12;
-    // Washed-out color gets a bigger saturation boost.
-    const saturate = avgSat < 0.25 ? 1.45 : 1.22;
+    // Always apply a strong, clearly-visible base pop — plus extra correction
+    // for genuinely dim/flat/washed-out shots (evening court floodlights etc).
+    const dimBoost   = avgLum < 90  ? 0.18 : avgLum < 140 ? 0.09 : 0;
+    const flatBoost  = range  < 120 ? 0.18 : 0.06;
+    const dullBoost  = avgSat < 0.25 ? 0.30 : avgSat < 0.4 ? 0.15 : 0;
 
-    return `brightness(${brightness}) contrast(${contrast}) saturate(${saturate})`;
+    const brightness = 1.05 + dimBoost;
+    const contrast    = 1.20 + flatBoost;
+    const saturate    = 1.40 + dullBoost;
+
+    return `brightness(${brightness.toFixed(2)}) contrast(${contrast.toFixed(2)}) saturate(${saturate.toFixed(2)})`;
   } catch (e) {
-    return "contrast(1.12) saturate(1.25) brightness(1.03)"; // safe fallback
+    return "brightness(1.08) contrast(1.25) saturate(1.45)"; // safe fallback — still a strong pop
   }
 }
 
