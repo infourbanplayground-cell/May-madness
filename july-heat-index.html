@@ -1325,11 +1325,12 @@ function calcGroupStandings(session, group) {
     h2h[wid][lid] = (h2h[wid][lid] || 0) + 1;
   });
   return rows.sort((a, b) => {
-    if (b.pts !== a.pts) return b.pts - a.pts;
-    if (b.gd !== a.gd) return b.gd - a.gd;
+    if (b.wins !== a.wins) return b.wins - a.wins;   // 1) most wins
+    if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
+    if (b.gf !== a.gf) return b.gf - a.gf;           // 3) points scored
     const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
-    if (aH !== 0) return -aH; // positive = a beat b more → a higher
-    return b.gf - a.gf;
+    if (aH !== 0) return -aH; // 4) head-to-head fallback
+    return b.pts - a.pts;
   });
 }
 
@@ -1360,7 +1361,7 @@ function calcGroupStandingsNormalized(session, group) {
     scored.forEach(s => { pts += s.pts; wins += s.w; gf += s.gf; ga += s.ga; });
     return { team, pts, wins, played: scored.length, gf, ga, gd: gf - ga };
   });
-  return rows.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || b.wins - a.wins);
+  return rows.sort((a, b) => b.wins - a.wins || b.gd - a.gd || b.gf - a.gf || b.pts - a.pts);
 }
 
 // Equalizes 3rd-place entries for cross-group comparison by adding ghost BYE wins
