@@ -1506,26 +1506,6 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
               ))}
             </div>
           )}
-          {/* Draw No Bet row */}
-          {match.odds_dnb_home&&(
-            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
-              {[
-                {type:'DNB1',label:'DNB',desc:match.home_team.split(' ').slice(-1)[0],odds:match.odds_dnb_home},
-                {type:'DNB2',label:'DNB',desc:match.away_team.split(' ').slice(-1)[0],odds:match.odds_dnb_away},
-              ].map(({type,label,desc,odds})=>(
-                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
-                  disabled={!canPredict||loading}
-                  onClick={()=>canPredict&&onPickClick(match,type)}
-                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
-                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
-                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
-                    <span style={{fontSize:9,color:'var(--muted)',fontWeight:600}}>{desc}</span>
-                  </div>
-                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
-                </button>
-              ))}
-            </div>
-          )}
           {/* Corners row — R16 only */}
           {match.stage==='r16'&&match.odds_corners_over&&(
             <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
