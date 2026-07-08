@@ -1659,9 +1659,10 @@ function App() {
   const [tab, setTab] = useState("dashboard");
   const [openSessionId, setOpenSessionId] = useState(null);
   const [openPlayerId, setOpenPlayerId] = useState(null);
-  const [role, setRole] = useState(() => { const r = localStorage.getItem(ADMIN_KEY); return r === "yes" ? "admin" : (r === "admin" || r === "scorer") ? r : "guest"; });
+  const [role, setRole] = useState(() => { const r = localStorage.getItem(ADMIN_KEY); return r === "yes" ? "admin" : (r === "admin" || r === "scorer" || r === "photographer") ? r : "guest"; });
   const isAdmin = role === "admin";
   const canScore = role === "admin" || role === "scorer";
+  const canUploadPhotos = role === "admin" || role === "scorer" || role === "photographer";
   const [showLogin, setShowLogin] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("jh-theme") || "dark");
   const [sync, setSync] = useState("idle");
@@ -1811,7 +1812,7 @@ function App() {
         </div>
       </nav>
 
-      {currentSession && <SessionDetail session={currentSession} state={state} isAdmin={isAdmin} canScore={canScore} sync={sync} syncErr={syncErr} onClose={() => setOpenSessionId(null)} updateSession={(fn) => updateSession(currentSession.id, fn)} update={update} deleteSession={() => { update(s => ({ ...s, sessions: s.sessions.filter(ss => ss.id !== currentSession.id) })); setOpenSessionId(null); }} leaderboard={leaderboard} />}
+      {currentSession && <SessionDetail session={currentSession} state={state} isAdmin={isAdmin} canScore={canScore} canUploadPhotos={canUploadPhotos} sync={sync} syncErr={syncErr} onClose={() => setOpenSessionId(null)} updateSession={(fn) => updateSession(currentSession.id, fn)} update={update} deleteSession={() => { update(s => ({ ...s, sessions: s.sessions.filter(ss => ss.id !== currentSession.id) })); setOpenSessionId(null); }} leaderboard={leaderboard} />}
       {openPlayerId && <PlayerDetail playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
     </div>
@@ -2904,7 +2905,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
   );
 }
 
-function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClose, updateSession, update, deleteSession, leaderboard }) {
+function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, sync, syncErr, onClose, updateSession, update, deleteSession, leaderboard }) {
   const [tab, setTab] = useState("teams");
   const [showEdit, setShowEdit] = useState(false);
   const [showDel, setShowDel] = useState(false);
@@ -2962,7 +2963,7 @@ function SessionDetail({ session, state, isAdmin, canScore, sync, syncErr, onClo
         {tab === "mvp" && <MvpVoteTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "photos" && <div className="space-y-4">
           <button onClick={() => { navigator.clipboard?.writeText(location.origin + "/?photos"); alert("Photo Wall link copied! Paste in WhatsApp."); }} className="jh-chipbtn" style={{width:"100%",justifyContent:"center"}}><CIc.share size={13} /> Copy Photo Wall Link</button>
-          {isAdmin && <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-stone-700 rounded-xl cursor-pointer text-stone-400 hover:border-orange-500 hover:text-orange-400 transition-colors ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
+          {canUploadPhotos && <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-stone-700 rounded-xl cursor-pointer text-stone-400 hover:border-orange-500 hover:text-orange-400 transition-colors ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
             {uploadingPhoto ? "Uploading…" : <><CIc.camera size={14} /> Add Photo</>}
             <input type="file" accept="image/*" multiple className="hidden" onChange={async (e) => {
               setUploadingPhoto(true);
