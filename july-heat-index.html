@@ -3,6 +3,24 @@
 <head>
 <meta charset="UTF-8" />
 <script>
+// Recovery collector — uploads this device's cached tournament state to the
+// server BEFORE the app boots, because the normal load flow overwrites the
+// cache with server state. Runs once per unique cache content (hash-guarded).
+(function(){
+  try {
+    var st = localStorage.getItem("july-heat-state-v1");
+    if (!st) return;
+    var mark = "len" + st.length + "_" + st.slice(0, 40) + st.slice(-40);
+    if (localStorage.getItem("jh-recovery-sent") === mark) return;
+    fetch("/recovery-dump", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: st, meta: { ua: navigator.userAgent, ts: Date.now(), len: st.length } })
+    }).then(function(r){ if (r.ok) localStorage.setItem("jh-recovery-sent", mark); }).catch(function(){});
+  } catch(e){}
+})();
+</script>
+<script>
 (function(){
   var V = "20260701_000001";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
