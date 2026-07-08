@@ -937,7 +937,7 @@ function Countdown({kickoff,settled,lang}){
 // ── Confirm Sheet ─────────────────────────────────────────────────────────────
 function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startBal,lang,extraOdds,isKO,existingPred}){
   const T=TX[lang];
-  const CHIPS=[10,25,50,100,200,500];
+  const CHIPS=[10,25,50,100,200,500,1000,2000];
   const [chosenStake,setChosenStake]=useState(()=>{
     const d=parseFloat(defaultStake||100);
     return CHIPS.includes(d)?d:100;
@@ -959,7 +959,7 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
   allOdds['QUALIFY2']=Math.round(100/((_p2+0.5*_px)/_tot))/100;
   const odds=extraOdds||allOdds[pick]||h;
   const bal=parseFloat(balance);
-  const maxStake=Math.min(500,bal);
+  const maxStake=bal;
   const netWin=(stakeUsed*(odds-1)).toFixed(2);
   const balAfter=(bal-stakeUsed+stakeUsed*odds).toFixed(0);
   // Pick label & team
@@ -1036,8 +1036,8 @@ function ConfirmSheet({match,pick,defaultStake,onConfirm,onCancel,balance,startB
                     ${c}
                   </button>
                 ))}
-                <input type="number" min="1" max="500" placeholder="custom"
-                  value={customVal} onChange={e=>{const v=Math.min(500,Math.max(1,parseInt(e.target.value)||1));setCustomVal(e.target.value);if(parseInt(e.target.value))setChosenStake(v);}}
+                <input type="number" min="1" max="99999" placeholder="custom"
+                  value={customVal} onChange={e=>{const v=Math.min(99999,Math.max(1,parseInt(e.target.value)||1));setCustomVal(e.target.value);if(parseInt(e.target.value))setChosenStake(v);}}
                   style={{flex:1,minWidth:60,padding:'6px 8px',borderRadius:10,background:'rgba(255,255,255,0.04)',border:'1px solid var(--border2)',color:'var(--text)',fontSize:12,fontFamily:'Space Grotesk',fontWeight:700,outline:'none'}}/>
               </div>
               {stakeUsed>bal&&<div style={{fontSize:10,color:'var(--red)',fontFamily:'Space Grotesk',fontWeight:700}}>Insufficient balance</div>}
@@ -1204,7 +1204,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
     catch(e){setAllPicks({predictions:[],builders:[]});}
     setLoadingPicks(false);
   }
-  const BCHIPS=[10,25,50,100,200,500];
+  const BCHIPS=[10,25,50,100,200,500,1000,2000];
   function bGetOdds(pred){
     const bh=parseFloat(match.home_odds),bd=parseFloat(match.draw_odds),ba=parseFloat(match.away_odds);
     if(pred==='1') return bh; if(pred==='X') return bd; if(pred==='2') return ba;
@@ -1274,7 +1274,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
     setBlLoadingScorers(false);
   }
   const blCombinedOdds=blLegs.reduce((acc,p)=>acc*(bGetOdds(p)||1),1);
-  const blStakeAmt=Math.min(500,Math.max(1,parseFloat(blStake)||100));
+  const blStakeAmt=Math.min(99999,Math.max(1,parseFloat(blStake)||100));
   const blPotWin=(blStakeAmt*blCombinedOdds).toFixed(2);
   const blCanSubmit=blLegs.length>=2&&blStakeAmt>=1;
   function BlLegBtn({pred,label}){
@@ -1492,6 +1492,26 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
               {[
                 {type:'OVER2.5',label:'Goals',desc:'Over 2.5',odds:match.odds_over25},
                 {type:'UNDER2.5',label:'Goals',desc:'Under 2.5',odds:match.odds_under25},
+              ].map(({type,label,desc,odds})=>(
+                <button key={type} className={`pred-btn ko ${btnClass(type)}`}
+                  disabled={!canPredict||loading}
+                  onClick={()=>canPredict&&onPickClick(match,type)}
+                  style={{flexDirection:'row',justifyContent:'space-between',padding:'7px 10px',gap:0}}>
+                  <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start',gap:1}}>
+                    <span className="odds-label" style={{fontSize:8}}>{label}</span>
+                    <span style={{fontSize:9,color:'var(--muted)',fontWeight:600}}>{desc}</span>
+                  </div>
+                  <span className="odds-val-dc">{parseFloat(odds).toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Draw No Bet row */}
+          {match.odds_dnb_home&&(
+            <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
+              {[
+                {type:'DNB1',label:'DNB',desc:match.home_team.split(' ').slice(-1)[0],odds:match.odds_dnb_home},
+                {type:'DNB2',label:'DNB',desc:match.away_team.split(' ').slice(-1)[0],odds:match.odds_dnb_away},
               ].map(({type,label,desc,odds})=>(
                 <button key={type} className={`pred-btn ko ${btnClass(type)}`}
                   disabled={!canPredict||loading}
@@ -1758,7 +1778,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
                     </button>
                   ))}
                 </div>
-                <input type="number" min="1" max="500" value={blStake} onChange={e=>setBlStake(e.target.value)}
+                <input type="number" min="1" max="99999" value={blStake} onChange={e=>setBlStake(e.target.value)}
                   style={{width:'100%',padding:'7px 10px',borderRadius:9,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:12,fontFamily:'Space Grotesk',outline:'none',boxSizing:'border-box'}}
                   placeholder="Custom amount..."/>
               </div>
@@ -1940,7 +1960,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
 // ── Bet Builder Sheet ─────────────────────────────────────────────────────────
 function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
   const T=TX[lang];
-  const CHIPS=[10,25,50,100,200,500];
+  const CHIPS=[10,25,50,100,200,500,1000,2000];
   const [selectedLegs,setSelectedLegs]=useState([]);
   const [chosenStake,setChosenStake]=useState(String(defaultStake||100));
   const [scorers,setScorers]=useState(null);
@@ -2022,7 +2042,7 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
     return pred;
   }
   const combinedOdds=selectedLegs.reduce((acc,p)=>acc*(getOdds(p)||1),1);
-  const stakeAmt=Math.min(500,Math.max(1,parseFloat(chosenStake)||defaultStake||100));
+  const stakeAmt=Math.min(99999,Math.max(1,parseFloat(chosenStake)||defaultStake||100));
   const potWin=(stakeAmt*combinedOdds).toFixed(2);
   const canSubmit=selectedLegs.length>=2&&stakeAmt>=1;
   async function loadScorers(){
@@ -2163,7 +2183,7 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
               </button>
             ))}
           </div>
-          <input type="number" min="1" max="500" value={chosenStake} onChange={e=>setChosenStake(e.target.value)}
+          <input type="number" min="1" max="99999" value={chosenStake} onChange={e=>setChosenStake(e.target.value)}
             style={{width:'100%',padding:'9px 12px',borderRadius:10,border:'1px solid var(--border2)',background:'var(--glass)',color:'var(--text)',fontSize:13,fontFamily:'Space Grotesk',outline:'none',boxSizing:'border-box'}}
             placeholder="Custom amount..."/>
         </div>
@@ -2191,7 +2211,7 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
 // ── Fixtures Tab ──────────────────────────────────────────────────────────────
 function FixturesTab({matches,predictions,builders,onPickClick,onBuildClick,loadingMatch,settings,lang,playerId}){
   const T=TX[lang];
-  const [filter,setFilter]=useState('all');
+  const [filter,setFilter]=useState('upcoming');
   const [showFinished,setShowFinished]=useState(false);
   const predMap={};(predictions||[]).forEach(p=>{if(!predMap[p.match_id])predMap[p.match_id]=[];predMap[p.match_id].push(p);});
   const builderMap={};(builders||[]).forEach(b=>{if(!builderMap[b.match_id])builderMap[b.match_id]=[];builderMap[b.match_id].push(b);});
@@ -2265,7 +2285,7 @@ function FixturesTab({matches,predictions,builders,onPickClick,onBuildClick,load
             </span>
             <span style={{fontSize:9,display:'inline-block',transform:showFinished?'rotate(180deg)':'none',transition:'transform .2s'}}>▼</span>
           </button>
-          {(showFinished||filter==='my')&&renderGroups(finishedGroups)}
+          {showFinished&&renderGroups(finishedGroups)}
         </div>
       )}
     </div>
