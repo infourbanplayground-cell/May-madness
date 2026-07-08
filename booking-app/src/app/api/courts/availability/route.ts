@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBookingsForDate } from '@/lib/store'
+import { getMergedBookingsForDate } from '@/lib/mergedBookings'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
 
 function timeToMinutes(t: string) {
@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'date query param required (YYYY-MM-DD)' }, { status: 400 })
   }
 
-  const bookings = await getBookingsForDate(date)
+  const bookings = (await getMergedBookingsForDate(date)).filter(
+    (b) => b.status !== 'cancelled'
+  )
 
   // Build availability map: courtId -> array of slot info
   const result: Record<string, Array<{ startTime: string; endTime: string; available: boolean }>> = {}

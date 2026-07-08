@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { addBooking, getBookingsForDate, getMemberById, getCourtPrices } from '@/lib/store'
+import { addBooking, getMemberById, getCourtPrices } from '@/lib/store'
+import { getMergedBookingsForDate } from '@/lib/mergedBookings'
 import { getMemberFromRequest } from '@/lib/memberAuth'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
 import { randomUUID } from 'crypto'
@@ -69,8 +70,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Booking extends past closing time' }, { status: 400 })
   }
 
-  // Check for conflicts
-  const existingBookings = await getBookingsForDate(date)
+  // Check for conflicts against MatchPoint + local bookings
+  const existingBookings = (await getMergedBookingsForDate(date)).filter(
+    (b) => b.status !== 'cancelled'
+  )
   const startMins = timeToMinutes(startTime)
   const endMins = timeToMinutes(endTime)
 

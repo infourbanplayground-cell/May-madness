@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
@@ -10,7 +10,6 @@ import { COURTS, TIME_SLOTS } from '@/lib/constants'
 type SlotInfo = { startTime: string; endTime: string; available: boolean }
 type Availability = Record<string, SlotInfo[]>
 type Prices = Record<string, number>
-
 type MemberInfo = { id: string; name: string; phone: string } | null
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -33,21 +32,11 @@ function formatDateDisplay(dateStr: string): string {
   return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-function formatDateShort(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  const d = new Date(year, month - 1, day)
-  return d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })
-}
-
 function localDateStr(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
-}
-
-function getTodayStr(): string {
-  return localDateStr(new Date())
 }
 
 function getDateRange(days: number): string[] {
@@ -61,43 +50,50 @@ function getDateRange(days: number): string[] {
 }
 
 const DURATIONS = [
-  { value: 60, label: '1h' },
-  { value: 90, label: '1.5h' },
-  { value: 120, label: '2h' },
+  { value: 60, label: '60 min' },
+  { value: 90, label: '90 min' },
+  { value: 120, label: '2 hours' },
 ]
+
+const SPORTS = ['All', ...Array.from(new Set(COURTS.map((c) => c.sport)))]
 
 const SPORT_COLORS: Record<string, string> = {
   Padel: '#6366f1',
   Pickleball: '#f59e0b',
 }
 
+const TIME_GROUPS: { label: string; icon: string; from: number; to: number }[] = [
+  { label: 'Morning', icon: '🌅', from: timeToMinutes('06:00'), to: timeToMinutes('12:00') },
+  { label: 'Afternoon', icon: '☀️', from: timeToMinutes('12:00'), to: timeToMinutes('17:00') },
+  { label: 'Evening', icon: '🌙', from: timeToMinutes('17:00'), to: timeToMinutes('24:00') },
+]
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function BookPage() {
   const router = useRouter()
-  const today = getTodayStr()
-  const dateRange = getDateRange(31)
+  const today = localDateStr(new Date())
+  const dateRange = useMemo(() => getDateRange(31), [])
 
   const [selectedDate, setSelectedDate] = useState(today)
+  const [sportFilter, setSportFilter] = useState('All')
   const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null)
   const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null)
   const [selectedDuration, setSelectedDuration] = useState<number>(60)
   const [availability, setAvailability] = useState<Availability>({})
   const [prices, setPrices] = useState<Prices>({})
-  const [member, setMember] = useState<MemberInfo>(undefined as unknown as MemberInfo)
-  const [loadingAvail, setLoadingAvail] = useState(false)
+  const [member, setMember] = useState<MemberInfo | undefined>(undefined)
+  const [loadingAvail, setLoadingAvail] = useState(true)
   const [bookingState, setBookingState] = useState<'idle' | 'confirming' | 'booking' | 'success' | 'error'>('idle')
   const [bookingError, setBookingError] = useState('')
 
-  // Load member session
   useEffect(() => {
     fetch('/api/account/me')
-      .then((r) => r.ok ? r.json() : null)
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => setMember(data ? data.member : null))
       .catch(() => setMember(null))
   }, [])
 
-  // Load prices once
   useEffect(() => {
     fetch('/api/courts/prices')
       .then((r) => r.json())
@@ -105,15 +101,13 @@ export default function BookPage() {
       .catch(() => {})
   }, [])
 
-  // Load availability when date changes
   const loadAvailability = useCallback(async () => {
     setLoadingAvail(true)
     setSelectedStartTime(null)
     setBookingState('idle')
     try {
       const res = await fetch(`/api/courts/availability?date=${selectedDate}`)
-      const data = await res.json()
-      setAvailability(data)
+      setAvailability(await res.json())
     } catch {
       setAvailability({})
     } finally {
@@ -123,51 +117,53 @@ export default function BookPage() {
 
   useEffect(() => { loadAvailability() }, [loadAvailability])
 
-  // When court or duration changes, reset time selection
   useEffect(() => {
     setSelectedStartTime(null)
     setBookingState('idle')
   }, [selectedCourtId, selectedDuration])
 
-  // Compute which start times are valid for the selected duration on selected court
+  const visibleCourts = COURTS.filter((c) => sportFilter === 'All' || c.sport === sportFilter)
+
+  // Past slots on today should not be bookable
+  const nowMins = useMemo(() => {
+    const n = new Date()
+    return n.getHours() * 60 + n.getMinutes()
+  }, [])
+
+  function slotIsPast(startTime: string): boolean {
+    return selectedDate === today && timeToMinutes(startTime) <= nowMins
+  }
+
+  function freeSlotCount(courtId: string): number {
+    const slots = availability[courtId] ?? []
+    return slots.filter((s) => s.available && !slotIsPast(s.startTime)).length
+  }
+
   function getValidSlots(courtId: string): Array<{ startTime: string; available: boolean }> {
     const slots = availability[courtId] ?? []
-    const lastSlot = TIME_SLOTS[TIME_SLOTS.length - 1]
-    const lastSlotEnd = addMinutesToTime(lastSlot, 30)
+    const closeMins = timeToMinutes(TIME_SLOTS[TIME_SLOTS.length - 1]) + 30
 
     return TIME_SLOTS.map((startTime) => {
-      const endTime = addMinutesToTime(startTime, selectedDuration)
+      if (slotIsPast(startTime)) return { startTime, available: false }
+      const endMins = timeToMinutes(startTime) + selectedDuration
+      if (endMins > closeMins) return { startTime, available: false }
 
-      // Check end time doesn't exceed closing time
-      if (timeToMinutes(endTime) > timeToMinutes(lastSlotEnd)) {
-        return { startTime, available: false }
-      }
-
-      // Check all 30-min chunks in the duration are available
       const numChunks = selectedDuration / 30
-      let allFree = true
       for (let i = 0; i < numChunks; i++) {
         const chunkStart = addMinutesToTime(startTime, i * 30)
         const slot = slots.find((s) => s.startTime === chunkStart)
-        if (!slot || !slot.available) {
-          allFree = false
-          break
-        }
+        if (!slot || !slot.available) return { startTime, available: false }
       }
-
-      return { startTime, available: allFree }
+      return { startTime, available: true }
     })
   }
 
-  // Which durations are valid for a given start time on selected court
   function getValidDurationsForSlot(courtId: string, startTime: string): number[] {
     const slots = availability[courtId] ?? []
-    const lastSlot = TIME_SLOTS[TIME_SLOTS.length - 1]
-    const lastSlotEnd = addMinutesToTime(lastSlot, 30)
+    const closeMins = timeToMinutes(TIME_SLOTS[TIME_SLOTS.length - 1]) + 30
 
     return DURATIONS.filter(({ value }) => {
-      const endTime = addMinutesToTime(startTime, value)
-      if (timeToMinutes(endTime) > timeToMinutes(lastSlotEnd)) return false
+      if (timeToMinutes(startTime) + value > closeMins) return false
       const numChunks = value / 30
       for (let i = 0; i < numChunks; i++) {
         const chunkStart = addMinutesToTime(startTime, i * 30)
@@ -187,8 +183,7 @@ export default function BookPage() {
     if (!selectedCourtId || !selectedStartTime) return
 
     if (!member) {
-      const next = encodeURIComponent('/book')
-      router.push(`/account/login?next=${next}`)
+      router.push(`/account/login?next=${encodeURIComponent('/book')}`)
       return
     }
 
@@ -223,261 +218,271 @@ export default function BookPage() {
     setBookingState('confirming')
   }
 
-  function resetBooking() {
-    setSelectedStartTime(null)
-    setBookingState('idle')
-    setBookingError('')
-    loadAvailability()
-  }
-
   const validSlots = selectedCourtId ? getValidSlots(selectedCourtId) : []
+  const showBar = selectedCourtId && selectedStartTime && bookingState !== 'success'
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-white/90 backdrop-blur border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shadow-sm">
-              <svg className="w-4.5 h-4.5 text-white" style={{ width: 18, height: 18 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm">
+              <svg style={{ width: 18, height: 18 }} className="text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
               </svg>
             </div>
-            <span className="font-bold text-gray-900">Urban Padel</span>
+            <div>
+              <span className="font-bold text-gray-900 leading-none block">Urban Playground</span>
+              <span className="text-[11px] text-gray-400 leading-none">Muscat, Oman</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            {member === undefined ? null : member ? (
-              <Link href="/account" className="text-sm text-indigo-600 font-medium hover:text-indigo-700">
-                My bookings
-              </Link>
-            ) : (
-              <Link href="/account/login" className="text-sm text-indigo-600 font-medium hover:text-indigo-700">
-                Sign in
-              </Link>
-            )}
-          </div>
+          {member === undefined ? null : member ? (
+            <Link href="/account" className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full pl-1.5 pr-3 py-1.5 transition-colors">
+              <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
+                {member.name.charAt(0).toUpperCase()}
+              </span>
+              My bookings
+            </Link>
+          ) : (
+            <Link href="/account/login" className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-full transition-colors">
+              Sign in
+            </Link>
+          )}
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 pb-16">
+      <main className="max-w-2xl mx-auto px-4 pb-40">
         {/* Hero */}
-        <div className="py-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Book a court</h1>
-          <p className="text-gray-500">Choose your court, date, and time</p>
+        <div className="pt-7 pb-5">
+          <h1 className="text-2xl font-bold text-gray-900">Book a court</h1>
+          <p className="text-gray-500 text-sm mt-0.5">Padel &amp; pickleball · open 06:00 – 24:00</p>
         </div>
 
-        {/* Step 1: Court selection */}
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Step 1 — Select court
-          </h2>
-          <div className="grid grid-cols-2 gap-3">
-            {COURTS.map((court) => {
-              const price = prices[court.id]
-              const sportColor = SPORT_COLORS[court.sport] ?? '#6366f1'
-              const isSelected = selectedCourtId === court.id
-              return (
-                <button
-                  key={court.id}
-                  onClick={() => setSelectedCourtId(isSelected ? null : court.id)}
-                  className={`relative rounded-2xl border-2 p-4 text-left transition-all ${
-                    isSelected
-                      ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                      : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-                  }`}
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center mb-3"
-                    style={{ backgroundColor: `${sportColor}15` }}
-                  >
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: sportColor }} />
-                  </div>
-                  <p className="font-semibold text-gray-900 text-sm">{court.name}</p>
-                  <p className="text-xs font-medium mt-0.5" style={{ color: sportColor }}>
-                    {court.sport}
-                  </p>
-                  {price !== undefined && price > 0 ? (
-                    <p className="text-xs text-gray-500 mt-1.5">OMR {price.toFixed(2)}/hr</p>
-                  ) : price === 0 ? (
-                    <p className="text-xs text-gray-400 mt-1.5">Free</p>
-                  ) : null}
-                  {isSelected && (
-                    <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        </section>
-
-        {/* Step 2: Date picker */}
-        <section className="mb-8">
-          <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-            Step 2 — Select date
-          </h2>
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+        {/* Date strip */}
+        <section className="mb-6">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
             {dateRange.map((dateStr) => {
               const isSelected = selectedDate === dateStr
               const isToday = dateStr === today
-              const [year, month, day] = dateStr.split('-').map(Number)
-              const d = new Date(year, month - 1, day)
-              const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
-              const dayNum = d.getDate()
+              const [y, m, d] = dateStr.split('-').map(Number)
+              const dt = new Date(y, m - 1, d)
               return (
                 <button
                   key={dateStr}
                   onClick={() => setSelectedDate(dateStr)}
-                  className={`flex flex-col items-center px-3 py-2.5 rounded-xl min-w-[52px] transition-all ${
+                  className={`flex flex-col items-center px-1 py-2.5 rounded-2xl min-w-[56px] snap-start transition-all ${
                     isSelected
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : isToday
-                      ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                      ? 'bg-gray-900 text-white shadow-lg scale-105'
                       : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <span className="text-xs font-medium">{isToday ? 'Today' : dayName}</span>
-                  <span className="text-lg font-bold leading-tight">{dayNum}</span>
+                  <span className={`text-[10px] font-medium uppercase tracking-wide ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                    {isToday ? 'Today' : dt.toLocaleDateString('en-US', { weekday: 'short' })}
+                  </span>
+                  <span className="text-lg font-bold leading-tight">{dt.getDate()}</span>
+                  <span className={`text-[10px] ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
+                    {dt.toLocaleDateString('en-US', { month: 'short' })}
+                  </span>
                 </button>
               )
             })}
           </div>
-          <p className="text-sm text-gray-600 mt-3 font-medium">{formatDateDisplay(selectedDate)}</p>
         </section>
 
-        {/* Step 3: Time + duration (only when court selected) */}
-        {selectedCourtId && (
-          <section className="mb-8">
-            <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Step 3 — Choose time &amp; duration
-            </h2>
+        {/* Sport filter */}
+        <section className="mb-4">
+          <div className="flex gap-2">
+            {SPORTS.map((sport) => (
+              <button
+                key={sport}
+                onClick={() => {
+                  setSportFilter(sport)
+                  if (sport !== 'All' && selectedCourt && selectedCourt.sport !== sport) {
+                    setSelectedCourtId(null)
+                  }
+                }}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                  sportFilter === sport
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {sport}
+              </button>
+            ))}
+          </div>
+        </section>
 
-            {/* Duration picker */}
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Duration</p>
-              <div className="flex gap-2">
-                {DURATIONS.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => setSelectedDuration(value)}
-                    className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                      selectedDuration === value
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+        {/* Court cards */}
+        <section className="mb-7">
+          <div className="grid grid-cols-2 gap-3">
+            {visibleCourts.map((court) => {
+              const price = prices[court.id]
+              const sportColor = SPORT_COLORS[court.sport] ?? '#6366f1'
+              const isSelected = selectedCourtId === court.id
+              const free = loadingAvail ? null : freeSlotCount(court.id)
+              return (
+                <button
+                  key={court.id}
+                  onClick={() => setSelectedCourtId(isSelected ? null : court.id)}
+                  className={`relative rounded-2xl p-4 text-left transition-all border-2 ${
+                    isSelected
+                      ? 'border-gray-900 bg-white shadow-lg'
+                      : 'border-transparent bg-white shadow-sm hover:shadow-md'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div
+                      className="w-9 h-9 rounded-xl flex items-center justify-center"
+                      style={{ backgroundColor: `${sportColor}14` }}
+                    >
+                      <svg style={{ width: 18, height: 18, color: sportColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9" strokeWidth={2} />
+                        <path strokeWidth={2} d="M12 3c2.5 2.4 4 5.5 4 9s-1.5 6.6-4 9c-2.5-2.4-4-5.5-4-9s1.5-6.6 4-9z" />
+                      </svg>
+                    </div>
+                    {isSelected && (
+                      <div className="w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <p className="font-bold text-gray-900 text-sm">{court.name}</p>
+                  <p className="text-xs font-medium" style={{ color: sportColor }}>{court.sport}</p>
+                  <div className="flex items-center justify-between mt-2">
+                    {free !== null ? (
+                      <span className={`text-[11px] font-medium ${free > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                        {free > 0 ? `${free} slots free` : 'Fully booked'}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-gray-300">Checking…</span>
+                    )}
+                    {price !== undefined && price > 0 && (
+                      <span className="text-[11px] text-gray-500 font-medium">OMR {price.toFixed(2)}/hr</span>
+                    )}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        {/* Time & duration */}
+        {selectedCourtId && (
+          <section className="mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-bold text-gray-900">Pick a time</h2>
+              <span className="text-xs text-gray-400">{formatDateDisplay(selectedDate)}</span>
             </div>
 
-            {/* Time grid */}
-            {loadingAvail ? (
-              <div className="text-center py-8 text-gray-400 text-sm">Loading availability…</div>
-            ) : (
-              <>
-                <p className="text-sm font-medium text-gray-700 mb-2">Available times</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {validSlots.map(({ startTime, available }) => {
-                    const isSelected = selectedStartTime === startTime
-                    return (
-                      <button
-                        key={startTime}
-                        disabled={!available}
-                        onClick={() => {
-                          setSelectedStartTime(isSelected ? null : startTime)
-                          setBookingState('idle')
-                          // Auto-adjust duration if needed
-                          if (!isSelected) {
-                            const validDurations = getValidDurationsForSlot(selectedCourtId, startTime)
-                            if (validDurations.length > 0 && !validDurations.includes(selectedDuration)) {
-                              setSelectedDuration(validDurations[0])
-                            }
-                          }
-                        }}
-                        className={`py-2.5 rounded-xl text-sm font-medium transition-all border ${
-                          !available
-                            ? 'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed'
-                            : isSelected
-                            ? 'bg-green-500 text-white border-green-500 shadow-sm'
-                            : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 hover:border-green-300'
-                        }`}
-                      >
-                        {startTime}
-                      </button>
-                    )
-                  })}
-                </div>
+            {/* Duration segmented control */}
+            <div className="flex bg-gray-200/70 rounded-xl p-1 mb-5">
+              {DURATIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setSelectedDuration(value)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+                    selectedDuration === value
+                      ? 'bg-white text-gray-900 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
 
-                <div className="flex items-center gap-4 mt-3">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <div className="w-3 h-3 rounded-sm bg-green-100 border border-green-300" />
-                    Available
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                    <div className="w-3 h-3 rounded-sm bg-gray-100 border border-gray-200" />
-                    Taken
-                  </div>
-                </div>
-              </>
+            {loadingAvail ? (
+              <div className="text-center py-10 text-gray-400 text-sm">Loading availability…</div>
+            ) : (
+              <div className="space-y-5">
+                {TIME_GROUPS.map((group) => {
+                  const groupSlots = validSlots.filter((s) => {
+                    const mins = timeToMinutes(s.startTime)
+                    return mins >= group.from && mins < group.to
+                  })
+                  const anyAvailable = groupSlots.some((s) => s.available)
+                  if (!groupSlots.length) return null
+                  return (
+                    <div key={group.label}>
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        {group.icon} {group.label}
+                        {!anyAvailable && <span className="ml-2 normal-case font-normal text-gray-300">— full</span>}
+                      </p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {groupSlots.map(({ startTime, available }) => {
+                          const isSelected = selectedStartTime === startTime
+                          return (
+                            <button
+                              key={startTime}
+                              disabled={!available}
+                              onClick={() => {
+                                setSelectedStartTime(isSelected ? null : startTime)
+                                setBookingState('idle')
+                                if (!isSelected) {
+                                  const valid = getValidDurationsForSlot(selectedCourtId, startTime)
+                                  if (valid.length > 0 && !valid.includes(selectedDuration)) {
+                                    setSelectedDuration(valid[0])
+                                  }
+                                }
+                              }}
+                              className={`py-2.5 rounded-xl text-sm font-semibold transition-all tabular-nums ${
+                                !available
+                                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed line-through decoration-gray-300'
+                                  : isSelected
+                                  ? 'bg-gray-900 text-white shadow-md scale-105'
+                                  : 'bg-white text-gray-800 shadow-sm hover:shadow border border-gray-100'
+                              }`}
+                            >
+                              {startTime}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </section>
         )}
 
-        {/* Booking summary + CTA */}
-        {selectedCourtId && selectedStartTime && bookingState !== 'success' && (
-          <section className="bg-white rounded-2xl border-2 border-indigo-100 shadow-md p-5 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Booking summary</h3>
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Court</span>
-                <span className="font-medium text-gray-900">{selectedCourt?.name} · {selectedCourt?.sport}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Date</span>
-                <span className="font-medium text-gray-900">{formatDateDisplay(selectedDate)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Time</span>
-                <span className="font-medium text-gray-900">{selectedStartTime} – {endTime}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Duration</span>
-                <span className="font-medium text-gray-900">
-                  {selectedDuration >= 60
-                    ? `${selectedDuration / 60}${selectedDuration % 60 ? '.5' : ''}h`
-                    : `${selectedDuration}min`}
-                </span>
-              </div>
-              {totalPrice > 0 && (
-                <div className="flex justify-between pt-2 border-t border-gray-100 mt-2">
-                  <span className="font-semibold text-gray-700">Total</span>
-                  <span className="font-bold text-indigo-600 text-base">OMR {totalPrice.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
+        {!selectedCourtId && !loadingAvail && (
+          <p className="text-center text-sm text-gray-400 py-6">Select a court to see available times</p>
+        )}
+      </main>
 
+      {/* Sticky bottom summary bar */}
+      {showBar && (
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+          <div className="max-w-2xl mx-auto px-4 py-4">
             {bookingState === 'error' && (
-              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
+              <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
                 {bookingError}
               </div>
             )}
-
             {bookingState === 'confirming' && member && (
-              <div className="mb-4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
-                Booking as <span className="font-semibold">{member.name}</span> ({member.phone})
+              <div className="mb-3 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
+                Booking as <span className="font-semibold">{member.name}</span> ({member.phone}) — tap confirm to finish
               </div>
             )}
-
-            <div className="flex gap-2">
+            <div className="flex items-center gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="font-bold text-gray-900 text-sm truncate">
+                  {selectedCourt?.name} · {selectedStartTime} – {endTime}
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {formatDateDisplay(selectedDate)}
+                  {totalPrice > 0 && <span className="font-semibold text-gray-800"> · OMR {totalPrice.toFixed(2)}</span>}
+                </p>
+              </div>
               {(bookingState === 'confirming' || bookingState === 'error') && (
                 <button
-                  onClick={resetBooking}
-                  className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
+                  onClick={() => { setBookingState('idle'); setBookingError('') }}
+                  className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 font-medium text-sm hover:bg-gray-50 transition-colors shrink-0"
                 >
                   Back
                 </button>
@@ -485,35 +490,41 @@ export default function BookPage() {
               <button
                 onClick={handleBook}
                 disabled={bookingState === 'booking'}
-                className="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold text-sm transition-colors shadow-sm"
+                className={`px-6 py-3 rounded-xl font-bold text-sm transition-all shrink-0 ${
+                  bookingState === 'confirming'
+                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white shadow-md'
+                } disabled:opacity-60`}
               >
                 {bookingState === 'booking'
                   ? 'Booking…'
                   : bookingState === 'confirming'
-                  ? 'Confirm booking'
+                  ? 'Confirm ✓'
                   : !member
                   ? 'Sign in to book'
                   : 'Book now'}
               </button>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
+      )}
 
-        {/* Success state */}
-        {bookingState === 'success' && selectedCourt && selectedStartTime && (
-          <section className="bg-white rounded-2xl border-2 border-green-200 shadow-md p-6 mb-6 text-center">
-            <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Success overlay */}
+      {bookingState === 'success' && selectedCourt && selectedStartTime && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-7 text-center shadow-2xl">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-1">You&apos;re booked!</h3>
-            <p className="text-gray-500 text-sm mb-1">{selectedCourt.name} · {formatDateDisplay(selectedDate)}</p>
-            <p className="text-gray-500 text-sm mb-4">{selectedStartTime} – {endTime}</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-1">You&apos;re booked! 🎾</h3>
+            <p className="text-gray-500 text-sm">{selectedCourt.name} · {formatDateDisplay(selectedDate)}</p>
+            <p className="text-gray-900 font-semibold mt-1">{selectedStartTime} – {endTime}</p>
             {totalPrice > 0 && (
-              <p className="text-indigo-600 font-bold mb-4">OMR {totalPrice.toFixed(2)}</p>
+              <p className="text-indigo-600 font-bold mt-2">OMR {totalPrice.toFixed(2)}</p>
             )}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mt-6">
               <button
                 onClick={() => {
                   setSelectedStartTime(null)
@@ -521,20 +532,20 @@ export default function BookPage() {
                   setSelectedCourtId(null)
                   loadAvailability()
                 }}
-                className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium text-sm hover:bg-gray-50 transition-colors"
+                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors"
               >
                 Book another
               </button>
               <Link
                 href="/account"
-                className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm text-center transition-colors"
+                className="flex-1 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm text-center transition-colors"
               >
                 My bookings
               </Link>
             </div>
-          </section>
-        )}
-      </main>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
