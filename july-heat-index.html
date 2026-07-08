@@ -774,6 +774,21 @@ function stateForLocalCache(state) {
   };
 }
 
+// Re-attach base64 photos from a previous state (which had them) onto a
+// server-merged state (which is photo-stripped), matched by id. Used when
+// adopting a concurrent-merge result so the UI keeps showing photos.
+function reattachPhotos(newState, prevState) {
+  if (!newState) return newState;
+  const pPhoto = {}, sPhoto = {};
+  (prevState?.players || []).forEach(p => { if (p.photoUrl?.startsWith("data:")) pPhoto[p.id] = p.photoUrl; });
+  (prevState?.sessions || []).forEach(s => { if (Array.isArray(s.photos) && s.photos.length) sPhoto[s.id] = s.photos; });
+  return {
+    ...newState,
+    players: (newState.players || []).map(p => pPhoto[p.id] ? { ...p, photoUrl: pPhoto[p.id] } : p),
+    sessions: (newState.sessions || []).map(s => sPhoto[s.id] ? { ...s, photos: sPhoto[s.id] } : s),
+  };
+}
+
 // Extract session photo arrays that need saving (only non-empty)
 function extractSessionPhotos(sessions) {
   const out = {};
@@ -818,6 +833,7 @@ async function apiGet(action, params = {}) {
   if (!stateRes.ok) throw new Error("Load failed (" + stateRes.status + ")");
   const data = await stateRes.json();
   if (!data.ok) throw new Error(data.error || "Load failed");
+  if (typeof data.version === "number") _serverVersion = data.version;  // track for concurrency
   const photosData = photosRes.ok ? await photosRes.json().catch(() => ({})) : {};
   const photos = photosData.photos || {};
   const sessionPhotosData = sessionPhotosRes.ok ? await sessionPhotosRes.json().catch(() => ({})) : {};
@@ -833,6 +849,7 @@ async function apiGet(action, params = {}) {
 // Write state and photos to the server (requires a valid token).
 let _lastSyncedPlayerPhotosJSON = "";
 let _lastSyncedSessionPhotosJSON = "";
+let _serverVersion = 0;  // optimistic-concurrency version last seen from server
 
 async function apiPost(body) {
   if (body.action !== "saveState") return { ok: true };
@@ -841,16 +858,20 @@ async function apiPost(body) {
 
   // Save state WITHOUT base64 photos — those go via /photos and /session-photos
   // below. Sending them here bloats the payload to tens of MB and trips a 413.
+  // baseVersion lets the server detect a concurrent edit and merge instead of
+  // clobbering another scorer's results.
   const saveRes = await fetch(WORKER_URL + "/save", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-    body: JSON.stringify({ state: stateForLocalCache(body.state) }),
+    body: JSON.stringify({ state: stateForLocalCache(body.state), baseVersion: _serverVersion }),
   });
   if (saveRes.status === 401) { setToken(""); throw new Error("Session expired — sign in again"); }
   if (!saveRes.ok) {
     const errData = await saveRes.json().catch(() => ({}));
     throw new Error(errData.error || "Save failed (" + saveRes.status + ")");
   }
+  const saveData = await saveRes.json().catch(() => ({}));
+  if (typeof saveData.version === "number") _serverVersion = saveData.version;
 
   // Save any base64 photos separately — only re-upload if they actually changed
   const photos = extractPhotos(body.state?.players);
@@ -876,7 +897,10 @@ async function apiPost(body) {
     }).then(r => { if (!r.ok) _lastSyncedSessionPhotosJSON = ""; }).catch(() => { _lastSyncedSessionPhotosJSON = ""; });
   }
 
-  return { ok: true };
+  // If the server merged in another scorer's changes, hand the merged state
+  // back so the app adopts it (with local photos re-attached) instead of
+  // re-saving its now-stale copy on the next tick.
+  return { ok: true, merged: !!saveData.merged, mergedState: saveData.merged ? saveData.state : null };
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1749,7 +1773,16 @@ function App() {
     clearTimeout(saveTimer.current);
     setSync("syncing");
     saveTimer.current = setTimeout(async () => {
-      try { await apiPost({ action: "saveState", state }); setSync("idle"); setSyncErr(""); }
+      try {
+        const res = await apiPost({ action: "saveState", state });
+        setSync("idle"); setSyncErr("");
+        // Another scorer's changes were merged server-side → adopt the merged
+        // result so this device shows everyone's results and stops re-saving
+        // its stale copy. Local photos are re-attached by id.
+        if (res && res.merged && res.mergedState) {
+          setState(prev => reattachPhotos(res.mergedState, prev));
+        }
+      }
       catch (e) {
         setSync("error"); setSyncErr(e.message || "Unknown sync error");
         // Session expired → token cleared by apiPost. Prompt re-login so the
@@ -3586,7 +3619,7 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
         <Btn variant="ghost" onClick={onClose} className={confirmed ? "" : "ml-auto"}>Cancel</Btn>
         {!confirmed
           ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm →</Btn>
-          : <Btn onClick={() => { onSave({ team1Id: t1, team2Id: t2, ...derived }); onClose(); }}>Save Result ✓</Btn>
+          : <Btn onClick={() => { onSave({ team1Id: t1, team2Id: t2, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
         }
       </div>
     </div>
@@ -4084,7 +4117,7 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
         <Btn variant="ghost" onClick={onClose} className={confirmed ? "" : "ml-auto"}>Cancel</Btn>
         {!confirmed
           ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm →</Btn>
-          : <Btn onClick={() => { onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived }); onClose(); }}>Save Result ✓</Btn>
+          : <Btn onClick={() => { onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
         }
       </div>
     </div>
