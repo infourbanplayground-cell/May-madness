@@ -839,11 +839,12 @@ async function apiPost(body) {
   const token = getToken();
   if (!token) throw new Error("Sign in to save");
 
-  // Save state (API strips base64 photos server-side too)
+  // Save state WITHOUT base64 photos — those go via /photos and /session-photos
+  // below. Sending them here bloats the payload to tens of MB and trips a 413.
   const saveRes = await fetch(WORKER_URL + "/save", {
     method: "POST",
     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-    body: JSON.stringify({ state: body.state }),
+    body: JSON.stringify({ state: stateForLocalCache(body.state) }),
   });
   if (saveRes.status === 401) { setToken(""); throw new Error("Session expired — sign in again"); }
   if (!saveRes.ok) {
