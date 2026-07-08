@@ -1154,10 +1154,11 @@ function drawComicPhotoFrame(ctx, img, w, h, wm) {
   ctx.restore();
 }
 
-async function watermarkPhotoToBase64(file, maxW = 1080) {
-  const wm = await loadJHWatermark();
-  try { await document.fonts.load("27px 'Bangers'"); } catch (e) {}
-  return new Promise((resolve, reject) => {
+// Uploads a resized photo to the server for Cloudinary enhancement (brightness/
+// contrast/vibrance auto-correct). Returns the enhanced image URL, or null if
+// the enhancement call fails — caller falls back to the original photo.
+async function enhancePhotoOnServer(file, maxW = 1600) {
+  const dataUrl = await new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
@@ -1166,12 +1167,57 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
       const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
       const canvas = document.createElement("canvas");
       canvas.width = w; canvas.height = h;
-      drawComicPhotoFrame(canvas.getContext("2d"), img, w, h, wm);
-      resolve(canvas.toDataURL("image/jpeg", 0.85));
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.9));
     };
     img.onerror = reject;
     img.src = url;
   });
+  try {
+    const res = await fetch(WORKER_URL + "/photo-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() },
+      body: JSON.stringify({ image: dataUrl }),
+    });
+    const json = await res.json();
+    return json.ok ? json.url : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function loadImageEl(src, useCors = false) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    if (useCors) img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function watermarkPhotoToBase64(file, maxW = 1080) {
+  const wm = await loadJHWatermark();
+  try { await document.fonts.load("27px 'Bangers'"); } catch (e) {}
+
+  const enhancedUrl = await enhancePhotoOnServer(file);
+  const img = enhancedUrl
+    ? await loadImageEl(enhancedUrl, true).catch(() => null)
+    : null;
+  const srcImg = img || await new Promise((resolve, reject) => {
+    const fallback = new Image();
+    const url = URL.createObjectURL(file);
+    fallback.onload = () => { URL.revokeObjectURL(url); resolve(fallback); };
+    fallback.onerror = reject;
+    fallback.src = url;
+  });
+
+  const scale = Math.min(1, maxW / srcImg.width);
+  const w = Math.round(srcImg.width * scale), h = Math.round(srcImg.height * scale);
+  const canvas = document.createElement("canvas");
+  canvas.width = w; canvas.height = h;
+  drawComicPhotoFrame(canvas.getContext("2d"), srcImg, w, h, wm);
+  return canvas.toDataURL("image/jpeg", 0.85);
 }
 
 // ── Share a photo via the native share sheet (Instagram etc.) ──
