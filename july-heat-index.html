@@ -1640,21 +1640,34 @@ function PlayerPicker({ players, value, onChange, exclude = [], placeholder = "P
   );
 }
 
-function Avatar({ player, size = 40, className = "" }) {
+function Avatar({ player, size = 40, className = "", ring = null }) {
   const initials = (player.name || "?").split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase();
   const [imgErr, setImgErr] = useState(false);
   const border = Math.max(2, Math.round(size * 0.07));
-  const commonStyle = { width: size, height: size, flexShrink: 0, border: `${border}px solid var(--ink)`, boxShadow: `${border}px ${border}px 0 var(--ink)`, borderRadius: 0 };
+  const ringStyle = ring ? { boxShadow: `${border}px ${border}px 0 var(--ink), 0 0 0 ${Math.max(2, Math.round(size*0.05))}px ${ring}` } : { boxShadow: `${border}px ${border}px 0 var(--ink)` };
+  const commonStyle = { width: size, height: size, flexShrink: 0, border: `${border}px solid var(--ink)`, borderRadius: 0, ...ringStyle };
   if (player.photoUrl && !imgErr) {
     return <img src={player.photoUrl} alt={player.name} onError={() => setImgErr(true)}
-      className={`object-cover shrink-0 ${className}`} style={{ ...commonStyle }} />;
+      className={`object-cover shrink-0 ${className}`}
+      style={{ ...commonStyle, objectPosition: "center 28%" }} />;  // bias crop toward faces (upper third)
   }
+  // Deterministic tinted initials background instead of flat black, so avatars
+  // without photos still read as distinct people.
+  const palette = ["#1467A8", "#B31414", "#1F8A24", "#C77800", "#6B2FB3", "#0E7C7B"];
+  const tint = palette[Math.abs((player.id || player.name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   return (
     <div className={`flex items-center justify-center shrink-0 font-bold ${className}`}
-      style={{ ...commonStyle, background: "var(--ink)", color: "var(--cream)", fontSize: size * 0.35, fontFamily: "'Bangers',cursive", letterSpacing: "1px" }}>
+      style={{ ...commonStyle, background: tint, color: "var(--cream)", fontSize: size * 0.36, fontFamily: "'Bangers',cursive", letterSpacing: "1px", textShadow: "1px 1px 0 rgba(0,0,0,.4)" }}>
       {initials}
     </div>
   );
+}
+
+// Small W/L form strip, shared by the rankings and player profile.
+function FormStrip({ form }) {
+  return <span style={{ display: "inline-flex", gap: 2 }}>
+    {form.map((r, i) => <span key={i} title={r === "W" ? "Win" : "Loss"} style={{ width: 12, height: 12, borderRadius: 2, background: r === "W" ? "#1F8A24" : "#C0392B", color: "#fff", fontSize: 8, fontWeight: "bold", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Verdana,sans-serif" }}>{r}</span>)}
+  </span>;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -4221,11 +4234,6 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
     const up = mv.kind === "up";
     return <span style={{ color: up ? "#1F8A24" : "#C0392B", fontSize: 10, fontWeight: "bold", fontFamily: "Verdana,sans-serif", display: "inline-flex", alignItems: "center", gap: 1 }}>{up ? "▲" : "▼"}{mv.n}</span>;
   };
-  const FormStrip = ({ form }) => (
-    <span style={{ display: "inline-flex", gap: 2 }}>
-      {form.map((r, i) => <span key={i} title={r === "W" ? "Win" : "Loss"} style={{ width: 12, height: 12, borderRadius: 2, background: r === "W" ? "#1F8A24" : "#C0392B", color: "#fff", fontSize: 8, fontWeight: "bold", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Verdana,sans-serif" }}>{r}</span>)}
-    </span>
-  );
   const podium = list.slice(0, 3);
   const rest = list.slice(3);
   const PODIUM_CFG = {
@@ -4351,19 +4359,32 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
   return <Modal open={true} onClose={onClose} title={player.name.toUpperCase()}>
     <div className="space-y-4">
       {canScore && <div className="flex justify-end -mt-1 -mb-2"><SyncIndicator status={sync} errMsg={syncErr} /></div>}
-      <div className="text-center py-3">
-        <div className="flex justify-center mb-3 relative">
-          <Avatar player={player} size={72} />
-          {canScore && <label className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer hover:bg-orange-400 shadow-lg">
-            {uploading ? <span className="text-[9px] text-white">…</span> : <I.camera size={12} className="text-white" />}
-            <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
-          </label>}
-        </div>
-        <div className="text-xs text-stone-500 uppercase tracking-wider mb-1">Rank #{rank}</div>
-        <div className="font-mono text-5xl font-bold" style={{ color: rank === 1 ? "#B58900" : rank <= 3 ? "#E85800" : "#131313" }}>{entry.totalPts}</div>
-        <div className="text-xs text-stone-500 uppercase tracking-wider">this series</div>
-        {prevSum > 0 && <div className="text-sm text-blue-400 mt-1 font-mono">+{prevSum} prev = <span className="font-bold text-stone-200">{entry.lifetimePts}</span> lifetime</div>}
-      </div>
+      {(() => {
+        const rankRing = rank === 1 ? "#FFCF00" : rank === 2 ? "#C9C9C9" : rank === 3 ? "#D08A3E" : null;
+        const form = recentForm(playerId, state.sessions);
+        const dec = entry.stats.groupPlayed + entry.stats.qfReached + entry.stats.sfReached + entry.stats.finalsReached;
+        const wins = entry.stats.groupWins + entry.stats.qfWins + entry.stats.sfWins + entry.stats.finalsWon;
+        const winRate = dec ? Math.round(wins / dec * 100) : 0;
+        const streak = currentStreak(form);
+        return <div className="text-center py-3">
+          <div className="flex justify-center mb-3 relative" style={{ paddingTop: rank <= 3 ? 4 : 0 }}>
+            <div style={{ position: "relative" }}>
+              <Avatar player={player} size={104} ring={rankRing} />
+              {rank <= 3 && <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%) rotate(-8deg)", fontSize: 26, filter: "drop-shadow(1px 1px 0 rgba(0,0,0,.5))" }}>{rank === 1 ? "👑" : rank === 2 ? "🥈" : "🥉"}</div>}
+              {canScore && <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer hover:bg-orange-400 shadow-lg" style={{ border: "2px solid #131313" }}>
+                {uploading ? <span className="text-[9px] text-white">…</span> : <I.camera size={13} className="text-white" />}
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+              </label>}
+            </div>
+          </div>
+          <div style={{ fontFamily: "'Bangers',cursive", fontSize: 26, letterSpacing: 1, color: "#131313", lineHeight: 1 }}>{player.name.toUpperCase()} {streak >= 3 && <span style={{ fontSize: 20 }}>🔥</span>}</div>
+          <div className="text-xs text-stone-500 uppercase tracking-wider mt-1 mb-1">Rank #{rank} · {winRate}% win</div>
+          {form.length > 0 && <div className="flex justify-center mb-2"><FormStrip form={form} /></div>}
+          <div className="font-mono text-5xl font-bold" style={{ color: rank === 1 ? "#B58900" : rank <= 3 ? "#E85800" : "#131313" }}>{entry.totalPts}</div>
+          <div className="text-xs text-stone-500 uppercase tracking-wider">this series</div>
+          {prevSum > 0 && <div className="text-sm text-blue-400 mt-1 font-mono">+{prevSum} prev = <span className="font-bold text-stone-200">{entry.lifetimePts}</span> lifetime</div>}
+        </div>;
+      })()}
       {prevSum > 0 && seriesNames.length > 0 && <Card className="p-3">
         <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold mb-2">Previous Series</div>
         <div className="space-y-1">
