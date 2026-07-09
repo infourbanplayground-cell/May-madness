@@ -1678,7 +1678,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
           <div style={{display:'flex',gap:6,marginBottom:6,direction:'ltr',flexWrap:'wrap'}}>
             <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',color:'var(--muted)',whiteSpace:'nowrap'}}>⏱ 1X2 · DC · BTTS · Goals — 90 min</span>
             <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(0,201,123,0.07)',border:'1px solid rgba(0,201,123,0.2)',color:'var(--green)',whiteSpace:'nowrap'}}>🏆 To Qualify — incl. ET &amp; pens</span>
-            {match.stage==='r16'&&(match.odds_corners_over||match.odds_cards_over||match.odds_btts_card_yes||match.odds_firstcorner_home)&&(
+            {match.stage&&match.stage!=='group'&&(match.odds_corners_over||match.odds_cards_over||match.odds_btts_card_yes||match.odds_firstcorner_home)&&(
               <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(74,158,255,0.07)',border:'1px solid rgba(74,158,255,0.2)',color:'var(--blue)',whiteSpace:'nowrap'}}>📐 Corners &amp; Cards — 90 min</span>
             )}
           </div>
@@ -3041,7 +3041,7 @@ function AdminPanel({matches,players,settings,onRefresh,showToast,lang,onClose})
                     style={{fontSize:10,color:goalsMatchId===m.id?'var(--green)':'var(--muted)',background:goalsMatchId===m.id?'rgba(0,201,123,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${goalsMatchId===m.id?'rgba(0,201,123,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                     ⚽ Goals
                   </button>
-                  {m.stage==='r16'&&(
+                  {m.stage&&m.stage!=='group'&&(
                     <button type="button" onClick={()=>{setCcMatchId(ccMatchId===m.id?null:m.id);if(ccMatchId!==m.id){setCcCorners('');setCcCards('');setCcFirstCorner('');setCcBttsCard(null);}}}
                       style={{fontSize:10,color:ccMatchId===m.id?'var(--blue)':'var(--muted)',background:ccMatchId===m.id?'rgba(74,158,255,0.1)':'rgba(255,255,255,0.04)',border:`1px solid ${ccMatchId===m.id?'rgba(74,158,255,0.3)':'var(--border)'}`,borderRadius:8,padding:'3px 10px',fontFamily:'Space Grotesk',fontWeight:700}}>
                       📐 C&amp;C
