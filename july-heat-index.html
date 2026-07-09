@@ -4269,7 +4269,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
         <>
           {climber && (
             <div style={{display:"flex",alignItems:"center",gap:8,background:"repeating-linear-gradient(45deg,#1F8A24,#1F8A24 8px,#1a7a20 8px,#1a7a20 16px)",border:"3px solid #131313",boxShadow:"3px 3px 0 rgba(19,19,19,.8)",padding:"7px 12px",transform:"rotate(-.4deg)"}}>
-              <span style={{fontSize:18}}>🚀</span>
+              <I.bolt size={18} style={{color:"#FFCF00"}} strokeWidth={2.5} />
               <span style={{fontFamily:"'Bangers',cursive",fontSize:15,letterSpacing:1,color:"#fff",textShadow:"1px 1px 0 rgba(0,0,0,.6)"}}>BIGGEST CLIMBER: {climber.e.player.name.toUpperCase()} ▲{climber.n}</span>
             </div>
           )}
@@ -4310,15 +4310,14 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",alignItems:"center",gap:6}}>
                         <span style={{fontFamily:"'Bangers',cursive",fontSize:20,letterSpacing:.5,color:"#131313",lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</span>
-                        {en.streak >= 3 && <span title={`On fire — ${en.streak} wins in a row`} style={{fontSize:13}}>🔥</span>}
+                        {en.streak >= 3 && <span title={`On fire — ${en.streak} wins in a row`} style={{display:"inline-flex"}}><CIc.flame size={13} /></span>}
                       </div>
                       <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".06em",color:"rgba(19,19,19,.55)",marginTop:3,textTransform:"uppercase",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                         {hasPlayed(e) ? <>
                           <span>{e.stats.sessionsPlayed} SESS</span>
                           <span>{en.winRate}% WIN</span>
                           {en.form.length > 0 && <FormStrip form={en.form} />}
-                          {e.stats.finalsWon > 0 && <span>🏆×{e.stats.finalsWon}</span>}
-                          {getMilestones(e).slice(0, 2).map(m => <span key={m.id} title={m.label + ": " + m.desc} style={{fontSize:11}}>{m.icon}</span>)}
+                          {e.stats.finalsWon > 0 && <span style={{display:"inline-flex",alignItems:"center",gap:2}}><I.trophy size={11} style={{color:"#B58900"}} strokeWidth={2.5} />×{e.stats.finalsWon}</span>}
                         </> : <span>NOT YET PLAYED</span>}
                       </div>
                     </div>
@@ -4370,14 +4369,15 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           <div className="flex justify-center mb-3 relative" style={{ paddingTop: rank <= 3 ? 4 : 0 }}>
             <div style={{ position: "relative" }}>
               <Avatar player={player} size={104} ring={rankRing} />
-              {rank <= 3 && <div style={{ position: "absolute", top: -14, left: "50%", transform: "translateX(-50%) rotate(-8deg)", fontSize: 26, filter: "drop-shadow(1px 1px 0 rgba(0,0,0,.5))" }}>{rank === 1 ? "👑" : rank === 2 ? "🥈" : "🥉"}</div>}
+              {rank === 1 && <div style={{ position: "absolute", top: -20, left: "50%", transform: "translateX(-50%) rotate(-8deg)", filter: "drop-shadow(1px 2px 0 rgba(0,0,0,.5))" }}><CIc.crown size={34} /></div>}
+              {(rank === 2 || rank === 3) && <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%) rotate(-6deg)", fontFamily: "'Bangers',cursive", fontSize: 15, letterSpacing: 1, color: "#131313", background: rankRing, border: "2px solid #131313", boxShadow: "2px 2px 0 rgba(0,0,0,.5)", padding: "1px 8px 0" }}>{rank === 2 ? "2ND" : "3RD"}</div>}
               {canScore && <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer hover:bg-orange-400 shadow-lg" style={{ border: "2px solid #131313" }}>
                 {uploading ? <span className="text-[9px] text-white">…</span> : <I.camera size={13} className="text-white" />}
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>}
             </div>
           </div>
-          <div style={{ fontFamily: "'Bangers',cursive", fontSize: 26, letterSpacing: 1, color: "#131313", lineHeight: 1 }}>{player.name.toUpperCase()} {streak >= 3 && <span style={{ fontSize: 20 }}>🔥</span>}</div>
+          <div style={{ fontFamily: "'Bangers',cursive", fontSize: 26, letterSpacing: 1, color: "#131313", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>{player.name.toUpperCase()} {streak >= 3 && <CIc.flame size={18} />}</div>
           <div className="text-xs text-stone-500 uppercase tracking-wider mt-1 mb-1">Rank #{rank} · {winRate}% win</div>
           {form.length > 0 && <div className="flex justify-center mb-2"><FormStrip form={form} /></div>}
           <div className="font-mono text-5xl font-bold" style={{ color: rank === 1 ? "#B58900" : rank <= 3 ? "#E85800" : "#131313" }}>{entry.totalPts}</div>
@@ -4404,7 +4404,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
         <Card className="p-3"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Match</div><div className="font-mono text-2xl font-bold text-stone-100">{entry.breakdown.matchPts}</div></Card>
         <Card className="p-3"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Knockout</div><div className="font-mono text-2xl font-bold text-red-400">{entry.breakdown.knockoutPts}</div></Card>
         <Card className="p-3"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">Top of Group</div><div className="font-mono text-2xl font-bold text-amber-400">+{entry.breakdown.topOfGroup}</div></Card>
-        <Card className="p-3"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">🔥 Streak</div><div className="font-mono text-2xl font-bold text-orange-500">+{entry.breakdown.streakPts}</div></Card>
+        <Card className="p-3"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1 flex items-center gap-1"><CIc.flame size={11} /> Streak</div><div className="font-mono text-2xl font-bold text-orange-500">+{entry.breakdown.streakPts}</div></Card>
         {entry.breakdown.comebackPts > 0 && <Card className="p-3 col-span-2"><div className="text-[10px] text-stone-500 uppercase tracking-wider mb-1">↩️ Comeback</div><div className="font-mono text-2xl font-bold text-blue-400">+{entry.breakdown.comebackPts}</div></Card>}
       </div>
       <Card className="p-3">
@@ -4414,7 +4414,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           <div><span className="text-stone-500">Group: </span><span className="text-stone-200 font-mono">{entry.stats.groupWins}W / {entry.stats.groupPlayed}P</span></div>
           <div><span className="text-stone-500">QF: </span><span className="text-stone-200 font-mono">{entry.stats.qfWins}W / {entry.stats.qfReached}P</span></div>
           <div><span className="text-stone-500">SF: </span><span className="text-stone-200 font-mono">{entry.stats.sfWins}W / {entry.stats.sfReached}P</span></div>
-          <div><span className="text-stone-500">🏆 / 🥈: </span><span className="text-amber-400 font-mono font-bold">{entry.stats.finalsWon} / {entry.stats.finalsReached - entry.stats.finalsWon}</span></div>
+          <div><span className="text-stone-500">Champ / Final: </span><span className="text-amber-400 font-mono font-bold">{entry.stats.finalsWon} / {entry.stats.finalsReached - entry.stats.finalsWon}</span></div>
         </div>
       </Card>
       {lockedNames.length > 0 && <Card className="p-3" style={{ borderColor: "rgba(220, 38, 38, 0.3)" }}>
