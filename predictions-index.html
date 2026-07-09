@@ -1654,8 +1654,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
               ))}
             </div>
           )}
-          {/* First Corner row — R16 only */}
-          {match.odds_firstcorner_home&&(
+          {false&&match.odds_firstcorner_home&&(
             <div className="flex gap-1.5 mb-1.5" style={{direction:'ltr'}}>
               {[
                 {type:'FIRSTCORNER-1',label:'1st Corner',desc:match.home_team.split(' ').slice(-1)[0],odds:match.odds_firstcorner_home},
@@ -1678,7 +1677,7 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
           <div style={{display:'flex',gap:6,marginBottom:6,direction:'ltr',flexWrap:'wrap'}}>
             <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',color:'var(--muted)',whiteSpace:'nowrap'}}>⏱ 1X2 · DC · BTTS · Goals — 90 min</span>
             <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(0,201,123,0.07)',border:'1px solid rgba(0,201,123,0.2)',color:'var(--green)',whiteSpace:'nowrap'}}>🏆 To Qualify — incl. ET &amp; pens</span>
-            {match.stage&&match.stage!=='group'&&(match.odds_corners_over||match.odds_cards_over||match.odds_btts_card_yes||match.odds_firstcorner_home)&&(
+            {match.stage&&match.stage!=='group'&&(match.odds_corners_over||match.odds_cards_over||match.odds_btts_card_yes)&&(
               <span style={{fontSize:8,fontFamily:'Space Grotesk',fontWeight:700,letterSpacing:.3,padding:'3px 7px',borderRadius:99,background:'rgba(74,158,255,0.07)',border:'1px solid rgba(74,158,255,0.2)',color:'var(--blue)',whiteSpace:'nowrap'}}>📐 Corners &amp; Cards — 90 min</span>
             )}
           </div>
@@ -1804,11 +1803,10 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
                   <BlLegBtn pred="CARDS-UNDER" label={`Under ${parseFloat(match.cards_line)||'?'} Cards`}/>
                 </div>
               )}
-              {(parseFloat(match.odds_btts_card_yes)||parseFloat(match.odds_firstcorner_home))&&(
+              {!!parseFloat(match.odds_btts_card_yes)&&(
                 <div style={{marginBottom:8}}>
                   <div style={bSecHdr}>Cards Specials</div>
-                  {!!parseFloat(match.odds_btts_card_yes)&&<><BlLegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><BlLegBtn pred="BTTS-CARD-N" label="Not Both Carded"/></>}
-                  {!!parseFloat(match.odds_firstcorner_home)&&<><BlLegBtn pred="FIRSTCORNER-1" label={match.home_team+' 1st Corner'}/><BlLegBtn pred="FIRSTCORNER-2" label={match.away_team+' 1st Corner'}/></>}
+                  <BlLegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><BlLegBtn pred="BTTS-CARD-N" label="Not Both Carded"/>
                 </div>
               )}
               <div style={{marginBottom:8}}>
@@ -2247,11 +2245,10 @@ function BuilderSheet({match,onConfirm,onCancel,lang,defaultStake}){
               <LegBtn pred="CARDS-UNDER" label={`Under ${parseFloat(match.cards_line)||'?'} Cards`}/>
             </div>
           )}
-          {(parseFloat(match.odds_btts_card_yes)||parseFloat(match.odds_firstcorner_home))&&(
+          {!!parseFloat(match.odds_btts_card_yes)&&(
             <div>
               <div style={secHdr}>Cards Specials</div>
-              {!!parseFloat(match.odds_btts_card_yes)&&<><LegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><LegBtn pred="BTTS-CARD-N" label="Not Both Carded"/></>}
-              {!!parseFloat(match.odds_firstcorner_home)&&<><LegBtn pred="FIRSTCORNER-1" label={match.home_team+' 1st Corner'}/><LegBtn pred="FIRSTCORNER-2" label={match.away_team+' 1st Corner'}/></>}
+              <LegBtn pred="BTTS-CARD-Y" label="Both Teams Carded"/><LegBtn pred="BTTS-CARD-N" label="Not Both Carded"/>
             </div>
           )}
           <div>
