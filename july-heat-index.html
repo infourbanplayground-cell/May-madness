@@ -141,6 +141,8 @@
   .kicker { font-family: 'Archivo', sans-serif; font-weight: 800; letter-spacing: .34em; text-transform: uppercase; color: var(--blue); font-size: 11px; display: inline-flex; align-items: center; gap: 10px; }
   .kicker::before { content: ''; width: 28px; height: 2px; background: var(--blue); box-shadow: 0 0 14px rgba(51,161,255,.6); border-radius: 2px; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  @keyframes jhRankIn { from { opacity: 0; } to { opacity: 1; } }
+  .jh-rank-in { animation: jhRankIn .4s ease both; }
 
   /* ═══════════════════════════════════════════════════════════
      JULY HEAT · NEON NIGHT COMIC BOOK OVERRIDES
@@ -1474,6 +1476,32 @@ function calcPlayerStats(pid, sessions) {
   });
   const streak = calcStreak(attended); total += streak; breakdown.streakPts = streak;
   return { totalPts: total, breakdown, stats, attended, partners };
+}
+
+// Last n decided results for a player across the series (most recent last),
+// as 'W'/'L'. Used for the form strip and hot-streak detection.
+function recentForm(pid, sessions, n = 5) {
+  const res = [];
+  sessions.forEach(s => {
+    const team = getPlayerTeam(s, pid); if (!team) return;
+    (s.groupMatches || []).forEach(m => {
+      if ((m.team1Id === team.id || m.team2Id === team.id) && m.winner) res.push(teamWon(m, team.id) ? "W" : "L");
+    });
+    ["qf", "sf"].forEach(r => {
+      const km = s.bracket?.[r]?.find(m => (m.team1Id === team.id || m.team2Id === team.id) && m.winner);
+      if (km) res.push(teamWon(km, team.id) ? "W" : "L");
+    });
+    const f = s.bracket?.final;
+    if (f && (f.team1Id === team.id || f.team2Id === team.id) && f.winner) res.push(teamWon(f, team.id) ? "W" : "L");
+  });
+  return res.slice(-n);
+}
+
+// Current win streak (trailing W count) from a form array.
+function currentStreak(form) {
+  let n = 0;
+  for (let i = form.length - 1; i >= 0; i--) { if (form[i] === "W") n++; else break; }
+  return n;
 }
 
 function getLockedPartners(pid, sessions) {
@@ -4149,10 +4177,57 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
   const hasPlayed = (l) => l.stats.groupPlayed > 0 || l.stats.qfReached > 0;
   const active = sorted.filter(hasPlayed);
   const list = mode === "lifetime" ? sorted : active;
-  const podium = list.slice(0, 3);
-  const rest = list.slice(3);
   const ptsOf = (e) => mode === "lifetime" ? e.lifetimePts : e.totalPts;
   const winsOf = (e) => e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon;
+
+  // ── Movement since previous session (season mode only) ──
+  const sessions = state.sessions || [];
+  const prevRank = useMemo(() => {
+    if (mode === "lifetime" || sessions.length < 2) return null;
+    const prev = sessions.slice(0, -1);
+    const board = state.players
+      .map(p => ({ id: p.id, s: calcPlayerStats(p.id, prev) }))
+      .filter(e => e.s.stats.groupPlayed > 0 || e.s.stats.qfReached > 0)
+      .sort((a, b) => b.s.totalPts - a.s.totalPts);
+    const m = {}; board.forEach((e, i) => { m[e.id] = i; });
+    return m;
+  }, [state.players, sessions, mode]);
+  const moveOf = (e, curRank) => {
+    if (!prevRank) return null;
+    if (!(e.player.id in prevRank)) return { kind: "new" };
+    const delta = prevRank[e.player.id] - curRank;
+    return { kind: delta > 0 ? "up" : delta < 0 ? "down" : "same", n: Math.abs(delta) };
+  };
+  // enrich each entry with form + derived stats
+  const enrich = (e) => {
+    const form = recentForm(e.player.id, sessions);
+    const decided = e.stats.groupPlayed + e.stats.qfReached + e.stats.sfReached + e.stats.finalsReached;
+    const wins = e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon;
+    return { form, streak: currentStreak(form), winRate: decided ? Math.round(wins / decided * 100) : 0,
+      pps: e.stats.sessionsPlayed ? (ptsOf(e) / e.stats.sessionsPlayed) : 0, decided, wins };
+  };
+  // biggest climber of the session (for a highlight callout)
+  const climber = (() => {
+    if (!prevRank) return null;
+    let best = null;
+    active.forEach((e, i) => { const mv = moveOf(e, i); if (mv && mv.kind === "up" && (!best || mv.n > best.n)) best = { e, n: mv.n }; });
+    return best && best.n >= 2 ? best : null;
+  })();
+
+  const MoveChip = ({ mv }) => {
+    if (!mv) return null;
+    if (mv.kind === "new") return <span style={{ fontFamily: "Verdana,sans-serif", fontSize: 8, fontWeight: "bold", letterSpacing: ".05em", background: "#1467A8", color: "#fff", padding: "1px 4px", borderRadius: 3 }}>NEW</span>;
+    if (mv.kind === "same") return <span style={{ color: "rgba(19,19,19,.4)", fontSize: 11, fontWeight: "bold" }}>–</span>;
+    const up = mv.kind === "up";
+    return <span style={{ color: up ? "#1F8A24" : "#C0392B", fontSize: 10, fontWeight: "bold", fontFamily: "Verdana,sans-serif", display: "inline-flex", alignItems: "center", gap: 1 }}>{up ? "▲" : "▼"}{mv.n}</span>;
+  };
+  const FormStrip = ({ form }) => (
+    <span style={{ display: "inline-flex", gap: 2 }}>
+      {form.map((r, i) => <span key={i} title={r === "W" ? "Win" : "Loss"} style={{ width: 12, height: 12, borderRadius: 2, background: r === "W" ? "#1F8A24" : "#C0392B", color: "#fff", fontSize: 8, fontWeight: "bold", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Verdana,sans-serif" }}>{r}</span>)}
+    </span>
+  );
+  const podium = list.slice(0, 3);
+  const rest = list.slice(3);
   const PODIUM_CFG = {
     1: { fill: "repeating-conic-gradient(from 0deg at 50% 28%, #E8B800 0deg 5deg, #FFCF00 5deg 12deg)", label: "1ST" },
     2: { fill: "repeating-conic-gradient(from 0deg at 50% 28%, #8f8f8f 0deg 5deg, #C9C9C9 5deg 12deg)", label: "2ND" },
@@ -4184,6 +4259,12 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
         </Card>
       ) : (
         <>
+          {climber && (
+            <div style={{display:"flex",alignItems:"center",gap:8,background:"repeating-linear-gradient(45deg,#1F8A24,#1F8A24 8px,#1a7a20 8px,#1a7a20 16px)",border:"3px solid #131313",boxShadow:"3px 3px 0 rgba(19,19,19,.8)",padding:"7px 12px",transform:"rotate(-.4deg)"}}>
+              <span style={{fontSize:18}}>🚀</span>
+              <span style={{fontFamily:"'Bangers',cursive",fontSize:15,letterSpacing:1,color:"#fff",textShadow:"1px 1px 0 rgba(0,0,0,.6)"}}>BIGGEST CLIMBER: {climber.e.player.name.toUpperCase()} ▲{climber.n}</span>
+            </div>
+          )}
           {/* ── PODIUM ── */}
           <div style={{display:"grid",gridTemplateColumns:"1fr 1.18fr 1fr",gap:10,alignItems:"end",paddingTop:28}}>
             {[{e:podium[1],rank:2,rot:".6deg",pad:"16px 6px 10px"},{e:podium[0],rank:1,rot:"-.6deg",pad:"24px 6px 12px"},{e:podium[2],rank:3,rot:".8deg",pad:"14px 6px 10px"}].map(({e,rank,rot,pad}) => e ? (
@@ -4193,8 +4274,12 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginBottom:8}}><Avatar player={e.player} size={rank===1?56:44} /></div>
                 <div style={{position:"relative",fontFamily:"'Bangers',cursive",fontSize:rank===1?20:16,letterSpacing:.5,color:"#131313",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>{e.player.name.toUpperCase()}</div>
                 <div style={{position:"relative",fontFamily:"'Bangers',cursive",fontSize:rank===1?42:32,lineHeight:.9,color:"#FFF6E0",WebkitTextStroke:"2px #131313",textShadow:"3px 3px 0 rgba(0,0,0,.75)",marginTop:5}}>{ptsOf(e)}</div>
-                <div style={{position:"relative",fontFamily:"Verdana,sans-serif",fontSize:8,fontWeight:"bold",letterSpacing:".1em",color:"rgba(19,19,19,.6)",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed} SESS · {winsOf(e)} W</div>
-                <div style={{position:"relative",display:"inline-block",fontFamily:"'Bangers',cursive",fontSize:13,letterSpacing:2,background:"#131313",color:"#FFF6E0",padding:"3px 10px 1px",marginTop:7}}>{PODIUM_CFG[rank].label}</div>
+                <div style={{position:"relative",fontFamily:"Verdana,sans-serif",fontSize:8,fontWeight:"bold",letterSpacing:".1em",color:"rgba(19,19,19,.6)",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed} SESS · {enrich(e).winRate}% WIN</div>
+                <div style={{position:"relative",display:"flex",justifyContent:"center",marginTop:5}}><FormStrip form={enrich(e).form} /></div>
+                <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:7}}>
+                  <span style={{display:"inline-block",fontFamily:"'Bangers',cursive",fontSize:13,letterSpacing:2,background:"#131313",color:"#FFF6E0",padding:"3px 10px 1px"}}>{PODIUM_CFG[rank].label}</span>
+                  {mode === "season" && <MoveChip mv={moveOf(e, rank - 1)} />}
+                </div>
               </div>
             ) : <div key={"slot"+rank} />)}
           </div>
@@ -4205,19 +4290,27 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
               {rest.map((e, idx) => {
                 const i = idx + 3;
                 const dim = mode === "lifetime" && !hasPlayed(e) && ptsOf(e) === 0;
+                const en = enrich(e);
+                const mv = moveOf(e, i);
                 return (
-                  <div key={e.player.id} className="jh-mock-row" style={{transform:`rotate(${i % 2 ? ".35" : "-.35"}deg)`,opacity:dim?0.6:1}} onClick={() => setOpenPlayerId(e.player.id)}>
-                    <div className="jh-mock-rank" style={{background:"var(--cream)"}}>{i + 1}</div>
-                    <Avatar player={e.player} size={36} />
+                  <div key={e.player.id} className={`jh-mock-row ${dim ? "" : "jh-rank-in"}`} style={{transform:`rotate(${i % 2 ? ".35" : "-.35"}deg)`,opacity:dim?0.6:1,animationDelay:`${Math.min(idx*30,360)}ms`}} onClick={() => setOpenPlayerId(e.player.id)}>
+                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:22}}>
+                      <div className="jh-mock-rank" style={{background:"var(--cream)",margin:0}}>{i + 1}</div>
+                      {mode === "season" && <MoveChip mv={mv} />}
+                    </div>
+                    <Avatar player={e.player} size={38} />
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontFamily:"'Bangers',cursive",fontSize:20,letterSpacing:.5,color:"#131313",lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</div>
-                      <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".08em",color:"rgba(19,19,19,.55)",marginTop:3,textTransform:"uppercase",display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6}}>
+                        <span style={{fontFamily:"'Bangers',cursive",fontSize:20,letterSpacing:.5,color:"#131313",lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</span>
+                        {en.streak >= 3 && <span title={`On fire — ${en.streak} wins in a row`} style={{fontSize:13}}>🔥</span>}
+                      </div>
+                      <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".06em",color:"rgba(19,19,19,.55)",marginTop:3,textTransform:"uppercase",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
                         {hasPlayed(e) ? <>
-                          <span>{e.stats.sessionsPlayed} SESS</span><span>·</span>
-                          <span>{winsOf(e)} WINS</span>
-                          {e.stats.finalsWon > 0 && <><span>·</span><span>🏆×{e.stats.finalsWon}</span></>}
-                          {(e.stats.finalsReached - e.stats.finalsWon) > 0 && <><span>·</span><span>🥈×{e.stats.finalsReached - e.stats.finalsWon}</span></>}
-                          {getMilestones(e).slice(0, 3).map(m => <span key={m.id} title={m.label + ": " + m.desc} style={{fontSize:11}}>{m.icon}</span>)}
+                          <span>{e.stats.sessionsPlayed} SESS</span>
+                          <span>{en.winRate}% WIN</span>
+                          {en.form.length > 0 && <FormStrip form={en.form} />}
+                          {e.stats.finalsWon > 0 && <span>🏆×{e.stats.finalsWon}</span>}
+                          {getMilestones(e).slice(0, 2).map(m => <span key={m.id} title={m.label + ": " + m.desc} style={{fontSize:11}}>{m.icon}</span>)}
                         </> : <span>NOT YET PLAYED</span>}
                       </div>
                     </div>
