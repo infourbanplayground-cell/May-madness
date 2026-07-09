@@ -1724,8 +1724,11 @@ function App() {
   const [sync, setSync] = useState("idle");
   const [syncErr, setSyncErr] = useState("");
   const saveTimer = useRef();
+  const retryTimer = useRef();
+  const savedFlash = useRef();
   const pollTimer = useRef();
   const initialLoaded = useRef(false);
+  const stateRef = useRef(null);
   const tapRef = useRef({ n: 0, t: 0 });
 
   useEffect(() => {
@@ -1768,28 +1771,34 @@ function App() {
 
   useEffect(() => {
     if (!state || !initialLoaded.current) return;
+    stateRef.current = state;
     try { localStorage.setItem(LOCAL_KEY, JSON.stringify(stateForLocalCache(state))); } catch (e) {}
     if (!canScore) return;
     clearTimeout(saveTimer.current);
+    clearTimeout(retryTimer.current);
     setSync("syncing");
-    saveTimer.current = setTimeout(async () => {
-      try {
-        const res = await apiPost({ action: "saveState", state });
-        setSync("idle"); setSyncErr("");
-        // Another scorer's changes were merged server-side → adopt the merged
-        // result so this device shows everyone's results and stops re-saving
-        // its stale copy. Local photos are re-attached by id.
-        if (res && res.merged && res.mergedState) {
-          setState(prev => reattachPhotos(res.mergedState, prev));
+    const attempt = (tryNo) => {
+      saveTimer.current = setTimeout(async () => {
+        try {
+          const res = await apiPost({ action: "saveState", state: stateRef.current });
+          setSync("saved"); setSyncErr("");
+          // brief "Saved ✓" flash, then settle to idle if nothing else queued
+          clearTimeout(savedFlash.current);
+          savedFlash.current = setTimeout(() => setSync(s => s === "saved" ? "idle" : s), 1500);
+          if (res && res.merged && res.mergedState) {
+            setState(prev => reattachPhotos(res.mergedState, prev));
+          }
+        } catch (e) {
+          setSync("error"); setSyncErr(e.message || "Unknown sync error");
+          if (!getToken()) { setShowLogin(true); return; }  // wait for re-login flush
+          // Auto-retry with capped backoff so a transient failure self-heals
+          // without the scorer having to touch anything.
+          const delay = Math.min(30000, 4000 * Math.pow(2, tryNo));
+          retryTimer.current = setTimeout(() => { setSync("syncing"); attempt(tryNo + 1); }, delay);
         }
-      }
-      catch (e) {
-        setSync("error"); setSyncErr(e.message || "Unknown sync error");
-        // Session expired → token cleared by apiPost. Prompt re-login so the
-        // scorer signs back in immediately instead of scoring into the void.
-        if (!getToken()) setShowLogin(true);
-      }
-    }, 3000);
+      }, tryNo === 0 ? 3000 : 0);
+    };
+    attempt(0);
   }, [state, canScore]);
 
   useEffect(() => {
@@ -1909,12 +1918,19 @@ function App() {
 }
 
 function SyncIndicator({ status, errMsg }) {
-  const map = { idle:{color:"#10b981",label:"Synced"}, syncing:{color:"#f59e0b",label:"Syncing"}, error:{color:"#ef4444",label:"Sync error"}, offline:{color:"#a8a29e",label:"Offline"} };
+  const map = {
+    idle:    { color: "#10b981", label: "Synced" },
+    saved:   { color: "#10b981", label: "Saved ✓" },
+    syncing: { color: "#f59e0b", label: "Saving…" },
+    error:   { color: "#ef4444", label: "Retrying…" },
+    offline: { color: "#a8a29e", label: "Offline" },
+  };
   const s = map[status] || map.idle;
-  const onClick = () => { if (status === "error" && errMsg) alert("Sync error:\n\n" + errMsg); };
+  const onClick = () => { if (status === "error" && errMsg) alert("Sync error:\n\n" + errMsg + "\n\n(Auto-retrying — your changes are safe on this device meanwhile.)"); };
+  const pulse = status === "syncing" || status === "error";
   return <div onClick={onClick} className={`flex items-center gap-1.5 text-[10px] uppercase font-semibold tracking-wider ${status === "error" ? "cursor-pointer" : ""}`} title={status === "error" ? (errMsg || s.label) : s.label}>
-    <div className="w-2 h-2 rounded-full" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}` }} />
-    <span className="text-stone-500 hidden sm:inline">{s.label}</span>
+    <div className="w-2 h-2 rounded-full" style={{ background: s.color, boxShadow: `0 0 8px ${s.color}`, animation: pulse ? "pulse 1.2s ease-in-out infinite" : "none" }} />
+    <span className="hidden sm:inline" style={{ color: status === "saved" ? "#10b981" : "#78716c" }}>{s.label}</span>
   </div>;
 }
 
