@@ -2062,27 +2062,25 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
           <div onClick={e=>e.stopPropagation()} style={{background:'var(--surface)',borderRadius:'22px 22px 0 0',padding:'24px 20px 36px',maxWidth:480,margin:'0 auto',width:'100%',border:'1px solid var(--border2)',borderBottom:'none'}}>
             <div style={{width:36,height:4,background:'rgba(255,255,255,0.15)',borderRadius:9,margin:'0 auto 22px'}}/>
             <div style={{textAlign:'center',marginBottom:18}}>
-              <div style={{fontSize:44,marginBottom:10}}>🏆🤝🦺</div>
-              <div style={{fontSize:20,fontWeight:900,fontFamily:'Space Grotesk',color:'var(--gold)',letterSpacing:-0.5,marginBottom:4}}>
-                {lang==='ar'?'مو رهان — هذا مكتوب':'NOT A BET — IT\'S SCRIPTED'}
+              <div style={{fontSize:44,marginBottom:10}}>🦺</div>
+              <div style={{fontSize:19,fontWeight:900,fontFamily:'Space Grotesk',color:'var(--gold)',letterSpacing:-0.5,marginBottom:4}}>
+                {lang==='ar'?'الحكم تدرّب ٢٠ سنة لهذه اللحظة':'The Referee Trained 20 Years For This'}
               </div>
               <div style={{fontSize:10,color:'var(--muted)',fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:1.5,textTransform:'uppercase'}}>
-                {lang==='ar'?'FIFA شكراً جزيلاً':'Brought to you by FIFA™'}
+                {lang==='ar'?'مسيرة مهنية كاملة — من أجل هذا اليوم':'A lifetime career. One moment.'}
               </div>
             </div>
             <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:14,padding:'16px 18px',marginBottom:12}}>
               {lang==='ar'
-                ?<div style={{fontSize:13,fontWeight:500,color:'var(--text)',lineHeight:1.85}}>
-                  🤙 مسي عنده <strong style={{color:'var(--gold)'}}>واتساب جروب</strong> مع الحكام اسمه "🟡 الليلة إن شاء الله"<br/>
-                  📋 الـ VAR اخترعوه أصلاً عشان <strong style={{color:'var(--gold)'}}>يمسحون الأدلة</strong> بدل ما يلغون الجزاء<br/>
-                  ⌚ سويسرا جابت <strong style={{color:'var(--gold)'}}>ساعاتها الفاخرة</strong> للبطولة — الحكم طلبها كلها مقدّماً<br/>
-                  🇦🇷 FIFA ما تقدر تعطيهم الكأس مباشرةً — <strong style={{color:'var(--gold)'}}>لازم يمثّلون</strong>
+                ?<div style={{fontSize:13,fontWeight:500,color:'var(--text)',lineHeight:1.95}}>
+                  🏋️ كل صفّارة في مسيرته كانت <strong style={{color:'var(--gold)'}}>تمريناً لهذا اليوم</strong><br/>
+                  💛 ما يهمه الكأس ولا البطولة — يهمه اللحظة اللي <strong style={{color:'var(--gold)'}}>مسي ينظر له بعيونه</strong> ويقول <em>"شكراً"</em><br/>
+                  🥺 لما مسي دخل منطقة الجزاء، <strong style={{color:'var(--gold)'}}>الحكم بكى من الداخل</strong> وصفّر قبل ما يطيح
                 </div>
-                :<div style={{fontSize:13,fontWeight:500,color:'var(--text)',lineHeight:1.85}}>
-                  🤙 Messi has a <strong style={{color:'var(--gold)'}}>WhatsApp group</strong> with the referees called "🟡 Tonight inshallah"<br/>
-                  📋 VAR was invented specifically to <strong style={{color:'var(--gold)'}}>erase evidence</strong> rather than cancel penalties<br/>
-                  ⌚ Switzerland brought their <strong style={{color:'var(--gold)'}}>finest watches</strong> — the referee pre-ordered them all<br/>
-                  🇦🇷 FIFA can't hand Argentina the trophy directly — <strong style={{color:'var(--gold)'}}>they have to perform</strong>
+                :<div style={{fontSize:13,fontWeight:500,color:'var(--text)',lineHeight:1.95}}>
+                  🏋️ Every whistle in his career was <strong style={{color:'var(--gold)'}}>preparation for today</strong><br/>
+                  💛 He doesn't care about the cup or the tournament — he cares about the moment <strong style={{color:'var(--gold)'}}>Messi looks him in the eyes</strong> and says <em>"thank you"</em><br/>
+                  🥺 When Messi entered the box, <strong style={{color:'var(--gold)'}}>the referee cried on the inside</strong> and blew the whistle before he even fell
                 </div>
               }
             </div>
@@ -2090,15 +2088,13 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
               <div style={{flex:1}}>
                 <div style={{fontSize:9,color:'var(--blue)',fontFamily:'Space Grotesk',fontWeight:800,letterSpacing:1.2,textTransform:'uppercase',marginBottom:2}}>VAR REVIEW</div>
                 <div style={{fontSize:12,color:'var(--muted)',fontWeight:600}}>
-                  {lang==='ar'
-                    ?'نراجع... نراجع... طبعاً ركلة جزاء. ليش تسأل؟ 🤦'
-                    :'Reviewing... reviewing... obviously a penalty. Why even ask? 🤦'}
+                  {lang==='ar'?'دعوه يعيش حلمه 🥹':'Let him live his dream 🥹'}
                 </div>
               </div>
               <span style={{fontSize:22}}>🟡</span>
             </div>
             <button onClick={()=>setTrollOpen(false)} style={{width:'100%',padding:'13px',borderRadius:12,background:'var(--gold)',color:'#0A0600',fontWeight:900,fontSize:14,border:'none',cursor:'pointer',fontFamily:'Space Grotesk',letterSpacing:.3}}>
-              {lang==='ar'?'😂 الفيفا ما بتوقف':'😂 FIFA never stops'}
+              {lang==='ar'?'😭 ما قدرت أحكم عليه':'😭 Couldn\'t judge him'}
             </button>
           </div>
         </div>
