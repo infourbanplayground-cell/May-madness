@@ -2093,8 +2093,8 @@ function MatchCard({match,predictions,builders,onPickClick,onBuildClick,loading,
               </div>
               <span style={{fontSize:22}}>🟡</span>
             </div>
-            <button onClick={()=>setTrollOpen(false)} style={{width:'100%',padding:'13px',borderRadius:12,background:'var(--gold)',color:'#0A0600',fontWeight:900,fontSize:14,border:'none',cursor:'pointer',fontFamily:'Space Grotesk',letterSpacing:.3}}>
-              {lang==='ar'?'😭 ما قدرت أحكم عليه':'😭 Couldn\'t judge him'}
+            <button onClick={()=>{setTrollOpen(false);window.open('https://youtube.com/shorts/9Tti1ShmSq8?si=UtFrj3mv0weA5XhH','_blank');}} style={{width:'100%',padding:'13px',borderRadius:12,background:'var(--gold)',color:'#0A0600',fontWeight:900,fontSize:14,border:'none',cursor:'pointer',fontFamily:'Space Grotesk',letterSpacing:.3}}>
+              {lang==='ar'?'😭 ما قدرت أحكم عليه ▶':'😭 Couldn\'t judge him ▶'}
             </button>
           </div>
         </div>
