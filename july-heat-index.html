@@ -3805,6 +3805,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     if (qualifiers.length === 0) { if (!silent) alert("No qualified teams yet"); return; }
     const seeded = [...qualifiers].sort((a, b) => b.pts - a.pts || b.wins - a.wins || a.groupRank - b.groupRank);
     const total = seeded.length;
+    if (total < 2) { if (!silent) alert("Only one team qualified — need at least 2 to make a bracket."); return; }
     if (total === 2) {
       updateSession(s => ({ ...s, bracket: { qf: [], sf: [], final: { id: uid("f"), team1Id: seeded[0].teamId, team2Id: seeded[1].teamId, s1: seeded[0].seed, s2: seeded[1].seed, winner: null } } }));
     } else if (total <= 4) {
