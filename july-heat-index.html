@@ -3686,7 +3686,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const teams = session.teams || [];
   const thirdPlaceMode = session.thirdPlaceMode || "best2";
 
-  const seedQF = () => {
+  const seedQF = (silent = false) => {
     const groups = getSessionGroups(session);
     const qCount = getQualifyCount(session);
     const standings = groups.map(g => {
@@ -3699,9 +3699,9 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const winners   = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd||0, gf: s[0].gf||0, seed: groups[gi]+"1" } : null).filter(Boolean);
       const runnersUp = standings.map((s, gi) => s[1]?.team?.id ? { id: s[1].team.id, pts: s[1].pts, wins: s[1].wins, gd: s[1].gd||0, gf: s[1].gf||0, seed: groups[gi]+"2" } : null).filter(Boolean);
       const rawThirds = standings.map((s, gi) => s[2]?.team?.id ? { id: s[2].team.id, pts: s[2].pts, wins: s[2].wins, gd: s[2].gd||0, gf: s[2].gf||0, seed: groups[gi]+"3" } : null).filter(Boolean);
-      if (winners.length < 4) { alert("Need results for all 4 group winners first"); return; }
-      if (runnersUp.length < 4) { alert("Need results for all 4 runners-up first"); return; }
-      if (rawThirds.length < 4) { alert("Need results for all 4 third-place teams first"); return; }
+      if (winners.length < 4) { if (!silent) alert("Need results for all 4 group winners first"); return; }
+      if (runnersUp.length < 4) { if (!silent) alert("Need results for all 4 runners-up first"); return; }
+      if (rawThirds.length < 4) { if (!silent) alert("Need results for all 4 third-place teams first"); return; }
 
       // Equalize for cross-group seeding: ghost BYE wins for smaller groups — does NOT change group points
       const eqWinners   = [...equalizeThirds(winners,   session)].sort(compareThirds);
@@ -3740,7 +3740,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const sortedThirds = [...equalized].sort(compareThirds);
       // Check for complete tie between 2nd and 3rd thirds (tiebreak match required)
       if (sortedThirds.length >= 3 && thirdPlaceMode === "best2" && compareThirds(sortedThirds[1], sortedThirds[2]) === 0) {
-        alert(`Tie between ${lbl(sortedThirds[1].id)} and ${lbl(sortedThirds[2].id)} for the last 3rd-place spot!\n\nPlay a tiebreak match to determine who qualifies.`);
+        if (!silent) alert(`Tie between ${lbl(sortedThirds[1].id)} and ${lbl(sortedThirds[2].id)} for the last 3rd-place spot!\n\nPlay a tiebreak match to determine who qualifies.`);
         return;
       }
       const t1sorted = tier1.sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
@@ -3769,7 +3769,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       // best2 mode: top 2 thirds directly into bracket
       const best2 = sortedThirds.slice(0, 2);
       const qualified = [...t1sorted, ...t2sorted, ...best2].slice(0, 8);
-      if (qualified.length < 4) { alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
+      if (qualified.length < 4) { if (!silent) alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
       const pairs = [[0,7],[3,4],[2,5],[1,6]];
       const qf = pairs.map(([x, y], i) => qualified[x] && qualified[y] ? {
         id: uid("qf"), slot: i + 1,
@@ -3783,7 +3783,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     if (qCount === 2 && (N === 2 || N === 4)) {
       const winners = standings.map((s, i) => ({ id: s[0]?.team?.id, seed: groups[i] + "1" }));
       const runners = standings.map((s, i) => ({ id: s[1]?.team?.id, seed: groups[i] + "2" }));
-      if (winners.some(w => !w.id) || runners.some(r => !r.id)) { alert("Need top 2 in every group first"); return; }
+      if (winners.some(w => !w.id) || runners.some(r => !r.id)) { if (!silent) alert("Need top 2 in every group first"); return; }
       const pairs = winners.map((w, i) => ({ a: w, b: runners[N - 1 - i] }));
       if (N === 2) {
         const sf = pairs.map((p, i) => ({ id: uid("sf"), slot: i + 1, team1Id: p.a.id, team2Id: p.b.id, s1: p.a.seed, s2: p.b.seed, winner: null }));
@@ -3802,7 +3802,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         if (s[i]?.team?.id) qualifiers.push({ teamId: s[i].team.id, pts: s[i].pts, wins: s[i].wins, groupRank: i, seed: groups[gi] + (i + 1) });
       }
     });
-    if (qualifiers.length === 0) { alert("No qualified teams yet"); return; }
+    if (qualifiers.length === 0) { if (!silent) alert("No qualified teams yet"); return; }
     const seeded = [...qualifiers].sort((a, b) => b.pts - a.pts || b.wins - a.wins || a.groupRank - b.groupRank);
     const total = seeded.length;
     if (total === 2) {
@@ -3817,6 +3817,36 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
     }
   };
+
+  // Group stage complete = every group has played its full round-robin and
+  // every match has a result. (A group of n plays n*(n-1)/2 matches.)
+  const groupStageComplete = (() => {
+    const groups = getSessionGroups(session);
+    const gm = session.groupMatches || [];
+    if (gm.length === 0) return false;
+    let expected = 0;
+    for (const g of groups) {
+      const n = teams.filter(t => t.group === g).length;
+      expected += (n * (n - 1)) / 2;
+    }
+    if (expected === 0 || gm.length < expected) return false;
+    return gm.every(m => m.winner);
+  })();
+  const bracketEmpty = !(b.qf?.length) && !(b.sf?.length) && !b.final && !(b.r16?.length) && !b.thirdsPlayoff;
+
+  // Auto-seed the knockout once the group stage is complete and no bracket
+  // exists yet — one-shot per session, guarded so it never re-seeds over
+  // knockout results. Silent so a tie/insufficient case just waits for the
+  // organizer to seed manually instead of popping an alert.
+  const autoSeededRef = useRef(null);
+  useEffect(() => {
+    if (!canScore) return;
+    if (groupStageComplete && bracketEmpty && autoSeededRef.current !== session.id) {
+      autoSeededRef.current = session.id;
+      seedQF(true);
+    }
+    if (!bracketEmpty) autoSeededRef.current = session.id;  // already seeded → don't auto-fire later
+  }, [canScore, groupStageComplete, bracketEmpty, session.id]);
 
   const lbl = (id) => {
     if (id === "PLAYOFF_TBD") return "Qualifier TBD";
@@ -3866,11 +3896,14 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     }
   }, [JSON.stringify(b)]);
 
-  if ((!b.qf || b.qf.length === 0) && (!b.r16 || b.r16.length === 0)) {
+  if (bracketEmpty) {
     return <Card className="p-6 text-center border-dashed">
       <I.swords className="mx-auto mb-3 text-stone-600" size={36} />
       <div className="text-stone-300 font-semibold mb-1">No bracket yet</div>
-      {canScore && <><div className="text-stone-500 text-sm mb-4">Auto-seed from group standings</div><Btn onClick={seedQF}><I.bolt size={14} /> Auto-Seed</Btn></>}
+      {canScore && <>
+        <div className="text-stone-500 text-sm mb-4">The knockout seeds automatically once every group match is in — or seed now from current standings.</div>
+        <Btn onClick={() => seedQF()}><I.bolt size={14} /> Auto-Seed</Btn>
+      </>}
     </Card>;
   }
 
@@ -3915,11 +3948,11 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       {b.qf.length === 4
         ? <BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} />
         : <>
-            <Card className="p-3">
+            {b.qf?.length > 0 && <Card className="p-3">
               <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title">QUARTERFINALS</h3><Pill color="orange">+1 · W+3 TB+2 L+1</Pill></div>
               {isAdmin && <div className="text-[10px] text-amber-400 mb-2 flex items-center gap-1"><I.alert size={10} /> Tap to edit (for dropouts)</div>}
               <div className="space-y-1.5">{b.qf.map(m => <BracketRow key={m.id} match={m} lbl={lbl} onClick={() => canScore && setEdit({ ...m, round: "qf" })} />)}</div>
-            </Card>
+            </Card>}
             {b.sf?.length > 0 && <Card className="p-3">
               <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title">SEMIFINALS</h3><Pill color="red">+2 · W+3 TB+2 L+1</Pill></div>
               <div className="space-y-1.5">{b.sf.map(m => <BracketRow key={m.id} match={m} lbl={lbl} onClick={() => canScore && setEdit({ ...m, round: "sf" })} />)}</div>
