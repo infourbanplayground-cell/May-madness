@@ -812,6 +812,26 @@ async function uploadSessionPhotosToServer(sessionId, photosArr) {
   } catch {}
 }
 
+// Upload an already-framed session photo (data URL) to Cloudinary and get back
+// a hosted URL, so the photo wall stays a few KB instead of tens of MB of
+// base64. Falls back to the original data URL if the upload fails, so adding
+// photos never breaks — a later migration can still move it to a URL.
+async function uploadFramedPhotoToCloud(dataUrl) {
+  const token = getToken();
+  if (!token || !dataUrl?.startsWith("data:")) return dataUrl;
+  try {
+    const res = await fetch(WORKER_URL + "/photo-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ image: dataUrl, raw: true }),
+    });
+    const json = await res.json();
+    return json.ok && json.url ? json.url : dataUrl;
+  } catch (e) {
+    return dataUrl;
+  }
+}
+
 // Read latest state. Returns { ok, state } shape for existing callers.
 async function apiGet(action, params = {}) {
   if (action === "unlock") {
@@ -1023,7 +1043,7 @@ function getSessionGroups(session) {
   return GROUPS.slice(0, session?.groupCount || 4);
 }
 function getQualifyCount(session) {
-  return session?.qualifyCount || 1;
+  return session?.qualifyCount || 2;  // default: top 2 per group qualify
 }
 
 function resizeToBase64(file, size = 200) {
@@ -2637,7 +2657,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
         );})}
       </div>
       </div>
-      {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||1, thirdPlaceMode: thirdPlaceMode||"best2", teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
+      {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||2, thirdPlaceMode: thirdPlaceMode||"best2", teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
       {showDraft && <DraftReminderModal onClose={() => setShowDraft(false)} state={state} leaderboard={leaderboard} />}
       {showAnnounce && <Modal open={true} onClose={() => setShowAnnounce(false)} title="SEASON ANNOUNCEMENT">
         <div className="space-y-3">
@@ -2653,7 +2673,7 @@ function CreateSessionModal({ onClose, onCreate, count }) {
   const [n, setN] = useState(`Session ${count + 1}`);
   const [d, setD] = useState(new Date().toISOString().slice(0, 10));
   const [groupCount, setGroupCount] = useState(4);
-  const [qualifyCount, setQualifyCount] = useState(1);
+  const [qualifyCount, setQualifyCount] = useState(2);
   const [thirdPlaceMode, setThirdPlaceMode] = useState("best2");
   const is3Groups = groupCount === 3;
   const is4GroupsAll3rds = groupCount === 4 && thirdPlaceMode === "all4r16";
@@ -3112,7 +3132,9 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
               setUploadingPhoto(true);
               const files = Array.from(e.target.files || []);
               const b64s = await Promise.all(files.map(f => watermarkPhotoToBase64(f)));
-              const newPhotos = [...(session.photos || []), ...b64s];
+              // Upload framed photos to Cloudinary → store URLs, not base64 blobs.
+              const urls = await Promise.all(b64s.map(b => uploadFramedPhotoToCloud(b)));
+              const newPhotos = [...(session.photos || []), ...urls];
               updateSession(s => ({ ...s, photos: newPhotos }));
               uploadSessionPhotosToServer(session.id, newPhotos);
               setUploadingPhoto(false);
@@ -3897,21 +3919,49 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     }
   }, [JSON.stringify(b)]);
 
+  // ── Qualify-per-group setting (editable here; re-seeds on change) ──
+  const currentQC = getQualifyCount(session);
+  const qcOptions = getSessionGroups(session).length === 2 ? [1, 2, 4] : [1, 2];
+  const koHasResults = (b.qf || []).some(m => m.winner) || (b.sf || []).some(m => m.winner) || (b.r16 || []).some(m => m.winner) || !!b.final?.winner;
+  const changeQualify = (q) => {
+    if (q === currentQC) return;
+    if (koHasResults && !confirm("Changing how many qualify re-seeds the knockout and clears the current knockout results. Continue?")) return;
+    autoSeededRef.current = null;  // let the auto-seed re-fire with the new count
+    updateSession(s => ({ ...s, qualifyCount: q, bracket: { qf: [], sf: [], final: null } }));
+  };
+  const QualifyControl = () => !canScore ? null : (
+    <Card className="p-3">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Qualify per group</div>
+          <div className="text-[11px] text-stone-600 mt-0.5">{qcOptions.length * currentQC >= 8 ? `${getSessionGroups(session).length * currentQC} teams → quarterfinals` : `${getSessionGroups(session).length * currentQC} teams`} · changing re-seeds</div>
+        </div>
+        <div className="flex gap-1.5">
+          {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#ea580c", color: "#fff", borderColor: "#131313" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>Top {q}</button>)}
+        </div>
+      </div>
+    </Card>
+  );
+
   if (bracketEmpty) {
-    return <Card className="p-6 text-center border-dashed">
-      <I.swords className="mx-auto mb-3 text-stone-600" size={36} />
-      <div className="text-stone-300 font-semibold mb-1">No bracket yet</div>
-      {canScore && <>
-        <div className="text-stone-500 text-sm mb-4">The knockout seeds automatically once every group match is in — or seed now from current standings.</div>
-        <Btn onClick={() => seedQF()}><I.bolt size={14} /> Auto-Seed</Btn>
-      </>}
-    </Card>;
+    return <div className="space-y-3">
+      <QualifyControl />
+      <Card className="p-6 text-center border-dashed">
+        <I.swords className="mx-auto mb-3 text-stone-600" size={36} />
+        <div className="text-stone-300 font-semibold mb-1">No bracket yet</div>
+        {canScore && <>
+          <div className="text-stone-500 text-sm mb-4">The knockout seeds automatically once every group match is in — or seed now from current standings.</div>
+          <Btn onClick={() => seedQF()}><I.bolt size={14} /> Auto-Seed</Btn>
+        </>}
+      </Card>
+    </div>;
   }
 
   const champId = b.final?.winner ? (b.final.winner === "team1" ? b.final.team1Id : b.final.team2Id) : null;
 
   return (
     <div className="space-y-4">
+      <QualifyControl />
       {champId && <div style={{ background:"var(--yellow)", border:"5px solid var(--ink)", boxShadow:"8px 8px 0 var(--ink)", padding:"20px", textAlign:"center", marginBottom:16 }}>
         <I.crown size={32} style={{ color:"var(--ink)", margin:"0 auto 8px" }} />
         <div style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"var(--ink)", marginBottom:4 }}>Champion</div>
