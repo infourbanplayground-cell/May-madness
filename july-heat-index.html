@@ -1466,12 +1466,30 @@ function calcPlayerStats(pid, sessions) {
     // 2X Double Points (applies to everything except streak)
     const mult = s.doublePoints ? 2 : 1;
     let sessionPlayed = 0;
+    // Uneven-group fairness: when a session's groups differ in size (e.g. 5/5/4),
+    // teams in the larger groups play more group matches and would otherwise bank
+    // extra series points. Cap each team's counted group results to (smallest
+    // group − 1) — everyone contributes the same number of best results, dropping
+    // their lowest. Equal-size sessions are unaffected (cap = all matches).
+    const grpSizes = {};
+    (s.teams || []).forEach(t => { if (t.group != null) grpSizes[t.group] = (grpSizes[t.group] || 0) + 1; });
+    const sizeVals = Object.values(grpSizes);
+    const uneven = sizeVals.length > 1 && new Set(sizeVals).size > 1;
+    const cap = uneven ? Math.max(1, Math.min(...sizeVals) - 1) : Infinity;
+    const grpResults = [];
     (s.groupMatches || []).forEach(m => {
       if (m.team1Id !== team.id && m.team2Id !== team.id) return;
       if (!m.winner) return; stats.groupPlayed++; sessionPlayed++;
-      if (teamWon(m, team.id)) { total += 3 * mult; breakdown.matchPts += 3 * mult; stats.groupWins++; }
-      else { const t = m.lossType || "tiebreak"; const p = t === "tiebreak" ? 2 : t === "competitive" ? 1 : 0; total += p * mult; breakdown.matchPts += p * mult; }
+      const won = teamWon(m, team.id);
+      if (won) stats.groupWins++;
+      const lt = m.lossType || "tiebreak";
+      grpResults.push(won ? 3 : (lt === "tiebreak" ? 2 : lt === "competitive" ? 1 : 0));
     });
+    // Keep each player's best `cap` group results toward series points (record
+    // counts above stay actual; only the points contribution is normalized).
+    grpResults.sort((a, b) => b - a);
+    const counted = cap === Infinity ? grpResults : grpResults.slice(0, cap);
+    counted.forEach(pts => { total += pts * mult; breakdown.matchPts += pts * mult; });
     // Only award top-of-group if team actually played matches
     if (sessionPlayed > 0 && getTopOfGroup(s, team.group) === team.id) { total += 1 * mult; breakdown.topOfGroup += 1 * mult; }
     // Only count streak if player actually played a match this session
