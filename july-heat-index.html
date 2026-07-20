@@ -3602,19 +3602,32 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
               <div className="flex items-center gap-2"><div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"var(--gold)", border:"3px solid var(--ink)", boxShadow:"3px 3px 0 var(--ink)", fontFamily:"'Bangers',cursive", fontSize:"20px", letterSpacing:"1px", color:"var(--ink)" }}>{g}</div><span style={{fontFamily:"'Bangers',cursive",fontSize:20,letterSpacing:1,color:"#131313"}}>GROUP {g}</span></div>
               {isAdmin && teams.length >= 2 && <Btn size="sm" variant="secondary" onClick={() => setAdd(g)}><I.plus size={12} /> Match</Btn>}
             </div>
-            {standings.length > 0 && <div className="mb-3 space-y-1">{standings.map((s, i) => {
-              const p1 = state.players.find(p => p.id === s.team.p1Id);
-              const p2 = state.players.find(p => p.id === s.team.p2Id);
-              const isTop = s.team.id === top;
-              return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(255,207,0,.5)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #131313" : "2px solid transparent" }}>
-                <span className="font-mono text-xs text-stone-500 w-4">{i + 1}</span>
-                {isTop && <I.crown size={12} className="text-amber-400" />}
-                <span className="flex-1 text-xs text-stone-200 truncate">{p1?.name?.split(" ")[0]} & {p2?.name?.split(" ")[0]}</span>
-                <span className="font-mono text-xs text-stone-400">{s.played}P</span>
-                {s.gd !== 0 && <span className={`font-mono text-xs w-8 text-right ${s.gd > 0 ? "text-emerald-500" : "text-red-500"}`}>{s.gd > 0 ? "+" : ""}{s.gd}</span>}
-                <span className="font-mono text-xs text-orange-400 font-bold w-7 text-right">{s.pts}</span>
-              </div>;
-            })}</div>}
+            {standings.length > 0 && <div className="mb-3">
+              <div className="flex items-center gap-2 px-2 pb-1 font-mono text-[9px] uppercase tracking-wider text-stone-500">
+                <span className="w-4">#</span>
+                <span className="flex-1">Team</span>
+                <span className="w-6 text-right" title="Wins">W</span>
+                <span className="w-6 text-right" title="Matches played">P</span>
+                <span className="w-8 text-right" title="Game difference">GD</span>
+                <span className="w-7 text-right" title="Points">Pts</span>
+              </div>
+              <div className="space-y-1">{standings.map((s, i) => {
+                const p1 = state.players.find(p => p.id === s.team.p1Id);
+                const p2 = state.players.find(p => p.id === s.team.p2Id);
+                const isTop = s.team.id === top;
+                return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(255,207,0,.5)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #131313" : "2px solid transparent" }}>
+                  <span className="font-mono text-xs text-stone-500 w-4">{i + 1}</span>
+                  <span className="flex-1 min-w-0 flex items-center gap-1">
+                    {isTop && <I.crown size={12} className="text-amber-400 shrink-0" />}
+                    <span className="text-xs text-stone-200 truncate">{p1?.name?.split(" ")[0]} & {p2?.name?.split(" ")[0]}</span>
+                  </span>
+                  <span className="font-mono text-xs text-stone-100 font-bold w-6 text-right">{s.wins}</span>
+                  <span className="font-mono text-xs text-stone-400 w-6 text-right">{s.played}</span>
+                  <span className={`font-mono text-xs w-8 text-right ${s.gd > 0 ? "text-emerald-500" : s.gd < 0 ? "text-red-500" : "text-stone-500"}`}>{s.gd > 0 ? "+" : ""}{s.gd}</span>
+                  <span className="font-mono text-xs text-orange-400 font-bold w-7 text-right">{s.pts}</span>
+                </div>;
+              })}</div>
+            </div>}
             {matches.length === 0 ? <div className="text-xs text-stone-600 italic px-2 py-3 text-center border border-dashed border-stone-800 rounded-lg">No matches</div>
               : <div className="space-y-1.5">{matches.map(m => {
                 const t1 = (session.teams || []).find(t => t.id === m.team1Id);
@@ -4021,6 +4034,40 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   return (
     <div className="space-y-4">
       <QualifyControl />
+      {(() => {
+        // Transparency panel: every qualified team with its ACTUAL group and
+        // placement, computed live from current standings — so it stays correct
+        // even if a team was moved between groups after the bracket was seeded.
+        const standCache = {};
+        const rankOf = (id) => {
+          const t = (session.teams || []).find(x => x.id === id); if (!t) return null;
+          const g = t.group; if (!standCache[g]) standCache[g] = calcGroupStandings(session, g);
+          const i = standCache[g].findIndex(r => r.team.id === id);
+          return i < 0 ? null : { g, rank: i + 1 };
+        };
+        const seen = new Set(); const rows = [];
+        const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
+          const id = m[tk];
+          if (id && !String(id).includes("TBD") && !seen.has(id)) { const r = rankOf(id); if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank }); } }
+        }); };
+        (b.qf || []).forEach(collect); (b.r16 || []).forEach(collect); collect(b.thirdsPlayoff);
+        if (!rows.length) return null;
+        const ord = (n) => n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`;
+        rows.sort((a, c) => a.rank - c.rank || a.g.localeCompare(c.g));
+        return <Card className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="jh-round-title" style={{ fontSize: 18 }}>SEEDING · WHO QUALIFIED</h3>
+            <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">{rows.length} teams</span>
+          </div>
+          <div className="space-y-1">{rows.map(r => (
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: "rgba(19,19,19,.06)" }}>
+              <SeedBadge seed={r.g + r.rank} />
+              <span className="flex-1 text-xs text-stone-200 truncate font-semibold">{lbl(r.id)}</span>
+              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wide">Group {r.g} · {ord(r.rank)}</span>
+            </div>
+          ))}</div>
+        </Card>;
+      })()}
       {champId && <div style={{ background:"var(--yellow)", border:"5px solid var(--ink)", boxShadow:"8px 8px 0 var(--ink)", padding:"20px", textAlign:"center", marginBottom:16 }}>
         <I.crown size={32} style={{ color:"var(--ink)", margin:"0 auto 8px" }} />
         <div style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"var(--ink)", marginBottom:4 }}>Champion</div>
