@@ -3938,26 +3938,53 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   }, [JSON.stringify(b)]);
 
   // ── Qualify-per-group setting (editable here; re-seeds on change) ──
+  const numGroups = getSessionGroups(session).length;
   const currentQC = getQualifyCount(session);
-  const qcOptions = getSessionGroups(session).length === 2 ? [1, 2, 4] : [1, 2];
+  const qcOptions = numGroups === 2 ? [1, 2, 4] : [1, 2];
   const koHasResults = (b.qf || []).some(m => m.winner) || (b.sf || []).some(m => m.winner) || (b.r16 || []).some(m => m.winner) || !!b.final?.winner;
+  const reseedGuard = () => !(koHasResults && !confirm("Changing knockout qualification re-seeds the bracket and clears the current knockout results. Continue?"));
   const changeQualify = (q) => {
     if (q === currentQC) return;
-    if (koHasResults && !confirm("Changing how many qualify re-seeds the knockout and clears the current knockout results. Continue?")) return;
+    if (!reseedGuard()) return;
     autoSeededRef.current = null;  // let the auto-seed re-fire with the new count
     updateSession(s => ({ ...s, qualifyCount: q, bracket: { qf: [], sf: [], final: null } }));
   };
+  const changeThirdMode = (mode) => {
+    if (mode === thirdPlaceMode) return;
+    if (!reseedGuard()) return;
+    autoSeededRef.current = null;
+    updateSession(s => ({ ...s, thirdPlaceMode: mode, bracket: { qf: [], sf: [], final: null } }));
+  };
+  // 3-group format has a FIXED qualification rule: top 2 per group + 2 best
+  // thirds = 8 → QF (qualifyCount doesn't apply). Show the rule instead of the
+  // misleading "Top N per group" buttons, and let the admin choose how the last
+  // third-place spot is decided (best-2 by points, or a 3rds playoff).
   const QualifyControl = () => !canScore ? null : (
     <Card className="p-3">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Qualify per group</div>
-          <div className="text-[11px] text-stone-600 mt-0.5">{qcOptions.length * currentQC >= 8 ? `${getSessionGroups(session).length * currentQC} teams → quarterfinals` : `${getSessionGroups(session).length * currentQC} teams`} · changing re-seeds</div>
+      {numGroups === 3 ? (
+        <div className="space-y-2.5">
+          <div>
+            <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Knockout qualification · 3 groups</div>
+            <div className="text-[11px] text-stone-400 mt-0.5">Top 2 per group + 2 best thirds → <span className="text-stone-200 font-semibold">8 teams → quarterfinals</span></div>
+          </div>
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Last 3rd-place spot</div>
+            <div className="flex gap-1.5">
+              {[["best2", "Best 2 thirds"], ["playoff", "3rds playoff"]].map(([m, label]) => <button key={m} type="button" onClick={() => changeThirdMode(m)} className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 active:scale-95" style={m === thirdPlaceMode ? { background: "#ea580c", color: "#fff", borderColor: "#131313" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>{label}</button>)}
+            </div>
+          </div>
         </div>
-        <div className="flex gap-1.5">
-          {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#ea580c", color: "#fff", borderColor: "#131313" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>Top {q}</button>)}
+      ) : (
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Qualify per group</div>
+            <div className="text-[11px] text-stone-600 mt-0.5">{numGroups * currentQC} teams{numGroups * currentQC >= 4 ? " → quarterfinals" : ""} · changing re-seeds</div>
+          </div>
+          <div className="flex gap-1.5">
+            {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#ea580c", color: "#fff", borderColor: "#131313" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>Top {q}</button>)}
+          </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 
