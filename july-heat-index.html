@@ -4035,9 +4035,10 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     <div className="space-y-4">
       <QualifyControl />
       {(() => {
-        // Transparency panel: every qualified team with its ACTUAL group and
-        // placement, computed live from current standings — so it stays correct
-        // even if a team was moved between groups after the bracket was seeded.
+        // Transparency panel: every qualified team with its OVERALL seed (1..8),
+        // its actual group + placement, and why it's ranked there — all computed
+        // live from current standings so it stays correct even if a team was
+        // moved between groups after the bracket was seeded.
         const standCache = {};
         const rankOf = (id) => {
           const t = (session.teams || []).find(x => x.id === id); if (!t) return null;
@@ -4045,25 +4046,40 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
           const i = standCache[g].findIndex(r => r.team.id === id);
           return i < 0 ? null : { g, rank: i + 1 };
         };
+        // Overall seed from the actual QF pairing (standard 8-seed bracket:
+        // slot1 = 1v8, slot2 = 4v5, slot3 = 3v6, slot4 = 2v7).
+        const seedByTeam = {};
+        const slotSeeds = { 1: [1, 8], 2: [4, 5], 3: [3, 6], 4: [2, 7] };
+        const std8 = (b.qf || []).length === 4 && !(b.r16 && b.r16.length);
+        if (std8) (b.qf || []).forEach((m, idx) => { const pr = slotSeeds[idx + 1]; if (pr) { if (m.team1Id) seedByTeam[m.team1Id] = pr[0]; if (m.team2Id) seedByTeam[m.team2Id] = pr[1]; } });
         const seen = new Set(); const rows = [];
         const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
           const id = m[tk];
-          if (id && !String(id).includes("TBD") && !seen.has(id)) { const r = rankOf(id); if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank }); } }
+          if (id && !String(id).includes("TBD") && !seen.has(id)) { const r = rankOf(id); if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank, seed: seedByTeam[id] || null }); } }
         }); };
         (b.qf || []).forEach(collect); (b.r16 || []).forEach(collect); collect(b.thirdsPlayoff);
         if (!rows.length) return null;
         const ord = (n) => n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`;
-        rows.sort((a, c) => a.rank - c.rank || a.g.localeCompare(c.g));
+        const why = (rk) => rk === 1 ? "Group winner" : rk === 2 ? "Runner-up" : rk === 3 ? "Best 3rd" : `${ord(rk)} place`;
+        rows.sort((a, c) => (a.seed || 99) - (c.seed || 99) || a.rank - c.rank || a.g.localeCompare(c.g));
+        const top = rows.find(r => r.seed === 1);
         return <Card className="p-3">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-1">
             <h3 className="jh-round-title" style={{ fontSize: 18 }}>SEEDING · WHO QUALIFIED</h3>
             <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">{rows.length} teams</span>
           </div>
+          <div className="text-[10px] text-stone-500 mb-2 leading-snug">
+            Seeded by group finish — winners (1–3), runners-up (4–6), then the 2 best thirds (7–8); ranked by wins, then game difference.
+            {top && <> Top seed plays the lowest (1 v 8). <span className="text-amber-400 font-bold">#1 seed: {lbl(top.id)}.</span></>}
+          </div>
           <div className="space-y-1">{rows.map(r => (
-            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: "rgba(19,19,19,.06)" }}>
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(255,207,0,.5)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #131313" : "2px solid transparent" }}>
+              {r.seed
+                ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#D91C1C" : "#131313", color: "#FFF6E0", border: "2px solid #131313" }}>{r.seed}</span>
+                : <span style={{ width: 22 }} className="shrink-0" />}
               <SeedBadge seed={r.g + r.rank} />
               <span className="flex-1 text-xs text-stone-200 truncate font-semibold">{lbl(r.id)}</span>
-              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wide">Group {r.g} · {ord(r.rank)}</span>
+              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wide">{why(r.rank)}</span>
             </div>
           ))}</div>
         </Card>;
