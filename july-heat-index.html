@@ -3586,11 +3586,19 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color: "#131313" }} />
           <div>
             <div className="text-xs font-bold" style={{ color: "#131313" }}>Uneven Groups</div>
-            <div className="text-[11px] text-stone-400 mt-0.5">Groups have different team counts ({groupSizes.join(" / ")}). Auto-Seed will equalize 3rd-place comparisons with ghost BYE wins for smaller groups{groupSizes.some(s => s === 5) ? " and drop-lowest for 5-team groups" : ""}.</div>
+            <div className="text-[11px] text-stone-400 mt-0.5">Groups have different team counts ({groupSizes.join(" / ")}). For knockout seeding, every team is ranked on the same number of matches — the smallest group's count ({Math.min(...groupSizes)} played) — so larger groups drop their lowest result. Group tables below still show all matches played.</div>
           </div>
         </div>
       )}
       {isAdmin && <div className="text-xs text-stone-400">Enter group stage match results. Top of group is auto-calculated.</div>}
+      <Card className="p-3">
+        <div className="text-xs font-bold text-stone-200 mb-1.5">How standings work</div>
+        <div className="text-[11px] text-stone-400 leading-relaxed space-y-1">
+          <div><span className="font-bold text-stone-200">Ranked by:</span> Wins <span className="text-stone-500">›</span> Game difference (GD) <span className="text-stone-500">›</span> Games won <span className="text-stone-500">›</span> Head-to-head. <span className="text-stone-500">(Most wins first — not total points.)</span></div>
+          <div><span className="font-bold text-stone-200">Columns:</span> <span className="font-mono">W</span> wins <span className="text-stone-600">·</span> <span className="font-mono">P</span> played <span className="text-stone-600">·</span> <span className="font-mono">GD</span> game difference <span className="text-stone-600">·</span> <span className="font-mono">Pts</span> points</div>
+          <div><span className="font-bold text-stone-200">Points:</span> Win <span className="text-emerald-500 font-mono">+3</span> <span className="text-stone-600">·</span> Tiebreak loss <span className="font-mono">+2</span> <span className="text-stone-600">·</span> Close loss <span className="font-mono">+1</span> <span className="text-stone-600">·</span> Blowout loss <span className="font-mono">0</span></div>
+        </div>
+      </Card>
       {groups.map(g => {
         const teams = (session.teams || []).filter(t => t.group === g);
         const matches = (session.groupMatches || []).filter(m => teams.find(t => t.id === m.team1Id) && teams.find(t => t.id === m.team2Id));
