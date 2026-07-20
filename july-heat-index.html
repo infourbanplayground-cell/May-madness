@@ -1390,23 +1390,37 @@ function scoreToResult(s1, s2) {
 
 function getTopOfGroup(s, g) { const ov = s.topOfGroupOverride && s.topOfGroupOverride[g]; if (ov) return ov; const r = calcGroupStandings(s, g); return r[0]?.team?.id || null; }
 
-// Returns standings for a group, dropping each team's lowest match for 5-team groups
-// so the 3rd-place comparison is fair across differently-sized groups.
+// Returns standings for a group NORMALISED to the session's smallest group size:
+// each team keeps only its best (minGroupSize − 1) results, so every team across
+// differently-sized groups is compared on the same number of matches. In a 5/5/4
+// session that means everyone is ranked on their best 3 games — the group-of-5
+// teams drop their single worst result, the group-of-4 teams are unchanged.
+// Used for KNOCKOUT SEEDING only; the displayed group table and leaderboard are
+// handled separately.
 function calcGroupStandingsNormalized(session, group) {
   const teams = (session.teams || []).filter(t => t.group === group);
   const matchList = session.groupMatches || [];
-  if (teams.length !== 5) return calcGroupStandings(session, group);
+  const sizes = getSessionGroups(session)
+    .map(g => (session.teams || []).filter(t => t.group === g).length)
+    .filter(n => n > 0);
+  const minSize = sizes.length ? Math.min(...sizes) : teams.length;
+  // If this group is already at the smallest size, there is nothing to drop.
+  if (teams.length <= minSize) return calcGroupStandings(session, group);
+  const keep = Math.max(1, minSize - 1);   // matches to count per team
   const rows = teams.map(team => {
     const myMatches = matchList.filter(m => (m.team1Id === team.id || m.team2Id === team.id) && m.winner);
     const scored = myMatches.map(m => {
       const isT1 = m.team1Id === team.id;
-      const pts = teamWon(m, team.id) ? 3 : (m.lossType === "tiebreak" ? 2 : m.lossType === "competitive" ? 1 : 0);
-      return { pts, gf: m.score ? (isT1 ? m.score.t1 : m.score.t2) : 0, ga: m.score ? (isT1 ? m.score.t2 : m.score.t1) : 0, w: teamWon(m, team.id) ? 1 : 0 };
+      const won = teamWon(m, team.id);
+      const pts = won ? 3 : (m.lossType === "tiebreak" ? 2 : m.lossType === "competitive" ? 1 : 0);
+      return { pts, gf: m.score ? (isT1 ? m.score.t1 : m.score.t2) : 0, ga: m.score ? (isT1 ? m.score.t2 : m.score.t1) : 0, w: won ? 1 : 0 };
     });
-    if (scored.length > 4) { scored.sort((a, b) => a.pts - b.pts); scored.shift(); }
+    // Keep the best `keep` results: sort best-first (pts, then game difference), drop the rest.
+    scored.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+    const best = scored.slice(0, keep);
     let pts = 0, wins = 0, gf = 0, ga = 0;
-    scored.forEach(s => { pts += s.pts; wins += s.w; gf += s.gf; ga += s.ga; });
-    return { team, pts, wins, played: scored.length, gf, ga, gd: gf - ga };
+    best.forEach(s => { pts += s.pts; wins += s.w; gf += s.gf; ga += s.ga; });
+    return { team, pts, wins, played: best.length, gf, ga, gd: gf - ga };
   });
   return rows.sort((a, b) => b.wins - a.wins || b.gd - a.gd || b.gf - a.gf || b.pts - a.pts);
 }
@@ -3729,10 +3743,9 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const seedQF = (silent = false) => {
     const groups = getSessionGroups(session);
     const qCount = getQualifyCount(session);
-    const standings = groups.map(g => {
-      const size = (session.teams || []).filter(t => t.group === g).length;
-      return size === 5 ? calcGroupStandingsNormalized(session, g) : calcGroupStandings(session, g);
-    });
+    // Seed off normalised standings so every team is ranked on the same number
+    // of matches (smallest group − 1). Equal-size groups are unaffected.
+    const standings = groups.map(g => calcGroupStandingsNormalized(session, g));
     const N = groups.length;
 
     if (N === 4 && thirdPlaceMode === "all4r16") {
@@ -3775,9 +3788,10 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const tier1 = standings.map((s, gi) => s[0]?.team?.id ? { id: s[0].team.id, pts: s[0].pts, wins: s[0].wins, gd: s[0].gd || 0, gf: s[0].gf || 0, tier: 1, seed: groups[gi] + "1" } : null).filter(Boolean);
       const tier2 = standings.map((s, gi) => s[1]?.team?.id ? { id: s[1].team.id, pts: s[1].pts, wins: s[1].wins, gd: s[1].gd || 0, gf: s[1].gf || 0, tier: 2, seed: groups[gi] + "2" } : null).filter(Boolean);
       const rawThirds = standings.map((s, gi) => s[2]?.team?.id ? { id: s[2].team.id, pts: s[2].pts, wins: s[2].wins, gd: s[2].gd || 0, gf: s[2].gf || 0, tier: 3, seed: groups[gi] + "3" } : null).filter(Boolean);
-      const equalized = equalizeThirds(rawThirds, session);
+      // Thirds already come from the normalised (dropped-game) standings, so every
+      // team has the same match count — compare them directly, no ghost-bye padding.
       // Padel ranking for 3rds: wins → game difference → games scored
-      const sortedThirds = [...equalized].sort(compareThirds);
+      const sortedThirds = [...rawThirds].sort(compareThirds);
       // Check for complete tie between 2nd and 3rd thirds (tiebreak match required)
       if (sortedThirds.length >= 3 && thirdPlaceMode === "best2" && compareThirds(sortedThirds[1], sortedThirds[2]) === 0) {
         if (!silent) alert(`Tie between ${lbl(sortedThirds[1].id)} and ${lbl(sortedThirds[2].id)} for the last 3rd-place spot!\n\nPlay a tiebreak match to determine who qualifies.`);
