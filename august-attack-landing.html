@@ -26,26 +26,33 @@ body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .wrap{position:relative;z-index:1;width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;gap:0}
 .emblem{width:min(56vw,232px);filter:drop-shadow(0 0 12px rgba(255,46,67,.55)) drop-shadow(0 0 30px rgba(255,46,67,.3))}
 .presents{font-weight:700;letter-spacing:8px;font-size:12px;color:#8B95A7;margin:18px 0 12px}
-.word{width:min(88vw,470px);filter:drop-shadow(0 0 12px rgba(255,46,67,.5));animation:wordGlitch 5.5s infinite}
-@keyframes wordGlitch{
-  0%,88%,100%{transform:translate(0);filter:drop-shadow(0 0 12px rgba(255,46,67,.5))}
-  89%{transform:translate(-3px,1px);filter:drop-shadow(3px 0 #ff2e43) drop-shadow(-3px 0 #3de1ff)}
-  90%{transform:translate(4px,-1px);clip-path:inset(18% 0 52% 0)}
-  91%{transform:translate(-4px,0);clip-path:inset(58% 0 12% 0);filter:drop-shadow(-3px 0 #3de1ff)}
-  92%{transform:translate(2px,1px);clip-path:inset(0 0 0 0);filter:drop-shadow(2px 0 #ff2e43)}
-  93%{transform:translate(0);filter:none}
+.word{width:min(88vw,470px);filter:drop-shadow(0 0 12px rgba(255,46,67,.5));animation:glitchIn 1.05s .7s both}
+/* ── one-time glitch-in reveal on page load ── */
+@keyframes glitchIn{
+  0%{opacity:0;transform:translate(-9px,0) skewX(6deg);filter:drop-shadow(6px 0 #ff2e43) drop-shadow(-6px 0 #3de1ff);clip-path:inset(45% 0 45% 0)}
+  15%{opacity:1;transform:translate(8px,-2px) skewX(-4deg);clip-path:inset(0 0 72% 0)}
+  30%{transform:translate(-7px,2px);filter:drop-shadow(-5px 0 #3de1ff);clip-path:inset(62% 0 6% 0)}
+  45%{transform:translate(5px,-1px);filter:drop-shadow(5px 0 #ff2e43);clip-path:inset(12% 0 34% 0)}
+  60%{transform:translate(-3px,0);clip-path:inset(34% 0 0 0)}
+  78%{transform:translate(2px,0);clip-path:none}
+  100%{opacity:1;transform:none;clip-path:none}
 }
-.soon{position:relative}
-.soon.glitch::before,.soon.glitch::after{content:attr(data-text);position:absolute;left:0;top:0;width:100%;pointer-events:none;letter-spacing:6px;opacity:0}
-.soon.glitch::before{color:#ff2e43;animation:glitchA 4s infinite steps(1)}
-.soon.glitch::after{color:#3de1ff;animation:glitchB 4.4s infinite steps(1)}
-@keyframes glitchA{0%,90%,100%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}91%{opacity:.9;transform:translate(-3px,-1px);clip-path:inset(0 0 55% 0)}93%{opacity:.9;transform:translate(3px,1px);clip-path:inset(40% 0 20% 0)}95%{opacity:.9;transform:translate(-2px,0);clip-path:inset(70% 0 0 0)}96%{opacity:0}}
-@keyframes glitchB{0%,90%,100%{opacity:0;transform:none;clip-path:inset(0 0 100% 0)}92%{opacity:.9;transform:translate(3px,1px);clip-path:inset(20% 0 45% 0)}94%{opacity:.9;transform:translate(-3px,-1px);clip-path:inset(55% 0 10% 0)}96%{opacity:0}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.emblem{animation:glitchIn 1s .1s both}
+.presents{animation:fadeUp .55s .5s both}
+.tag{animation:fadeUp .55s 1.2s both}
+.chip{animation:fadeUp .55s 1.35s both}
+.soon{position:relative;animation:glitchIn .95s 1.5s both}
+.sub{animation:fadeUp .55s 1.75s both}
+.rule{animation:fadeUp .55s 1.9s both}
+.foot{animation:fadeUp .55s 2.05s both}
+/* static scanline texture (no loop) */
 body::after{content:"";position:fixed;inset:0;z-index:5;pointer-events:none;
-  background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px);
-  mix-blend-mode:multiply;opacity:.5;animation:flicker 7s infinite steps(1)}
-@keyframes flicker{0%,96%,100%{opacity:.5}96.5%{opacity:.2}97%{opacity:.7}97.5%{opacity:.3}}
-@media (prefers-reduced-motion:reduce){.word,.soon.glitch::before,.soon.glitch::after,body::after,.chip i{animation:none}.soon.glitch::before,.soon.glitch::after{opacity:0}}
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 1px,transparent 1px 3px);
+  mix-blend-mode:multiply;opacity:.42}
+@media (prefers-reduced-motion:reduce){
+  .emblem,.word,.presents,.tag,.chip,.soon,.sub,.rule,.foot,.chip i{animation:none;opacity:1;transform:none;clip-path:none}
+}
 .tag{font-weight:700;letter-spacing:4px;font-size:clamp(13px,3.4vw,16px);margin-top:16px}
 .tag b{color:#FF2E43;text-shadow:var(--glow)}
 .chip{margin-top:26px;display:inline-flex;align-items:center;gap:9px;font-weight:700;letter-spacing:3px;font-size:13px;
