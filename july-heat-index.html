@@ -1372,23 +1372,43 @@ function initState() {
 function getPlayerTeam(s, pid) { return (s.teams || []).find(t => t.p1Id === pid || t.p2Id === pid); }
 function teamWon(m, tid) { if (!m || !m.winner) return false; if (m.winner === "team1") return m.team1Id === tid; if (m.winner === "team2") return m.team2Id === tid; return false; }
 
+// Baseline group size for scoring. A group of 4 plays 3 matches, so every
+// team's best GROUP_COUNTED_GAMES results are what count toward standings and
+// series points. In a 5-team group (4 matches) each team therefore drops its
+// single lowest result, keeping the maximum identical to a group of 4.
+// Knockout/playoff matches are never group matches, so they never count here.
+const GROUP_COUNTED_GAMES = 3;
+
+function teamGroupResults(session, teamId) {
+  const out = [];
+  (session.groupMatches || []).forEach(m => {
+    if (m.team1Id !== teamId && m.team2Id !== teamId) return;
+    if (!m.winner) return;
+    const isT1 = m.team1Id === teamId;
+    const won = teamWon(m, teamId);
+    const lt = m.lossType || "tiebreak";
+    out.push({
+      pts: won ? 3 : (lt === "tiebreak" ? 2 : lt === "competitive" ? 1 : 0),
+      w: won ? 1 : 0,
+      gf: m.score ? (isT1 ? m.score.t1 : m.score.t2) : 0,
+      ga: m.score ? (isT1 ? m.score.t2 : m.score.t1) : 0,
+    });
+  });
+  const playedActual = out.length;
+  out.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+  const counted = out.slice(0, GROUP_COUNTED_GAMES);
+  return { counted, playedActual, dropped: playedActual - counted.length };
+}
+
 function calcGroupStandings(session, group) {
   const teams = (session.teams || []).filter(t => t.group === group);
   const matchList = session.groupMatches || [];
   const rows = teams.map(team => {
-    let pts = 0, wins = 0, played = 0, gf = 0, ga = 0;
-    matchList.forEach(m => {
-      if (m.team1Id !== team.id && m.team2Id !== team.id) return;
-      if (!m.winner) return;
-      played++;
-      const isT1 = m.team1Id === team.id;
-      if (m.score) { gf += isT1 ? m.score.t1 : m.score.t2; ga += isT1 ? m.score.t2 : m.score.t1; }
-      if (teamWon(m, team.id)) { pts += 3; wins++; }
-      else { const t = m.lossType || "tiebreak"; if (t === "tiebreak") pts += 2; else if (t === "competitive") pts += 1; }
-    });
-    return { team, pts, wins, played, gf, ga, gd: gf - ga };
+    const { counted, playedActual, dropped } = teamGroupResults(session, team.id);
+    let pts = 0, wins = 0, gf = 0, ga = 0;
+    counted.forEach(r => { pts += r.pts; wins += r.w; gf += r.gf; ga += r.ga; });
+    return { team, pts, wins, played: counted.length, playedActual, dropped, gf, ga, gd: gf - ga };
   });
-  // h2h wins map
   const h2h = {};
   matchList.forEach(m => {
     if (!m.winner) return;
@@ -1398,11 +1418,11 @@ function calcGroupStandings(session, group) {
     h2h[wid][lid] = (h2h[wid][lid] || 0) + 1;
   });
   return rows.sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;   // 1) most wins
-    if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
-    if (b.gf !== a.gf) return b.gf - a.gf;           // 3) points scored
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    if (b.gd !== a.gd) return b.gd - a.gd;
+    if (b.gf !== a.gf) return b.gf - a.gf;
     const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
-    if (aH !== 0) return -aH; // 4) head-to-head fallback
+    if (aH !== 0) return -aH;
     return b.pts - a.pts;
   });
 }
@@ -1423,32 +1443,10 @@ function getTopOfGroup(s, g) { const ov = s.topOfGroupOverride && s.topOfGroupOv
 // teams drop their single worst result, the group-of-4 teams are unchanged.
 // Used for KNOCKOUT SEEDING only; the displayed group table and leaderboard are
 // handled separately.
+// Retained for compatibility: the drop-lowest rule now lives in
+// calcGroupStandings, so seeding and the displayed table always agree.
 function calcGroupStandingsNormalized(session, group) {
-  const teams = (session.teams || []).filter(t => t.group === group);
-  const matchList = session.groupMatches || [];
-  const sizes = getSessionGroups(session)
-    .map(g => (session.teams || []).filter(t => t.group === g).length)
-    .filter(n => n > 0);
-  const minSize = sizes.length ? Math.min(...sizes) : teams.length;
-  // If this group is already at the smallest size, there is nothing to drop.
-  if (teams.length <= minSize) return calcGroupStandings(session, group);
-  const keep = Math.max(1, minSize - 1);   // matches to count per team
-  const rows = teams.map(team => {
-    const myMatches = matchList.filter(m => (m.team1Id === team.id || m.team2Id === team.id) && m.winner);
-    const scored = myMatches.map(m => {
-      const isT1 = m.team1Id === team.id;
-      const won = teamWon(m, team.id);
-      const pts = won ? 3 : (m.lossType === "tiebreak" ? 2 : m.lossType === "competitive" ? 1 : 0);
-      return { pts, gf: m.score ? (isT1 ? m.score.t1 : m.score.t2) : 0, ga: m.score ? (isT1 ? m.score.t2 : m.score.t1) : 0, w: won ? 1 : 0 };
-    });
-    // Keep the best `keep` results: sort best-first (pts, then game difference), drop the rest.
-    scored.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
-    const best = scored.slice(0, keep);
-    let pts = 0, wins = 0, gf = 0, ga = 0;
-    best.forEach(s => { pts += s.pts; wins += s.w; gf += s.gf; ga += s.ga; });
-    return { team, pts, wins, played: best.length, gf, ga, gd: gf - ga };
-  });
-  return rows.sort((a, b) => b.wins - a.wins || b.gd - a.gd || b.gf - a.gf || b.pts - a.pts);
+  return calcGroupStandings(session, group);
 }
 
 // Equalizes 3rd-place entries for cross-group comparison by adding ghost BYE wins
@@ -1506,30 +1504,20 @@ function calcPlayerStats(pid, sessions) {
     // 2X Double Points (applies to everything except streak)
     const mult = s.doublePoints ? 2 : 1;
     let sessionPlayed = 0;
-    // Uneven-group fairness: when a session's groups differ in size (e.g. 5/5/4),
-    // teams in the larger groups play more group matches and would otherwise bank
-    // extra series points. Cap each team's counted group results to (smallest
-    // group − 1) — everyone contributes the same number of best results, dropping
-    // their lowest. Equal-size sessions are unaffected (cap = all matches).
-    const grpSizes = {};
-    (s.teams || []).forEach(t => { if (t.group != null) grpSizes[t.group] = (grpSizes[t.group] || 0) + 1; });
-    const sizeVals = Object.values(grpSizes);
-    const uneven = sizeVals.length > 1 && new Set(sizeVals).size > 1;
-    const cap = uneven ? Math.max(1, Math.min(...sizeVals) - 1) : Infinity;
-    const grpResults = [];
+    // Group scoring is normalised to the group-of-4 baseline: only each team's
+    // best GROUP_COUNTED_GAMES (3) results count toward series points, so a
+    // 5-team group (4 matches) drops its lowest and the maximum matches a group
+    // of 4. Win/played records stay actual. Knockout and playoff matches are not
+    // group matches, so they never enter this calculation.
     (s.groupMatches || []).forEach(m => {
       if (m.team1Id !== team.id && m.team2Id !== team.id) return;
-      if (!m.winner) return; stats.groupPlayed++; sessionPlayed++;
-      const won = teamWon(m, team.id);
-      if (won) stats.groupWins++;
-      const lt = m.lossType || "tiebreak";
-      grpResults.push(won ? 3 : (lt === "tiebreak" ? 2 : lt === "competitive" ? 1 : 0));
+      if (!m.winner) return;
+      stats.groupPlayed++; sessionPlayed++;
+      if (teamWon(m, team.id)) stats.groupWins++;
     });
-    // Keep each player's best `cap` group results toward series points (record
-    // counts above stay actual; only the points contribution is normalized).
-    grpResults.sort((a, b) => b - a);
-    const counted = cap === Infinity ? grpResults : grpResults.slice(0, cap);
-    counted.forEach(pts => { total += pts * mult; breakdown.matchPts += pts * mult; });
+    teamGroupResults(s, team.id).counted.forEach(r => {
+      total += r.pts * mult; breakdown.matchPts += r.pts * mult;
+    });
     // Only award top-of-group if team actually played matches
     if (sessionPlayed > 0 && getTopOfGroup(s, team.group) === team.id) { total += 1 * mult; breakdown.topOfGroup += 1 * mult; }
     // Only count streak if player actually played a match this session
@@ -3641,6 +3629,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
           <div><span className="font-bold text-stone-200">Ranked by:</span> Wins <span className="text-stone-500">›</span> Game difference (GD) <span className="text-stone-500">›</span> Games won <span className="text-stone-500">›</span> Head-to-head. <span className="text-stone-500">(Most wins first — not total points.)</span></div>
           <div><span className="font-bold text-stone-200">Columns:</span> <span className="font-mono">W</span> wins <span className="text-stone-600">·</span> <span className="font-mono">P</span> played <span className="text-stone-600">·</span> <span className="font-mono">GD</span> game difference <span className="text-stone-600">·</span> <span className="font-mono">Pts</span> points</div>
           <div><span className="font-bold text-stone-200">Points:</span> Win <span className="text-emerald-500 font-mono">+3</span> <span className="text-stone-600">·</span> Tiebreak loss <span className="font-mono">+2</span> <span className="text-stone-600">·</span> Close loss <span className="font-mono">+1</span> <span className="text-stone-600">·</span> Blowout loss <span className="font-mono">0</span></div>
+          <div><span className="font-bold text-stone-200">Best 3 count:</span> only each team's best {GROUP_COUNTED_GAMES} group results count — a 5-team group drops its lowest game, so the maximum matches a group of 4. Knockout and playoff matches never count as group games.</div>
         </div>
       </Card>
       {groups.map(g => {
