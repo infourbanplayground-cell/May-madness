@@ -2178,9 +2178,12 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
       {/* ── AUGUST ATTACK BRAND HERO ── */}
       <div className="jh-hero" style={{margin:"2px 0 8px",padding:0,background:"#0A0A0A",border:"1.5px solid rgba(255,46,67,.55)",boxShadow:"0 0 12px rgba(255,46,67,.32)",transform:"none",position:"relative"}}>
         <div style={{position:"absolute",top:0,left:0,zIndex:5,background:"rgba(255,46,67,.14)",border:"1px solid rgba(255,46,67,.55)",borderTop:"none",borderLeft:"none",fontFamily:"'Anton',Impact,sans-serif",fontSize:12,letterSpacing:"2.5px",color:"#F4F6FA",padding:"6px 14px 4px"}}>URBAN PLAYGROUND · VOL.6</div>
-        <div className="jh-hero-inner" style={{padding:"34px 16px 22px",textAlign:"center"}}>
-          <img className="jh-logo-img" src="assets/jh-watermark.png" alt="August Attack" />
-          <div style={{marginTop:4}}><span className="jh-mock-caption">MON &amp; WED · 5:30 PM · <b>ALL AUGUST</b></span></div>
+        <div className="jh-hero-inner" style={{padding:"30px 16px 22px",textAlign:"center"}}>
+          <img className="aa-emblem glitch-in" src="assets/aa-emblem.png" alt="Urban Playground" />
+          <div className="aa-presents">URBAN PLAYGROUND PRESENTS</div>
+          <img className="aa-wordmark glitch-in d2" src="assets/aa-wordmark.png" alt="August Attack" />
+          <div className="aa-tag glitch-in d3">SERVE FIRST. <b>STRIKE HARD.</b></div>
+          <div style={{marginTop:14}}><span className="jh-mock-caption">MON &amp; WED · 5:30 PM · <b>ALL AUGUST</b></span></div>
         </div>
       </div>
 
@@ -5451,6 +5454,54 @@ nav.fixed button[style*="var(--orange-br)"],nav.fixed button[style*="#FF2E43"]{
 [style*="rgba(255,196,0"] , [style*="rgba(255,207,0"]{color:#F4F6FA;}
 [style*="rgba(255,196,0"] *{color:#F4F6FA !important;}
 [style*="rgba(255,196,0"] .text-stone-400,[style*="rgba(255,196,0"] .text-stone-500{color:#E6E9EF !important;}
+
+
+/* ═══════════════════════════════════════════════════════════
+   AUGUST ATTACK · GLITCH + BRAND LOCKUP (design-language match)
+   ═══════════════════════════════════════════════════════════ */
+.aa-emblem{width:190px;max-width:52%;display:block;margin:0 auto;
+  filter:drop-shadow(0 0 14px rgba(255,46,67,.55)) drop-shadow(0 0 34px rgba(255,46,67,.3));}
+.aa-presents{font-family:'Rajdhani','Archivo',sans-serif;font-weight:700;letter-spacing:7px;
+  font-size:11px;color:#8B95A7;margin:16px 0 10px;}
+.aa-wordmark{width:300px;max-width:88%;display:block;margin:0 auto;
+  filter:drop-shadow(0 0 12px rgba(255,46,67,.5));}
+.aa-tag{font-family:'Rajdhani','Archivo',sans-serif;font-weight:700;letter-spacing:4px;font-size:12px;
+  color:#F4F6FA;margin-top:14px;}
+.aa-tag b{color:#FF2E43;text-shadow:0 0 12px rgba(255,46,67,.8);}
+
+/* one-time glitch-in reveal */
+@keyframes aaGlitchIn{
+  0%{opacity:0;transform:translate(-8px,0) skewX(5deg);
+     filter:drop-shadow(5px 0 #FF2E43) drop-shadow(-5px 0 #3DE1FF);clip-path:inset(45% 0 45% 0)}
+  18%{opacity:1;transform:translate(7px,-2px) skewX(-3deg);clip-path:inset(0 0 70% 0)}
+  36%{transform:translate(-6px,2px);filter:drop-shadow(-4px 0 #3DE1FF);clip-path:inset(60% 0 6% 0)}
+  54%{transform:translate(4px,-1px);filter:drop-shadow(4px 0 #FF2E43);clip-path:inset(12% 0 34% 0)}
+  72%{transform:translate(-2px,0);clip-path:inset(30% 0 0 0)}
+  100%{opacity:1;transform:none;clip-path:none}
+}
+.glitch-in{animation:aaGlitchIn .95s .1s both;}
+.glitch-in.d2{animation-delay:.5s;}
+.glitch-in.d3{animation-delay:1.05s;}
+
+/* scanline texture over the whole app (static, tactical) */
+#root::after{content:"";position:fixed;inset:0;z-index:60;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px);
+  mix-blend-mode:multiply;opacity:.4;}
+
+/* panels: thin glowing red edge like the brand board */
+.jh-panel,.jh-hero,.jh-srow,.jh-lbrow,.jh-mock-sess,
+[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
+  border:1px solid rgba(255,46,67,.45) !important;
+  box-shadow:0 0 14px rgba(255,46,67,.16) !important;
+}
+/* section labels: red letterspaced caps */
+.jh-round-title,.jh-sec-kicker,.aa-kicker{
+  font-family:'Rajdhani','Archivo',sans-serif !important;font-weight:700 !important;
+  letter-spacing:3.5px !important;text-transform:uppercase !important;
+}
+@media (prefers-reduced-motion:reduce){
+  .glitch-in{animation:none !important;opacity:1 !important;transform:none !important;clip-path:none !important;filter:none !important;}
+}
 
 </style>
 
