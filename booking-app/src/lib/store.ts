@@ -26,6 +26,17 @@ export async function initDB(): Promise<void> {
       price_per_hour NUMERIC(10,2) DEFAULT 0.00
     );
   `)
+  // Tracks whether an app-created booking has been keyed into MatchPoint by
+  // staff. MatchPoint's Query API is read-only, so this is done by hand.
+  // bookings is owned by postgres; if the app user lacks rights to alter it the
+  // column is added out-of-band and this is a no-op.
+  try {
+    await pool.query(
+      'ALTER TABLE bookings ADD COLUMN IF NOT EXISTS synced_to_matchpoint BOOLEAN NOT NULL DEFAULT FALSE'
+    )
+  } catch {
+    // insufficient privilege — column is managed by the DBA migration
+  }
 }
 
 // ─── Row mappers ──────────────────────────────────────────────────────────────
@@ -57,6 +68,7 @@ function rowToBooking(row: Record<string, unknown>): Booking {
     priceTotal: row.price_total != null ? Number(row.price_total) : undefined,
     durationMinutes: row.duration_minutes != null ? Number(row.duration_minutes) : undefined,
     bookingSource: (row.booking_source as string) ?? 'admin',
+    syncedToMatchpoint: Boolean(row.synced_to_matchpoint),
   }
 }
 
@@ -135,6 +147,30 @@ export async function addBooking(booking: Booking): Promise<void> {
       ]
     )
   }
+}
+
+/**
+ * App-created bookings (not imported from MatchPoint) that staff still need to
+ * key into MatchPoint by hand. Cancelled bookings are excluded — nothing to
+ * enter. Past bookings are kept so nothing silently disappears from the queue.
+ */
+export async function getPendingMatchpointEntry(): Promise<Booking[]> {
+  const { rows } = await pool.query(
+    `SELECT * FROM bookings
+      WHERE synced_to_matchpoint = FALSE
+        AND status <> 'cancelled'
+        AND booking_source <> 'matchpoint'
+      ORDER BY date, start_time`
+  )
+  return rows.map(rowToBooking)
+}
+
+export async function setBookingSynced(id: string, synced: boolean): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    'UPDATE bookings SET synced_to_matchpoint = $2 WHERE id = $1',
+    [id, synced]
+  )
+  return (rowCount ?? 0) > 0
 }
 
 export async function cancelBooking(id: string): Promise<void> {

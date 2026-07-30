@@ -25,6 +25,8 @@ export type Booking = {
   priceTotal?: number
   durationMinutes?: number
   bookingSource?: string
+  /** App-created bookings only: has staff keyed this into MatchPoint yet? */
+  syncedToMatchpoint?: boolean
 }
 
 export type Member = {
