@@ -4613,18 +4613,25 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
       {hasLifetime && (
         <div style={{display:"flex",border:"1px solid rgba(244,246,250,.10)",boxShadow:"none"}}>
           {["season","lifetime"].map(m => (
-            <button key={m} onClick={() => setMode(m)} style={{flex:1,padding:"9px 0 7px",fontFamily:"'Anton',cursive",fontSize:17,letterSpacing:2,border:"none",cursor:"pointer",background:mode===m?"#FF2E43":"var(--cream)",color:mode===m?"#F4F6FA":"rgba(19,19,19,.5)",textShadow:mode===m?"none":"none",borderRight:m==="season"?"4px solid #0A0C12":"none"}}>
+            <button key={m} onClick={() => setMode(m)} style={{flex:1,padding:"9px 0 7px",fontFamily:"'Anton',cursive",fontSize:17,letterSpacing:2,border:"none",cursor:"pointer",background:mode===m?"#FF2E43":"rgba(16,20,32,.92)",color:mode===m?"#F4F6FA":"#8B95A7",textShadow:mode===m?"none":"none",borderRight:m==="season"?"1px solid rgba(244,246,250,.10)":"none"}}>
               {m === "season" ? "THIS SERIES" : "ALL-TIME"}
             </button>
           ))}
         </div>
       )}
       {list.length === 0 ? (
+        <>
         <Card className="p-8 text-center border-dashed">
           <I.trophy className="mx-auto mb-3 text-stone-600" size={32} />
           <div className="text-stone-300 font-semibold">Ranking locked</div>
           <div className="text-stone-500 text-sm mt-1">Standings appear after the first match is played</div>
         </Card>
+        {hasLifetime && mode === "season" && (
+          <div style={{textAlign:"center",marginTop:14}}>
+            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Anton',cursive",fontSize:14,letterSpacing:2,color:"#0A0C12",background:"#3DE1FF",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 22px rgba(61,225,255,.35)"}}>SEE ALL-TIME RANKINGS →</button>
+          </div>
+        )}
+        </>
       ) : (
         <>
           {climber && (
@@ -4642,7 +4649,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginBottom:8}}><Avatar player={e.player} size={rank===1?56:44} /></div>
                 <div style={{position:"relative",fontFamily:"'Anton',cursive",fontSize:rank===1?20:16,letterSpacing:.5,color:"#F4F6FA",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>{e.player.name.toUpperCase()}</div>
                 <div style={{position:"relative",fontFamily:"'Anton',cursive",fontSize:rank===1?42:32,lineHeight:.9,color:"#F4F6FA",WebkitTextStroke:"0",textShadow:"none",marginTop:5}}>{ptsOf(e)}</div>
-                <div style={{position:"relative",fontFamily:"Verdana,sans-serif",fontSize:8,fontWeight:"bold",letterSpacing:".1em",color:"#8B95A7",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed} SESS · {enrich(e).winRate}% WIN</div>
+                <div style={{position:"relative",fontFamily:"Verdana,sans-serif",fontSize:8,fontWeight:"bold",letterSpacing:".1em",color:"#8B95A7",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed > 0 ? `${e.stats.sessionsPlayed} SESS · ${enrich(e).winRate}% WIN` : "CARRIED OVER"}</div>
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginTop:5}}><FormStrip form={enrich(e).form} /></div>
                 <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:7}}>
                   <span style={{display:"inline-block",fontFamily:"'Anton',cursive",fontSize:13,letterSpacing:2,background:"#0A0C12",color:"#F4F6FA",padding:"3px 10px 1px"}}>{PODIUM_CFG[rank].label}</span>
@@ -4678,7 +4685,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
                           <span>{en.winRate}% WIN</span>
                           {en.form.length > 0 && <FormStrip form={en.form} />}
                           {e.stats.finalsWon > 0 && <span style={{display:"inline-flex",alignItems:"center",gap:2}}><I.trophy size={11} style={{color:"#B58900"}} strokeWidth={2.5} />×{e.stats.finalsWon}</span>}
-                        </> : <span>NOT YET PLAYED</span>}
+                        </> : <span>{mode === "lifetime" ? "CARRIED FROM PREVIOUS SERIES" : "NOT YET PLAYED"}</span>}
                       </div>
                     </div>
                     <div style={{fontFamily:"'Anton',cursive",fontSize:28,color:"#FF2E43",WebkitTextStroke:"0",textShadow:"none",whiteSpace:"nowrap"}}>{ptsOf(e)}<span style={{fontSize:11,color:"#F4F6FA",WebkitTextStroke:"0"}}> PTS</span></div>
@@ -5255,7 +5262,7 @@ html:not(.light) .screen-bg{
   border:1px solid rgba(244,246,250,.14) !important;
   border-radius:18px !important;
   box-shadow:none !important;
-  transform: !important;
+  transform:none !important;
 }
 
 /* surface containers → comic panels */
@@ -5548,6 +5555,7 @@ nav.fixed button[style*="var(--orange-br)"],nav.fixed button[style*="#FF2E43"]{
 
 /* ── kickers: flat tactical labels, not boxed comic bursts ── */
 .aa-kicker,.jh-burst2,.jh-sec-kicker{
+  display:block !important;
   background:none !important;border:none !important;box-shadow:none !important;
   color:#FF2E43 !important;padding:0 0 0 10px !important;position:relative !important;
   font-size:11px !important;letter-spacing:3.5px !important;margin-bottom:12px !important;
@@ -5672,6 +5680,111 @@ html:not(.light) nav.fixed .grid > button[style*="var(--orange-br)"] svg{color:#
 .space-y-1\.5 > div:hover,.space-y-1 > div:hover{background-color:rgba(255,46,67,.06) !important;}
 /* standings rows keep their own treatment (they carry rank meaning) */
 .jh-lbrow,.jh-srow{border-bottom:none !important;}
+
+
+/* ═══════════════════════════════════════════════════════════
+   AUGUST ATTACK · MOTION + NAV PASS
+   1. Bottom nav no longer drifts: it drops backdrop-filter (the
+      expensive thing that re-rasterises while Safari's toolbar
+      collapses), gets its own compositor layer, and finally
+      honours env(safe-area-inset-bottom) — the page has always
+      set viewport-fit=cover but never read the inset back.
+   2. Nav restyled as a HUD console: segment dividers, mono
+      labels, corner ticks, active segment in red.
+   3. Press feedback on everything pressable.
+   4. Motion curves + durations: UI moves in under 250ms.
+   5. Hover effects gated to devices that actually hover, so a
+      tap no longer leaves a row stuck in its hover colour.
+   6. prefers-reduced-motion covers scanlines and chromatic
+      text-splits, not just .glitch-in.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-in-out:cubic-bezier(.77,0,.175,1);
+}
+
+/* ── 1 · NAV: stable, safe-area aware ─────────────────────── */
+nav.fixed.bottom-0{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  padding-bottom:env(safe-area-inset-bottom,0px) !important;
+  transform:translateZ(0);
+  will-change:transform;
+}
+/* colour needs html:not(.light) to outrank the earlier dark-mode nav rule,
+   otherwise that rule wins on specificity and the ticks never paint */
+html:not(.light) nav.fixed.bottom-0{
+  /* fully opaque: with backdrop-blur gone, any translucency lets the
+     hero type ghost through the bar */
+  background-color:#06070B !important;
+  border-top:1px solid rgba(255,46,67,.35) !important;
+  /* corner ticks, drawn as backgrounds so no pseudo-element clash */
+  background-image:
+    linear-gradient(#3DE1FF,#3DE1FF), linear-gradient(#3DE1FF,#3DE1FF),
+    linear-gradient(#FF2E43,#FF2E43), linear-gradient(#FF2E43,#FF2E43) !important;
+  background-size:14px 2px, 2px 14px, 14px 2px, 2px 14px !important;
+  background-position:0 0, 0 0, 100% 100%, 100% 100% !important;
+  background-repeat:no-repeat !important;
+}
+/* the main region must clear the taller nav */
+main.pb-24{ padding-bottom:calc(6rem + env(safe-area-inset-bottom,0px)) !important; }
+
+/* ── 2 · NAV: HUD console segments ────────────────────────── */
+html:not(.light) nav.fixed .grid > button,
+html:not(.light) nav.fixed .grid > a{
+  border-right:1px solid rgba(244,246,250,.08) !important;
+  border-radius:0 !important;
+  transition:color 160ms ease, background-color 160ms ease,
+             transform 160ms var(--ease-out) !important;
+}
+html:not(.light) nav.fixed .grid > *:last-child{ border-right:none !important; }
+nav.fixed .grid > button span,nav.fixed .grid > a span{
+  font-family:'JetBrains Mono',monospace !important;
+  font-size:9px !important;letter-spacing:1px !important;
+}
+
+/* ── 3 · PRESS FEEDBACK ───────────────────────────────────── */
+nav.fixed .grid > button:active,
+nav.fixed .grid > a:active{ transform:scale(.94) !important; }
+.jh-srow:active,.jh-lbrow:active,.jh-mock-row:active,.jh-mock-sess:active{
+  transform:scale(.985);
+}
+button:active:not(:disabled),[role="button"]:active{ transform:scale(.97); }
+.jh-srow,.jh-lbrow,.jh-mock-row,.jh-mock-sess{
+  transition:transform 160ms var(--ease-out), background-color 160ms ease;
+}
+
+/* ── 4 · CURVES: replace Tailwind's transition-all ─────────── */
+.transition-all{
+  transition-property:transform,background-color,border-color,color,opacity !important;
+  transition-duration:180ms !important;
+  transition-timing-function:var(--ease-out) !important;
+}
+.transition-colors{ transition-duration:160ms !important; }
+
+/* ── 5 · HOVER ONLY WHERE HOVER EXISTS ────────────────────── */
+@media (hover:none){
+  .jh-srow:hover,.jh-lbrow:hover,.jh-mock-row:hover,.jh-mock-sess:hover,
+  .space-y-1\.5 > div:hover,.space-y-1 > div:hover{
+    background-color:inherit !important;
+    border-color:inherit !important;
+  }
+}
+
+/* ── 6 · REDUCED MOTION, properly ─────────────────────────── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important;
+  }
+  .glitch-in,.splash .splash-logo-wrap{
+    animation:none !important;opacity:1 !important;transform:none !important;
+    clip-path:none !important;filter:none !important;
+  }
+  /* scanlines and chromatic splits read as motion for some viewers */
+  .aa-scan,.jh-scan,[class*="scanline"]{ display:none !important; }
+  .glitch-txt,.jh-glitch,.h1-split{ text-shadow:none !important; }
+}
 
 </style>
 
