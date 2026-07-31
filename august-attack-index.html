@@ -5786,7 +5786,158 @@ button:active:not(:disabled),[role="button"]:active{ transform:scale(.97); }
   .glitch-txt,.jh-glitch,.h1-split{ text-shadow:none !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   AUGUST ATTACK · FEEL PASS
+   The previous pass fixed plumbing. This one is what you see:
+   a nav rule that travels instead of jumping, tab content that
+   enters, rows that cascade, and sheets that come from where
+   they belong.
+   Everything moves on transform/opacity only, under 320ms.
+   ═══════════════════════════════════════════════════════════ */
+:root{ --ease-drawer:cubic-bezier(.32,.72,0,1); }
+
+/* ── A · NAV: the rule slides between tabs ────────────────── */
+/* the old active state slapped a 2px border on whichever tab
+   was current — it teleported. A single travelling rule reads
+   as one object moving, which is what the user's eye expects. */
+html:not(.light) nav.fixed.bottom-0 .grid > button[style*="color: var(--orange-br)"],
+html:not(.light) nav.fixed.bottom-0 .grid > button[style*="color:var(--orange-br)"]{
+  border-top:2px solid transparent !important;
+}
+nav.fixed.bottom-0 .aa-ind{
+  position:absolute;top:0;left:0;height:2px;width:0;
+  background:#FF2E43;box-shadow:0 0 10px rgba(255,46,67,.9);
+  pointer-events:none;z-index:3;
+  transition:transform 260ms var(--ease-in-out), width 260ms var(--ease-in-out);
+}
+/* icons take the press too, not just the segment */
+nav.fixed .grid > button svg,nav.fixed .grid > a svg{
+  transition:transform 160ms var(--ease-out);
+}
+nav.fixed .grid > button:active svg,nav.fixed .grid > a:active svg{ transform:scale(.9); }
+
+/* ── B · TAB CONTENT ENTERS ───────────────────────────────── */
+/* switching tabs is the single most-repeated transition in the
+   app, so it gets the shortest, quietest treatment that still
+   reads as a change: 190ms, 6px, no glitch. */
+main > div{ animation:aaViewIn 190ms var(--ease-out) both; }
+@keyframes aaViewIn{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+/* ── C · ROWS CASCADE ─────────────────────────────────────── */
+/* The app already cascades rows (30ms steps, capped at 360ms) and
+   deliberately fades opacity ONLY — every row carries an inline
+   rotate(±.35deg) tilt, and any keyframe that animates transform
+   would land on `transform:none` and flatten the tilt for good.
+   So: keep it opacity-only, just make it faster and give it a
+   real ease-out instead of the default `ease`. */
+.jh-rank-in{ animation-duration:260ms !important; animation-timing-function:var(--ease-out) !important; }
+/* rows WITHOUT an inline transform can afford the extra 7px rise */
+.jh-lbrow:not([style*="rotate"]),.jh-srow:not([style*="rotate"]),
+.jh-mock-sess:not([style*="rotate"]){
+  animation:aaRowIn 260ms var(--ease-out) both;
+}
+@keyframes aaRowIn{ from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:none} }
+/* past the fold there is nothing to cascade — and 238 staggered
+   rows would take nine seconds to finish */
+.jh-lbrow:nth-child(n+13),.jh-srow:nth-child(n+13),.jh-mock-sess:nth-child(n+13){ animation:none; }
+.jh-lbrow:nth-child(2),.jh-srow:nth-child(2),.jh-mock-sess:nth-child(2){animation-delay:35ms}
+.jh-lbrow:nth-child(3),.jh-srow:nth-child(3),.jh-mock-sess:nth-child(3){animation-delay:70ms}
+.jh-lbrow:nth-child(4),.jh-srow:nth-child(4),.jh-mock-sess:nth-child(4){animation-delay:105ms}
+.jh-lbrow:nth-child(5),.jh-srow:nth-child(5),.jh-mock-sess:nth-child(5){animation-delay:140ms}
+.jh-lbrow:nth-child(6),.jh-srow:nth-child(6),.jh-mock-sess:nth-child(6){animation-delay:170ms}
+.jh-lbrow:nth-child(7),.jh-srow:nth-child(7),.jh-mock-sess:nth-child(7){animation-delay:195ms}
+.jh-lbrow:nth-child(n+8),.jh-srow:nth-child(n+8),.jh-mock-sess:nth-child(n+8){animation-delay:215ms}
+
+/* ── D · FULL-SCREEN DETAIL: comes up from the bottom ─────── */
+/* session + player detail cover the whole screen. Sliding them
+   up from the edge they were opened toward makes the back
+   button feel like a reversal rather than a teleport. */
+.fixed.inset-0.z-40{ animation:aaSheetIn 300ms var(--ease-drawer) both; }
+@keyframes aaSheetIn{ from{transform:translateY(100%)} to{transform:none} }
+
+/* ── E · MODAL: backdrop fades, sheet rises ───────────────── */
+@keyframes aaFadeIn{ from{opacity:0} to{opacity:1} }
+/* the scrim fades on a pseudo-element, NOT on the container: fading
+   the container drags the panel's opacity down with it, and you see
+   the page straight through the sheet while it rises. */
+.fixed.inset-0.z-50::before{
+  content:'';position:absolute;inset:0;background:rgba(6,7,11,.92);
+  animation:aaFadeIn 180ms ease both;
+}
+/* on phones this stack is bottom-anchored, so it travels its own
+   height; from sm: up it's centred and just settles 10px. */
+.fixed.inset-0.z-50 > div{ animation:aaSheetUp 300ms var(--ease-drawer) both; }
+@keyframes aaSheetUp{ from{transform:translateY(100%)} to{transform:none} }
+@media (min-width:640px){
+  @keyframes aaSheetUp{ from{opacity:0;transform:translateY(10px) scale(.98)} to{opacity:1;transform:none} }
+}
+
+/* ── E2 · fixes the slow-motion pass surfaced ─────────────── */
+/* The panel ships at rgba(20,24,36,.85). Standing still that reads
+   as depth; mid-rise you see the rankings list straight through it
+   and the eye reads two objects instead of one panel moving. Opaque
+   while it travels, and a heavier scrim behind it. */
+.fixed.inset-0.z-50 > div{ background:#141826 !important; position:relative; z-index:1; }
+.fixed.inset-0.z-50 > div > div[style*="sticky"]{ background:#141826 !important; }
+.fixed.inset-0.z-50{ background:transparent !important; }
+/* the active tab's red wash was arriving instantly while the rule
+   was still travelling — two events where there should be one */
+html:not(.light) nav.fixed.bottom-0 .grid > button,
+html:not(.light) nav.fixed.bottom-0 .grid > a{
+  transition:color 260ms var(--ease-in-out),
+             background-color 260ms var(--ease-in-out),
+             transform 160ms var(--ease-out) !important;
+}
+
+/* ── F · REDUCED MOTION: gentler, not absent ──────────────── */
+/* movement goes; opacity stays, because a panel that appears
+   with no transition at all reads as a glitch. */
+@media (prefers-reduced-motion:reduce){
+  main > div,.jh-lbrow,.jh-srow,.jh-mock-row,.jh-mock-sess,.jh-rank-in,
+  .fixed.inset-0.z-40,.fixed.inset-0.z-50,.fixed.inset-0.z-50 > div{
+    animation:aaFadeIn 140ms ease both !important;
+  }
+  nav.fixed.bottom-0 .aa-ind{ transition:none !important; }
+}
+
 </style>
+
+<script>
+/* Bottom-nav indicator. The nav is rendered by React and the active
+   tab is only knowable from the inline `color: var(--orange-br)` it
+   carries, so the rule is measured from the DOM rather than driven by
+   app state — no React changes, and it survives re-renders because a
+   MutationObserver re-measures. Width is set too: the segments are
+   equal now, but they change count when an admin logs in. */
+(function(){
+  function mount(){
+    var nav=document.querySelector('nav.fixed.bottom-0');
+    var grid=nav&&nav.querySelector('.grid');
+    if(!grid) return false;
+    var ind=nav.querySelector('.aa-ind');
+    if(!ind){ ind=document.createElement('div'); ind.className='aa-ind'; nav.appendChild(ind); }
+    function place(){
+      var el=grid.querySelector('[style*="orange-br"]')||grid.firstElementChild;
+      if(!el) return;
+      var r=el.getBoundingClientRect(), n=nav.getBoundingClientRect();
+      if(!r.width) return;
+      ind.style.width=r.width+'px';
+      ind.style.transform='translateX('+(r.left-n.left)+'px)';
+    }
+    place();
+    new MutationObserver(place).observe(grid,
+      {attributes:true,subtree:true,childList:true,attributeFilter:['style','class']});
+    grid.addEventListener('click',function(){ requestAnimationFrame(place); setTimeout(place,80); });
+    addEventListener('resize',place);
+    addEventListener('orientationchange',function(){ setTimeout(place,120); });
+    return true;
+  }
+  /* the app boots behind a splash, so poll briefly until the nav exists */
+  var t=setInterval(function(){ if(mount()) clearInterval(t); },200);
+  setTimeout(function(){ clearInterval(t); },30000);
+})();
+</script>
 
 </body>
 </html>
