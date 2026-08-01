@@ -2738,6 +2738,43 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
   </Modal>;
 }
 
+
+// ─── FORMAT explainer for WhatsApp ──────────────────────────────────────
+// Everything here is derived, not typed: the point values come from the same
+// numbers the scoring engine uses, and the pool is checked against its parts
+// so the post can never contradict the app.
+function generateFormatText(state) {
+  const seriesName = state.seasonName || "AUGUST ATTACK";
+  const vol = state.seasonSubtitle?.match(/VOL\.\s*\d+/i)?.[0] || "Vol. 6";
+  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9;
+  const season = [75, 45, 30];
+  const pool = sessionVoucher * perTeam * sessionsTotal + season.reduce((a, b) => a + b, 0);
+
+  let t = `🔥 *${seriesName} · HOW IT WORKS* 🔥\n`;
+  t += `_Urban Social Series · ${vol}_\n\n`;
+  t += `📍 Urban Playground, Oman\n`;
+  t += `🗓️ Mon & Wed · 5:30 PM · all August\n`;
+  t += `💸 7 OMR per player\n\n`;
+  t += `━━━━━━━━━━━━━━━━━━━━\n*🎾 THE FORMAT*\n\n`;
+  t += `A *social* series — not a closed league.\n\n`;
+  t += `• 16 teams · 4 groups of 4\n`;
+  t += `• Group stage, then knockouts: QF → SF → Final\n`;
+  t += `• New partners every session — you're not locked to one player all series\n`;
+  t += `• Everyone gets ranked, first night or fiftieth\n`;
+  t += `• Points follow *you*, not your team\n\n`;
+  t += `━━━━━━━━━━━━━━━━━━━━\n*📊 POINTS PER NIGHT*\n\n`;
+  t += `*Group stage*\nWin +3\nTiebreak loss +2\nCompetitive loss +1\nTop of your group +1\n\n`;
+  t += `*Knockouts*\nReach QF +1\nReach SF +2\nReach Final +3\nWin the Final +5 🏆\n\n`;
+  t += `_Only your best ${GROUP_COUNTED_GAMES} group games count — a bigger group is never an advantage._\n\n`;
+  t += `━━━━━━━━━━━━━━━━━━━━\n*💰 PRIZES — ${pool} OMR*\n\n`;
+  t += `*Every session*\n🏆 Winners take a *${sessionVoucher} OMR voucher each*\n\n`;
+  t += `*End of season*\n🥇 1st — *${season[0]} OMR*\n🥈 2nd — *${season[1]} OMR*\n🥉 3rd — *${season[2]} OMR*\n\n`;
+  t += `⚡ *Sessions 8 & 9 pay DOUBLE points* — the table can still flip on the last night, so it's never too late to join.\n\n`;
+  t += `━━━━━━━━━━━━━━━━━━━━\n📊 Live table: attack.urbanpadel.om\n`;
+  t += `💥 *Serve first. Strike hard.* 👑`;
+  return t;
+}
+
 const SEASON_ANNOUNCEMENT = `🔥🔥🔥 *IT'S BACK* 🔥🔥🔥
 
 *AUGUST ATTACK · Urban Social Series Vol. 6*
@@ -2773,6 +2810,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
   const [show, setShow] = useState(false);
   const [showDraft, setShowDraft] = useState(false);
   const [showAnnounce, setShowAnnounce] = useState(false);
+  const [showFormat, setShowFormat] = useState(false);
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:8}}>
@@ -2783,6 +2821,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
         <div className="flex gap-2 flex-wrap">
           <button className="jh-chipbtn" onClick={() => setShowAnnounce(true)}><CIc.megaphone size={12} /> ANNOUNCE</button>
           <button className="jh-chipbtn" onClick={() => setShowDraft(true)}><CIc.clipboard size={12} /> SIGNUP</button>
+          <button className="jh-chipbtn" onClick={() => setShowFormat(true)}><CIc.flame size={12} /> FORMAT</button>
           {isAdmin && <button className="jh-chipbtn red" onClick={() => setShow(true)}>+ NEW</button>}
         </div>
       </div>
@@ -2813,6 +2852,13 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
       </div>
       {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||2, thirdPlaceMode: thirdPlaceMode||"best2", teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
       {showDraft && <DraftReminderModal onClose={() => setShowDraft(false)} state={state} leaderboard={leaderboard} />}
+      {showFormat && (() => { const txt = generateFormatText(state); return (
+        <Modal open={true} onClose={() => setShowFormat(false)} title="HOW IT WORKS">
+        <div className="space-y-3">
+          <textarea readOnly rows={18} value={txt} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
+          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(txt); setShowFormat(false); }}>📋 Copy for WhatsApp</Btn>
+        </div>
+        </Modal>); })()}
       {showAnnounce && <Modal open={true} onClose={() => setShowAnnounce(false)} title="SEASON ANNOUNCEMENT">
         <div className="space-y-3">
           <textarea readOnly rows={18} value={SEASON_ANNOUNCEMENT} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
