@@ -261,6 +261,18 @@ animates `transform` with `both` fill lands on `transform: none` and flattens
 that tilt permanently. This is why the row entry animation is opacity-only.
 If you need a rise, guard it: `:not([style*="rotate"])`.
 
+**Never leave a transform animation *filling* on an element that can contain
+`position: fixed` children.** `animation-fill-mode: both/forwards` keeps the
+last keyframe applied forever, and a filling transform animation computes to
+`matrix(1,0,0,1,0,0)` even when that keyframe says `transform: none`. Any
+computed transform other than `none` makes the element the containing block
+for its fixed descendants — so `inset: 0` stops meaning "the viewport" and
+every modal inside it lands somewhere absurd. This shipped once: the
+tab-transition on `main > div` captured every modal in the app and pushed the
+sign-up sheet 435px above the top of the screen. Drop the fill; if you need a
+backwards fill because of a delay, put the animation on a wrapper that never
+contains fixed children.
+
 **Modals.** Never fade the container — it drags the panel's opacity down and you
 see the page through the sheet mid-rise. Put the scrim on a `::before` and keep
 the panel opaque while it travels.

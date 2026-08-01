@@ -4885,33 +4885,6 @@ function RestoreModal({ onClose }) {
 function SettingsView({ state, update, setTab, logout }) {
   const [showExp, setShowExp] = useState(false);
   const [showHist, setShowHist] = useState(false);
-  const [syncing, setSyncing] = useState(false);
-  const [syncMsg, setSyncMsg] = useState(null);
-
-  const syncJuneFury = async () => {
-    setSyncing(true); setSyncMsg(null);
-    try {
-      const r = await fetch("/jf-leaderboard");
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.error || "Failed");
-      const map = {};
-      d.standings.forEach(e => { if (e.pts > 0) map[e.id] = e.pts; });
-      let matched = 0;
-      update(s => ({
-        ...s,
-        players: s.players.map(p => {
-          const pts = map[p.id];
-          if (pts === undefined) return p;
-          matched++;
-          return { ...p, prevSeriesPts: { ...(p.prevSeriesPts || {}), "June Fury": pts } };
-        })
-      }));
-      setSyncMsg(`✓ Synced ${Object.keys(map).length} June Fury players`);
-    } catch (e) {
-      setSyncMsg("Error: " + e.message);
-    }
-    setSyncing(false);
-  };
 
   return (
     <div className="space-y-4">
@@ -4951,14 +4924,6 @@ function SettingsView({ state, update, setTab, logout }) {
           ))}
         </div>
         <Btn size="sm" variant="secondary" onClick={() => update(s => ({ ...s, prevSeriesNames: [...(s.prevSeriesNames || []), "New Series"] }))}><I.plus size={12} /> Add Series</Btn>
-      </Card>
-      <Card className="p-4">
-        <h3 className="font-display text-lg text-stone-200 mb-3">SYNC</h3>
-        <div className="text-xs text-stone-500 mb-3">Pull final June Fury standings into each player's all-time points. Safe to run multiple times — overwrites the "June Fury" entry.</div>
-        <Btn variant="secondary" className="w-full" onClick={syncJuneFury} disabled={syncing}>
-          {syncing ? "Syncing…" : "⚡ Sync June Fury Points"}
-        </Btn>
-        {syncMsg && <div className={`text-xs mt-2 font-semibold ${syncMsg.startsWith("Error") ? "text-red-400" : "text-emerald-400"}`}>{syncMsg}</div>}
       </Card>
       <Card className="p-4">
         <h3 className="font-display text-lg text-stone-200 mb-3">PUBLIC LINK</h3>
