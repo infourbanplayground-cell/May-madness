@@ -5901,6 +5901,66 @@ html:not(.light) nav.fixed.bottom-0 .grid > a{
   nav.fixed.bottom-0 .aa-ind{ transition:none !important; }
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   AUGUST ATTACK · BOOT SEQUENCE
+   The beats from the launch film, brought into the app — but
+   only on the FIRST paint of a page load. <html> carries .aa-boot
+   for the length of the timeline and then loses it, so none of
+   this replays on a tab switch. Same rule as before: rare enough
+   to be loud, never on something pressed fifty times a day.
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1 · SPLASH — the mark glitches in, then breathes as it always did */
+.splash .splash-logo{ animation:aaBootMark 720ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes aaBootMark{
+  0%{opacity:0;transform:translateX(-24px) skewX(7deg) scale(1.06);
+     filter:drop-shadow(15px 0 rgba(255,46,67,.9)) drop-shadow(-15px 0 rgba(61,225,255,.9));
+     clip-path:inset(42% 0 42% 0)}
+  22%{opacity:1;transform:translateX(16px) skewX(-4deg) scale(1.03);clip-path:inset(0 0 58% 0)}
+  46%{transform:translateX(-9px) skewX(2deg);clip-path:inset(8% 0 0 0)}
+  68%{transform:translateX(5px);clip-path:inset(0 0 0 0);
+      filter:drop-shadow(4px 0 rgba(255,46,67,.6)) drop-shadow(-4px 0 rgba(61,225,255,.6))}
+  100%{transform:none;filter:drop-shadow(0 0 14px rgba(255,46,67,.5)) drop-shadow(0 0 34px rgba(255,46,67,.3))}
+}
+.splash .splash-chip{ animation:aaBootIn 420ms 260ms cubic-bezier(.23,1,.32,1) both; }
+
+/* 2 · HERO TAGLINE — resolves out of blur, tracking tightening as it lands */
+html.aa-boot .aa-tagline{ animation:aaBootTag 620ms 120ms cubic-bezier(.23,1,.32,1) both; }
+@keyframes aaBootTag{
+  0%{opacity:0;letter-spacing:.28em;filter:blur(6px)}
+  60%{opacity:1;letter-spacing:.05em;filter:blur(0)}
+  100%{opacity:1;letter-spacing:normal}
+}
+
+/* 3 · PRIZE PANEL — the slam. Safe to animate transform here: the panel
+   carries an inline transform:none, so landing on none changes nothing. */
+html.aa-boot .jh-panel.jh-fill-green{
+  animation:aaBootSlam 620ms 340ms cubic-bezier(.23,1,.32,1) both;
+}
+@keyframes aaBootSlam{
+  0%{opacity:0;transform:scale(.92)}
+  58%{opacity:1;transform:scale(1.018);box-shadow:0 0 90px rgba(255,46,67,.5)}
+  100%{transform:none;box-shadow:none}
+}
+/* the pool figure keeps a slow breath once it has landed */
+html.aa-boot .jh-star{ animation:aaBootGlow 2.6s 1s ease-in-out 2; }
+@keyframes aaBootGlow{
+  0%,100%{filter:drop-shadow(0 0 10px rgba(255,46,67,.45))}
+  50%{filter:drop-shadow(0 0 26px rgba(255,46,67,.9))}
+}
+
+@keyframes aaBootIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* reduced motion: the mark still fades, nothing travels or tears */
+@media (prefers-reduced-motion:reduce){
+  .splash .splash-logo,.splash .splash-chip,
+  html.aa-boot .aa-tagline,html.aa-boot .jh-panel.jh-fill-green,html.aa-boot .jh-star{
+    animation:aaBootFade 200ms ease both !important;
+  }
+  @keyframes aaBootFade{from{opacity:0}to{opacity:1}}
+}
+
 </style>
 
 <script>
@@ -5936,6 +5996,54 @@ html:not(.light) nav.fixed.bottom-0 .grid > a{
   /* the app boots behind a splash, so poll briefly until the nav exists */
   var t=setInterval(function(){ if(mount()) clearInterval(t); },200);
   setTimeout(function(){ clearInterval(t); },30000);
+})();
+</script>
+
+<script>
+/* Boot sequence driver.
+   - marks <html> for the length of the timeline only, so a tab switch
+     never replays it
+   - counts the three dashboard stat tiles up from zero, once. The numbers
+     are React-rendered, so this writes textContent and stops the moment
+     React writes something else — worst case it snaps to the real value,
+     which is what it would have shown anyway. */
+(function(){
+  var root=document.documentElement, RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  root.classList.add('aa-boot');
+  setTimeout(function(){ root.classList.remove('aa-boot'); }, 6000);
+  if (RM) return;
+
+  var done=false;
+  function countUp(el, target){
+    var t0=null, dur=900, last=null;
+    function step(ts){
+      if(!t0) t0=ts;
+      if(last!==null && el.textContent!==last) return;      // React took over
+      var k=Math.min(1,(ts-t0)/dur), e=1-Math.pow(1-k,3);   // ease-out cubic
+      last=String(Math.round(target*e));
+      el.textContent=last;
+      if(k<1) requestAnimationFrame(step); else el.textContent=String(target);
+    }
+    requestAnimationFrame(step);
+  }
+  function run(){
+    if(done) return true;
+    var grid=document.querySelector('main .grid.grid-cols-3');
+    if(!grid) return false;
+    var cells=[].slice.call(grid.children).slice(0,3), any=false;
+    cells.forEach(function(c,i){
+      var el=c.firstElementChild;
+      if(!el) return;
+      var n=parseInt(el.textContent,10);
+      if(isNaN(n) || String(n)!==el.textContent.trim() || n<=0) return;
+      any=true; el.textContent='0';
+      setTimeout(function(){ countUp(el,n); }, 420 + i*90);
+    });
+    done=true;
+    return any || true;
+  }
+  var t=setInterval(function(){ if(run()) clearInterval(t); }, 200);
+  setTimeout(function(){ clearInterval(t); }, 12000);
 })();
 </script>
 
