@@ -62,7 +62,7 @@ These are aliased for backwards compatibility with the July Heat markup:
 
 ```css
 --orange:    #FF2E43   /* not orange */
---orange-br: #FF2E43   /* the active-nav sentinel — see §5 */
+--orange-br: #FF2E43   /* the active-nav sentinel — see §6 */
 --gold:      #3DE1FF   /* not gold */
 --yellow:    #3DE1FF   /* not yellow */
 --blue:      #3DE1FF
@@ -109,7 +109,76 @@ no ticks. Ticks are for cards only, or the page turns into noise.
 
 ---
 
-## 3. Motion system
+## 3. Brand assets
+
+Served from `/assets/` on every host (`/var/www/<host>/public/assets/`).
+Not in the repo — the server is the only copy, so back up before overwriting.
+
+| File | Size | What it is | Notes |
+|---|---|---|---|
+| `aa-emblem.png` | 432×583, RGBA | Urban Playground neon emblem | The August-era mark. Identical on all hosts |
+| `aa-wordmark.png` | 728×278 (attack) / 610×254 (elsewhere) | AUGUST ATTACK lockup | **Two different files under one name** — see below |
+| `up-logo.png` | 940×788, RGBA | Original Urban Playground logo | **Overwritten on `attack` with the emblem** — see below |
+| `up-logo-new.png` | 940×788, RGBA | Same as `up-logo.png` elsewhere | Consistent across hosts |
+| `july-heat-logo.png` | 500×621, palette, **no alpha** | July Heat mark | Palette PNG — will show a box on non-white backgrounds |
+| `july-heat-logo-black.png` | — | Dark-background variant | |
+| `jh-watermark.png` | — | July Heat photo-frame watermark | **Also overwritten on `attack`** |
+| `june-fury-lockup.png` | — | Vol.4 lockup | Legacy |
+| `sig-logo.png` / `sig-logo-dark.png` | 108×170 | Signature mark | Light / dark pair. Not referenced by the August app |
+| `aa-burst.svg` | 8KB | Attack burst motif | On `attack` only. **Currently unreferenced** |
+
+### Same filename, different image per host
+
+Verified by checksum:
+
+| File | `attack` | `heat` / `urbanpadel.om` |
+|---|---|---|
+| `up-logo.png` | `61261c02` (the AA emblem) | `da50f2fa` (real UP logo) |
+| `jh-watermark.png` | `61261c02` (the AA emblem) | `7682c92c` (July Heat mark) |
+| `aa-wordmark.png` | `28666b9d` | `45b3b52a` (the trimmed "clean" one) |
+
+Two files on `attack` were overwritten in place with the emblem rather than
+having their references updated. It renders correctly today, which is exactly
+what makes it dangerous: **markup shared between hosts shows a different logo
+depending on where it's served.** If you copy a component from the landing page
+into the app, or the reverse, check the logo it renders — don't assume the path
+means the same thing. `assets/jh-watermark` is still referenced 4× in the August
+app and only looks right because of this overwrite.
+
+Fixing it means pointing those references at `aa-emblem.png` and restoring the
+two files. Worth doing before Vol.7 inherits the confusion.
+
+### Logos embedded in the app
+
+The August app also carries logos inline as base64, not just by URL:
+
+- `UP_LOGO_FULL` — the emblem
+- `UP_LOGO_ICON` — the emblem again
+- one inline `<img src="data:image/png;base64,…">` in the header — the emblem again
+
+All three are **byte-identical** (md5 `555a85e8`, ~316KB each): **949KB of a
+1613KB file is three copies of one image.** Collapsing them to a single constant
+would cut roughly 630KB — about 39% of the page — off every cold load. Not yet
+done; it touches JSX, so it wants its own change and its own verification.
+
+When adding a logo, prefer `/assets/` over embedding. Embedding is only worth it
+for the splash mark, which must paint before any network request resolves.
+
+### Usage rules
+
+- The emblem is the app mark; the wordmark is the series mark. Don't substitute
+  one for the other — the wordmark carries the volume identity.
+- Clear space around the emblem: at least 25% of its width on all sides.
+- Never recolour either mark. The neon glow is baked into the PNG; a CSS filter
+  will fight it.
+- On dark surfaces use `july-heat-logo-black.png` / `sig-logo-dark.png`. The
+  plain `july-heat-logo.png` has **no alpha channel** and will show a box.
+- Header lockup is emblem-only at 26px; the splash uses the wordmark at 260px
+  (`max-width: 70vw`).
+
+---
+
+## 4. Motion system
 
 Full rationale in the `emil-design-eng` skill; these are the values in the app.
 
@@ -143,7 +212,7 @@ Rules that hold:
 
 ---
 
-## 4. CSS architecture (read this before editing styles)
+## 5. CSS architecture (read this before editing styles)
 
 The app is a **single HTML file** with three `<style>` blocks, and each series
 re-skin was appended to the end rather than editing what came before. The last
@@ -174,7 +243,7 @@ The app loads React/Babel/Tailwind from CDN. To test headlessly, copy it to
 
 ---
 
-## 5. Component gotchas
+## 6. Component gotchas
 
 **Bottom nav.** React renders it; the active tab is identifiable *only* by the
 inline `color: var(--orange-br)` it carries. The travelling indicator measures
@@ -204,7 +273,7 @@ PLAYGROUND…", `jh-watermark.png`. Known debt; it needs an August Attack rewrit
 
 ---
 
-## 6. Print & social assets
+## 7. Print & social assets
 
 Built with Python + Playwright, in the session scratchpad, not committed:
 
@@ -232,7 +301,7 @@ is missing common glyphs and produces visibly uneven lettering.
 
 ---
 
-## 7. Before you ship a UI change
+## 8. Before you ship a UI change
 
 - [ ] Verified with `getComputedStyle`, not by reading source
 - [ ] Checked at 430px wide — that's the real device
