@@ -1416,14 +1416,14 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
 async function sharePhoto(dataUrl, idx) {
   try {
     const blob = await (await fetch(dataUrl)).blob();
-    const f = new File([blob], `july-heat-${idx + 1}.jpg`, { type: blob.type || "image/jpeg" });
+    const f = new File([blob], `august-attack-${idx + 1}.jpg`, { type: blob.type || "image/jpeg" });
     if (navigator.canShare && navigator.canShare({ files: [f] })) {
       await navigator.share({ files: [f], title: "August Attack" });
       return;
     }
   } catch (e) { if (e && e.name === "AbortError") return; }
   const a = document.createElement("a");
-  a.href = dataUrl; a.download = `july-heat-${idx + 1}.jpg`;
+  a.href = dataUrl; a.download = `august-attack-${idx + 1}.jpg`;
   document.body.appendChild(a); a.click(); a.remove();
 }
 function generatePlayerCard(entry, state) {
@@ -1447,7 +1447,7 @@ function generatePlayerCard(entry, state) {
   if (entry.stats.finalsReached - entry.stats.finalsWon > 0) txt += `🥈 Finalist ×${entry.stats.finalsReached - entry.stats.finalsWon}\n`;
   if (entry.stats.sfReached > 0) txt += `⚔️ Semifinalist ×${entry.stats.sfReached}\n`;
   if (badges.length > 0) { txt += `\n🎖 Badges: ${badges.map(b => b.icon+" "+b.label).join(" · ")}\n`; }
-  txt += `\n🎾 heat.urbanpadel.om`;
+  txt += `\n🎾 attack.urbanpadel.om`;
   return txt;
 }
 
@@ -1891,7 +1891,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
               })}
             </div>
         }
-        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">heat.urbanpadel.om · Urban Playground Oman</div>
+        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">attack.urbanpadel.om · Urban Playground Oman</div>
       </div>
     </div>
   );
@@ -1925,7 +1925,7 @@ function PublicPhotosPage({ state }) {
             </div>
           ))
         }
-        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">heat.urbanpadel.om/?photos · Urban Playground Oman</div>
+        <div className="text-center mt-8 text-xs text-stone-600 uppercase tracking-widest">attack.urbanpadel.om/?photos · Urban Playground Oman</div>
       </div>
     </div>
   );
@@ -2741,38 +2741,33 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
 const SEASON_ANNOUNCEMENT = `🔥🔥🔥 *IT'S BACK* 🔥🔥🔥
 
 *AUGUST ATTACK · Urban Social Series Vol. 6*
-_The heat is ON — and so are the points_ ☀️
+_Serve first. Strike hard._ ⚡
 
-After the dust settled on June Fury, we're kicking off a brand new season — bigger nights, bigger drama, and the same relentless competition you love 🏆
+July Heat is done and dusted — new season, new partners, new rivalries 🏆
 
 ━━━━━━━━━━━━━━━━━━━━
-📅 *FIRST SESSION*
-*This Thursday* — mark it, block it, don't miss it
-
+📅 *MON & WED · 5:30 PM · ALL AUGUST*
 📍 Urban Playground, Oman
-🕠 5:30 PM
 💸 7 OMR per player
 ━━━━━━━━━━━━━━━━━━━━
 
-📆 *Schedule:* Back to *Monday & Wednesday* from next week
 🗓️ 9 sessions total · Sessions 8 & 9 pay *DOUBLE POINTS* 🔥
 💰 *402 OMR prize pool* up for grabs
 
 ━━━━━━━━━━━━━━━━━━━━
-New season. New partners. New rivalries.
-Your *June Fury* points carry over — but the throne is wide open 👑
+Your *July Heat* points carry over — but the throne is wide open 👑
 
-🏆 *June Fury final standings:*
+🏆 *July Heat final standings:*
 heat.urbanpadel.om → Leaderboard
 
 📊 *August Attack live tracker:*
-https://heat.urbanpadel.om
+https://attack.urbanpadel.om
 ━━━━━━━━━━━━━━━━━━━━
 
 Drop your name + partner below to lock your spot 👇
 
 ⚠️ *16 teams max · first come, first served*
-💥 *Feel the Heat — secure your spot* 👑`;
+💥 *Serve first. Strike hard.* 👑`;
 
 function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab }) {
   const [show, setShow] = useState(false);
@@ -2780,12 +2775,12 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
   const [showAnnounce, setShowAnnounce] = useState(false);
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between" style={{paddingTop:8}}>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:8}}>
+        <div className="flex items-center gap-2 min-w-0">
           <button onClick={() => setTab("dashboard")} aria-label="Back to Home" style={{ width:36, height:36, display:"grid", placeItems:"center", background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,246,250,.14)", boxShadow:"none", flexShrink:0 }}><I.back size={17} style={{color:"#F4F6FA"}} /></button>
           <div className="aa-kicker" style={{margin:0}}>SESSIONS</div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <button className="jh-chipbtn" onClick={() => setShowAnnounce(true)}><CIc.megaphone size={12} /> ANNOUNCE</button>
           <button className="jh-chipbtn" onClick={() => setShowDraft(true)}><CIc.clipboard size={12} /> SIGNUP</button>
           {isAdmin && <button className="jh-chipbtn red" onClick={() => setShow(true)}>+ NEW</button>}
@@ -3033,7 +3028,7 @@ function generateReminderText(session, state, leaderboard) {
   text += `\n⏳ Waitlist\n`;
   waitlist.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
   text += `\n⚠️ *16 teams max* · first come, first served\n`;
-  text += `💥 *Feel the Heat — secure your spot* 👑`;
+  text += `💥 *Serve first. Strike hard.* 👑`;
   return text;
 }
 
@@ -3089,7 +3084,7 @@ function generateSessionShareText(session, state, leaderboard) {
   if (seriesLeader) {
     text += `📈 *Series Leader:* ${seriesLeader.player.name} (${seriesLeader.totalPts} pts)\n`;
   }
-  text += `\n🎾 *heat.urbanpadel.om*`;
+  text += `\n🎾 *attack.urbanpadel.om*`;
   return text;
 }
 
@@ -3366,7 +3361,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
             </button>
           </div>
           {session.doublePoints && <Btn variant="secondary" className="w-full" onClick={() => {
-            const txt = `🔥⚡ *SURPRISE ALERT* ⚡🔥\n\nTONIGHT is a *DOUBLE POINTS* session!\n2× everything — group wins, KOs, streak, all of it.\n\n📅 ${session.name}${session.date ? " · " + new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" }) : ""}\n📍 Urban Playground\n\nDon't miss this one 👀\n🎾 heat.urbanpadel.om`;
+            const txt = `🔥⚡ *SURPRISE ALERT* ⚡🔥\n\nTONIGHT is a *DOUBLE POINTS* session!\n2× everything — group wins, KOs, streak, all of it.\n\n📅 ${session.name}${session.date ? " · " + new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" }) : ""}\n📍 Urban Playground\n\nDon't miss this one 👀\n🎾 attack.urbanpadel.om`;
             navigator.clipboard?.writeText(txt);
           }}>📣 Copy 2X Announcement</Btn>}
           <Btn variant="danger" className="w-full" onClick={() => setShowDel(true)}><I.trash size={14} /> Delete Session</Btn>
@@ -3637,7 +3632,7 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
               const p2 = state.players.find(p => p.id === t.p2Id);
               const seed = getSeedNum(t.id);
               return <button key={t.id} onClick={() => isAdmin && setEdit(t)} className="w-full flex items-center gap-2 p-2 rounded-lg bg-stone-900/50 hover:bg-stone-800/70 text-left">
-                {seed ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0" style={{ background: seed <= 4 ? "#FF2E43" : "rgba(19,19,19,.12)", color: seed <= 4 ? "#F4F6FA" : "rgba(19,19,19,.6)", border: "1px solid rgba(244,246,250,.14)", borderRadius: 0 }}>S{seed}</span> : null}
+                {seed ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0 text-center" style={{ background: seed <= 4 ? "#FF2E43" : "rgba(244,246,250,.08)", color: seed <= 4 ? "#F4F6FA" : "#8B95A7", border: "1px solid rgba(244,246,250,.14)", borderRadius: 0, minWidth: 28 }}>S{seed}</span> : <span className="shrink-0" style={{ width: 28 }} aria-hidden="true" />}
                 <div className="flex-1 min-w-0"><div className="text-sm text-stone-100 truncate">{p1?.name || "?"} & {p2?.name || "?"}</div></div>
                 {isAdmin && <I.edit size={12} className="text-stone-500" />}
               </button>;
@@ -5959,6 +5954,40 @@ html.aa-boot .jh-star{ animation:aaBootGlow 2.6s 1s ease-in-out 2; }
     animation:aaBootFade 200ms ease both !important;
   }
   @keyframes aaBootFade{from{opacity:0}to{opacity:1}}
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   SESSION DETAIL · LAYOUT FIXES
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1 · The tab strip was a horizontal scroller with no affordance, so it
+   clipped mid-word ("L…" for List) and Photos / MVP were simply invisible
+   — there was nothing to tell you they existed. On a 430px screen there
+   is room to wrap, so every tab is reachable without a hidden gesture. */
+.fixed.inset-0.z-40 .sticky > .max-w-3xl.flex.gap-2.overflow-x-auto{
+  flex-wrap:wrap !important;
+  overflow-x:visible !important;
+  row-gap:6px !important;
+}
+.fixed.inset-0.z-40 .sticky > .max-w-3xl.flex button{
+  padding-left:10px !important;padding-right:10px !important;
+}
+
+/* 2 · Team rows are list items, not cards, so they must not carry the
+   corner-tick treatment (DESIGN.md §2: "ticks are for cards only").
+   They were picking it up because the rule keys off bg-stone-9* and these
+   rows are bg-stone-900/50 — the ticks then landed on top of the seed
+   badge and the name. */
+html:not(.light) .space-y-1 > button[class*="bg-stone-9"],
+html:not(.light) .space-y-1\.5 > button[class*="bg-stone-9"],
+html:not(.light) .space-y-2 > button[class*="bg-stone-9"]{
+  background-image:none !important;
+  background-color:rgba(255,255,255,.028) !important;
+  border-bottom:1px solid rgba(244,246,250,.07) !important;
+}
+html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
+  background-color:rgba(255,46,67,.06) !important;
 }
 
 </style>
