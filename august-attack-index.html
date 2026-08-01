@@ -5816,7 +5816,7 @@ nav.fixed .grid > button:active svg,nav.fixed .grid > a:active svg{ transform:sc
 /* switching tabs is the single most-repeated transition in the
    app, so it gets the shortest, quietest treatment that still
    reads as a change: 190ms, 6px, no glitch. */
-main > div{ animation:aaViewIn 190ms var(--ease-out) both; }
+main > div{ animation:aaViewIn 190ms var(--ease-out); }
 @keyframes aaViewIn{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
 /* ── C · ROWS CASCADE ─────────────────────────────────────── */
@@ -5848,7 +5848,7 @@ main > div{ animation:aaViewIn 190ms var(--ease-out) both; }
 /* session + player detail cover the whole screen. Sliding them
    up from the edge they were opened toward makes the back
    button feel like a reversal rather than a teleport. */
-.fixed.inset-0.z-40{ animation:aaSheetIn 300ms var(--ease-drawer) both; }
+.fixed.inset-0.z-40{ animation:aaSheetIn 300ms var(--ease-drawer); }
 @keyframes aaSheetIn{ from{transform:translateY(100%)} to{transform:none} }
 
 /* ── E · MODAL: backdrop fades, sheet rises ───────────────── */
@@ -5862,7 +5862,7 @@ main > div{ animation:aaViewIn 190ms var(--ease-out) both; }
 }
 /* on phones this stack is bottom-anchored, so it travels its own
    height; from sm: up it's centred and just settles 10px. */
-.fixed.inset-0.z-50 > div{ animation:aaSheetUp 300ms var(--ease-drawer) both; }
+.fixed.inset-0.z-50 > div{ animation:aaSheetUp 300ms var(--ease-drawer); }
 @keyframes aaSheetUp{ from{transform:translateY(100%)} to{transform:none} }
 @media (min-width:640px){
   @keyframes aaSheetUp{ from{opacity:0;transform:translateY(10px) scale(.98)} to{opacity:1;transform:none} }
@@ -5931,7 +5931,7 @@ html.aa-boot .aa-tagline{ animation:aaBootTag 620ms 120ms cubic-bezier(.23,1,.32
 /* 3 · PRIZE PANEL — the slam. Safe to animate transform here: the panel
    carries an inline transform:none, so landing on none changes nothing. */
 html.aa-boot .jh-panel.jh-fill-green{
-  animation:aaBootSlam 620ms 340ms cubic-bezier(.23,1,.32,1) both;
+  animation:aaBootSlam 620ms 340ms cubic-bezier(.23,1,.32,1);
 }
 @keyframes aaBootSlam{
   0%{opacity:0;transform:scale(.92)}
@@ -5973,6 +5973,12 @@ html.aa-boot .jh-star{ animation:aaBootGlow 2.6s 1s ease-in-out 2; }
 .fixed.inset-0.z-40 .sticky > .max-w-3xl.flex button{
   padding-left:10px !important;padding-right:10px !important;
 }
+
+/* Modals render as siblings inside `space-y-4`, so Tailwind's
+   `> * + * { margin-top:1rem }` was pushing the full-screen overlay down 16px
+   and its bottom edge off-screen by the same amount. A fixed inset-0 overlay
+   should never carry a margin. */
+.fixed.inset-0{ margin:0 !important; }
 
 /* 2 · Team rows are list items, not cards, so they must not carry the
    corner-tick treatment (DESIGN.md §2: "ticks are for cards only").
