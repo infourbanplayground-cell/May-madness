@@ -121,6 +121,11 @@ ssh urbanpadel 'nginx -t && systemctl reload nginx'
 - SMTP: `mail.urbanpadel.om:465` (SSL) or `:587` (STARTTLS)
 - Logs: `ssh urbanpadel 'tail -20 /var/log/mail.log'`
 
+## Design
+
+Anything touching how the apps look or move — palette, type, motion, print
+assets — is in **`DESIGN.md`**. Read it before editing UI.
+
 ## Rules
 
 - Never copy `.env` files off the server
