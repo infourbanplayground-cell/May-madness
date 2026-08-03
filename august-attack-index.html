@@ -1193,148 +1193,103 @@ function resizePhotoToBase64(file, maxW = 900) {
 }
 
 // ── Photo Wall: watermark every upload with the August Attack logo ──
-let _jhWatermarkImg = null;
+let _aaEmblemImg = null;
 function loadJHWatermark() {
-  if (_jhWatermarkImg) return Promise.resolve(_jhWatermarkImg);
+  if (_aaEmblemImg) return Promise.resolve(_aaEmblemImg);
   return new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => { _jhWatermarkImg = img; resolve(img); };
+    img.onload = () => { _aaEmblemImg = img; resolve(img); };
     img.onerror = () => resolve(null);
-    img.src = "assets/jh-watermark.png";
+    img.src = "assets/aa-emblem.png";
   });
 }
-function drawComicPhotoFrame(ctx, img, w, h, wm) {
+function drawAttackPhotoFrame(ctx, img, w, h, wm) {
+  // August Attack photo frame. Replaces the July Heat comic frame (aged
+  // paper, sunburst rays, halftone vignette, "MEANWHILE, AT URBAN
+  // PLAYGROUND...", a SNAP! burst) which had been recoloured but never
+  // redrawn — and which still stamped HEAT.URBANPADEL.OM on every share.
+  //
+  // Wall photos arrive via watermarkPhotoToBase64 at up to 1080px (the 200px
+  // cap in resizeToBase64 is the avatar path, not this one), so the frame is
+  // sized in units of min(w,h)/1080 and holds at full resolution.
   const s = Math.min(w, h) / 1080;
-  const ink = "#0A0C12", yellow = "#3DE1FF", cream = "#F4F6FA", red = "#FF2E43";
+  const ink = "#0A0C12", ice = "#3DE1FF", chalk = "#F4F6FA", red = "#FF2E43";
+  const pad = 26 * s;
 
-  // ── aged paper background ──
-  ctx.fillStyle = "#0A0C12";
+  // ── court black base + faint tactical grid ──
+  ctx.fillStyle = "#06070B";
   ctx.fillRect(0, 0, w, h);
-  // subtle rays from center
-  const cx = w / 2, cy = h / 2, R = Math.sqrt(w * w + h * h);
-  for (let i = 0; i < 36; i++) {
-    if (i % 2) continue;
-    const a1 = (i / 36) * Math.PI * 2, a2 = ((i + 1) / 36) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, R, a1, a2);
-    ctx.closePath();
-    ctx.fillStyle = "rgba(19,19,19,.045)";
-    ctx.fill();
-  }
-  // print dot grid
-  ctx.fillStyle = "rgba(0,0,0,.07)";
-  const stepD = 12 * s;
-  for (let y = 0; y < h; y += stepD)
-    for (let x = (y / stepD % 2) * stepD / 2; x < w; x += stepD) {
-      ctx.beginPath(); ctx.arc(x, y, 1.7 * s, 0, 7); ctx.fill();
-    }
-
-  // ── photo as tilted comic panel ──
-  const pad = 64 * s;
-  const pw = w - 2 * pad, ph = h - 2 * pad;
-  const rot = -1.4 * Math.PI / 180;
   ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(rot);
-  // offset shadow
-  ctx.fillStyle = "rgba(19,19,19,.9)";
-  ctx.fillRect(-pw / 2 + 14 * s, -ph / 2 + 14 * s, pw, ph);
-  // photo
-  ctx.drawImage(img, -pw / 2, -ph / 2, pw, ph);
-  // halftone vignette on photo corners
-  ctx.save();
-  ctx.beginPath(); ctx.rect(-pw / 2, -ph / 2, pw, ph); ctx.clip();
-  ctx.fillStyle = "rgba(19,19,19,.5)";
-  const dS = 10 * s, reach = 150 * s;
-  for (let yy = -ph / 2; yy < ph / 2; yy += dS)
-    for (let xx = -pw / 2; xx < pw / 2; xx += dS) {
-      const dx = Math.min(xx + pw / 2, pw / 2 - xx), dy = Math.min(yy + ph / 2, ph / 2 - yy);
-      const d = Math.min(dx, dy);
-      if (d > reach) continue;
-      const r = 2.6 * s * (1 - d / reach);
-      if (r < .4) continue;
-      ctx.beginPath(); ctx.arc(xx, yy, r, 0, 7); ctx.fill();
-    }
-  ctx.restore();
-  // ink border
-  ctx.lineWidth = 9 * s; ctx.strokeStyle = ink;
-  ctx.strokeRect(-pw / 2, -ph / 2, pw, ph);
+  ctx.strokeStyle = "rgba(255,46,67,.07)";
+  ctx.lineWidth = Math.max(1, 1 * s);
+  const cell = 46 * s * 2;
+  for (let x = 0; x < w; x += cell) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let y = 0; y < h; y += cell) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
   ctx.restore();
 
-  ctx.textBaseline = "middle"; ctx.textAlign = "center";
-
-  // ── narration box (top-left, overlapping panel edge) ──
-  const nLabel = "MEANWHILE, AT URBAN PLAYGROUND...";
-  ctx.font = `${23 * s}px 'Anton', Impact, sans-serif`;
-  const ntw = ctx.measureText(nLabel).width;
-  const nw2 = ntw + 32 * s, nh2 = 44 * s;
-  const nx = pad - 20 * s, ny = pad - 22 * s;
+  // ── the photo, cover-fitted into the frame window ──
+  const barH = 92 * s;                       // bottom plate
+  const iw = w - pad * 2, ih = h - pad * 2 - barH;
+  const scale = Math.max(iw / img.width, ih / img.height);
+  const dw = img.width * scale, dh = img.height * scale;
   ctx.save();
-  ctx.translate(nx + nw2 / 2, ny + nh2 / 2);
-  ctx.rotate(-1.2 * Math.PI / 180);
-  ctx.fillStyle = "rgba(0,0,0,.6)"; ctx.fillRect(-nw2 / 2 + 5 * s, -nh2 / 2 + 5 * s, nw2, nh2);
-  ctx.fillStyle = cream; ctx.fillRect(-nw2 / 2, -nh2 / 2, nw2, nh2);
-  ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.strokeRect(-nw2 / 2, -nh2 / 2, nw2, nh2);
-  ctx.fillStyle = ink;
-  ctx.fillText(nLabel, 0, 2 * s);
+  ctx.beginPath(); ctx.rect(pad, pad, iw, ih); ctx.clip();
+  ctx.drawImage(img, pad + (iw - dw) / 2, pad + (ih - dh) / 2, dw, dh);
+
+  // chromatic tear slices — red pulled left, cyan pushed right
+  // kept to the top and bottom eighths: slices across the middle cut straight
+  // through whoever is in the photo, and over bright areas "screen" blows
+  // them out to white, which reads as a defect rather than as styling
+  ctx.globalCompositeOperation = "screen";
+  ctx.fillStyle = "rgba(255,46,67,.26)";
+  ctx.fillRect(pad - 9 * s, pad + ih * 0.10, iw * 0.38, 7 * s);
+  ctx.fillStyle = "rgba(61,225,255,.28)";
+  ctx.fillRect(pad + iw * 0.58 + 11 * s, pad + ih * 0.88, iw * 0.42, 5 * s);
+  ctx.globalCompositeOperation = "source-over";
+
+  // scanlines
+  ctx.fillStyle = "rgba(0,0,0,.20)";
+  for (let y = pad; y < pad + ih; y += 3 * s) ctx.fillRect(pad, y, iw, Math.max(1, 1 * s));
+
+  // edge falloff so the photo sits into the plate rather than on top of it
+  const g = ctx.createLinearGradient(0, pad + ih - 120 * s, 0, pad + ih);
+  g.addColorStop(0, "rgba(6,7,11,0)"); g.addColorStop(1, "rgba(6,7,11,.78)");
+  ctx.fillStyle = g; ctx.fillRect(pad, pad + ih - 120 * s, iw, 120 * s);
   ctx.restore();
 
-  // ── logo sticker (top-right, bursting over panel corner) ──
-  if (wm) {
-    const lw = 300 * s, lh = lw * (wm.height / wm.width);
-    ctx.save();
-    ctx.translate(w - pad - 60 * s, pad + 40 * s);
-    ctx.rotate(8 * Math.PI / 180);
-    // black backdrop behind the logo for contrast against the aged-paper background
-    const bgPad = 16 * s, bgR = 14 * s;
-    ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowOffsetX = 6 * s; ctx.shadowOffsetY = 6 * s;
-    ctx.fillStyle = "#0A0A0A";
-    ctx.beginPath();
-    ctx.roundRect(-lw / 2 - bgPad, -lh / 2 - bgPad, lw + bgPad * 2, lh + bgPad * 2, bgR);
-    ctx.fill();
-    ctx.shadowColor = "transparent";
-    ctx.drawImage(wm, -lw / 2, -lh / 2, lw, lh);
-    ctx.restore();
-  }
-
-  // ── SNAP! star (bottom-left) ──
-  const starPts = [[50,0],[61,18],[82,9],[79,32],[100,38],[84,53],[98,72],[73,70],[72,95],[53,79],[33,96],[32,70],[7,71],[22,53],[4,39],[25,33],[21,9],[42,18]];
-  const sr = 170 * s, sx0 = pad + 30 * s, sy0 = h - pad - 60 * s;
-  ctx.save();
-  ctx.translate(sx0, sy0);
-  ctx.rotate(-9 * Math.PI / 180);
-  ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowOffsetX = 5 * s; ctx.shadowOffsetY = 5 * s;
-  ctx.beginPath();
-  starPts.forEach(([px, py], i) => {
-    const X = (px - 50) / 100 * sr, Y = (py - 50) / 100 * sr;
-    i === 0 ? ctx.moveTo(X, Y) : ctx.lineTo(X, Y);
-  });
-  ctx.closePath();
-  ctx.fillStyle = yellow; ctx.fill();
-  ctx.shadowColor = "transparent";
-  ctx.lineWidth = 4 * s; ctx.strokeStyle = ink; ctx.stroke();
-  ctx.font = `${34 * s}px 'Anton', Impact, sans-serif`;
-  ctx.lineWidth = 3 * s; ctx.strokeStyle = ink;
-  ctx.strokeText("SNAP!", 0, 3 * s);
+  // ── corner ticks: cyan opens top-left, red closes bottom-right ──
+  const tk = 40 * s, tw3 = 4 * s;
+  ctx.fillStyle = ice;
+  ctx.fillRect(pad, pad, tk, tw3); ctx.fillRect(pad, pad, tw3, tk);
   ctx.fillStyle = red;
-  ctx.fillText("SNAP!", 0, 3 * s);
-  ctx.restore();
+  ctx.fillRect(pad + iw - tk, pad + ih - tw3, tk, tw3);
+  ctx.fillRect(pad + iw - tw3, pad + ih - tk, tw3, tk);
 
-  // ── URL strip (bottom-right, overlapping panel edge) ──
-  const label = "HEAT.URBANPADEL.OM";
-  ctx.font = `${25 * s}px 'Anton', Impact, sans-serif`;
-  const tw = ctx.measureText(label).width;
-  const sw2 = tw + 52 * s, sh2 = 46 * s;
-  const ux = w - pad - sw2 + 24 * s, uy = h - pad - sh2 / 2;
-  ctx.save();
-  ctx.translate(ux + sw2 / 2, uy + sh2 / 2);
-  ctx.rotate(1 * Math.PI / 180);
-  ctx.fillStyle = yellow; ctx.fillRect(-sw2 / 2 - 4 * s, -sh2 / 2 - 4 * s, sw2 + 8 * s, sh2 + 8 * s);
-  ctx.fillStyle = ink; ctx.fillRect(-sw2 / 2, -sh2 / 2, sw2, sh2);
-  ctx.fillStyle = yellow;
-  ctx.fillText(label, 0, 2 * s);
-  ctx.restore();
+  // ── bottom plate: emblem, series, URL ──
+  const by = h - pad - barH;
+  ctx.fillStyle = "rgba(6,7,11,.96)";
+  ctx.fillRect(pad, by, iw, barH);
+  ctx.fillStyle = red;
+  ctx.fillRect(pad, by, iw, 3 * s);
+
+  let tx = pad + 20 * s;
+  if (wm) {                                   // emblem, left
+    const lh = barH - 30 * s, lw = (wm.width / wm.height) * lh;
+    ctx.drawImage(wm, tx, by + 15 * s, lw, lh);
+    tx += lw + 18 * s;
+  }
+  ctx.textAlign = "left"; ctx.textBaseline = "middle";
+  ctx.fillStyle = chalk;
+  ctx.font = `${30 * s}px 'Anton', Impact, sans-serif`;
+  ctx.fillText("AUGUST ATTACK", tx, by + barH / 2 - 12 * s);
+  ctx.fillStyle = "#8B95A7";
+  ctx.font = `700 ${17 * s}px 'JetBrains Mono', monospace`;
+  ctx.fillText("URBAN SOCIAL SERIES \u00B7 VOL.6", tx, by + barH / 2 + 18 * s);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = ice;
+  ctx.font = `700 ${19 * s}px 'JetBrains Mono', monospace`;
+  ctx.fillText("ATTACK.URBANPADEL.OM", w - pad - 20 * s, by + barH / 2);
 }
 
 // Uploads a resized photo to the server for Cloudinary enhancement (brightness/
@@ -1425,7 +1380,7 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
   const w = Math.round(srcImg.width * scale), h = Math.round(srcImg.height * scale);
   const canvas = document.createElement("canvas");
   canvas.width = w; canvas.height = h;
-  drawComicPhotoFrame(canvas.getContext("2d"), srcImg, w, h, wm);
+  drawAttackPhotoFrame(canvas.getContext("2d"), srcImg, w, h, wm);
   return canvas.toDataURL("image/jpeg", 0.85);
 }
 
@@ -1880,7 +1835,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
     <div className="min-h-screen" style={{ background: "none, #0A0C12" }}>
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
-          <img src="assets/jh-watermark.png" alt="August Attack" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
+          <img src="assets/aa-wordmark.png" alt="August Attack" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
           <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#FF2E43", color: "#3DE1FF", border: "1px solid rgba(244,246,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>VOL. 6 · SERIES STANDINGS</div>
         </div>
         {top.length === 0
@@ -1921,7 +1876,7 @@ function PublicPhotosPage({ state }) {
     <div className="min-h-screen" style={{ background: "none, #0A0C12" }}>
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
-          <img src="assets/jh-watermark.png" alt="August Attack" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
+          <img src="assets/aa-wordmark.png" alt="August Attack" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
           <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#FF2E43", color: "#3DE1FF", border: "1px solid rgba(244,246,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
         </div>
         {sessions.length === 0
@@ -1931,7 +1886,7 @@ function PublicPhotosPage({ state }) {
               <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 20, letterSpacing: 1, color:"#F4F6FA", background:"rgba(61,225,255,.14)", border: "1px solid rgba(244,246,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
                 {s.name.toUpperCase()}{s.date ? ` · ${new Date(s.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 aa-wall">
                 {(s.photos || []).map((src, i) => (
                   <div key={i} className="relative">
                     <img src={src} alt={`${s.name} photo ${i + 1}`} className="w-full cursor-pointer" style={{ aspectRatio: "4/3", objectFit: "cover", border: "1px solid rgba(244,246,250,.14)", boxShadow: "none" }} onClick={() => sharePhoto(src, i)} />
@@ -3380,7 +3335,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           </label>}
           {sessionPhotos.length === 0
             ? <div className="text-center text-stone-500 py-12">{isAdmin ? "No photos yet — tap to add some from tonight" : "No photos yet"}</div>
-            : <div className="grid grid-cols-2 gap-2">
+            : <div className="grid grid-cols-2 gap-2 aa-wall">
                 {sessionPhotos.map((src, i) => (
                   <div key={i} className="relative group">
                     <img src={src} alt={`Photo ${i+1}`} className="w-full rounded-lg object-cover cursor-pointer" style={{ aspectRatio: "4/3" }} onClick={() => sharePhoto(src, i)} />
@@ -6065,6 +6020,46 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
 @media (prefers-reduced-motion:reduce){
   .aa-toast{transition:opacity 140ms ease;transform:none}
   .aa-toast.in{transform:none}
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   PHOTO WALL
+   The tiles were plain hairline-bordered images on a dark page —
+   the one surface in the app with no treatment at all. They now
+   carry the same marks as the shared frame, so a photo on the wall
+   and the same photo in WhatsApp read as one system.
+   ═══════════════════════════════════════════════════════════ */
+.aa-wall{ gap:10px !important; }
+.aa-wall > div{
+  position:relative;
+  background:#06070B;
+  /* corner ticks: cyan opens, red closes — same grammar as the cards */
+  background-image:
+    linear-gradient(#3DE1FF,#3DE1FF), linear-gradient(#3DE1FF,#3DE1FF),
+    linear-gradient(#FF2E43,#FF2E43), linear-gradient(#FF2E43,#FF2E43);
+  background-size:18px 3px, 3px 18px, 18px 3px, 3px 18px;
+  background-position:0 0, 0 0, 100% 100%, 100% 100%;
+  background-repeat:no-repeat;
+  padding:5px;
+  transition:transform 160ms var(--ease-out);
+}
+.aa-wall > div:active{ transform:scale(.985); }
+.aa-wall img{
+  display:block;width:100%;border:none !important;
+  filter:saturate(1.06) contrast(1.04);
+}
+/* scanlines + a red/cyan edge, drawn over the image only */
+.aa-wall > div::after{
+  content:"";position:absolute;inset:5px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.20) 0 1px,transparent 1px 3px);
+  box-shadow:inset 3px 0 0 rgba(255,46,67,.85), inset -3px 0 0 rgba(61,225,255,.7);
+}
+@media (hover:hover){
+  .aa-wall > div:hover{ transform:translateY(-2px); }
+}
+@media (prefers-reduced-motion:reduce){
+  .aa-wall > div,.aa-wall > div:hover{ transition:none;transform:none }
 }
 
 </style>

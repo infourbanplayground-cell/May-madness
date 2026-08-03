@@ -277,8 +277,11 @@ contains fixed children.
 see the page through the sheet mid-rise. Put the scrim on a `::before` and keep
 the panel opaque while it travels.
 
-**Photo pipeline is capped at 200×200** (`resizeToBase64(file, size = 200)`).
-Don't design frames that need more resolution than that.
+**Two photo pipelines, two very different caps.** Player avatars go through
+`resizeToBase64(file, size = 200)` — 200px, so avatar treatments must survive
+that. Session/wall photos go through `resizePhotoToBase64` (900px) and
+`watermarkPhotoToBase64` (1080px, server-enhanced up to 1600px). Don't design
+for 200px on the wall; that cap belongs to avatars only.
 
 **`drawComicPhotoFrame` is still July Heat** — halftone, "MEANWHILE, AT URBAN
 PLAYGROUND…", `jh-watermark.png`. Known debt; it needs an August Attack rewrite.
