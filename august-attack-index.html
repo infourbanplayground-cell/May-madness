@@ -34,7 +34,7 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-<meta name="theme-color" content="#3DE1FF" />
+<meta name="theme-color" content="#0A0C12" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -42,6 +42,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="August Attack" />
 <title>AUGUST ATTACK · Urban Playground</title>
+<meta name="description" content="August Attack — Vol.6 of the Urban Social Series. Social padel in Oman, Mon &amp; Wed 5:30 PM all August. New partners every session, everyone ranked, 402 OMR prize pool." />
+
+<!-- Link preview. WhatsApp is how this gets shared, and without these it
+     pasted as a bare grey link with no image and no context. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Urban Playground" />
+<meta property="og:title" content="AUGUST ATTACK · Urban Social Series Vol.6" />
+<meta property="og:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all August. New partners every session, everyone ranked, 402 OMR prize pool." />
+<meta property="og:url" content="https://attack.urbanpadel.om/" />
+<meta property="og:image" content="https://attack.urbanpadel.om/assets/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="August Attack — Serve first. Strike hard." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="AUGUST ATTACK · Urban Social Series Vol.6" />
+<meta name="twitter:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all August. 402 OMR prize pool." />
+<meta name="twitter:image" content="https://attack.urbanpadel.om/assets/og-cover.png" />
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FF6B7A'/%3E%3Cstop offset='50%25' style='stop-color:%23FF2E43'/%3E%3Cstop offset='100%25' style='stop-color:%23B3121F'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 10 C 35 25 30 40 35 55 C 38 65 30 70 28 75 C 35 70 45 75 50 90 C 55 75 65 70 72 75 C 70 70 62 65 65 55 C 70 40 65 25 50 10 Z' fill='url(%23g)'/%3E%3C/svg%3E" />
 
@@ -1956,7 +1973,10 @@ function App() {
     const root = document.documentElement;
     if (theme === "light") root.classList.add("light"); else root.classList.remove("light");
     localStorage.setItem("jh-theme", theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#3DE1FF");
+    // this paints the browser/OS chrome around the app. It was pinned to cyan
+    // regardless of theme — wrong in both modes, and cyan is the support
+    // colour here, not the brand one.
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#F4F6FA" : "#0A0C12");
   }, [theme]);
 
   // Secret sign-in: tap brand logo 5× within 2.5s
@@ -3320,12 +3340,12 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
         {tab === "teams" && <TeamsTab session={session} state={state} updateSession={updateSession} update={update} isAdmin={isAdmin} leaderboard={leaderboard || []} />}
-        {tab === "signups" && <SignupsTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} onRemind={() => { navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard||[])); alert("Copied! Paste in WhatsApp."); }} />}
+        {tab === "signups" && <SignupsTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} onRemind={() => { navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard||[])); alert("Copied — paste it in WhatsApp."); }} />}
         {tab === "groups" && <GroupsTab session={session} state={state} updateSession={updateSession} isAdmin={canScore} />}
         {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "mvp" && <MvpVoteTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}
         {tab === "photos" && <div className="space-y-4">
-          <button onClick={() => { navigator.clipboard?.writeText(location.origin + "/?photos"); alert("Photo Wall link copied! Paste in WhatsApp."); }} className="jh-chipbtn" style={{width:"100%",justifyContent:"center"}}><CIc.share size={13} /> Copy Photo Wall Link</button>
+          <button onClick={() => { navigator.clipboard?.writeText(location.origin + "/?photos"); alert("Photo Wall link copied — paste it in WhatsApp."); }} className="jh-chipbtn" style={{width:"100%",justifyContent:"center"}}><CIc.share size={13} /> Copy Photo Wall Link</button>
           {canUploadPhotos && <label className={`flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-stone-700 rounded-xl cursor-pointer text-stone-400 hover:border-orange-500 hover:text-orange-400 transition-colors ${uploadingPhoto ? "opacity-50 pointer-events-none" : ""}`}>
             {uploadingPhoto ? "Uploading…" : <><CIc.camera size={14} /> Add Photo</>}
             <input type="file" accept="image/*" multiple className="hidden" onChange={async (e) => {
@@ -4874,7 +4894,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
       <Btn variant="secondary" className="w-full" onClick={() => {
         const txt = generatePlayerCard(entry, state);
         navigator.clipboard?.writeText(txt);
-        alert("Player card copied! Paste it in WhatsApp.");
+        alert("Player card copied — paste it in WhatsApp.");
       }}>📜 Copy My Player Card</Btn>
     </div>
   </Modal>;
@@ -4903,7 +4923,7 @@ function RestoreModal({ onClose }) {
         body: JSON.stringify({ id: v.id }),
       });
       const d = await r.json();
-      if (d.ok) { alert("Restored ✓ — reloading."); location.reload(); }
+      if (d.ok) { alert("Restored — reloading."); setTimeout(() => location.reload(), 1100); }
       else { setErr(d.error || "Restore failed"); setBusy(false); }
     } catch (e) { setErr("Restore failed"); setBusy(false); }
   };
@@ -6010,6 +6030,43 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
   background-color:rgba(255,46,67,.06) !important;
 }
 
+
+/* ═══════════════════════════════════════════════════════════
+   TASTE PASS
+   ═══════════════════════════════════════════════════════════ */
+
+/* 1 · Tabular figures. This is a scoreboard: points, W/P/GD and rank
+   columns sit under each other, and proportional digits make them shuffle
+   left and right as scores change. Tabular numerals lock the column. */
+.font-mono,.jh-lbrow,.jh-srow,.jh-mock-row,.jh-mock-sess,.jh-chip .jc-val,
+.jh-rank,.jh-lbpts,table,.grid > div{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+
+/* 2 · Branded toasts instead of the OS alert box.
+   window.alert renders an unstyled system dialog stamped with the domain
+   name, blocks the whole page, and looks nothing like the app. The shim
+   below reroutes all 20 call sites into this without touching any of them. */
+#aa-toast-host{
+  position:fixed;left:0;right:0;bottom:calc(74px + env(safe-area-inset-bottom,0px));
+  z-index:60;display:flex;flex-direction:column;align-items:center;gap:8px;
+  pointer-events:none;padding:0 16px;
+}
+.aa-toast{
+  max-width:min(92vw,430px);background:#06070B;color:#F4F6FA;
+  box-shadow:inset 3px 0 0 #FF2E43, 0 10px 34px rgba(0,0,0,.62), 0 0 0 1px rgba(255,46,67,.28);
+  padding:13px 16px 12px;font-family:'Archivo',sans-serif;font-weight:600;
+  font-size:14px;line-height:1.45;letter-spacing:.01em;white-space:pre-line;
+  opacity:0;transform:translateY(12px) scale(.98);
+  transition:opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.aa-toast.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .aa-toast{transition:opacity 140ms ease;transform:none}
+  .aa-toast.in{transform:none}
+}
+
 </style>
 
 <script>
@@ -6093,6 +6150,36 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
   }
   var t=setInterval(function(){ if(run()) clearInterval(t); }, 200);
   setTimeout(function(){ clearInterval(t); }, 12000);
+})();
+</script>
+
+<script>
+/* Branded toast in place of window.alert.
+   Shimming the global rather than editing 20 call sites keeps this a single
+   reviewable change and means anything added later gets it for free.
+   Caveat handled at the one place that mattered: the restore flow used to
+   rely on alert() blocking before location.reload(), so that call site now
+   delays its reload instead. confirm() is deliberately untouched — it needs
+   to block, and a toast cannot answer a question. */
+(function(){
+  var host=null, native=window.alert.bind(window);
+  function show(msg){
+    try{
+      if(!host){ host=document.createElement('div'); host.id='aa-toast-host';
+                 document.body.appendChild(host); }
+      var t=document.createElement('div');
+      t.className='aa-toast'; t.setAttribute('role','status');
+      t.setAttribute('aria-live','polite'); t.textContent=String(msg);
+      host.appendChild(t);
+      requestAnimationFrame(function(){ t.classList.add('in'); });
+      var life=Math.min(7000, 2600 + String(msg).length*28);
+      setTimeout(function(){
+        t.classList.remove('in');
+        setTimeout(function(){ t.remove(); }, 260);
+      }, life);
+    }catch(e){ native(msg); }   // never lose a message to a broken toast
+  }
+  window.alert = show;
 })();
 </script>
 
