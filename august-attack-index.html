@@ -1237,19 +1237,9 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
   ctx.drawImage(img, pad + (iw - dw) / 2, pad + (ih - dh) / 2, dw, dh);
 
   // chromatic tear slices — red pulled left, cyan pushed right
-  // kept to the top and bottom eighths: slices across the middle cut straight
-  // through whoever is in the photo, and over bright areas "screen" blows
-  // them out to white, which reads as a defect rather than as styling
-  ctx.globalCompositeOperation = "screen";
-  ctx.fillStyle = "rgba(255,46,67,.26)";
-  ctx.fillRect(pad - 9 * s, pad + ih * 0.10, iw * 0.38, 7 * s);
-  ctx.fillStyle = "rgba(61,225,255,.28)";
-  ctx.fillRect(pad + iw * 0.58 + 11 * s, pad + ih * 0.88, iw * 0.42, 5 * s);
-  ctx.globalCompositeOperation = "source-over";
-
-  // scanlines
-  ctx.fillStyle = "rgba(0,0,0,.20)";
-  for (let y = pad; y < pad + ih; y += 3 * s) ctx.fillRect(pad, y, iw, Math.max(1, 1 * s));
+  // No scanlines and no tear slices over the photo — both drew lines
+  // straight across the image. The frame carries its identity in the
+  // border: corner ticks, the red/cyan edge and the bottom plate.
 
   // edge falloff so the photo sits into the plate rather than on top of it
   const g = ctx.createLinearGradient(0, pad + ih - 120 * s, 0, pad + ih);
@@ -4324,7 +4314,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
 }
 
 function BracketTreeView({ b, lbl, canScore, setEdit }) {
-  const CARD_H = 64, GAP = 22, COL_W = 134, CONN_W = 46;
+  const CARD_H = 66, GAP = 20, COL_W = 106, CONN_W = 26;
   const step = CARD_H + GAP;
   const qfTops = [0, 1, 2, 3].map(i => i * step);
   const qfCenters = qfTops.map(t => t + CARD_H / 2);
@@ -4360,9 +4350,12 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
         onClick={() => canScore && !isPlaceholder && setEdit({ ...m, round })}
         style={{
           position: "absolute", top, left, width: COL_W, height: CARD_H,
-          background: isFinal ? "rgba(61,225,255,.13)" : isEmpty ? "rgba(19,19,19,.06)" : w ? "rgba(63,163,60,.2)" : "var(--cream)",
-          border: "1px solid rgba(244,246,250,.14)",
-          borderRadius: 0, boxShadow: "none", padding: "7px 8px", textAlign: "left",
+          background: isEmpty ? "rgba(244,246,250,.03)" : isFinal ? "rgba(61,225,255,.09)" : "rgba(6,7,11,.72)",
+          border: isEmpty ? "1px dashed rgba(244,246,250,.16)" : "1px solid rgba(244,246,250,.10)",
+          borderRadius: 0,
+          // the decided side carries the accent; the final is the one cyan card
+          boxShadow: w ? `inset 3px 0 0 ${isFinal ? "#3DE1FF" : "#FF2E43"}` : "none",
+          padding: "7px 8px", textAlign: "left",
           cursor: canScore && !isPlaceholder ? "pointer" : "default",
           display: "flex", flexDirection: "column", justifyContent: isEmpty ? "center" : "space-between",
           transition: "border-color 0.15s",
@@ -4379,13 +4372,17 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
             <div key={key} style={{
               display: "flex", alignItems: "center", gap: "3px",
               fontSize: "11px", lineHeight: "1.3",
-              color: won ? "#1F8A24" : lost ? "rgba(19,19,19,.4)" : id ? "#0A0C12" : "rgba(19,19,19,.4)",
-              fontWeight: won ? "700" : "400",
+              color: won ? "#F4F6FA" : lost ? "#5C6675" : id ? "#C9CFDA" : "#5C6675",
+              fontWeight: won ? "700" : "500",
             }}>
-              {won && <I.trophy size={9} style={{ flexShrink: 0, color: "#1F8A24" }} />}
-              {seed && seed !== "Q" && <SeedBadge seed={seed} />}
+              {won && <I.trophy size={9} style={{ flexShrink: 0, color: "#FF2E43" }} />}
+              {seed && seed !== "Q" && (
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px",
+                  fontWeight: 700, letterSpacing: ".04em", flexShrink: 0,
+                  color: won ? "#FF2E43" : "#6B7484" }}>{seed}</span>
+              )}
               {m.score && id && (
-                <span style={{ fontFamily: "monospace", fontSize: "10px", fontWeight: 700, color: won ? "#1F8A24" : "rgba(19,19,19,.45)", flexShrink: 0 }}>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "10px", fontWeight: 700, fontVariantNumeric: "tabular-nums", color: won ? "#FF2E43" : "#5C6675", flexShrink: 0 }}>
                   {key === "team1" ? m.score.t1 : m.score.t2}
                 </span>
               )}
@@ -4401,11 +4398,12 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
 
   const qfWon = (i) => b.qf[i]?.winner;
   const sfWon = (i) => sfData[i]?.winner;
-  const qfConnColor = (i) => qfWon(i) ? "#3FA33C" : "rgba(19,19,19,.3)";
-  const sfConnColor = (i) => sfWon(i) ? "#E8B800" : "rgba(19,19,19,.3)";
+  // the advancing path lights up: red through the QFs, cyan into the final
+  const qfConnColor = (i) => qfWon(i) ? "#FF2E43" : "rgba(244,246,250,.16)";
+  const sfConnColor = (i) => sfWon(i) ? "#3DE1FF" : "rgba(244,246,250,.16)";
 
   return (
-    <div className="rounded-xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--hairline)" }}>
+    <div style={{ background: "rgba(16,20,32,.92)", border: "1px solid rgba(244,246,250,.10)", borderRadius: 0, overflow: "hidden" }}>
       <div className="flex items-center justify-between px-3 pt-3 pb-2">
         <h3 className="jh-round-title">BRACKET</h3>
         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
@@ -4413,10 +4411,10 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
           <span style={{ color:"#8B95A7" }}>→</span>
           <span style={{ color: "#FF2E43" }}>SF</span>
           <span style={{ color:"#8B95A7" }}>→</span>
-          <span style={{ color: "#B58900" }}>Final</span>
+          <span style={{ color: "#3DE1FF" }}>Final</span>
         </div>
       </div>
-      <div style={{ overflowX: "auto", padding: "0 12px 12px" }}>
+      <div style={{ overflowX: "auto", overflowY: "hidden", padding: "0 10px 12px", WebkitOverflowScrolling: "touch" }}>
         <div style={{ position: "relative", width: totalW, height: totalH, minWidth: Math.min(totalW, 320) }}>
           {/* QF */}
           {b.qf.map((m, i) => <MiniCard key={m.id} m={m} round="qf" top={qfTops[i]} left={colX.qf} />)}
@@ -4454,13 +4452,13 @@ function SeedBadge({ seed }) {
   if (!seed) return null;
   // Tier color: ends in 1 = winner (green), 2 = runner-up (gold), 3 = third (purple), else blue
   const n = parseInt(seed.slice(-1));
+  // group winner red, runner-up cyan, third and below steel — the same
+  // ladder the leaderboard medals use, instead of green/gold/purple/blue
   const cfg = n === 1
-    ? { bg: "#3FA33C", color: "#F4F6FA" }
+    ? { bg: "rgba(255,46,67,.9)",   color: "#F4F6FA" }
     : n === 2
-    ? { bg: "#3DE1FF", color:"#F4F6FA" }
-    : n === 3
-    ? { bg: "#1467A8", color: "#F4F6FA" }
-    : { bg: "#1B8EE0", color: "#F4F6FA" };
+    ? { bg: "rgba(61,225,255,.16)", color: "#3DE1FF" }
+    : { bg: "rgba(244,246,250,.10)", color: "#8B95A7" };
   return <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold font-mono shrink-0" style={{ background: cfg.bg, color: cfg.color, border: "1px solid rgba(244,246,250,.14)", borderRadius: 0 }}>{seed}</span>;
 }
 
@@ -6060,6 +6058,13 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
 }
 @media (prefers-reduced-motion:reduce){
   .aa-wall > div,.aa-wall > div:hover{ transition:none;transform:none }
+}
+
+
+/* photo wall: no scanline overlay across the image — the tiles keep the
+   corner ticks and the red/cyan edge, the photo itself stays clean */
+.aa-wall > div::after{
+  background:none !important;
 }
 
 </style>
