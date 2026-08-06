@@ -40,24 +40,31 @@ LEFT = 9 - len(OLD['sessions'])
 RED, ICE, CHALK, STEEL, COURT, GREEN = '#FF2E43', '#3DE1FF', '#F4F6FA', '#8B95A7', '#0A0C12', '#27E08A'
 
 STORY_CSS = '''
-/* story cut: same content grammar, compressed to 1080x1920 inside the
-   250px safe margins Instagram reserves top and bottom */
-.mast img{width:250px} .mast .iss b{font-size:26px} .mast .iss{font-size:11px}
-.sec{margin:22px 0 11px} .sec:first-of-type{margin-top:20px}
-.sec b{font-size:12px}
-.num{padding:14px 6px 11px} .num b{font-size:40px} .num span{font-size:10px}
-.card{padding:13px 15px;gap:13px} .card .n{font-size:23px} .card .d{font-size:13px}
-.card .k{font-size:10px}
-.night{padding:15px 17px 14px} .night .hd h3{font-size:24px}
-.night .v2{font-size:16px} .night .sub{font-size:11px;margin-top:9px}
-.tbl{padding:2px 16px 8px}
-.tr{padding:8px 0;gap:12px} .tr .nm{font-size:21px} .tr .pt{font-size:24px;width:70px}
-.tr .rk{font-size:21px;width:30px} .tr .meta{font-size:11px;width:158px}
-.note{font-size:14px;margin-top:10px}
-.next{padding:17px 20px 16px} .next h4{font-size:24px;margin-bottom:7px}
-.next p{font-size:15px;line-height:1.5}
-.foot{margin-top:22px;padding-top:16px} .foot .u{font-size:26px}
-.foot .s{font-size:10px} .foot img{height:70px}
+/* Story cut is sized for a PHONE, not for fitting everything in. At 1080
+   wide a story is viewed at ~390pt, so anything under ~26px here lands
+   below 10pt on the device. Type is set first and content is cut to suit,
+   rather than shrinking type until the content fits. */
+.mast img{width:300px}
+.mast .iss b{font-size:38px} .mast .iss{font-size:15px}
+.sec{margin:22px 0 12px} .sec:first-of-type{margin-top:18px}
+.sec b{font-size:17px;letter-spacing:.26em}
+
+.num{padding:24px 6px 20px} .num b{font-size:74px} .num span{font-size:15px}
+
+.card{padding:20px 22px;gap:18px}
+.card .k{font-size:14px} .card .n{font-size:34px} .card .d{font-size:20px;line-height:1.35}
+
+.tbl{padding:6px 24px 12px}
+.tr{padding:10px 0;gap:18px}
+.tr .rk{font-size:34px;width:46px}
+.tr .nm{font-size:33px}
+.tr .meta{font-size:16px;width:250px;white-space:nowrap}
+.tr .pt{font-size:42px;width:104px}
+
+.next{padding:22px 26px 20px} .next h4{font-size:31px;margin-bottom:8px;line-height:1.15}
+.next p{font-size:21px;line-height:1.45}
+.foot{margin-top:24px;padding-top:18px}
+.foot .u{font-size:38px} .foot .s{font-size:15px} .foot img{height:104px}
 '''
 
 def av(pid, size=96, accent=RED):
@@ -225,20 +232,20 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
   <div class="nums">
     <div class="num"><b>{T['matches']}</b><span>MATCHES PLAYED</span></div>
     <div class="num i"><b>{T['ranked']}</b><span>PLAYERS RANKED</span></div>
-    <div class="num"><b>{D['debutants']}</b><span>SERIES DEBUTANTS</span></div>
+    {'' if STORY else f'<div class="num"><b>{D["debutants"]}</b><span>SERIES DEBUTANTS</span></div>'}
     <div class="num i"><b>{LEFT}</b><span>NIGHTS LEFT</span></div>
   </div>
 
   <div class="sec"><b>HIGHLIGHTS</b><i></i></div>
   <div class="hl">
-    {card('SERIES LEADER', D['leader']['id'], D['leader']['name'],
+    {'' if False else ''}{card('SERIES LEADER', D['leader']['id'], D['leader']['name'],
           f"MVP on night one, champion on night two. <em>{D['leader']['pts']} pts</em> from {D['leader']['wins']} wins.")}
-    {card('BIGGEST CLIMBER', D['topClimber']['id'], D['topClimber']['name'],
-          f"Up <em>{D['topClimber']['delta']} places</em> after taking the night-two title.", cyan=True)}
     {card('CHAMPIONS ON DEBUT', C1['p1'], ' &amp; '.join(D['champDebut']),
-          "Won the opening night on their <em>first ever</em> Urban Playground appearance.")}
-    {card('MOST CONSISTENT', EX['bestRateOther']['id'], EX['bestRateOther']['name'],
-          f"<em>{EX['bestRateOther']['rate']}%</em> win rate across both nights without a title.", cyan=True)}
+          "Won the opening night on their <em>first ever</em> Urban Playground appearance.", cyan=True)}
+    {'' if STORY else card('BIGGEST CLIMBER', D['topClimber']['id'], D['topClimber']['name'],
+          f"Up <em>{D['topClimber']['delta']} places</em> after taking the night-two title.", cyan=True)}
+    {'' if STORY else card('MOST CONSISTENT', EX['bestRateOther']['id'], EX['bestRateOther']['name'],
+          f"<em>{EX['bestRateOther']['rate']}%</em> win rate across both nights without a title.")}
   </div>
 
   {'' if STORY else f'''<div class="sec"><b>THE NIGHTS</b><i></i></div>
@@ -246,23 +253,22 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
 
   <div class="sec"><b>STANDINGS &middot; TOP {len(TOP)}</b><i></i></div>
   <div class="tbl">{rows}</div>
-  <p class="note">Only <b>{OLD['bothNights']} players</b> have played both nights.
+  {'' if STORY else f'''<p class="note">Only <b>{OLD['bothNights']} players</b> have played both nights.
     {OLD['oneNight']} have played once, and <b>{D['streakBonus']}</b> have already banked a
     streak bonus &mdash; one good night is worth roughly a third of the current lead, so the
-    table is nowhere near settled.</p>
+    table is nowhere near settled.</p>'''}
 
   <div class="sec"><b>WHAT'S NEXT</b><i></i></div>
   <div class="next">
-    <h4>{LEFT} NIGHTS TO GO</h4>
-    <p>Mon &amp; Wed, 5:30 PM, all August &mdash; 7 OMR a player.
-    <b>Nights 8 and 9 pay double points</b>, so the table can still flip on the last ball.
-    New partners every session: if you missed the first two, you have not missed the series.</p>
+    {'' if STORY else f'<h4>{LEFT} NIGHTS TO GO</h4>'}
+    {f'<h4>{LEFT} NIGHTS TO GO</h4>' if STORY else ''}
+    <p>{'Mon &amp; Wed &middot; 5:30 PM &middot; 7 OMR. <b>Nights 8 &amp; 9 pay double</b> — the table can still flip on the last ball.' if STORY else 'Mon &amp; Wed, 5:30 PM, all August &mdash; 7 OMR a player. <b>Nights 8 and 9 pay double points</b>, so the table can still flip on the last ball. New partners every session: if you missed the first two, you have not missed the series.'}</p>
   </div>
 
   <div class="foot">
     <div>
       <div class="u">ATTACK<em>.</em>URBANPADEL<em>.</em>OM</div>
-      <div class="s">URBAN SOCIAL SERIES &middot; VOL.6 &middot; LIVE TABLE &amp; FULL RULES</div>
+      {'' if STORY else '<div class="s">URBAN SOCIAL SERIES &middot; VOL.6 &middot; LIVE TABLE &amp; FULL RULES</div>'}
     </div>
     <img src="data:image/png;base64,{emblem}" alt="Urban Playground">
   </div>
