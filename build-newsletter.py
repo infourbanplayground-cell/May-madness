@@ -34,7 +34,7 @@ OLD = json.load(open(f'{SC}/news_stats.json'))          # session/match totals
 import sys
 STORY = '--story' in sys.argv          # 1080x1920 instead of the tall report
 S1, S2 = OLD['sessions'][0], OLD['sessions'][1]
-TOP, T = D['top'][:5 if STORY else 8], OLD['totals']
+TOP, T = D['top'][:4 if STORY else 8], OLD['totals']
 LEFT = 9 - len(OLD['sessions'])
 
 RED, ICE, CHALK, STEEL, COURT, GREEN = '#FF2E43', '#3DE1FF', '#F4F6FA', '#8B95A7', '#0A0C12', '#27E08A'
@@ -46,24 +46,27 @@ STORY_CSS = '''
    rather than shrinking type until the content fits. */
 .mast img{width:300px}
 .mast .iss b{font-size:38px} .mast .iss{font-size:15px}
-.sec{margin:22px 0 12px} .sec:first-of-type{margin-top:18px}
+.sec{margin:16px 0 10px} .sec:first-of-type{margin-top:14px}
 .sec b{font-size:17px;letter-spacing:.26em}
 
-.num{padding:24px 6px 20px} .num b{font-size:74px} .num span{font-size:15px}
+.num{padding:20px 6px 16px} .num b{font-size:74px} .num span{font-size:15px}
 
-.card{padding:20px 22px;gap:18px}
-.card .k{font-size:14px} .card .n{font-size:34px} .card .d{font-size:20px;line-height:1.35}
+/* Four cards means two rows here, so the padding comes off the box rather
+   than off the type — the names and the numbers stay phone-legible. */
+.hl{gap:12px}
+.card{padding:16px 18px;gap:16px}
+.card .k{font-size:14px} .card .n{font-size:32px} .card .d{font-size:19px;line-height:1.3}
 
 .tbl{padding:6px 24px 12px}
 .tr{padding:10px 0;gap:18px}
 .tr .rk{font-size:34px;width:46px}
 .tr .nm{font-size:33px}
-.tr .meta{font-size:16px;width:250px;white-space:nowrap}
+.tr .meta{font-size:16px;width:266px;white-space:nowrap}
 .tr .pt{font-size:42px;width:104px}
 
-.next{padding:22px 26px 20px} .next h4{font-size:31px;margin-bottom:8px;line-height:1.15}
-.next p{font-size:21px;line-height:1.45}
-.foot{margin-top:24px;padding-top:18px}
+.next{padding:18px 24px 16px} .next h4{font-size:30px;margin-bottom:7px;line-height:1.15}
+.next p{font-size:20px;line-height:1.42}
+.foot{margin-top:18px;padding-top:14px}
 .foot .u{font-size:38px} .foot .s{font-size:15px} .foot img{height:104px}
 '''
 
@@ -242,10 +245,14 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
           f"MVP on night one, champion on night two. <em>{D['leader']['pts']} pts</em> from {D['leader']['wins']} wins.")}
     {card('CHAMPIONS ON DEBUT', C1['p1'], ' &amp; '.join(D['champDebut']),
           "Won the opening night on their <em>first ever</em> Urban Playground appearance.", cyan=True)}
-    {'' if STORY else card('BIGGEST CLIMBER', D['topClimber']['id'], D['topClimber']['name'],
-          f"Up <em>{D['topClimber']['delta']} places</em> after taking the night-two title.", cyan=True)}
-    {'' if STORY else card('MOST CONSISTENT', EX['bestRateOther']['id'], EX['bestRateOther']['name'],
-          f"<em>{EX['bestRateOther']['rate']}%</em> win rate across both nights without a title.")}
+    {card('BIGGEST CLIMBER', D['topClimber']['id'], D['topClimber']['name'],
+          (f"Up <em>{D['topClimber']['delta']} places</em> — took the night-two title."
+           if STORY else
+           f"Up <em>{D['topClimber']['delta']} places</em> after taking the night-two title."), cyan=True)}
+    {card('MOST CONSISTENT', EX['bestRateOther']['id'], EX['bestRateOther']['name'],
+          (f"<em>{EX['bestRateOther']['rate']}%</em> win rate, no title yet."
+           if STORY else
+           f"<em>{EX['bestRateOther']['rate']}%</em> win rate across both nights without a title."))}
   </div>
 
   {'' if STORY else f'''<div class="sec"><b>THE NIGHTS</b><i></i></div>
