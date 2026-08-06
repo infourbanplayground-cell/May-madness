@@ -31,11 +31,34 @@ EX = json.load(open(f'{SC}/news_extra.json'))
 PH = json.load(open(f'{SC}/news_photos.json'))
 OLD = json.load(open(f'{SC}/news_stats.json'))          # session/match totals
 
+import sys
+STORY = '--story' in sys.argv          # 1080x1920 instead of the tall report
 S1, S2 = OLD['sessions'][0], OLD['sessions'][1]
-TOP, T = D['top'][:8], OLD['totals']
+TOP, T = D['top'][:5 if STORY else 8], OLD['totals']
 LEFT = 9 - len(OLD['sessions'])
 
 RED, ICE, CHALK, STEEL, COURT, GREEN = '#FF2E43', '#3DE1FF', '#F4F6FA', '#8B95A7', '#0A0C12', '#27E08A'
+
+STORY_CSS = '''
+/* story cut: same content grammar, compressed to 1080x1920 inside the
+   250px safe margins Instagram reserves top and bottom */
+.mast img{width:250px} .mast .iss b{font-size:26px} .mast .iss{font-size:11px}
+.sec{margin:22px 0 11px} .sec:first-of-type{margin-top:20px}
+.sec b{font-size:12px}
+.num{padding:14px 6px 11px} .num b{font-size:40px} .num span{font-size:10px}
+.card{padding:13px 15px;gap:13px} .card .n{font-size:23px} .card .d{font-size:13px}
+.card .k{font-size:10px}
+.night{padding:15px 17px 14px} .night .hd h3{font-size:24px}
+.night .v2{font-size:16px} .night .sub{font-size:11px;margin-top:9px}
+.tbl{padding:2px 16px 8px}
+.tr{padding:8px 0;gap:12px} .tr .nm{font-size:21px} .tr .pt{font-size:24px;width:70px}
+.tr .rk{font-size:21px;width:30px} .tr .meta{font-size:11px;width:158px}
+.note{font-size:14px;margin-top:10px}
+.next{padding:17px 20px 16px} .next h4{font-size:24px;margin-bottom:7px}
+.next p{font-size:15px;line-height:1.5}
+.foot{margin-top:22px;padding-top:16px} .foot .u{font-size:26px}
+.foot .s{font-size:10px} .foot img{height:70px}
+'''
 
 def av(pid, size=96, accent=RED):
     src = PH.get(pid)
@@ -49,12 +72,13 @@ def dm(iso):
     return f"{int(d)} {['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][int(m)-1]}"
 
 CSS = f"""
+
 @font-face{{font-family:'Anton';src:url(data:font/woff2;base64,{anton}) format('woff2');font-display:block}}
 @font-face{{font-family:'Mono';font-weight:700;src:url(data:font/woff2;base64,{mono}) format('woff2')}}
 @font-face{{font-family:'Archivo';font-weight:800;src:url(data:font/woff2;base64,{arch8}) format('woff2')}}
 @font-face{{font-family:'Archivo';font-weight:600;src:url(data:font/woff2;base64,{arch6}) format('woff2')}}
 *{{margin:0;padding:0;box-sizing:border-box}}
-body{{width:1080px;position:relative;color:{CHALK};font-family:Archivo,sans-serif;background:
+body{{width:1080px;{'height:1920px;overflow:hidden;' if STORY else ''}position:relative;color:{CHALK};font-family:Archivo,sans-serif;background:
   radial-gradient(ellipse 90% 24% at 50% 0%, rgba(255,46,67,.26), transparent 60%),
   radial-gradient(ellipse 60% 18% at 8% 50%, rgba(61,225,255,.09), transparent 62%),
   linear-gradient(180deg,#08090D 0%,{COURT} 38%,#06070B 100%)}}
@@ -62,7 +86,7 @@ body{{width:1080px;position:relative;color:{CHALK};font-family:Archivo,sans-seri
   background-image:linear-gradient(rgba(255,46,67,.05) 1px,transparent 1px),
    linear-gradient(90deg,rgba(255,46,67,.05) 1px,transparent 1px);background-size:46px 46px;
   -webkit-mask-image:radial-gradient(120% 46% at 50% 10%,#000,transparent 88%)}}
-.z{{position:relative;z-index:2;padding:60px 68px 66px}}
+.z{{position:relative;z-index:2;padding:{'250px 62px 250px' if STORY else '60px 68px 66px'}{';min-height:1920px;display:flex;flex-direction:column;justify-content:center' if STORY else ''}}}
 
 .av{{display:inline-block;flex:none;background-size:cover;background-position:center 22%;
   background-color:#141826}}
@@ -158,6 +182,7 @@ body{{width:1080px;position:relative;color:{CHALK};font-family:Archivo,sans-seri
 .foot .s{{margin-top:5px;font-family:Mono;font-weight:700;font-size:12px;
   letter-spacing:.18em;color:{STEEL}}}
 .foot img{{height:94px;filter:drop-shadow(0 0 18px rgba(255,46,67,.5))}}
+{STORY_CSS if STORY else ''}
 """
 
 def card(kicker, pid, nm, desc, cyan=False):
@@ -216,10 +241,10 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
           f"<em>{EX['bestRateOther']['rate']}%</em> win rate across both nights without a title.", cyan=True)}
   </div>
 
-  <div class="sec"><b>THE NIGHTS</b><i></i></div>
-  <div class="nights">{night(S1,C1,1)}{night(S2,C2,2)}</div>
+  {'' if STORY else f'''<div class="sec"><b>THE NIGHTS</b><i></i></div>
+  <div class="nights">{night(S1,C1,1)}{night(S2,C2,2)}</div>'''}
 
-  <div class="sec"><b>STANDINGS &middot; TOP 8</b><i></i></div>
+  <div class="sec"><b>STANDINGS &middot; TOP {len(TOP)}</b><i></i></div>
   <div class="tbl">{rows}</div>
   <p class="note">Only <b>{OLD['bothNights']} players</b> have played both nights.
     {OLD['oneNight']} have played once, and <b>{D['streakBonus']}</b> have already banked a
@@ -243,5 +268,6 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
   </div>
 </div>"""
 
-open(f'{SC}/newsletter.html', 'w').write(HTML)
-print('built newsletter.html')
+out = 'newsletter-story.html' if STORY else 'newsletter.html'
+open(f'{SC}/{out}', 'w').write(HTML)
+print('built', out, '(1080x1920 story cut)' if STORY else '(tall report)')
