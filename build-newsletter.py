@@ -80,6 +80,7 @@ body{{width:1080px;position:relative;color:{CHALK};font-family:Archivo,sans-seri
 .lede b{{color:{CHALK};font-weight:800}}
 
 .sec{{display:flex;align-items:center;gap:14px;margin:40px 0 16px}}
+.sec:first-of-type{{margin-top:34px}}
 .sec b{{font-family:Mono;font-weight:700;font-size:14px;letter-spacing:.3em;color:{RED};white-space:nowrap}}
 .sec i{{flex:1;height:1px;background:rgba(244,246,250,.14)}}
 
@@ -194,12 +195,6 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
     <img src="data:image/png;base64,{word}" alt="August Attack">
     <div class="iss"><b>THE REPORT</b>AFTER TWO NIGHTS &middot; VOL.6</div>
   </div>
-
-  <p class="lede">Two nights in, and the series already has a leader who did it the hard way.
-    <b>{D['leader']['name']}</b> was voted MVP on opening night, then went out on Wednesday and won
-    the whole thing with <b>{D['topClimber']['name']}</b>. But only <b>{OLD['bothNights']}</b> of the
-    {T['ranked']} players who have stepped on court have played both nights &mdash; almost nobody has
-    shown their hand yet.</p>
 
   <div class="sec"><b>THE NUMBERS</b><i></i></div>
   <div class="nums">
