@@ -44,30 +44,31 @@ STORY_CSS = '''
    wide a story is viewed at ~390pt, so anything under ~26px here lands
    below 10pt on the device. Type is set first and content is cut to suit,
    rather than shrinking type until the content fits. */
-.mast img{width:300px}
-.mast .iss b{font-size:38px} .mast .iss{font-size:15px}
-.sec{margin:16px 0 10px} .sec:first-of-type{margin-top:14px}
-.sec b{font-size:17px;letter-spacing:.26em}
+.mast img{width:330px}
+.mast .iss b{font-size:42px} .mast .iss{font-size:16px}
+.mast{padding-bottom:20px}
+.sec{margin:15px 0 10px} .sec:first-of-type{margin-top:13px}
+.sec b{font-size:18px;letter-spacing:.26em}
 
-.num{padding:20px 6px 16px} .num b{font-size:74px} .num span{font-size:15px}
+.num{padding:18px 6px 15px} .num b{font-size:80px} .num span{font-size:16px}
 
-/* Four cards means two rows here, so the padding comes off the box rather
-   than off the type — the names and the numbers stay phone-legible. */
-.hl{gap:12px}
-.card{padding:16px 18px;gap:16px}
-.card .k{font-size:14px} .card .n{font-size:32px} .card .d{font-size:19px;line-height:1.3}
+/* Four cards means two rows here, so the second row is paid for out of the
+   frame and the box padding — never out of the type size. */
+.hl{gap:14px}
+.card{padding:16px 20px;gap:18px}
+.card .k{font-size:15px} .card .n{font-size:33px} .card .d{font-size:21px;line-height:1.32}
 
-.tbl{padding:6px 24px 12px}
-.tr{padding:10px 0;gap:18px}
-.tr .rk{font-size:34px;width:46px}
-.tr .nm{font-size:33px}
-.tr .meta{font-size:16px;width:266px;white-space:nowrap}
-.tr .pt{font-size:42px;width:104px}
+.tbl{padding:8px 26px 14px}
+.tr{padding:9px 0;gap:18px}
+.tr .rk{font-size:38px;width:50px}
+.tr .nm{font-size:36px}
+.tr .meta{font-size:17px;width:284px;white-space:nowrap}
+.tr .pt{font-size:47px;width:112px}
 
-.next{padding:18px 24px 16px} .next h4{font-size:30px;margin-bottom:7px;line-height:1.15}
-.next p{font-size:20px;line-height:1.42}
-.foot{margin-top:18px;padding-top:14px}
-.foot .u{font-size:38px} .foot .s{font-size:15px} .foot img{height:104px}
+.next{padding:17px 26px 15px} .next h4{font-size:34px;margin-bottom:9px;line-height:1.15}
+.next p{font-size:22px;line-height:1.45}
+.foot{margin-top:16px;padding-top:13px}
+.foot .u{font-size:42px} .foot .s{font-size:15px} .foot img{height:114px}
 '''
 
 def av(pid, size=96, accent=RED):
@@ -96,7 +97,7 @@ body{{width:1080px;{'height:1920px;overflow:hidden;' if STORY else ''}position:r
   background-image:linear-gradient(rgba(255,46,67,.05) 1px,transparent 1px),
    linear-gradient(90deg,rgba(255,46,67,.05) 1px,transparent 1px);background-size:46px 46px;
   -webkit-mask-image:radial-gradient(120% 46% at 50% 10%,#000,transparent 88%)}}
-.z{{position:relative;z-index:2;padding:{'250px 62px 250px' if STORY else '60px 68px 66px'}{';min-height:1920px;display:flex;flex-direction:column;justify-content:center' if STORY else ''}}}
+.z{{position:relative;z-index:2;padding:{'170px 62px 244px' if STORY else '60px 68px 66px'}{';min-height:1920px;display:flex;flex-direction:column;justify-content:center' if STORY else ''}}}
 
 .av{{display:inline-block;flex:none;background-size:cover;background-position:center 22%;
   background-color:#141826}}
