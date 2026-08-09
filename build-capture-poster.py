@@ -52,6 +52,33 @@ CAMERA_SVG = f'''<svg class="cam" viewBox="0 0 132 84" fill="none"
   <rect x="18" y="46" width="26" height="8" fill="{CHALK}"/>
 </svg>'''
 
+# The empty right of the headline gets the thing the poster is actually about:
+# a camera viewfinder with a player mid-celebration inside it. It doubles as
+# the illustration for step 03, which is the one instruction people misread.
+VIEW_SVG = f'''<svg class="view" viewBox="0 0 340 430" fill="none"
+  xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect x="2" y="2" width="336" height="426" fill="rgba(245,101,48,.05)"/>
+  <!-- viewfinder brackets -->
+  <path d="M2 62 V2 H62"     stroke="{ORANGE}" stroke-width="7"/>
+  <path d="M278 2 H338 V62"  stroke="{ORANGE}" stroke-width="7"/>
+  <path d="M2 368 V428 H62"  stroke="{ORANGE}" stroke-width="7"/>
+  <path d="M278 428 H338 V368" stroke="{ORANGE}" stroke-width="7"/>
+  <!-- REC -->
+  <circle cx="42" cy="40" r="11" fill="{ORANGE}"/>
+  <text x="62" y="49" fill="{CHALK}" font-family="Mono" font-weight="700"
+        font-size="26" letter-spacing="4">REC</text>
+  <!-- player, both arms up -->
+  <circle cx="170" cy="150" r="27" fill="{CHALK}"/>
+  <path d="M152 190 h36 l14 92 h-20 l-8 -52 -8 52 h-20 z" fill="{CHALK}"/>
+  <path d="M154 196 L112 132" stroke="{CHALK}" stroke-width="17" stroke-linecap="square"/>
+  <path d="M186 196 L228 132" stroke="{CHALK}" stroke-width="17" stroke-linecap="square"/>
+  <path d="M150 282 L134 372" stroke="{CHALK}" stroke-width="19" stroke-linecap="square"/>
+  <path d="M190 282 L206 372" stroke="{CHALK}" stroke-width="19" stroke-linecap="square"/>
+  <!-- racket in the raised right hand -->
+  <ellipse cx="240" cy="108" rx="25" ry="31" stroke="{ORANGE}" stroke-width="8"/>
+  <path d="M232 136 L226 152" stroke="{ORANGE}" stroke-width="8"/>
+</svg>'''
+
 STEPS = [
     ('SCAN THE QR',      'Pick your court and how long you are playing for.'),
     ('START RECORDING',  'Tap <em>REC</em>. The court camera does the rest.'),
@@ -114,19 +141,23 @@ body{{width:1080px;height:1528px;overflow:hidden;position:relative;color:{CHALK}
   line-height:1.9}}
 .top .wm b{{display:block;font-family:Anton;font-size:26px;letter-spacing:.05em;color:{CHALK}}}
 
-h1{{align-self:flex-start;margin-top:26px;font-family:Anton;font-size:96px;line-height:.92;
+.hero{{display:flex;align-items:flex-start;gap:32px;width:100%;margin-top:20px}}
+.hl{{flex:1;min-width:0}}
+.view{{flex:none;width:298px;height:auto;
+  filter:drop-shadow(0 0 34px rgba(245,101,48,.28))}}
+h1{{font-family:Anton;font-size:96px;line-height:.92;
   letter-spacing:.01em;text-transform:uppercase}}
 h1 em{{font-style:normal;color:{ORANGE};text-shadow:0 0 44px rgba(245,101,48,.5)}}
 .cam{{height:74px;width:auto;margin-left:26px;vertical-align:-6px;
   filter:drop-shadow(0 0 26px rgba(245,101,48,.55))}}
-.by{{align-self:flex-start;margin-top:16px;display:inline-flex;align-items:center;gap:12px;
+.by{{margin-top:18px;display:inline-flex;align-items:center;gap:12px;
   padding:10px 20px 8px;background:{ORANGE}}}
 .by b{{font-family:Anton;font-size:25px;letter-spacing:.05em;color:#fff}}
 .by span{{font-family:Mono;font-weight:700;font-size:13px;letter-spacing:.2em;
   color:rgba(255,255,255,.82)}}
 
 .steps{{width:100%;margin-top:30px}}
-.st{{display:flex;gap:24px;align-items:flex-start;padding:20px 0;
+.st{{display:flex;gap:24px;align-items:flex-start;padding:17px 0;
   border-bottom:1px solid rgba(244,246,250,.10)}}
 .st:last-child{{border-bottom:none}}
 .n{{flex:none;width:78px;font-family:Anton;font-size:56px;line-height:.9;color:{ORANGE};
@@ -172,8 +203,13 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
     <div class="wm"><b>URBAN PLAYGROUND</b>COURT CAMERA</div>
   </div>
 
-  <h1>CAPTURE{CAMERA_SVG}<br>YOUR <em>BEST</em><br>MOMENTS</h1>
-  <div class="by"><span>POWERED BY</span><b>SAVE MY PLAY</b></div>
+  <div class="hero">
+    <div class="hl">
+      <h1>CAPTURE{CAMERA_SVG}<br>YOUR <em>BEST</em><br>MOMENTS</h1>
+      <div class="by"><span>POWERED BY</span><b>SAVE MY PLAY</b></div>
+    </div>
+    {VIEW_SVG}
+  </div>
 
   <div class="steps">{steps_html}</div>
 
