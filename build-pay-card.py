@@ -29,6 +29,14 @@ area, so they read as registration marks without eating the quiet zone.
 
 Verify a real code survives the render — don't eyeball it:
   cv2.QRCodeDetector().detectAndDecodeMulti(<the final 1080x1350 png>)
+
+Brand assets live on the server, not in this repo (DESIGN.md §3). Fetch and
+trim the house mark before the first run — the shipped file carries 250px of
+transparent padding that would otherwise throw off every width set below:
+
+  scp urbanpadel:/var/www/urbanpadel.om/public/assets/up-logo-new.png .
+  python3 -c "from PIL import Image; im=Image.open('up-logo-new.png').convert('RGBA'); \
+    im.crop(im.split()[3].getbbox()).save('up-logo-clean.png')"
 """
 import argparse, base64, os, sys
 
@@ -42,6 +50,8 @@ ap.add_argument('--amount',  default=None, help='omit for a card with no price')
 ap.add_argument('--unit',    default='PER PLAYER, PER SESSION')
 ap.add_argument('--bank',    default=None)
 ap.add_argument('--account', default=None)
+ap.add_argument('--mobile',  default=None, help='mobile-transfer number')
+ap.add_argument('--alias',   default=None, help='bank alias, e.g. name@BANK')
 ap.add_argument('--iban',    default=None)
 ap.add_argument('--out',     default='pay-card')
 A = ap.parse_args()
@@ -54,7 +64,7 @@ CHALK, STEEL = '#F4F6FA', '#8B95A7'
 if A.brand == 'up':
     ACCENT, SUPPORT = '#F56530', '#F56530'   # house brand runs on one colour
     COURT, DEEP     = '#0E0F13', '#08090C'
-    LOGO, LOGO_W    = b64f('up-logo-clean.png'), 200
+    LOGO, LOGO_W    = b64f('up-logo-clean.png'), 190
     URL, STRAP      = 'URBANPADEL<em>.</em>OM', 'URBAN PLAYGROUND &middot; OMAN'
 else:
     ACCENT, SUPPORT = '#FF2E43', '#3DE1FF'
@@ -62,11 +72,21 @@ else:
     LOGO, LOGO_W    = b64f('aa-wordmark-clean.png'), 360
     URL, STRAP      = 'ATTACK<em>.</em>URBANPADEL<em>.</em>OM', 'URBAN SOCIAL SERIES &middot; VOL.6'
 
-# Unset fields render as a dotted rule you can write on — the card is useful
-# as a printed form before anybody has typed the details in.
+# Only the routes you actually supply get a row. With nothing supplied the
+# card falls back to a blank form -- dotted rules you can write on -- which is
+# what makes the placeholder useful before any details exist.
+ROUTES = [('BANK', A.bank), ('ACCOUNT NAME', A.account), ('MOBILE', A.mobile),
+          ('ALIAS', A.alias), ('IBAN', A.iban)]
+BLANK_FORM = [l for l, _ in ROUTES if l != 'IBAN']
+
 def field(label, value):
     inner = f'<span class="v">{value}</span>' if value else '<span class="blank"></span>'
     return f'<div class="fr"><span class="l">{label}</span>{inner}</div>'
+
+if any(v for _, v in ROUTES):
+    rows_html = ''.join(field(l, v) for l, v in ROUTES if v)
+else:
+    rows_html = ''.join(field(l, None) for l in BLANK_FORM)
 
 if A.qr:
     p = A.qr if os.path.isabs(A.qr) else f'{SC}/{A.qr}'
@@ -118,7 +138,7 @@ body{{width:1080px;height:1350px;overflow:hidden;position:relative;color:{CHALK}
   letter-spacing:.2em;color:{STEEL}}}
 
 /* QR panel — chalk ground and a real quiet zone, see the module docstring */
-.panel{{position:relative;margin-top:18px;width:470px;height:470px;background:{CHALK};
+.panel{{position:relative;margin-top:16px;width:430px;height:430px;background:{CHALK};
   padding:48px;flex:none;box-shadow:0 0 70px rgba({SGLOW},.16)}}
 .panel .rt{{position:absolute;width:26px;height:26px;z-index:2}}
 .panel .rt.a{{top:12px;left:12px;border-top:4px solid {ACCENT};border-left:4px solid {ACCENT}}}
@@ -180,11 +200,7 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
   </div>
 
   <div class="or"><b>OR TRANSFER TO</b><i></i></div>
-  <div class="fields">
-    {field('BANK', A.bank)}
-    {field('ACCOUNT NAME', A.account)}
-    {field('IBAN', A.iban)}
-  </div>
+  <div class="fields">{rows_html}</div>
   <div class="ref">SEND YOUR <em>NAME</em> WITH THE TRANSFER</div>
 
   <div class="foot">
