@@ -9,6 +9,7 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/book') ||
     pathname === '/account/login' ||
     pathname === '/account/register' ||
+    pathname === '/account/claim' ||
     pathname.startsWith('/api/account/') ||
     pathname.startsWith('/api/courts/') ||
     pathname.startsWith('/api/auth/')

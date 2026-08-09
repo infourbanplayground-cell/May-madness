@@ -8,7 +8,7 @@ export { COURTS, TIME_SLOTS } from './constants'
 // Date object, so .toISOString() on a UTC+4 server rolls the date back one day.
 types.setTypeParser(types.builtins.DATE, (val: string) => val)
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 // ─── DB Init ──────────────────────────────────────────────────────────────────
 
@@ -207,6 +207,44 @@ export async function getMemberByPhone(phone: string): Promise<(Member & { passw
 export async function getMemberById(id: string): Promise<Member | null> {
   const { rows } = await pool.query('SELECT * FROM members WHERE id=$1', [id])
   if (!rows.length) return null
+  return rowToMember(rows[0] as Record<string, unknown>)
+}
+
+/**
+ * Create the app account for a verified imported customer, linking the two so
+ * their MatchPoint history can be attached later. If an account already exists
+ * for that customer the password is reset instead, which is safe because the
+ * caller has just proved control of the address on file.
+ */
+export async function createMemberFromCustomer(
+  customerCode: string,
+  name: string,
+  phone: string,
+  passwordHash: string
+): Promise<Member> {
+  const { rows: existing } = await pool.query(
+    'SELECT * FROM members WHERE customer_code = $1',
+    [customerCode]
+  )
+  if (existing.length) {
+    const { rows } = await pool.query(
+      'UPDATE members SET password_hash = $2 WHERE customer_code = $1 RETURNING *',
+      [customerCode, passwordHash]
+    )
+    return rowToMember(rows[0] as Record<string, unknown>)
+  }
+
+  // Phone is UNIQUE on members; fall back to the customer code if the number is
+  // blank or already taken, so claiming can never fail on a data collision.
+  const safePhone = phone.trim() || `mp-${customerCode}`
+  const { rows: clash } = await pool.query('SELECT id FROM members WHERE phone = $1', [safePhone])
+  const finalPhone = clash.length ? `mp-${customerCode}` : safePhone
+
+  const { rows } = await pool.query(
+    `INSERT INTO members (name, phone, password_hash, customer_code)
+     VALUES ($1, $2, $3, $4) RETURNING *`,
+    [name, finalPhone, passwordHash, customerCode]
+  )
   return rowToMember(rows[0] as Record<string, unknown>)
 }
 

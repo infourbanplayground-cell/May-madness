@@ -102,10 +102,21 @@ function LoginForm() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Don&apos;t have an account?{' '}
+        <div className="mt-6 p-4 rounded-xl bg-indigo-50 border border-indigo-100">
+          <p className="text-sm text-indigo-900 font-medium mb-0.5">Played here before?</p>
+          <p className="text-sm text-indigo-700">
+            If you&apos;ve booked with us previously we already have your details.{' '}
+            <Link href="/account/claim" className="font-semibold underline hover:text-indigo-800">
+              Set up your account
+            </Link>{' '}
+            with a code instead of starting from scratch.
+          </p>
+        </div>
+
+        <p className="text-center text-sm text-gray-500 mt-5">
+          New to Urban Playground?{' '}
           <Link href="/account/register" className="text-indigo-600 font-medium hover:text-indigo-700">
-            Create one
+            Create an account
           </Link>
         </p>
 
