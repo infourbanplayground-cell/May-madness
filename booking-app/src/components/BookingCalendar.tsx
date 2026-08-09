@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { format, addDays, subDays, parseISO } from 'date-fns'
-import { ChevronLeft, ChevronRight, Plus, X, Phone, User, FileText, RefreshCw, DollarSign } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, FileText, RefreshCw, DollarSign } from 'lucide-react'
 import { Court, Booking } from '@/lib/types'
 import { TIME_SLOTS } from '@/lib/constants'
+import CustomerSearch from '@/components/CustomerSearch'
 
 const COURTS: Court[] = [
   { id: 'court-1', name: 'Court 1', sport: 'Padel', color: '#6366f1' },
@@ -455,30 +456,11 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
             </div>
           </div>
 
-          <div>
-            <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
-              <User size={14} /> Player Name *
-            </label>
-            <input
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              required
-              placeholder="Full name"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <div>
-            <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
-              <Phone size={14} /> Phone
-            </label>
-            <input
-              value={playerPhone}
-              onChange={(e) => setPlayerPhone(e.target.value)}
-              placeholder="+1 (555) 000-0000"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+          <CustomerSearch
+            name={playerName}
+            phone={playerPhone}
+            onChange={({ name, phone }) => { setPlayerName(name); setPlayerPhone(phone) }}
+          />
 
           <div>
             <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">

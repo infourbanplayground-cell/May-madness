@@ -148,6 +148,30 @@ export async function fetchMpCustomers(): Promise<MpCustomer[]> {
   return mpFetch('/customers') as Promise<MpCustomer[]>
 }
 
+/**
+ * Every customer, following pagination. MatchPoint caps limit at 1000 and the
+ * club has more than that, so a single call silently truncates.
+ * maxPages guards against a HasMore that never goes false.
+ */
+export async function fetchAllMpCustomers(maxPages = 25): Promise<MpCustomer[]> {
+  const all: MpCustomer[] = []
+  let offset = 0
+  const limit = 1000
+  for (let page = 0; page < maxPages; page++) {
+    const res = await fetch(`${BASE_URL}/customers?offset=${offset}&limit=${limit}`, {
+      headers: { 'X-Api-Token': API_KEY },
+      cache: 'no-store',
+    })
+    if (!res.ok) throw new Error(`MatchPoint /customers → ${res.status} ${res.statusText}`)
+    const json = await res.json() as MpEnvelope
+    if (!json.Ok) throw new Error(json.Error ?? 'MatchPoint API error')
+    all.push(...((json.Data ?? []) as MpCustomer[]))
+    if (!json.HasMore) break
+    offset += limit
+  }
+  return all
+}
+
 export async function fetchMpSales(dateFrom: string, dateTo: string): Promise<MpSale[]> {
   return mpFetch(`/sales?dateFrom=${dateFrom}&dateTo=${dateTo}`) as Promise<MpSale[]>
 }

@@ -218,6 +218,99 @@ export async function createMember(name: string, phone: string, passwordHash: st
   return rowToMember(rows[0] as Record<string, unknown>)
 }
 
+// ─── Imported MatchPoint customers ────────────────────────────────────────────
+// A local copy of the MatchPoint customer list. Kept locally rather than read
+// live so the player list survives cancelling the MatchPoint subscription.
+
+export type StoredCustomer = {
+  code: string
+  name: string
+  email: string
+  mobile: string
+  memberCode: string
+  entryDate: string | null
+  status: string
+  type: string
+  groups: string[]
+}
+
+function rowToCustomer(row: Record<string, unknown>): StoredCustomer {
+  return {
+    code: row.code as string,
+    name: row.name as string,
+    email: (row.email as string) ?? '',
+    mobile: (row.mobile as string) ?? '',
+    memberCode: (row.member_code as string) ?? '',
+    entryDate: row.entry_date ? String(row.entry_date).slice(0, 10) : null,
+    status: (row.status as string) ?? '',
+    type: (row.type as string) ?? '',
+    groups: (row.groups as string[]) ?? [],
+  }
+}
+
+/** Upsert a batch of customers. Returns how many rows were newly inserted. */
+export async function upsertCustomers(customers: StoredCustomer[]): Promise<number> {
+  if (!customers.length) return 0
+  const client = await pool.connect()
+  let inserted = 0
+  try {
+    await client.query('BEGIN')
+    for (const c of customers) {
+      const { rows } = await client.query(
+        `INSERT INTO mp_customers
+           (code, name, email, mobile, member_code, entry_date, status, type, groups, imported_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9, now())
+         ON CONFLICT (code) DO UPDATE SET
+           name=EXCLUDED.name, email=EXCLUDED.email, mobile=EXCLUDED.mobile,
+           member_code=EXCLUDED.member_code, entry_date=EXCLUDED.entry_date,
+           status=EXCLUDED.status, type=EXCLUDED.type, groups=EXCLUDED.groups,
+           imported_at=now()
+         RETURNING (xmax = 0) AS is_new`,
+        [
+          c.code, c.name, c.email, c.mobile, c.memberCode,
+          c.entryDate || null, c.status, c.type, c.groups,
+        ]
+      )
+      if (rows[0]?.is_new) inserted++
+    }
+    await client.query('COMMIT')
+  } catch (e) {
+    await client.query('ROLLBACK')
+    throw e
+  } finally {
+    client.release()
+  }
+  return inserted
+}
+
+export async function getCustomerCount(): Promise<{ total: number; lastImport: string | null }> {
+  const { rows } = await pool.query(
+    'SELECT count(*)::int AS total, max(imported_at) AS last_import FROM mp_customers'
+  )
+  return {
+    total: rows[0].total as number,
+    lastImport: rows[0].last_import ? String(rows[0].last_import) : null,
+  }
+}
+
+/** Name or mobile prefix/substring search, for front-desk autocomplete. */
+export async function searchCustomers(query: string, limit = 8): Promise<StoredCustomer[]> {
+  const q = query.trim()
+  if (q.length < 2) return []
+  const { rows } = await pool.query(
+    `SELECT * FROM mp_customers
+      WHERE lower(name) LIKE lower($1)
+         OR mobile LIKE $1
+         OR lower(email) LIKE lower($1)
+      ORDER BY
+        CASE WHEN lower(name) LIKE lower($2) THEN 0 ELSE 1 END,
+        name
+      LIMIT $3`,
+    [`%${q}%`, `${q}%`, limit]
+  )
+  return rows.map(rowToCustomer)
+}
+
 // ─── Court prices ─────────────────────────────────────────────────────────────
 
 export async function getCourtPrices(): Promise<Record<string, number>> {
