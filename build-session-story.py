@@ -30,6 +30,7 @@ ap.add_argument('--voucher', default='14')
 ap.add_argument('--left',    default='7', help='sessions remaining, including this one')
 ap.add_argument('--full',    action='store_true', help='16 teams already in')
 ap.add_argument('--partners', default=None, help='e.g. "4" — teams still needing a partner')
+ap.add_argument('--anim',    action='store_true', help='emit the animated cut')
 ap.add_argument('--out',     default='session-story')
 A = ap.parse_args()
 
@@ -53,6 +54,48 @@ else:
 
 partners = (f'<div class="pn">{A.partners} teams still need a partner &mdash; '
             f'say the word and we pair you up.</div>') if A.partners else ''
+
+# Animated cut. Every animation uses `both` fill and a fixed delay, so the
+# whole page is a pure function of time -- which is what lets the recorder
+# pause the timeline and scrub to an exact frame instead of racing it.
+# (Safe here: nothing on this page is position:fixed, so the identity
+# transform these leave behind cannot become an unwanted containing block.)
+ANIM_CSS = """
+@keyframes aIn   {from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:none}}
+@keyframes aSlam {0%{opacity:0;transform:scale(1.7)} 60%{opacity:1;transform:scale(.94)}
+                  80%{transform:scale(1.03)} 100%{opacity:1;transform:scale(1)}}
+@keyframes aWipe {from{clip-path:inset(0 100% 0 0)} to{clip-path:inset(0 0 0 0)}}
+@keyframes aTick {from{opacity:0;transform:scale(.4)} to{opacity:1;transform:scale(1)}}
+@keyframes aGrid {from{opacity:0} to{opacity:.5}}
+@keyframes aPulse{0%,100%{opacity:1} 50%{opacity:.55}}
+@keyframes aGlow {0%,100%{text-shadow:0 0 60px rgba(255,46,67,.5)}
+                  50%{text-shadow:0 0 110px rgba(255,46,67,.95)}}
+@keyframes aJit  {0%,92%,100%{transform:translate(0,0)} 94%{transform:translate(-7px,2px)}
+                  96%{transform:translate(6px,-3px)} 98%{transform:translate(-3px,0)}}
+
+.grid{animation:aGrid .8s var(--e) both}
+.tk  {animation:aTick .5s var(--e) both .2s}
+.word{animation:aSlam .85s var(--e) both .15s}
+.kick{animation:aIn .5s var(--e) both .75s}
+.sn span{animation:aIn .45s var(--e) both 1.0s}
+.sn b{animation:aSlam .7s var(--e) both 1.15s, aGlow 2.6s ease-in-out 1.9s infinite}
+.when{animation:aWipe .6s var(--e) both 1.75s}
+.where{animation:aIn .45s var(--e) both 2.0s}
+.tile:nth-child(1){animation:aIn .5s var(--e) both 2.2s}
+.tile:nth-child(2){animation:aIn .5s var(--e) both 2.33s}
+.tile:nth-child(3){animation:aIn .5s var(--e) both 2.46s}
+.sec{animation:aWipe .5s var(--e) both 2.7s}
+.cr:nth-child(1){animation:aIn .5s var(--e) both 2.95s}
+.cr:nth-child(2){animation:aIn .5s var(--e) both 3.1s}
+.cr:nth-child(3){animation:aIn .5s var(--e) both 3.25s}
+.chase{animation:aIn .5s var(--e) both 2.85s}
+.cta{animation:aIn .6s var(--e) both 3.6s}
+.cta h4 em{animation:aPulse 1.4s ease-in-out 4.3s infinite}
+.foot{animation:aIn .5s var(--e) both 4.1s}
+.word{will-change:transform}
+body{--e:cubic-bezier(.23,1,.32,1)}
+.z{animation:aJit 1.2s steps(1,end) 4.3s infinite}
+"""
 
 CSS = f"""
 @font-face{{font-family:'Anton';src:url(data:font/woff2;base64,{anton}) format('woff2');font-display:block}}
@@ -163,5 +206,7 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
   <div class="foot">ATTACK<em>.</em>URBANPADEL<em>.</em>OM</div>
 </div>"""
 
+if A.anim:
+    HTML = HTML.replace('</style>', ANIM_CSS + '</style>')
 open(f'{SC}/{A.out}.html', 'w').write(HTML)
 print(f'built {A.out}.html  session {A.session}  full={A.full}')
