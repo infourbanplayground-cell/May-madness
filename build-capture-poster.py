@@ -67,16 +67,20 @@ VIEW_SVG = f'''<svg class="view" viewBox="0 0 340 430" fill="none"
   <circle cx="42" cy="40" r="11" fill="{ORANGE}"/>
   <text x="62" y="49" fill="{CHALK}" font-family="Mono" font-weight="700"
         font-size="26" letter-spacing="4">REC</text>
-  <!-- player, both arms up -->
-  <circle cx="170" cy="150" r="27" fill="{CHALK}"/>
-  <path d="M152 190 h36 l14 92 h-20 l-8 -52 -8 52 h-20 z" fill="{CHALK}"/>
-  <path d="M154 196 L112 132" stroke="{CHALK}" stroke-width="17" stroke-linecap="square"/>
-  <path d="M186 196 L228 132" stroke="{CHALK}" stroke-width="17" stroke-linecap="square"/>
-  <path d="M150 282 L134 372" stroke="{CHALK}" stroke-width="19" stroke-linecap="square"/>
-  <path d="M190 282 L206 372" stroke="{CHALK}" stroke-width="19" stroke-linecap="square"/>
-  <!-- racket in the raised right hand -->
-  <ellipse cx="240" cy="108" rx="25" ry="31" stroke="{ORANGE}" stroke-width="8"/>
-  <path d="M232 136 L226 152" stroke="{ORANGE}" stroke-width="8"/>
+  <!-- player, both arms up. Joints: shoulder 170,192  hip 170,272 -->
+  <g stroke="{CHALK}" stroke-linecap="round" fill="none">
+    <path d="M170 176 V272" stroke-width="22"/>
+    <path d="M170 198 L118 138" stroke-width="16"/>
+    <path d="M170 198 L222 138" stroke-width="16"/>
+    <path d="M170 268 L136 366" stroke-width="18"/>
+    <path d="M170 268 L204 366" stroke-width="18"/>
+  </g>
+  <circle cx="170" cy="140" r="27" fill="{CHALK}"/>
+  <!-- racket, gripped in the raised right hand at 222,138 -->
+  <g stroke="{ORANGE}" fill="none" stroke-linecap="round">
+    <path d="M224 136 L240 112" stroke-width="9"/>
+    <ellipse cx="249" cy="88" rx="23" ry="28" stroke-width="9"/>
+  </g>
 </svg>'''
 
 STEPS = [
