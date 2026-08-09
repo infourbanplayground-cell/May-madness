@@ -43,6 +43,15 @@ ORANGE, CHALK, STEEL = '#F56530', '#F4F6FA', '#8B95A7'
 # Step 3 in the original reads: raise your hands to "Save it. Your last point
 # will be saved automatically — an unclosed quote and a missing full stop.
 # Rewritten rather than reproduced.
+CAMERA_SVG = f'''<svg class="cam" viewBox="0 0 132 84" fill="none"
+  xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <rect x="4" y="26" width="80" height="54" fill="{ORANGE}"/>
+  <path d="M92 44 L128 26 L128 80 L92 62 Z" fill="{ORANGE}"/>
+  <circle cx="30" cy="16" r="14" stroke="{ORANGE}" stroke-width="7"/>
+  <circle cx="64" cy="16" r="10" stroke="{ORANGE}" stroke-width="7"/>
+  <rect x="18" y="46" width="26" height="8" fill="{CHALK}"/>
+</svg>'''
+
 STEPS = [
     ('SCAN THE QR',      'Pick your court and how long you are playing for.'),
     ('START RECORDING',  'Tap <em>REC</em>. The court camera does the rest.'),
@@ -108,6 +117,8 @@ body{{width:1080px;height:1528px;overflow:hidden;position:relative;color:{CHALK}
 h1{{align-self:flex-start;margin-top:26px;font-family:Anton;font-size:96px;line-height:.92;
   letter-spacing:.01em;text-transform:uppercase}}
 h1 em{{font-style:normal;color:{ORANGE};text-shadow:0 0 44px rgba(245,101,48,.5)}}
+.cam{{height:74px;width:auto;margin-left:26px;vertical-align:-6px;
+  filter:drop-shadow(0 0 26px rgba(245,101,48,.55))}}
 .by{{align-self:flex-start;margin-top:16px;display:inline-flex;align-items:center;gap:12px;
   padding:10px 20px 8px;background:{ORANGE}}}
 .by b{{font-family:Anton;font-size:25px;letter-spacing:.05em;color:#fff}}
@@ -161,7 +172,7 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
     <div class="wm"><b>URBAN PLAYGROUND</b>COURT CAMERA</div>
   </div>
 
-  <h1>CAPTURE<br>YOUR <em>BEST</em><br>MOMENTS</h1>
+  <h1>CAPTURE{CAMERA_SVG}<br>YOUR <em>BEST</em><br>MOMENTS</h1>
   <div class="by"><span>POWERED BY</span><b>SAVE MY PLAY</b></div>
 
   <div class="steps">{steps_html}</div>
