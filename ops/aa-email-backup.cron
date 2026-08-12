@@ -1,0 +1,2 @@
+# Hourly check; sends only when a session has just been completed.
+20 * * * * root /usr/local/bin/aa-email-backup.sh

@@ -121,6 +121,32 @@ ssh urbanpadel 'nginx -t && systemctl reload nginx'
 - SMTP: `mail.urbanpadel.om:465` (SSL) or `:587` (STARTTLS)
 - Logs: `ssh urbanpadel 'tail -20 /var/log/mail.log'`
 
+## Backups
+
+| What | Where | Schedule |
+|---|---|---|
+| August Attack, emailed off-site | `/usr/local/bin/aa-email-backup.sh` (repo: `ops/`) | `/etc/cron.d/aa-email-backup` — hourly, **sends only when a session completes** |
+| July Heat, hourly local snapshot | `/usr/local/bin/jh-backup.sh` → `/opt/backups/july-heat` | `/etc/cron.d/jh-backup` — hourly |
+| ~~July Heat, emailed daily~~ | script still at `/usr/local/bin/jh-email-backup.sh` | **retired** — cron moved to `/root/jh-email-backup.cron.disabled` |
+
+The August Attack job runs hourly but only mails when the count of sessions
+with `completed:true` in `aa_tournament_state` exceeds the marker in
+`/var/lib/aa-backup/last-completed` — so it is one email per session night,
+not one a day. The marker is advanced **only after** sendmail accepts the
+message, so a failed send retries on the next hour rather than silently
+skipping that session's backup.
+
+To re-send the most recent session's backup by hand:
+
+```bash
+ssh urbanpadel 'echo $(( $(cat /var/lib/aa-backup/last-completed) - 1 )) \
+  > /var/lib/aa-backup/last-completed && /usr/local/bin/aa-email-backup.sh'
+```
+
+**Known gap:** `jh-backup` still snapshots the *finished* July Heat hourly,
+while August Attack has no local snapshots at all — its only off-site copy
+is the per-session email. Worth adding an `aa-backup.sh` mirror.
+
 ## Design
 
 Anything touching how the apps look or move — palette, type, motion, print
