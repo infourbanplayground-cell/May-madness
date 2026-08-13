@@ -1,84 +1,103 @@
 @import "tailwindcss";
 
-/* Urban Playground house skin — same language as the print set in
-   build_venue_art.py: court black, Urban orange, square corners, Anton
-   display, mono for anything numeric. See DESIGN.md. */
+/* Urban Playground house skin — warmer than the tournament apps on purpose.
+   The August Attack skin is meant to feel like a fixture list on a wall; a
+   shop has to feel like somewhere you'd hand over money, so the surfaces are
+   lifted off pure black, the accent is the house orange, and corners carry a
+   small radius instead of the series' hard 0. See DESIGN.md. */
 :root {
   --up-orange: #f56530;
-  --up-court: #0e0f13;
-  --up-deep: #08090c;
-  --up-chalk: #f4f6fa;
-  --up-steel: #8b95a7;
-  --up-panel: rgba(20, 22, 28, 0.92);
-  --up-hair: rgba(244, 246, 250, 0.12);
+  --up-orange-soft: #ff8a5c;
+  --up-court: #16171d;
+  --up-deep: #101116;
+  --up-chalk: #f6f4f2;
+  --up-steel: #9aa1ad;
+  --up-panel: #1d1f27;
+  --up-panel-hi: #252833;
+  --up-hair: rgba(246, 244, 242, 0.1);
+  --r: 10px;
 }
 
 html { color-scheme: dark; }
 
 body {
   background:
-    radial-gradient(ellipse 92% 30% at 50% 0%, rgba(245, 101, 48, 0.16), transparent 62%),
-    linear-gradient(180deg, #0a0b0f 0%, var(--up-court) 44%, var(--up-deep) 100%);
+    radial-gradient(ellipse 80% 26% at 50% 0%, rgba(245, 101, 48, 0.13), transparent 60%),
+    linear-gradient(180deg, #191a20 0%, var(--up-court) 40%, var(--up-deep) 100%);
   background-attachment: fixed;
   color: var(--up-chalk);
   font-family: Archivo, system-ui, sans-serif;
   min-height: 100vh;
 }
 
-/* Nothing in this brand is rounded. */
-* { border-radius: 0 !important; }
-
-.display { font-family: Anton, Impact, sans-serif; letter-spacing: 0.02em; }
+.display { font-family: Anton, Impact, sans-serif; letter-spacing: 0.01em; }
 .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
 
-/* The corner-tick plate, drawn as background gradients so it never collides
-   with a pseudo-element the way a ::before/::after implementation would. */
-.plate {
-  background-color: var(--up-panel);
-  background-image:
-    linear-gradient(var(--up-orange), var(--up-orange)),
-    linear-gradient(var(--up-orange), var(--up-orange));
-  background-size: 22px 3px, 3px 22px;
-  background-position: 0 0, 0 0;
-  background-repeat: no-repeat;
+/* Card surface. The orange corner tick is kept from the print set — it is the
+   one piece of the house language that still reads at small sizes — but it now
+   sits on a lifted, rounded panel rather than a hard black plate. */
+.card {
+  background: var(--up-panel);
+  border: 1px solid var(--up-hair);
+  border-radius: var(--r);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+              transform 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.18s;
 }
-.plate-br {
-  background-image:
-    linear-gradient(var(--up-orange), var(--up-orange)),
-    linear-gradient(var(--up-orange), var(--up-orange)),
-    linear-gradient(var(--up-orange), var(--up-orange)),
-    linear-gradient(var(--up-orange), var(--up-orange));
-  background-size: 22px 3px, 3px 22px, 22px 3px, 3px 22px;
-  background-position: 0 0, 0 0, 100% 100%, 100% 100%;
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 26px; height: 3px;
+  background: var(--up-orange);
+}
+a.card:hover {
+  background: var(--up-panel-hi);
+  border-color: rgba(245, 101, 48, 0.4);
+  transform: translateY(-2px);
 }
 
 .btn {
   background: var(--up-orange);
   color: #fff;
+  border-radius: var(--r);
   font-family: Anton, Impact, sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   transition: filter 0.16s cubic-bezier(0.23, 1, 0.32, 1),
               transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
 }
-.btn:hover { filter: brightness(1.12); }
+.btn:hover { filter: brightness(1.1); }
 .btn:active { transform: translateY(1px); }
-.btn:disabled { opacity: 0.4; filter: none; transform: none; cursor: not-allowed; }
+.btn:disabled { opacity: 0.38; filter: none; transform: none; cursor: not-allowed; }
 
 .btn-ghost {
   border: 1px solid var(--up-hair);
+  border-radius: var(--r);
   color: var(--up-chalk);
   transition: border-color 0.16s, background 0.16s;
 }
-.btn-ghost:hover { border-color: var(--up-orange); background: rgba(245, 101, 48, 0.08); }
+.btn-ghost:hover { border-color: var(--up-orange); background: rgba(245, 101, 48, 0.09); }
+.btn-ghost:disabled { opacity: 0.35; cursor: not-allowed; }
 
 input, textarea, select {
-  background: rgba(6, 7, 11, 0.6);
+  background: rgba(12, 13, 17, 0.7);
   border: 1px solid var(--up-hair);
+  border-radius: var(--r);
   color: var(--up-chalk);
 }
+input::placeholder, textarea::placeholder { color: #6d747f; }
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--up-orange);
+  box-shadow: 0 0 0 3px rgba(245, 101, 48, 0.16);
+}
+
+.pill {
+  border-radius: 999px;
+  background: rgba(245, 101, 48, 0.12);
+  color: var(--up-orange-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

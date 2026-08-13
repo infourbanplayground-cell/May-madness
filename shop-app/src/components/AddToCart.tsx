@@ -8,7 +8,7 @@ export default function AddToCart({ productId, stock }: { productId: string; sto
   if (stock <= 0) {
     return (
       <button disabled className="btn px-6 py-3 w-full sm:w-auto">
-        SOLD OUT
+        Sold out
       </button>
     )
   }
@@ -22,7 +22,7 @@ export default function AddToCart({ productId, stock }: { productId: string; sto
         setTimeout(() => setAdded(false), 1600)
       }}
     >
-      {added ? 'ADDED ✓' : 'ADD TO CART'}
+      {added ? 'Added ✓' : 'Add to cart'}
     </button>
   )
 }

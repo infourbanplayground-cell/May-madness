@@ -88,10 +88,10 @@ export default function CartPage() {
 
   if (rows.length === 0) {
     return (
-      <div className="plate plate-br p-8">
-        <h1 className="display text-3xl">YOUR CART IS EMPTY</h1>
+      <div className="card p-8">
+        <h1 className="display text-3xl">Your cart is empty</h1>
         <Link href="/" className="btn inline-block px-6 py-3 mt-5">
-          BROWSE THE SHOP
+          Browse the shop
         </Link>
       </div>
     )
@@ -99,7 +99,7 @@ export default function CartPage() {
 
   return (
     <div>
-      <h1 className="display text-4xl mb-6">YOUR CART</h1>
+      <h1 className="display text-4xl mb-6">Your cart</h1>
 
       {missing > 0 && (
         <p className="mono text-xs tracking-[.12em] text-[var(--up-orange)] mb-4">
@@ -107,7 +107,7 @@ export default function CartPage() {
         </p>
       )}
 
-      <div className="plate p-5">
+      <div className="card p-5">
         {rows.map(({ line, product }) => (
           <div
             key={product.id}
@@ -161,10 +161,10 @@ export default function CartPage() {
         </div>
       </div>
 
-      <form onSubmit={placeOrder} className="plate plate-br p-6 mt-6">
-        <h2 className="display text-2xl">WHO IS COLLECTING?</h2>
+      <form onSubmit={placeOrder} className="card p-6 mt-6">
+        <h2 className="display text-2xl">Who&apos;s collecting?</h2>
         <p className="text-sm text-[var(--up-steel)] mt-2">
-          We hold the order under your name. Nothing is charged now.
+          We&apos;ll hold it under your name. Nothing is charged now.
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2 mt-5">
@@ -210,7 +210,7 @@ export default function CartPage() {
         )}
 
         <button type="submit" disabled={placing} className="btn px-8 py-4 mt-6 w-full sm:w-auto">
-          {placing ? 'PLACING…' : 'RESERVE THIS ORDER'}
+          {placing ? 'Placing…' : 'Reserve this order'}
         </button>
       </form>
     </div>

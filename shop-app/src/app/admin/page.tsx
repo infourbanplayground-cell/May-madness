@@ -99,8 +99,8 @@ export default function Admin() {
 
   if (!authed) {
     return (
-      <form onSubmit={login} className="plate plate-br p-7 max-w-md">
-        <h1 className="display text-3xl">SHOP ADMIN</h1>
+      <form onSubmit={login} className="card p-7 max-w-md">
+        <h1 className="display text-3xl">Shop admin</h1>
         <input
           type="password"
           autoFocus
@@ -110,7 +110,7 @@ export default function Admin() {
           className="w-full mt-5 px-3 py-3"
         />
         {loginError && <p className="text-[var(--up-orange)] mt-3 font-semibold">{loginError}</p>}
-        <button className="btn px-6 py-3 mt-5 w-full">SIGN IN</button>
+        <button className="btn px-6 py-3 mt-5 w-full">Sign in</button>
       </form>
     )
   }
@@ -118,7 +118,7 @@ export default function Admin() {
   return (
     <div>
       <div className="flex items-center gap-3 mb-7">
-        <h1 className="display text-4xl flex-1">SHOP ADMIN</h1>
+        <h1 className="display text-4xl flex-1">Shop admin</h1>
         <button
           className="btn-ghost px-4 py-2 mono text-[11px] tracking-[.16em]"
           onClick={async () => {
@@ -153,7 +153,7 @@ export default function Admin() {
         <div className="space-y-3">
           {orders.length === 0 && <p className="text-[var(--up-steel)]">No orders yet.</p>}
           {orders.map((o) => (
-            <div key={o.ref} className="plate p-5">
+            <div key={o.ref} className="card p-5">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
                 <span className="display text-2xl">{o.ref}</span>
                 <span className="mono text-[11px] tracking-[.16em] text-[var(--up-orange)]">
@@ -203,7 +203,7 @@ export default function Admin() {
 
       {tab === 'products' && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <form onSubmit={saveProduct} className="plate plate-br p-6 h-fit">
+          <form onSubmit={saveProduct} className="card p-6 h-fit">
             <h2 className="display text-2xl">{form.id ? 'EDIT PRODUCT' : 'NEW PRODUCT'}</h2>
 
             <Field label="NAME">
@@ -264,7 +264,7 @@ export default function Admin() {
 
           <div className="space-y-3">
             {products.map((p) => (
-              <div key={p.id} className="plate p-4 flex items-center gap-4">
+              <div key={p.id} className="card p-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
                   <p className="display text-xl truncate">
                     {p.name}

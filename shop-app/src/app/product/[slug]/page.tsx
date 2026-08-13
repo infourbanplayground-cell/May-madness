@@ -52,7 +52,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <AddToCart productId={p.id} stock={p.stock} />
           </div>
 
-          <div className="plate plate-br p-5 mt-8">
+          <div className="card p-5 mt-8">
             <p className="mono text-[11px] tracking-[.2em] text-[var(--up-orange)]">
               HOW IT WORKS
             </p>

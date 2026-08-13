@@ -18,7 +18,7 @@ export default async function OrderPage({ params }: { params: Promise<{ ref: str
   if (!order) notFound()
 
   const statusLabel: Record<string, string> = {
-    pending: 'RESERVED — AWAITING PAYMENT',
+    pending: 'RESERVED · WE\u2019RE HOLDING IT',
     paid: 'PAID — READY TO COLLECT',
     collected: 'COLLECTED',
     cancelled: 'CANCELLED',
@@ -26,18 +26,18 @@ export default async function OrderPage({ params }: { params: Promise<{ ref: str
 
   return (
     <div>
-      <div className="plate plate-br p-7">
+      <div className="card p-7">
         <span className="mono text-[11px] tracking-[.24em] text-[var(--up-orange)]">
           {statusLabel[order.status] ?? order.status.toUpperCase()}
         </span>
-        <h1 className="display text-4xl sm:text-5xl mt-3">ORDER {order.ref}</h1>
+        <h1 className="display text-4xl sm:text-5xl mt-3">Order {order.ref}</h1>
         <p className="mt-3 text-[#c3cad6]">
           Thanks {order.name.split(' ')[0]} — we&apos;re holding this for you at the club.
           Quote <strong className="text-[var(--up-chalk)]">{order.ref}</strong> when you collect.
         </p>
       </div>
 
-      <div className="plate p-6 mt-5">
+      <div className="card p-6 mt-5">
         <h2 className="mono text-[11px] tracking-[.24em] text-[var(--up-orange)]">YOUR ORDER</h2>
         {order.items.map((i, idx) => (
           <div
@@ -61,7 +61,7 @@ export default async function OrderPage({ params }: { params: Promise<{ ref: str
       </div>
 
       {order.status === 'pending' && (
-        <div className="plate p-6 mt-5">
+        <div className="card p-6 mt-5">
           <h2 className="mono text-[11px] tracking-[.24em] text-[var(--up-orange)]">
             HOW TO PAY
           </h2>
@@ -86,7 +86,7 @@ export default async function OrderPage({ params }: { params: Promise<{ ref: str
               )}`}
               className="btn inline-block px-6 py-3 mt-6"
             >
-              SEND US A MESSAGE
+              Message us on WhatsApp
             </a>
           )}
         </div>
