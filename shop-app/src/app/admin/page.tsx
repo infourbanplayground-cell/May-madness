@@ -41,6 +41,7 @@ export default function Admin() {
   const [orders, setOrders] = useState<Order[]>([])
   const [form, setForm] = useState({ ...blank })
   const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
 
   const load = useCallback(async () => {
     const [p, o] = await Promise.all([
@@ -230,10 +231,39 @@ export default function Admin() {
                   className="w-full px-3 py-2" />
               </Field>
             </div>
-            <Field label="IMAGE URL (OPTIONAL)">
-              <input value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                placeholder="https://…" className="w-full px-3 py-2" />
+            <Field label="PHOTO">
+              <div className="flex items-start gap-3">
+                {form.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.imageUrl} alt="" className="w-20 h-20 object-cover shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="w-full px-3 py-2 text-sm"
+                    onChange={async (e) => {
+                      const f = e.target.files?.[0]
+                      if (!f) return
+                      setError(''); setUploading(true)
+                      const fd = new FormData(); fd.append('file', f)
+                      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+                      const data = await res.json()
+                      setUploading(false)
+                      // Reset so re-picking the same file still fires onChange.
+                      e.target.value = ''
+                      if (!res.ok) { setError(data.error ?? 'Upload failed'); return }
+                      setForm((f0) => ({ ...f0, imageUrl: data.url }))
+                    }}
+                  />
+                  <p className="mono text-[10px] text-[var(--up-steel)] mt-1">
+                    {uploading ? 'UPLOADING…' : 'JPEG, PNG OR WEBP · UP TO 6MB · OR PASTE A URL BELOW'}
+                  </p>
+                  <input value={form.imageUrl}
+                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                    placeholder="/uploads/… or https://…" className="w-full px-3 py-2 mt-2 text-sm" />
+                </div>
+              </div>
             </Field>
             <Field label="DESCRIPTION">
               <textarea rows={3} value={form.description}
