@@ -5,7 +5,7 @@ import fs from 'fs';
 // frame. Screen-recording this drifts (an earlier story came out 3.2x slow);
 // scrubbing lands on exact frame times with no retiming afterwards.
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const FPS = 30, SECONDS = 13;
+const FPS = 30, SECONDS = 22.5;
 const FRAMES = FPS * SECONDS;
 const DIR = `${SC}/_recap_frames`;
 
