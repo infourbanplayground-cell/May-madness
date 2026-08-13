@@ -20,6 +20,8 @@ export type Product = {
   stock: number
   imageUrl: string | null
   active: boolean
+  costBaisa: number | null
+  size: string | null
 }
 
 export type OrderItem = {
@@ -60,6 +62,10 @@ export async function initDB(): Promise<void> {
       active BOOLEAN NOT NULL DEFAULT true,
       created_at TIMESTAMPTZ DEFAULT now()
     );
+    -- Added after launch: landed cost per unit (for margin) and the size a
+    -- shoe SKU represents. Idempotent so initDB stays safe to re-run.
+    ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS cost_baisa INTEGER;
+    ALTER TABLE shop_products ADD COLUMN IF NOT EXISTS size TEXT;
     CREATE TABLE IF NOT EXISTS shop_orders (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       ref TEXT UNIQUE NOT NULL,
@@ -92,6 +98,8 @@ const toProduct = (r: Record<string, unknown>): Product => ({
   stock: Number(r.stock),
   imageUrl: (r.image_url as string) ?? null,
   active: Boolean(r.active),
+  costBaisa: r.cost_baisa == null ? null : Number(r.cost_baisa),
+  size: (r.size as string) ?? null,
 })
 
 export async function listProducts(includeInactive = false): Promise<Product[]> {
@@ -288,18 +296,25 @@ export async function upsertProduct(p: {
   stock: number
   imageUrl: string | null
   active: boolean
+  costBaisa?: number | null
+  size?: string | null
 }): Promise<void> {
   if (p.id) {
+    // cost and size are only overwritten when supplied, so editing a product
+    // in the admin form cannot silently wipe the imported cost.
     await pool.query(
       `UPDATE shop_products SET slug=$2,name=$3,category=$4,description=$5,
-       price_baisa=$6,stock=$7,image_url=$8,active=$9 WHERE id=$1`,
-      [p.id, p.slug, p.name, p.category, p.description, p.priceBaisa, p.stock, p.imageUrl, p.active],
+       price_baisa=$6,stock=$7,image_url=$8,active=$9,
+       cost_baisa=COALESCE($10, cost_baisa), size=COALESCE($11, size) WHERE id=$1`,
+      [p.id, p.slug, p.name, p.category, p.description, p.priceBaisa, p.stock,
+       p.imageUrl, p.active, p.costBaisa ?? null, p.size ?? null],
     )
   } else {
     await pool.query(
-      `INSERT INTO shop_products (slug,name,category,description,price_baisa,stock,image_url,active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
-      [p.slug, p.name, p.category, p.description, p.priceBaisa, p.stock, p.imageUrl, p.active],
+      `INSERT INTO shop_products (slug,name,category,description,price_baisa,stock,image_url,active,cost_baisa,size)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+      [p.slug, p.name, p.category, p.description, p.priceBaisa, p.stock,
+       p.imageUrl, p.active, p.costBaisa ?? null, p.size ?? null],
     )
   }
 }

@@ -11,6 +11,8 @@ type Product = {
   stock: number
   imageUrl: string | null
   active: boolean
+  costBaisa: number | null
+  size: string | null
 }
 type OrderItem = { name: string; qty: number; unitBaisa: number }
 type Order = {
@@ -263,6 +265,23 @@ export default function Admin() {
           </form>
 
           <div className="space-y-3">
+            {products.some((p) => p.costBaisa != null) && (() => {
+              const withCost = products.filter((p) => p.costBaisa != null)
+              const cost = withCost.reduce((n, p) => n + (p.costBaisa ?? 0) * p.stock, 0)
+              const retail = withCost.reduce((n, p) => n + p.priceBaisa * p.stock, 0)
+              const units = withCost.reduce((n, p) => n + p.stock, 0)
+              return (
+                <div className="card p-4 flex flex-wrap gap-x-8 gap-y-2">
+                  <Stat k="UNITS" v={String(units)} />
+                  <Stat k="COST" v={fmt(cost)} />
+                  <Stat k="RETAIL" v={fmt(retail)} />
+                  <Stat
+                    k="MARGIN"
+                    v={`${fmt(retail - cost)}  (${retail ? (((retail - cost) / retail) * 100).toFixed(1) : '0'}%)`}
+                  />
+                </div>
+              )
+            })()}
             {products.map((p) => (
               <div key={p.id} className="card p-4 flex items-center gap-4">
                 <div className="flex-1 min-w-0">
@@ -275,6 +294,16 @@ export default function Admin() {
                   <p className="mono text-xs text-[var(--up-steel)]">
                     {fmt(p.priceBaisa)} OMR · {p.stock} in stock · {p.category}
                   </p>
+                  {p.costBaisa != null && (
+                    <p className="mono text-xs text-[var(--up-steel)] mt-0.5">
+                      cost {fmt(p.costBaisa)} ·{' '}
+                      <span className="text-[var(--up-orange)]">
+                        {p.priceBaisa
+                          ? `${(((p.priceBaisa - p.costBaisa) / p.priceBaisa) * 100).toFixed(0)}% margin`
+                          : 'no price set'}
+                      </span>
+                    </p>
+                  )}
                 </div>
                 <button className="btn-ghost px-3 py-2 mono text-[10px] tracking-[.14em]"
                   onClick={() => setForm({
@@ -297,6 +326,15 @@ export default function Admin() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function Stat({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <div className="mono text-[10px] tracking-[.18em] text-[var(--up-steel)]">{k}</div>
+      <div className="display text-xl tabular-nums">{v}</div>
     </div>
   )
 }
