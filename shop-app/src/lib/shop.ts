@@ -319,6 +319,24 @@ export async function upsertProduct(p: {
   }
 }
 
+/**
+ * Partial update for the things edited most often — visibility, price, stock —
+ * so a row toggle does not have to round-trip every field and risk blanking
+ * the ones the caller did not send.
+ */
+export async function patchProduct(
+  id: string,
+  f: { active?: boolean; priceBaisa?: number; stock?: number },
+): Promise<void> {
+  const sets: string[] = []
+  const vals: unknown[] = [id]
+  if (f.active !== undefined) { vals.push(f.active); sets.push(`active=$${vals.length}`) }
+  if (f.priceBaisa !== undefined) { vals.push(f.priceBaisa); sets.push(`price_baisa=$${vals.length}`) }
+  if (f.stock !== undefined) { vals.push(f.stock); sets.push(`stock=$${vals.length}`) }
+  if (sets.length === 0) return
+  await pool.query(`UPDATE shop_products SET ${sets.join(',')} WHERE id=$1`, vals)
+}
+
 export async function deleteProduct(id: string): Promise<void> {
   await pool.query('DELETE FROM shop_products WHERE id=$1', [id])
 }

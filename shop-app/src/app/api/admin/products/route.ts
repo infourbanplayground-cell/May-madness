@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/adminAuth'
-import { deleteProduct, initDB, listProducts, upsertProduct } from '@/lib/shop'
+import { deleteProduct, initDB, listProducts, patchProduct, upsertProduct } from '@/lib/shop'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,6 +56,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 400 })
   }
   return NextResponse.json({ ok: true })
+}
+
+// Partial update: one or many ids, only the fields supplied. Used by the row
+// toggles and the bulk publish/hide actions.
+export async function PATCH(req: NextRequest) {
+  if (!(await isAdmin())) return NextResponse.json({ error: 'Unauthorised' }, { status: 401 })
+  await initDB()
+  const b = (await req.json().catch(() => ({}))) as Record<string, unknown>
+
+  const ids = Array.isArray(b.ids) ? b.ids.filter((x): x is string => typeof x === 'string') : []
+  if (ids.length === 0) return NextResponse.json({ error: 'No products given' }, { status: 400 })
+
+  const fields: { active?: boolean; priceBaisa?: number; stock?: number } = {}
+  if (typeof b.active === 'boolean') fields.active = b.active
+  if (b.price !== undefined) {
+    const omr = Number(b.price)
+    if (!Number.isFinite(omr) || omr < 0) {
+      return NextResponse.json({ error: 'Price must be a number' }, { status: 400 })
+    }
+    fields.priceBaisa = Math.round(omr * 1000)
+  }
+  if (b.stock !== undefined) {
+    const n = Math.floor(Number(b.stock))
+    if (!Number.isFinite(n) || n < 0) {
+      return NextResponse.json({ error: 'Stock must be zero or more' }, { status: 400 })
+    }
+    fields.stock = n
+  }
+  if (Object.keys(fields).length === 0) {
+    return NextResponse.json({ error: 'Nothing to change' }, { status: 400 })
+  }
+
+  for (const id of ids) await patchProduct(id, fields)
+  return NextResponse.json({ ok: true, updated: ids.length })
 }
 
 export async function DELETE(req: NextRequest) {
