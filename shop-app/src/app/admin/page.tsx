@@ -36,7 +36,8 @@ export default function Admin() {
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
-  const [tab, setTab] = useState<'orders' | 'products'>('orders')
+  const [tab, setTab] = useState<'orders' | 'products' | 'photos'>('orders')
+  const [busy, setBusy] = useState<string | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [form, setForm] = useState({ ...blank })
@@ -134,7 +135,7 @@ export default function Admin() {
       </div>
 
       <div className="flex gap-3 mb-6">
-        {(['orders', 'products'] as const).map((t) => (
+        {(['orders', 'products', 'photos'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -147,6 +148,9 @@ export default function Admin() {
               <span className="ml-2">
                 {orders.filter((o) => o.status === 'pending').length}
               </span>
+            )}
+            {t === 'photos' && (
+              <span className="ml-2">{products.filter((p) => !p.imageUrl).length}</span>
             )}
           </button>
         ))}
@@ -201,6 +205,80 @@ export default function Admin() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+
+      {tab === 'photos' && (
+        <div>
+          <div className="card p-5 mb-5">
+            <h2 className="display text-xl">Add photos</h2>
+            <p className="text-sm text-[var(--up-steel)] mt-2 leading-relaxed">
+              Click any tile to attach a photo — it uploads and saves straight
+              away, no need to open the product. Save the images from your
+              supplier&apos;s site first, or shoot the item on your phone.
+            </p>
+            <p className="mono text-[11px] tracking-[.14em] text-[var(--up-orange)] mt-3">
+              {products.filter((p) => !p.imageUrl).length} OF {products.length} STILL WITHOUT A PHOTO
+            </p>
+          </div>
+
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            {[...products]
+              .sort((a, b) => Number(!!a.imageUrl) - Number(!!b.imageUrl))
+              .map((p) => (
+                <label
+                  key={p.id}
+                  className={`card p-3 cursor-pointer block ${busy === p.id ? 'opacity-50' : ''}`}
+                >
+                  <div className="w-full h-28 bg-[#0f1015] flex items-center justify-center overflow-hidden">
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="mono text-[10px] tracking-[.14em] text-[var(--up-steel)]">
+                        {busy === p.id ? 'UPLOADING…' : '+ ADD PHOTO'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs mt-2 leading-tight line-clamp-2">{p.name}</p>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      e.target.value = ''
+                      if (!file) return
+                      setError(''); setBusy(p.id)
+                      try {
+                        const fd = new FormData(); fd.append('file', file)
+                        const up = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+                        const upData = await up.json()
+                        if (!up.ok) { setError(upData.error ?? 'Upload failed'); return }
+                        // Send the whole product back, or the save would blank
+                        // the fields this form is not showing.
+                        const save = await fetch('/api/admin/products', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            id: p.id, slug: p.slug, name: p.name, category: p.category,
+                            description: p.description, price: fmt(p.priceBaisa),
+                            stock: p.stock, imageUrl: upData.url, active: p.active,
+                          }),
+                        })
+                        if (!save.ok) {
+                          const d = await save.json()
+                          setError(d.error ?? 'Could not attach the photo'); return
+                        }
+                        await load()
+                      } finally { setBusy(null) }
+                    }}
+                  />
+                </label>
+              ))}
+          </div>
+          {error && <p className="text-[var(--up-orange)] mt-4 font-semibold">{error}</p>}
         </div>
       )}
 
