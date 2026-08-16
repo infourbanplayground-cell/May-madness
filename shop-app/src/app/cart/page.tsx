@@ -161,7 +161,7 @@ export default function CartPage() {
         </div>
       </div>
 
-      <form onSubmit={placeOrder} className="card p-6 mt-6">
+      <form id="reserve-form" onSubmit={placeOrder} className="card p-6 mt-6">
         <h2 className="display text-2xl">Who&apos;s collecting?</h2>
         <p className="text-sm text-[var(--up-steel)] mt-2">
           We&apos;ll hold it under your name. Nothing is charged now.
@@ -209,10 +209,30 @@ export default function CartPage() {
           </p>
         )}
 
-        <button type="submit" disabled={placing} className="btn px-8 py-4 mt-6 w-full sm:w-auto">
+        <button type="submit" disabled={placing} className="hidden sm:inline-block btn px-8 py-4 mt-6">
           {placing ? 'Placing…' : 'Reserve this order'}
         </button>
       </form>
+
+      {/* Mobile: total + submit pinned to the bottom, wired to the form above
+          via the form= attribute so the browser still runs its validation
+          (name, phone) even though the button lives outside the <form>. */}
+      <div className="sm:hidden fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-6 bg-[rgba(16,17,22,.96)] backdrop-blur border-t border-[var(--up-hair)]">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="mono text-[8.5px] tracking-[.18em] text-[var(--up-steel)]">
+              {rows.length} ITEM{rows.length > 1 ? 'S' : ''} · PAY AT THE CLUB
+            </div>
+            <div className="display text-xl mt-0.5 tabular-nums">
+              {fmt(total)} <span className="text-[var(--up-orange)] text-sm">OMR</span>
+            </div>
+          </div>
+          <button type="submit" form="reserve-form" disabled={placing} className="btn flex-none px-5 py-3.5">
+            {placing ? 'PLACING…' : 'RESERVE THESE'}
+          </button>
+        </div>
+      </div>
+      <div className="sm:hidden h-24" />
     </div>
   )
 }

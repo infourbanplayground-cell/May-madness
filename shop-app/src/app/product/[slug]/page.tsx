@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { getProduct, fmtOMR, initDB } from '@/lib/shop'
-import AddToCart from '@/components/AddToCart'
+import { getProduct, listProducts, initDB } from '@/lib/shop'
+import { groupProducts } from '@/lib/group'
+import ProductPurchase from '@/components/ProductPurchase'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const { slug } = await params
   const p = await getProduct(slug)
   if (!p || !p.active) notFound()
+
+  // Re-derive the model group from the live catalogue rather than trusting
+  // the URL alone, so sibling sizes always match what's actually in stock.
+  const all = await listProducts()
+  const group = groupProducts(all).find((g) => g.variants.some((v) => v.slug === slug))
+  const variants = group?.variants ?? [p]
 
   return (
     <div>
@@ -31,15 +38,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <span className="mono text-[11px] tracking-[.24em] text-[var(--up-orange)]">
             {p.category.toUpperCase()}
           </span>
-          <h1 className="display text-4xl sm:text-5xl mt-2 leading-[0.95]">{p.name}</h1>
+          <h1 className="display text-4xl sm:text-5xl mt-2 leading-[0.95]">{group?.name ?? p.name}</h1>
 
           <p className="display text-4xl mt-5 tabular-nums">
-            {fmtOMR(p.priceBaisa)}
+            {(p.priceBaisa / 1000).toFixed(3)}
             <span className="text-[var(--up-orange)] text-2xl ml-2">OMR</span>
-          </p>
-
-          <p className="mono text-xs tracking-[.14em] text-[var(--up-steel)] mt-2">
-            {p.stock > 0 ? `${p.stock} IN STOCK` : 'SOLD OUT'}
           </p>
 
           {p.description && (
@@ -48,11 +51,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </p>
           )}
 
-          <div className="mt-7">
-            <AddToCart productId={p.id} stock={p.stock} />
-          </div>
+          <ProductPurchase
+            variants={variants.map((v) => ({
+              id: v.id,
+              size: v.size,
+              priceBaisa: v.priceBaisa,
+              stock: v.stock,
+            }))}
+          />
 
-          <div className="card p-5 mt-8">
+          <div className="card p-5 mt-2 sm:mt-8">
             <p className="mono text-[11px] tracking-[.2em] text-[var(--up-orange)]">
               HOW IT WORKS
             </p>

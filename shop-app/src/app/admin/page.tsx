@@ -20,11 +20,15 @@ export default function Admin() {
   const [authed, setAuthed] = useState<boolean | null>(null)
   const [password, setPassword] = useState('')
   const [loginError, setLoginError] = useState('')
-  const [tab, setTab] = useState<'orders' | 'products' | 'photos'>('orders')
+  const [tab, setTab] = useState<'orders' | 'stock' | 'products' | 'photos'>('orders')
   const [busy, setBusy] = useState<string | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [error, setError] = useState('')
+
+  const pendingCount = orders.filter((o) => o.status === 'pending').length
+  const lowStockCount = products.filter((p) => p.active && p.stock > 0 && p.stock <= 2).length
+  const noPhotoCount = products.filter((p) => p.active && !p.imageUrl).length
 
   const load = useCallback(async () => {
     const [p, o] = await Promise.all([
@@ -67,6 +71,21 @@ export default function Admin() {
     load()
   }
 
+  async function bumpStock(id: string, next: number) {
+    if (next < 0) return
+    setBusy(id)
+    try {
+      await fetch('/api/admin/products', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id], stock: next }),
+      })
+      await load()
+    } finally {
+      setBusy(null)
+    }
+  }
+
   if (authed === null) return <p className="mono text-sm text-[var(--up-steel)]">LOADING…</p>
 
   if (!authed) {
@@ -102,8 +121,30 @@ export default function Admin() {
         </button>
       </div>
 
-      <div className="flex gap-3 mb-6">
-        {(['orders', 'products', 'photos'] as const).map((t) => (
+      {(pendingCount > 0 || lowStockCount > 0 || noPhotoCount > 0) && (
+        <div className="card p-4 mb-6 border border-[rgba(245,101,48,.35)] bg-[rgba(245,101,48,.08)]">
+          <div className="mono text-[10px] tracking-[.18em] text-[var(--up-orange-soft)]">
+            NEEDS YOU NOW
+          </div>
+          <div className="flex flex-wrap gap-6 mt-2.5">
+            <button onClick={() => setTab('orders')} className="text-left">
+              <div className="display text-2xl">{pendingCount}</div>
+              <div className="mono text-[9px] tracking-[.14em] text-[#c3cad6]">PENDING</div>
+            </button>
+            <button onClick={() => setTab('stock')} className="text-left">
+              <div className="display text-2xl">{lowStockCount}</div>
+              <div className="mono text-[9px] tracking-[.14em] text-[#c3cad6]">LOW STOCK</div>
+            </button>
+            <button onClick={() => setTab('photos')} className="text-left">
+              <div className="display text-2xl">{noPhotoCount}</div>
+              <div className="mono text-[9px] tracking-[.14em] text-[#c3cad6]">NO PHOTO</div>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-3 mb-6 flex-wrap">
+        {(['orders', 'stock', 'products', 'photos'] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -111,15 +152,10 @@ export default function Admin() {
               tab === t ? 'btn' : 'btn-ghost'
             }`}
           >
-            {t.toUpperCase()}
-            {t === 'orders' && (
-              <span className="ml-2">
-                {orders.filter((o) => o.status === 'pending').length}
-              </span>
-            )}
-            {t === 'photos' && (
-              <span className="ml-2">{products.filter((p) => !p.imageUrl).length}</span>
-            )}
+            {t === 'stock' ? 'LOW STOCK' : t.toUpperCase()}
+            {t === 'orders' && <span className="ml-2">{pendingCount}</span>}
+            {t === 'stock' && <span className="ml-2">{lowStockCount}</span>}
+            {t === 'photos' && <span className="ml-2">{noPhotoCount}</span>}
           </button>
         ))}
       </div>
@@ -176,6 +212,51 @@ export default function Admin() {
         </div>
       )}
 
+      {tab === 'stock' && (
+        <div>
+          <p className="text-sm text-[var(--up-steel)] mb-4">
+            Lowest stock first. Change a number here and it saves — no need to open the product.
+          </p>
+          <div className="space-y-2">
+            {[...products]
+              .filter((p) => p.active)
+              .sort((a, b) => a.stock - b.stock)
+              .map((p) => (
+                <div key={p.id} className="card flex items-center gap-3 p-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold truncate">{p.name}</div>
+                    <div className="mono text-[10px] tracking-[.14em] text-[var(--up-steel)] mt-1">
+                      {p.category}{p.size ? ` · EU ${p.size}` : ''}
+                    </div>
+                  </div>
+                  <button
+                    aria-label={`Decrease stock for ${p.name}`}
+                    disabled={busy === p.id || p.stock <= 0}
+                    className="btn-ghost w-8 h-8 leading-none flex-none"
+                    onClick={() => bumpStock(p.id, p.stock - 1)}
+                  >
+                    −
+                  </button>
+                  <span
+                    className={`display text-lg w-7 text-center tabular-nums flex-none ${
+                      p.stock <= 1 ? 'text-[var(--up-orange)]' : ''
+                    }`}
+                  >
+                    {p.stock}
+                  </span>
+                  <button
+                    aria-label={`Increase stock for ${p.name}`}
+                    disabled={busy === p.id}
+                    className="btn-ghost w-8 h-8 leading-none flex-none"
+                    onClick={() => bumpStock(p.id, p.stock + 1)}
+                  >
+                    +
+                  </button>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
       {tab === 'photos' && (
         <div>
