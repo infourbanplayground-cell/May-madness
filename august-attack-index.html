@@ -842,6 +842,21 @@ const LOCAL_KEY = "july-heat-state-v1";
 const ADMIN_KEY = "july-heat-admin";
 const TOKEN_KEY = "july-heat-token";
 
+// ── WHO IS HOLDING THE PHONE ──────────────────────────────────────────────
+// A local preference, not a login. It personalises the view and must never
+// gate anything — scoring stays behind the admin token. Anyone can pick any
+// name, which is fine for "show me my row" and unacceptable for "let me
+// edit scores", so the two are kept entirely separate.
+// New key on purpose: the july-heat-* keys above are load-bearing and are
+// documented as never-rename.
+const ME_KEY = "aa-me";
+function getMe() { try { return localStorage.getItem(ME_KEY) || ""; } catch (e) { return ""; } }
+function saveMe(id) { try { id ? localStorage.setItem(ME_KEY, id) : localStorage.removeItem(ME_KEY); } catch (e) {} }
+
+// Rank is always taken over the players who have actually played, so the
+// number here matches the number the RANK tab shows.
+function hasPlayedEntry(e) { return e.stats.groupPlayed > 0 || e.stats.qfReached > 0; }
+
 function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; } }
 function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); } catch (e) {} }
 
@@ -1741,6 +1756,150 @@ function Input({ value, onChange, placeholder, className = "", type = "text", au
   return <input type={type} value={value || ""} onChange={e => onChange(e.target.value)} placeholder={placeholder} autoFocus={autoFocus} className={className} style={{width:"100%",background:"#fff",border:"1px solid rgba(244,246,250,.10)",borderRadius:0,padding:"12px 14px",color:"#F4F6FA",fontFamily:"'Archivo',sans-serif",fontSize:"16px",fontWeight:700,outline:"none"}} onFocus={e=>e.target.style.borderColor="var(--red)"} onBlur={e=>e.target.style.borderColor="var(--ink)"} />;
 }
 
+// ── YOUR STANDING ────────────────────────────────────────────────────────
+// The first thing on HOME once the phone knows who it belongs to. Answers
+// "where do I stand" without a scroll: rank, points, movement since the last
+// session, and the gap to the place above.
+function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
+  const played = leaderboard.filter(hasPlayedEntry);
+
+  // Rank a session ago, so movement is real rather than decorative. Same
+  // method the RANK tab uses: rebuild the table over sessions minus the last.
+  const prevRank = useMemo(() => {
+    const ss = state.sessions || [];
+    if (ss.length < 2) return null;
+    const board = state.players
+      .map(pl => ({ id: pl.id, s: calcPlayerStats(pl.id, ss.slice(0, -1)) }))
+      .filter(e => e.s.stats.groupPlayed > 0 || e.s.stats.qfReached > 0)
+      .sort((a, b) => b.s.totalPts - a.s.totalPts);
+    const m = {}; board.forEach((e, i) => { m[e.id] = i + 1; });
+    return m;
+  }, [state.players, state.sessions]);
+
+  if (!meId || !played.some(e => e.player.id === meId)) {
+    return (
+      <button onClick={onOpenPicker}
+        style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+                background:"rgba(20,24,36,.92)",border:"1px solid rgba(255,46,67,.35)",borderRadius:0,
+                padding:"16px 16px 14px",cursor:"pointer",textAlign:"left"}}>
+        <span>
+          <span style={{display:"block",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
+                        letterSpacing:".22em",color:"#FF2E43"}}>YOUR STANDING</span>
+          <span style={{display:"block",marginTop:6,fontFamily:"'Anton',cursive",fontSize:24,letterSpacing:1,
+                        color:"#F4F6FA",lineHeight:1}}>WHICH ONE ARE YOU?</span>
+          <span style={{display:"block",marginTop:6,fontFamily:"'Archivo',sans-serif",fontSize:12,color:"#8B95A7"}}>
+            Tap once to follow your own rank</span>
+        </span>
+        <span style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:20,
+                      color:"#FF2E43"}}>&rarr;</span>
+      </button>
+    );
+  }
+
+  const i    = played.findIndex(e => e.player.id === meId);
+  const me   = played[i];
+  const rank = i + 1;
+  const above = i > 0 ? played[i - 1] : null;
+  const gap   = above ? above.totalPts - me.totalPts : 0;
+  const was   = prevRank ? prevRank[meId] : null;
+  const delta = (was && was !== rank) ? was - rank : 0;
+
+  const box = { flex:1, background:"rgba(10,12,18,.55)", border:"1px solid rgba(244,246,250,.08)",
+                padding:"10px 8px 9px", textAlign:"center" };
+  const num = { fontFamily:"'Anton',cursive", fontSize:26, lineHeight:1, color:"#F4F6FA" };
+  const cap = { display:"block", marginTop:5, fontFamily:"'JetBrains Mono',monospace", fontWeight:700,
+                fontSize:9, letterSpacing:".14em", color:"#8B95A7" };
+
+  return (
+    <div style={{background:"rgba(20,24,36,.92)",border:"1px solid rgba(255,46,67,.35)",
+                 borderRadius:0,padding:"14px 14px 13px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
+        <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
+                      letterSpacing:".22em",color:"#FF2E43"}}>YOUR STANDING</span>
+        <button onClick={onOpenPicker}
+          style={{background:"none",border:"none",cursor:"pointer",padding:"2px 0",
+                  fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
+                  letterSpacing:".14em",color:"#8B95A7"}}>NOT YOU?</button>
+      </div>
+
+      <div onClick={() => setTab("leaderboard")} style={{display:"flex",alignItems:"baseline",gap:10,cursor:"pointer"}}>
+        <span style={{fontFamily:"'Anton',cursive",fontSize:52,lineHeight:.85,color:"#FF2E43"}}>
+          {rank}<span style={{fontSize:20,color:"#8B95A7"}}>{rank===1?"st":rank===2?"nd":rank===3?"rd":"th"}</span></span>
+        <span style={{flex:1,minWidth:0,fontFamily:"'Anton',cursive",fontSize:23,letterSpacing:.5,color:"#F4F6FA",
+                      lineHeight:1.05,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+          {me.player.name.toUpperCase()}</span>
+      </div>
+
+      <div style={{display:"flex",gap:8,marginTop:12}}>
+        <div style={box}><span style={num}>{me.totalPts}</span><span style={cap}>POINTS</span></div>
+        <div style={box}>
+          <span style={{...num, color: delta > 0 ? "#27E08A" : delta < 0 ? "#FF2E43" : "#8B95A7"}}>
+            {delta > 0 ? "\u25B2" + delta : delta < 0 ? "\u25BC" + Math.abs(delta) : "\u2013"}</span>
+          <span style={cap}>SINCE LAST</span>
+        </div>
+        <div style={box}>
+          <span style={num}>{above ? gap : "\u2013"}</span>
+          <span style={cap}>{above ? "BEHIND " + rank_ordinal(rank - 1) : "TOP SPOT"}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+function rank_ordinal(n) { return n + (n===1?"ST":n===2?"ND":n===3?"RD":"TH"); }
+
+// ── "Which one are you?" ──────────────────────────────────────────────────
+// Searchable because 73 names is too many to scan, and a shared phone needs
+// to be able to switch without clearing storage by hand.
+function MePicker({ leaderboard, meId, onPick, onClear, onClose }) {
+  const [q, setQ] = useState("");
+  const played = leaderboard.filter(hasPlayedEntry);
+  const shown = q ? played.filter(e => e.player.name.toLowerCase().includes(q.toLowerCase())) : played;
+  return (
+    <Modal open={true} onClose={onClose} title="WHICH ONE ARE YOU?">
+      <div style={{fontFamily:"'Archivo',sans-serif",fontSize:13,lineHeight:1.5,color:"#8B95A7",marginBottom:14}}>
+        Saved on this phone only. No account, and it never unlocks scoring.
+      </div>
+      <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search your name"
+        style={{width:"100%",background:"rgba(10,12,18,.9)",border:"1px solid rgba(244,246,250,.14)",
+                color:"#F4F6FA",padding:"12px 14px",fontFamily:"'Archivo',sans-serif",fontSize:15,
+                outline:"none",borderRadius:0,marginBottom:12}} />
+      <div style={{maxHeight:"46vh",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+        {shown.map((e, i) => {
+          const mine = e.player.id === meId;
+          return (
+            <button key={e.player.id} onClick={() => onPick(e.player.id)}
+              style={{width:"100%",display:"flex",alignItems:"center",gap:12,textAlign:"left",
+                      background: mine ? "rgba(255,46,67,.12)" : "rgba(10,12,18,.6)",
+                      border:"1px solid " + (mine ? "rgba(255,46,67,.5)" : "rgba(244,246,250,.08)"),
+                      borderRadius:0,padding:"11px 12px",marginBottom:6,cursor:"pointer"}}>
+              <span style={{flex:"0 0 auto",width:34,textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
+                            fontWeight:700,fontSize:12,color:"#8B95A7"}}>{played.indexOf(e) + 1}</span>
+              <span style={{flex:1,minWidth:0,fontFamily:"'Anton',cursive",fontSize:19,letterSpacing:.5,
+                            color:"#F4F6FA",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                {e.player.name.toUpperCase()}</span>
+              <span style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                            fontSize:12,color:"#8B95A7"}}>{e.totalPts} PTS</span>
+            </button>
+          );
+        })}
+        {shown.length === 0 && (
+          <div style={{padding:"18px 4px",fontFamily:"'Archivo',sans-serif",fontSize:14,color:"#8B95A7"}}>
+            No one by that name has played yet.
+          </div>
+        )}
+      </div>
+      {meId && (
+        <button onClick={onClear}
+          style={{marginTop:12,width:"100%",background:"none",border:"1px solid rgba(244,246,250,.14)",
+                  color:"#8B95A7",padding:"11px",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
+                  fontSize:11,letterSpacing:".16em",cursor:"pointer",borderRadius:0}}>
+          NOT ME — FORGET THIS PHONE
+        </button>
+      )}
+    </Modal>
+  );
+}
+
 function Modal({ open, onClose, title, children }) {
   if (!open) return null;
   return (
@@ -1903,6 +2062,12 @@ function App() {
   const canScore = role === "admin" || role === "scorer";
   const canUploadPhotos = role === "admin" || role === "scorer" || role === "photographer";
   const [showLogin, setShowLogin] = useState(false);
+  // Who this phone belongs to. Deliberately separate from `role`: identity
+  // personalises the view, the token authorises changes.
+  const [meId, setMeId] = useState(getMe);
+  const [showMe, setShowMe] = useState(false);
+  const pickMe  = (id) => { setMeId(id); saveMe(id); setShowMe(false); };
+  const clearMe = ()   => { setMeId(""); saveMe(""); setShowMe(false); };
   const [theme, setTheme] = useState(() => localStorage.getItem("jh-theme") || "dark");
   const [sync, setSync] = useState("idle");
   const [syncErr, setSyncErr] = useState("");
@@ -2073,10 +2238,10 @@ function App() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-4 pb-24">
-        {tab === "dashboard" && <DashboardView state={state} leaderboard={leaderboard} setTab={setTab} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} />}
+        {tab === "dashboard" && <DashboardView state={state} leaderboard={leaderboard} setTab={setTab} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} meId={meId} onOpenPicker={() => setShowMe(true)} />}
         {tab === "players" && isAdmin && <PlayersView state={state} update={update} setOpenPlayerId={setOpenPlayerId} isAdmin={isAdmin} />}
         {tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} />}
-        {tab === "leaderboard" && <LeaderboardView leaderboard={leaderboard} state={state} setOpenPlayerId={setOpenPlayerId} />}
+        {tab === "leaderboard" && <LeaderboardView leaderboard={leaderboard} state={state} setOpenPlayerId={setOpenPlayerId} meId={meId} onOpenPicker={() => setShowMe(true)} />}
         {tab === "settings" && isAdmin && <SettingsView state={state} update={update} setTab={setTab} logout={logout} />}
       </main>
 
@@ -2099,6 +2264,7 @@ function App() {
       {currentSession && <SessionDetail session={currentSession} state={state} isAdmin={isAdmin} canScore={canScore} canUploadPhotos={canUploadPhotos} sync={sync} syncErr={syncErr} onClose={() => setOpenSessionId(null)} updateSession={(fn) => updateSession(currentSession.id, fn)} update={update} deleteSession={() => { update(s => ({ ...s, sessions: s.sessions.filter(ss => ss.id !== currentSession.id) })); setOpenSessionId(null); }} leaderboard={leaderboard} />}
       {openPlayerId && <PlayerDetail playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
+      {showMe && <MePicker leaderboard={leaderboard} meId={meId} onPick={pickMe} onClear={clearMe} onClose={() => setShowMe(false)} />}
     </div>
   );
 }
@@ -2137,7 +2303,7 @@ function LoginModal({ onClose, onLogin }) {
 // ═══════════════════════════════════════════════════════════════
 // VIEWS
 // ═══════════════════════════════════════════════════════════════
-function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }) {
+function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, meId, onOpenPicker }) {
   // HOW TO SCORE is read once and then sits permanently between the standings
   // and the end of the page — roughly 1,500pt of it. Collapsed by default;
   // the rules are unchanged, they just stop costing a scroll every visit.
@@ -2174,6 +2340,10 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin }
           <div style={{marginTop:14}}><span className="jh-mock-caption">MON &amp; WED · 5:30 PM · <b>ALL AUGUST</b></span></div>
         </div>
       </div>
+
+      {/* ── YOUR STANDING — the first thing on HOME that is about the reader ── */}
+      <YourStanding leaderboard={leaderboard} state={state} meId={meId}
+                    onOpenPicker={onOpenPicker} setTab={setTab} />
 
       {/* ── Stats ────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-2">
@@ -4571,7 +4741,7 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
   </Modal>;
 }
 
-function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
+function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPicker }) {
   const [mode, setMode] = useState("season"); // "season" | "lifetime"
   const hasLifetime = leaderboard.some(e => {
     const p = e.player;
@@ -4691,6 +4861,50 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId }) {
               </div>
             ) : <div key={"slot"+rank} />)}
           </div>
+
+          {/* ── YOUR ROW, PINNED ──
+              Rank 58 should not have to scroll past 57 strangers to find
+              itself. Pinned above the field, and only when the player is
+              outside the podium — inside it they are already on screen. */}
+          {(() => {
+            const mi = meId ? list.findIndex(e => e.player.id === meId) : -1;
+            if (mi < 3) return null;
+            const e = list[mi], en = enrich(e), mv = moveOf(e, mi);
+            return (
+              <div style={{marginTop:14}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:6}}>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
+                                letterSpacing:".22em",color:"#FF2E43"}}>YOU</span>
+                  <button onClick={onOpenPicker} style={{background:"none",border:"none",cursor:"pointer",
+                          fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
+                          letterSpacing:".14em",color:"#8B95A7",padding:"2px 0"}}>NOT YOU?</button>
+                </div>
+                <div className="jh-mock-row" onClick={() => setOpenPlayerId(e.player.id)}
+                     style={{transform:"none",border:"1px solid rgba(255,46,67,.5)",
+                             background:"rgba(255,46,67,.08)",cursor:"pointer"}}>
+                  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:22}}>
+                    <div className="jh-mock-rank" style={{background:"rgba(20,24,36,.85)",margin:0}}>{mi + 1}</div>
+                    {mode === "season" && <MoveChip mv={mv} />}
+                  </div>
+                  <Avatar player={e.player} size={38} />
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontFamily:"'Anton',cursive",fontSize:21,letterSpacing:.5,color:"#F4F6FA",
+                                 lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                      {e.player.name.toUpperCase()}</div>
+                    <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",
+                                 letterSpacing:".06em",color:"#8B95A7",marginTop:3,textTransform:"uppercase",
+                                 display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                      <span>{e.stats.sessionsPlayed} SESS</span>
+                      <span>{en.winRate}% WIN</span>
+                      {en.form.length > 0 && <FormStrip form={en.form} />}
+                    </div>
+                  </div>
+                  <div style={{fontFamily:"'Anton',cursive",fontSize:28,color:"#FF2E43",whiteSpace:"nowrap"}}>
+                    {ptsOf(e)}<span style={{fontSize:12,color:"#8B95A7",marginLeft:3}}>PTS</span></div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ── REST OF FIELD ── */}
           {rest.length > 0 && (
