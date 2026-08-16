@@ -1,0 +1,269 @@
+'use client'
+import { useCallback, useEffect, useState } from 'react'
+import ProductsTab, { type Product } from '@/components/ProductsTab'
+
+type OrderItem = { name: string; qty: number; unitBaisa: number }
+type Order = {
+  ref: string
+  name: string
+  phone: string
+  note: string | null
+  status: string
+  totalBaisa: number
+  createdAt: string
+  items: OrderItem[]
+}
+
+const fmt = (b: number) => (b / 1000).toFixed(3)
+
+export default function Admin() {
+  const [authed, setAuthed] = useState<boolean | null>(null)
+  const [password, setPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [tab, setTab] = useState<'orders' | 'products' | 'photos'>('orders')
+  const [busy, setBusy] = useState<string | null>(null)
+  const [products, setProducts] = useState<Product[]>([])
+  const [orders, setOrders] = useState<Order[]>([])
+  const [error, setError] = useState('')
+
+  const load = useCallback(async () => {
+    const [p, o] = await Promise.all([
+      fetch('/api/admin/products'),
+      fetch('/api/admin/orders'),
+    ])
+    if (p.status === 401 || o.status === 401) {
+      setAuthed(false)
+      return
+    }
+    setProducts(await p.json())
+    setOrders(await o.json())
+    setAuthed(true)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  async function login(e: React.FormEvent) {
+    e.preventDefault()
+    setLoginError('')
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    })
+    if (!res.ok) {
+      setLoginError('Wrong password')
+      return
+    }
+    setPassword('')
+    load()
+  }
+
+  async function setStatus(ref: string, status: string) {
+    await fetch('/api/admin/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ref, status }),
+    })
+    load()
+  }
+
+  if (authed === null) return <p className="mono text-sm text-[var(--up-steel)]">LOADING…</p>
+
+  if (!authed) {
+    return (
+      <form onSubmit={login} className="card p-7 max-w-md">
+        <h1 className="display text-3xl">Shop admin</h1>
+        <input
+          type="password"
+          autoFocus
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full mt-5 px-3 py-3"
+        />
+        {loginError && <p className="text-[var(--up-orange)] mt-3 font-semibold">{loginError}</p>}
+        <button className="btn px-6 py-3 mt-5 w-full">Sign in</button>
+      </form>
+    )
+  }
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-7">
+        <h1 className="display text-4xl flex-1">Shop admin</h1>
+        <button
+          className="btn-ghost px-4 py-2 mono text-[11px] tracking-[.16em]"
+          onClick={async () => {
+            await fetch('/api/admin/login', { method: 'DELETE' })
+            setAuthed(false)
+          }}
+        >
+          SIGN OUT
+        </button>
+      </div>
+
+      <div className="flex gap-3 mb-6">
+        {(['orders', 'products', 'photos'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-5 py-2 mono text-[11px] tracking-[.18em] ${
+              tab === t ? 'btn' : 'btn-ghost'
+            }`}
+          >
+            {t.toUpperCase()}
+            {t === 'orders' && (
+              <span className="ml-2">
+                {orders.filter((o) => o.status === 'pending').length}
+              </span>
+            )}
+            {t === 'photos' && (
+              <span className="ml-2">{products.filter((p) => !p.imageUrl).length}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'orders' && (
+        <div className="space-y-3">
+          {orders.length === 0 && <p className="text-[var(--up-steel)]">No orders yet.</p>}
+          {orders.map((o) => (
+            <div key={o.ref} className="card p-5">
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span className="display text-2xl">{o.ref}</span>
+                <span className="mono text-[11px] tracking-[.16em] text-[var(--up-orange)]">
+                  {o.status.toUpperCase()}
+                </span>
+                <span className="flex-1" />
+                <span className="display text-2xl tabular-nums">{fmt(o.totalBaisa)} OMR</span>
+              </div>
+
+              <p className="mt-2 text-[#c3cad6]">
+                {o.name} · <a className="underline" href={`tel:${o.phone}`}>{o.phone}</a>
+              </p>
+              {o.note && <p className="mt-1 text-sm text-[var(--up-steel)]">“{o.note}”</p>}
+
+              <ul className="mt-3 text-sm text-[#c3cad6]">
+                {o.items.map((i, n) => (
+                  <li key={n}>
+                    {i.qty} × {i.name}{' '}
+                    <span className="mono text-[var(--up-steel)]">{fmt(i.unitBaisa)}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="flex flex-wrap gap-2 mt-4">
+                {['pending', 'paid', 'collected', 'cancelled'].map((s) => (
+                  <button
+                    key={s}
+                    disabled={o.status === s}
+                    onClick={() => setStatus(o.ref, s)}
+                    className={`px-3 py-2 mono text-[10px] tracking-[.14em] ${
+                      o.status === s ? 'btn' : 'btn-ghost'
+                    }`}
+                  >
+                    {s.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              {o.status !== 'cancelled' && (
+                <p className="mono text-[10px] text-[var(--up-steel)] mt-2">
+                  CANCELLING RETURNS THESE ITEMS TO STOCK
+                </p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+
+      {tab === 'photos' && (
+        <div>
+          <div className="card p-5 mb-5">
+            <h2 className="display text-xl">Add photos</h2>
+            <p className="text-sm text-[var(--up-steel)] mt-2 leading-relaxed">
+              Click any tile to attach a photo — it uploads and saves straight
+              away, no need to open the product. Save the images from your
+              supplier&apos;s site first, or shoot the item on your phone.
+            </p>
+            <p className="mono text-[11px] tracking-[.14em] text-[var(--up-orange)] mt-3">
+              {products.filter((p) => !p.imageUrl).length} OF {products.length} STILL WITHOUT A PHOTO
+            </p>
+          </div>
+
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+            {[...products]
+              .sort((a, b) => Number(!!a.imageUrl) - Number(!!b.imageUrl))
+              .map((p) => (
+                <label
+                  key={p.id}
+                  className={`card p-3 cursor-pointer block ${busy === p.id ? 'opacity-50' : ''}`}
+                >
+                  <div className="w-full h-28 bg-[#0f1015] flex items-center justify-center overflow-hidden">
+                    {p.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="mono text-[10px] tracking-[.14em] text-[var(--up-steel)]">
+                        {busy === p.id ? 'UPLOADING…' : '+ ADD PHOTO'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs mt-2 leading-tight line-clamp-2">{p.name}</p>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      e.target.value = ''
+                      if (!file) return
+                      setError(''); setBusy(p.id)
+                      try {
+                        const fd = new FormData(); fd.append('file', file)
+                        const up = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+                        const upData = await up.json()
+                        if (!up.ok) { setError(upData.error ?? 'Upload failed'); return }
+                        // Send the whole product back, or the save would blank
+                        // the fields this form is not showing.
+                        const save = await fetch('/api/admin/products', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            id: p.id, slug: p.slug, name: p.name, category: p.category,
+                            description: p.description, price: fmt(p.priceBaisa),
+                            stock: p.stock, imageUrl: upData.url, active: p.active,
+                          }),
+                        })
+                        if (!save.ok) {
+                          const d = await save.json()
+                          setError(d.error ?? 'Could not attach the photo'); return
+                        }
+                        await load()
+                      } finally { setBusy(null) }
+                    }}
+                  />
+                </label>
+              ))}
+          </div>
+          {error && <p className="text-[var(--up-orange)] mt-4 font-semibold">{error}</p>}
+        </div>
+      )}
+
+      {tab === 'products' && (
+        <ProductsTab products={products} reload={load} />
+      )}
+
+    </div>
+  )
+}
+
+function Stat({ k, v }: { k: string; v: string }) {
+  return (
+    <div>
+      <div className="mono text-[10px] tracking-[.18em] text-[var(--up-steel)]">{k}</div>
+      <div className="display text-xl tabular-nums">{v}</div>
+    </div>
+  )
+}
+

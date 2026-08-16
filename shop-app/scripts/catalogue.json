@@ -1,0 +1,219 @@
+{
+  "_comment": "Landed cost per unit in BAISA (1 OMR = 1000 baisa), derived from the supplier invoice with shipping, coupon and supplement loaded proportionally. Unit costs are taken from the LINE total divided by qty, not the invoice's 2dp unit column, because that column is rounded (0.98 x 30 = 29.40 but the true line was 29.26). Retail prices are NOT in this file - they are applied at import time.",
+  "items": [
+    {
+      "name": "New Balance 796V3 Gris Blanco",
+      "size": "42.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 10.58
+    },
+    {
+      "name": "New Balance 796V3 Gris Blanco",
+      "size": "43",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 10.58
+    },
+    {
+      "name": "New Balance 796V3 Gris Blanco",
+      "size": "44",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 10.58
+    },
+    {
+      "name": "New Balance 796V3 Gris Blanco",
+      "size": "44.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 10.58
+    },
+    {
+      "name": "New Balance 796V3 Gris Blanco",
+      "size": "45",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 10.58
+    },
+    {
+      "name": "Puma Nova Court Rojo Burdeos",
+      "size": "44.5",
+      "category": "Shoes",
+      "qty": 2,
+      "lineOmr": 26.26
+    },
+    {
+      "name": "Joma Set 2612 Gris",
+      "size": "43",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 16.52
+    },
+    {
+      "name": "Wilson Courtglide Blanco Azul",
+      "size": "43 1/3",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 16.52
+    },
+    {
+      "name": "Wilson Courtglide Blanco Azul",
+      "size": "44",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 16.52
+    },
+    {
+      "name": "Asics Game FF Clay Gris Azul",
+      "size": "44.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.28
+    },
+    {
+      "name": "Asics Game FF Clay Medianoche (Women's)",
+      "size": "42",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.5
+    },
+    {
+      "name": "Asics Game FF Padel Negro Coral",
+      "size": "42",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.28
+    },
+    {
+      "name": "Asics Game FF Padel Negro Coral",
+      "size": "44",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.28
+    },
+    {
+      "name": "Asics Upcourt 6 Blanco Gris",
+      "size": "42.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.28
+    },
+    {
+      "name": "Asics Upcourt 6 Blanco Gris",
+      "size": "44.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 19.28
+    },
+    {
+      "name": "Asics Gel Resolution X Clay Beige (Women's)",
+      "size": "39.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 47.51
+    },
+    {
+      "name": "Asics Gel Resolution X Clay Negro",
+      "size": "44.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 41.79
+    },
+    {
+      "name": "Asics Solution Speed FF 4 Clay Negro",
+      "size": "43.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 34.34
+    },
+    {
+      "name": "Asics Sonicsmash FF Verde",
+      "size": "45",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 31.2
+    },
+    {
+      "name": "Joma Open A1 Padel 2574 Azul Royal",
+      "size": "41",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 13.56
+    },
+    {
+      "name": "Joma Open A1 Padel 2574 Azul Royal",
+      "size": "44",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 13.56
+    },
+    {
+      "name": "Adidas Game Spec 2 Negro",
+      "size": "44 2/3",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 14.4
+    },
+    {
+      "name": "Joma Point 2523 Caqui",
+      "size": "46",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 14.61
+    },
+    {
+      "name": "Head Revolt Court 5.0 (Women's)",
+      "size": "42.5",
+      "category": "Shoes",
+      "qty": 1,
+      "lineOmr": 18.64
+    },
+    {
+      "name": "Jhayber Tactica Azul Marino",
+      "size": "46",
+      "category": "Shoes",
+      "qty": 4,
+      "lineOmr": 8.46
+    },
+    {
+      "name": "Racket Protector - Clear Textured",
+      "size": "",
+      "category": "Accessories",
+      "qty": 30,
+      "lineOmr": 29.26
+    },
+    {
+      "name": "Wilson Pro Padel Overgrip",
+      "size": "",
+      "category": "Accessories",
+      "qty": 5,
+      "lineOmr": 153.79,
+      "note": "Invoiced as 5 boxes of 60. Split to singles on import.",
+      "unitsPerPack": 60
+    },
+    {
+      "name": "Head Invisible Socks Black (3 pack)",
+      "size": "43-46",
+      "category": "Apparel",
+      "qty": 5,
+      "lineOmr": 8.37
+    },
+    {
+      "name": "Head Quarter Socks Black/White (3 pack)",
+      "size": "43-46",
+      "category": "Apparel",
+      "qty": 10,
+      "lineOmr": 18.89
+    },
+    {
+      "name": "Adidas Speed RX Balls (tube of 3)",
+      "size": "",
+      "category": "Balls",
+      "qty": 2,
+      "lineOmr": 72.96,
+      "note": "Invoiced as 2 cases of 72 balls. Split to 24 tubes of 3 per case.",
+      "unitsPerPack": 24
+    }
+  ]
+}

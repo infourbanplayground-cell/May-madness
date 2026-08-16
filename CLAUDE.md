@@ -90,6 +90,17 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
+### Shop (Urban Playground) — Next.js
+- URL: https://shop.urbanpadel.om
+- Source: `/home/user/May-madness/shop-app/` (Next.js 16 / App Router, TypeScript)
+- App dir on VPS: `/opt/shop-app` — systemd: `shop-app` — port 3006
+- Key pages: `src/app/page.tsx` (home/catalogue), `src/app/product/[slug]/page.tsx`, `src/app/cart/page.tsx`, `src/app/order/[ref]/page.tsx`, `src/app/admin/page.tsx`
+- Components: `src/components/ProductsTab.tsx`, `AddToCart.tsx`, `CartButton.tsx`
+- Lib: `src/lib/shop.ts` (catalogue/data), `src/lib/cart.ts`, `src/lib/adminAuth.ts` (session cookie signed with `SESSION_SECRET`, admin password via `ADMIN_PASSWORD` — both in `.env.local` on the server, never copied down)
+- Styling: Tailwind via `src/app/globals.css`
+- Uploaded product images live on the server at `/opt/shop-app/data/uploads/` (not synced locally — binary, not source)
+- Deploy: since this is a built Next.js app (not static HTML), edit locally, `scp -r` changed files under `src/`/`public/` to `urbanpadel:/opt/shop-app/`, then `ssh urbanpadel 'cd /opt/shop-app && npm run build && systemctl restart shop-app'`
+
 ## Common Commands
 
 ```bash
