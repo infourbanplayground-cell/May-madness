@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Emblem } from '@/components/Brand'
 import { Member, Booking } from '@/lib/types'
 
 const COURT_COLORS: Record<string, string> = {
-  'court-1': '#6366f1',
-  'court-2': '#10b981',
-  'court-3': '#f59e0b',
-  'court-4': '#ef4444',
+  'court-1': '#FF8A3D',
+  'court-2': '#FFC24B',
+  'court-3': '#33A1FF',
+  'court-4': '#8DF3E8',
 }
 
 const COURT_NAMES: Record<string, string> = {
@@ -51,30 +52,30 @@ function BookingCard({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-2xl border border-hair shadow-sm overflow-hidden">
       <div className="h-1.5" style={{ backgroundColor: color }} />
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-semibold text-gray-900 text-sm">{courtName}</span>
+              <span className="font-semibold text-cream text-sm">{courtName}</span>
               {booking.status === 'cancelled' && (
-                <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
+                <span className="text-xs bg-flare/20 text-[#ff9a96] px-2 py-0.5 rounded-full font-medium">
                   Cancelled
                 </span>
               )}
             </div>
-            <p className="text-gray-600 text-sm">{formatDate(booking.date)}</p>
-            <p className="text-gray-500 text-sm">
+            <p className="text-warm text-sm">{formatDate(booking.date)}</p>
+            <p className="text-faint text-sm">
               {booking.startTime} – {booking.endTime}
               {booking.durationMinutes && (
-                <span className="ml-1.5 text-gray-400">
+                <span className="ml-1.5 text-faint">
                   ({booking.durationMinutes >= 60 ? `${booking.durationMinutes / 60}h` : `${booking.durationMinutes}m`})
                 </span>
               )}
             </p>
             {booking.priceTotal != null && booking.priceTotal > 0 && (
-              <p className="text-indigo-600 font-semibold text-sm mt-1">
+              <p className="text-ember font-semibold text-sm mt-1">
                 OMR {booking.priceTotal.toFixed(2)}
               </p>
             )}
@@ -91,11 +92,11 @@ function BookingCard({
                 </button>
               ) : (
                 <div className="flex flex-col items-end gap-1.5">
-                  <span className="text-xs text-gray-500">Are you sure?</span>
+                  <span className="text-xs text-faint">Are you sure?</span>
                   <div className="flex gap-2">
                     <button
                       onClick={() => setConfirming(false)}
-                      className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                      className="text-xs text-faint hover:text-cream/90 font-medium"
                     >
                       Keep
                     </button>
@@ -153,8 +154,8 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-400 text-sm">Loading…</div>
+      <div className="min-h-screen heat-bg flex items-center justify-center">
+        <div className="text-faint text-sm">Loading…</div>
       </div>
     )
   }
@@ -163,23 +164,19 @@ export default function AccountPage() {
   const displayUpcoming = upcomingBookings
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen heat-bg">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <header className="bg-surface border-b border-hair sticky top-0 z-10">
         <div className="max-w-lg mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <Link href="/book" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
-                </svg>
-              </div>
-              <span className="font-bold text-gray-900 text-sm">Urban Padel</span>
+              <Emblem size={30} />
+              <span className="h-display text-base">Urban Playground</span>
             </Link>
           </div>
           <button
             onClick={handleLogout}
-            className="text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors"
+            className="text-sm text-faint hover:text-cream/90 font-medium transition-colors"
           >
             Sign out
           </button>
@@ -188,27 +185,27 @@ export default function AccountPage() {
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* Member greeting */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <div className="bg-surface rounded-2xl border border-hair shadow-sm p-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
-              <span className="text-indigo-600 font-bold text-lg">
+            <div className="w-12 h-12 rounded-full bg-ember/15 flex items-center justify-center shrink-0">
+              <span className="text-ember font-bold text-lg">
                 {member?.name?.[0]?.toUpperCase() ?? '?'}
               </span>
             </div>
             <div>
-              <p className="font-semibold text-gray-900">{member?.name}</p>
-              <p className="text-sm text-gray-500">{member?.phone}</p>
+              <p className="font-semibold text-cream">{member?.name}</p>
+              <p className="text-sm text-faint">{member?.phone}</p>
             </div>
           </div>
 
           <div className="mt-4 flex gap-3">
-            <div className="flex-1 bg-indigo-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-indigo-600">{confirmedUpcoming.length}</p>
-              <p className="text-xs text-indigo-600 font-medium mt-0.5">Upcoming</p>
+            <div className="flex-1 bg-ember/10 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-ember">{confirmedUpcoming.length}</p>
+              <p className="text-xs text-ember font-medium mt-0.5">Upcoming</p>
             </div>
-            <div className="flex-1 bg-gray-50 rounded-xl p-3 text-center">
-              <p className="text-2xl font-bold text-gray-600">{pastBookings.length}</p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">Past</p>
+            <div className="flex-1 bg-surface-2 rounded-xl p-3 text-center">
+              <p className="text-2xl font-bold text-warm">{pastBookings.length}</p>
+              <p className="text-xs text-faint font-medium mt-0.5">Past</p>
             </div>
           </div>
         </div>
@@ -216,24 +213,24 @@ export default function AccountPage() {
         {/* Book CTA */}
         <Link
           href="/book"
-          className="block w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm text-center transition-colors shadow-sm"
+          className="block w-full py-3.5 rounded-xl bg-ember hover:bg-ember-deep text-ink font-semibold text-sm text-center transition-colors shadow-sm"
         >
           Book a court
         </Link>
 
         {/* Tabs */}
-        <div className="flex bg-gray-100 rounded-xl p-1">
+        <div className="flex bg-surface-2 rounded-xl p-1">
           <button
             onClick={() => setActiveTab('upcoming')}
             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'upcoming'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-surface text-cream shadow-sm'
+                : 'text-faint hover:text-cream/90'
             }`}
           >
             Upcoming
             {confirmedUpcoming.length > 0 && (
-              <span className="ml-1.5 bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+              <span className="ml-1.5 bg-ember text-ink text-xs px-1.5 py-0.5 rounded-full">
                 {confirmedUpcoming.length}
               </span>
             )}
@@ -242,8 +239,8 @@ export default function AccountPage() {
             onClick={() => setActiveTab('past')}
             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
               activeTab === 'past'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-surface text-cream shadow-sm'
+                : 'text-faint hover:text-cream/90'
             }`}
           >
             History
@@ -254,9 +251,9 @@ export default function AccountPage() {
         {activeTab === 'upcoming' && (
           <div className="space-y-3">
             {displayUpcoming.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-faint">
                 <p className="text-4xl mb-3">🎾</p>
-                <p className="font-medium text-gray-600">No upcoming bookings</p>
+                <p className="font-medium text-warm">No upcoming bookings</p>
                 <p className="text-sm mt-1">Book a court to get started</p>
               </div>
             ) : (
@@ -274,7 +271,7 @@ export default function AccountPage() {
         {activeTab === 'past' && (
           <div className="space-y-3">
             {pastBookings.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
+              <div className="text-center py-12 text-faint">
                 <p className="text-sm">No booking history yet</p>
               </div>
             ) : (

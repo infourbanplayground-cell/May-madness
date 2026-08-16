@@ -87,7 +87,7 @@ export default function CustomerSearch({
         <label className="flex items-center gap-2 text-xs font-medium text-warm mb-1">
           <User size={14} /> Player *
         </label>
-        <div className="flex items-center gap-3 bg-indigo-950/40 border border-indigo-800 rounded-lg px-3 py-2.5">
+        <div className="flex items-center gap-3 bg-ember/10 border border-ember/40 rounded-lg px-3 py-2.5">
           <div className="w-7 h-7 rounded-full bg-ember text-cream text-xs font-bold flex items-center justify-center shrink-0">
             {picked.name.charAt(0).toUpperCase()}
           </div>
@@ -119,7 +119,7 @@ export default function CustomerSearch({
       </label>
 
       {/* Lookup */}
-      <div className="flex items-center gap-2 bg-surface-2 border border-hair rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500">
+      <div className="flex items-center gap-2 bg-surface-2 border border-hair rounded-lg px-3 py-2.5 focus-within:border-ember">
         <Search size={14} className="text-faint shrink-0" />
         <input
           value={query}

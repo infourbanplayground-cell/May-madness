@@ -6,6 +6,7 @@ import LogoutButton from '@/components/LogoutButton'
 import MatchPointPanel from '@/components/MatchPointPanel'
 import AdminDashboard from '@/components/AdminDashboard'
 import PendingEntry from '@/components/PendingEntry'
+import { Emblem } from '@/components/Brand'
 
 type Tab = 'dashboard' | 'calendar' | 'pending' | 'customers' | 'matches' | 'activities' | 'sales'
 
@@ -39,11 +40,7 @@ export default function HomePage() {
       {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-3 border-b border-hair bg-ink shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-ember flex items-center justify-center">
-            <svg className="w-4 h-4 text-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
-            </svg>
-          </div>
+          <Emblem size={32} />
           <span className="h-display text-lg">Urban Playground</span>
           <span className="label-mono bg-ember/20 text-ember px-2 py-1 rounded-full">Admin</span>
         </div>

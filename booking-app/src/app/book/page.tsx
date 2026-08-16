@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
+import { BrandMark, Emblem } from '@/components/Brand'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -203,15 +204,7 @@ export default function BookPage() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur bg-ink/85 border-b border-hair">
         <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember to-ember-deep flex items-center justify-center shrink-0">
-              <span className="font-display text-[15px] text-ink leading-none pt-0.5">UP</span>
-            </div>
-            <div>
-              <p className="h-display text-[15px] leading-none">Urban Playground</p>
-              <p className="label-mono text-faint mt-1">Muscat, Oman</p>
-            </div>
-          </div>
+          <BrandMark subtitle="Muscat, Oman" size={38} />
           {member === undefined ? null : member ? (
             <Link href="/account" className="label-mono text-ember hover:text-gold transition-colors">
               My bookings
@@ -479,10 +472,8 @@ export default function BookPage() {
       {confirmed && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center px-4">
           <div className="w-full max-w-sm bg-surface border border-hair rounded-3xl p-7 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-ember/20 border border-ember/40 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-ember" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex justify-center mb-4">
+              <Emblem size={64} />
             </div>
             <h2 className="h-display text-3xl mb-2">You&apos;re booked</h2>
             <p className="text-warm text-sm">

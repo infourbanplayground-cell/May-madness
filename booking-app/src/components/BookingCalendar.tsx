@@ -337,7 +337,7 @@ function PricingPanel() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 flex-1 bg-surface-2 rounded-lg border border-hair px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+                <div className="flex items-center gap-1.5 flex-1 bg-surface-2 rounded-lg border border-hair px-3 py-2 focus-within:border-ember">
                   <span className="text-warm text-sm">OMR</span>
                   <input
                     type="number"
@@ -481,7 +481,7 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
                 type="checkbox"
                 checked={isRecurring}
                 onChange={(e) => setIsRecurring(e.target.checked)}
-                className="rounded accent-indigo-600"
+                className="rounded accent-[#FF8A3D]"
               />
               <span className="text-sm text-cream/90 flex items-center gap-1.5">
                 <RefreshCw size={14} /> Recurring booking
