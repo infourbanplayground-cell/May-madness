@@ -129,18 +129,22 @@ export default function AdminDashboard() {
               {week.map((w, i) => {
                 const h = Math.max(4, Math.round((w.count / maxCount) * 100))
                 return (
-                  <div key={w.date} className="flex-1 flex flex-col items-center gap-1.5 group relative">
+                  <div key={w.date} className="flex-1 flex flex-col items-center gap-1.5 group relative h-full">
                     <div className="absolute -top-7 hidden group-hover:block bg-gray-800 border border-gray-700 text-gray-100 text-xs rounded-md px-2 py-0.5 whitespace-nowrap z-10">
                       {w.date}: {w.count}
                     </div>
                     {i === peakIdx && w.count > 0 && (
                       <span className="text-[10px] text-gray-300 font-semibold tabular-nums">{w.count}</span>
                     )}
-                    <div
-                      className="w-full max-w-[26px] rounded-t transition-colors bg-indigo-500 group-hover:bg-indigo-400"
-                      style={{ height: `${h}%` }}
-                    />
-                    <span className={`text-[10px] ${i === 0 ? 'text-indigo-400 font-semibold' : 'text-gray-500'}`}>
+                    {/* Track gives the bar a resolved height to size against —
+                        a percentage against an auto-height parent collapses to 0. */}
+                    <div className="w-full flex-1 flex items-end justify-center min-h-0">
+                      <div
+                        className="w-full max-w-[26px] rounded-t transition-colors bg-indigo-500 group-hover:bg-indigo-400"
+                        style={{ height: `${h}%` }}
+                      />
+                    </div>
+                    <span className={`text-[10px] shrink-0 ${i === 0 ? 'text-indigo-400 font-semibold' : 'text-gray-500'}`}>
                       {dayLabel(w.date, i)}
                     </span>
                   </div>
