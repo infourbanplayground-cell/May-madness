@@ -28,20 +28,20 @@ function isObjectArray(v: unknown): v is Row[] {
 function SubTable({ rows }: { rows: Row[] }) {
   const cols = Object.keys(rows[0])
   return (
-    <div className="rounded-lg border border-gray-800 overflow-x-auto">
+    <div className="rounded-lg border border-hair overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-gray-800/60">
+          <tr className="bg-surface-2/60">
             {cols.map((c) => (
-              <th key={c} className="px-2.5 py-1.5 text-left font-semibold text-gray-400 whitespace-nowrap">{c}</th>
+              <th key={c} className="px-2.5 py-1.5 text-left font-semibold text-warm whitespace-nowrap">{c}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-t border-gray-800/60">
+            <tr key={i} className="border-t border-hair-soft">
               {cols.map((c) => (
-                <td key={c} className="px-2.5 py-1.5 text-gray-300 whitespace-nowrap">
+                <td key={c} className="px-2.5 py-1.5 text-cream/90 whitespace-nowrap">
                   {r[c] === null || r[c] === undefined || r[c] === ''
                     ? '—'
                     : typeof r[c] === 'object' ? JSON.stringify(r[c]) : String(r[c])}
@@ -63,12 +63,12 @@ function DetailPane({ row }: { row: Row }) {
   ) as [string, Row][]
 
   return (
-    <div className="p-4 bg-gray-900/80 space-y-4">
+    <div className="p-4 bg-surface/80 space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
         {scalars.map(([k, v]) => (
           <div key={k} className="min-w-0">
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">{k}</p>
-            <p className="text-sm text-gray-200 truncate">
+            <p className="text-[10px] uppercase tracking-wide text-faint">{k}</p>
+            <p className="text-sm text-cream truncate">
               {v === null || v === undefined || v === '' ? '—' : String(v)}
             </p>
           </div>
@@ -76,12 +76,12 @@ function DetailPane({ row }: { row: Row }) {
       </div>
       {plainObjects.map(([k, obj]) => (
         <div key={k}>
-          <p className="text-xs font-semibold text-gray-400 mb-1.5">{k}</p>
+          <p className="text-xs font-semibold text-warm mb-1.5">{k}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1">
             {Object.entries(obj).map(([ok, ov]) => (
               <div key={ok}>
-                <span className="text-[10px] text-gray-500">{ok}: </span>
-                <span className="text-xs text-gray-300">{ov === null || ov === '' ? '—' : String(ov)}</span>
+                <span className="text-[10px] text-faint">{ok}: </span>
+                <span className="text-xs text-cream/90">{ov === null || ov === '' ? '—' : String(ov)}</span>
               </div>
             ))}
           </div>
@@ -89,7 +89,7 @@ function DetailPane({ row }: { row: Row }) {
       ))}
       {nested.map(([k, rows]) => (
         <div key={k}>
-          <p className="text-xs font-semibold text-gray-400 mb-1.5">{k} ({rows.length})</p>
+          <p className="text-xs font-semibold text-warm mb-1.5">{k} ({rows.length})</p>
           <SubTable rows={rows} />
         </div>
       ))}
@@ -167,44 +167,44 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-800 shrink-0 flex-wrap">
-        <h2 className="text-sm font-semibold text-white mr-1">{title}</h2>
+      <div className="flex items-center gap-3 px-6 py-3 border-b border-hair shrink-0 flex-wrap">
+        <h2 className="text-sm font-semibold text-cream mr-1">{title}</h2>
 
         {hasDateRange && (
           <>
             <input
               type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="bg-surface-2 border border-hair rounded-lg px-3 py-1.5 text-sm text-cream focus:outline-none focus:border-ember"
             />
-            <span className="text-gray-600 text-xs">→</span>
+            <span className="text-faint/70 text-xs">→</span>
             <input
               type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="bg-surface-2 border border-hair rounded-lg px-3 py-1.5 text-sm text-cream focus:outline-none focus:border-ember"
             />
           </>
         )}
 
-        <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 focus-within:border-indigo-500 min-w-[180px]">
-          <Search size={14} className="text-gray-500 shrink-0" />
+        <div className="flex items-center gap-2 bg-surface-2 border border-hair rounded-lg px-3 py-1.5 focus-within:border-ember min-w-[180px]">
+          <Search size={14} className="text-faint shrink-0" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={`Search ${title.toLowerCase()}…`}
-            className="bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none w-full"
+            className="bg-transparent text-sm text-cream placeholder-faint/60 focus:outline-none w-full"
           />
         </div>
 
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ember hover:bg-ember-deep disabled:opacity-50 text-ink text-sm font-medium transition-colors"
         >
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           {loading ? 'Loading…' : 'Refresh'}
         </button>
 
         {filtered && (
-          <span className="ml-auto text-xs text-gray-500">
+          <span className="ml-auto text-xs text-faint">
             {filtered.length}{query && data ? ` of ${data.length}` : ''} records
           </span>
         )}
@@ -212,21 +212,21 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
 
       {/* Sales summary chips */}
       {salesSummary && (
-        <div className="flex gap-3 px-6 py-3 border-b border-gray-800 shrink-0 flex-wrap">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">Revenue</p>
-            <p className="text-lg font-bold text-white tabular-nums">OMR {salesSummary.total.toFixed(2)}</p>
+        <div className="flex gap-3 px-6 py-3 border-b border-hair shrink-0 flex-wrap">
+          <div className="bg-surface border border-hair rounded-xl px-4 py-2">
+            <p className="text-[10px] uppercase tracking-wide text-faint">Revenue</p>
+            <p className="text-lg font-bold text-cream tabular-nums">OMR {salesSummary.total.toFixed(2)}</p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">Documents</p>
-            <p className="text-lg font-bold text-white tabular-nums">{salesSummary.docs}</p>
+          <div className="bg-surface border border-hair rounded-xl px-4 py-2">
+            <p className="text-[10px] uppercase tracking-wide text-faint">Documents</p>
+            <p className="text-lg font-bold text-cream tabular-nums">{salesSummary.docs}</p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">Paid</p>
+          <div className="bg-surface border border-hair rounded-xl px-4 py-2">
+            <p className="text-[10px] uppercase tracking-wide text-faint">Paid</p>
             <p className="text-lg font-bold text-green-400 tabular-nums">{salesSummary.paid}</p>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2">
-            <p className="text-[10px] uppercase tracking-wide text-gray-500">Unpaid</p>
+          <div className="bg-surface border border-hair rounded-xl px-4 py-2">
+            <p className="text-[10px] uppercase tracking-wide text-faint">Unpaid</p>
             <p className="text-lg font-bold text-amber-400 tabular-nums">{salesSummary.unpaid}</p>
           </div>
         </div>
@@ -243,13 +243,13 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
         )}
 
         {loading && !filtered && !error && (
-          <div className="flex items-center justify-center h-48 text-gray-500 text-sm gap-2">
+          <div className="flex items-center justify-center h-48 text-faint text-sm gap-2">
             <RefreshCw size={16} className="animate-spin" /> Loading {title.toLowerCase()}…
           </div>
         )}
 
         {filtered && filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-48 text-gray-500">
+          <div className="flex flex-col items-center justify-center h-48 text-faint">
             <Inbox size={36} className="mb-3 opacity-40" />
             <p className="text-sm">
               {query ? `No ${title.toLowerCase()} match “${query}”` : `No ${title.toLowerCase()} found for this period`}
@@ -258,13 +258,13 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
         )}
 
         {filtered && filtered.length > 0 && (
-          <div className="rounded-xl border border-gray-800 overflow-x-auto">
+          <div className="rounded-xl border border-hair overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-900 border-b border-gray-800">
+                <tr className="bg-surface border-b border-hair">
                   {hasNested && <th className="w-8" />}
                   {columns.map((col) => (
-                    <th key={col} className="px-4 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide whitespace-nowrap">
+                    <th key={col} className="px-4 py-3 text-left text-xs font-semibold text-warm uppercase tracking-wide whitespace-nowrap">
                       {col}
                     </th>
                   ))}
@@ -275,15 +275,15 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
                   <Fragment key={i}>
                     <tr
                       onClick={() => hasNested && setExpanded(expanded === i ? null : i)}
-                      className={`border-b border-gray-800/60 transition-colors ${
-                        hasNested ? 'cursor-pointer hover:bg-gray-900/60' : 'hover:bg-gray-900/40'
-                      } ${expanded === i ? 'bg-gray-900/60' : ''}`}
+                      className={`border-b border-hair-soft transition-colors ${
+                        hasNested ? 'cursor-pointer hover:bg-surface/60' : 'hover:bg-surface/40'
+                      } ${expanded === i ? 'bg-surface/60' : ''}`}
                     >
                       {hasNested && (
                         <td className="pl-3">
                           <ChevronRight
                             size={14}
-                            className={`text-gray-600 transition-transform ${expanded === i ? 'rotate-90' : ''}`}
+                            className={`text-faint/70 transition-transform ${expanded === i ? 'rotate-90' : ''}`}
                           />
                         </td>
                       )}
@@ -292,18 +292,18 @@ export default function MatchPointPanel({ endpoint, title, hasDateRange }: Props
                         return (
                           <td key={col} className="px-4 py-3 whitespace-nowrap max-w-[220px] overflow-hidden text-ellipsis">
                             {val === null || val === undefined || val === '' ? (
-                              <span className="text-gray-600">—</span>
+                              <span className="text-faint/70">—</span>
                             ) : typeof val === 'boolean' ? (
-                              <span className={val ? 'text-green-400' : 'text-gray-500'}>{String(val)}</span>
+                              <span className={val ? 'text-green-400' : 'text-faint'}>{String(val)}</span>
                             ) : (
-                              <span className="text-gray-200">{String(val)}</span>
+                              <span className="text-cream">{String(val)}</span>
                             )}
                           </td>
                         )
                       })}
                     </tr>
                     {expanded === i && (
-                      <tr className="border-b border-gray-800">
+                      <tr className="border-b border-hair">
                         <td colSpan={columns.length + (hasNested ? 1 : 0)}>
                           <DetailPane row={row} />
                         </td>

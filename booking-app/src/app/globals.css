@@ -1,11 +1,83 @@
 @import "tailwindcss";
 
+/* ── JULY HEAT design tokens ───────────────────────────────────────────────
+   Extracted from the Urban Playground design system. Exposed through
+   @theme so they become Tailwind utilities (bg-ink, text-ember, font-display).
+   ------------------------------------------------------------------------ */
+@theme {
+  /* Surfaces — near-black with a warm cast, not neutral grey */
+  --color-ink: #08070a;
+  --color-ink-2: #0a0807;
+  --color-surface: #140c08;
+  --color-surface-2: #17100f;
+  --color-surface-3: #221713; /* hover state for raised controls */
+
+  /* Text */
+  --color-cream: #fff4ec;
+  --color-warm: #c7a192;
+  --color-faint: #8c7167;
+
+  /* Accents */
+  --color-ember: #ff8a3d;
+  --color-ember-deep: #ff5e1e;
+  --color-flare: #ff2a24;
+  --color-gold: #ffc24b;
+  --color-azure: #33a1ff;
+  --color-lime: #e4ff3b;
+  --color-mint: #8df3e8;
+
+  /* Hairlines */
+  --color-hair: rgba(255, 240, 228, 0.12);
+  --color-hair-soft: rgba(255, 240, 228, 0.07);
+
+  /* Type */
+  --font-display: var(--font-anton), Impact, sans-serif;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+}
+
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
 }
 
+/* Display headings are set in Anton: condensed, uppercase, tight. */
+.h-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+}
+
+/* Small mono labels — the "1 PICK A DAY" eyebrow style. */
+.label-mono {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 10.5px;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Ambient warmth behind the player screens, matching the comp. */
+.heat-bg {
+  background:
+    radial-gradient(90% 50% at 2% 0%, rgba(51, 161, 255, 0.1), transparent 55%),
+    radial-gradient(110% 60% at 90% 4%, rgba(255, 94, 30, 0.12), transparent 55%),
+    #08070a;
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

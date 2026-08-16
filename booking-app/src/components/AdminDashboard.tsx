@@ -27,6 +27,14 @@ type Stats = {
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+// MatchPoint names courts "Court 3 “MONDO”" etc, so match on the number.
+const COURT_ACCENTS = ['#FF8A3D', '#FFC24B', '#33A1FF', '#8DF3E8']
+function courtAccent(resourceName: string): string {
+  const m = (resourceName ?? '').match(/\d+/)
+  const idx = m ? parseInt(m[0], 10) - 1 : 0
+  return COURT_ACCENTS[idx] ?? COURT_ACCENTS[0]
+}
+
 function dayLabel(dateStr: string, i: number): string {
   if (i === 0) return 'Today'
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -53,7 +61,7 @@ export default function AdminDashboard() {
 
   if (loading && !stats) {
     return (
-      <div className="flex items-center justify-center h-64 text-gray-500 text-sm gap-2">
+      <div className="flex items-center justify-center h-64 text-faint text-sm gap-2">
         <RefreshCw size={16} className="animate-spin" /> Loading dashboard…
       </div>
     )
@@ -64,7 +72,7 @@ export default function AdminDashboard() {
       <div className="max-w-md mx-auto mt-12 p-5 bg-red-900/20 border border-red-800 rounded-2xl text-center">
         <p className="text-red-400 font-semibold mb-1">Could not load stats</p>
         <p className="text-red-300/70 text-sm mb-4">{stats?.error}</p>
-        <button onClick={load} className="px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm">
+        <button onClick={load} className="px-4 py-2 rounded-lg bg-surface-2 hover:bg-surface-3 text-cream text-sm">
           Retry
         </button>
       </div>
@@ -77,11 +85,12 @@ export default function AdminDashboard() {
   const maxCount = Math.max(1, ...week.map((w) => w.count))
   const peakIdx = week.findIndex((w) => w.count === maxCount)
 
+  // JULY HEAT accents — ember, azure, lime, gold
   const tiles = [
-    { label: 'Bookings today', value: String(t.bookings), icon: CalendarDays, accent: '#6366f1' },
-    { label: 'Occupancy', value: `${t.occupancy}%`, icon: Percent, accent: '#10b981' },
-    { label: 'Players', value: String(t.players), icon: Users, accent: '#f59e0b' },
-    { label: 'Revenue (OMR)', value: t.revenue.toFixed(2), icon: Banknote, accent: '#ec4899' },
+    { label: 'Bookings today', value: String(t.bookings), icon: CalendarDays, accent: '#FF8A3D' },
+    { label: 'Occupancy', value: `${t.occupancy}%`, icon: Percent, accent: '#33A1FF' },
+    { label: 'Players', value: String(t.players), icon: Users, accent: '#E4FF3B' },
+    { label: 'Revenue (OMR)', value: t.revenue.toFixed(2), icon: Banknote, accent: '#FFC24B' },
   ]
 
   return (
@@ -90,13 +99,13 @@ export default function AdminDashboard() {
         {/* Header row */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold text-white">Today at Urban Playground</h1>
-            <p className="text-sm text-gray-500">{t.date} · live from MatchPoint</p>
+            <h1 className="h-display text-3xl">Today at Urban Playground</h1>
+            <p className="label-mono text-faint mt-1.5">{t.date} · live from MatchPoint</p>
           </div>
           <button
             onClick={load}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-cream/90 text-sm transition-colors"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
           </button>
@@ -105,7 +114,7 @@ export default function AdminDashboard() {
         {/* Stat tiles */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {tiles.map(({ label, value, icon: Icon, accent }) => (
-            <div key={label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+            <div key={label} className="bg-surface border border-hair rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center"
@@ -113,38 +122,38 @@ export default function AdminDashboard() {
                 >
                   <Icon size={14} style={{ color: accent }} />
                 </div>
-                <span className="text-xs text-gray-400">{label}</span>
+                <span className="label-mono text-faint">{label}</span>
               </div>
-              <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
+              <p className="h-display text-4xl mt-1 tabular-nums">{value}</p>
             </div>
           ))}
         </div>
 
         <div className="grid lg:grid-cols-5 gap-6">
           {/* 7-day outlook */}
-          <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-1">Next 7 days</h2>
-            <p className="text-xs text-gray-500 mb-4">Bookings per day</p>
+          <div className="lg:col-span-2 bg-surface border border-hair rounded-2xl p-5">
+            <h2 className="h-display text-xl">Next 7 days</h2>
+            <p className="label-mono text-faint mt-1 mb-4">Bookings per day</p>
             <div className="flex items-end gap-2 h-32">
               {week.map((w, i) => {
                 const h = Math.max(4, Math.round((w.count / maxCount) * 100))
                 return (
                   <div key={w.date} className="flex-1 flex flex-col items-center gap-1.5 group relative h-full">
-                    <div className="absolute -top-7 hidden group-hover:block bg-gray-800 border border-gray-700 text-gray-100 text-xs rounded-md px-2 py-0.5 whitespace-nowrap z-10">
+                    <div className="absolute -top-7 hidden group-hover:block bg-surface-2 border border-hair text-cream text-xs rounded-md px-2 py-0.5 whitespace-nowrap z-10">
                       {w.date}: {w.count}
                     </div>
                     {i === peakIdx && w.count > 0 && (
-                      <span className="text-[10px] text-gray-300 font-semibold tabular-nums">{w.count}</span>
+                      <span className="text-[10px] text-cream/90 font-semibold tabular-nums">{w.count}</span>
                     )}
                     {/* Track gives the bar a resolved height to size against —
                         a percentage against an auto-height parent collapses to 0. */}
                     <div className="w-full flex-1 flex items-end justify-center min-h-0">
                       <div
-                        className="w-full max-w-[26px] rounded-t transition-colors bg-indigo-500 group-hover:bg-indigo-400"
+                        className="w-full max-w-[26px] rounded-t transition-colors bg-ember group-hover:bg-gold"
                         style={{ height: `${h}%` }}
                       />
                     </div>
-                    <span className={`text-[10px] shrink-0 ${i === 0 ? 'text-indigo-400 font-semibold' : 'text-gray-500'}`}>
+                    <span className={`text-[10px] shrink-0 ${i === 0 ? 'text-ember font-semibold' : 'text-faint'}`}>
                       {dayLabel(w.date, i)}
                     </span>
                   </div>
@@ -154,23 +163,29 @@ export default function AdminDashboard() {
           </div>
 
           {/* Today's schedule */}
-          <div className="lg:col-span-3 bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-1">Today&apos;s schedule</h2>
-            <p className="text-xs text-gray-500 mb-4">{schedule.length} booking{schedule.length === 1 ? '' : 's'}</p>
+          <div className="lg:col-span-3 bg-surface border border-hair rounded-2xl p-5">
+            <h2 className="h-display text-xl">Today&apos;s schedule</h2>
+            <p className="label-mono text-faint mt-1 mb-4">{schedule.length} booking{schedule.length === 1 ? '' : 's'}</p>
             {schedule.length === 0 ? (
-              <p className="text-sm text-gray-500 py-8 text-center">No bookings today yet</p>
+              <p className="text-sm text-faint py-8 text-center">No bookings today yet</p>
             ) : (
               <div className="space-y-2 max-h-64 overflow-auto pr-1">
                 {schedule.map((b) => (
                   <div
                     key={b.id}
-                    className="flex items-center gap-3 bg-gray-800/50 rounded-xl px-3 py-2.5"
+                    className="flex items-center gap-3 bg-surface-2/50 rounded-xl px-3 py-2.5 border-l-2"
+                    style={{ borderLeftColor: courtAccent(b.resourceName) }}
                   >
-                    <span className="text-xs font-semibold text-gray-200 tabular-nums w-24 shrink-0">
+                    <span className="font-mono text-xs font-bold text-gold tabular-nums w-24 shrink-0">
                       {b.startTime}–{b.endTime}
                     </span>
-                    <span className="text-xs text-gray-400 truncate flex-1">{b.playerName}</span>
-                    <span className="text-[11px] text-gray-500 shrink-0">{b.resourceName}</span>
+                    <span className="text-xs text-cream/90 truncate flex-1">{b.playerName}</span>
+                    <span
+                      className="font-mono text-[11px] shrink-0"
+                      style={{ color: courtAccent(b.resourceName) }}
+                    >
+                      {b.resourceName}
+                    </span>
                     {b.billed && (
                       <span className="text-[10px] bg-green-900/50 text-green-400 px-1.5 py-0.5 rounded-full shrink-0">
                         paid

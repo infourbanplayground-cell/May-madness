@@ -50,7 +50,7 @@ export default function MatchPointSync() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors"
+        className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg bg-surface-2 hover:bg-surface-3 text-cream/90 hover:text-cream transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -60,10 +60,10 @@ export default function MatchPointSync() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-50 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4">
+        <div className="absolute right-0 top-10 z-50 w-80 bg-surface border border-hair rounded-xl shadow-2xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-white">Sync from MatchPoint</h3>
-            <button onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-300">
+            <h3 className="text-sm font-semibold text-cream">Sync from MatchPoint</h3>
+            <button onClick={() => setOpen(false)} className="text-faint hover:text-cream/90">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -72,21 +72,21 @@ export default function MatchPointSync() {
 
           <div className="space-y-2 mb-4">
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">From</label>
+              <label className="text-xs text-warm mb-1 block">From</label>
               <input
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-surface-2 border border-hair rounded-lg px-3 py-1.5 text-sm text-cream focus:outline-none focus:border-ember"
               />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">To</label>
+              <label className="text-xs text-warm mb-1 block">To</label>
               <input
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                className="w-full bg-surface-2 border border-hair rounded-lg px-3 py-1.5 text-sm text-cream focus:outline-none focus:border-ember"
               />
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function MatchPointSync() {
           <button
             onClick={handleSync}
             disabled={loading}
-            className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors"
+            className="w-full py-2 rounded-lg bg-ember hover:bg-ember-deep disabled:opacity-50 disabled:cursor-not-allowed text-ink text-sm font-medium transition-colors"
           >
             {loading ? 'Syncing…' : 'Import Bookings'}
           </button>
@@ -105,7 +105,7 @@ export default function MatchPointSync() {
                 <>
                   <p className="font-semibold mb-1">Sync complete</p>
                   <p>Fetched: {result.fetched} · Imported: {result.imported} · Skipped: {result.skipped}</p>
-                  <p className="text-gray-400 mt-1">{result.dateFrom} → {result.dateTo}</p>
+                  <p className="text-warm mt-1">{result.dateFrom} → {result.dateTo}</p>
                 </>
               ) : (
                 <>
@@ -116,7 +116,7 @@ export default function MatchPointSync() {
             </div>
           )}
 
-          <p className="mt-3 text-xs text-gray-600">
+          <p className="mt-3 text-xs text-faint/70">
             Pulls bookings from TPC-MatchPoint and imports new ones into the local database.
           </p>
         </div>

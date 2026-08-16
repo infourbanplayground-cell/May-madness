@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
 
@@ -12,277 +11,252 @@ type Availability = Record<string, SlotInfo[]>
 type Prices = Record<string, number>
 type MemberInfo = { id: string; name: string; phone: string } | null
 
+type Confirmed = {
+  id: string
+  courtId: string
+  date: string
+  startTime: string
+  endTime: string
+  playerName: string
+  playerPhone: string
+  priceTotal: number
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function timeToMinutes(t: string) {
+const timeToMinutes = (t: string) => {
   const [h, m] = t.split(':').map(Number)
   return h * 60 + m
 }
 
-function addMinutesToTime(t: string, mins: number): string {
+const addMinutes = (t: string, mins: number) => {
   const total = timeToMinutes(t) + mins
-  const h = Math.floor(total / 60).toString().padStart(2, '0')
-  const m = (total % 60).toString().padStart(2, '0')
-  return `${h}:${m}`
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
-function formatDateDisplay(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-').map(Number)
-  const d = new Date(year, month - 1, day)
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+const localDateStr = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+function formatDateLong(dateStr: string) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
 }
 
-function localDateStr(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
+const DURATIONS = [60, 90, 120]
 
-function getDateRange(days: number): string[] {
-  const result: string[] = []
-  for (let i = 0; i < days; i++) {
-    const d = new Date()
-    d.setDate(d.getDate() + i)
-    result.push(localDateStr(d))
-  }
-  return result
-}
-
-const DURATIONS = [
-  { value: 60, label: '60 min' },
-  { value: 90, label: '90 min' },
-  { value: 120, label: '2 hours' },
+const TIME_GROUPS = [
+  { label: 'Morning',   from: timeToMinutes('06:00'), to: timeToMinutes('12:00') },
+  { label: 'Afternoon', from: timeToMinutes('12:00'), to: timeToMinutes('17:00') },
+  { label: 'Evening',   from: timeToMinutes('17:00'), to: timeToMinutes('24:00') },
 ]
 
-const SPORTS = ['All', ...Array.from(new Set(COURTS.map((c) => c.sport)))]
-
-const SPORT_COLORS: Record<string, string> = {
-  Padel: '#6366f1',
-  Pickleball: '#f59e0b',
+const COURT_ACCENT: Record<string, string> = {
+  'court-1': '#FF8A3D',
+  'court-2': '#FFC24B',
+  'court-3': '#33A1FF',
+  'court-4': '#8DF3E8',
 }
 
-const TIME_GROUPS: { label: string; icon: string; from: number; to: number }[] = [
-  { label: 'Morning', icon: '🌅', from: timeToMinutes('06:00'), to: timeToMinutes('12:00') },
-  { label: 'Afternoon', icon: '☀️', from: timeToMinutes('12:00'), to: timeToMinutes('17:00') },
-  { label: 'Evening', icon: '🌙', from: timeToMinutes('17:00'), to: timeToMinutes('24:00') },
-]
-
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BookPage() {
-  const router = useRouter()
   const today = localDateStr(new Date())
-  const dateRange = useMemo(() => getDateRange(31), [])
+  const dateRange = useMemo(
+    () => Array.from({ length: 31 }, (_, i) => {
+      const d = new Date()
+      d.setDate(d.getDate() + i)
+      return localDateStr(d)
+    }),
+    []
+  )
 
-  const [selectedDate, setSelectedDate] = useState(today)
-  const [sportFilter, setSportFilter] = useState('All')
-  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null)
-  const [selectedStartTime, setSelectedStartTime] = useState<string | null>(null)
-  const [selectedDuration, setSelectedDuration] = useState<number>(60)
+  const [date, setDate] = useState(today)
+  const [duration, setDuration] = useState(90)
+  const [startTime, setStartTime] = useState<string | null>(null)
+  const [courtId, setCourtId] = useState<string | null>(null)
+
   const [availability, setAvailability] = useState<Availability>({})
   const [prices, setPrices] = useState<Prices>({})
   const [member, setMember] = useState<MemberInfo | undefined>(undefined)
-  const [loadingAvail, setLoadingAvail] = useState(true)
-  const [bookingState, setBookingState] = useState<'idle' | 'confirming' | 'booking' | 'success' | 'error'>('idle')
-  const [bookingError, setBookingError] = useState('')
+  const [loading, setLoading] = useState(true)
+
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [confirmed, setConfirmed] = useState<Confirmed | null>(null)
 
   useEffect(() => {
     fetch('/api/account/me')
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setMember(data ? data.member : null))
+      .then((d) => {
+        setMember(d ? d.member : null)
+        if (d?.member) { setName(d.member.name); setPhone(d.member.phone) }
+      })
       .catch(() => setMember(null))
   }, [])
 
   useEffect(() => {
-    fetch('/api/courts/prices')
-      .then((r) => r.json())
-      .then(setPrices)
-      .catch(() => {})
+    fetch('/api/courts/prices').then((r) => r.json()).then(setPrices).catch(() => {})
   }, [])
 
   const loadAvailability = useCallback(async () => {
-    setLoadingAvail(true)
-    setSelectedStartTime(null)
-    setBookingState('idle')
+    setLoading(true)
+    setStartTime(null)
+    setCourtId(null)
     try {
-      const res = await fetch(`/api/courts/availability?date=${selectedDate}`)
+      const res = await fetch(`/api/courts/availability?date=${date}`)
       setAvailability(await res.json())
     } catch {
       setAvailability({})
     } finally {
-      setLoadingAvail(false)
+      setLoading(false)
     }
-  }, [selectedDate])
+  }, [date])
 
   useEffect(() => { loadAvailability() }, [loadAvailability])
 
-  useEffect(() => {
-    setSelectedStartTime(null)
-    setBookingState('idle')
-  }, [selectedCourtId, selectedDuration])
+  // Changing duration invalidates the chosen time and court.
+  useEffect(() => { setStartTime(null); setCourtId(null) }, [duration])
 
-  const visibleCourts = COURTS.filter((c) => sportFilter === 'All' || c.sport === sportFilter)
-
-  // Past slots on today should not be bookable
   const nowMins = useMemo(() => {
     const n = new Date()
     return n.getHours() * 60 + n.getMinutes()
   }, [])
 
-  function slotIsPast(startTime: string): boolean {
-    return selectedDate === today && timeToMinutes(startTime) <= nowMins
-  }
+  const isPast = useCallback(
+    (t: string) => date === today && timeToMinutes(t) <= nowMins,
+    [date, today, nowMins]
+  )
 
-  function freeSlotCount(courtId: string): number {
-    const slots = availability[courtId] ?? []
-    return slots.filter((s) => s.available && !slotIsPast(s.startTime)).length
-  }
-
-  function getValidSlots(courtId: string): Array<{ startTime: string; available: boolean }> {
-    const slots = availability[courtId] ?? []
-    const closeMins = timeToMinutes(TIME_SLOTS[TIME_SLOTS.length - 1]) + 30
-
-    return TIME_SLOTS.map((startTime) => {
-      if (slotIsPast(startTime)) return { startTime, available: false }
-      const endMins = timeToMinutes(startTime) + selectedDuration
-      if (endMins > closeMins) return { startTime, available: false }
-
-      const numChunks = selectedDuration / 30
-      for (let i = 0; i < numChunks; i++) {
-        const chunkStart = addMinutesToTime(startTime, i * 30)
-        const slot = slots.find((s) => s.startTime === chunkStart)
-        if (!slot || !slot.available) return { startTime, available: false }
-      }
-      return { startTime, available: true }
-    })
-  }
-
-  function getValidDurationsForSlot(courtId: string, startTime: string): number[] {
-    const slots = availability[courtId] ?? []
-    const closeMins = timeToMinutes(TIME_SLOTS[TIME_SLOTS.length - 1]) + 30
-
-    return DURATIONS.filter(({ value }) => {
-      if (timeToMinutes(startTime) + value > closeMins) return false
-      const numChunks = value / 30
-      for (let i = 0; i < numChunks; i++) {
-        const chunkStart = addMinutesToTime(startTime, i * 30)
-        const slot = slots.find((s) => s.startTime === chunkStart)
-        if (!slot || !slot.available) return false
-      }
-      return true
-    }).map((d) => d.value)
-  }
-
-  const selectedCourt = COURTS.find((c) => c.id === selectedCourtId)
-  const pricePerHour = selectedCourtId ? (prices[selectedCourtId] ?? 0) : 0
-  const totalPrice = (pricePerHour * selectedDuration) / 60
-  const endTime = selectedStartTime ? addMinutesToTime(selectedStartTime, selectedDuration) : null
-
-  async function handleBook() {
-    if (!selectedCourtId || !selectedStartTime) return
-
-    if (!member) {
-      router.push(`/account/login?next=${encodeURIComponent('/book')}`)
-      return
-    }
-
-    if (bookingState === 'confirming') {
-      setBookingState('booking')
-      setBookingError('')
-      try {
-        const res = await fetch('/api/account/bookings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            courtId: selectedCourtId,
-            date: selectedDate,
-            startTime: selectedStartTime,
-            durationMinutes: selectedDuration,
-          }),
-        })
-        if (res.ok) {
-          setBookingState('success')
-        } else {
-          const data = await res.json()
-          setBookingError(data.error || 'Booking failed. Please try again.')
-          setBookingState('error')
+  /** Courts with every 30-min chunk free for `duration` starting at `t`. */
+  const freeCourtsAt = useCallback(
+    (t: string): string[] => {
+      const closing = timeToMinutes(TIME_SLOTS[TIME_SLOTS.length - 1]) + 30
+      if (timeToMinutes(t) + duration > closing) return []
+      const chunks = duration / 30
+      return COURTS.filter((court) => {
+        const slots = availability[court.id] ?? []
+        for (let i = 0; i < chunks; i++) {
+          const s = slots.find((x) => x.startTime === addMinutes(t, i * 30))
+          if (!s || !s.available) return false
         }
-      } catch {
-        setBookingError('Network error. Please try again.')
-        setBookingState('error')
-      }
-      return
-    }
+        return true
+      }).map((c) => c.id)
+    },
+    [availability, duration]
+  )
 
-    setBookingState('confirming')
+  // Precompute free courts for every slot once per availability/duration change.
+  const slotMap = useMemo(() => {
+    const map = new Map<string, string[]>()
+    for (const t of TIME_SLOTS) map.set(t, isPast(t) ? [] : freeCourtsAt(t))
+    return map
+  }, [freeCourtsAt, isPast])
+
+  const availableCourts = startTime ? (slotMap.get(startTime) ?? []) : []
+  const selectedCourt = COURTS.find((c) => c.id === courtId)
+  const endTime = startTime ? addMinutes(startTime, duration) : null
+  const price = courtId ? ((prices[courtId] ?? 0) * duration) / 60 : 0
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!courtId || !startTime) return
+    setSubmitting(true)
+    setError('')
+    try {
+      const res = await fetch('/api/bookings/public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courtId, date, startTime, durationMinutes: duration,
+          playerName: name.trim(), playerPhone: phone.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Something went wrong. Please try again.')
+        return
+      }
+      setConfirmed({ ...data.booking, priceTotal: data.booking.priceTotal ?? 0 })
+      setSheetOpen(false)
+    } catch {
+      setError('Network problem. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const validSlots = selectedCourtId ? getValidSlots(selectedCourtId) : []
-  const showBar = selectedCourtId && selectedStartTime && bookingState !== 'success'
+  function reset() {
+    setConfirmed(null)
+    setStartTime(null)
+    setCourtId(null)
+    setError('')
+    loadAvailability()
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen heat-bg pb-40">
       {/* Header */}
-      <header className="bg-white/90 backdrop-blur border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-2xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      <header className="sticky top-0 z-30 backdrop-blur bg-ink/85 border-b border-hair">
+        <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-sm">
-              <svg style={{ width: 18, height: 18 }} className="text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
-              </svg>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-ember to-ember-deep flex items-center justify-center shrink-0">
+              <span className="font-display text-[15px] text-ink leading-none pt-0.5">UP</span>
             </div>
             <div>
-              <span className="font-bold text-gray-900 leading-none block">Urban Playground</span>
-              <span className="text-[11px] text-gray-400 leading-none">Muscat, Oman</span>
+              <p className="h-display text-[15px] leading-none">Urban Playground</p>
+              <p className="label-mono text-faint mt-1">Muscat, Oman</p>
             </div>
           </div>
           {member === undefined ? null : member ? (
-            <Link href="/account" className="flex items-center gap-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full pl-1.5 pr-3 py-1.5 transition-colors">
-              <span className="w-6 h-6 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
-                {member.name.charAt(0).toUpperCase()}
-              </span>
+            <Link href="/account" className="label-mono text-ember hover:text-gold transition-colors">
               My bookings
             </Link>
           ) : (
-            <Link href="/account/login" className="text-sm bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-full transition-colors">
+            <Link href="/account/login" className="label-mono text-faint hover:text-cream transition-colors">
               Sign in
             </Link>
           )}
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 pb-40">
-        {/* Hero */}
-        <div className="pt-7 pb-5">
-          <h1 className="text-2xl font-bold text-gray-900">Book a court</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Padel &amp; pickleball · open 06:00 – 24:00</p>
+      <main className="max-w-lg mx-auto px-4">
+        <div className="pt-7 pb-6">
+          <h1 className="h-display text-4xl">Book a court</h1>
+          <p className="text-warm text-sm mt-2">Padel &amp; pickleball · open 06:00 – 24:00</p>
+          <p className="text-faint text-xs mt-1">No account needed — just your name and mobile.</p>
         </div>
 
-        {/* Date strip */}
-        <section className="mb-6">
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 snap-x">
-            {dateRange.map((dateStr) => {
-              const isSelected = selectedDate === dateStr
-              const isToday = dateStr === today
-              const [y, m, d] = dateStr.split('-').map(Number)
-              const dt = new Date(y, m - 1, d)
+        {/* 1 — Day */}
+        <section className="mb-7">
+          <p className="label-mono text-faint mb-3">
+            <span className="text-ember">1</span> Pick a day
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+            {dateRange.map((d) => {
+              const sel = d === date
+              const [y, mo, da] = d.split('-').map(Number)
+              const dt = new Date(y, mo - 1, da)
               return (
                 <button
-                  key={dateStr}
-                  onClick={() => setSelectedDate(dateStr)}
-                  className={`flex flex-col items-center px-1 py-2.5 rounded-2xl min-w-[56px] snap-start transition-all ${
-                    isSelected
-                      ? 'bg-gray-900 text-white shadow-lg scale-105'
-                      : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                  key={d}
+                  onClick={() => setDate(d)}
+                  className={`shrink-0 w-[62px] py-2.5 rounded-2xl border transition-all ${
+                    sel
+                      ? 'border-ember bg-ember/15 text-cream'
+                      : 'border-hair bg-surface/60 text-warm hover:border-warm/40'
                   }`}
                 >
-                  <span className={`text-[10px] font-medium uppercase tracking-wide ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {isToday ? 'Today' : dt.toLocaleDateString('en-US', { weekday: 'short' })}
+                  <span className="label-mono block text-[9px] text-faint">
+                    {d === today ? 'Today' : dt.toLocaleDateString('en-GB', { weekday: 'short' })}
                   </span>
-                  <span className="text-lg font-bold leading-tight">{dt.getDate()}</span>
-                  <span className={`text-[10px] ${isSelected ? 'text-gray-300' : 'text-gray-400'}`}>
-                    {dt.toLocaleDateString('en-US', { month: 'short' })}
+                  <span className="h-display block text-2xl mt-1">{dt.getDate()}</span>
+                  <span className="label-mono block text-[9px] text-faint mt-0.5">
+                    {dt.toLocaleDateString('en-GB', { month: 'short' })}
                   </span>
                 </button>
               )
@@ -290,259 +264,258 @@ export default function BookPage() {
           </div>
         </section>
 
-        {/* Sport filter */}
-        <section className="mb-4">
-          <div className="flex gap-2">
-            {SPORTS.map((sport) => (
+        {/* 2 — Duration */}
+        <section className="mb-7">
+          <p className="label-mono text-faint mb-3">
+            <span className="text-ember">2</span> How long
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {DURATIONS.map((d) => (
               <button
-                key={sport}
-                onClick={() => {
-                  setSportFilter(sport)
-                  if (sport !== 'All' && selectedCourt && selectedCourt.sport !== sport) {
-                    setSelectedCourtId(null)
-                  }
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                  sportFilter === sport
-                    ? 'bg-gray-900 text-white shadow-sm'
-                    : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                key={d}
+                onClick={() => setDuration(d)}
+                className={`py-3 rounded-2xl border font-semibold text-sm transition-all ${
+                  duration === d
+                    ? 'border-ember bg-ember/15 text-cream'
+                    : 'border-hair bg-surface/60 text-warm hover:border-warm/40'
                 }`}
               >
-                {sport}
+                {d} min
               </button>
             ))}
           </div>
         </section>
 
-        {/* Court cards */}
+        {/* 3 — Time */}
         <section className="mb-7">
-          <div className="grid grid-cols-2 gap-3">
-            {visibleCourts.map((court) => {
-              const price = prices[court.id]
-              const sportColor = SPORT_COLORS[court.sport] ?? '#6366f1'
-              const isSelected = selectedCourtId === court.id
-              const free = loadingAvail ? null : freeSlotCount(court.id)
-              return (
-                <button
-                  key={court.id}
-                  onClick={() => setSelectedCourtId(isSelected ? null : court.id)}
-                  className={`relative rounded-2xl p-4 text-left transition-all border-2 ${
-                    isSelected
-                      ? 'border-gray-900 bg-white shadow-lg'
-                      : 'border-transparent bg-white shadow-sm hover:shadow-md'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${sportColor}14` }}
-                    >
-                      <svg style={{ width: 18, height: 18, color: sportColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="9" strokeWidth={2} />
-                        <path strokeWidth={2} d="M12 3c2.5 2.4 4 5.5 4 9s-1.5 6.6-4 9c-2.5-2.4-4-5.5-4-9s1.5-6.6 4-9z" />
-                      </svg>
+          <p className="label-mono text-faint mb-3">
+            <span className="text-ember">3</span> Pick a start time
+          </p>
+
+          {loading ? (
+            <p className="text-faint text-sm py-8 text-center">Checking availability…</p>
+          ) : (
+            <div className="space-y-5">
+              {TIME_GROUPS.map((g) => {
+                const slots = TIME_SLOTS.filter((t) => {
+                  const m = timeToMinutes(t)
+                  return m >= g.from && m < g.to
+                })
+                if (!slots.length) return null
+                const anyFree = slots.some((t) => (slotMap.get(t) ?? []).length > 0)
+                // Distinguish "already gone" from "taken" — telling someone
+                // 06:00 is fully booked at 8pm is just wrong.
+                const allPast = slots.every((t) => isPast(t))
+                const suffix = anyFree ? null : allPast ? 'earlier today' : 'fully booked'
+                return (
+                  <div key={g.label}>
+                    <p className="label-mono text-faint mb-2">
+                      {g.label}
+                      {suffix && (
+                        <span className="text-faint/60 normal-case tracking-normal"> — {suffix}</span>
+                      )}
+                    </p>
+                    <div className="grid grid-cols-4 gap-2">
+                      {slots.map((t) => {
+                        const free = (slotMap.get(t) ?? []).length
+                        const sel = startTime === t
+                        return (
+                          <button
+                            key={t}
+                            disabled={free === 0}
+                            onClick={() => { setStartTime(sel ? null : t); setCourtId(null) }}
+                            className={`relative py-2.5 rounded-xl font-mono text-sm font-bold transition-all ${
+                              free === 0
+                                ? 'text-faint/40 line-through cursor-not-allowed bg-surface/30'
+                                : sel
+                                ? 'bg-ember text-ink'
+                                : 'bg-surface text-cream border border-hair hover:border-ember/60'
+                            }`}
+                          >
+                            {t}
+                            {free > 0 && !sel && (
+                              <span className="absolute top-1 right-1.5 text-[9px] text-faint font-sans">
+                                {free}
+                              </span>
+                            )}
+                          </button>
+                        )
+                      })}
                     </div>
-                    {isSelected && (
-                      <div className="w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
-                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
                   </div>
-                  <p className="font-bold text-gray-900 text-sm">{court.name}</p>
-                  <p className="text-xs font-medium" style={{ color: sportColor }}>{court.sport}</p>
-                  <div className="flex items-center justify-between mt-2">
-                    {free !== null ? (
-                      <span className={`text-[11px] font-medium ${free > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                        {free > 0 ? `${free} slots free` : 'Fully booked'}
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-gray-300">Checking…</span>
-                    )}
-                    {price !== undefined && price > 0 && (
-                      <span className="text-[11px] text-gray-500 font-medium">OMR {price.toFixed(2)}/hr</span>
-                    )}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </section>
 
-        {/* Time & duration */}
-        {selectedCourtId && (
-          <section className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-bold text-gray-900">Pick a time</h2>
-              <span className="text-xs text-gray-400">{formatDateDisplay(selectedDate)}</span>
-            </div>
-
-            {/* Duration segmented control */}
-            <div className="flex bg-gray-200/70 rounded-xl p-1 mb-5">
-              {DURATIONS.map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setSelectedDuration(value)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
-                    selectedDuration === value
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {loadingAvail ? (
-              <div className="text-center py-10 text-gray-400 text-sm">Loading availability…</div>
-            ) : (
-              <div className="space-y-5">
-                {TIME_GROUPS.map((group) => {
-                  const groupSlots = validSlots.filter((s) => {
-                    const mins = timeToMinutes(s.startTime)
-                    return mins >= group.from && mins < group.to
-                  })
-                  const anyAvailable = groupSlots.some((s) => s.available)
-                  if (!groupSlots.length) return null
-                  return (
-                    <div key={group.label}>
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                        {group.icon} {group.label}
-                        {!anyAvailable && <span className="ml-2 normal-case font-normal text-gray-300">— full</span>}
+        {/* 4 — Court, only once a time is chosen */}
+        {startTime && (
+          <section className="mb-8">
+            <p className="label-mono text-faint mb-3">
+              <span className="text-ember">4</span> Which court
+            </p>
+            <div className="grid grid-cols-2 gap-2.5">
+              {availableCourts.map((id) => {
+                const court = COURTS.find((c) => c.id === id)!
+                const accent = COURT_ACCENT[id] ?? '#FF8A3D'
+                const sel = courtId === id
+                const rate = prices[id]
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setCourtId(sel ? null : id)}
+                    className={`rounded-2xl border p-4 text-left transition-all ${
+                      sel ? 'border-ember bg-ember/10' : 'border-hair bg-surface/60 hover:border-warm/40'
+                    }`}
+                  >
+                    <span
+                      className="block w-8 h-1 rounded-full mb-3"
+                      style={{ backgroundColor: accent }}
+                    />
+                    <p className="h-display text-lg">{court.name}</p>
+                    <p className="label-mono mt-1" style={{ color: accent }}>{court.sport}</p>
+                    {rate !== undefined && rate > 0 && (
+                      <p className="text-faint text-xs mt-2 font-mono">
+                        OMR {((rate * duration) / 60).toFixed(2)}
                       </p>
-                      <div className="grid grid-cols-4 gap-2">
-                        {groupSlots.map(({ startTime, available }) => {
-                          const isSelected = selectedStartTime === startTime
-                          return (
-                            <button
-                              key={startTime}
-                              disabled={!available}
-                              onClick={() => {
-                                setSelectedStartTime(isSelected ? null : startTime)
-                                setBookingState('idle')
-                                if (!isSelected) {
-                                  const valid = getValidDurationsForSlot(selectedCourtId, startTime)
-                                  if (valid.length > 0 && !valid.includes(selectedDuration)) {
-                                    setSelectedDuration(valid[0])
-                                  }
-                                }
-                              }}
-                              className={`py-2.5 rounded-xl text-sm font-semibold transition-all tabular-nums ${
-                                !available
-                                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed line-through decoration-gray-300'
-                                  : isSelected
-                                  ? 'bg-gray-900 text-white shadow-md scale-105'
-                                  : 'bg-white text-gray-800 shadow-sm hover:shadow border border-gray-100'
-                              }`}
-                            >
-                              {startTime}
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </section>
-        )}
-
-        {!selectedCourtId && !loadingAvail && (
-          <p className="text-center text-sm text-gray-400 py-6">Select a court to see available times</p>
         )}
       </main>
 
-      {/* Sticky bottom summary bar */}
-      {showBar && (
-        <div className="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-200 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
-          <div className="max-w-2xl mx-auto px-4 py-4">
-            {bookingState === 'error' && (
-              <div className="mb-3 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600 text-sm">
-                {bookingError}
-              </div>
-            )}
-            {bookingState === 'confirming' && member && (
-              <div className="mb-3 p-3 rounded-xl bg-indigo-50 border border-indigo-100 text-sm text-indigo-800">
-                Booking as <span className="font-semibold">{member.name}</span> ({member.phone}) — tap confirm to finish
-              </div>
-            )}
-            <div className="flex items-center gap-4">
-              <div className="min-w-0 flex-1">
-                <p className="font-bold text-gray-900 text-sm truncate">
-                  {selectedCourt?.name} · {selectedStartTime} – {endTime}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {formatDateDisplay(selectedDate)}
-                  {totalPrice > 0 && <span className="font-semibold text-gray-800"> · OMR {totalPrice.toFixed(2)}</span>}
-                </p>
-              </div>
-              {(bookingState === 'confirming' || bookingState === 'error') && (
-                <button
-                  onClick={() => { setBookingState('idle'); setBookingError('') }}
-                  className="px-4 py-3 rounded-xl border border-gray-200 text-gray-500 font-medium text-sm hover:bg-gray-50 transition-colors shrink-0"
-                >
-                  Back
-                </button>
-              )}
-              <button
-                onClick={handleBook}
-                disabled={bookingState === 'booking'}
-                className={`px-6 py-3 rounded-xl font-bold text-sm transition-all shrink-0 ${
-                  bookingState === 'confirming'
-                    ? 'bg-green-600 hover:bg-green-700 text-white shadow-md'
-                    : 'bg-gray-900 hover:bg-gray-800 text-white shadow-md'
-                } disabled:opacity-60`}
-              >
-                {bookingState === 'booking'
-                  ? 'Booking…'
-                  : bookingState === 'confirming'
-                  ? 'Confirm ✓'
-                  : !member
-                  ? 'Sign in to book'
-                  : 'Book now'}
-              </button>
+      {/* Sticky summary */}
+      {courtId && startTime && !confirmed && (
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-hair bg-ink/95 backdrop-blur">
+          <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="h-display text-lg truncate">
+                {selectedCourt?.name} · {startTime}–{endTime}
+              </p>
+              <p className="label-mono text-faint mt-1 truncate">
+                {formatDateLong(date)}
+                {price > 0 && <span className="text-gold"> · OMR {price.toFixed(2)}</span>}
+              </p>
             </div>
+            <button
+              onClick={() => { setSheetOpen(true); setError('') }}
+              className="shrink-0 px-6 py-3 rounded-xl bg-gradient-to-r from-ember to-ember-deep text-ink font-bold text-sm hover:brightness-110 transition-all"
+            >
+              Book
+            </button>
           </div>
         </div>
       )}
 
-      {/* Success overlay */}
-      {bookingState === 'success' && selectedCourt && selectedStartTime && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="bg-white rounded-3xl w-full max-w-sm p-7 text-center shadow-2xl">
-            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Details sheet — name and mobile only */}
+      {sheetOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center">
+          <div className="w-full sm:max-w-sm bg-surface border-t sm:border border-hair sm:rounded-3xl rounded-t-3xl p-6">
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <h2 className="h-display text-2xl">Almost there</h2>
+                <p className="label-mono text-faint mt-1.5">
+                  {selectedCourt?.name} · {startTime}–{endTime}
+                </p>
+              </div>
+              <button
+                onClick={() => setSheetOpen(false)}
+                className="text-faint hover:text-cream text-xl leading-none"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-flare/15 border border-flare/40 text-[#ff9a96] text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={submit} className="space-y-3">
+              <div>
+                <label className="label-mono text-faint block mb-1.5">Your name</label>
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  autoFocus
+                  placeholder="Full name"
+                  className="w-full bg-ink border border-hair rounded-xl px-4 py-3 text-cream placeholder-faint/60 focus:outline-none focus:border-ember text-sm"
+                />
+              </div>
+              <div>
+                <label className="label-mono text-faint block mb-1.5">Mobile</label>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  inputMode="tel"
+                  placeholder="9123 4567"
+                  className="w-full bg-ink border border-hair rounded-xl px-4 py-3 text-cream placeholder-faint/60 focus:outline-none focus:border-ember text-sm font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-ember to-ember-deep text-ink font-bold text-sm disabled:opacity-60 hover:brightness-110 transition-all"
+              >
+                {submitting ? 'Booking…' : `Confirm${price > 0 ? ` · OMR ${price.toFixed(2)}` : ''}`}
+              </button>
+              <p className="text-faint text-[11px] text-center pt-1">
+                Pay at the club. Free cancellation up to 2 hours before.
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation — account setup offered only now */}
+      {confirmed && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center px-4">
+          <div className="w-full max-w-sm bg-surface border border-hair rounded-3xl p-7 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-ember/20 border border-ember/40 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-7 h-7 text-ember" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-1">You&apos;re booked! 🎾</h3>
-            <p className="text-gray-500 text-sm">{selectedCourt.name} · {formatDateDisplay(selectedDate)}</p>
-            <p className="text-gray-900 font-semibold mt-1">{selectedStartTime} – {endTime}</p>
-            {totalPrice > 0 && (
-              <p className="text-indigo-600 font-bold mt-2">OMR {totalPrice.toFixed(2)}</p>
+            <h2 className="h-display text-3xl mb-2">You&apos;re booked</h2>
+            <p className="text-warm text-sm">
+              {COURTS.find((c) => c.id === confirmed.courtId)?.name} · {formatDateLong(confirmed.date)}
+            </p>
+            <p className="font-mono text-cream text-lg mt-1">
+              {confirmed.startTime}–{confirmed.endTime}
+            </p>
+            {confirmed.priceTotal > 0 && (
+              <p className="text-gold font-bold mt-2 font-mono">OMR {confirmed.priceTotal.toFixed(2)}</p>
             )}
-            <div className="flex gap-2 mt-6">
-              <button
-                onClick={() => {
-                  setSelectedStartTime(null)
-                  setBookingState('idle')
-                  setSelectedCourtId(null)
-                  loadAvailability()
-                }}
-                className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold text-sm hover:bg-gray-50 transition-colors"
-              >
-                Book another
-              </button>
-              <Link
-                href="/account"
-                className="flex-1 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 text-white font-semibold text-sm text-center transition-colors"
-              >
-                My bookings
-              </Link>
-            </div>
+
+            {!member && (
+              <div className="mt-6 p-4 rounded-2xl bg-ink border border-hair text-left">
+                <p className="h-display text-base mb-1">Want to skip this next time?</p>
+                <p className="text-faint text-xs mb-3">
+                  Set up an account to see your bookings and rebook in one tap.
+                </p>
+                <Link
+                  href="/account/claim"
+                  className="block w-full py-2.5 rounded-xl bg-ember/15 border border-ember/40 text-ember font-bold text-sm text-center hover:bg-ember/25 transition-colors"
+                >
+                  Set up my account
+                </Link>
+              </div>
+            )}
+
+            <button
+              onClick={reset}
+              className="w-full mt-3 py-3 rounded-xl border border-hair text-warm font-semibold text-sm hover:text-cream hover:border-warm/40 transition-colors"
+            >
+              Book another court
+            </button>
           </div>
         </div>
       )}

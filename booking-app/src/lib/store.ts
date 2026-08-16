@@ -173,6 +173,24 @@ export async function setBookingSynced(id: string, synced: boolean): Promise<boo
   return (rowCount ?? 0) > 0
 }
 
+/**
+ * How many upcoming, non-cancelled bookings this mobile number already holds.
+ * Used to cap anonymous bookings so a public endpoint cannot be used to
+ * block out the courts.
+ */
+export async function countUpcomingBookingsForPhone(phone: string, fromDate: string): Promise<number> {
+  const digits = phone.replace(/\D/g, '')
+  if (!digits) return 0
+  const { rows } = await pool.query(
+    `SELECT count(*)::int AS n FROM bookings
+      WHERE regexp_replace(COALESCE(player_phone,''), '\\D', '', 'g') = $1
+        AND date >= $2
+        AND status <> 'cancelled'`,
+    [digits, fromDate]
+  )
+  return rows[0].n as number
+}
+
 export async function cancelBooking(id: string): Promise<void> {
   await pool.query("UPDATE bookings SET status='cancelled' WHERE id=$1", [id])
 }

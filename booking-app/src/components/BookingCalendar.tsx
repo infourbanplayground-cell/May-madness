@@ -76,13 +76,13 @@ export default function BookingCalendar() {
   return (
     <div className="flex flex-col h-full">
       {/* Tab bar */}
-      <div className="flex border-b border-gray-800 px-6 pt-3 gap-4">
+      <div className="flex border-b border-hair px-6 pt-3 gap-4">
         <button
           onClick={() => setActiveTab('calendar')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'calendar'
-              ? 'border-indigo-500 text-white'
-              : 'border-transparent text-gray-400 hover:text-gray-300'
+              ? 'border-ember text-cream'
+              : 'border-transparent text-warm hover:text-cream/90'
           }`}
         >
           Calendar
@@ -91,8 +91,8 @@ export default function BookingCalendar() {
           onClick={() => setActiveTab('pricing')}
           className={`pb-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
             activeTab === 'pricing'
-              ? 'border-indigo-500 text-white'
-              : 'border-transparent text-gray-400 hover:text-gray-300'
+              ? 'border-ember text-cream'
+              : 'border-transparent text-warm hover:text-cream/90'
           }`}
         >
           <DollarSign size={14} />
@@ -107,31 +107,31 @@ export default function BookingCalendar() {
       {activeTab === 'calendar' && <>
 
       {/* Date navigation */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-hair">
         <button
           onClick={() => setSelectedDate((d) => subDays(d, 1))}
-          className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-surface-2 text-warm hover:text-cream transition-colors"
         >
           <ChevronLeft size={20} />
         </button>
 
         <div className="text-center">
-          <div className="text-xl font-bold text-white">
+          <div className="text-xl font-bold text-cream">
             {format(selectedDate, 'EEEE, MMMM d')}
           </div>
-          <div className="text-sm text-gray-400">{format(selectedDate, 'yyyy')}</div>
+          <div className="text-sm text-warm">{format(selectedDate, 'yyyy')}</div>
         </div>
 
         <button
           onClick={() => setSelectedDate((d) => addDays(d, 1))}
-          className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+          className="p-2 rounded-lg hover:bg-surface-2 text-warm hover:text-cream transition-colors"
         >
           <ChevronRight size={20} />
         </button>
       </div>
 
       {/* Week strip */}
-      <div className="flex px-6 py-3 gap-2 border-b border-gray-800 overflow-x-auto">
+      <div className="flex px-6 py-3 gap-2 border-b border-hair overflow-x-auto">
         {Array.from({ length: 7 }, (_, i) => {
           const d = addDays(subDays(selectedDate, 3), i)
           const isToday = format(d, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
@@ -142,10 +142,10 @@ export default function BookingCalendar() {
               onClick={() => setSelectedDate(d)}
               className={`flex flex-col items-center px-3 py-2 rounded-xl min-w-[52px] transition-colors ${
                 isSelected
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-ember text-cream'
                   : isToday
-                  ? 'bg-gray-800 text-indigo-400'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                  ? 'bg-surface-2 text-ember'
+                  : 'text-warm hover:bg-surface-2 hover:text-cream'
               }`}
             >
               <span className="text-xs font-medium">{DAY_NAMES[d.getDay()]}</span>
@@ -159,14 +159,14 @@ export default function BookingCalendar() {
       <div className="flex-1 overflow-auto">
         <div className="min-w-[600px]">
           {/* Court headers */}
-          <div className="flex sticky top-0 z-10 bg-gray-950 border-b border-gray-800">
+          <div className="flex sticky top-0 z-10 bg-ink border-b border-hair">
             <div className="w-16 shrink-0" />
             {COURTS.map((court) => (
               <div
                 key={court.id}
-                className="flex-1 text-center py-3 border-l border-gray-800"
+                className="flex-1 text-center py-3 border-l border-hair"
               >
-                <div className="text-sm font-bold text-white">{court.name}</div>
+                <div className="text-sm font-bold text-cream">{court.name}</div>
                 <div
                   className="text-xs font-medium mt-0.5"
                   style={{ color: court.color }}
@@ -179,9 +179,9 @@ export default function BookingCalendar() {
 
           {/* Time rows */}
           {TIME_SLOTS.map((time) => (
-            <div key={time} className="flex border-b border-gray-800/50 h-12">
+            <div key={time} className="flex border-b border-hair-soft h-12">
               <div className="w-16 shrink-0 flex items-center justify-center">
-                <span className="text-xs text-gray-500">{time}</span>
+                <span className="text-xs text-faint">{time}</span>
               </div>
 
               {COURTS.map((court) => {
@@ -191,12 +191,12 @@ export default function BookingCalendar() {
                 return (
                   <div
                     key={court.id}
-                    className="flex-1 border-l border-gray-800/50 relative"
+                    className="flex-1 border-l border-hair-soft relative"
                   >
                     {isStart && booking ? (
                       <button
                         onClick={() => setDetailBooking(booking)}
-                        className="absolute inset-x-1 top-0.5 rounded-md text-white text-xs font-semibold px-2 py-1 text-left overflow-hidden z-10 hover:brightness-110 transition-all"
+                        className="absolute inset-x-1 top-0.5 rounded-md text-cream text-xs font-semibold px-2 py-1 text-left overflow-hidden z-10 hover:brightness-110 transition-all"
                         style={{
                           backgroundColor: court.color,
                           height: `${slotSpan(booking) * 48 - 4}px`,
@@ -216,11 +216,11 @@ export default function BookingCalendar() {
                           setSlotSelection({ courtId: court.id, startTime: time })
                           setShowModal(true)
                         }}
-                        className="absolute inset-0 hover:bg-gray-800/60 transition-colors group"
+                        className="absolute inset-0 hover:bg-surface-2/60 transition-colors group"
                       >
                         <Plus
                           size={14}
-                          className="absolute inset-0 m-auto text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute inset-0 m-auto text-faint/70 opacity-0 group-hover:opacity-100 transition-opacity"
                         />
                       </button>
                     ) : null}
@@ -314,8 +314,8 @@ function PricingPanel() {
   return (
     <div className="flex-1 overflow-auto p-6">
       <div className="max-w-md">
-        <h2 className="text-lg font-bold text-white mb-1">Court Pricing</h2>
-        <p className="text-sm text-gray-400 mb-6">Set per-hour rates shown to members on the booking page.</p>
+        <h2 className="text-lg font-bold text-cream mb-1">Court Pricing</h2>
+        <p className="text-sm text-warm mb-6">Set per-hour rates shown to members on the booking page.</p>
 
         {error && (
           <div className="mb-4 p-3 rounded-xl bg-red-900/30 border border-red-800 text-red-400 text-sm">
@@ -325,20 +325,20 @@ function PricingPanel() {
 
         <div className="space-y-3">
           {COURTS.map((court) => (
-            <div key={court.id} className="bg-gray-900 rounded-xl border border-gray-800 p-4">
+            <div key={court.id} className="bg-surface rounded-xl border border-hair p-4">
               <div className="flex items-center gap-3 mb-3">
                 <div
                   className="w-3 h-3 rounded-full shrink-0"
                   style={{ backgroundColor: court.color }}
                 />
                 <div>
-                  <p className="font-medium text-white text-sm">{court.name}</p>
-                  <p className="text-xs text-gray-400">{court.sport}</p>
+                  <p className="font-medium text-cream text-sm">{court.name}</p>
+                  <p className="text-xs text-warm">{court.sport}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 flex-1 bg-gray-800 rounded-lg border border-gray-700 px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
-                  <span className="text-gray-400 text-sm">OMR</span>
+                <div className="flex items-center gap-1.5 flex-1 bg-surface-2 rounded-lg border border-hair px-3 py-2 focus-within:ring-2 focus-within:ring-indigo-500">
+                  <span className="text-warm text-sm">OMR</span>
                   <input
                     type="number"
                     min="0"
@@ -346,14 +346,14 @@ function PricingPanel() {
                     value={prices[court.id] ?? ''}
                     onChange={(e) => setPrices((p) => ({ ...p, [court.id]: e.target.value }))}
                     placeholder="0.00"
-                    className="flex-1 bg-transparent text-white text-sm focus:outline-none"
+                    className="flex-1 bg-transparent text-cream text-sm focus:outline-none"
                   />
-                  <span className="text-gray-400 text-xs">/hr</span>
+                  <span className="text-warm text-xs">/hr</span>
                 </div>
                 <button
                   onClick={() => handleSave(court.id)}
                   disabled={saving === court.id}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 bg-indigo-600 hover:bg-indigo-500 text-white"
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 bg-ember hover:bg-ember-deep text-ink"
                 >
                   {saving === court.id ? 'Saving…' : saved === court.id ? 'Saved!' : 'Save'}
                 </button>
@@ -422,22 +422,22 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4">
-      <div className="bg-gray-900 rounded-2xl w-full max-w-md border border-gray-800 shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+      <div className="bg-surface rounded-2xl w-full max-w-md border border-hair shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-hair">
           <div>
-            <h2 className="font-bold text-white">New Booking</h2>
-            <p className="text-sm text-gray-400">
+            <h2 className="font-bold text-cream">New Booking</h2>
+            <p className="text-sm text-warm">
               <span style={{ color: court.color }}>{court.name}</span> · {date} · {startTime} – {endTime}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
+          <button onClick={onClose} className="text-warm hover:text-cream">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSave} className="p-6 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">Duration</label>
+            <label className="block text-xs font-medium text-warm mb-1">Duration</label>
             <div className="flex gap-2">
               {[30, 60, 90, 120].map((d) => (
                 <button
@@ -446,8 +446,8 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
                   onClick={() => setDuration(d)}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
                     duration === d
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-ember text-cream'
+                      : 'bg-surface-2 text-cream/90 hover:bg-surface-2'
                   }`}
                 >
                   {d}m
@@ -463,7 +463,7 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
           />
 
           <div>
-            <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
+            <label className="flex items-center gap-2 text-xs font-medium text-warm mb-1">
               <FileText size={14} /> Notes
             </label>
             <textarea
@@ -471,7 +471,7 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Equipment, special requests…"
               rows={2}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full bg-surface-2 border border-hair rounded-lg px-4 py-2.5 text-cream placeholder-faint/60 focus:outline-none focus:ring-2 focus:ring-ember resize-none"
             />
           </div>
 
@@ -483,16 +483,16 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
                 onChange={(e) => setIsRecurring(e.target.checked)}
                 className="rounded accent-indigo-600"
               />
-              <span className="text-sm text-gray-300 flex items-center gap-1.5">
+              <span className="text-sm text-cream/90 flex items-center gap-1.5">
                 <RefreshCw size={14} /> Recurring booking
               </span>
             </label>
           </div>
 
           {isRecurring && (
-            <div className="bg-gray-800 rounded-xl p-4 space-y-3">
+            <div className="bg-surface-2 rounded-xl p-4 space-y-3">
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-2">Repeat on</label>
+                <label className="block text-xs font-medium text-warm mb-2">Repeat on</label>
                 <div className="flex gap-1.5">
                   {DAY_NAMES.map((day, i) => (
                     <button
@@ -501,8 +501,8 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
                       onClick={() => toggleDay(i)}
                       className={`w-9 h-9 rounded-lg text-xs font-semibold transition-colors ${
                         recurringDays.includes(i)
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                          ? 'bg-ember text-cream'
+                          : 'bg-gray-700 text-warm hover:bg-gray-600'
                       }`}
                     >
                       {day}
@@ -511,14 +511,14 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1">Repeat until</label>
+                <label className="block text-xs font-medium text-warm mb-1">Repeat until</label>
                 <input
                   type="date"
                   value={recurringUntil}
                   onChange={(e) => setRecurringUntil(e.target.value)}
                   min={date}
                   required={isRecurring}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-cream focus:outline-none focus:ring-2 focus:ring-ember"
                 />
               </div>
             </div>
@@ -528,14 +528,14 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 font-medium transition-colors"
+              className="flex-1 py-2.5 rounded-lg bg-surface-2 text-cream/90 hover:bg-surface-2 font-medium transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold transition-colors"
+              className="flex-1 py-2.5 rounded-lg bg-ember hover:bg-ember-deep disabled:opacity-50 text-ink font-semibold transition-colors"
             >
               {saving ? 'Saving…' : 'Book'}
             </button>
@@ -560,7 +560,7 @@ function BookingDetail({ booking, court, onClose, onCancel }: DetailProps) {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 px-4 pb-4 sm:pb-0">
-      <div className="bg-gray-900 rounded-2xl w-full max-w-sm border border-gray-800 shadow-2xl">
+      <div className="bg-surface rounded-2xl w-full max-w-sm border border-hair shadow-2xl">
         <div
           className="h-2 rounded-t-2xl"
           style={{ backgroundColor: court.color }}
@@ -568,41 +568,41 @@ function BookingDetail({ booking, court, onClose, onCancel }: DetailProps) {
         <div className="px-6 py-4">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h2 className="font-bold text-white text-lg">{booking.playerName}</h2>
+              <h2 className="font-bold text-cream text-lg">{booking.playerName}</h2>
               <p className="text-sm" style={{ color: court.color }}>
                 {court.name} · {court.sport}
               </p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white mt-0.5">
+            <button onClick={onClose} className="text-warm hover:text-cream mt-0.5">
               <X size={20} />
             </button>
           </div>
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Date</span>
-              <span className="text-white">{booking.date}</span>
+              <span className="text-warm">Date</span>
+              <span className="text-cream">{booking.date}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Time</span>
-              <span className="text-white">{booking.startTime} – {booking.endTime}</span>
+              <span className="text-warm">Time</span>
+              <span className="text-cream">{booking.startTime} – {booking.endTime}</span>
             </div>
             {booking.playerPhone && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Phone</span>
-                <span className="text-white">{booking.playerPhone}</span>
+                <span className="text-warm">Phone</span>
+                <span className="text-cream">{booking.playerPhone}</span>
               </div>
             )}
             {booking.notes && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Notes</span>
-                <span className="text-white text-right max-w-[60%]">{booking.notes}</span>
+                <span className="text-warm">Notes</span>
+                <span className="text-cream text-right max-w-[60%]">{booking.notes}</span>
               </div>
             )}
             {booking.isRecurring && (
               <div className="flex justify-between">
-                <span className="text-gray-400">Recurring</span>
-                <span className="text-indigo-400 flex items-center gap-1">
+                <span className="text-warm">Recurring</span>
+                <span className="text-ember flex items-center gap-1">
                   <RefreshCw size={12} /> Yes
                 </span>
               </div>
@@ -619,17 +619,17 @@ function BookingDetail({ booking, court, onClose, onCancel }: DetailProps) {
               </button>
             ) : (
               <div className="space-y-2">
-                <p className="text-center text-sm text-gray-400">Are you sure?</p>
+                <p className="text-center text-sm text-warm">Are you sure?</p>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setConfirming(false)}
-                    className="flex-1 py-2.5 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700 font-medium transition-colors"
+                    className="flex-1 py-2.5 rounded-lg bg-surface-2 text-cream/90 hover:bg-surface-2 font-medium transition-colors"
                   >
                     Keep
                   </button>
                   <button
                     onClick={() => onCancel(booking.id)}
-                    className="flex-1 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-semibold transition-colors"
+                    className="flex-1 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-cream font-semibold transition-colors"
                   >
                     Yes, cancel
                   </button>

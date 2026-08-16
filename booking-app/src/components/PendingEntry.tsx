@@ -59,10 +59,10 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
   return (
     <div className="flex flex-col h-full">
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-800 shrink-0 flex-wrap">
+      <div className="flex items-center gap-3 px-6 py-3 border-b border-hair shrink-0 flex-wrap">
         <div>
-          <h2 className="text-sm font-semibold text-white">To enter in MatchPoint</h2>
-          <p className="text-xs text-gray-500">
+          <h2 className="text-sm font-semibold text-cream">To enter in MatchPoint</h2>
+          <p className="text-xs text-faint">
             Bookings taken here that still need keying into MatchPoint by hand
           </p>
         </div>
@@ -71,8 +71,8 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
             href="/api/admin/pending/export"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               rows.length
-                ? 'bg-gray-800 hover:bg-gray-700 text-gray-200'
-                : 'bg-gray-900 text-gray-600 pointer-events-none'
+                ? 'bg-surface-2 hover:bg-surface-3 text-cream'
+                : 'bg-surface text-faint/70 pointer-events-none'
             }`}
           >
             <Download size={14} /> CSV
@@ -80,7 +80,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
           <button
             onClick={load}
             disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-ember hover:bg-ember-deep disabled:opacity-50 text-ink text-sm font-medium transition-colors"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} /> Refresh
           </button>
@@ -103,7 +103,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
             </span>
             <button
               onClick={() => { mark(justDone, false); setJustDone(null) }}
-              className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-white"
+              className="ml-auto flex items-center gap-1 text-xs text-warm hover:text-cream"
             >
               <Undo2 size={12} /> Undo
             </button>
@@ -111,7 +111,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
         )}
 
         {loading && !rows.length && (
-          <div className="flex items-center justify-center h-40 text-gray-500 text-sm gap-2">
+          <div className="flex items-center justify-center h-40 text-faint text-sm gap-2">
             <RefreshCw size={16} className="animate-spin" /> Loading…
           </div>
         )}
@@ -121,8 +121,8 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
             <div className="w-14 h-14 rounded-full bg-green-900/30 flex items-center justify-center mb-4">
               <ClipboardCheck size={26} className="text-green-400" />
             </div>
-            <p className="text-white font-semibold mb-1">Nothing waiting</p>
-            <p className="text-sm text-gray-500 max-w-xs">
+            <p className="text-cream font-semibold mb-1">Nothing waiting</p>
+            <p className="text-sm text-faint max-w-xs">
               Every booking taken in this app has been entered into MatchPoint.
             </p>
           </div>
@@ -130,7 +130,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
 
         {rows.length > 0 && (
           <>
-            <p className="text-xs text-gray-500 mb-3">
+            <p className="text-xs text-faint mb-3">
               {rows.length} booking{rows.length === 1 ? '' : 's'} waiting. Enter each one in MatchPoint,
               then tick it off here.
             </p>
@@ -138,16 +138,16 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
               {rows.map((b) => (
                 <div
                   key={b.id}
-                  className="flex items-center gap-4 bg-gray-900 border border-gray-800 rounded-xl px-4 py-3"
+                  className="flex items-center gap-4 bg-surface border border-hair rounded-xl px-4 py-3"
                 >
                   <div className="text-center shrink-0 w-16">
-                    <p className="text-[11px] text-gray-500">{formatDate(b.date)}</p>
-                    <p className="text-sm font-bold text-white tabular-nums">{b.startTime}</p>
+                    <p className="text-[11px] text-faint">{formatDate(b.date)}</p>
+                    <p className="text-sm font-bold text-cream tabular-nums">{b.startTime}</p>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-white truncate">{b.playerName}</p>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-sm font-semibold text-cream truncate">{b.playerName}</p>
+                    <p className="text-xs text-warm truncate">
                       {b.courtName} · {b.startTime}–{b.endTime}
                       {b.playerPhone && <> · {b.playerPhone}</>}
                     </p>
@@ -156,15 +156,15 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full shrink-0 ${
                       b.bookingSource === 'member'
-                        ? 'bg-indigo-900/50 text-indigo-300'
-                        : 'bg-gray-800 text-gray-400'
+                        ? 'bg-ember/20 text-ember'
+                        : 'bg-surface-2 text-warm'
                     }`}
                   >
                     {b.bookingSource === 'member' ? 'Online' : 'Front desk'}
                   </span>
 
                   {b.priceTotal != null && b.priceTotal > 0 && (
-                    <span className="text-xs text-gray-400 tabular-nums shrink-0">
+                    <span className="text-xs text-warm tabular-nums shrink-0">
                       OMR {b.priceTotal.toFixed(2)}
                     </span>
                   )}
@@ -172,7 +172,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
                   <button
                     onClick={() => mark(b, true)}
                     disabled={busyId === b.id}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-xs font-semibold transition-colors shrink-0"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-ink text-xs font-semibold transition-colors shrink-0"
                   >
                     <Check size={13} />
                     {busyId === b.id ? 'Saving…' : 'Entered'}

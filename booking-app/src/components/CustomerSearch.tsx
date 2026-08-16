@@ -84,16 +84,16 @@ export default function CustomerSearch({
   if (picked) {
     return (
       <div>
-        <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
+        <label className="flex items-center gap-2 text-xs font-medium text-warm mb-1">
           <User size={14} /> Player *
         </label>
         <div className="flex items-center gap-3 bg-indigo-950/40 border border-indigo-800 rounded-lg px-3 py-2.5">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+          <div className="w-7 h-7 rounded-full bg-ember text-cream text-xs font-bold flex items-center justify-center shrink-0">
             {picked.name.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-white truncate">{picked.name}</p>
-            <p className="text-xs text-gray-400 truncate">
+            <p className="text-sm font-medium text-cream truncate">{picked.name}</p>
+            <p className="text-xs text-warm truncate">
               {picked.mobile || 'no phone on file'}
               {picked.memberCode && <> · member {picked.memberCode}</>}
             </p>
@@ -103,7 +103,7 @@ export default function CustomerSearch({
             type="button"
             onClick={clearPick}
             title="Choose someone else"
-            className="text-gray-500 hover:text-white shrink-0"
+            className="text-faint hover:text-cream shrink-0"
           >
             <X size={16} />
           </button>
@@ -114,39 +114,39 @@ export default function CustomerSearch({
 
   return (
     <div ref={boxRef} className="relative">
-      <label className="flex items-center gap-2 text-xs font-medium text-gray-400 mb-1">
+      <label className="flex items-center gap-2 text-xs font-medium text-warm mb-1">
         <User size={14} /> Player *
       </label>
 
       {/* Lookup */}
-      <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500">
-        <Search size={14} className="text-gray-500 shrink-0" />
+      <div className="flex items-center gap-2 bg-surface-2 border border-hair rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-indigo-500">
+        <Search size={14} className="text-faint shrink-0" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length && setOpen(true)}
           placeholder="Search name, phone or email…"
-          className="bg-transparent text-white placeholder-gray-500 focus:outline-none w-full text-sm"
+          className="bg-transparent text-cream placeholder-faint/60 focus:outline-none w-full text-sm"
         />
-        {loading && <span className="text-[10px] text-gray-500 shrink-0">…</span>}
+        {loading && <span className="text-[10px] text-faint shrink-0">…</span>}
       </div>
 
       {/* Results */}
       {open && results.length > 0 && (
-        <div className="absolute z-30 left-0 right-0 mt-1 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
+        <div className="absolute z-30 left-0 right-0 mt-1 bg-surface border border-hair rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto">
           {results.map((c) => (
             <button
               key={c.code}
               type="button"
               onClick={() => pick(c)}
-              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-800 text-left transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2 hover:bg-surface-2 text-left transition-colors"
             >
-              <div className="w-6 h-6 rounded-full bg-gray-700 text-gray-200 text-[11px] font-bold flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 rounded-full bg-gray-700 text-cream text-[11px] font-bold flex items-center justify-center shrink-0">
                 {c.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-white truncate">{c.name}</p>
-                <p className="text-[11px] text-gray-500 truncate">
+                <p className="text-sm text-cream truncate">{c.name}</p>
+                <p className="text-[11px] text-faint truncate">
                   {c.mobile || c.email || '—'}
                 </p>
               </div>
@@ -156,8 +156,8 @@ export default function CustomerSearch({
       )}
 
       {open && query.trim().length >= 2 && !loading && results.length === 0 && (
-        <div className="absolute z-30 left-0 right-0 mt-1 bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5">
-          <p className="text-xs text-gray-500">
+        <div className="absolute z-30 left-0 right-0 mt-1 bg-surface border border-hair rounded-xl px-3 py-2.5">
+          <p className="text-xs text-faint">
             No match — type the name below to book a walk-in.
           </p>
         </div>
@@ -170,13 +170,13 @@ export default function CustomerSearch({
           onChange={(e) => onChange({ name: e.target.value, phone })}
           required
           placeholder="Or type name"
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="bg-surface-2 border border-hair rounded-lg px-3 py-2 text-cream placeholder-faint/60 text-sm focus:outline-none focus:ring-2 focus:ring-ember"
         />
         <input
           value={phone}
           onChange={(e) => onChange({ name, phone: e.target.value })}
           placeholder="Phone"
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="bg-surface-2 border border-hair rounded-lg px-3 py-2 text-cream placeholder-faint/60 text-sm focus:outline-none focus:ring-2 focus:ring-ember"
         />
       </div>
     </div>

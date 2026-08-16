@@ -35,31 +35,31 @@ export default function HomePage() {
   useEffect(() => { refreshPendingCount() }, [refreshPendingCount, tab])
 
   return (
-    <div className="flex flex-col h-screen bg-gray-950">
+    <div className="flex flex-col h-screen bg-ink">
       {/* Top bar */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-gray-800 bg-gray-950 shrink-0">
+      <header className="flex items-center justify-between px-6 py-3 border-b border-hair bg-ink shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-8 h-8 rounded-lg bg-ember flex items-center justify-center">
+            <svg className="w-4 h-4 text-cream" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
             </svg>
           </div>
-          <span className="font-bold text-white">Urban Playground</span>
-          <span className="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-0.5 rounded-full font-medium">Admin</span>
+          <span className="h-display text-lg">Urban Playground</span>
+          <span className="label-mono bg-ember/20 text-ember px-2 py-1 rounded-full">Admin</span>
         </div>
         <LogoutButton />
       </header>
 
       {/* Nav tabs */}
-      <nav className="flex border-b border-gray-800 bg-gray-950 shrink-0 px-4 overflow-x-auto">
+      <nav className="flex border-b border-hair bg-ink shrink-0 px-4 overflow-x-auto">
         {TABS.map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               tab === t.id
-                ? 'border-indigo-500 text-white'
-                : 'border-transparent text-gray-400 hover:text-gray-200'
+                ? 'border-ember text-cream'
+                : 'border-transparent text-warm hover:text-cream'
             }`}
           >
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,7 +67,7 @@ export default function HomePage() {
             </svg>
             {t.label}
             {t.id === 'pending' && pendingCount > 0 && (
-              <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-gray-950 text-[11px] font-bold flex items-center justify-center tabular-nums">
+              <span className="ml-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-lime text-ink text-[11px] font-bold flex items-center justify-center tabular-nums">
                 {pendingCount}
               </span>
             )}

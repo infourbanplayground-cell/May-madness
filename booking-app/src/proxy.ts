@@ -12,7 +12,10 @@ export function proxy(request: NextRequest) {
     pathname === '/account/claim' ||
     pathname.startsWith('/api/account/') ||
     pathname.startsWith('/api/courts/') ||
-    pathname.startsWith('/api/auth/')
+    pathname.startsWith('/api/auth/') ||
+    // Booking without an account. Guarded inside the route by phone
+    // validation, a per-number cap and a per-IP burst limit.
+    pathname === '/api/bookings/public'
   ) {
     return NextResponse.next()
   }
