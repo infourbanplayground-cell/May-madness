@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Emblem } from '@/components/Brand'
+import { formatTime } from '@/lib/time'
 import { Member, Booking } from '@/lib/types'
 
 const COURT_COLORS: Record<string, string> = {
@@ -67,7 +68,7 @@ function BookingCard({
             </div>
             <p className="text-warm text-sm">{formatDate(booking.date)}</p>
             <p className="text-faint text-sm">
-              {booking.startTime} – {booking.endTime}
+              {formatTime(booking.startTime)} – {formatTime(booking.endTime)}
               {booking.durationMinutes && (
                 <span className="ml-1.5 text-faint">
                   ({booking.durationMinutes >= 60 ? `${booking.durationMinutes / 60}h` : `${booking.durationMinutes}m`})

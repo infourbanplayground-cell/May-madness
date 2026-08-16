@@ -4,15 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { format, addDays, subDays, parseISO } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, X, FileText, RefreshCw, DollarSign } from 'lucide-react'
 import { Court, Booking } from '@/lib/types'
-import { TIME_SLOTS } from '@/lib/constants'
+import { COURTS, TIME_SLOTS } from '@/lib/constants'
 import CustomerSearch from '@/components/CustomerSearch'
+import { formatTime, formatTimeShort } from '@/lib/time'
 
-const COURTS: Court[] = [
-  { id: 'court-1', name: 'Court 1', sport: 'Padel', color: '#6366f1' },
-  { id: 'court-2', name: 'Court 2', sport: 'Padel', color: '#10b981' },
-  { id: 'court-3', name: 'Court 3', sport: 'Pickleball', color: '#f59e0b' },
-  { id: 'court-4', name: 'Court 4', sport: 'Pickleball', color: '#ef4444' },
-]
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -160,7 +155,7 @@ export default function BookingCalendar() {
         <div className="min-w-[600px]">
           {/* Court headers */}
           <div className="flex sticky top-0 z-10 bg-ink border-b border-hair">
-            <div className="w-16 shrink-0" />
+            <div className="w-20 shrink-0" />
             {COURTS.map((court) => (
               <div
                 key={court.id}
@@ -180,8 +175,8 @@ export default function BookingCalendar() {
           {/* Time rows */}
           {TIME_SLOTS.map((time) => (
             <div key={time} className="flex border-b border-hair-soft h-12">
-              <div className="w-16 shrink-0 flex items-center justify-center">
-                <span className="text-xs text-faint">{time}</span>
+              <div className="w-20 shrink-0 flex items-center justify-center">
+                <span className="text-[11px] text-faint whitespace-nowrap">{formatTimeShort(time)}</span>
               </div>
 
               {COURTS.map((court) => {
@@ -196,7 +191,7 @@ export default function BookingCalendar() {
                     {isStart && booking ? (
                       <button
                         onClick={() => setDetailBooking(booking)}
-                        className="absolute inset-x-1 top-0.5 rounded-md text-cream text-xs font-semibold px-2 py-1 text-left overflow-hidden z-10 hover:brightness-110 transition-all"
+                        className="absolute inset-x-1 top-0.5 rounded-md text-ink text-xs font-semibold px-2 py-1 text-left overflow-hidden z-10 hover:brightness-110 transition-all"
                         style={{
                           backgroundColor: court.color,
                           height: `${slotSpan(booking) * 48 - 4}px`,
@@ -204,7 +199,7 @@ export default function BookingCalendar() {
                       >
                         <div className="truncate">{booking.playerName}</div>
                         <div className="opacity-80 text-[10px]">
-                          {booking.startTime} – {booking.endTime}
+                          {formatTime(booking.startTime)} – {formatTime(booking.endTime)}
                         </div>
                         {booking.isRecurring && (
                           <RefreshCw size={10} className="absolute top-1 right-1 opacity-70" />
@@ -427,7 +422,7 @@ function BookingModal({ courtId, date, startTime, onClose, onSaved }: ModalProps
           <div>
             <h2 className="font-bold text-cream">New Booking</h2>
             <p className="text-sm text-warm">
-              <span style={{ color: court.color }}>{court.name}</span> · {date} · {startTime} – {endTime}
+              <span style={{ color: court.color }}>{court.name}</span> · {date} · {formatTime(startTime)} – {formatTime(endTime)}
             </p>
           </div>
           <button onClick={onClose} className="text-warm hover:text-cream">
@@ -585,7 +580,7 @@ function BookingDetail({ booking, court, onClose, onCancel }: DetailProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-warm">Time</span>
-              <span className="text-cream">{booking.startTime} – {booking.endTime}</span>
+              <span className="text-cream">{formatTime(booking.startTime)} – {formatTime(booking.endTime)}</span>
             </div>
             {booking.playerPhone && (
               <div className="flex justify-between">

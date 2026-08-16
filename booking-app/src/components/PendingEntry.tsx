@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { RefreshCw, Download, Check, ClipboardCheck, Undo2 } from 'lucide-react'
 import { Booking } from '@/lib/types'
+import { formatTime, formatTimeShort } from '@/lib/time'
 
 type PendingBooking = Booking & { courtName: string }
 
@@ -99,7 +100,7 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
             <Check size={16} className="text-green-400 shrink-0" />
             <span className="text-green-300">
               Marked <span className="font-semibold">{justDone.playerName}</span> ({formatDate(justDone.date)}{' '}
-              {justDone.startTime}) as entered.
+              {formatTimeShort(justDone.startTime)}) as entered.
             </span>
             <button
               onClick={() => { mark(justDone, false); setJustDone(null) }}
@@ -142,13 +143,13 @@ export default function PendingEntry({ onCountChange }: { onCountChange?: (n: nu
                 >
                   <div className="text-center shrink-0 w-16">
                     <p className="text-[11px] text-faint">{formatDate(b.date)}</p>
-                    <p className="text-sm font-bold text-cream tabular-nums">{b.startTime}</p>
+                    <p className="text-sm font-bold text-cream tabular-nums">{formatTimeShort(b.startTime)}</p>
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-cream truncate">{b.playerName}</p>
                     <p className="text-xs text-warm truncate">
-                      {b.courtName} · {b.startTime}–{b.endTime}
+                      {b.courtName} · {formatTime(b.startTime)} – {formatTime(b.endTime)}
                       {b.playerPhone && <> · {b.playerPhone}</>}
                     </p>
                   </div>

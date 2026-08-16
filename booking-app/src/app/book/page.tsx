@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { COURTS, TIME_SLOTS } from '@/lib/constants'
 import { BrandMark, Emblem } from '@/components/Brand'
+import { formatTime, formatTimeShort } from '@/lib/time'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,17 +49,11 @@ function formatDateLong(dateStr: string) {
 const DURATIONS = [60, 90, 120]
 
 const TIME_GROUPS = [
-  { label: 'Morning',   from: timeToMinutes('06:00'), to: timeToMinutes('12:00') },
-  { label: 'Afternoon', from: timeToMinutes('12:00'), to: timeToMinutes('17:00') },
-  { label: 'Evening',   from: timeToMinutes('17:00'), to: timeToMinutes('24:00') },
+  { label: 'Late afternoon', from: timeToMinutes('16:00'), to: timeToMinutes('18:00') },
+  { label: 'Evening',        from: timeToMinutes('18:00'), to: timeToMinutes('21:00') },
+  { label: 'Late night',     from: timeToMinutes('21:00'), to: timeToMinutes('24:00') },
 ]
 
-const COURT_ACCENT: Record<string, string> = {
-  'court-1': '#FF8A3D',
-  'court-2': '#FFC24B',
-  'court-3': '#33A1FF',
-  'court-4': '#8DF3E8',
-}
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -220,7 +215,7 @@ export default function BookPage() {
       <main className="max-w-lg mx-auto px-4">
         <div className="pt-7 pb-6">
           <h1 className="h-display text-4xl">Book a court</h1>
-          <p className="text-warm text-sm mt-2">Padel &amp; pickleball · open 06:00 – 24:00</p>
+          <p className="text-warm text-sm mt-2">Padel &amp; pickleball · open 4:00 PM – 12:00 AM</p>
           <p className="text-faint text-xs mt-1">No account needed — just your name and mobile.</p>
         </div>
 
@@ -325,7 +320,7 @@ export default function BookPage() {
                                 : 'bg-surface text-cream border border-hair hover:border-ember/60'
                             }`}
                           >
-                            {t}
+                            {formatTimeShort(t)}
                             {free > 0 && !sel && (
                               <span className="absolute top-1 right-1.5 text-[9px] text-faint font-sans">
                                 {free}
@@ -351,7 +346,7 @@ export default function BookPage() {
             <div className="grid grid-cols-2 gap-2.5">
               {availableCourts.map((id) => {
                 const court = COURTS.find((c) => c.id === id)!
-                const accent = COURT_ACCENT[id] ?? '#FF8A3D'
+                const accent = court.color
                 const sel = courtId === id
                 const rate = prices[id]
                 return (
@@ -387,7 +382,7 @@ export default function BookPage() {
           <div className="max-w-lg mx-auto px-4 py-4 flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="h-display text-lg truncate">
-                {selectedCourt?.name} · {startTime}–{endTime}
+                {selectedCourt?.name} · {startTime && endTime ? `${formatTime(startTime)} – ${formatTime(endTime)}` : null}
               </p>
               <p className="label-mono text-faint mt-1 truncate">
                 {formatDateLong(date)}
@@ -412,7 +407,7 @@ export default function BookPage() {
               <div>
                 <h2 className="h-display text-2xl">Almost there</h2>
                 <p className="label-mono text-faint mt-1.5">
-                  {selectedCourt?.name} · {startTime}–{endTime}
+                  {selectedCourt?.name} · {startTime && endTime ? `${formatTime(startTime)} – ${formatTime(endTime)}` : null}
                 </p>
               </div>
               <button
@@ -480,7 +475,7 @@ export default function BookPage() {
               {COURTS.find((c) => c.id === confirmed.courtId)?.name} · {formatDateLong(confirmed.date)}
             </p>
             <p className="font-mono text-cream text-lg mt-1">
-              {confirmed.startTime}–{confirmed.endTime}
+              {formatTime(confirmed.startTime)} – {formatTime(confirmed.endTime)}
             </p>
             {confirmed.priceTotal > 0 && (
               <p className="text-gold font-bold mt-2 font-mono">OMR {confirmed.priceTotal.toFixed(2)}</p>

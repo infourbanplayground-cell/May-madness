@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { CalendarDays, Users, Percent, Banknote, RefreshCw } from 'lucide-react'
+import { formatTime } from '@/lib/time'
 
 type Stats = {
   ok: boolean
@@ -176,8 +177,8 @@ export default function AdminDashboard() {
                     className="flex items-center gap-3 bg-surface-2/50 rounded-xl px-3 py-2.5 border-l-2"
                     style={{ borderLeftColor: courtAccent(b.resourceName) }}
                   >
-                    <span className="font-mono text-xs font-bold text-gold tabular-nums w-24 shrink-0">
-                      {b.startTime}–{b.endTime}
+                    <span className="font-mono text-xs font-bold text-gold tabular-nums w-36 shrink-0">
+                      {formatTime(b.startTime)} – {formatTime(b.endTime)}
                     </span>
                     <span className="text-xs text-cream/90 truncate flex-1">{b.playerName}</span>
                     <span
