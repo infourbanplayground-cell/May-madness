@@ -1424,7 +1424,7 @@ function generatePlayerCard(entry, state) {
   if (entry.stats.finalsReached - entry.stats.finalsWon > 0) txt += `🥈 Finalist ×${entry.stats.finalsReached - entry.stats.finalsWon}\n`;
   if (entry.stats.sfReached > 0) txt += `⚔️ Semifinalist ×${entry.stats.sfReached}\n`;
   if (badges.length > 0) { txt += `\n🎖 Badges: ${badges.map(b => b.icon+" "+b.label).join(" · ")}\n`; }
-  txt += `\n🎾 attack.urbanpadel.om`;
+  txt += `\n🎾 https://attack.urbanpadel.om`;
   return txt;
 }
 
@@ -2923,7 +2923,7 @@ function generateFormatText(state) {
   t += `*Every session*\n🏆 Winners take a *${sessionVoucher} OMR voucher each*\n\n`;
   t += `*End of season*\n🥇 1st — *${season[0]} OMR*\n🥈 2nd — *${season[1]} OMR*\n🥉 3rd — *${season[2]} OMR*\n\n`;
   t += `⚡ *Sessions 8 & 9 pay DOUBLE points* — the table can still flip on the last night, so it's never too late to join.\n\n`;
-  t += `━━━━━━━━━━━━━━━━━━━━\n📊 Live table: attack.urbanpadel.om\n`;
+  t += `━━━━━━━━━━━━━━━━━━━━\n📊 Live table: https://attack.urbanpadel.om\n`;
   t += `💥 *Serve first. Strike hard.* 👑`;
   return t;
 }
@@ -3226,7 +3226,7 @@ function generateReminderText(session, state, leaderboard) {
   // The four other generated posts all carry the link; the signup post was the
   // only one without it, and it is the post players actually act on. Sits under
   // the standings because that is the tease the link pays off.
-  text += `\n🎾 Full table & your own rank: attack.urbanpadel.om\n`;
+  text += `\n🎾 Full table & your own rank: https://attack.urbanpadel.om\n`;
   text += `\nDrop name + partner below 👇\n\n`;
   slots.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
   text += `\n⏳ Waitlist\n`;
@@ -3288,7 +3288,7 @@ function generateSessionShareText(session, state, leaderboard) {
   if (seriesLeader) {
     text += `📈 *Series Leader:* ${seriesLeader.player.name} (${seriesLeader.totalPts} pts)\n`;
   }
-  text += `\n🎾 *attack.urbanpadel.om*`;
+  text += `\n🎾 https://attack.urbanpadel.om`;
   return text;
 }
 
@@ -3565,7 +3565,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
             </button>
           </div>
           {session.doublePoints && <Btn variant="secondary" className="w-full" onClick={() => {
-            const txt = `🔥⚡ *SURPRISE ALERT* ⚡🔥\n\nTONIGHT is a *DOUBLE POINTS* session!\n2× everything — group wins, KOs, streak, all of it.\n\n📅 ${session.name}${session.date ? " · " + new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" }) : ""}\n📍 Urban Playground\n\nDon't miss this one 👀\n🎾 attack.urbanpadel.om`;
+            const txt = `🔥⚡ *SURPRISE ALERT* ⚡🔥\n\nTONIGHT is a *DOUBLE POINTS* session!\n2× everything — group wins, KOs, streak, all of it.\n\n📅 ${session.name}${session.date ? " · " + new Date(session.date + "T12:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" }) : ""}\n📍 Urban Playground\n\nDon't miss this one 👀\n🎾 https://attack.urbanpadel.om`;
             navigator.clipboard?.writeText(txt);
           }}>📣 Copy 2X Announcement</Btn>}
           <Btn variant="danger" className="w-full" onClick={() => setShowDel(true)}><I.trash size={14} /> Delete Session</Btn>
