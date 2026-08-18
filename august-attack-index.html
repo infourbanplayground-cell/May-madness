@@ -3223,6 +3223,10 @@ function generateReminderText(session, state, leaderboard) {
     text += `\n*📈 Current Standings:*\n`;
     top5.forEach((e, i) => { text += `${rankEmoji[i]} ${e.player.name} — ${e.totalPts} pts\n`; });
   }
+  // The four other generated posts all carry the link; the signup post was the
+  // only one without it, and it is the post players actually act on. Sits under
+  // the standings because that is the tease the link pays off.
+  text += `\n🎾 Full table & your own rank: attack.urbanpadel.om\n`;
   text += `\nDrop name + partner below 👇\n\n`;
   slots.forEach((s, i) => { text += `${i + 1}- ${s}\n`; });
   text += `\n⏳ Waitlist\n`;
