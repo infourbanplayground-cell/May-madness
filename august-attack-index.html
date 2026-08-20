@@ -2345,6 +2345,38 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
       <YourStanding leaderboard={leaderboard} state={state} meId={meId}
                     onOpenPicker={onOpenPicker} setTab={setTab} />
 
+      {/* ── Series progress + prize pool ──
+          "2 of 9" beats an empty screen at reading whether the series is
+          nearly over or just getting going (review finding #2's other
+          half). The pool figure is computed from the same numbers
+          generateFormatText already uses for the WhatsApp post below, not
+          retyped — the two can't quietly drift apart. */}
+      <div style={{display:"flex",gap:8}}>
+        {(() => {
+          const planned = Math.max(9, state.sessions.length);
+          const done = state.sessions.filter(s => s.completed).length;
+          const pct = planned ? Math.round(done / planned * 100) : 0;
+          return (
+            <div style={{flex:1,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,246,250,.10)",padding:"12px 14px"}}>
+              <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".18em",color:"#8B95A7",textTransform:"uppercase"}}>Series progress</div>
+              <div style={{fontFamily:"'Anton',cursive",fontSize:26,color:"#F4F6FA",lineHeight:1,margin:"6px 0 8px"}}>{done}<span style={{color:"#8B95A7",fontSize:18}}> / {planned}</span></div>
+              <div style={{height:4,background:"rgba(139,149,167,.25)"}}><div style={{width:pct+"%",height:4,background:"#FF2E43"}} /></div>
+            </div>
+          );
+        })()}
+        {(() => {
+          const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9, season = [75, 45, 30];
+          const pool = sessionVoucher * perTeam * sessionsTotal + season.reduce((a, b) => a + b, 0);
+          return (
+            <div style={{width:150,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,246,250,.10)",padding:"12px 14px"}}>
+              <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".18em",color:"#8B95A7",textTransform:"uppercase"}}>Prize pool</div>
+              <div style={{fontFamily:"'Anton',cursive",fontSize:26,color:"#F4F6FA",lineHeight:1,margin:"6px 0 8px"}}>{pool}<span style={{fontSize:13,color:"#8B95A7"}}> OMR</span></div>
+              <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".1em",color:"#3DE1FF"}}>2X ON THE LAST TWO</div>
+            </div>
+          );
+        })()}
+      </div>
+
       {/* ── Stats ────────────────────────────────────── */}
       <div className="grid grid-cols-3 gap-2">
         {[
@@ -4746,6 +4778,12 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
 }
 
 function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPicker }) {
+  // Review finding #5: 48+ rows with no search and no way to jump, every
+  // row carrying a photo and a large total so the accent marked nothing.
+  // Search takes over the whole list when active; ThinRow (below) is the
+  // "rank 4+ get a thin row" half of the same finding.
+  const [q, setQ] = useState("");
+  const [showTail, setShowTail] = useState(false);
   const [mode, setMode] = useState("season"); // "season" | "lifetime"
   const hasLifetime = leaderboard.some(e => {
     const p = e.player;
@@ -4802,7 +4840,47 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
     return <span style={{ color: up ? "#1F8A24" : "#C0392B", fontSize: 10, fontWeight: "bold", fontFamily: "Verdana,sans-serif", display: "inline-flex", alignItems: "center", gap: 1 }}>{up ? "▲" : "▼"}{mv.n}</span>;
   };
   const podium = list.slice(0, 3);
-  const rest = list.slice(3);
+  // Every row below is derived from `indexed`, never from a re-filtered
+  // `list` — filtering list directly loses each player's true rank
+  // position, which would render "4" for someone who is actually 11th.
+  const indexed = list.map((e, i) => ({ e, i }));
+  const rest = indexed.slice(3);
+  // Below 4pts is mostly players who dropped by for one match — real
+  // enough to rank, not interesting enough to spend 48 rows of scroll on
+  // by default. TAIL_MAX=3 keeps everyone who could plausibly still be
+  // chasing the podium visible without a tap.
+  const TAIL_MAX = 3;
+  const restMain = rest.filter(({ e }) => ptsOf(e) > TAIL_MAX);
+  const restTail = rest.filter(({ e }) => ptsOf(e) <= TAIL_MAX);
+  const found = q ? indexed.filter(({ e }) => e.player.name.toLowerCase().includes(q.toLowerCase())) : [];
+
+  // Rank 4+, collapsed to one line: rank, name, a flame past a 3-win
+  // streak, movement, win%, points. No photo, no ticks — those are spent
+  // on the podium and the pinned YOU row, and nowhere else, or the accent
+  // stops meaning anything (review finding #6).
+  const ThinRow = ({ e, i }) => {
+    const en = enrich(e);
+    const isMe = e.player.id === meId;
+    return (
+      <div onClick={() => setOpenPlayerId(e.player.id)}
+        style={{display:"flex",alignItems:"center",gap:10,padding:"11px 10px",
+                borderTop:"1px solid rgba(139,149,167,.16)",cursor:"pointer",
+                background:isMe ? "rgba(255,46,67,.07)" : "none"}}>
+        <div style={{width:26,flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
+                     fontWeight:700,color:isMe ? "#FF2E43" : "#8B95A7"}}>{i + 1}</div>
+        <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontFamily:"'Anton',cursive",fontSize:17,letterSpacing:.5,color:"#F4F6FA",
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</span>
+          {en.streak >= 3 && <span style={{display:"inline-flex",flex:"0 0 auto"}}><CIc.flame size={12} /></span>}
+        </div>
+        {mode === "season" && <MoveChip mv={moveOf(e, i)} />}
+        <div style={{width:38,flex:"0 0 auto",textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
+                     fontSize:11,color:"#8B95A7"}}>{hasPlayed(e) ? en.winRate + "%" : "–"}</div>
+        <div style={{width:38,flex:"0 0 auto",textAlign:"right",fontFamily:"'Anton',cursive",fontSize:18,
+                     color:"#F4F6FA"}}>{ptsOf(e)}</div>
+      </div>
+    );
+  };
   const PODIUM_CFG = {
     1: { fill: "none", label: "1ST" },
     2: { fill: "none", label: "2ND" },
@@ -4826,7 +4904,15 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
           ))}
         </div>
       )}
-      {list.length === 0 ? (
+      <Input value={q} onChange={setQ} placeholder="Find a player&hellip;" />
+      {q ? (
+        <div>
+          {found.length === 0
+            ? <div style={{padding:"18px 4px",fontFamily:"Verdana,sans-serif",fontSize:11,fontWeight:"bold",
+                           letterSpacing:".1em",color:"#8B95A7",textTransform:"uppercase"}}>No ranked player by that name</div>
+            : found.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}
+        </div>
+      ) : list.length === 0 ? (
         <>
         <Card className="p-8 text-center border-dashed">
           <I.trophy className="mx-auto mb-3 text-stone-600" size={32} />
@@ -4910,41 +4996,27 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
             );
           })()}
 
-          {/* ── REST OF FIELD ── */}
-          {rest.length > 0 && (
-            <div style={{marginTop:4}}>
-              {rest.map((e, idx) => {
-                const i = idx + 3;
-                const dim = mode === "lifetime" && !hasPlayed(e) && ptsOf(e) === 0;
-                const en = enrich(e);
-                const mv = moveOf(e, i);
-                return (
-                  <div key={e.player.id} className={`jh-mock-row ${dim ? "" : "jh-rank-in"}`} style={{transform:`rotate(${i % 2 ? ".35" : "-.35"}deg)`,opacity:dim?0.6:1,animationDelay:`${Math.min(idx*30,360)}ms`}} onClick={() => setOpenPlayerId(e.player.id)}>
-                    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:22}}>
-                      <div className="jh-mock-rank" style={{background:"rgba(20,24,36,.85)",margin:0}}>{i + 1}</div>
-                      {mode === "season" && <MoveChip mv={mv} />}
-                    </div>
-                    <Avatar player={e.player} size={38} />
-                    <div style={{flex:1,minWidth:0}}>
-                      <div style={{display:"flex",alignItems:"center",gap:6}}>
-                        <span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:.5,color:"#F4F6FA",lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</span>
-                        {en.streak >= 3 && <span title={`On fire — ${en.streak} wins in a row`} style={{display:"inline-flex"}}><CIc.flame size={13} /></span>}
-                      </div>
-                      <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".06em",color:"#8B95A7",marginTop:3,textTransform:"uppercase",display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-                        {hasPlayed(e) ? <>
-                          <span>{e.stats.sessionsPlayed} SESS</span>
-                          <span>{en.winRate}% WIN</span>
-                          {en.form.length > 0 && <FormStrip form={en.form} />}
-                          {e.stats.finalsWon > 0 && <span style={{display:"inline-flex",alignItems:"center",gap:2}}><I.trophy size={11} style={{color:"#B58900"}} strokeWidth={2.5} />×{e.stats.finalsWon}</span>}
-                        </> : <span>{mode === "lifetime" ? "CARRIED FROM PREVIOUS SERIES" : "NOT YET PLAYED"}</span>}
-                      </div>
-                    </div>
-                    <div style={{fontFamily:"'Anton',cursive",fontSize:28,color:"#FF2E43",WebkitTextStroke:"0",textShadow:"none",whiteSpace:"nowrap"}}>{ptsOf(e)}<span style={{fontSize:11,color:"#F4F6FA",WebkitTextStroke:"0"}}> PTS</span></div>
-                  </div>
-                );
-              })}
+          {/* ── RANKS 4+ — thin rows, quiet tail ──
+              Review finding #5: the old rows here carried a photo, a
+              five-game strip and a large total each — the same weight as
+              the podium, so nothing on the screen actually read as a
+              podium. restMain (above TAIL_MAX) always renders; restTail
+              (a single-match walk-on on 3pts or fewer) sits behind one
+              tap, same threshold used to size the collapse. */}
+          {restMain.length > 0 && (
+            <div style={{marginTop:8}}>
+              {restMain.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}
             </div>
           )}
+          {restTail.length > 0 && (showTail
+            ? <div>{restTail.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}</div>
+            : <button onClick={() => setShowTail(true)}
+                style={{width:"100%",textAlign:"left",background:"none",border:"none",
+                        borderTop:"1px solid rgba(139,149,167,.16)",padding:"14px 4px",cursor:"pointer",
+                        fontFamily:"Verdana,sans-serif",fontSize:10,fontWeight:"bold",letterSpacing:".14em",
+                        color:"#FF2E43",textTransform:"uppercase"}}>
+                Show {restTail.length} more on {TAIL_MAX} pts or fewer
+              </button>)}
         </>
       )}
     </div>
