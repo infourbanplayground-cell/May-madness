@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0F14">
+<title>September Surge · Urban Playground</title>
+<meta name="description" content="September Surge — Urban Social Series Vol.7. Live standings, carried over from August Attack.">
+<meta property="og:title" content="September Surge">
+<meta property="og:description" content="Urban Social Series Vol.7 — coming September. Live standings, synced from August Attack.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://surge.urbanpadel.om/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- JetBrains Mono requested at 500/700 only — nothing on this page sets it to
+     400, so a 400 request would just be a wasted fetch on every visitor. -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     SEPTEMBER SURGE — Vol.7.
+
+     Same structural language as urbanpadel.om and attack.urbanpadel.om
+     (topbar / hero / plate cards / section rules) so navigating between
+     them reads as one site, not three. What changes is the skin: Attack
+     is a single hard strike (static plates, corner ticks, warm red
+     leading cool cyan). Surge is a rising current — energy building
+     rather than exploding once. Cyan leads, amber supports, inverting
+     Attack's ratio; card marker is one rising bar instead of four
+     corner ticks; display type leans forward (italic, wide, heavy)
+     instead of standing tall (Anton/Teko).
+
+     The standings below are not a snapshot. They are fetched live from
+     the same August Attack backend this server already runs — see the
+     LOAD + SYNC section at the bottom of this file — so this page and
+     the app can never quietly disagree with each other.
+     ────────────────────────────────────────────────────────────── */
+  :root {
+    --base:    #0A0F14;   /* page base — cooler/darker than court black */
+    --void:    #050709;   /* gradient floor, nav */
+    --plate:   rgba(14,19,26,.92);
+    --cyan:    #00E5FF;   /* lead accent */
+    --amber:   #FF9E1B;   /* support accent — urgency/live-now only */
+    --white:   #F4F9FA;
+    --steel:   #5C6B78;   /* bold letterspaced kickers only — ~3.3:1, not for prose */
+    --steel-p: #8A9BA8;   /* prose-length secondary text — clears 4.5:1 */
+    --hair:    rgba(244,249,250,.10);
+    --e-out:   cubic-bezier(.34,1.56,.64,1);
+    --glow:    0 0 40px rgba(0,229,255,.24), 0 0 90px rgba(0,229,255,.12);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    min-height:100vh;
+    font-family:'Archivo', system-ui, sans-serif;
+    font-variation-settings:'wdth' 100,'wght' 400;
+    -webkit-font-smoothing:antialiased;
+    color:var(--white);
+    background:var(--base);
+    overflow-x:hidden;
+  }
+  .bg {
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 100% 46% at 6% -6%, rgba(0,229,255,.16), transparent 62%),
+      radial-gradient(ellipse 70% 36% at 100% 30%, rgba(255,158,27,.05), transparent 60%),
+      radial-gradient(ellipse 70% 40% at 8% 90%, rgba(0,229,255,.08), transparent 62%),
+      linear-gradient(180deg,#060A0E 0%, var(--base) 50%, var(--void) 100%);
+  }
+  /* Waveform texture, not a grid — a drifting trace instead of a static
+     tactical lattice. One tiled inline SVG, animated on background-position
+     only (cheap, transform/opacity-adjacent) so it can be killed outright
+     under reduced motion without any layout shift. */
+  .wave {
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.16;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='64' viewBox='0 0 240 64'%3E%3Cpath d='M0 32 C 20 4, 40 4, 60 32 S 100 60, 120 32 S 160 4, 180 32 S 220 60, 240 32' fill='none' stroke='%2300E5FF' stroke-width='1.4'/%3E%3C/svg%3E");
+    background-repeat:repeat-x; background-position:0 18%; background-size:240px 64px;
+    -webkit-mask-image:linear-gradient(180deg, transparent, #000 14%, #000 60%, transparent);
+            mask-image:linear-gradient(180deg, transparent, #000 14%, #000 60%, transparent);
+    animation:drift 34s linear infinite;
+  }
+  @keyframes drift { to { background-position:240px 18%; } }
+
+  .wrap {
+    position:relative; z-index:1;
+    max-width:820px; margin:0 auto;
+    padding:20px 16px 56px;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    border:1px solid var(--hair); background:rgba(10,15,20,.7);
+    padding:12px 16px; margin-bottom:30px;
+  }
+  .topbar .est {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.22em; white-space:nowrap;
+    color:var(--cyan); border:1px solid var(--cyan); padding:5px 9px;
+  }
+  .topbar .who {
+    font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:clamp(13px,3.2vw,17px); letter-spacing:.3em; color:var(--white);
+  }
+  .topbar .om {
+    font-family:'JetBrains Mono',monospace; font-weight:500; font-size:12px;
+    letter-spacing:.18em; color:var(--steel-p);
+  }
+
+  /* ── HERO ── */
+  .hero { text-align:center; margin-bottom:34px; }
+  .hero img.mark {
+    width:clamp(120px,26vw,168px); height:auto; display:block; margin:0 auto 18px;
+    filter:drop-shadow(0 0 26px rgba(0,229,255,.38));
+  }
+  .vol {
+    display:inline-flex; align-items:center; gap:9px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.26em; color:var(--void); background:var(--cyan);
+    padding:7px 13px 6px; box-shadow:var(--glow);
+  }
+  /* Display face: Archivo pushed wide + heavy + italic instead of a
+     separate display font — the forward lean IS the brand move here. */
+  /* "SEPTEMBER" is one unbreakable word — unlike a multi-word headline, a
+     vw-scaled clamp doesn't protect it, because there is no earlier break
+     point for the browser to wrap at before it overflows. Sized against the
+     word's measured ink at this exact font-stretch/weight/style (wdth:125
+     runs ~8.15px of ink per 1px of font-size for this string), not guessed:
+     max container width here is min(100vw-32, 788px), so font-size is
+     capped at container-width / 8.15 with a safety margin, both ends. */
+  h1 {
+    margin-top:20px;
+    font-family:'Archivo', sans-serif; font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;
+    font-size:clamp(34px,10.2vw,90px); line-height:.86; letter-spacing:-.01em;
+    text-transform:uppercase;
+    text-shadow:0 0 50px rgba(0,229,255,.32);
+  }
+  h1 em { font-style:italic; color:var(--cyan); }
+  .tagline {
+    margin-top:14px; font-family:'Archivo',sans-serif; font-style:italic;
+    font-variation-settings:'wdth' 112,'wght' 700;
+    font-size:clamp(18px,3.6vw,24px); letter-spacing:.01em; color:var(--white);
+    text-transform:uppercase;
+  }
+  .sub {
+    display:inline-block; margin-top:20px;
+    font-family:'JetBrains Mono',monospace; font-weight:500;
+    font-size:13px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--steel-p);
+    border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    padding:9px 6px;
+  }
+  /* display:block rather than inline-flex: two adjacent inline-level boxes
+     wrap onto the same line whenever there's room, which put this chip
+     crowding right up against .sub on wider screens. Forcing its own line
+     removes that ambiguity regardless of viewport width. */
+  .soon {
+    margin:18px auto 0; width:fit-content; display:flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
+    letter-spacing:.18em; color:var(--steel-p);
+    border:1px solid var(--hair); padding:7px 12px;
+  }
+  .soon i { width:6px; height:6px; background:var(--steel-p); display:block; }
+
+  /* ── SECTION RULE ── */
+  .sec { display:flex; align-items:center; gap:14px; margin:0 0 16px; }
+  .sec span {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.3em; color:var(--cyan); white-space:nowrap;
+  }
+  .sec .line { flex:1; height:1px; background:var(--hair); }
+
+  /* Plate — the base card surface everywhere on this page. */
+  .plate { background:var(--plate); border:1px solid var(--hair); }
+
+  /* Rising bar — Surge's card marker, one gradient bar instead of four
+     corner ticks. Bright at the top, fading down: reads as charging up.
+     Layered as a second background image so it never collides with the
+     plate's own background colour or any pseudo-element. */
+  .bar {
+    background-image: linear-gradient(180deg, var(--barc, var(--cyan)) 0%, transparent 85%);
+    background-size:3px 100%; background-repeat:no-repeat; background-position:0 0;
+  }
+
+  /* ── SYNC STRIP ── */
+  .syncrow {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-bottom:16px; flex-wrap:wrap;
+  }
+  .sync {
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
+    letter-spacing:.14em; color:var(--steel-p); text-transform:uppercase;
+  }
+  .sync .dot {
+    width:7px; height:7px; border-radius:50%; background:var(--cyan);
+    box-shadow:0 0 8px var(--cyan); flex:none;
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  .sync.err .dot { background:var(--amber); box-shadow:0 0 8px var(--amber); animation:none; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .blurb {
+    margin-bottom:20px; font-weight:400; font-size:15px; line-height:1.55;
+    color:var(--steel-p); max-width:640px;
+  }
+  .blurb b { color:var(--white); font-weight:700; }
+
+  /* ── PODIUM (top 3) ── */
+  .podium {
+    display:grid; grid-template-columns:1fr 1.12fr 1fr; gap:10px;
+    align-items:end; margin-bottom:14px;
+  }
+  /* min-width:0 overrides the grid item's default min-width:auto — without
+     it, the unwrapped name text sets the track's intrinsic minimum and
+     blows the whole grid past the viewport, even though .pname itself has
+     text-overflow:ellipsis. The ellipsis rule is inert until the box
+     actually has a constrained width to truncate against. */
+  .pcard { min-width:0; padding:18px 10px 16px; text-align:center; --barc:var(--cyan); }
+  .pcard.p1 { padding-top:26px; --barc:var(--cyan); box-shadow:var(--glow); }
+  .pcard.p2 { --barc:#C3D0D8; }
+  .pcard.p3 { --barc:var(--steel); }
+  .prank {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.14em; color:var(--steel-p);
+  }
+  .pcard.p1 .prank { color:var(--cyan); }
+  .av {
+    display:block; margin:10px auto 0; border-radius:50%;
+    background-size:cover; background-position:center 22%;
+    background-color:#121821; box-shadow:inset 0 0 0 2px rgba(244,249,250,.14);
+  }
+  .pcard.p1 .av { width:76px; height:76px; box-shadow:inset 0 0 0 2px var(--cyan); }
+  .pcard.p2 .av, .pcard.p3 .av { width:60px; height:60px; }
+  /* Two-line clamp, not a single-line ellipsis: a one-line cut at this
+     column width chopped the series leader down to "MUNTHE..." — most
+     names in this roster are two words and fit in two lines whole; only a
+     genuinely long name still truncates, and only on its second line. */
+  .pname {
+    margin-top:10px; font-family:'Archivo',sans-serif; font-style:italic;
+    font-variation-settings:'wdth' 108,'wght' 800;
+    font-size:14px; line-height:1.18; text-transform:uppercase;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .ppts {
+    margin-top:6px; font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:22px; color:var(--cyan);
+  }
+  .pcard.p2 .ppts, .pcard.p3 .ppts { color:var(--white); font-size:18px; }
+  .ppts span { font-size:11px; color:var(--steel-p); margin-left:2px; }
+
+  /* ── FIELD (rank 4+) — plain thin rows, no bar, no photo. Only the
+     podium spends the accent; if everything below it did too, nothing
+     would read as the podium any more. ── */
+  .field { margin-top:4px; }
+  .frow {
+    display:flex; align-items:center; gap:14px;
+    padding:12px 14px; border-bottom:1px solid var(--hair);
+  }
+  .frow:last-child { border-bottom:none; }
+  .frow .r {
+    flex:none; width:30px; font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:13px; color:var(--steel-p); text-align:right;
+  }
+  .frow .n {
+    flex:1; min-width:0; font-weight:600; font-size:15px; color:var(--white);
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .frow .w {
+    flex:none; font-family:'JetBrains Mono',monospace; font-weight:500; font-size:12px;
+    color:var(--steel-p);
+  }
+  .frow .pt {
+    flex:none; font-family:'JetBrains Mono',monospace; font-weight:700; font-size:15px;
+    color:var(--white); min-width:52px; text-align:right;
+  }
+  .frow .pt span { font-size:10px; color:var(--steel-p); margin-left:2px; }
+
+  .more {
+    width:100%; margin-top:12px; padding:12px; text-align:center;
+    background:none; border:1px solid var(--hair); color:var(--steel-p);
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
+    letter-spacing:.16em; cursor:pointer;
+  }
+
+  .empty {
+    padding:34px 20px; text-align:center; color:var(--steel-p);
+    font-size:14px; line-height:1.6;
+  }
+
+  /* ── CTA ROW ── */
+  .ctas { display:flex; gap:12px; margin-top:26px; flex-wrap:wrap; }
+  .cta {
+    flex:1 1 200px; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:15px 18px; text-decoration:none; text-align:center;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px;
+    letter-spacing:.14em; text-transform:uppercase;
+    transition:transform .16s var(--e-out), box-shadow .16s var(--e-out);
+  }
+  .cta.primary { background:var(--cyan); color:var(--void); box-shadow:var(--glow); }
+  .cta.ghost { background:none; border:1px solid var(--hair); color:var(--white); }
+
+  /* ── FOOTER ── */
+  .foot {
+    margin-top:34px; width:100%;
+    border-top:1px solid rgba(0,229,255,.30);
+    padding:20px 4px 0;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  }
+  .foot-l {
+    font-family:'Archivo',sans-serif; font-style:italic;
+    font-variation-settings:'wdth' 118,'wght' 800;
+    font-size:22px; letter-spacing:.01em; text-transform:uppercase;
+  }
+  .foot-r {
+    font-family:'JetBrains Mono',monospace; font-weight:500; font-size:12px;
+    letter-spacing:.12em; color:var(--steel-p); text-align:right;
+  }
+
+  @media (max-width:640px) {
+    .podium { grid-template-columns:1fr 1.05fr 1fr; gap:8px; }
+    .pname { font-size:14px; }
+  }
+  @media (max-width:520px) {
+    .topbar { flex-wrap:wrap; justify-content:center; text-align:center; row-gap:10px; }
+    .topbar .who { order:0; flex:1 0 100%; letter-spacing:.22em; }
+    .topbar .est { order:1; }
+    .topbar .om  { order:2; }
+    .foot { justify-content:center; text-align:center; }
+    .foot-r { text-align:center; }
+    .frow .w { display:none; }
+  }
+  @media (hover:hover) {
+    .cta.primary:hover { transform:translateY(-2px); box-shadow:0 18px 44px rgba(0,0,0,.5), 0 0 50px rgba(0,229,255,.35); }
+    .cta.ghost:hover { border-color:rgba(0,229,255,.4); color:var(--cyan); }
+    .more:hover { border-color:rgba(0,229,255,.35); color:var(--cyan); }
+  }
+  .cta:active, .more:active { transform:translateY(1px) scale(.99); }
+
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { transition-duration:.01ms !important; animation-duration:.01ms !important; }
+    .wave { animation:none; }
+    .sync .dot { animation:none; }
+    .cta:hover, .cta:active { transform:none; }
+  }
+  :focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wave"></div>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="est">EST. 2026</span>
+    <span class="who">URBAN PLAYGROUND</span>
+    <span class="om">MUSCAT · OMAN</span>
+  </div>
+
+  <div class="hero">
+    <img class="mark" src="/assets/up-logo-cyan.png" alt="Urban Playground">
+    <span class="vol">VOL. 7</span>
+    <h1>SEPTEMBER<br><em>SURGE</em></h1>
+    <div class="tagline">Ride the surge.</div>
+    <div class="sub">Urban Social Series · Muscat</div>
+    <div class="soon"><i></i>COMING SEPTEMBER</div>
+  </div>
+
+  <div class="sec"><span>SERIES STANDINGS</span><div class="line"></div></div>
+
+  <div class="syncrow">
+    <span class="sync" id="syncLabel"><span class="dot"></span>LOADING&hellip;</span>
+  </div>
+
+  <div class="blurb">
+    Points carry over — <b>the race already on the board in August Attack
+    is the race that continues here.</b> This table is pulled live from
+    the same series: the moment a score is entered in the app, it's
+    reflected below.
+  </div>
+
+  <div id="standings">
+    <div class="empty">Loading live standings&hellip;</div>
+  </div>
+
+  <div class="ctas">
+    <a class="cta primary" href="https://attack.urbanpadel.om">OPEN THE FULL APP &#9654;</a>
+    <a class="cta ghost" href="https://urbanpadel.om">&#9664; ALL SERIES</a>
+  </div>
+
+  <div class="foot">
+    <span class="foot-l">Urbanpadel.om</span>
+    <span class="foot-r">Urban Social Series · Vol. 7 · 2026</span>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SCORING ENGINE — verbatim from aa_score.cjs (the app's own file),
+   module.exports line dropped since these become globals here instead.
+   Not a re-implementation: if this ever disagrees with the app, it is
+   because this copy has drifted, not because the maths differ. Re-sync
+   by diffing against aa_score.cjs if the app's scoring rules ever change.
+   ═══════════════════════════════════════════════════════════════ */
+function getPlayerTeam(s, pid) { return (s.teams || []).find(t => t.p1Id === pid || t.p2Id === pid); }
+function teamWon(m, tid) { if (!m || !m.winner) return false; if (m.winner === "team1") return m.team1Id === tid; if (m.winner === "team2") return m.team2Id === tid; return false; }
+
+const GROUP_COUNTED_GAMES = 3;
+
+function teamGroupResults(session, teamId) {
+  const out = [];
+  (session.groupMatches || []).forEach(m => {
+    if (m.team1Id !== teamId && m.team2Id !== teamId) return;
+    if (!m.winner) return;
+    const isT1 = m.team1Id === teamId;
+    const won = teamWon(m, teamId);
+    const lt = m.lossType || "tiebreak";
+    out.push({
+      pts: won ? 3 : (lt === "tiebreak" ? 2 : lt === "competitive" ? 1 : 0),
+      w: won ? 1 : 0,
+      gf: m.score ? (isT1 ? m.score.t1 : m.score.t2) : 0,
+      ga: m.score ? (isT1 ? m.score.t2 : m.score.t1) : 0,
+    });
+  });
+  const playedActual = out.length;
+  out.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+  return { all: out, counted: out.slice(0, GROUP_COUNTED_GAMES), playedActual };
+}
+
+function calcGroupStandings(session, group) {
+  const teams = (session.teams || []).filter(t => t.group === group);
+  const matchList = session.groupMatches || [];
+  const rows = teams.map(team => {
+    let pts = 0, wins = 0, played = 0, gf = 0, ga = 0;
+    matchList.forEach(m => {
+      if (m.team1Id !== team.id && m.team2Id !== team.id) return;
+      if (!m.winner) return;
+      played++;
+      const isT1 = m.team1Id === team.id;
+      if (m.score) { gf += isT1 ? m.score.t1 : m.score.t2; ga += isT1 ? m.score.t2 : m.score.t1; }
+      if (teamWon(m, team.id)) { pts += 3; wins++; }
+      else { const t = m.lossType || "tiebreak"; if (t === "tiebreak") pts += 2; else if (t === "competitive") pts += 1; }
+    });
+    return { team, pts, wins, played, gf, ga, gd: gf - ga };
+  });
+  const h2h = {};
+  matchList.forEach(m => {
+    if (!m.winner) return;
+    const wid = m.winner === "team1" ? m.team1Id : m.team2Id;
+    const lid = m.winner === "team1" ? m.team2Id : m.team1Id;
+    if (!h2h[wid]) h2h[wid] = {};
+    h2h[wid][lid] = (h2h[wid][lid] || 0) + 1;
+  });
+  return rows.sort((a, b) => {
+    if (b.wins !== a.wins) return b.wins - a.wins;
+    if (b.gd !== a.gd) return b.gd - a.gd;
+    if (b.gf !== a.gf) return b.gf - a.gf;
+    const aH = ((h2h[a.team.id] && h2h[a.team.id][b.team.id]) || 0) - ((h2h[b.team.id] && h2h[b.team.id][a.team.id]) || 0);
+    if (aH !== 0) return -aH;
+    return b.pts - a.pts;
+  });
+}
+
+function getTopOfGroup(s, g) {
+  const ov = s.topOfGroupOverride && s.topOfGroupOverride[g];
+  if (ov) return ov;
+  const r = calcGroupStandings(s, g);
+  return (r[0] && r[0].team && r[0].team.id) || null;
+}
+
+function calcStreak(idxs) {
+  if (!idxs || !idxs.length) return 0;
+  const sorted = [...idxs].sort((a, b) => a - b);
+  let total = 0, len = 0, last = null;
+  for (const i of sorted) {
+    if (last === null || i === last + 1) len++; else len = 1;
+    last = i;
+    if (len === 2 || len === 3) total += 1;
+    else if (len >= 4) total += 3;
+  }
+  return Math.min(total, 5);
+}
+
+function koMatchPts(match, teamId) {
+  if (teamWon(match, teamId)) return 3;
+  const t = match.lossType || "tiebreak";
+  return t === "tiebreak" ? 2 : t === "competitive" ? 1 : 0;
+}
+
+function calcPlayerStats(pid, sessions) {
+  let total = 0;
+  const stats = { groupWins: 0, groupPlayed: 0, sessionsPlayed: 0, qfReached: 0, qfWins: 0, sfReached: 0, sfWins: 0, finalsReached: 0, finalsWon: 0 };
+  const attended = [];
+  sessions.forEach((s, idx) => {
+    const team = getPlayerTeam(s, pid); if (!team) return;
+    stats.sessionsPlayed++;
+    const mult = s.doublePoints ? 2 : 1;
+    let sessionPlayed = 0;
+    (s.groupMatches || []).forEach(m => {
+      if (m.team1Id !== team.id && m.team2Id !== team.id) return;
+      if (!m.winner) return;
+      stats.groupPlayed++; sessionPlayed++;
+      if (teamWon(m, team.id)) stats.groupWins++;
+    });
+    teamGroupResults(s, team.id).counted.forEach(r => { total += r.pts * mult; });
+    if (sessionPlayed > 0 && getTopOfGroup(s, team.group) === team.id) { total += 1 * mult; }
+    if (sessionPlayed > 0) {
+      if (attended.length > 0 && (idx - attended[attended.length - 1]) >= 3) { total += 2; }
+      attended.push(idx);
+    }
+    const qfM = s.bracket && s.bracket.qf && s.bracket.qf.find(m => (m.team1Id === team.id || m.team2Id === team.id) && m.winner);
+    if (qfM) { stats.qfReached++; if (teamWon(qfM, team.id)) stats.qfWins++; total += (1 + koMatchPts(qfM, team.id)) * mult; }
+    const sfM = s.bracket && s.bracket.sf && s.bracket.sf.find(m => (m.team1Id === team.id || m.team2Id === team.id) && m.winner);
+    if (sfM) { stats.sfReached++; if (teamWon(sfM, team.id)) stats.sfWins++; total += (2 + koMatchPts(sfM, team.id)) * mult; }
+    const f = s.bracket && s.bracket.final;
+    if (f && (f.team1Id === team.id || f.team2Id === team.id) && f.winner) {
+      stats.finalsReached++;
+      total += (3 + koMatchPts(f, team.id) + (teamWon(f, team.id) ? 5 : 0)) * mult;
+      if (teamWon(f, team.id)) stats.finalsWon++;
+    }
+  });
+  total += calcStreak(attended);
+  return { totalPts: total, stats, attended };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOAD + SYNC
+
+   /state and /photos are proxied by THIS server's nginx straight to the
+   same August Attack API process attack.urbanpadel.om itself talks to
+   (127.0.0.1:3005) — see the surge.urbanpadel.om vhost. Not a copy of the
+   data, not a second database: the same backend, read-only. Only /state
+   is polled on an interval; /photos is fetched once, since avatars change
+   far less often than scores and the payload is heavier.
+   ═══════════════════════════════════════════════════════════════ */
+const POLL_MS = 45000;
+const $standings = document.getElementById('standings');
+const $sync = document.getElementById('syncLabel');
+let photosCache = null;
+let lastSyncAt = null;
+let expandedField = false;
+
+function hasPlayed(e) { return e.stats.groupPlayed > 0 || e.stats.qfReached > 0; }
+
+function avatarStyle(pid) {
+  const src = photosCache && photosCache[pid];
+  return src ? `background-image:url(${src})` : '';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(state) {
+  const leaderboard = state.players
+    .map(p => ({ player: p, ...calcPlayerStats(p.id, state.sessions || []) }))
+    .filter(hasPlayed)
+    .sort((a, b) => b.totalPts - a.totalPts);
+
+  if (leaderboard.length === 0) {
+    $standings.innerHTML = '<div class="empty plate">Standings will appear here the moment August Attack starts scoring.</div>';
+    return;
+  }
+
+  const podium = leaderboard.slice(0, 3);
+  const field = leaderboard.slice(3, expandedField ? leaderboard.length : 13);
+  const remaining = leaderboard.length - 3 - field.length;
+
+  const pHtml = podium.map((e, i) => `
+    <div class="pcard plate bar p${i + 1}">
+      <div class="prank">${i === 0 ? '1ST' : i === 1 ? '2ND' : '3RD'}</div>
+      <span class="av" style="width:${i === 0 ? 76 : 60}px;height:${i === 0 ? 76 : 60}px;${avatarStyle(e.player.id)}"></span>
+      <div class="pname">${escapeHtml(e.player.name)}</div>
+      <div class="ppts">${e.totalPts}<span>PTS</span></div>
+    </div>`).join('');
+
+  const fHtml = field.map((e, i) => {
+    const played = e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon;
+    const rate = e.stats.groupPlayed ? Math.round((e.stats.groupWins / e.stats.groupPlayed) * 100) : 0;
+    return `<div class="frow">
+      <span class="r">${i + 4}</span>
+      <span class="n">${escapeHtml(e.player.name)}</span>
+      <span class="w">${rate}% WIN</span>
+      <span class="pt">${e.totalPts}<span>PTS</span></span>
+    </div>`;
+  }).join('');
+
+  $standings.innerHTML =
+    `<div class="podium">${pHtml}</div>` +
+    `<div class="field plate">${fHtml}</div>` +
+    (remaining > 0 ? `<button class="more" id="moreBtn">SHOW ${remaining} MORE</button>` : '');
+
+  const moreBtn = document.getElementById('moreBtn');
+  if (moreBtn) moreBtn.addEventListener('click', () => { expandedField = true; render(state); });
+}
+
+function setSyncLabel(ok) {
+  if (!lastSyncAt) return;
+  const secs = Math.round((Date.now() - lastSyncAt) / 1000);
+  const when = secs < 5 ? 'JUST NOW' : secs < 60 ? `${secs}S AGO` : `${Math.round(secs / 60)}M AGO`;
+  $sync.className = ok ? 'sync' : 'sync err';
+  $sync.innerHTML = `<span class="dot"></span>${ok ? 'LIVE · SYNCED ' + when : 'SYNC ISSUE · SHOWING LAST KNOWN, ' + when}`;
+}
+
+let lastState = null;
+
+async function loadPhotosOnce() {
+  if (photosCache) return;
+  try {
+    const r = await fetch('/photos', { cache: 'no-store' });
+    if (r.ok) { const d = await r.json(); photosCache = d.photos || {}; }
+  } catch (e) { /* avatars are decoration, not required for the table to work */ }
+}
+
+async function sync() {
+  try {
+    const r = await fetch('/state', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if (!d.ok || !d.state) throw new Error('bad payload');
+    lastState = d.state;
+    lastSyncAt = Date.now();
+    await loadPhotosOnce();
+    render(lastState);
+    setSyncLabel(true);
+  } catch (e) {
+    if (lastState) { setSyncLabel(false); }
+    else { $standings.innerHTML = '<div class="empty plate">Couldn&rsquo;t reach live standings right now &mdash; try refreshing.</div>'; }
+  }
+}
+
+sync();
+setInterval(sync, POLL_MS);
+setInterval(() => setSyncLabel(!!lastState), 1000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && lastSyncAt && Date.now() - lastSyncAt > 15000) sync();
+});
+</script>
+</body>
+</html>

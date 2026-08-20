@@ -90,6 +90,30 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
+### September Surge (Vol.7 preview)
+- URL: https://surge.urbanpadel.om
+- Local copy: `surge-index.html` — static, deploy by copying straight to
+  `/var/www/surge.urbanpadel.om/public/index.html` (+ `assets/up-logo-cyan*.png`)
+- Standings are **not stored here**. The page has its own dedicated nginx vhost
+  (`/etc/nginx/sites-available/surge.urbanpadel.om`, not the wildcard) that
+  proxies `GET /state`, `/photos`, `/session-photos` straight through to the
+  August Attack API on `127.0.0.1:3005` — the same backend `attack.urbanpadel.om`
+  itself talks to. That's the live sync: same data, same request, no copy to
+  drift out of date.
+- **Read-only by construction, not by convention.** `/login`, `/save`,
+  `/photo-upload`, `/history`, `/restore`, `/recovery-dump` are deliberately
+  absent from the vhost's proxy regex, so there is no route from this
+  subdomain to writing a score or reading admin data — nginx serves the
+  static page for anything else, it never reaches the API for those paths.
+  If a future volume needs write access here, that is a new decision, not a
+  regex tweak.
+- The in-page leaderboard math is a byte-for-byte copy of `calcPlayerStats`
+  and its dependencies from `aa_score.cjs` (the app's own scoring engine),
+  not a re-implementation — verified against it player-by-player before
+  shipping. If the app's scoring rules ever change, re-sync this copy by
+  diffing against `aa_score.cjs`; the comment at the top of the `<script>`
+  block in `surge-index.html` says the same.
+
 ## Common Commands
 
 ```bash
