@@ -165,6 +165,31 @@ Sites affected: `urbanpadel.om`, `americano.urbanpadel.om`, `predictions.urbanpa
 
 Diagnostic: `curl -sI https://unpkg.com/@babel/standalone/babel.min.js | grep location` — if it shows `@8` or higher, that's the culprit.
 
+### Babel `data-presets` — use `react` only, never `stage-3`
+A blank page with **no server-side symptom** (curl returns 200 and the right HTML) usually means the in-browser Babel transform threw, so the script never ran. The Americano app shipped blank because of:
+```html
+<!-- WRONG — stage-3 pulls in the decorators plugin, which throws:
+     "The decorators plugin, when .version is '2018-09' or not specified,
+      requires a 'decoratorsBeforeExport' option" -->
+<script type="text/babel" data-presets="react,stage-3">
+
+<!-- CORRECT — matches the working June Fury / predictions pages -->
+<script type="text/babel" data-presets="react">
+```
+Optional chaining (`a?.b`) and nullish coalescing (`a ?? b`) need **no** extra preset — Babel 7's parser handles them and every current browser runs them natively.
+
+**Verify the way the browser does it** — read the presets off the page rather than assuming, or the check passes while the page stays blank:
+```bash
+node -e '
+const babel=require("@babel/standalone"), fs=require("fs");
+const h=fs.readFileSync(process.argv[1],"utf8");
+const m=h.match(/<script type="text\/babel"([^>]*)>([\s\S]*?)<\/script>/);
+const p=(m[1].match(/data-presets="([^"]*)"/)||[,"react"])[1].split(",").map(s=>s.trim());
+babel.transform(m[2],{presets:p}); console.log("compiles with",p);
+' americano-index.html
+```
+A `curl | grep` only proves the HTML shipped — it never executes the JS. To actually render a page in this sandbox (outbound HTTPS from Chromium is blocked by the agent proxy): `curl -sSL` the CDN assets to disk (**`-L` is required** — unpkg replies with a redirect stub otherwise), rewrite the tags to local paths, serve on `127.0.0.1` (in the proxy's `noProxy` list) with a stubbed `/state`, then point Playwright at it with `--proxy-server=direct://`.
+
 ### Dates on UTC+4 server
 Never use `new Date().toISOString().split('T')[0]` for date strings — UTC date is behind Oman local time (UTC+4). Use `getFullYear()/getMonth()/getDate()` (local methods). In `pg`, configure `types.setTypeParser(types.builtins.DATE, val => val)` so DATE columns return plain strings.
 
