@@ -33,6 +33,7 @@ sleep 4 && grep Connected /tmp/chisel.log
 ### Americano (standalone classic-format app)
 - URL: https://americano.urbanpadel.om — **its own app**, independent of the monthly tournament clones below. Do not point this domain at any of them again.
 - Format: classic Americano — individual players, partners rotate every round (circle-method round-robin scheduling), points accumulate per-player, not per fixed team. Modeled on padelution.com's Americano format page.
+- **Courts**: set at tournament setup and changeable mid-tournament (Play tab → "Courts in use"). Court count only decides which pairs get a court each round — the circle method alone decides who partners whom, so benching a pair skips that partnership rather than repeating it. Changing courts midway rebuilds only the not-yet-scored rounds, resuming the circle cycle at its current index (`generateSchedule`'s `startRound`) — restarting it would replay used partnerships. Sit-outs rotate by accumulated sit-out count so rest spreads evenly. Caveat: asking for more rounds than the cycle length (n-1 for even n) wraps the cycle and *does* repeat partners.
 - Frontend: `/var/www/americano-app/public/` — local copy: `americano-index.html`
 - API: `/opt/americano-api/api.js` — systemd: `americano-api` — port 3007 — local copy: `americano-api.js`
 - DB tables: `americano_state`, `americano_photos` (own tables for tournaments/rounds — not shared with the monthly apps)
