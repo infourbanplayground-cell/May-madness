@@ -35,10 +35,10 @@ sleep 4 && grep Connected /tmp/chisel.log
 - Format: classic Americano — individual players, partners rotate every round (circle-method round-robin scheduling), points accumulate per-player, not per fixed team. Modeled on padelution.com's Americano format page.
 - Frontend: `/var/www/americano-app/public/` — local copy: `americano-index.html`
 - API: `/opt/americano-api/api.js` — systemd: `americano-api` — port 3007 — local copy: `americano-api.js`
-- DB tables: `americano_state`, `americano_photos` (own tables, not shared with the monthly apps)
+- DB tables: `americano_state`, `americano_photos` (own tables for tournaments/rounds — not shared with the monthly apps)
 - Deploy frontend: `scp americano-index.html urbanpadel:/var/www/americano-app/public/index.html` (then bump `/var/www/americano-app/public/version.txt` for cache-busting)
 - Deploy API: `scp americano-api.js urbanpadel:/opt/americano-api/api.js && ssh urbanpadel 'systemctl restart americano-api'`
-- Player roster was seeded once from June Fury's existing player list (names/photos only, no stats) — the two rosters are independent from that point on.
+- **Player roster is a live read from August Attack's DB** (`aa_tournament_state`, see `fetchSharedPlayers()` in `americano-api.js`) — by design, on the owner's request, so the two apps' player lists always stay in sync. `GET /state` overlays the live-fetched players onto Americano's own stored state; `POST /save` strips any `players` field before persisting so a stale local copy can never get served. This means: Americano's Players tab is **read-only** (no add/edit/delete UI) — add or edit players in August Attack, not here. If August Attack's app/table is ever retired or renamed, `fetchSharedPlayers()` must be repointed or Americano's player list breaks.
 - nginx vhost: `/etc/nginx/sites-available/americano.urbanpadel.om` — serves the static root directly and proxies `/state /login /save /photos` to port 3007 (same pattern as the monthly apps below, just its own root/port).
 
 ### Monthly tournament apps (groups + knockout bracket format)

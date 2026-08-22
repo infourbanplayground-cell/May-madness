@@ -256,19 +256,14 @@ function LoginModal({ onClose, onLoggedIn }) {
 }
 
 // ── Players view ─────────────────────────────────────────────────
-function PlayersView({ state, canEdit, addPlayer, editPlayer, removePlayer }) {
+function PlayersView({ state }) {
   const [q, setQ] = useState("");
-  const [addOpen, setAddOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
   const players = (state.players || []).filter(p => p.name.toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => a.name.localeCompare(b.name));
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Input placeholder="Search players…" value={q} onChange={e => setQ(e.target.value)} />
-        {canEdit && <Btn onClick={() => setAddOpen(true)}>+ Add</Btn>}
-      </div>
-      <div className="text-sm text-[var(--muted)]">{players.length} players</div>
+      <Input placeholder="Search players…" value={q} onChange={e => setQ(e.target.value)} />
+      <div className="text-sm text-[var(--muted)]">{players.length} players · synced from August Attack's roster</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {players.map(p => (
           <Card key={p.id} className="flex items-center gap-3 !p-3">
@@ -276,46 +271,12 @@ function PlayersView({ state, canEdit, addPlayer, editPlayer, removePlayer }) {
             <div className="flex-1 min-w-0">
               <div className="font-bold truncate">{p.name}</div>
             </div>
-            {canEdit && <button onClick={() => setEditing(p)} className="text-[var(--muted)] hover:text-[var(--orange-br)] px-2">✎</button>}
           </Card>
         ))}
       </div>
-      {addOpen && <PlayerModal title="Add Player" onClose={() => setAddOpen(false)} onSave={(name, photoUrl) => { addPlayer(name, photoUrl); setAddOpen(false); }} />}
-      {editing && <PlayerModal title="Edit Player" initial={editing}
-        onClose={() => setEditing(null)}
-        onSave={(name, photoUrl) => { editPlayer(editing.id, name, photoUrl); setEditing(null); }}
-        onDelete={() => { removePlayer(editing.id); setEditing(null); }} />}
     </div>
   );
 }
-function PlayerModal({ title, initial, onClose, onSave, onDelete }) {
-  const [name, setName] = useState(initial?.name || "");
-  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl || "");
-  function handleFile(e) {
-    const f = e.target.files?.[0]; if (!f) return;
-    const reader = new FileReader();
-    reader.onload = ev => setPhotoUrl(ev.target.result);
-    reader.readAsDataURL(f);
-  }
-  return (
-    <Modal title={title} onClose={onClose}>
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <Avatar player={{ name, photoUrl }} size={56} />
-          <label className="text-sm px-3 py-2 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
-            Upload photo<input type="file" accept="image/*" className="hidden" onChange={handleFile} />
-          </label>
-        </div>
-        <Input placeholder="Player name" value={name} onChange={e => setName(e.target.value)} autoFocus />
-        <div className="flex gap-2">
-          <Btn onClick={() => name.trim() && onSave(name.trim(), photoUrl)} className="flex-1">Save</Btn>
-          {onDelete && <Btn variant="danger" onClick={onDelete}>Delete</Btn>}
-        </div>
-      </div>
-    </Modal>
-  );
-}
-
 // ── New tournament setup ─────────────────────────────────────────
 function SetupView({ state, canEdit, onStart }) {
   const [selected, setSelected] = useState({});
@@ -555,17 +516,6 @@ function App() {
     saveTimer.current = setTimeout(() => { apiPost("/save", { state: next }, true); }, 400);
   }
 
-  function addPlayer(name, photoUrl) {
-    const p = { id: uid("p"), name, photoUrl: photoUrl || "", addedAt: Date.now() };
-    persist({ ...state, players: [...(state.players || []), p] });
-  }
-  function editPlayer(id, name, photoUrl) {
-    persist({ ...state, players: state.players.map(p => p.id === id ? { ...p, name, photoUrl } : p) });
-  }
-  function removePlayer(id) {
-    persist({ ...state, players: state.players.filter(p => p.id !== id) });
-  }
-
   const activeTournament = (state.tournaments || []).find(t => t.status === "active");
 
   function startTournament(t) {
@@ -609,7 +559,7 @@ function App() {
               onScore={scoreMatch} onFinish={finishTournament} />
           : <SetupView state={state} canEdit={canEdit} onStart={startTournament} />)}
         {tab === "standings" && <StandingsView tournament={activeTournament} players={state.players} />}
-        {tab === "players" && <PlayersView state={state} canEdit={canEdit} addPlayer={addPlayer} editPlayer={editPlayer} removePlayer={removePlayer} />}
+        {tab === "players" && <PlayersView state={state} />}
         {tab === "history" && <HistoryView state={state} players={state.players} />}
       </main>
 

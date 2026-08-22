@@ -54,10 +54,20 @@ async function initDb() {
 
 // ── Routes ────────────────────────────────────────────────────────
 
+// Player roster is a live read from August Attack's DB table — Americano has
+// no player data of its own, so the two apps' rosters always stay in sync.
+async function fetchSharedPlayers() {
+  const r = await pool.query("SELECT data FROM aa_tournament_state WHERE id = 1");
+  const players = r.rows[0]?.data?.players;
+  return Array.isArray(players) ? players.map(p => ({ id: p.id, name: p.name, photoUrl: p.photoUrl || "" })) : [];
+}
+
 app.get("/state", async (req, res) => {
   try {
     const r = await pool.query("SELECT data FROM americano_state WHERE id = 1");
-    res.json({ ok: true, state: r.rows[0]?.data || {} });
+    const state = r.rows[0]?.data || {};
+    const players = await fetchSharedPlayers();
+    res.json({ ok: true, state: { ...state, players } });
   } catch (e) {
     res.status(500).json({ ok: false, error: String(e.message) });
   }
@@ -80,14 +90,10 @@ app.post("/save", async (req, res) => {
   if (!state || typeof state !== "object")
     return res.status(400).json({ ok: false, error: "Missing state" });
 
-  // Strip base64 photos from state before storing (photos stored separately)
+  // Players are a live read from August Attack's DB (see fetchSharedPlayers) —
+  // never persist a local copy, so a stale one can't get served after a save.
   const clean = JSON.parse(JSON.stringify(state));
-  if (Array.isArray(clean.players)) {
-    clean.players = clean.players.map(p => {
-      if (p.photoUrl?.startsWith("data:")) { const { photoUrl, ...rest } = p; return rest; }
-      return p;
-    });
-  }
+  delete clean.players;
 
   try {
     await pool.query(
