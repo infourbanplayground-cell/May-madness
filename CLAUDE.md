@@ -30,12 +30,30 @@ sleep 4 && grep Connected /tmp/chisel.log
 
 ## Owner's Apps
 
-### June Fury (Americano tournament)
-- URL: https://americano.urbanpadel.om
-- Frontend: `/var/www/americano.urbanpadel.om/public/` — local copy: `june-fury-index.html`
-- API: `/opt/june-fury-api/api.js` — systemd: `june-fury-api` — port 3001
-- Deploy frontend: `scp june-fury-index.html urbanpadel:/var/www/americano.urbanpadel.om/public/index.html`
-- Deploy API: `scp api.js urbanpadel:/opt/june-fury-api/ && ssh urbanpadel 'systemctl restart june-fury-api'`
+### Americano (standalone classic-format app)
+- URL: https://americano.urbanpadel.om — **its own app**, independent of the monthly tournament clones below. Do not point this domain at any of them again.
+- Format: classic Americano — individual players, partners rotate every round (circle-method round-robin scheduling), points accumulate per-player, not per fixed team. Modeled on padelution.com's Americano format page.
+- Frontend: `/var/www/americano-app/public/` — local copy: `americano-index.html`
+- API: `/opt/americano-api/api.js` — systemd: `americano-api` — port 3007 — local copy: `americano-api.js`
+- DB tables: `americano_state`, `americano_photos` (own tables, not shared with the monthly apps)
+- Deploy frontend: `scp americano-index.html urbanpadel:/var/www/americano-app/public/index.html` (then bump `/var/www/americano-app/public/version.txt` for cache-busting)
+- Deploy API: `scp americano-api.js urbanpadel:/opt/americano-api/api.js && ssh urbanpadel 'systemctl restart americano-api'`
+- Player roster was seeded once from June Fury's existing player list (names/photos only, no stats) — the two rosters are independent from that point on.
+- nginx vhost: `/etc/nginx/sites-available/americano.urbanpadel.om` — serves the static root directly and proxies `/state /login /save /photos` to port 3007 (same pattern as the monthly apps below, just its own root/port).
+
+### Monthly tournament apps (groups + knockout bracket format)
+Each month gets its own clone of the same tournament-tracker codebase (Teams/Groups/Bracket tabs, not the Americano rotation format). `americano.urbanpadel.om` used to redirect to whichever one was "current" — that redirect has been removed; Americano is now separate and permanent.
+
+| App | Domain | Port | systemd | DB table prefix |
+|---|---|---|---|---|
+| June Fury | june.urbanpadel.om | 3001 | `june-fury-api` | (default: `tournament_state`, `player_photos`) |
+| July Heat | heat.urbanpadel.om | 3004 | `july-heat-api` | `jh_` |
+| August Attack | attack.urbanpadel.om | 3005 | `august-attack-api` | `aa_` |
+
+- June Fury frontend root: `/var/www/americano.urbanpadel.om/public/` (legacy path, kept as-is — do not repurpose this directory) — local copy: `june-fury-index.html`
+- Deploy June Fury frontend: `scp june-fury-index.html urbanpadel:/var/www/americano.urbanpadel.om/public/index.html`
+- Deploy June Fury API: `scp api.js urbanpadel:/opt/june-fury-api/ && ssh urbanpadel 'systemctl restart june-fury-api'`
+- **Known leftover bug (not yet fixed, left alone on request):** `surge.urbanpadel.om` proxies to port 3005 (August Attack's backend) with no dedicated `surge` service or DB prefix of its own — looks like a stray/incomplete config, not intentional. Investigate before touching August Attack's port or before standing up a real "surge" app.
 
 ### WC2026 Predictions
 - URL: https://predictions.urbanpadel.om

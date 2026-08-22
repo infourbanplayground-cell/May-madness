@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>
+(function(){
+  var V = "20260822_000001";
+  fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
+    .then(function(r){ return r.text(); })
+    .then(function(v){
+      v = v.trim();
+      var stored = localStorage.getItem("am-build");
+      if (stored && stored !== v) { localStorage.setItem("am-build", v); location.reload(true); }
+      else { localStorage.setItem("am-build", v); }
+    }).catch(function(){});
+})();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#0a0807" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Americano" />
+<title>🎾 AMERICANO · Urban Playground</title>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23fbbf24'/%3E%3Cstop offset='50%25' style='stop-color:%23f97316'/%3E%3Cstop offset='100%25' style='stop-color:%23dc2626'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 10 C 35 25 30 40 35 55 C 38 65 30 70 28 75 C 35 70 45 75 50 90 C 55 75 65 70 72 75 C 70 70 62 65 65 55 C 70 40 65 25 50 10 Z' fill='url(%23g)'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+
+<style>
+  :root {
+    --ink: #0A0807;
+    --ink2: #140C08;
+    --orange: #FF5E1E;
+    --orange-br: #FF8A3D;
+    --red: #FF2A24;
+    --ember: #8A1E08;
+    --blue: #33A1FF;
+    --blue-deep: #1E63D6;
+    --blue-soft: #7FC4FF;
+    --gold: #FFC24B;
+    --cream: #FFF4EC;
+    --muted: #C7A192;
+    --muted2: #8C7167;
+  }
+  html, body { background: var(--ink); color: var(--cream); font-family: 'Archivo', system-ui, sans-serif; }
+  * { -webkit-tap-highlight-color: transparent; }
+  h1, h2, .display { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--ember); border-radius: 8px; }
+  .card {
+    background: linear-gradient(180deg, var(--ink2), var(--ink));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
+  }
+  .glow-orange { box-shadow: 0 0 0 1px rgba(255,94,30,0.35), 0 8px 30px -8px rgba(255,94,30,0.35); }
+  .glow-blue { box-shadow: 0 0 0 1px rgba(51,161,255,0.35), 0 8px 30px -8px rgba(51,161,255,0.35); }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react,stage-3">
+
+const { useState, useEffect, useMemo, useCallback, useRef } = React;
+
+// ── API helpers ──────────────────────────────────────────────────
+const API = ""; // same-origin, nginx routes /state /login /save /photos to the backend
+
+function getToken() { try { return localStorage.getItem("am-token") || ""; } catch (e) { return ""; } }
+function setToken(t) { try { t ? localStorage.setItem("am-token", t) : localStorage.removeItem("am-token"); } catch (e) {} }
+function getRole() { try { return localStorage.getItem("am-role") || ""; } catch (e) { return ""; } }
+function setRole(r) { try { r ? localStorage.setItem("am-role", r) : localStorage.removeItem("am-role"); } catch (e) {} }
+
+async function apiGet(path) {
+  const r = await fetch(API + path);
+  return r.json();
+}
+async function apiPost(path, body, auth) {
+  const headers = { "Content-Type": "application/json" };
+  if (auth) headers["Authorization"] = "Bearer " + getToken();
+  const r = await fetch(API + path, { method: "POST", headers, body: JSON.stringify(body || {}) });
+  return r.json();
+}
+
+// ── IDs ──────────────────────────────────────────────────────────
+function uid(prefix) {
+  return prefix + "_" + Math.random().toString(36).slice(2, 10);
+}
+
+// ── Americano scheduling: circle method ─────────────────────────
+// Produces a 1-factorization of the player set: over (n-1) rounds (n even,
+// padded with a bye slot if odd) every pair of players appears together as
+// PARTNERS exactly once. This is the same rotation math used by classic
+// Americano generators (padelution etc). Courts are formed by combining two
+// partner-pairs per round, with the grouping offset rotated each round to
+// spread opponent variety too.
+function circlePairRounds(n) {
+  const arr = Array.from({ length: n }, (_, i) => i);
+  if (n % 2 === 1) arr.push(-1); // bye slot
+  const total = arr.length;
+  const cycles = total - 1;
+  let cur = arr.slice();
+  const rounds = [];
+  for (let r = 0; r < cycles; r++) {
+    const pairs = [];
+    for (let i = 0; i < total / 2; i++) pairs.push([cur[i], cur[total - 1 - i]]);
+    rounds.push(pairs);
+    const fixed = cur[0];
+    const rest = cur.slice(1);
+    rest.unshift(rest.pop());
+    cur = [fixed, ...rest];
+  }
+  return rounds;
+}
+
+function generateSchedule(playerIds, numRounds) {
+  const n = playerIds.length;
+  if (n < 4) return [];
+  const cyclePairs = circlePairRounds(n); // index-based, cycles = (n even ? n-1 : n)
+  const cycles = cyclePairs.length;
+  const rounds = [];
+  for (let r = 0; r < numRounds; r++) {
+    const pairsIdx = cyclePairs[r % cycles];
+    // drop byes -> those players sit out
+    const realPairs = pairsIdx.filter(([a, b]) => a !== -1 && b !== -1);
+    const byePlayers = [];
+    pairsIdx.forEach(([a, b]) => {
+      if (a === -1 && b !== -1) byePlayers.push(playerIds[b]);
+      if (b === -1 && a !== -1) byePlayers.push(playerIds[a]);
+    });
+    // rotate grouping offset each round for opponent variety
+    const offset = r % Math.max(1, realPairs.length);
+    const rotated = realPairs.slice(offset).concat(realPairs.slice(0, offset));
+    const courts = [];
+    for (let i = 0; i + 1 < rotated.length; i += 2) {
+      const [a, b] = rotated[i];
+      const [c, d] = rotated[i + 1];
+      courts.push({
+        court: courts.length + 1,
+        team1: [playerIds[a], playerIds[b]],
+        team2: [playerIds[c], playerIds[d]],
+        score1: null,
+        score2: null,
+      });
+    }
+    if (rotated.length % 2 === 1) {
+      const [a, b] = rotated[rotated.length - 1];
+      byePlayers.push(playerIds[a], playerIds[b]);
+    }
+    rounds.push({ roundNum: r + 1, sitOuts: byePlayers, courts });
+  }
+  return rounds;
+}
+
+// ── Standings ────────────────────────────────────────────────────
+function calcStandings(tournament, players) {
+  const byId = {};
+  players.forEach(p => { byId[p.id] = p; });
+  const stats = {};
+  (tournament.playerIds || []).forEach(id => {
+    stats[id] = { id, name: byId[id]?.name || "?", photoUrl: byId[id]?.photoUrl || "", points: 0, played: 0, wins: 0, diff: 0 };
+  });
+  (tournament.rounds || []).forEach(round => {
+    (round.courts || []).forEach(m => {
+      if (m.score1 == null || m.score2 == null) return;
+      const s1 = Number(m.score1), s2 = Number(m.score2);
+      m.team1.forEach(id => {
+        if (!stats[id]) return;
+        stats[id].points += s1; stats[id].played += 1; stats[id].diff += (s1 - s2);
+        if (s1 > s2) stats[id].wins += 1;
+      });
+      m.team2.forEach(id => {
+        if (!stats[id]) return;
+        stats[id].points += s2; stats[id].played += 1; stats[id].diff += (s2 - s1);
+        if (s2 > s1) stats[id].wins += 1;
+      });
+    });
+  });
+  return Object.values(stats).sort((a, b) => b.points - a.points || b.diff - a.diff || b.wins - a.wins);
+}
+
+// ── Small UI atoms ───────────────────────────────────────────────
+function Btn({ children, onClick, variant = "orange", className = "", disabled, type = "button" }) {
+  const styles = {
+    orange: "bg-gradient-to-b from-[var(--orange-br)] to-[var(--orange)] text-[var(--ink)] glow-orange",
+    blue: "bg-gradient-to-b from-[var(--blue-soft)] to-[var(--blue)] text-[var(--ink)] glow-blue",
+    ghost: "bg-white/5 text-[var(--cream)] border border-white/10",
+    danger: "bg-gradient-to-b from-[var(--red)] to-[var(--ember)] text-white",
+  };
+  return (
+    <button type={type} disabled={disabled} onClick={onClick}
+      className={`px-4 py-2.5 rounded-xl font-bold text-sm active:scale-95 transition disabled:opacity-40 disabled:active:scale-100 ${styles[variant]} ${className}`}>
+      {children}
+    </button>
+  );
+}
+function Card({ children, className = "" }) { return <div className={`card p-4 ${className}`}>{children}</div>; }
+function Input(props) {
+  return <input {...props} className={`w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[var(--cream)] placeholder-[var(--muted2)] outline-none focus:border-[var(--orange)] ${props.className || ""}`} />;
+}
+function Avatar({ player, size = 40 }) {
+  const initials = (player?.name || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  return player?.photoUrl
+    ? <img src={player.photoUrl} style={{ width: size, height: size }} className="rounded-full object-cover border border-white/10" />
+    : <div style={{ width: size, height: size }} className="rounded-full flex items-center justify-center bg-gradient-to-br from-[var(--orange)] to-[var(--red)] text-[var(--ink)] font-black text-xs">{initials}</div>;
+}
+function Modal({ title, onClose, children, wide }) {
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className={`card w-full ${wide ? "sm:max-w-2xl" : "sm:max-w-md"} max-h-[90vh] overflow-y-auto rounded-b-none sm:rounded-b-[18px]`}>
+        <div className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-[var(--ink2)] z-10">
+          <h2 className="display text-lg">{title}</h2>
+          <button onClick={onClose} className="text-[var(--muted)] text-2xl leading-none px-2">×</button>
+        </div>
+        <div className="p-4">{children}</div>
+      </div>
+    </div>
+  );
+}
+function Pill({ children, tone = "orange" }) {
+  const tones = { orange: "bg-[var(--orange)]/15 text-[var(--orange-br)] border-[var(--orange)]/30", blue: "bg-[var(--blue)]/15 text-[var(--blue-soft)] border-[var(--blue)]/30", muted: "bg-white/5 text-[var(--muted)] border-white/10" };
+  return <span className={`text-[11px] font-bold uppercase tracking-wide px-2 py-1 rounded-full border ${tones[tone]}`}>{children}</span>;
+}
+
+// ── Login modal ──────────────────────────────────────────────────
+function LoginModal({ onClose, onLoggedIn }) {
+  const [pin, setPin] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function submit() {
+    setBusy(true); setErr("");
+    const r = await apiPost("/login", { pin });
+    setBusy(false);
+    if (r.ok) { setToken(r.token); setRole(r.role); onLoggedIn(r.role); onClose(); }
+    else setErr("Wrong PIN");
+  }
+  return (
+    <Modal title="Scorer / Admin Login" onClose={onClose}>
+      <div className="space-y-3">
+        <Input type="password" inputMode="numeric" placeholder="Enter PIN" value={pin}
+          onChange={e => setPin(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} autoFocus />
+        {err && <div className="text-[var(--red)] text-sm">{err}</div>}
+        <Btn onClick={submit} disabled={busy || !pin} className="w-full">{busy ? "..." : "Login"}</Btn>
+      </div>
+    </Modal>
+  );
+}
+
+// ── Players view ─────────────────────────────────────────────────
+function PlayersView({ state, canEdit, addPlayer, editPlayer, removePlayer }) {
+  const [q, setQ] = useState("");
+  const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const players = (state.players || []).filter(p => p.name.toLowerCase().includes(q.toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <Input placeholder="Search players…" value={q} onChange={e => setQ(e.target.value)} />
+        {canEdit && <Btn onClick={() => setAddOpen(true)}>+ Add</Btn>}
+      </div>
+      <div className="text-sm text-[var(--muted)]">{players.length} players</div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {players.map(p => (
+          <Card key={p.id} className="flex items-center gap-3 !p-3">
+            <Avatar player={p} />
+            <div className="flex-1 min-w-0">
+              <div className="font-bold truncate">{p.name}</div>
+            </div>
+            {canEdit && <button onClick={() => setEditing(p)} className="text-[var(--muted)] hover:text-[var(--orange-br)] px-2">✎</button>}
+          </Card>
+        ))}
+      </div>
+      {addOpen && <PlayerModal title="Add Player" onClose={() => setAddOpen(false)} onSave={(name, photoUrl) => { addPlayer(name, photoUrl); setAddOpen(false); }} />}
+      {editing && <PlayerModal title="Edit Player" initial={editing}
+        onClose={() => setEditing(null)}
+        onSave={(name, photoUrl) => { editPlayer(editing.id, name, photoUrl); setEditing(null); }}
+        onDelete={() => { removePlayer(editing.id); setEditing(null); }} />}
+    </div>
+  );
+}
+function PlayerModal({ title, initial, onClose, onSave, onDelete }) {
+  const [name, setName] = useState(initial?.name || "");
+  const [photoUrl, setPhotoUrl] = useState(initial?.photoUrl || "");
+  function handleFile(e) {
+    const f = e.target.files?.[0]; if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => setPhotoUrl(ev.target.result);
+    reader.readAsDataURL(f);
+  }
+  return (
+    <Modal title={title} onClose={onClose}>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <Avatar player={{ name, photoUrl }} size={56} />
+          <label className="text-sm px-3 py-2 rounded-xl bg-white/5 border border-white/10 cursor-pointer">
+            Upload photo<input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          </label>
+        </div>
+        <Input placeholder="Player name" value={name} onChange={e => setName(e.target.value)} autoFocus />
+        <div className="flex gap-2">
+          <Btn onClick={() => name.trim() && onSave(name.trim(), photoUrl)} className="flex-1">Save</Btn>
+          {onDelete && <Btn variant="danger" onClick={onDelete}>Delete</Btn>}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+// ── New tournament setup ─────────────────────────────────────────
+function SetupView({ state, canEdit, onStart }) {
+  const [selected, setSelected] = useState({});
+  const [points, setPoints] = useState(32);
+  const [rounds, setRounds] = useState(7);
+  const [name, setName] = useState("");
+  const players = (state.players || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+  const n = Object.values(selected).filter(Boolean).length;
+  const suggestedRounds = n >= 4 ? (n % 2 === 0 ? n - 1 : n) : 0;
+
+  useEffect(() => { if (suggestedRounds) setRounds(Math.min(suggestedRounds, 8)); }, [n]);
+
+  function toggle(id) { setSelected(s => ({ ...s, [id]: !s[id] })); }
+
+  function start() {
+    const ids = Object.keys(selected).filter(id => selected[id]);
+    if (ids.length < 4) return;
+    onStart({
+      id: uid("t"),
+      name: name.trim() || `Americano ${new Date().toLocaleDateString()}`,
+      createdAt: Date.now(),
+      pointsPerMatch: Number(points) || 32,
+      playerIds: ids,
+      numRounds: Number(rounds) || 1,
+      rounds: generateSchedule(ids, Number(rounds) || 1),
+      status: "active",
+    });
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <h2 className="display text-xl mb-2">🎾 Classic Americano</h2>
+        <p className="text-sm text-[var(--muted)] leading-relaxed">
+          Partners rotate every round — there are no fixed teams. Each point your pair wins
+          adds to <b className="text-[var(--cream)]">your own</b> individual total. After all
+          rounds, individual point totals decide the final ranking.
+        </p>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <Pill>Recommended: 32 points/match</Pill>
+          <Pill tone="blue">Best with player count ÷ 4</Pill>
+          <Pill tone="muted">8 players ≈ 2 hours</Pill>
+        </div>
+      </Card>
+
+      {!canEdit ? (
+        <Card className="text-center text-[var(--muted)]">Login as scorer/admin to set up a tournament.</Card>
+      ) : (
+        <>
+          <Card className="space-y-3">
+            <Input placeholder="Tournament name (optional)" value={name} onChange={e => setName(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-[var(--muted)] block mb-1">Points per match</label>
+                <Input type="number" value={points} onChange={e => setPoints(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--muted)] block mb-1">Rounds</label>
+                <Input type="number" min="1" value={rounds} onChange={e => setRounds(e.target.value)} />
+              </div>
+            </div>
+            {n > 0 && suggestedRounds > 0 && (
+              <div className="text-xs text-[var(--muted)]">Full partner rotation for {n} players covers {suggestedRounds} rounds.</div>
+            )}
+          </Card>
+
+          <Card>
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-bold">Select players</div>
+              <div className="text-sm text-[var(--muted)]">{n} selected{n % 4 !== 0 && n > 0 ? ` (${n % 4} will sit out some rounds)` : ""}</div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto">
+              {players.map(p => (
+                <button key={p.id} onClick={() => toggle(p.id)}
+                  className={`flex items-center gap-2 p-2 rounded-xl border text-left ${selected[p.id] ? "border-[var(--orange)] bg-[var(--orange)]/10" : "border-white/10 bg-white/5"}`}>
+                  <Avatar player={p} size={28} />
+                  <span className="text-sm truncate">{p.name}</span>
+                </button>
+              ))}
+            </div>
+          </Card>
+
+          <Btn onClick={start} disabled={n < 4} className="w-full">Start Tournament ({n} players)</Btn>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── Live round view ──────────────────────────────────────────────
+function LiveView({ tournament, players, canEdit, onScore, onFinish, onNextRound }) {
+  const byId = {}; players.forEach(p => { byId[p.id] = p; });
+  const [roundIdx, setRoundIdx] = useState(() => {
+    const firstOpen = tournament.rounds.findIndex(r => r.courts.some(m => m.score1 == null));
+    return firstOpen === -1 ? tournament.rounds.length - 1 : firstOpen;
+  });
+  const round = tournament.rounds[roundIdx];
+  const allScored = tournament.rounds.every(r => r.courts.every(m => m.score1 != null && m.score2 != null));
+
+  function Name({ id }) {
+    const p = byId[id];
+    return <div className="flex items-center gap-2"><Avatar player={p} size={32} /><span className="font-bold text-sm">{p?.name || "?"}</span></div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <button disabled={roundIdx === 0} onClick={() => setRoundIdx(i => i - 1)} className="px-3 py-2 rounded-xl bg-white/5 disabled:opacity-30">‹</button>
+        <div className="text-center">
+          <div className="display text-xl">ROUND {round.roundNum}</div>
+          <div className="text-xs text-[var(--muted)]">of {tournament.rounds.length}</div>
+        </div>
+        <button disabled={roundIdx === tournament.rounds.length - 1} onClick={() => setRoundIdx(i => i + 1)} className="px-3 py-2 rounded-xl bg-white/5 disabled:opacity-30">›</button>
+      </div>
+
+      {round.sitOuts.length > 0 && (
+        <Card className="!p-3 text-sm text-[var(--muted)]">
+          Sitting out: {round.sitOuts.map(id => byId[id]?.name || "?").join(", ")}
+        </Card>
+      )}
+
+      <div className="space-y-3">
+        {round.courts.map((m, mi) => (
+          <Card key={`${roundIdx}-${mi}`} className={m.score1 != null ? "opacity-80" : ""}>
+            <div className="text-xs text-[var(--muted)] mb-2">Court {m.court}</div>
+            <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-3">
+              <div className="space-y-1">{m.team1.map(id => <Name key={id} id={id} />)}</div>
+              <ScoreEntry m={m} canEdit={canEdit} pointsPerMatch={tournament.pointsPerMatch}
+                onSubmit={(s1, s2) => onScore(roundIdx, mi, s1, s2)} />
+              <div className="space-y-1 text-right">{m.team2.map(id => <Name key={id} id={id} />)}</div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {canEdit && roundIdx === tournament.rounds.length - 1 && allScored && (
+        <Btn variant="blue" onClick={onFinish} className="w-full">Finish Tournament</Btn>
+      )}
+    </div>
+  );
+}
+function ScoreEntry({ m, canEdit, pointsPerMatch, onSubmit }) {
+  const [s1, setS1] = useState(m.score1 ?? "");
+  const [s2, setS2] = useState(m.score2 ?? "");
+  const done = m.score1 != null;
+  if (!canEdit && !done) return <div className="text-[var(--muted)] text-xs text-center">vs</div>;
+  return (
+    <div className="flex items-center gap-1">
+      <Input type="number" disabled={!canEdit} value={s1} onChange={e => setS1(e.target.value)}
+        onBlur={() => s1 !== "" && s2 !== "" && onSubmit(Number(s1), Number(s2))}
+        className="!w-14 text-center !px-1" placeholder="0" />
+      <span className="text-[var(--muted)] text-xs">-</span>
+      <Input type="number" disabled={!canEdit} value={s2} onChange={e => setS2(e.target.value)}
+        onBlur={() => s1 !== "" && s2 !== "" && onSubmit(Number(s1), Number(s2))}
+        className="!w-14 text-center !px-1" placeholder="0" />
+    </div>
+  );
+}
+
+// ── Standings view ───────────────────────────────────────────────
+function StandingsView({ tournament, players }) {
+  if (!tournament) return <Card className="text-center text-[var(--muted)]">No active tournament yet.</Card>;
+  const standings = calcStandings(tournament, players);
+  return (
+    <div className="space-y-2">
+      <div className="text-sm text-[var(--muted)] mb-2">{tournament.name}</div>
+      {standings.map((s, i) => (
+        <Card key={s.id} className={`flex items-center gap-3 !p-3 ${i === 0 ? "glow-orange" : ""}`}>
+          <div className={`display text-lg w-6 text-center ${i === 0 ? "text-[var(--orange-br)]" : "text-[var(--muted)]"}`}>{i + 1}</div>
+          <Avatar player={s} />
+          <div className="flex-1 min-w-0">
+            <div className="font-bold truncate">{s.name}</div>
+            <div className="text-xs text-[var(--muted)]">{s.played} played · {s.wins} won</div>
+          </div>
+          <div className="text-right">
+            <div className="display text-lg mono">{s.points}</div>
+            <div className="text-xs text-[var(--muted)]">pts</div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+// ── History view ─────────────────────────────────────────────────
+function HistoryView({ state, players }) {
+  const [openId, setOpenId] = useState(null);
+  const done = (state.tournaments || []).filter(t => t.status === "completed").sort((a, b) => b.createdAt - a.createdAt);
+  if (!done.length) return <Card className="text-center text-[var(--muted)]">No completed tournaments yet.</Card>;
+  const open = done.find(t => t.id === openId);
+  if (open) {
+    return (
+      <div className="space-y-3">
+        <button onClick={() => setOpenId(null)} className="text-sm text-[var(--muted)]">‹ Back to history</button>
+        <StandingsView tournament={open} players={players} />
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-2">
+      {done.map(t => (
+        <button key={t.id} onClick={() => setOpenId(t.id)} className="w-full text-left">
+          <Card className="flex items-center justify-between !p-3">
+            <div>
+              <div className="font-bold">{t.name}</div>
+              <div className="text-xs text-[var(--muted)]">{new Date(t.createdAt).toLocaleDateString()} · {t.playerIds.length} players · {t.rounds.length} rounds</div>
+            </div>
+            <span className="text-[var(--muted)]">›</span>
+          </Card>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── App ──────────────────────────────────────────────────────────
+function App() {
+  const [state, setState] = useState({ players: [], tournaments: [] });
+  const [loading, setLoading] = useState(true);
+  const [role, setRoleState] = useState(getRole());
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [tab, setTab] = useState("play");
+  const saveTimer = useRef(null);
+
+  useEffect(() => {
+    apiGet("/state").then(r => {
+      if (r.ok) setState(prev => ({ players: [], tournaments: [], ...r.state }));
+      setLoading(false);
+    });
+  }, []);
+
+  const canEdit = role === "admin" || role === "scorer";
+
+  function persist(next) {
+    setState(next);
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => { apiPost("/save", { state: next }, true); }, 400);
+  }
+
+  function addPlayer(name, photoUrl) {
+    const p = { id: uid("p"), name, photoUrl: photoUrl || "", addedAt: Date.now() };
+    persist({ ...state, players: [...(state.players || []), p] });
+  }
+  function editPlayer(id, name, photoUrl) {
+    persist({ ...state, players: state.players.map(p => p.id === id ? { ...p, name, photoUrl } : p) });
+  }
+  function removePlayer(id) {
+    persist({ ...state, players: state.players.filter(p => p.id !== id) });
+  }
+
+  const activeTournament = (state.tournaments || []).find(t => t.status === "active");
+
+  function startTournament(t) {
+    persist({ ...state, tournaments: [...(state.tournaments || []), t] });
+  }
+  function scoreMatch(roundIdx, matchIdx, s1, s2) {
+    const t = activeTournament; if (!t) return;
+    const rounds = t.rounds.map((r, ri) => ri !== roundIdx ? r : {
+      ...r, courts: r.courts.map((m, mi) => mi !== matchIdx ? m : { ...m, score1: s1, score2: s2 }),
+    });
+    const nextT = { ...t, rounds };
+    persist({ ...state, tournaments: state.tournaments.map(x => x.id === t.id ? nextT : x) });
+  }
+  function finishTournament() {
+    const t = activeTournament; if (!t) return;
+    persist({ ...state, tournaments: state.tournaments.map(x => x.id === t.id ? { ...x, status: "completed", completedAt: Date.now() } : x) });
+    setTab("history");
+  }
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center text-[var(--muted)]">Loading…</div>;
+
+  const tabs = [
+    { id: "play", label: "🎾 Play" },
+    { id: "standings", label: "🏆 Standings" },
+    { id: "players", label: "👥 Players" },
+    { id: "history", label: "📜 History" },
+  ];
+
+  return (
+    <div className="min-h-screen pb-24">
+      <header className="sticky top-0 z-30 bg-[var(--ink)]/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+        <h1 className="display text-xl tracking-wide">🎾 AMERICANO</h1>
+        {canEdit
+          ? <Pill tone={role === "admin" ? "orange" : "blue"}>{role}</Pill>
+          : <button onClick={() => setLoginOpen(true)} className="text-sm text-[var(--muted)] underline">Login</button>}
+      </header>
+
+      <main className="max-w-2xl mx-auto p-4">
+        {tab === "play" && (activeTournament
+          ? <LiveView tournament={activeTournament} players={state.players} canEdit={canEdit}
+              onScore={scoreMatch} onFinish={finishTournament} />
+          : <SetupView state={state} canEdit={canEdit} onStart={startTournament} />)}
+        {tab === "standings" && <StandingsView tournament={activeTournament} players={state.players} />}
+        {tab === "players" && <PlayersView state={state} canEdit={canEdit} addPlayer={addPlayer} editPlayer={editPlayer} removePlayer={removePlayer} />}
+        {tab === "history" && <HistoryView state={state} players={state.players} />}
+      </main>
+
+      <nav className="fixed bottom-0 inset-x-0 bg-[var(--ink2)] border-t border-white/10 flex z-30">
+        {tabs.map(tb => (
+          <button key={tb.id} onClick={() => setTab(tb.id)}
+            className={`flex-1 py-3 text-xs font-bold ${tab === tb.id ? "text-[var(--orange-br)]" : "text-[var(--muted)]"}`}>
+            {tb.label}
+          </button>
+        ))}
+      </nav>
+
+      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} onLoggedIn={r => setRoleState(r)} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
