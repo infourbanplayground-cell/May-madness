@@ -31,6 +31,9 @@ ap.add_argument('--left',    default='7', help='sessions remaining, including th
 ap.add_argument('--full',    action='store_true', help='16 teams already in')
 ap.add_argument('--partners', default=None, help='e.g. "4" — teams still needing a partner')
 ap.add_argument('--anim',    action='store_true', help='emit the animated cut')
+ap.add_argument('--kick',    default='TOMORROW', help='banner above the session number — '
+                 'was hardcoded to TOMORROW, which is wrong any time the story is posted '
+                 'more than a day out. Pass the real framing, e.g. "THIS MONDAY".')
 ap.add_argument('--out',     default='session-story')
 A = ap.parse_args()
 
@@ -50,7 +53,10 @@ chase = ''.join(
 if A.full:
     cta_h, cta_p = 'THE LIST IS <em>FULL</em>', 'Waitlist is open &mdash; drop your name, teams drop out every week.'
 else:
-    cta_h, cta_p = 'GET YOUR <em>NAME</em> DOWN', 'Sixteen teams max, first come first served.'
+    # Deliberately no spot count here — "3 left" reads as a countdown timer
+    # and goes stale the moment the next name lands. "Spots remaining" says
+    # the same urgency without a number that needs updating.
+    cta_h, cta_p = 'GET YOUR <em>NAME</em> DOWN', 'Spots remaining &mdash; sixteen teams max, first come first served.'
 
 partners = (f'<div class="pn">{A.partners} teams still need a partner &mdash; '
             f'say the word and we pair you up.</div>') if A.partners else ''
@@ -182,7 +188,7 @@ HTML = f"""<!doctype html><meta charset="utf-8"><style>{CSS}</style>
 <div class="grid"></div><div class="tk tl"></div><div class="tk br"></div>
 <div class="z">
   <img class="word" src="data:image/png;base64,{word}" alt="August Attack">
-  <div class="kick"><b>TOMORROW</b></div>
+  <div class="kick"><b>{A.kick}</b></div>
 
   <div class="sn"><span>SESSION</span><b>{int(A.session):02d}</b></div>
   <div class="when">{A.date} &middot; <em>{A.time}</em></div>
