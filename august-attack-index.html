@@ -4220,8 +4220,8 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         if (!silent) alert(`Tie between ${lbl(sortedThirds[1].id)} and ${lbl(sortedThirds[2].id)} for the last 3rd-place spot!\n\nPlay a tiebreak match to determine who qualifies.`);
         return;
       }
-      const t1sorted = tier1.sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
-      const t2sorted = tier2.sort((a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd);
+      const t1sorted = tier1.sort(compareThirds);
+      const t2sorted = tier2.sort(compareThirds);
 
       if (thirdPlaceMode === "playoff" && sortedThirds.length >= 3) {
         // T3A (best third) → direct QF spot; T3B vs T3C play a qualifier
@@ -4272,9 +4272,8 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         // N === 4: rank both tiers by actual group-stage strength and cross-seed —
         // strongest winner faces the weakest runner-up, and the BEST runner-up gets
         // the weakest winner (a reward for a strong 2nd, not a random group-letter pairing).
-        const cmp = (a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd || b.gf - a.gf;
-        const W = [...winners].sort(cmp);   // strongest → weakest
-        const R = [...runners].sort(cmp);   // strongest → weakest
+        const W = [...winners].sort(compareThirds);   // strongest → weakest
+        const R = [...runners].sort(compareThirds);   // strongest → weakest
         const assign = W.map((w, i) => ({ w, r: R[3 - i] }));
         // A team can't face its own group's other qualifier — they already played.
         // Swap with whichever pairing resolves the conflict on both sides.
@@ -4317,11 +4316,11 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     const qualifiers = [];
     standings.forEach((s, gi) => {
       for (let i = 0; i < qCount; i++) {
-        if (s[i]?.team?.id) qualifiers.push({ teamId: s[i].team.id, pts: s[i].pts, wins: s[i].wins, groupRank: i, seed: groups[gi] + (i + 1) });
+        if (s[i]?.team?.id) qualifiers.push({ teamId: s[i].team.id, pts: s[i].pts, wins: s[i].wins, gd: s[i].gd || 0, gf: s[i].gf || 0, groupRank: i, seed: groups[gi] + (i + 1) });
       }
     });
     if (qualifiers.length === 0) { if (!silent) alert("No qualified teams yet"); return; }
-    const seeded = [...qualifiers].sort((a, b) => b.pts - a.pts || b.wins - a.wins || a.groupRank - b.groupRank);
+    const seeded = [...qualifiers].sort((a, b) => a.groupRank - b.groupRank || b.wins - a.wins || b.gd - a.gd || b.gf - a.gf);
     const total = seeded.length;
     if (total < 2) { if (!silent) alert("Only one team qualified — need at least 2 to make a bracket."); return; }
     if (total === 2) {
