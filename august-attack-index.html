@@ -4184,6 +4184,20 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const teams = session.teams || [];
   const thirdPlaceMode = session.thirdPlaceMode || "best2";
 
+  // Everything the seeding is derived from: which team is in which group, and
+  // every group-stage result. Seeding that was computed from a different
+  // signature is stale — a late result or a corrected score changes who
+  // finished where, and therefore who should be playing whom.
+  const seedInputSig = JSON.stringify({
+    t: (session.teams || []).map(t => [t.id, t.group]).sort(),
+    m: (session.groupMatches || []).map(m => [m.team1Id, m.team2Id, m.winner || "", m.lossType || "", m.score?.t1 ?? "", m.score?.t2 ?? ""]).sort(),
+  });
+
+  // Every seeding write goes through here so the bracket always records the
+  // group results it was built from, and clears any manual override.
+  const applyBracket = (bracket) =>
+    updateSession(s => ({ ...s, bracket, seedSig: seedInputSig, seedManual: false }));
+
   // Turns the tier list from seedStandardBracket into stored QF matches.
   const qfFromTiers = (tiers) => {
     const pairing = seedStandardBracket(tiers);
@@ -4234,7 +4248,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         winner: null, r16Slot: 4-i,
       }));
 
-      updateSession(s => ({ ...s, bracket: { r16, qf, sf: [], final: null } }));
+      applyBracket({ r16, qf, sf: [], final: null } );
       return;
     }
 
@@ -4265,7 +4279,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         const qf = qfFromTiers([t1sorted, t2sorted, [t3a, { id: "PLAYOFF_TBD", seed: "Q" }]]);
         if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
         const thirdsPlayoff = { id: uid("tpo"), team1Id: t3b.id, team2Id: t3c.id, s1: t3b.seed, s2: t3c.seed, winner: null };
-        updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null, thirdsPlayoff } }));
+        applyBracket({ qf, sf: [], final: null, thirdsPlayoff } );
         return;
       }
 
@@ -4273,7 +4287,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const best2 = sortedThirds.slice(0, 2);
       const qf = qfFromTiers([t1sorted, t2sorted, best2]);
       if (!qf) { if (!silent) alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
-      updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
+      applyBracket({ qf, sf: [], final: null } );
       return;
     }
 
@@ -4287,7 +4301,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       if (N === 2) {
         const pairs = winners.map((w, i) => ({ a: w, b: runners[N - 1 - i] }));
         const sf = pairs.map((p, i) => ({ id: uid("sf"), slot: i + 1, team1Id: p.a.id, team2Id: p.b.id, s1: p.a.seed, s2: p.b.seed, winner: null }));
-        updateSession(s => ({ ...s, bracket: { qf: [], sf, final: null } }));
+        applyBracket({ qf: [], sf, final: null } );
       } else {
         // N === 4: all four winners take seeds 1-4, all four runners-up 5-8,
         // each tier ranked by wins → GD → GF. 1v8 then means the strongest
@@ -4295,7 +4309,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         // runner-up the weakest winner.
         const qf = qfFromTiers([[...winners].sort(compareThirds), [...runners].sort(compareThirds)]);
         if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
-        updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
+        applyBracket({ qf, sf: [], final: null } );
       }
       return;
     }
@@ -4310,7 +4324,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const tiers = [0, 1, 2, 3].map(i => [at(a, i, groups[0]), at(b, i, groups[1])].sort(compareThirds));
       const qf = qfFromTiers(tiers);
       if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
-      updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
+      applyBracket({ qf, sf: [], final: null } );
       return;
     }
 
@@ -4325,15 +4339,15 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     const total = seeded.length;
     if (total < 2) { if (!silent) alert("Only one team qualified — need at least 2 to make a bracket."); return; }
     if (total === 2) {
-      updateSession(s => ({ ...s, bracket: { qf: [], sf: [], final: { id: uid("f"), team1Id: seeded[0].teamId, team2Id: seeded[1].teamId, s1: seeded[0].seed, s2: seeded[1].seed, winner: null } } }));
+      applyBracket({ qf: [], sf: [], final: { id: uid("f"), team1Id: seeded[0].teamId, team2Id: seeded[1].teamId, s1: seeded[0].seed, s2: seeded[1].seed, winner: null } } );
     } else if (total <= 4) {
       const sf = [];
       for (let i = 0; i < Math.floor(total / 2); i++) sf.push({ id: uid("sf"), slot: i + 1, team1Id: seeded[i].teamId, team2Id: seeded[total - 1 - i].teamId, s1: seeded[i].seed, s2: seeded[total - 1 - i].seed, winner: null });
-      updateSession(s => ({ ...s, bracket: { qf: [], sf, final: null } }));
+      applyBracket({ qf: [], sf, final: null } );
     } else {
       const pick = [[0,7],[3,4],[1,6],[2,5]];
       const qf = pick.map(([x, y], i) => seeded[x] && seeded[y] ? { id: uid("qf"), slot: i + 1, team1Id: seeded[x].teamId, team2Id: seeded[y].teamId, s1: seeded[x].seed, s2: seeded[y].seed, winner: null } : null).filter(Boolean);
-      updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
+      applyBracket({ qf, sf: [], final: null } );
     }
   };
 
@@ -4353,19 +4367,30 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   })();
   const bracketEmpty = !(b.qf?.length) && !(b.sf?.length) && !b.final && !(b.r16?.length) && !b.thirdsPlayoff;
 
-  // Auto-seed the knockout once the group stage is complete and no bracket
-  // exists yet — one-shot per session, guarded so it never re-seeds over
-  // knockout results. Silent so a tie/insufficient case just waits for the
-  // organizer to seed manually instead of popping an alert.
-  const autoSeededRef = useRef(null);
+  // The knockout is "locked" as soon as any of it has been played — including
+  // the thirds qualifier, whose winner takes the 8th seed. Past that point the
+  // seeding is history and must never be recomputed.
+  const koLocked = (b.qf || []).some(m => m.winner)
+    || (b.sf || []).some(m => m.winner)
+    || (b.r16 || []).some(m => m.winner)
+    || !!b.final?.winner
+    || !!b.thirdsPlayoff?.winner;
+
+  // Keep the seeding in sync with the group results, instead of seeding once
+  // and letting it go stale. A score entered or corrected after the bracket
+  // was drawn changes who finished 1st/2nd/3rd, and therefore who should be
+  // playing whom — that used to require a hand-patch to fix.
+  //
+  // Re-seeding is skipped whenever it could destroy something: once any
+  // knockout match has a result (koLocked), or when an admin has deliberately
+  // arranged the seeding by hand (seedManual). Silent, so a tie or an
+  // incomplete group just waits for the organizer rather than popping alerts.
   useEffect(() => {
-    if (!canScore) return;
-    if (groupStageComplete && bracketEmpty && autoSeededRef.current !== session.id) {
-      autoSeededRef.current = session.id;
-      seedQF(true);
-    }
-    if (!bracketEmpty) autoSeededRef.current = session.id;  // already seeded → don't auto-fire later
-  }, [canScore, groupStageComplete, bracketEmpty, session.id]);
+    if (!canScore || !groupStageComplete) return;
+    if (koLocked || session.seedManual) return;
+    if (!bracketEmpty && session.seedSig === seedInputSig) return;  // already current
+    seedQF(true);
+  }, [canScore, groupStageComplete, bracketEmpty, koLocked, session.seedManual, session.seedSig, seedInputSig]);
 
   const lbl = (id) => {
     if (id === "PLAYOFF_TBD") return "Qualifier TBD";
@@ -4419,8 +4444,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const numGroups = getSessionGroups(session).length;
   const currentQC = getQualifyCount(session);
   const qcOptions = numGroups === 2 ? [1, 2, 4] : [1, 2];
-  const koHasResults = (b.qf || []).some(m => m.winner) || (b.sf || []).some(m => m.winner) || (b.r16 || []).some(m => m.winner) || !!b.final?.winner;
-  const reseedGuard = () => !(koHasResults && !confirm("Changing knockout qualification re-seeds the bracket and clears the current knockout results. Continue?"));
+  const reseedGuard = () => !(koLocked && !confirm("Changing knockout qualification re-seeds the bracket and clears the current knockout results. Continue?"));
   const changeQualify = (q) => {
     if (q === currentQC) return;
     if (!reseedGuard()) return;
@@ -4570,9 +4594,19 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
 
       {/* Bracket tree (4 QF) or fallback list */}
       {isAdmin && b.qf.length === 4 && !(b.r16?.length) && (
-        koHasResults
+        koLocked
           ? <div className="text-[10px] text-stone-500 flex items-center gap-1 px-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>
-          : <div className="flex justify-end"><Btn variant="secondary" onClick={() => setSeedEdit(true)}><I.swords size={12} /> Edit seeding</Btn></div>
+          : <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="text-[10px] text-stone-500 flex items-center gap-1">
+                {session.seedManual
+                  ? <><I.alert size={10} /> Seeded by hand — it won't follow group-result changes. Re-seed to resume auto.</>
+                  : <>Seeding follows the group results automatically until a knockout score is entered.</>}
+              </div>
+              <div className="flex gap-1.5">
+                {session.seedManual && <Btn variant="ghost" onClick={() => seedQF()}><I.bolt size={12} /> Re-seed</Btn>}
+                <Btn variant="secondary" onClick={() => setSeedEdit(true)}><I.swords size={12} /> Edit seeding</Btn>
+              </div>
+            </div>
       )}
       {b.qf.length === 4
         ? <BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} />
@@ -4606,8 +4640,11 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         onReset={() => updateSession(s => ({ ...s, bracket: { r16: s.bracket.r16, qf: s.bracket.qf, sf: [], final: null, thirdsPlayoff: s.bracket.thirdsPlayoff } }))}
       />}
 
+      {/* A hand-arranged bracket sets seedManual, which parks the automatic
+          re-seed — otherwise the next group-result edit would silently undo
+          the organizer's arrangement. "Re-seed" clears it again. */}
       {seedEdit && <QFSeedingModal qf={b.qf} lbl={lbl} onClose={() => setSeedEdit(false)}
-        onSave={(newQf) => { updateSession(s => ({ ...s, bracket: { ...s.bracket, qf: newQf } })); setSeedEdit(false); }}
+        onSave={(newQf) => { updateSession(s => ({ ...s, bracket: { ...s.bracket, qf: newQf }, seedManual: true })); setSeedEdit(false); }}
       />}
     </div>
   );
