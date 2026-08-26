@@ -4381,16 +4381,29 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   // was drawn changes who finished 1st/2nd/3rd, and therefore who should be
   // playing whom — that used to require a hand-patch to fix.
   //
+  // DELIBERATELY LIMITED TO 3-GROUP SESSIONS. That format seeds 8 from 3
+  // groups, so two of the three third-place teams qualify and their ranking
+  // decides both the last QF seed and who plays the qualifier — the part that
+  // actually moved when a late result landed. The other formats take a fixed
+  // top-N per group, where a late result reorders the group but rarely changes
+  // who is in, so re-seeding them is churn on a live bracket for little gain.
+  //
   // Re-seeding is skipped whenever it could destroy something: once any
   // knockout match has a result (koLocked), or when an admin has deliberately
   // arranged the seeding by hand (seedManual). Silent, so a tie or an
   // incomplete group just waits for the organizer rather than popping alerts.
+  const autoReseedFormat = getSessionGroups(session).length === 3;
   useEffect(() => {
     if (!canScore || !groupStageComplete) return;
     if (koLocked || session.seedManual) return;
-    if (!bracketEmpty && session.seedSig === seedInputSig) return;  // already current
+    if (!autoReseedFormat) {
+      // Other formats keep the original behaviour: seed once, never redraw.
+      if (!bracketEmpty) return;
+    } else if (!bracketEmpty && session.seedSig === seedInputSig) {
+      return;  // already current
+    }
     seedQF(true);
-  }, [canScore, groupStageComplete, bracketEmpty, koLocked, session.seedManual, session.seedSig, seedInputSig]);
+  }, [canScore, groupStageComplete, bracketEmpty, koLocked, autoReseedFormat, session.seedManual, session.seedSig, seedInputSig]);
 
   const lbl = (id) => {
     if (id === "PLAYOFF_TBD") return "Qualifier TBD";
@@ -4600,7 +4613,9 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
               <div className="text-[10px] text-stone-500 flex items-center gap-1">
                 {session.seedManual
                   ? <><I.alert size={10} /> Seeded by hand — it won't follow group-result changes. Re-seed to resume auto.</>
-                  : <>Seeding follows the group results automatically until a knockout score is entered.</>}
+                  : autoReseedFormat
+                  ? <>Seeding follows the group results automatically until a knockout score is entered.</>
+                  : <>Seeded from the final group standings. Edit a group result and re-seed to redraw.</>}
               </div>
               <div className="flex gap-1.5">
                 {session.seedManual && <Btn variant="ghost" onClick={() => seedQF()}><I.bolt size={12} /> Re-seed</Btn>}
