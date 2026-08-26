@@ -4233,16 +4233,38 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     }
 
     if (qCount === 2 && (N === 2 || N === 4)) {
-      const winners = standings.map((s, i) => ({ id: s[0]?.team?.id, seed: groups[i] + "1" }));
-      const runners = standings.map((s, i) => ({ id: s[1]?.team?.id, seed: groups[i] + "2" }));
-      if (winners.some(w => !w.id) || runners.some(r => !r.id)) { if (!silent) alert("Need top 2 in every group first"); return; }
-      const pairs = winners.map((w, i) => ({ a: w, b: runners[N - 1 - i] }));
+      const mkTier = (rank) => standings.map((s, i) => s[rank]?.team?.id
+        ? { id: s[rank].team.id, seed: groups[i] + (rank + 1), group: groups[i], pts: s[rank].pts, wins: s[rank].wins, gd: s[rank].gd || 0, gf: s[rank].gf || 0 }
+        : null);
+      const winners = mkTier(0);
+      const runners = mkTier(1);
+      if (winners.some(w => !w) || runners.some(r => !r)) { if (!silent) alert("Need top 2 in every group first"); return; }
       if (N === 2) {
+        const pairs = winners.map((w, i) => ({ a: w, b: runners[N - 1 - i] }));
         const sf = pairs.map((p, i) => ({ id: uid("sf"), slot: i + 1, team1Id: p.a.id, team2Id: p.b.id, s1: p.a.seed, s2: p.b.seed, winner: null }));
         updateSession(s => ({ ...s, bracket: { qf: [], sf, final: null } }));
       } else {
-        const order = [0, 2, 1, 3];
-        const qf = order.map((idx, i) => ({ id: uid("qf"), slot: i + 1, team1Id: pairs[idx].a.id, team2Id: pairs[idx].b.id, s1: pairs[idx].a.seed, s2: pairs[idx].b.seed, winner: null }));
+        // N === 4: rank both tiers by actual group-stage strength and cross-seed —
+        // strongest winner faces the weakest runner-up, and the BEST runner-up gets
+        // the weakest winner (a reward for a strong 2nd, not a random group-letter pairing).
+        const cmp = (a, b) => b.pts - a.pts || b.wins - a.wins || b.gd - a.gd || b.gf - a.gf;
+        const W = [...winners].sort(cmp);   // strongest → weakest
+        const R = [...runners].sort(cmp);   // strongest → weakest
+        const assign = W.map((w, i) => ({ w, r: R[3 - i] }));
+        // A team can't face its own group's other qualifier — they already played.
+        // Swap with whichever pairing resolves the conflict on both sides.
+        for (let i = 0; i < assign.length; i++) {
+          if (assign[i].w.group === assign[i].r.group) {
+            for (let j = 0; j < assign.length; j++) {
+              if (j === i) continue;
+              if (assign[j].w.group !== assign[i].r.group && assign[i].w.group !== assign[j].r.group) {
+                const tmp = assign[i].r; assign[i].r = assign[j].r; assign[j].r = tmp;
+                break;
+              }
+            }
+          }
+        }
+        const qf = assign.map((p, i) => ({ id: uid("qf"), slot: i + 1, team1Id: p.w.id, team2Id: p.r.id, s1: p.w.seed, s2: p.r.seed, winner: null }));
         updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
       }
       return;
