@@ -4134,6 +4134,7 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
 
 function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const [edit, setEdit] = useState(null);
+  const [seedEdit, setSeedEdit] = useState(false);
   const b = session.bracket || { qf: [], sf: [], final: null };
   const teams = session.teams || [];
   const thirdPlaceMode = session.thirdPlaceMode || "best2";
@@ -4568,6 +4569,11 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       )}
 
       {/* Bracket tree (4 QF) or fallback list */}
+      {isAdmin && b.qf.length === 4 && !(b.r16?.length) && (
+        koHasResults
+          ? <div className="text-[10px] text-stone-500 flex items-center gap-1 px-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>
+          : <div className="flex justify-end"><Btn variant="secondary" onClick={() => setSeedEdit(true)}><I.swords size={12} /> Edit seeding</Btn></div>
+      )}
       {b.qf.length === 4
         ? <BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} />
         : <>
@@ -4598,6 +4604,10 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
           return { ...s, bracket: nb };
         })}
         onReset={() => updateSession(s => ({ ...s, bracket: { r16: s.bracket.r16, qf: s.bracket.qf, sf: [], final: null, thirdsPlayoff: s.bracket.thirdsPlayoff } }))}
+      />}
+
+      {seedEdit && <QFSeedingModal qf={b.qf} lbl={lbl} onClose={() => setSeedEdit(false)}
+        onSave={(newQf) => { updateSession(s => ({ ...s, bracket: { ...s.bracket, qf: newQf } })); setSeedEdit(false); }}
       />}
     </div>
   );
@@ -4837,6 +4847,71 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
           ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm →</Btn>
           : <Btn onClick={() => { onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
         }
+      </div>
+    </div>
+  </Modal>;
+}
+
+// Lets the admin swap opponents across the QF before any score exists. Only
+// available while every QF match is still fully unresolved (no winner) — the
+// gate that opens this modal in BracketTab enforces that, so nothing here
+// ever touches a recorded score. Matches with a still-unknown side (a thirds
+// playoff TBD, an R16 winner) are locked out of this tool since there's
+// nothing yet to seed. Swapping happens two rows at a time — a pure exchange
+// of "team2" between two matches — so it can never produce a duplicate or
+// drop a team, unlike freeform per-slot dropdowns would.
+function QFSeedingModal({ qf, lbl, onClose, onSave }) {
+  const seedFor = {};
+  qf.forEach(m => { if (m.team1Id) seedFor[m.team1Id] = m.s1; if (m.team2Id) seedFor[m.team2Id] = m.s2; });
+  const isReal = (id) => id && !String(id).includes("TBD");
+  const [rows, setRows] = useState(() => qf.map(m => ({
+    id: m.id, slot: m.slot, team1Id: m.team1Id, team2Id: m.team2Id,
+    locked: !(isReal(m.team1Id) && isReal(m.team2Id)),
+  })));
+  const swapWith = (i, j) => setRows(rs => {
+    const next = rs.map(r => ({ ...r }));
+    const t2 = next[i].team2Id;
+    next[i].team2Id = next[j].team2Id;
+    next[j].team2Id = t2;
+    return next;
+  });
+  return <Modal open={true} onClose={onClose} title="EDIT QF SEEDING">
+    <div className="space-y-3">
+      <div className="text-xs text-cyan-300 bg-cyan-400/10 border border-cyan-300/30 rounded-lg p-2 flex gap-2">
+        <I.alert size={14} className="shrink-0 mt-0.5" />
+        <span>Swap who each seed plays. No score exists yet on any of these matches, so nothing here touches a result.</span>
+      </div>
+      {rows.map((r, i) => (
+        <div key={r.id} className="rounded-lg bg-stone-900/60 border border-stone-800 p-2.5 space-y-1.5">
+          <div className="flex items-center gap-2 text-sm">
+            <SeedBadge seed={seedFor[r.team1Id]} />
+            <span className="flex-1 min-w-0 truncate font-semibold text-stone-200">{lbl(r.team1Id)}</span>
+            <span className="text-stone-600 font-mono text-xs shrink-0">vs</span>
+            <span className="flex-1 min-w-0 truncate text-right text-stone-200">{lbl(r.team2Id)}</span>
+            <SeedBadge seed={seedFor[r.team2Id]} />
+          </div>
+          {r.locked ? (
+            <div className="text-[10px] text-stone-500">One side isn't decided yet — this match can't be re-seeded.</div>
+          ) : (
+            <select
+              value=""
+              onChange={e => { const j = Number(e.target.value); if (!Number.isNaN(j)) swapWith(i, j); }}
+              className="w-full bg-stone-800 border border-stone-700 rounded-md px-2 py-1.5 text-xs text-stone-300"
+            >
+              <option value="">Swap opponent with…</option>
+              {rows.map((o, j) => j !== i && !o.locked && (
+                <option key={o.id} value={j}>Match {o.slot}: {lbl(o.team2Id)}</option>
+              ))}
+            </select>
+          )}
+        </div>
+      ))}
+      <div className="flex gap-2 pt-1">
+        <Btn variant="ghost" onClick={onClose} className="ml-auto">Cancel</Btn>
+        <Btn onClick={() => onSave(qf.map((m, i) => {
+          const r = rows[i];
+          return r.locked ? m : { ...m, team2Id: r.team2Id, s2: seedFor[r.team2Id] };
+        }))}>Save seeding ✓</Btn>
       </div>
     </div>
   </Modal>;
