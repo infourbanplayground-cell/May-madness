@@ -1563,6 +1563,51 @@ function compareThirds(a, b) {
   return b.wins - a.wins || b.gd - a.gd || b.gf - a.gf;
 }
 
+// Standard 8-team knockout pairing: 1v8, 4v5, 3v6, 2v7 — in that slot order,
+// so the top two seeds sit in opposite halves and can only meet in the final.
+// The seeding transparency panel reads the same table, so the two never drift.
+const SEED_PAIRS = [[0, 7], [3, 4], [2, 5], [1, 6]];
+
+// Builds the QF pairing from tiers of qualifiers, in strict tier order:
+// every group winner outranks every runner-up, every runner-up outranks
+// every third. Seeds 1..8 are just the flattened tiers, so seed 1 is the
+// best 1st and seed 8 the weakest last-tier qualifier. Callers sort each
+// tier internally with compareThirds (wins → GD → GF) — never by points,
+// which include consolation scoring for close losses and so measure
+// participation rather than strength.
+//
+// If a pairing would rematch two teams that already met in the group stage,
+// it's resolved by swapping seats WITHIN one tier (a 2nd trades places with
+// another 2nd), so a clash fix can never promote a team above a tier it
+// didn't earn, and 1v8 stays 1v8.
+function seedStandardBracket(tiers) {
+  const seeded = tiers.flat();
+  if (seeded.length !== 8) return null;
+  const bounds = [];
+  let off = 0;
+  tiers.forEach(t => { bounds.push([off, off + t.length]); off += t.length; });
+  const tierOf = (i) => bounds.findIndex(([lo, hi]) => i >= lo && i < hi);
+  // A still-undecided slot (thirds-playoff winner) has no group yet, so it
+  // can't clash — treat it as compatible with everyone.
+  const grp = (x) => x?.group || (/^[A-Z]\d$/.test(x?.seed || "") ? x.seed[0] : null);
+  const partnerOf = (i) => { const p = SEED_PAIRS.find(pr => pr[0] === i || pr[1] === i); return p[0] === i ? p[1] : p[0]; };
+
+  for (const [x, y] of SEED_PAIRS) {
+    const gx = grp(seeded[x]), gy = grp(seeded[y]);
+    if (!gx || !gy || gx !== gy) continue;
+    const [lo, hi] = bounds[tierOf(y)];
+    for (let k = lo; k < hi; k++) {
+      if (k === y) continue;
+      // Swapping y and k must leave BOTH pairings clash-free.
+      if (grp(seeded[k]) !== gx && grp(seeded[y]) !== grp(seeded[partnerOf(k)])) {
+        const t = seeded[y]; seeded[y] = seeded[k]; seeded[k] = t;
+        break;
+      }
+    }
+  }
+  return SEED_PAIRS.map(([x, y], i) => ({ slot: i + 1, a: seeded[x], b: seeded[y] }));
+}
+
 function calcStreak(idxs) {
   if (!idxs?.length) return 0;
   const sorted = [...idxs].sort((a, b) => a - b);
@@ -4139,28 +4184,15 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const teams = session.teams || [];
   const thirdPlaceMode = session.thirdPlaceMode || "best2";
 
-  // Two teams from the same group already played each other in the round-robin —
-  // pairing them again in the QF is a wasted, uninformative rematch. Seed letters are
-  // always the first char of s1/s2 (e.g. "A1", "B2"; a TBD placeholder like "Q" has no
-  // real group letter, so it's naturally left alone). Swaps team2 across matches until
-  // no match pits two teams from the same group against each other.
-  const fixGroupRematches = (qf) => {
-    for (let i = 0; i < qf.length; i++) {
-      const g1 = qf[i].s1?.[0], g2 = qf[i].s2?.[0];
-      if (g1 && g2 && g1 === g2) {
-        for (let j = 0; j < qf.length; j++) {
-          if (j === i) continue;
-          const oj1 = qf[j].s1?.[0], oj2 = qf[j].s2?.[0];
-          if (oj2 && oj2 !== g1 && (!oj1 || oj1 !== g2)) {
-            const t2 = qf[i].team2Id, s2 = qf[i].s2;
-            qf[i].team2Id = qf[j].team2Id; qf[i].s2 = qf[j].s2;
-            qf[j].team2Id = t2; qf[j].s2 = s2;
-            break;
-          }
-        }
-      }
-    }
-    return qf;
+  // Turns the tier list from seedStandardBracket into stored QF matches.
+  const qfFromTiers = (tiers) => {
+    const pairing = seedStandardBracket(tiers);
+    if (!pairing) return null;
+    return pairing.map(p => ({
+      id: uid("qf"), slot: p.slot,
+      team1Id: p.a.id, team2Id: p.b.id,
+      s1: p.a.seed, s2: p.b.seed, winner: null,
+    }));
   };
 
   const seedQF = (silent = false) => {
@@ -4228,31 +4260,19 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         const t3a = sortedThirds[0];
         const t3b = sortedThirds[1];
         const t3c = sortedThirds[2];
-        const seeded7 = [...t1sorted, ...t2sorted, t3a]; // 7 known + 1 TBD
-        const PLAYOFF_TBD = "PLAYOFF_TBD";
-        const seeded8ids = [...seeded7.map(t => t.id), PLAYOFF_TBD];
-        const seeded8seeds = [...seeded7.map(t => t.seed), "Q"];
-        const pairs = [[0,7],[3,4],[2,5],[1,6]];
-        const qf = pairs.map(([x, y], i) => ({
-          id: uid("qf"), slot: i + 1,
-          team1Id: seeded8ids[x], team2Id: seeded8ids[y],
-          s1: seeded8seeds[x], s2: seeded8seeds[y], winner: null
-        }));
+        // Tier 3 is [best third, playoff winner]: the known best third takes
+        // seed 7, the still-undecided qualifier seed 8.
+        const qf = qfFromTiers([t1sorted, t2sorted, [t3a, { id: "PLAYOFF_TBD", seed: "Q" }]]);
+        if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
         const thirdsPlayoff = { id: uid("tpo"), team1Id: t3b.id, team2Id: t3c.id, s1: t3b.seed, s2: t3c.seed, winner: null };
-        updateSession(s => ({ ...s, bracket: { qf: fixGroupRematches(qf), sf: [], final: null, thirdsPlayoff } }));
+        updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null, thirdsPlayoff } }));
         return;
       }
 
       // best2 mode: top 2 thirds directly into bracket
       const best2 = sortedThirds.slice(0, 2);
-      const qualified = [...t1sorted, ...t2sorted, ...best2].slice(0, 8);
-      if (qualified.length < 4) { if (!silent) alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
-      const pairs = [[0,7],[3,4],[2,5],[1,6]];
-      const qf = fixGroupRematches(pairs.map(([x, y], i) => qualified[x] && qualified[y] ? {
-        id: uid("qf"), slot: i + 1,
-        team1Id: qualified[x].id, team2Id: qualified[y].id,
-        s1: qualified[x].seed, s2: qualified[y].seed, winner: null
-      } : null).filter(Boolean));
+      const qf = qfFromTiers([t1sorted, t2sorted, best2]);
+      if (!qf) { if (!silent) alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
       updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
       return;
     }
@@ -4269,26 +4289,12 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         const sf = pairs.map((p, i) => ({ id: uid("sf"), slot: i + 1, team1Id: p.a.id, team2Id: p.b.id, s1: p.a.seed, s2: p.b.seed, winner: null }));
         updateSession(s => ({ ...s, bracket: { qf: [], sf, final: null } }));
       } else {
-        // N === 4: rank both tiers by actual group-stage strength and cross-seed —
-        // strongest winner faces the weakest runner-up, and the BEST runner-up gets
-        // the weakest winner (a reward for a strong 2nd, not a random group-letter pairing).
-        const W = [...winners].sort(compareThirds);   // strongest → weakest
-        const R = [...runners].sort(compareThirds);   // strongest → weakest
-        const assign = W.map((w, i) => ({ w, r: R[3 - i] }));
-        // A team can't face its own group's other qualifier — they already played.
-        // Swap with whichever pairing resolves the conflict on both sides.
-        for (let i = 0; i < assign.length; i++) {
-          if (assign[i].w.group === assign[i].r.group) {
-            for (let j = 0; j < assign.length; j++) {
-              if (j === i) continue;
-              if (assign[j].w.group !== assign[i].r.group && assign[i].w.group !== assign[j].r.group) {
-                const tmp = assign[i].r; assign[i].r = assign[j].r; assign[j].r = tmp;
-                break;
-              }
-            }
-          }
-        }
-        const qf = assign.map((p, i) => ({ id: uid("qf"), slot: i + 1, team1Id: p.w.id, team2Id: p.r.id, s1: p.w.seed, s2: p.r.seed, winner: null }));
+        // N === 4: all four winners take seeds 1-4, all four runners-up 5-8,
+        // each tier ranked by wins → GD → GF. 1v8 then means the strongest
+        // winner draws the weakest runner-up, and 4v5 gives the best
+        // runner-up the weakest winner.
+        const qf = qfFromTiers([[...winners].sort(compareThirds), [...runners].sort(compareThirds)]);
+        if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
         updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
       }
       return;
@@ -4297,18 +4303,13 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
     if (N === 2 && qCount === 4) {
       const a = standings[0], b = standings[1];
       if (!a[3]?.team?.id || !b[3]?.team?.id) { if (!silent) alert("Need top 4 in every group first"); return; }
-      const A = [0, 1, 2, 3].map(i => ({ id: a[i].team.id, seed: groups[0] + (i + 1) }));
-      const B = [0, 1, 2, 3].map(i => ({ id: b[i].team.id, seed: groups[1] + (i + 1) }));
-      // Cross the groups by rank (A1 vs B4, A2 vs B3, ...) so the same group never
-      // meets itself in the QF, and interleave A/B so the two group winners (A1/B1)
-      // land in opposite halves and can only meet in the final.
-      const seeded = [A[0], B[0], A[1], B[1], A[2], B[2], A[3], B[3]];
-      const pairs = [[0, 7], [3, 4], [1, 6], [2, 5]];
-      const qf = pairs.map(([x, y], i) => ({
-        id: uid("qf"), slot: i + 1,
-        team1Id: seeded[x].id, team2Id: seeded[y].id,
-        s1: seeded[x].seed, s2: seeded[y].seed, winner: null
-      }));
+      const at = (s, i, g) => ({ id: s[i].team.id, seed: g + (i + 1), group: g, wins: s[i].wins, gd: s[i].gd || 0, gf: s[i].gf || 0 });
+      // Four tiers of two: both group winners, then both 2nds, both 3rds, both
+      // 4ths — each pair ranked against each other by wins → GD → GF, so seed 1
+      // is the stronger of the two group winners rather than whichever is "A".
+      const tiers = [0, 1, 2, 3].map(i => [at(a, i, groups[0]), at(b, i, groups[1])].sort(compareThirds));
+      const qf = qfFromTiers(tiers);
+      if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
       updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
       return;
     }
