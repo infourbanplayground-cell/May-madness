@@ -4138,6 +4138,30 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
   const teams = session.teams || [];
   const thirdPlaceMode = session.thirdPlaceMode || "best2";
 
+  // Two teams from the same group already played each other in the round-robin —
+  // pairing them again in the QF is a wasted, uninformative rematch. Seed letters are
+  // always the first char of s1/s2 (e.g. "A1", "B2"; a TBD placeholder like "Q" has no
+  // real group letter, so it's naturally left alone). Swaps team2 across matches until
+  // no match pits two teams from the same group against each other.
+  const fixGroupRematches = (qf) => {
+    for (let i = 0; i < qf.length; i++) {
+      const g1 = qf[i].s1?.[0], g2 = qf[i].s2?.[0];
+      if (g1 && g2 && g1 === g2) {
+        for (let j = 0; j < qf.length; j++) {
+          if (j === i) continue;
+          const oj1 = qf[j].s1?.[0], oj2 = qf[j].s2?.[0];
+          if (oj2 && oj2 !== g1 && (!oj1 || oj1 !== g2)) {
+            const t2 = qf[i].team2Id, s2 = qf[i].s2;
+            qf[i].team2Id = qf[j].team2Id; qf[i].s2 = qf[j].s2;
+            qf[j].team2Id = t2; qf[j].s2 = s2;
+            break;
+          }
+        }
+      }
+    }
+    return qf;
+  };
+
   const seedQF = (silent = false) => {
     const groups = getSessionGroups(session);
     const qCount = getQualifyCount(session);
@@ -4214,7 +4238,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
           s1: seeded8seeds[x], s2: seeded8seeds[y], winner: null
         }));
         const thirdsPlayoff = { id: uid("tpo"), team1Id: t3b.id, team2Id: t3c.id, s1: t3b.seed, s2: t3c.seed, winner: null };
-        updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null, thirdsPlayoff } }));
+        updateSession(s => ({ ...s, bracket: { qf: fixGroupRematches(qf), sf: [], final: null, thirdsPlayoff } }));
         return;
       }
 
@@ -4223,11 +4247,11 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       const qualified = [...t1sorted, ...t2sorted, ...best2].slice(0, 8);
       if (qualified.length < 4) { if (!silent) alert("Not enough results — need at least 2 teams per group and some 3rd-place results"); return; }
       const pairs = [[0,7],[3,4],[2,5],[1,6]];
-      const qf = pairs.map(([x, y], i) => qualified[x] && qualified[y] ? {
+      const qf = fixGroupRematches(pairs.map(([x, y], i) => qualified[x] && qualified[y] ? {
         id: uid("qf"), slot: i + 1,
         team1Id: qualified[x].id, team2Id: qualified[y].id,
         s1: qualified[x].seed, s2: qualified[y].seed, winner: null
-      } : null).filter(Boolean);
+      } : null).filter(Boolean));
       updateSession(s => ({ ...s, bracket: { qf, sf: [], final: null } }));
       return;
     }
