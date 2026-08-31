@@ -170,6 +170,256 @@ POST_SWEEP = [
 SKIN = os.path.join(HERE, "ops", "surge-skin.css")
 
 
+RANK_ANCHOR = "  // Rank 4+, collapsed to one line:"
+RANK_END = "\n}\n\nfunction PlayerDetail("
+
+# Section 06 of the design language is the RANK screen, and the handoff is
+# explicit that it "is the screen that tests the skin". Vol.6 renders the top
+# three as a three-up podium of rotated cards with a crown, which no amount of
+# CSS re-pointing turns into Surge's language — the spec replaces it with three
+# full-width rows carrying the rising bar, and moves the pinned YOU row above
+# them, directly under the search.
+#
+# So this is the one place the build rewrites markup rather than re-skinning it.
+# It swaps the render half of LeaderboardView only; every value it draws
+# (`ptsOf`, `enrich`, `moveOf`, `climber`, `restMain`, `restTail`, `found`,
+# `ThinRow`) is computed by the half above, which is untouched, so no scoring
+# or ranking behaviour changes with it.
+RANK_JSX = r'''  // ── RANKS 4+ (design language, section 06) ──
+  // A plain table: rank, name, movement, win %, points. No photo, no bar,
+  // no pill strip — those are spent on the top three and the pinned YOU row
+  // and nowhere else, or the accent stops meaning anything. Rows run about
+  // 42pt against August's 88, so 48 ranks fit in roughly three screens.
+  const ThinRow = ({ e, i }) => {
+    const en = enrich(e);
+    const isMe = e.player.id === meId;
+    return (
+      <div onClick={() => setOpenPlayerId(e.player.id)}
+        style={{display:"flex",alignItems:"center",gap:10,padding:"10px 4px",
+                borderTop:"1px solid rgba(92,107,120,.18)",cursor:"pointer",
+                background:isMe ? "rgba(255,158,27,.07)" : "none"}}>
+        <div style={{width:20,flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:12,
+                     color:isMe ? "#FF9E1B" : "#5C6B78"}}>{i + 1}</div>
+        <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",gap:6}}>
+          <span style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:15,color:"#F4F9FA",
+                        overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name}</span>
+          {en.streak >= 3 && <span style={{display:"inline-flex",flex:"0 0 auto"}}><CIc.flame size={12} /></span>}
+        </div>
+        {mode === "season" && <MoveChip mv={moveOf(e, i)} />}
+        <div style={{width:32,flex:"0 0 auto",textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
+                     fontSize:10,color:"#5C6B78"}}>{hasPlayed(e) ? en.winRate + "%" : "–"}</div>
+        <div style={{width:30,flex:"0 0 auto",textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
+                     fontSize:15,fontWeight:700,color:"#F4F9FA"}}>{ptsOf(e)}</div>
+      </div>
+    );
+  };
+
+  // ── TOP THREE (design language, section 06) ──
+  // One card signature, spent where it means something: only the top three
+  // carry a rising bar, and only first place carries the bloom. The bar is
+  // the same 3px gradient the panels use, so RANK reads as the same system.
+  const TopRow = ({ e, i }) => {
+    const en = enrich(e), lead = i === 0;
+    const bar = lead ? "#00E5FF" : "#5C6B78";
+    const isClimber = climber && climber.e.player.id === e.player.id;
+    return (
+      <div onClick={() => setOpenPlayerId(e.player.id)}
+        style={{display:"flex",alignItems:"center",gap:11,cursor:"pointer",
+                background:"#050709",padding:"12px 12px 12px 15px",
+                backgroundImage:`linear-gradient(180deg,${bar},${lead ? "rgba(0,229,255,.06)" : "rgba(92,107,120,.06)"})`,
+                backgroundSize:"3px 100%",backgroundPosition:"left top",backgroundRepeat:"no-repeat",
+                boxShadow:lead ? "0 0 30px rgba(0,229,255,.12)" : "none"}}>
+        <div style={{width:20,flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:15,
+                     fontWeight:700,color:bar}}>{i + 1}</div>
+        <Avatar player={e.player} size={38} />
+        <div style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",gap:3}}>
+          <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 800",
+                       fontSize:19,lineHeight:1,textTransform:"uppercase",color:"#F4F9FA",
+                       overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name}</div>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:9.5,color:"#5C6B78",
+                       display:"flex",alignItems:"center",gap:5,minWidth:0,overflow:"hidden",whiteSpace:"nowrap"}}>
+            {e.stats.sessionsPlayed > 0
+              ? <span>{e.stats.sessionsPlayed} SESS &middot; {en.winRate}% WIN</span>
+              : <span>CARRIED OVER</span>}
+            {/* Biggest climber is a fact inside the player's own row, not the
+                striped banner above the list it was in August. */}
+            {isClimber
+              ? <span>&middot; &#9650;{climber.n} BIGGEST CLIMBER</span>
+              /* The form run is set as mono letters, not August's green/red
+                 chips: on this screen colour is reserved for rank, and five
+                 traffic lights per row is exactly the noise section 06 is
+                 written to remove. */
+              : en.form.length > 0 && <span style={{letterSpacing:".08em"}}>&middot; {en.form.join("")}</span>}
+          </div>
+        </div>
+        <div style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:23,fontWeight:700,
+                     color:lead ? "#00E5FF" : "#F4F9FA"}}>{ptsOf(e)}</div>
+      </div>
+    );
+  };
+
+  // ── THE PINNED YOU ROW ──
+  // The one place Strike Amber appears on this screen: it is the only row
+  // about the person holding the phone. Sits under the search, above the
+  // top three, and steps aside when they are already in the top three.
+  const MeRow = () => {
+    const mi = meId ? list.findIndex(e => e.player.id === meId) : -1;
+    if (mi < 3) return null;
+    const e = list[mi], mv = moveOf(e, mi);
+    return (
+      <div onClick={() => setOpenPlayerId(e.player.id)}
+        style={{display:"flex",alignItems:"center",gap:11,cursor:"pointer",
+                background:"#050709",padding:"10px 12px 10px 15px",
+                backgroundImage:"linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.08))",
+                backgroundSize:"3px 100%",backgroundPosition:"left top",backgroundRepeat:"no-repeat"}}>
+        <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,letterSpacing:".34em",
+                     textTransform:"uppercase",fontSize:8.5,color:"#FF9E1B"}}>You</div>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,fontWeight:700,color:"#5C6B78"}}>{mi + 1}</div>
+        <div style={{flex:1,minWidth:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+                     fontVariationSettings:"'wdth' 118,'wght' 800",fontSize:17,textTransform:"uppercase",
+                     color:"#F4F9FA",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name}</div>
+        {mode === "season" && <MoveChip mv={mv} />}
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:"#F4F9FA"}}>{ptsOf(e)}</div>
+        <button onClick={(ev) => { ev.stopPropagation(); onOpenPicker(); }}
+          style={{background:"none",border:"none",cursor:"pointer",padding:"2px 0",
+                  fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:9,
+                  letterSpacing:".14em",color:"#5C6B78"}}>NOT YOU?</button>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-end justify-between" style={{paddingTop:8}}>
+        <div>
+          <div className="jh-sec-kicker">Series Standings</div>
+          <h2 className="jh-sec-title">RANKINGS</h2>
+        </div>
+        {active.length > 0 && (
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,letterSpacing:".12em",
+                        color:"#5C6B78",border:"1px solid rgba(92,107,120,.3)",padding:"5px 8px",
+                        whiteSpace:"nowrap"}}>{active.length} RANKED</span>
+        )}
+      </div>
+
+      {/* The active segment is a solid cyan fill, same as the primary button
+          on HOME, so "the filled cyan thing is the live one" holds app-wide. */}
+      {hasLifetime && (
+        <div style={{display:"flex",border:"1px solid rgba(92,107,120,.3)"}}>
+          {["season","lifetime"].map(m => (
+            <button key={m} onClick={() => setMode(m)}
+              style={{flex:1,textAlign:"center",padding:"10px 0",border:"none",cursor:"pointer",
+                      fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+                      fontVariationSettings:"'wdth' 118,'wght' 800",fontSize:14,textTransform:"uppercase",
+                      background:mode===m?"#00E5FF":"transparent",color:mode===m?"#050709":"#5C6B78",
+                      boxShadow:mode===m?"0 0 24px rgba(0,229,255,.3)":"none"}}>
+              {m === "season" ? "This series" : "All-time"}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Input value={q} onChange={setQ} placeholder="Find a player&hellip;" />
+
+      {q ? (
+        <div>
+          {found.length === 0
+            ? <div style={{padding:"18px 4px",fontFamily:"'JetBrains Mono',monospace",fontSize:11,
+                           letterSpacing:".1em",color:"#5C6B78",textTransform:"uppercase"}}>No ranked player by that name</div>
+            : found.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}
+        </div>
+      ) : list.length === 0 ? (
+        <>
+        <Card className="p-8 text-center border-dashed">
+          <I.trophy className="mx-auto mb-3 text-stone-600" size={32} />
+          <div className="text-stone-300 font-semibold">Ranking locked</div>
+          <div className="text-stone-500 text-sm mt-1">Standings appear after the first match is played</div>
+        </Card>
+        {hasLifetime && mode === "season" && (
+          <div style={{textAlign:"center",marginTop:14}}>
+            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 800",fontSize:14,letterSpacing:2,color:"#050709",background:"#00E5FF",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 30px rgba(0,229,255,.4)"}}>SEE ALL-TIME RANKINGS &#9654;</button>
+          </div>
+        )}
+        </>
+      ) : (
+        <>
+          <MeRow />
+          <div style={{display:"flex",flexDirection:"column",gap:7,marginTop:14}}>
+            {podium.map((e, i) => <TopRow key={e.player.id} e={e} i={i} />)}
+          </div>
+
+          {/* ── RANKS 4+ — a plain table, and a quiet tail ──
+              Thin rows run about 42pt against August's 88, so the ranked
+              field fits in roughly three screens instead of ten. restTail
+              (a single-match walk-on on TAIL_MAX pts or fewer) sits behind
+              one tap. */}
+          {restMain.length > 0 && (
+            <div style={{marginTop:8}}>
+              {restMain.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}
+            </div>
+          )}
+          {restTail.length > 0 && (showTail
+            ? <div>{restTail.map(({ e, i }) => <ThinRow key={e.player.id} e={e} i={i} />)}</div>
+            : <button onClick={() => setShowTail(true)}
+                style={{width:"100%",textAlign:"left",background:"none",border:"none",
+                        borderTop:"1px solid rgba(92,107,120,.18)",padding:"14px 4px",cursor:"pointer",
+                        fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,
+                        letterSpacing:".14em",color:"#00E5FF",textTransform:"uppercase"}}>
+                Show {restTail.length} more on {TAIL_MAX} pts or fewer &#9654;
+              </button>)}
+        </>
+      )}
+    </div>
+  );
+'''
+
+
+# HOME's top-three block still carried August's medal treatment: the panel
+# took `.jh-fill-blue`, and `--blue` is Vol.7's amber, so the one card on HOME
+# that is not urgent wore the urgency accent; and the first-place chip was that
+# same amber over silver and bronze. Both break rules the spec states outright
+# — amber is live-now and urgency only, and gold stays out of the palette in
+# favour of the cyan / #C3D0D8 / steel ladder.
+#
+# `.jh-fill-blue` carries `--blue`, and the skin maps that family to amber. It
+# is worn by the two largest panels in the app (HOME's top three, SESSIONS'
+# list), neither of which is urgent, so both move to the cyan family.
+HOME_MEDALS = [
+    ('<div className="jh-panel jh-fill-blue" style={{transform:"none"}}>',
+     '<div className="jh-panel jh-fill-red" style={{transform:"none"}}>', 2),
+    ('style={{background: i === 0 ? "var(--blue)" : i === 1 ? "#C9C9C9" : "#8A9BA8"}}',
+     'style={{background: i === 0 ? "#00E5FF" : i === 1 ? "#C3D0D8" : "#5C6B78",'
+     ' color: "#050709"}}', 1),
+    # The crown above first place is drawn as an inline SVG with a hardcoded
+    # fill, so neither the colour sweep nor the skin reaches it. Gold stays
+    # out of the palette and amber is urgency-only, so it takes the cyan.
+    ('<path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#FF9E1B"',
+     '<path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#00E5FF"', 1),
+]
+
+
+def rebuild_rank(s, report):
+    """Replace LeaderboardView's render with the design language's RANK screen."""
+    i = s.find(RANK_ANCHOR)
+    if i < 0 or s.count(RANK_ANCHOR) != 1:
+        sys.exit("BUILD FAILED: could not locate LeaderboardView's podium block "
+                 "(expected exactly one 'const PODIUM_CFG = {')")
+    j = s.find(RANK_END, i)
+    if j < 0:
+        sys.exit("BUILD FAILED: LeaderboardView no longer ends before PlayerDetail")
+    old = s[i:j]
+    # The three things Vol.6's podium does that the spec removes. If any has
+    # already gone, the block is not what this rewrite was written against.
+    for marker in ("PODIUM_CFG", "CIc.crown", "rotate(${rot})"):
+        if marker not in old:
+            sys.exit(f"BUILD FAILED: podium block is missing {marker!r} — "
+                     f"has the Vol.6 RANK screen been rewritten?")
+    s = s[:i] + RANK_JSX + s[j:]
+    report.append(f"  rank   podium -> section-06 top-three rows "
+                  f"({len(old)/1024:.0f}KB -> {len(RANK_JSX)/1024:.0f}KB)")
+    return s
+
+
 def apply_skin(s, report):
     """Append the handoff's surge-skin.css as the last <style> block.
 
@@ -214,7 +464,65 @@ def apply_skin(s, report):
   --tick:var(--surge-amber) !important;
   border-color:rgba(255,158,27,.55) !important;
 }
+
+
+/* ── 7 · UN-HIDE THE WAVEFORM ──────────────────────────────────────────
+   The skin paints the surge trace on body::before, but an earlier August
+   layer carries `html:not(.light) body::before{ display:none }` — written
+   when that pseudo-element held a halftone dot field nobody wanted in
+   dark mode. `html` never gets `.light` here, so that rule always matches
+   and it out-specifies the skin's bare `body::before`: the trace was being
+   painted and then hidden, which also took its animation with it.
+
+   Restated at matching specificity with the geometry the layer above had
+   set unimportantly, so the background-image and `surgeTrace` in section 1
+   are the ones that survive.
+   ────────────────────────────────────────────────────────────────────── */
+
+html body::before{
+  content:"" !important;
+  display:block !important;
+  position:fixed !important;
+  inset:0 !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+}
+html:not(.light) .court-motif{ display:none !important; }
+
+
+/* ── 8 · SECTION TITLES ARE TYPE, NOT PLATES ───────────────────────────
+   A July Heat layer still styles .jh-sec-title as a filled "burst badge",
+   which under the token swap turned RANKINGS into a solid cyan block —
+   the loudest object on the screen the skin is supposed to quieten. The
+   design language sets it as plain uppercase italic display type at 38px
+   with no plate, letting the rising bar be the only card signature.
+   ────────────────────────────────────────────────────────────────────── */
+
+.jh-sec-title{
+  display:block !important;
+  background:none !important;
+  border:none !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+  -webkit-text-stroke:0 !important;
+  padding:0 !important;
+  margin-bottom:0 !important;
+  color:var(--surge-white) !important;
+  font-size:38px !important;
+  line-height:.88 !important;
+  letter-spacing:-.01em !important;
+}
+.jh-sec-title em{ color:var(--surge-cyan) !important; text-shadow:none !important; }
+
+/* The nav's 5px rule was August's orange and still showed through at the
+   left edge. Amber is urgency-only in Vol.7, so the rule is cyan. */
+nav.fixed{ border-top-color:var(--surge-cyan) !important; }
+
+/* The nav also carried an amber radial bloom at 10% 8%, which read as an
+   orange sliver in its top-left corner. Same rule: amber is urgency-only. */
+nav.fixed.bottom-0{ background-image:none !important; }
 """
+
     marker = "</style>"
     i = s.rindex(marker)
     block = ("\n<style>\n/* ══ SEPTEMBER SURGE · VOL.7 SKIN — appended last, per the handoff ══ */\n"
@@ -326,6 +634,14 @@ def main():
     # Appended after the guard: the handoff's CSS carries its own commentary
     # ("Anton can then be dropped", "Serve first. Strike hard." as the line
     # being replaced), which is documentation of the change, not a leftover.
+    for old, new, want in HOME_MEDALS:
+        if s.count(old) != want:
+            sys.exit(f"BUILD FAILED: expected exactly {want} match(es) for the medal/panel "
+                     f"fix, found {s.count(old)}: {old[:60]!r}")
+        s = s.replace(old, new)
+    report.append("  fix    panel bars amber -> cyan, medal chips -> cyan/steel ladder")
+
+    s = rebuild_rank(s, report)
     s = apply_skin(s, report)
 
     open(DST, "w").write(s)
