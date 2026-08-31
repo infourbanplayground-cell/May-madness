@@ -54,6 +54,46 @@ MOTION = [
      "0 0 40px rgba(0,229,255,.24), 0 0 90px rgba(0,229,255,.12)"),
 ]
 
+# ── Display face. Attack stands tall (Anton); Surge leans forward — Archivo
+# pushed wide, heavy and italic, the same treatment surge-index.html uses. This
+# is the biggest single "is it Surge or is it Attack in cyan paint" lever, so it
+# is done properly rather than left as a colour swap. Both the CSS and the JSX
+# inline-style forms are declaration lists, so siblings can be added safely.
+# Matched by regex, not exact strings: the Vol.6 app writes this declaration in
+# at least five shapes (CSS and JSX, with and without spaces, with 'cursive' or
+# 'Impact,sans-serif' fallbacks), and an exact-match table silently missed 35 of
+# them on the first attempt — leaving most of the app still standing tall.
+DISPLAY_RE = [
+    # CSS:  font-family:'Anton',cursive   /   font-family: 'Anton', Impact, sans-serif
+    (re.compile(r"font-family:\s*'Anton'[^;}\"']*"),
+     "font-family:'Archivo',sans-serif;font-style:italic;"
+     "font-variation-settings:'wdth' 118,'wght' 900"),
+    # JSX:  fontFamily: "'Anton',cursive"
+    (re.compile(r'fontFamily:\s*"\'Anton\'[^"]*"'),
+     'fontFamily:"\'Archivo\',sans-serif",fontStyle:"italic",'
+     'fontVariationSettings:"\'wdth\' 118,\'wght\' 900"'),
+    # The splash preloads the display face by name before first paint.
+    (re.compile(r'document\.fonts\.load\("(\d+)px \'Anton\'"\)'),
+     r'document.fonts.load("italic \1px Archivo")'),
+    # The shareable player card is drawn on a canvas, where the display face is
+    # a font shorthand string rather than a CSS declaration. Missing this would
+    # leave every card players post to WhatsApp still set in Attack's face.
+    (re.compile(r"px \'Anton\', Impact, sans-serif`"),
+     "px 'Archivo', sans-serif`"),
+    (re.compile(r"ctx\.font = `\$\{([^}]+)\}px 'Archivo', sans-serif`"),
+     r"ctx.font = `italic 900 ${\1}px 'Archivo', sans-serif`"),
+    (re.compile(r"/\* ── Fonts: Anton for all display text ── \*/"),
+     "/* ── Fonts: Archivo, leaned forward, for all display text ── */"),
+]
+DISPLAY = [
+    # Load the variable axes Surge needs instead of Anton. The static Archivo
+    # request that Vol.6 also made is dropped in the same step — the variable
+    # axes cover every weight it asked for, and requesting the family twice in
+    # one URL just fetches a second overlapping face.
+    ("family=Anton&", "family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&"),
+    ("family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&", ""),
+]
+
 # ── Assets. The Surge lockup replaces the Attack wordmark; the cyan Urban
 # Playground emblem (already on this subdomain) replaces the Attack emblem. ──
 ASSETS = [
@@ -116,6 +156,17 @@ def main():
             if n:
                 report.append(f"  colour {old:<12} -> {new:<12} {n:>5}")
 
+    for rx, new in DISPLAY_RE:
+        s, n = rx.subn(new, s)
+        if n:
+            report.append(f"  display {rx.pattern[:44]:<44} {n:>4}")
+
+    for old, new in DISPLAY:
+        n = s.count(old)
+        if n:
+            s = s.replace(old, new)
+            report.append(f"  display {old[:44]:<44} {n:>4}")
+
     for old, new in MOTION:
         n = s.count(old)
         if n:
@@ -162,7 +213,7 @@ def main():
     # counts rather than waved through, so an accidental leftover still fails.
     EXPECTED = {"August Attack": 3, "attack.urbanpadel.om": 1}
     FORBIDDEN = ["AUGUST ATTACK", "aa-wordmark", "aa-emblem", "jh-watermark",
-                 "#FF2E43", "#3DE1FF", "Serve first", "Serve First",
+                 "#FF2E43", "#3DE1FF", "Serve first", "Serve First", "Anton",
                  "VOL. 6", "Vol.6", "all August", "heat.urbanpadel.om"]
 
     bad = {p: s.count(p) for p in FORBIDDEN if s.count(p)}

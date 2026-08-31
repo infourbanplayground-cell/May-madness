@@ -64,7 +64,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
@@ -132,7 +132,7 @@
 
   /* Bottom safe-area / nav border */
   #root { position: relative; z-index: 1; }
-  .font-display { font-family: 'Anton', cursive; letter-spacing: 0.05em; }
+  .font-display { font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900; letter-spacing: 0.05em; }
   .font-mono { font-family: 'JetBrains Mono', monospace; }
   /* padel court motif watermark */
   * { -webkit-touch-callout: none; }
@@ -174,8 +174,8 @@
   body::after { mix-blend-mode: overlay; opacity: .3; }
   #root { position: relative; z-index: 1; }
 
-  /* ── Fonts: Anton for all display text ── */
-  .font-display { font-family: 'Anton', cursive !important; letter-spacing: .08em; }
+  /* ── Fonts: Archivo, leaned forward, for all display text ── */
+  .font-display { font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900; letter-spacing: .08em; }
 
   /* ── Neon glow on kicker lines ── */
   .kicker { color: var(--orange); }
@@ -262,7 +262,7 @@ body::before{
 }
 
 /* ── FONTS ── */
-.font-display,h1,h2,h3,.font-display *{font-family:'Anton',cursive !important;letter-spacing:.06em;}
+.font-display,h1,h2,h3,.font-display *{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:.06em;}
 
 /* ── BOTTOM NAV ── */
 nav.fixed{
@@ -271,7 +271,7 @@ nav.fixed{
   box-shadow:0 -3px 0 var(--ink) !important;
 }
 nav.fixed button,nav.fixed a{
-  font-family:'Anton',cursive !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   letter-spacing:2px !important;
   font-size:13px !important;
   color:rgba(255,247,232,.55) !important;
@@ -352,7 +352,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
   border:1px solid rgba(244,249,250,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
-  font-family:'Anton',cursive !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   letter-spacing:2px !important;
   font-size:20px !important;
   padding-top:10px !important;
@@ -414,7 +414,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
   background:var(--red) !important;
   border:1px solid rgba(244,249,250,.14) !important;
   border-radius:0 !important;
-  font-family:'Anton',cursive !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   letter-spacing:2px !important;
 }
 
@@ -468,7 +468,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 
 /* ── STAT GRID NUMBERS ── */
 .text-3xl.font-mono.font-bold[style*="color: #00E5FF"]{
-  font-family:'Anton',cursive !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   font-size:3rem !important;
   -webkit-text-stroke: 0;
 }
@@ -563,13 +563,13 @@ body::before{
 .jh-lockup{margin:0 0 16px;}
 .jh-logo-img{width:340px;max-width:96%;display:block;margin:0 auto 2px;
   animation:logo-glow 3s ease-in-out infinite;}
-.jh-vol{display:inline-block;margin-top:8px;font-family:'Anton',cursive;font-size:22px;
+.jh-vol{display:inline-block;margin-top:8px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;
   letter-spacing:1px;color:var(--cream);background:var(--orange);
   border:1px solid rgba(244,249,250,.10);box-shadow:none;
   padding:5px 16px 2px;transform: none;-webkit-text-stroke: 0;}
 
 /* tag flag */
-.jh-flag{display:inline-flex;align-items:center;gap:8px;font-family:'Anton',cursive;
+.jh-flag{display:inline-flex;align-items:center;gap:8px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   letter-spacing:2px;font-size:18px;padding:5px 16px 2px;
   border:1px solid rgba(244,249,250,.10);box-shadow:none;
   text-decoration:none;white-space:nowrap;}
@@ -594,7 +594,7 @@ body::before{
 .jh-chip .jc-ico{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;
   background:var(--blue);border:1px solid rgba(244,249,250,.14);}
 .jh-chip .jc-lab{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--red);}
-.jh-chip .jc-val{font-family:'Anton',cursive;font-size:24px;letter-spacing:1px;color:#F4F9FA;line-height:.9;margin-top:2px;}
+.jh-chip .jc-val{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:24px;letter-spacing:1px;color:#F4F9FA;line-height:.9;margin-top:2px;}
 
 /* prize burst */
 .jh-burst{display:grid;place-items:center;text-align:center;flex:0 0 auto;
@@ -602,19 +602,19 @@ body::before{
 
 /* pool row */
 .jh-pool{display:flex;align-items:center;gap:16px;margin:16px 0;}
-.jh-pool-note .big{font-family:'Anton',cursive;font-size:clamp(28px,8vw,42px);line-height:.9;color:var(--cream);}
+.jh-pool-note .big{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:clamp(28px,8vw,42px);line-height:.9;color:var(--cream);}
 .jh-pool-note .big em{font-style:normal;color:var(--red);}
 .jh-pool-note .teams{display:inline-block;margin-top:8px;background:var(--blue);
   border:1px solid rgba(244,249,250,.10);box-shadow:none;
-  font-family:'Anton',cursive;font-size:20px;letter-spacing:1px;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;letter-spacing:1px;
   padding:4px 14px 2px;transform: none;color:#F4F9FA;}
 
 /* section footer strip */
 .jh-strip{background:#111111;border:3px solid var(--blue);
   box-shadow:0 0 18px rgba(255,158,27,.4);color:var(--cream);
   padding:12px 20px;display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
-.jh-strip .b{font-family:'Anton',cursive;letter-spacing:2px;font-size:22px;color:var(--blue);}
-.jh-strip .c{font-family:'Anton',cursive;letter-spacing:1px;font-size:20px;color:var(--cream);}
+.jh-strip .b{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:2px;font-size:22px;color:var(--blue);}
+.jh-strip .c{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:1px;font-size:20px;color:var(--cream);}
 .jh-strip .c b{color:var(--orange);}
 
 /* session row (srow style) */
@@ -622,7 +622,7 @@ body::before{
   border:1px solid rgba(244,249,250,.10);box-shadow:none;padding:14px 18px;
   cursor:pointer;transition:transform .1s;}
 .jh-srow:hover{transform:translate(-2px,-2px);}
-.jh-srow .sx{font-family:'Anton',cursive;font-size:36px;line-height:.8;color:var(--cream);
+.jh-srow .sx{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:36px;line-height:.8;color:var(--cream);
   background:var(--blue);border:1px solid rgba(244,249,250,.14);
   width:56px;height:56px;flex:0 0 auto;display:grid;place-items:center;padding-top:5px;}
 .jh-srow.done .sx{background:var(--blue);}
@@ -630,10 +630,10 @@ body::before{
 .jh-srow.upcoming .sx{background:rgba(11,8,20,.12);color:#8A9BA8;}
 .jh-srow .sd small{display:block;font-size:10px;font-weight:900;letter-spacing:.16em;
   text-transform:uppercase;color:var(--red);}
-.jh-srow .sd b{font-family:'Anton',cursive;font-size:26px;letter-spacing:1px;
+.jh-srow .sd b{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:26px;letter-spacing:1px;
   color:#F4F9FA;line-height:.86;display:block;margin-top:2px;}
 .jh-srow .tags{display:flex;flex-direction:column;align-items:flex-end;gap:5px;margin-left:auto;}
-.jh-pill{font-family:'Anton',cursive;font-size:14px;color:var(--cream);background:var(--orange);
+.jh-pill{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:14px;color:var(--cream);background:var(--orange);
   border:1px solid rgba(244,249,250,.14);box-shadow:none;
   padding:3px 10px 1px;letter-spacing:1px;white-space:nowrap;}
 .jh-pill.done{background:var(--blue);color:#F4F9FA;}
@@ -650,14 +650,14 @@ body::before{
 .jh-lbrow.r1{border-color:var(--orange);box-shadow:none;}
 .jh-lbrow.r2{box-shadow:none;}
 .jh-lbrow.r3{box-shadow:none;}
-.jh-rank{font-family:'Anton',cursive;font-size:22px;width:40px;height:40px;
+.jh-rank{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;width:40px;height:40px;
   display:grid;place-items:center;border:1px solid rgba(244,249,250,.14);flex:0 0 auto;}
 .jh-lbrow.r1 .jh-rank{background:var(--blue);color:#F4F9FA;}
 .jh-lbrow.r2 .jh-rank{background:#a0a0a0;color:#F4F9FA;}
 .jh-lbrow.r3 .jh-rank{background:#cd7f32;color:var(--cream);}
-.jh-lbname{font-family:'Anton',cursive;font-size:20px;letter-spacing:.5px;color:#F4F9FA;}
+.jh-lbname{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;letter-spacing:.5px;color:#F4F9FA;}
 .jh-lbsub{font-size:11px;font-weight:700;color:#8A9BA8;margin-top:1px;}
-.jh-pts{font-family:'Anton',cursive;font-size:32px;-webkit-text-stroke: 0;}
+.jh-pts{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:32px;-webkit-text-stroke: 0;}
 .jh-lbrow.r1 .jh-pts{color:var(--orange);font-size:38px;}
 .jh-lbrow.r2 .jh-pts{color:#6e6e6e;}
 .jh-lbrow.r3 .jh-pts{color:#5B6472;}
@@ -666,7 +666,7 @@ body::before{
 .jh-sec-kicker{display:inline-block;background:var(--blue);color:var(--cream);
   font-weight:900;font-size:12px;letter-spacing:.22em;text-transform:uppercase;
   padding:5px 12px;transform: none;margin-bottom:6px;}
-.jh-sec-title{font-family:'Anton',cursive;font-size:clamp(52px,14vw,80px);
+.jh-sec-title{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:clamp(52px,14vw,80px);
   line-height:.82;letter-spacing:2px;text-transform:uppercase;color:var(--cream);
   text-shadow:none;margin-bottom:16px;}
 .jh-sec-title em{font-style:normal;color:var(--red);
@@ -768,7 +768,7 @@ body::after{opacity:.28 !important;}
 .jh-sec-title em{color:var(--red) !important;}
 /* display type: tactical caps, never comic */
 .font-display,.jh-sec-title,.jh-round-title,.jh-lbname,.jh-pts,.jh-vol,.jh-flag,.jh-pill{
-  font-family:'Anton',Impact,sans-serif !important;letter-spacing:.02em !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:.02em !important;
 }
 /* buttons → neon */
 button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
@@ -1292,7 +1292,7 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
   }
   ctx.textAlign = "left"; ctx.textBaseline = "middle";
   ctx.fillStyle = chalk;
-  ctx.font = `${30 * s}px 'Anton', Impact, sans-serif`;
+  ctx.font = `italic 900 ${30 * s}px 'Archivo', sans-serif`;
   ctx.fillText("SEPTEMBER SURGE", tx, by + barH / 2 - 12 * s);
   ctx.fillStyle = "#8A9BA8";
   ctx.font = `700 ${17 * s}px 'JetBrains Mono', monospace`;
@@ -1367,7 +1367,7 @@ function loadImageEl(src, useCors = false) {
 
 async function watermarkPhotoToBase64(file, maxW = 1080) {
   const wm = await loadJHWatermark();
-  try { await document.fonts.load("27px 'Anton'"); } catch (e) {}
+  try { await document.fonts.load("italic 27px Archivo"); } catch (e) {}
 
   const enhancedUrl = await enhancePhotoOnServer(file);
   let srcImg = enhancedUrl ? await loadImageEl(enhancedUrl, true).catch(() => null) : null;
@@ -1786,16 +1786,16 @@ function UPLogo({ size = 40, variant = "auto" }) {
 function Pill({ children, color = "orange" }) {
   const bg = { orange:"var(--orange)", red:"var(--red)", amber:"var(--blue)", blue:"var(--blue)", stone:"rgba(255,247,232,.2)", green:"#1FD9C4" };
   const tc = { orange:"var(--cream)", red:"var(--cream)", amber:"var(--ink)", blue:"var(--ink)", stone:"var(--cream)", green:"var(--ink)" };
-  return <span style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 10px 1px",background:bg[color]||bg.orange,color:tc[color]||"var(--cream)",border:"1px solid rgba(244,249,250,.14)",boxShadow:"none",borderRadius:0,fontFamily:"'Anton',cursive",fontSize:"14px",letterSpacing:"1px",whiteSpace:"nowrap"}}>{children}</span>;
+  return <span style={{display:"inline-flex",alignItems:"center",gap:4,padding:"3px 10px 1px",background:bg[color]||bg.orange,color:tc[color]||"var(--cream)",border:"1px solid rgba(244,249,250,.14)",boxShadow:"none",borderRadius:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:"14px",letterSpacing:"1px",whiteSpace:"nowrap"}}>{children}</span>;
 }
 
 function Btn({ children, onClick, variant = "primary", size = "md", className = "", disabled, type = "button" }) {
   const styles = {
-    primary: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
-    secondary: { background:"rgba(20,24,36,.85)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
-    ghost: { background:"transparent", color:"var(--blue)", border:"3px solid var(--blue)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
-    danger: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"14px", paddingRight:"14px" },
-    gold: { background:"rgba(255,158,27,.14)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
+    primary: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
+    secondary: { background:"rgba(20,24,36,.85)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
+    ghost: { background:"transparent", color:"var(--blue)", border:"3px solid var(--blue)", boxShadow:"none", borderRadius:0, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
+    danger: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"14px", paddingRight:"14px" },
+    gold: { background:"rgba(255,158,27,.14)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
   };
   return <button type={type} onClick={onClick} disabled={disabled} className={`inline-flex items-center justify-center gap-2 ${className}`} style={{...styles[variant]||styles.primary,opacity:disabled?.5:1,cursor:disabled?"not-allowed":"pointer",transition:"transform .1s, box-shadow .1s"}} onMouseEnter={e=>{if(!disabled){e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow="none";}}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=styles[variant]?.boxShadow||"none";}} onMouseDown={e=>{e.currentTarget.style.transform="translate(3px,3px)";e.currentTarget.style.boxShadow="none";}} onMouseUp={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=styles[variant]?.boxShadow||"none";}}>{children}</button>;
 }
@@ -1837,7 +1837,7 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
         <span>
           <span style={{display:"block",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
                         letterSpacing:".22em",color:"#00E5FF"}}>YOUR STANDING</span>
-          <span style={{display:"block",marginTop:6,fontFamily:"'Anton',cursive",fontSize:24,letterSpacing:1,
+          <span style={{display:"block",marginTop:6,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:24,letterSpacing:1,
                         color:"#F4F9FA",lineHeight:1}}>WHICH ONE ARE YOU?</span>
           <span style={{display:"block",marginTop:6,fontFamily:"'Archivo',sans-serif",fontSize:12,color:"#8A9BA8"}}>
             Tap once to follow your own rank</span>
@@ -1858,7 +1858,7 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
 
   const box = { flex:1, background:"rgba(10,15,20,.55)", border:"1px solid rgba(244,249,250,.08)",
                 padding:"10px 8px 9px", textAlign:"center" };
-  const num = { fontFamily:"'Anton',cursive", fontSize:26, lineHeight:1, color:"#F4F9FA" };
+  const num = { fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:26, lineHeight:1, color:"#F4F9FA" };
   const cap = { display:"block", marginTop:5, fontFamily:"'JetBrains Mono',monospace", fontWeight:700,
                 fontSize:9, letterSpacing:".14em", color:"#8A9BA8" };
 
@@ -1875,9 +1875,9 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
       </div>
 
       <div onClick={() => setTab("leaderboard")} style={{display:"flex",alignItems:"baseline",gap:10,cursor:"pointer"}}>
-        <span style={{fontFamily:"'Anton',cursive",fontSize:52,lineHeight:.85,color:"#00E5FF"}}>
+        <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:52,lineHeight:.85,color:"#00E5FF"}}>
           {rank}<span style={{fontSize:20,color:"#8A9BA8"}}>{rank===1?"st":rank===2?"nd":rank===3?"rd":"th"}</span></span>
-        <span style={{flex:1,minWidth:0,fontFamily:"'Anton',cursive",fontSize:23,letterSpacing:.5,color:"#F4F9FA",
+        <span style={{flex:1,minWidth:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:23,letterSpacing:.5,color:"#F4F9FA",
                       lineHeight:1.05,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
           {me.player.name.toUpperCase()}</span>
       </div>
@@ -1926,7 +1926,7 @@ function MePicker({ leaderboard, meId, onPick, onClear, onClose }) {
                       borderRadius:0,padding:"11px 12px",marginBottom:6,cursor:"pointer"}}>
               <span style={{flex:"0 0 auto",width:34,textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
                             fontWeight:700,fontSize:12,color:"#8A9BA8"}}>{played.indexOf(e) + 1}</span>
-              <span style={{flex:1,minWidth:0,fontFamily:"'Anton',cursive",fontSize:19,letterSpacing:.5,
+              <span style={{flex:1,minWidth:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:19,letterSpacing:.5,
                             color:"#F4F9FA",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                 {e.player.name.toUpperCase()}</span>
               <span style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,
@@ -1958,7 +1958,7 @@ function Modal({ open, onClose, title, children }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose} style={{background:"rgba(11,8,20,.85)"}}>
       <div onClick={e => e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:520,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,249,250,.10)",boxShadow:"none",borderRadius:0,maxHeight:"90vh",overflowY:"auto"}}>
         <div style={{position:"sticky",top:0,background:"rgba(20,24,36,.85)",borderBottom:"1px solid rgba(244,249,250,.10)",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10}}>
-          <h2 style={{fontFamily:"'Anton',cursive",fontSize:"28px",letterSpacing:"2px",color:"#F4F9FA"}}>{title}</h2>
+          <h2 style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:"28px",letterSpacing:"2px",color:"#F4F9FA"}}>{title}</h2>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",color:"#F4F9FA",padding:4}}><I.x size={22} /></button>
         </div>
         <div style={{padding:20}}>{children}</div>
@@ -2013,7 +2013,7 @@ function Avatar({ player, size = 40, className = "", ring = null }) {
   const tint = palette[Math.abs((player.id || player.name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   return (
     <div className={`flex items-center justify-center shrink-0 font-bold ${className}`}
-      style={{ ...commonStyle, background: tint, color: "var(--cream)", fontSize: size * 0.36, fontFamily: "'Anton',cursive", letterSpacing: "1px", textShadow: "none" }}>
+      style={{ ...commonStyle, background: tint, color: "var(--cream)", fontSize: size * 0.36, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", letterSpacing: "1px", textShadow: "none" }}>
       {initials}
     </div>
   );
@@ -2037,7 +2037,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/surge-lockup.png" alt="September Surge" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
-          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>VOL. 7 · SERIES STANDINGS</div>
+          <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>VOL. 7 · SERIES STANDINGS</div>
         </div>
         {top.length === 0
           ? <div className="text-center text-stone-500 py-12">No standings yet</div>
@@ -2046,19 +2046,19 @@ function PublicLeaderboardPage({ state, leaderboard }) {
                 const badges = getMilestones(e).slice(0, 3);
                 return (
                   <div key={e.player.id} style={{ background:"rgba(20,24,36,.85)", border: "1px solid rgba(244,249,250,.10)", boxShadow: `5px 5px 0 ${i < 3 ? rankColors[i] : "rgba(11,8,20,.35)"}`, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: i < 3 ? rankColors[i] : "#e5e0d8", border: "1px solid rgba(244,249,250,.14)", fontFamily: "'Anton',cursive", fontSize: 15, color:"#F4F9FA" }}>
+                    <div style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: i < 3 ? rankColors[i] : "#e5e0d8", border: "1px solid rgba(244,249,250,.14)", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 15, color:"#F4F9FA" }}>
                       {i + 1}
                     </div>
                     <Avatar player={e.player} size={36} />
                     <div className="flex-1 min-w-0">
-                      <div style={{ fontFamily: "'Anton',cursive", fontSize: 18, color:"#F4F9FA", letterSpacing: ".5px" }}>{e.player.name}</div>
+                      <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 18, color:"#F4F9FA", letterSpacing: ".5px" }}>{e.player.name}</div>
                       <div style={{ fontSize: 10, color:"#8A9BA8", marginTop: 2 }}>
                         {e.stats.sessionsPlayed}s · {e.stats.groupWins + e.stats.qfWins + e.stats.sfWins + e.stats.finalsWon}W
                         {e.stats.finalsWon > 0 && ` · 🏆×${e.stats.finalsWon}`}
                         {badges.length > 0 && <span className="ml-1">{badges.map(b => b.icon).join("")}</span>}
                       </div>
                     </div>
-                    <div style={{ fontFamily: "'Anton',cursive", fontSize: 28, color: i === 0 ? "#B58900" : i === 1 ? "#8a8a8a" : i === 2 ? "#a05e18" : "var(--ink)", WebkitTextStroke:"0" }}>{e.totalPts}</div>
+                    <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 28, color: i === 0 ? "#B58900" : i === 1 ? "#8a8a8a" : i === 2 ? "#a05e18" : "var(--ink)", WebkitTextStroke:"0" }}>{e.totalPts}</div>
                   </div>
                 );
               })}
@@ -2078,13 +2078,13 @@ function PublicPhotosPage({ state }) {
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/surge-lockup.png" alt="September Surge" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
-          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
+          <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
         </div>
         {sessions.length === 0
           ? <div className="text-center text-stone-500 py-12">No photos yet — check back after the next session</div>
           : sessions.map(s => (
             <div key={s.id} style={{ marginBottom: 22 }}>
-              <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
+              <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
                 {s.name.toUpperCase()}{s.date ? ` · ${new Date(s.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </div>
               <div className="grid grid-cols-2 gap-2 aa-wall">
@@ -2381,7 +2381,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
 
       {/* ── SEPTEMBER SURGE BRAND HERO ── */}
       <div className="jh-hero" style={{margin:"2px 0 8px",padding:0,background:"#0A0A0A",border:"1px solid rgba(244,249,250,.10)",boxShadow:"none",transform:"none",position:"relative"}}>
-        <div style={{position:"absolute",top:0,left:0,zIndex:5,background:"rgba(0,229,255,.14)",border:"1px solid rgba(244,249,250,.10)",borderTop:"none",borderLeft:"none",fontFamily:"'Anton',Impact,sans-serif",fontSize:12,letterSpacing:"2.5px",color:"#F4F9FA",padding:"6px 14px 4px"}}>URBAN PLAYGROUND · VOL.7</div>
+        <div style={{position:"absolute",top:0,left:0,zIndex:5,background:"rgba(0,229,255,.14)",border:"1px solid rgba(244,249,250,.10)",borderTop:"none",borderLeft:"none",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:12,letterSpacing:"2.5px",color:"#F4F9FA",padding:"6px 14px 4px"}}>URBAN PLAYGROUND · VOL.7</div>
         <div className="jh-hero-inner" style={{padding:"18px 16px 16px",textAlign:"center"}}>
           {/* The emblem and "URBAN PLAYGROUND PRESENTS" both sat here, within
               700pt of the identical mark in the header. The header keeps the
@@ -2411,7 +2411,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           return (
             <div style={{flex:1,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,249,250,.10)",padding:"12px 14px"}}>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".18em",color:"#8A9BA8",textTransform:"uppercase"}}>Series progress</div>
-              <div style={{fontFamily:"'Anton',cursive",fontSize:26,color:"#F4F9FA",lineHeight:1,margin:"6px 0 8px"}}>{done}<span style={{color:"#8A9BA8",fontSize:18}}> / {planned}</span></div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:26,color:"#F4F9FA",lineHeight:1,margin:"6px 0 8px"}}>{done}<span style={{color:"#8A9BA8",fontSize:18}}> / {planned}</span></div>
               <div style={{height:4,background:"rgba(138,155,168,.25)"}}><div style={{width:pct+"%",height:4,background:"#00E5FF"}} /></div>
             </div>
           );
@@ -2422,7 +2422,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           return (
             <div style={{width:150,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,249,250,.10)",padding:"12px 14px"}}>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".18em",color:"#8A9BA8",textTransform:"uppercase"}}>Prize pool</div>
-              <div style={{fontFamily:"'Anton',cursive",fontSize:26,color:"#F4F9FA",lineHeight:1,margin:"6px 0 8px"}}>{pool}<span style={{fontSize:13,color:"#8A9BA8"}}> OMR</span></div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:26,color:"#F4F9FA",lineHeight:1,margin:"6px 0 8px"}}>{pool}<span style={{fontSize:13,color:"#8A9BA8"}}> OMR</span></div>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".1em",color:"#FF9E1B"}}>2X ON THE LAST TWO</div>
             </div>
           );
@@ -2438,8 +2438,8 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
         ].map(({ value, label, fill, rot }) => (
           <div key={label} style={{ background:fill, border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, padding:"16px 6px 10px", textAlign:"center", transform:`rotate(${rot})`, position:"relative", overflow:"hidden" }}>
             
-            <div style={{ position:"relative", fontFamily:"'Anton',cursive", fontSize:"52px", lineHeight:.8, color:"#F4F9FA", WebkitTextStroke:"0", textShadow:"none" }}>{value}</div>
-            <div style={{ position:"relative", display:"inline-block", fontFamily:"'Anton',cursive", fontSize:"13px", letterSpacing:"2px", background:"#0A0F14", color:"#F4F9FA", padding:"3px 10px 1px", marginTop:8 }}>{label}</div>
+            <div style={{ position:"relative", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"52px", lineHeight:.8, color:"#F4F9FA", WebkitTextStroke:"0", textShadow:"none" }}>{value}</div>
+            <div style={{ position:"relative", display:"inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"13px", letterSpacing:"2px", background:"#0A0F14", color:"#F4F9FA", padding:"3px 10px 1px", marginTop:8 }}>{label}</div>
           </div>
         ))}
       </div>
@@ -2454,10 +2454,10 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                 {i === 0 && <span className="jh-crown"><CIc.crown size={26} /></span>}
                 <div className="jh-mock-rank" style={{background: i === 0 ? "var(--blue)" : i === 1 ? "#C9C9C9" : "#8A9BA8"}}>{i + 1}</div>
                 <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontFamily:"'Anton',cursive",fontSize:22,letterSpacing:1,color:"#F4F9FA",lineHeight:1}}>{e.player.name.toUpperCase()}</div>
+                  <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:22,letterSpacing:1,color:"#F4F9FA",lineHeight:1}}>{e.player.name.toUpperCase()}</div>
                   <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".12em",color:"#8A9BA8",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed} SESS · {e.stats.groupWins} WINS</div>
                 </div>
-                <div style={{fontFamily:"'Anton',cursive",fontSize:32,color:"#00E5FF",WebkitTextStroke:"0",textShadow:"none",whiteSpace:"nowrap"}}>{e.totalPts}<span style={{fontSize:12,color:"#F4F9FA",WebkitTextStroke:"0",letterSpacing:1}}> PTS</span></div>
+                <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:32,color:"#00E5FF",WebkitTextStroke:"0",textShadow:"none",whiteSpace:"nowrap"}}>{e.totalPts}<span style={{fontSize:12,color:"#F4F9FA",WebkitTextStroke:"0",letterSpacing:1}}> PTS</span></div>
               </div>
             ))}
             <div style={{textAlign:"center",marginTop:4}}>
@@ -2476,7 +2476,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             <div className="aa-kicker" style={{background:"var(--blue)"}}>{allDone ? "LATEST SESSION" : "NEXT UP"}</div>
             <div className="jh-mock-sess" onClick={() => setOpenSessionId(latest.id)}>
               <div className="jh-pow" style={{color: latest.completed ? "#3FA33C" : "#00E5FF"}}>{latest.completed ? "DONE" : "LIVE"}</div>
-              <div style={{fontFamily:"'Anton',cursive",fontSize:34,letterSpacing:1,color:"#F4F9FA",lineHeight:.9,paddingRight:70}}>{latest.name.toUpperCase()}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:34,letterSpacing:1,color:"#F4F9FA",lineHeight:.9,paddingRight:70}}>{latest.name.toUpperCase()}</div>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:9.5,fontWeight:"bold",letterSpacing:".1em",color:"#8A9BA8",textTransform:"uppercase",marginTop:6}}>{latest.date ? new Date(latest.date + "T12:00:00").toLocaleDateString("en-GB", {weekday:"short",day:"numeric",month:"short"}).toUpperCase() : "NO DATE"} · {latest.teams?.length || 0} TEAMS{latest.doublePoints ? " · ⚡ 2X POINTS" : ""}</div>
               <div className="jh-mock-btn">OPEN SESSION →</div>
             </div>
@@ -2498,10 +2498,10 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
       {/* ── Prize panel ──────────────────────────────── */}
       <div className="jh-panel jh-fill-green" style={{transform:"none"}}>
         <div style={{display:"flex",alignItems:"center",gap:14,padding:"14px 12px",position:"relative",zIndex:2}}>
-          <div className="jh-star"><div><div style={{fontFamily:"'Anton',cursive",fontSize:34,lineHeight:.8,color:"#00E5FF",WebkitTextStroke:"0"}}>402</div><div style={{fontFamily:"'Anton',cursive",fontSize:15,color:"#F4F9FA"}}>OMR</div></div></div>
+          <div className="jh-star"><div><div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:34,lineHeight:.8,color:"#00E5FF",WebkitTextStroke:"0"}}>402</div><div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:15,color:"#F4F9FA"}}>OMR</div></div></div>
           <div>
-            <div style={{fontFamily:"'Anton',cursive",fontSize:30,letterSpacing:1,color:"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",lineHeight:.95}}>PRIZE POOL<br/>UP FOR GRABS</div>
-            <div style={{display:"inline-flex",alignItems:"center",gap:6,marginTop:8,fontFamily:"'Anton',cursive",fontSize:14,letterSpacing:1.5,background:"#0A0F14",color:"var(--blue)",padding:"4px 10px 2px",transform:"none"}}>SESSIONS 8 &amp; 9 = 2X POINTS <CIc.flame size={11} /></div>
+            <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:30,letterSpacing:1,color:"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",lineHeight:.95}}>PRIZE POOL<br/>UP FOR GRABS</div>
+            <div style={{display:"inline-flex",alignItems:"center",gap:6,marginTop:8,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:14,letterSpacing:1.5,background:"#0A0F14",color:"var(--blue)",padding:"4px 10px 2px",transform:"none"}}>SESSIONS 8 &amp; 9 = 2X POINTS <CIc.flame size={11} /></div>
           </div>
         </div>
       </div>
@@ -2525,7 +2525,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:14 }}>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--blue)" }}>GROUP STAGE</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--blue)" }}>GROUP STAGE</span>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
             </div>
             <div className="space-y-1.5">
@@ -2537,14 +2537,14 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
               ].map(({ label, pts, color, bg, border, icon }) => (
                 <div key={label} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:bg, border:`4px solid ${border}`, boxShadow:`4px 4px 0 ${border}`, marginBottom:8 }}>
                   <span style={{ color, flexShrink:0 }}>{icon}</span>
-                  <span style={{ flex:1, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{label}</span>
-                  <span style={{ fontFamily:"'Anton',cursive", fontSize:"28px", color, WebkitTextStroke:"0", letterSpacing:"1px" }}>{pts}</span>
+                  <span style={{ flex:1, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{label}</span>
+                  <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"28px", color, WebkitTextStroke:"0", letterSpacing:"1px" }}>{pts}</span>
                 </div>
               ))}
               <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", marginBottom:8 }}>
                 <Icon d='<path d="M11.562 3.266a.5.5 0 01.876 0L15.39 8.87a1 1 0 001.516.294L21.183 5.5a.5.5 0 01.798.519l-2.834 10.246a1 1 0 01-.956.734H5.81a1 1 0 01-.957-.734L2.02 6.02a.5.5 0 01.798-.519l4.276 3.664a1 1 0 001.516-.294z"/><path d="M5 21h14"/>' size={13} style={{ color:"#F4F9FA" }} />
-                <span style={{ flex:1, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>TOP OF GROUP</span>
-                <span style={{ fontFamily:"'Anton',cursive", fontSize:"28px", color:"#F4F9FA", WebkitTextStroke:"0", letterSpacing:"1px" }}>+1</span>
+                <span style={{ flex:1, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>TOP OF GROUP</span>
+                <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"28px", color:"#F4F9FA", WebkitTextStroke:"0", letterSpacing:"1px" }}>+1</span>
               </div>
             </div>
           </div>
@@ -2553,7 +2553,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:10, margin:"16px 0 14px" }}>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--red)" }}>KNOCKOUT STAGE</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--red)" }}>KNOCKOUT STAGE</span>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
             </div>
             <div className="space-y-1.5">
@@ -2564,14 +2564,14 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
               ].map(({ label, pts, color }) => (
                 <div key={label} style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", marginBottom:8 }}>
                   <div style={{ width:12, height:12, background:color, border:"1px solid rgba(244,249,250,.14)", flexShrink:0 }} />
-                  <span style={{ flex:1, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{label}</span>
-                  <span style={{ fontFamily:"'Anton',cursive", fontSize:"28px", color, WebkitTextStroke:"0", letterSpacing:"1px" }}>{pts}</span>
+                  <span style={{ flex:1, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{label}</span>
+                  <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"28px", color, WebkitTextStroke:"0", letterSpacing:"1px" }}>{pts}</span>
                 </div>
               ))}
               <div style={{ display:"flex", alignItems:"center", gap:10, padding:"12px 14px", background:"var(--blue)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", marginBottom:8 }}>
                 <Icon d='<path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2z"/>' size={16} style={{ color:"#F4F9FA" }} />
-                <span style={{ flex:1, fontFamily:"'Anton',cursive", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>WIN FINAL 🏆</span>
-                <span style={{ fontFamily:"'Anton',cursive", fontSize:"36px", color:"var(--red)", WebkitTextStroke:"0", letterSpacing:"1px" }}>+5</span>
+                <span style={{ flex:1, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>WIN FINAL 🏆</span>
+                <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"36px", color:"var(--red)", WebkitTextStroke:"0", letterSpacing:"1px" }}>+5</span>
               </div>
             </div>
           </div>
@@ -2580,13 +2580,13 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div>
             <div style={{ display:"flex", alignItems:"center", gap:10, margin:"16px 0 14px" }}>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--orange)" }}>ATTENDANCE STREAK</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"16px", letterSpacing:"3px", color:"#F4F9FA", padding:"3px 12px", border:"1px solid rgba(244,249,250,.14)", background:"var(--orange)" }}>ATTENDANCE STREAK</span>
               <div style={{ height:3, flex:1, background:"var(--ink)" }}/>
             </div>
             <div className="flex gap-1.5 mb-2">
               {[{n:1,pts:"0",lbl:"1ST"},{n:2,pts:"+1",lbl:"2ND"},{n:3,pts:"+1",lbl:"3RD"},{n:4,pts:"+3",lbl:"4TH 🔥"}].map(({n,pts,lbl}) => (
                 <div key={n} style={{ flex:1, padding:"10px 6px", textAlign:"center", background: n===4?"var(--orange)":n===1?"rgba(240,233,216,.6)":"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow: n===4?"none":"none", marginRight: n<4?6:0 }}>
-                  <div style={{ fontFamily:"'Anton',cursive", fontSize:"26px", letterSpacing:"1px", color: n===4?"var(--cream)":n===1?"rgba(11,8,20,.3)":"var(--ink)", WebkitTextStroke: n===4?"1px var(--ink)":"none" }}>{pts}</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"26px", letterSpacing:"1px", color: n===4?"var(--cream)":n===1?"rgba(11,8,20,.3)":"var(--ink)", WebkitTextStroke: n===4?"1px var(--ink)":"none" }}>{pts}</div>
                   <div style={{ fontFamily:"'Archivo',sans-serif", fontWeight:900, fontSize:"9px", letterSpacing:".14em", textTransform:"uppercase", color: n===4?"rgba(255,247,232,.85)":"rgba(11,8,20,.65)", marginTop:3 }}>{lbl}</div>
                 </div>
               ))}
@@ -2597,9 +2597,9 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           {/* Comeback Bonus */}
           <div style={{ padding:"14px 16px", background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none" }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"20px", flexShrink:0 }}>↩️</span>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>COMEBACK BONUS</span>
-              <span style={{ marginLeft:"auto", fontFamily:"'Anton',cursive", fontSize:"28px", color:"var(--blue)", WebkitTextStroke:"0", letterSpacing:"1px" }}>+2</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", flexShrink:0 }}>↩️</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>COMEBACK BONUS</span>
+              <span style={{ marginLeft:"auto", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"28px", color:"var(--blue)", WebkitTextStroke:"0", letterSpacing:"1px" }}>+2</span>
             </div>
             <div style={{ fontSize:"14px", fontWeight:700, color:"#8A9BA8", lineHeight:1.4 }}>Missed <b style={{color:"#F4F9FA"}}>2+ sessions in a row</b>? Show up again and earn a one-time +2 for coming back.</div>
           </div>
@@ -2607,8 +2607,8 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           {/* Double Points */}
           <div style={{ padding:"14px 16px", background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none" }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-              <div style={{ padding:"4px 12px 2px", background:"var(--red)", border:"1px solid rgba(244,249,250,.14)", fontFamily:"'Anton',cursive", fontSize:"22px", letterSpacing:"1px", color:"var(--cream)", flexShrink:0 }}>2X</div>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>LAST TWO SESSIONS</span>
+              <div style={{ padding:"4px 12px 2px", background:"var(--red)", border:"1px solid rgba(244,249,250,.14)", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"22px", letterSpacing:"1px", color:"var(--cream)", flexShrink:0 }}>2X</div>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"22px", letterSpacing:"1px", color:"#F4F9FA" }}>LAST TWO SESSIONS</span>
             </div>
             <div style={{ fontSize:"14px", fontWeight:700, color:"#8A9BA8", lineHeight:1.4 }}>All points doubled — wins, knockouts, top of group. <b style={{color:"var(--red)"}}>Streak bonus NOT doubled</b> (stays max +5).</div>
           </div>
@@ -2617,7 +2617,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div style={{ padding:"14px 16px", background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none" }}>
             <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
               <I.lock size={16} style={{ color:"var(--red)", flexShrink:0 }} />
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:"22px", letterSpacing:"1px", color:"var(--red)" }}>LOYALTY LOCKOUT 🔒</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"22px", letterSpacing:"1px", color:"var(--red)" }}>LOYALTY LOCKOUT 🔒</span>
             </div>
             <div style={{ fontSize:"14px", fontWeight:700, color:"#8A9BA8", lineHeight:1.4 }}>Win the session final with a partner → you <b style={{color:"var(--red)"}}>cannot pair with them again</b> for the rest of the series.</div>
           </div>
@@ -3075,14 +3075,14 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
           const num = state.sessions.length - ridx;
           return (
           <div key={s.id} className="jh-mock-row" style={{transform:`rotate(${ridx % 2 ? ".4" : "-.4"}deg)`,padding:"12px 14px"}} onClick={() => setOpenSessionId(s.id)}>
-            <div style={{width:52,height:52,flex:"0 0 auto",display:"grid",placeItems:"center",fontFamily:"'Anton',cursive",fontSize:30,paddingTop:3,color:s.completed?"#8A9BA8":"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",background:s.completed?"rgba(20,24,36,.92)":"#00E5FF",border:s.completed?"1px solid rgba(244,249,250,.14)":"1px solid rgba(0,229,255,.5)"}}>{num}</div>
+            <div style={{width:52,height:52,flex:"0 0 auto",display:"grid",placeItems:"center",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:30,paddingTop:3,color:s.completed?"#8A9BA8":"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",background:s.completed?"rgba(20,24,36,.92)":"#00E5FF",border:s.completed?"1px solid rgba(244,249,250,.14)":"1px solid rgba(0,229,255,.5)"}}>{num}</div>
             <div style={{flex:1,minWidth:0}}>
-              <div style={{fontFamily:"'Anton',cursive",fontSize:24,letterSpacing:1,color:"#F4F9FA",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name.toUpperCase()}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:24,letterSpacing:1,color:"#F4F9FA",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{s.name.toUpperCase()}</div>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".08em",color:"#8A9BA8",marginTop:4,textTransform:"uppercase"}}>{s.date ? new Date(s.date).toLocaleDateString("en-GB", { weekday: "short", month: "short", day: "numeric" }).toUpperCase() : "NO DATE"} · {s.teams?.length || 0} TEAMS · {(s.groupMatches || []).filter(m => m.winner).length} MATCHES</div>
             </div>
             <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flex:"0 0 auto"}}>
-              <span style={{fontFamily:"'Anton',cursive",fontSize:13,letterSpacing:1,color:"#F4F9FA",background:s.completed?"#0A0F14":"#00E5FF",border:"1px solid rgba(244,249,250,.14)",boxShadow:"none",padding:"2px 8px 1px",transform:"none"}}>{s.completed ? "DONE" : "LIVE"}</span>
-              {s.doublePoints && <span style={{fontFamily:"'Anton',cursive",fontSize:12,letterSpacing:1,color:"#F4F9FA",background:"rgba(255,158,27,.14)",border:"1px solid rgba(244,249,250,.14)",padding:"2px 7px 1px",transform:"none"}}>2X PTS</span>}
+              <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:13,letterSpacing:1,color:"#F4F9FA",background:s.completed?"#0A0F14":"#00E5FF",border:"1px solid rgba(244,249,250,.14)",boxShadow:"none",padding:"2px 8px 1px",transform:"none"}}>{s.completed ? "DONE" : "LIVE"}</span>
+              {s.doublePoints && <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:12,letterSpacing:1,color:"#F4F9FA",background:"rgba(255,158,27,.14)",border:"1px solid rgba(244,249,250,.14)",padding:"2px 7px 1px",transform:"none"}}>2X PTS</span>}
             </div>
           </div>
         );})}
@@ -3465,7 +3465,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
       <div style={{ background:"rgba(20,24,36,.85)", border:"1px solid rgba(244,249,250,.10)", boxShadow: isFull ? "none" : "none", padding:"14px 18px" }}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <div style={{ fontFamily:"'Anton',cursive", fontSize:46, lineHeight:1, color: isFull ? "#ef4444" : "var(--ink)", WebkitTextStroke:"0" }}>
+            <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:46, lineHeight:1, color: isFull ? "#ef4444" : "var(--ink)", WebkitTextStroke:"0" }}>
               {filledSlots}<span style={{ fontSize:26, color:"#8A9BA8" }}>/{MAX_TEAMS}</span>
             </div>
             <div style={{ fontWeight:900, fontSize:10, letterSpacing:".18em", textTransform:"uppercase", color:"#8A9BA8", marginTop:2 }}>
@@ -3475,10 +3475,10 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
           </div>
           <div style={{ display:"flex", flexDirection:"column", gap:6, alignItems:"flex-end" }}>
             {isFull
-              ? <div style={{ fontFamily:"'Anton',cursive", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>🔒 FULL</div>
-              : <div style={{ fontFamily:"'Anton',cursive", fontSize:20, color:"var(--orange)", border:"1px solid rgba(244,249,250,.14)", padding:"3px 10px", boxShadow:"none" }}>{MAX_TEAMS - filledSlots} OPEN</div>
+              ? <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>🔒 FULL</div>
+              : <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:20, color:"var(--orange)", border:"1px solid rgba(244,249,250,.14)", padding:"3px 10px", boxShadow:"none" }}>{MAX_TEAMS - filledSlots} OPEN</div>
             }
-            <button onClick={onRemind} style={{ fontFamily:"'Anton',cursive", fontSize:15, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
+            <button onClick={onRemind} style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:15, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
           </div>
         </div>
         <div style={{ height:7, background:"rgba(11,8,20,.12)", border:"1px solid rgba(244,249,250,.14)" }}>
@@ -3492,7 +3492,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
         <div className="space-y-1.5">
           {slots.map((val, i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background: val.trim() ? "var(--cream)" : "rgba(255,247,232,.35)", border: val.trim() ? "3px solid var(--ink)" : "2px dashed rgba(11,8,20,.25)", boxShadow: val.trim() ? "none" : "none", padding:"6px 10px" }}>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:16, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.3)", width:22, flexShrink:0 }}>{i + 1}-</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:16, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.3)", width:22, flexShrink:0 }}>{i + 1}-</span>
               {isAdmin
                 ? <input value={val} onChange={e => setSlot(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:700, color:"#F4F9FA", minWidth:0 }} />
                 : <span style={{ flex:1, fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.25)" }}>{val.trim() || "—"}</span>
@@ -3509,7 +3509,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
         <div className="space-y-1.5">
           {waitlist.map((val, i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(255,247,232,.25)", border:"2px dashed rgba(11,8,20,.2)", padding:"6px 10px", opacity: val.trim() ? 1 : 0.6 }}>
-              <span style={{ fontFamily:"'Anton',cursive", fontSize:14, color:"#8A9BA8", width:22, flexShrink:0 }}>{i + 1}-</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:14, color:"#8A9BA8", width:22, flexShrink:0 }}>{i + 1}-</span>
               {isAdmin
                 ? <input value={val} onChange={e => setWl(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:13, fontWeight:700, color:"#F4F9FA", minWidth:0 }} />
                 : <span style={{ flex:1, fontSize:13, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(11,8,20,.25)" }}>{val.trim() || "—"}</span>
@@ -3762,7 +3762,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
 
           {!session.mvpVotingOpen && !session.mvpId && (
             <div style={{ background:"rgba(20,24,36,.85)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center" }}>
-              <div style={{ fontFamily: "'Anton',cursive", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>VOTING HASN'T STARTED</div>
+              <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>VOTING HASN'T STARTED</div>
               {canScore
                 ? <>
                     <div style={{ fontSize: 13, fontWeight: 700, color:"#8A9BA8", marginBottom: 14 }}>Hand the device around the courts once you open voting.</div>
@@ -3777,32 +3777,32 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
             <div style={{ background:"rgba(20,24,36,.85)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center", position: "relative" }}>
               {justVoted ? (
                 <div style={{ padding: "20px 0" }}>
-                  <div style={{ fontFamily: "'Anton',cursive", fontSize: 30, color: "#3FA33C" }}>🎉 VOTE LOCKED!</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 30, color: "#3FA33C" }}>🎉 VOTE LOCKED!</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color:"#F4F9FA", marginTop: 6 }}>Thanks for repping <b>{justVoted}</b></div>
                   <div style={{ fontSize: 11, fontWeight: 700, color:"#8A9BA8", marginTop: 10, textTransform: "uppercase", letterSpacing: 1 }}>Pass it to the next voter →</div>
                 </div>
               ) : (
                 <>
-                  <div style={{ fontFamily: "'Anton',cursive", fontSize: 13, letterSpacing: 1, color:"#8A9BA8", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 1</div>
-                  <div style={{ fontFamily: "'Anton',cursive", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>WHO ARE YOU?</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 13, letterSpacing: 1, color:"#8A9BA8", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 1</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>WHO ARE YOU?</div>
                   <select value={voterPick} onChange={e => chooseVoter(e.target.value)}
-                    style={{ width: "100%", background: "#fff", border: "1px solid rgba(244,249,250,.10)", padding: "14px 12px", fontFamily: "'Anton',cursive", fontSize: 20, color:"#F4F9FA", marginBottom: 14 }}>
+                    style={{ width: "100%", background: "#fff", border: "1px solid rgba(244,249,250,.10)", padding: "14px 12px", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 20, color:"#F4F9FA", marginBottom: 14 }}>
                     <option value="">— Select your name —</option>
                     {eligible.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
 
                   {voterPick && alreadyVoted && (
-                    <div style={{ background: "#FF9E1B", border: "1px solid rgba(244,249,250,.10)", padding: "14px", marginBottom: 14, fontFamily: "'Anton',cursive", fontSize: 17, color:"#F4F9FA" }}>
+                    <div style={{ background: "#FF9E1B", border: "1px solid rgba(244,249,250,.10)", padding: "14px", marginBottom: 14, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 17, color:"#F4F9FA" }}>
                       🚫 {state.players.find(p => p.id === voterPick)?.name} already voted tonight!
                     </div>
                   )}
 
                   {voterPick && !alreadyVoted && (
                     <>
-                      <div style={{ fontFamily: "'Anton',cursive", fontSize: 13, letterSpacing: 1, color:"#8A9BA8", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 2</div>
-                      <div style={{ fontFamily: "'Anton',cursive", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>WHO'S YOUR MVP?</div>
+                      <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 13, letterSpacing: 1, color:"#8A9BA8", marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>Step 2</div>
+                      <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 22, color:"#F4F9FA", marginBottom: 10 }}>WHO'S YOUR MVP?</div>
                       <select value={pick} onChange={e => setPick(e.target.value)}
-                        style={{ width: "100%", background: "#fff", border: "1px solid rgba(244,249,250,.10)", padding: "14px 12px", fontFamily: "'Anton',cursive", fontSize: 20, color:"#F4F9FA", marginBottom: 14 }}>
+                        style={{ width: "100%", background: "#fff", border: "1px solid rgba(244,249,250,.10)", padding: "14px 12px", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 20, color:"#F4F9FA", marginBottom: 14 }}>
                         <option value="">— Select a player —</option>
                         {votable.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
@@ -3819,7 +3819,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
             <div style={{ background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "24px 18px", textAlign: "center" }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><CIc.crown size={40} /></div>
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color:"#F4F9FA", textTransform: "uppercase" }}>MVP of the Night</div>
-              <div style={{ fontFamily: "'Anton',cursive", fontSize: 40, color:"#F4F9FA", marginTop: 4 }}>{mvpPlayer.name}</div>
+              <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 40, color:"#F4F9FA", marginTop: 4 }}>{mvpPlayer.name}</div>
               {canScore && <button className="jh-chipbtn" style={{ marginTop: 14 }} onClick={reopenVoting}>🔄 Reopen Voting</button>}
             </div>
           )}
@@ -3834,8 +3834,8 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
                     : tally.map((t, i) => (
                       <div key={t.id} className="jh-mock-row" style={{ transform: `rotate(${i % 2 ? ".4" : "-.4"}deg)` }}>
                         <div className="jh-mock-rank" style={{ background: i === 0 ? "var(--blue)" : "var(--cream)" }}>{i + 1}</div>
-                        <div style={{ flex: 1, fontFamily: "'Anton',cursive", fontSize: 20, color:"#F4F9FA" }}>{t.player.name}</div>
-                        <div style={{ fontFamily: "'Anton',cursive", fontSize: 28, color: "#00E5FF", WebkitTextStroke:"0" }}>{t.count}</div>
+                        <div style={{ flex: 1, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 20, color:"#F4F9FA" }}>{t.player.name}</div>
+                        <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 28, color: "#00E5FF", WebkitTextStroke:"0" }}>{t.count}</div>
                       </div>
                     ))
                   }
@@ -3924,8 +3924,8 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
         <Card key={g} className="p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
-              <span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span>
+              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
+              <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span>
             </div>
             <span className="text-xs text-stone-500 font-mono">{byGroup[g].length} / 4</span>
           </div>
@@ -4051,7 +4051,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
         return (
           <Card key={g} className="p-3">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2"><div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div><span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span></div>
+              <div className="flex items-center gap-2"><div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div><span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span></div>
               {isAdmin && teams.length >= 2 && <Btn size="sm" variant="secondary" onClick={() => setAdd(g)}><I.plus size={12} /> Match</Btn>}
             </div>
             {standings.length > 0 && <div className="mb-3">
@@ -4597,7 +4597,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
       {champId && <div style={{ background:"var(--blue)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", padding:"20px", textAlign:"center", marginBottom:16 }}>
         <I.crown size={32} style={{ color:"#F4F9FA", margin:"0 auto 8px" }} />
         <div style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"#F4F9FA", marginBottom:4 }}>Champion</div>
-        <div style={{ fontFamily:"'Anton',cursive", fontSize:"36px", letterSpacing:"1.5px", color:"#F4F9FA" }}>{lbl(champId)}</div>
+        <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize:"36px", letterSpacing:"1.5px", color:"#F4F9FA" }}>{lbl(champId)}</div>
       </div>}
 
       {/* R16 round (all4r16 mode) */}
@@ -5083,14 +5083,14 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
         <div style={{width:26,flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
                      fontWeight:700,color:isMe ? "#00E5FF" : "#8A9BA8"}}>{i + 1}</div>
         <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",gap:6}}>
-          <span style={{fontFamily:"'Anton',cursive",fontSize:17,letterSpacing:.5,color:"#F4F9FA",
+          <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:17,letterSpacing:.5,color:"#F4F9FA",
                         overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.player.name.toUpperCase()}</span>
           {en.streak >= 3 && <span style={{display:"inline-flex",flex:"0 0 auto"}}><CIc.flame size={12} /></span>}
         </div>
         {mode === "season" && <MoveChip mv={moveOf(e, i)} />}
         <div style={{width:38,flex:"0 0 auto",textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
                      fontSize:11,color:"#8A9BA8"}}>{hasPlayed(e) ? en.winRate + "%" : "–"}</div>
-        <div style={{width:38,flex:"0 0 auto",textAlign:"right",fontFamily:"'Anton',cursive",fontSize:18,
+        <div style={{width:38,flex:"0 0 auto",textAlign:"right",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:18,
                      color:"#F4F9FA"}}>{ptsOf(e)}</div>
       </div>
     );
@@ -5112,7 +5112,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
       {hasLifetime && (
         <div style={{display:"flex",border:"1px solid rgba(244,249,250,.10)",boxShadow:"none"}}>
           {["season","lifetime"].map(m => (
-            <button key={m} onClick={() => setMode(m)} style={{flex:1,padding:"9px 0 7px",fontFamily:"'Anton',cursive",fontSize:17,letterSpacing:2,border:"none",cursor:"pointer",background:mode===m?"#00E5FF":"rgba(16,20,32,.92)",color:mode===m?"#F4F9FA":"#8A9BA8",textShadow:mode===m?"none":"none",borderRight:m==="season"?"1px solid rgba(244,249,250,.10)":"none"}}>
+            <button key={m} onClick={() => setMode(m)} style={{flex:1,padding:"9px 0 7px",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:17,letterSpacing:2,border:"none",cursor:"pointer",background:mode===m?"#00E5FF":"rgba(16,20,32,.92)",color:mode===m?"#F4F9FA":"#8A9BA8",textShadow:mode===m?"none":"none",borderRight:m==="season"?"1px solid rgba(244,249,250,.10)":"none"}}>
               {m === "season" ? "THIS SERIES" : "ALL-TIME"}
             </button>
           ))}
@@ -5135,7 +5135,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
         </Card>
         {hasLifetime && mode === "season" && (
           <div style={{textAlign:"center",marginTop:14}}>
-            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Anton',cursive",fontSize:14,letterSpacing:2,color:"#0A0F14",background:"#FF9E1B",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 22px rgba(255,158,27,.35)"}}>SEE ALL-TIME RANKINGS →</button>
+            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:14,letterSpacing:2,color:"#0A0F14",background:"#FF9E1B",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 22px rgba(255,158,27,.35)"}}>SEE ALL-TIME RANKINGS →</button>
           </div>
         )}
         </>
@@ -5154,12 +5154,12 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                 {rank === 1 && <div style={{position:"absolute",top:-26,left:"50%",transform:"translateX(-50%)",filter:"drop-shadow(0 0 10px rgba(0,229,255,.5))",zIndex:5}}><CIc.crown size={36} /></div>}
                 <div style={{position:"absolute",inset:0,backgroundImage:"radial-gradient(rgba(0,0,0,.16) 22%,transparent 24%)",backgroundSize:"9px 9px",mixBlendMode:"multiply",pointerEvents:"none"}} />
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginBottom:8}}><Avatar player={e.player} size={rank===1?56:44} /></div>
-                <div style={{position:"relative",fontFamily:"'Anton',cursive",fontSize:rank===1?20:16,letterSpacing:.5,color:"#F4F9FA",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>{e.player.name.toUpperCase()}</div>
-                <div style={{position:"relative",fontFamily:"'Anton',cursive",fontSize:rank===1?42:32,lineHeight:.9,color:"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",marginTop:5}}>{ptsOf(e)}</div>
+                <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:rank===1?20:16,letterSpacing:.5,color:"#F4F9FA",lineHeight:.95,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",padding:"0 2px"}}>{e.player.name.toUpperCase()}</div>
+                <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:rank===1?42:32,lineHeight:.9,color:"#F4F9FA",WebkitTextStroke:"0",textShadow:"none",marginTop:5}}>{ptsOf(e)}</div>
                 <div style={{position:"relative",fontFamily:"Verdana,sans-serif",fontSize:8,fontWeight:"bold",letterSpacing:".1em",color:"#8A9BA8",marginTop:3,textTransform:"uppercase"}}>{e.stats.sessionsPlayed > 0 ? `${e.stats.sessionsPlayed} SESS · ${enrich(e).winRate}% WIN` : "CARRIED OVER"}</div>
                 <div style={{position:"relative",display:"flex",justifyContent:"center",marginTop:5}}><FormStrip form={enrich(e).form} /></div>
                 <div style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",gap:6,marginTop:7}}>
-                  <span style={{display:"inline-block",fontFamily:"'Anton',cursive",fontSize:13,letterSpacing:2,background:"#0A0F14",color:"#F4F9FA",padding:"3px 10px 1px"}}>{PODIUM_CFG[rank].label}</span>
+                  <span style={{display:"inline-block",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:13,letterSpacing:2,background:"#0A0F14",color:"#F4F9FA",padding:"3px 10px 1px"}}>{PODIUM_CFG[rank].label}</span>
                   {mode === "season" && <MoveChip mv={moveOf(e, rank - 1)} />}
                 </div>
               </div>
@@ -5192,7 +5192,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                   </div>
                   <Avatar player={e.player} size={38} />
                   <div style={{flex:1,minWidth:0}}>
-                    <div style={{fontFamily:"'Anton',cursive",fontSize:21,letterSpacing:.5,color:"#F4F9FA",
+                    <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:21,letterSpacing:.5,color:"#F4F9FA",
                                  lineHeight:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                       {e.player.name.toUpperCase()}</div>
                     <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",
@@ -5203,7 +5203,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                       {en.form.length > 0 && <FormStrip form={en.form} />}
                     </div>
                   </div>
-                  <div style={{fontFamily:"'Anton',cursive",fontSize:28,color:"#00E5FF",whiteSpace:"nowrap"}}>
+                  <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:28,color:"#00E5FF",whiteSpace:"nowrap"}}>
                     {ptsOf(e)}<span style={{fontSize:12,color:"#8A9BA8",marginLeft:3}}>PTS</span></div>
                 </div>
               </div>
@@ -5274,14 +5274,14 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
             <div style={{ position: "relative" }}>
               <Avatar player={player} size={104} ring={rankRing} />
               {rank === 1 && <div style={{ position: "absolute", top: -20, left: "50%", transform: "translateX(-50%)", filter: "drop-shadow(0 0 10px rgba(0,229,255,.5))" }}><CIc.crown size={34} /></div>}
-              {(rank === 2 || rank === 3) && <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontFamily: "'Anton',cursive", fontSize: 15, letterSpacing: 1, color:"#F4F9FA", background: rankRing, border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "1px 8px 0" }}>{rank === 2 ? "2ND" : "3RD"}</div>}
+              {(rank === 2 || rank === 3) && <div style={{ position: "absolute", top: -10, left: "50%", transform: "translateX(-50%)", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 15, letterSpacing: 1, color:"#F4F9FA", background: rankRing, border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "1px 8px 0" }}>{rank === 2 ? "2ND" : "3RD"}</div>}
               {canScore && <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center cursor-pointer hover:bg-orange-400 shadow-lg" style={{ border: "1px solid rgba(244,249,250,.14)" }}>
                 {uploading ? <span className="text-[9px] text-white">…</span> : <I.camera size={13} className="text-white" />}
                 <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
               </label>}
             </div>
           </div>
-          <div style={{ fontFamily: "'Anton',cursive", fontSize: 26, letterSpacing: 1, color:"#F4F9FA", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>{player.name.toUpperCase()} {streak >= 3 && <CIc.flame size={18} />}</div>
+          <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900", fontSize: 26, letterSpacing: 1, color:"#F4F9FA", lineHeight: 1, display: "inline-flex", alignItems: "center", gap: 6, justifyContent: "center" }}>{player.name.toUpperCase()} {streak >= 3 && <CIc.flame size={18} />}</div>
           <div className="text-xs text-stone-500 uppercase tracking-wider mt-1 mb-1">Rank #{rank} · {winRate}% win</div>
           {form.length > 0 && <div className="flex justify-center mb-2"><FormStrip form={form} /></div>}
           <div className="font-mono text-5xl font-bold" style={{ color: rank === 1 ? "#B58900" : rank <= 3 ? "#00E5FF" : "#0A0F14" }}>{entry.totalPts}</div>
@@ -5571,7 +5571,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 .rounded-lg[style*="rgba(249,115,22"]{background:rgba(0,229,255,.08) !important;border:1px solid rgba(244,249,250,.10) !important;box-shadow:none !important;}
 .rounded-lg[style*="transparent"]{background:rgba(255,255,255,.03) !important;border:1px solid rgba(244,249,250,.1) !important;}
 [style*="rgba(28,25,23"]{background:rgba(20,24,36,.85) !important;border:1px solid rgba(244,249,250,.12) !important;}
-.rounded-lg[style*="rgba"] .text-stone-300{color:#F4F9FA !important;font-family:'Anton',Impact,sans-serif !important;font-size:16px !important;letter-spacing:1px !important;}
+.rounded-lg[style*="rgba"] .text-stone-300{color:#F4F9FA !important;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:16px !important;letter-spacing:1px !important;}
 .rounded-lg[style*="rgba"] .font-mono{font-family:'JetBrains Mono',monospace !important;font-size:22px !important;font-weight:700 !important;}
 
 /* ── attendance streak cells ── */
@@ -5590,7 +5590,7 @@ select:focus,textarea:focus,input:focus{border-color:rgba(0,229,255,.7) !importa
 
 /* ── bottom nav ── */
 nav.fixed{background:rgba(5,7,9,.96) !important;border-top:1px solid rgba(244,249,250,.10) !important;box-shadow:0 -6px 20px -10px rgba(0,229,255,.6) !important;}
-nav.fixed *{font-family:'Anton',Impact,sans-serif !important;letter-spacing:2px !important;}
+nav.fixed *{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:2px !important;}
 nav.fixed button,nav.fixed a{color:rgba(244,249,250,.5) !important;background:transparent !important;}
 
 /* ── header / sticky sub-nav ── */
@@ -5598,7 +5598,7 @@ header.sticky{background:rgba(5,7,9,.96) !important;border-bottom:1px solid rgba
 .sticky.top-\[57px\]{background:rgba(5,7,9,.97) !important;border-bottom:1px solid rgba(0,229,255,.35) !important;}
 
 /* ── display type ── */
-h1,h2,h3,.font-display,[class*="font-display"]{font-family:'Anton',Impact,sans-serif !important;letter-spacing:.04em !important;}
+h1,h2,h3,.font-display,[class*="font-display"]{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:.04em !important;}
 
 /* ── dividers ── */
 [class*="bg-stone-9"] .border-b,[class*="bg-stone-9"] .border-t{border-color:rgba(244,249,250,.1) !important;}
@@ -5606,7 +5606,7 @@ h1,h2,h3,.font-display,[class*="font-display"]{font-family:'Anton',Impact,sans-s
 /* ── sub-tab buttons ── */
 button[style*="background: linear-gradient(135deg, var(--orange)"]{
   border:1px solid rgba(244,249,250,.10) !important;
-  font-family:'Anton',Impact,sans-serif !important;font-size:16px !important;letter-spacing:2px !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:16px !important;letter-spacing:2px !important;
   box-shadow:0 0 12px rgba(0,229,255,.3) !important;
 }
 
@@ -5818,10 +5818,10 @@ html:not(.light) .jh-pool-note .big{ color:#F4F9FA; }
 
 /* ── MOCKUP COMPONENTS ── */
 .jh-mast{display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(244,249,250,.14);background:var(--blue);background-image:radial-gradient(rgba(0,0,0,.06) 20%,transparent 22%);background-size:7px 7px;box-shadow:none;padding:8px 14px;transform: none;}
-.jh-mast-issue{font-family:'Anton',cursive;font-size:15px;letter-spacing:1px;background:var(--page-ink);color:var(--cream);padding:4px 10px 2px;transform: none;}
-.jh-mast-name{font-family:'Anton',cursive;font-size:24px;letter-spacing:2px;color:#F4F9FA;}
-.jh-mast-price{font-family:'Anton',cursive;font-size:13px;letter-spacing:1px;color:#F4F9FA;border:1px solid rgba(244,249,250,.14);border-radius:50%;width:46px;height:46px;display:grid;place-items:center;background:rgba(20,24,36,.85);transform: none;text-align:center;line-height:.9;}
-.jh-mock-caption{display:inline-block;background:var(--blue);border:1px solid rgba(244,249,250,.14);box-shadow:none;font-family:'Anton',cursive;font-size:17px;letter-spacing:1.5px;color:#F4F9FA;padding:6px 16px 4px;transform: none;}
+.jh-mast-issue{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:15px;letter-spacing:1px;background:var(--page-ink);color:var(--cream);padding:4px 10px 2px;transform: none;}
+.jh-mast-name{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:24px;letter-spacing:2px;color:#F4F9FA;}
+.jh-mast-price{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:13px;letter-spacing:1px;color:#F4F9FA;border:1px solid rgba(244,249,250,.14);border-radius:50%;width:46px;height:46px;display:grid;place-items:center;background:rgba(20,24,36,.85);transform: none;text-align:center;line-height:.9;}
+.jh-mock-caption{display:inline-block;background:var(--blue);border:1px solid rgba(244,249,250,.14);box-shadow:none;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:17px;letter-spacing:1.5px;color:#F4F9FA;padding:6px 16px 4px;transform: none;}
 .jh-mock-caption b{color:var(--comic-red);}
 .jh-panel{position:relative;overflow:hidden;border:1px solid rgba(244,249,250,.14);box-shadow:none;}
 .jh-fill-red{background:none;}
@@ -5829,20 +5829,20 @@ html:not(.light) .jh-pool-note .big{ color:#F4F9FA; }
 .jh-fill-green{background:none;}
 .jh-fill-yellow{background:none;}
 .jh-dots::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(0,0,0,.22) 22%,transparent 24%);background-size:9px 9px;mix-blend-mode:multiply;opacity:.5;}
-.jh-burst2{position:relative;z-index:3;display:inline-block;font-family:'Anton',cursive;font-size:30px;letter-spacing:2px;color:var(--blue);-webkit-text-stroke: 0;text-shadow:none;background:var(--comic-red);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:8px 18px 4px;transform: none;margin:0 0 12px;}
+.jh-burst2{position:relative;z-index:3;display:inline-block;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;letter-spacing:2px;color:var(--blue);-webkit-text-stroke: 0;text-shadow:none;background:var(--comic-red);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:8px 18px 4px;transform: none;margin:0 0 12px;}
 .jh-mock-row{display:flex;align-items:center;gap:10px;position:relative;z-index:2;background:rgba(20,24,36,.85);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:9px 12px;margin-bottom:10px;cursor:pointer;transition:transform .1s;}
 .jh-mock-row:hover{transform:translate(-2px,-2px) !important;}
-.jh-mock-rank{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;font-family:'Anton',cursive;font-size:19px;border:1px solid rgba(244,249,250,.14);color:#F4F9FA;}
+.jh-mock-rank{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:19px;border:1px solid rgba(244,249,250,.14);color:#F4F9FA;}
 .jh-crown{position:absolute;right:-6px;top:-12px;z-index:3;font-size:26px;transform: none;filter:drop-shadow(0 0 10px rgba(0,229,255,.5));}
-.jh-mock-chip{position:relative;z-index:2;font-family:'Anton',cursive;font-size:15px;letter-spacing:2px;background:var(--page-ink);color:var(--cream);border:none;padding:6px 14px 4px;cursor:pointer;}
+.jh-mock-chip{position:relative;z-index:2;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:15px;letter-spacing:2px;background:var(--page-ink);color:var(--cream);border:none;padding:6px 14px 4px;cursor:pointer;}
 .jh-bubble-wrap{position:relative;margin:2px 4px 8px;transform: none;}
-.jh-bubble{position:relative;background:rgba(20,24,36,.85);border:1px solid rgba(244,249,250,.14);border-radius:26px;padding:14px 18px 12px;box-shadow:none;font-family:'Anton',cursive;font-size:21px;letter-spacing:1.5px;color:#F4F9FA;text-align:center;line-height:1.1;}
+.jh-bubble{position:relative;background:rgba(20,24,36,.85);border:1px solid rgba(244,249,250,.14);border-radius:26px;padding:14px 18px 12px;box-shadow:none;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:21px;letter-spacing:1.5px;color:#F4F9FA;text-align:center;line-height:1.1;}
 .jh-bubble b{color:#EC1E8C;}
 .jh-bubble::after{content:'';position:absolute;bottom:-20px;left:54px;border:14px solid transparent;border-top:1px solid rgba(244,249,250,.10);transform: none;}
 .jh-bubble::before{content:'';position:absolute;bottom:-11px;left:60px;z-index:1;border:10px solid transparent;border-top:16px solid #fff;transform: none;}
 .jh-mock-sess{position:relative;z-index:2;background:rgba(20,24,36,.85);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:14px;transform: none;cursor:pointer;}
 .jh-pow{position:absolute;top:8px;right:8px;z-index:4;display:inline-flex;align-items:center;justify-content:center;padding:5px 12px;background:rgba(0,229,255,.15);border:1px solid rgba(0,229,255,.7);border-radius:2px;clip-path:none;box-shadow:0 0 12px rgba(0,229,255,.4);}
-.jh-mock-btn{display:inline-block;margin-top:12px;font-family:'Anton',cursive;font-size:20px;letter-spacing:2px;color:var(--cream);background:var(--comic-red);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:6px 18px 3px;transform: none;}
+.jh-mock-btn{display:inline-block;margin-top:12px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;letter-spacing:2px;color:var(--cream);background:var(--comic-red);border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:6px 18px 3px;transform: none;}
 .jh-star{flex:0 0 auto;width:104px;height:104px;display:grid;place-items:center;text-align:center;background:var(--blue);border:1px solid rgba(244,249,250,.14);clip-path:polygon(50% 0,61% 18%,82% 9%,79% 32%,100% 38%,84% 53%,98% 72%,73% 70%,72% 95%,53% 79%,33% 96%,32% 70%,7% 71%,22% 53%,4% 39%,25% 33%,21% 9%,42% 18%);transform: none;filter:drop-shadow(0 0 10px rgba(0,229,255,.5));}
 
 /* ── COMIC STRIP BOTTOM NAV (mockup style) ── */
@@ -5859,7 +5859,7 @@ html:not(.light) nav.fixed .grid > a{
   border-radius:0 !important;
   color:#8A9BA8 !important;
   padding-top:11px !important; padding-bottom:9px !important;
-  font-family:'Anton',cursive !important;
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
 }
 html:not(.light) nav.fixed .grid > button:last-child,
 html:not(.light) nav.fixed .grid > a:last-child{ border-right:none !important; }
@@ -5871,7 +5871,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 }
 
 /* comic chip buttons */
-.jh-chipbtn{display:inline-flex;align-items:center;gap:5px;font-family:'Anton',cursive;font-size:15px;letter-spacing:1.5px;background:rgba(20,24,36,.85);color:#F4F9FA;border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:6px 12px 4px;cursor:pointer;}
+.jh-chipbtn{display:inline-flex;align-items:center;gap:5px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:15px;letter-spacing:1.5px;background:rgba(20,24,36,.85);color:#F4F9FA;border:1px solid rgba(244,249,250,.14);box-shadow:none;padding:6px 12px 4px;cursor:pointer;}
 .jh-chipbtn.red{background:#00E5FF;color:#F4F9FA;text-shadow:none;}
 .jh-chipbtn:active{transform:translate(2px,2px);box-shadow:none;}
 
@@ -5879,7 +5879,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .text-emerald-400,.text-emerald-300{color:#1F8A24 !important;}
 .bg-emerald-500{background:#3FA33C !important;}
 /* round titles */
-.jh-round-title{font-family:'Anton',cursive;font-size:24px;letter-spacing:1.5px;color:#F4F9FA;text-shadow:none;}
+.jh-round-title{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:24px;letter-spacing:1.5px;color:#F4F9FA;text-shadow:none;}
 
 /* ═══════════════════════════════════════════════════════════
    SEPTEMBER SURGE · NEON — HOME / PANEL SYSTEM (last word)
@@ -5917,7 +5917,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .aa-kicker,.jh-burst2{
   display:inline-block !important;clip-path:none !important;background:rgba(0,229,255,.12) !important;
   border:1px solid rgba(244,249,250,.10) !important;border-radius:2px !important;
-  color:#00E5FF !important;font-family:'Anton',Impact,sans-serif !important;
+  color:#00E5FF !important;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   font-size:13px !important;letter-spacing:2.5px !important;padding:5px 12px !important;
   box-shadow:0 0 12px rgba(0,229,255,.25) !important;text-shadow:none !important;
   width:auto !important;height:auto !important;transform:none !important;margin-bottom:10px !important;
@@ -5929,7 +5929,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
   display:grid !important;place-items:center !important;width:96px !important;height:96px !important;
   flex:0 0 auto !important;}
 /* LIVE/DONE stamp → neon pill */
-.jh-pow{font-family:'Anton',Impact,sans-serif !important;transform:none !important;
+.jh-pow{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;transform:none !important;
   -webkit-text-stroke:0 !important;text-shadow:0 0 12px currentColor !important;
   font-size:20px !important;letter-spacing:2px !important;}
 .jh-crown{color:#FF9E1B !important;filter:drop-shadow(0 0 8px rgba(255,158,27,.6));}
@@ -5937,14 +5937,14 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .jh-mock-btn,.jh-mock-chip,.jh-chipbtn{
   background:rgba(0,229,255,.14) !important;border:1px solid rgba(0,229,255,.65) !important;
   color:#F4F9FA !important;border-radius:2px !important;box-shadow:none !important;
-  font-family:'Anton',Impact,sans-serif !important;letter-spacing:1.5px !important;transform:none !important;}
+  font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:1.5px !important;transform:none !important;}
 .jh-mock-btn:hover,.jh-mock-chip:hover,.jh-chipbtn:hover{box-shadow:0 0 14px rgba(0,229,255,.4) !important;}
 .jh-mock-caption{background:rgba(0,229,255,.12) !important;border:1px solid rgba(244,249,250,.10) !important;
-  color:#F4F9FA !important;font-family:'Anton',Impact,sans-serif !important;letter-spacing:1.5px !important;
+  color:#F4F9FA !important;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;letter-spacing:1.5px !important;
   padding:5px 14px !important;display:inline-block !important;transform:none !important;box-shadow:none !important;}
 .jh-mock-caption b{color:#00E5FF !important;}
 /* new neon tagline strip (replaces speech bubble) */
-.aa-tagline{margin:10px 4px 8px;text-align:center;font-family:'Anton',Impact,sans-serif;
+.aa-tagline{margin:10px 4px 8px;text-align:center;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
   font-size:15px;letter-spacing:4px;color:#F4F9FA;padding:12px 14px;
   background:linear-gradient(90deg,transparent,rgba(0,229,255,.12),transparent);
   border-top:1px solid rgba(0,229,255,.35);border-bottom:1px solid rgba(0,229,255,.35);}
