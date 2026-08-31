@@ -60,6 +60,43 @@ def sub1(text, old, new, what):
     return text.replace(old, new)
 
 
+NAME_DIV = re.compile(
+    r"<div style=\"font-family:'Anton';font-size:84px;[^\"]*?min-height:106px;\"></div>")
+
+
+def white_name_box(section, accent):
+    """Swap the underline-rule name holder for a solid white field to write on.
+
+    The handoff leaves the name as an empty div over a glowing accent rule —
+    handsome on screen, but on a printed dark sheet there is nothing to write
+    on: pen on near-black card is unreadable. This makes it a white plate,
+    keeping the accent as a bar along the bottom edge so the brand cue from the
+    original survives.
+    """
+    n = len(NAME_DIV.findall(section))
+    if n != 1:
+        sys.exit(f"BUILD FAILED: expected 1 name holder in the section, found {n}")
+    box = (
+        '<div style="position:relative;margin-top:12px;max-width:1180px;height:132px;'
+        'background:#FFFFFF;'
+        # Sit the plate off the dark ground with a soft drop, and finish the
+        # bottom edge with the section's accent so it still reads as designed.
+        'box-shadow:0 18px 44px -22px rgba(0,0,0,.85), 0 0 0 1px rgba(10,12,18,.28) inset;'
+        f'border-bottom:6px solid {accent};">'
+        # Faint corner ticks, in the same language as the sheet's outer frame,
+        # so the plate looks placed rather than pasted on.
+        '<span style="position:absolute;top:10px;left:10px;width:22px;height:2px;'
+        'background:rgba(10,12,18,.30);"></span>'
+        '<span style="position:absolute;top:10px;left:10px;width:2px;height:22px;'
+        'background:rgba(10,12,18,.30);"></span>'
+        '<span style="position:absolute;top:10px;right:10px;width:22px;height:2px;'
+        'background:rgba(10,12,18,.30);"></span>'
+        '<span style="position:absolute;top:10px;right:10px;width:2px;height:22px;'
+        'background:rgba(10,12,18,.30);"></span>'
+        '</div>')
+    return NAME_DIV.sub(box, section)
+
+
 def make_fifth(fourth):
     s = fourth
     s = sub1(s, 'data-label="4th"', 'data-label="5th"', "section label")
@@ -90,6 +127,9 @@ def main():
     ap.add_argument("--sessions", default="eight", help="how many sessions the copy claims")
     ap.add_argument("--third-prize", default="35", help="3rd place prize in OMR")
     ap.add_argument("--date", default="28 August 2026", help="date printed in the stats grid")
+    ap.add_argument("--name-style", choices=["box", "rule"], default="box",
+                    help="box = white field to write the winner's name on (default); "
+                         "rule = the handoff's underline")
     a = ap.parse_args()
 
     deck = open(DECK).read()
@@ -97,6 +137,20 @@ def main():
     if len(secs) != 4:
         sys.exit(f"BUILD FAILED: expected 4 sections in the handoff, found {len(secs)}")
     secs.append(make_fifth(secs[3]))
+
+    if a.name_style == "box":
+        # Accent per placement, matching the deck: red, cyan, chalk, steel, and
+        # the deep steel the generated 5th continues with.
+        accents = ["#FF2E43", "#3DE1FF", "#F4F6FA", "#8B95A7", "#6C7686"]
+        for i, acc in enumerate(accents):
+            bar = acc
+            # 3rd place's accent is chalk, which vanishes against the white
+            # plate. An ink bar is no better — it vanishes against the dark
+            # sheet instead. Steel is the only value that reads against both.
+            r, g, b = (int(acc[j:j+2], 16) for j in (1, 3, 5))
+            if (0.299*r + 0.587*g + 0.114*b) > 200:
+                bar = "#8B95A7"
+            secs[i] = white_name_box(secs[i], bar)
 
     faces = "".join([
         face("Anton", 400, "anton-400.woff2"),

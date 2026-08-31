@@ -67,6 +67,19 @@ The handoff stops at 4th place; 5th is generated from the 4th by
 `make_fifth()`, which asserts every substitution so a missed swap fails the
 build instead of shipping a certificate that still says "Fourth".
 
+The name holder is a solid white plate (~182 x 19mm) to write the winner's
+name on — the handoff's glowing underline looks right on screen but leaves
+nothing writable on a near-black printed sheet. `--name-style rule` restores
+the original. The plate keeps the placement accent as a bar along its bottom
+edge; 3rd place is the exception, where the chalk accent would vanish against
+the white plate and an ink bar would vanish against the dark sheet, so it uses
+steel, the one value that reads against both.
+
+PDFs are assembled from the 300 DPI raster by `pack-certificate-pdfs.py`, not
+printed from the browser: Chromium's vector PDF export tiles large blurred
+shadows and the seams print as hard-edged rectangular blocks around the
+placement numeral's glow.
+
 ### Copy that disagrees with the live app
 
 Defaults match the handoff exactly. Flags override:
