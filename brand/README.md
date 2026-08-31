@@ -47,3 +47,32 @@ To rebuild:
 python3 build-certificates.py          # fonts expected in /tmp/certs/fonts
 node render-certificates.mjs
 ```
+
+## certificates-deck/
+
+The certificates as designed in the Claude Design handoff bundle
+(`Certificates Deck.dc.html`) — 1920×1080 editorial artboards, distinct from
+the A4 set in `certificates/`.
+
+Built by `build-certificates-deck.py` + `render-certificates-deck.mjs`. The
+handoff sections are used verbatim (they are pure inline-styled HTML); fonts
+and images are inlined as base64 so the print shop cannot substitute a face
+or drop an asset.
+
+The PDF page is **297 × 167.06mm** — full A4 landscape width at the design's
+own 16:9 ratio, so it prints centred on A4 with an even top/bottom margin and
+nothing is cropped or stretched.
+
+The handoff stops at 4th place; 5th is generated from the 4th by
+`make_fifth()`, which asserts every substitution so a missed swap fails the
+build instead of shipping a certificate that still says "Fourth".
+
+### Copy that disagrees with the live app
+
+Defaults match the handoff exactly. Flags override:
+
+| Handoff says | App says | Flag |
+|---|---|---|
+| "Eight sessions" | `sessionsTotal = 9` | `--sessions nine` |
+| 3rd = 35 OMR | `season = [75, 45, 30]` | `--third-prize 30` |
+| 28 August 2026 | Session 9 not yet scheduled | `--date "..."` |
