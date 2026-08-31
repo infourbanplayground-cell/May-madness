@@ -114,6 +114,21 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   The vhost no longer proxies read-only into 3005 — it proxies the full route
   set into 3008, because Surge now writes its own scores.
 
+**All-time carry-over.** Only the all-time total crosses volumes; the Vol.7
+series table starts at zero. `ops/build-surge-carryover.py` generates
+`ops/sync-aa-to-surge.js` (engine lifted verbatim from the Vol.6 app, so totals
+match attack.urbanpadel.om), which writes each player's final Vol.6 points into
+`prevSeriesPts["August Attack"]` on the Surge state, carries the roster and
+profile photos, and refuses to touch Vol.7 sessions. It is idempotent —
+**re-run it once Session 9's knockouts finish**, because it was first run while
+Vol.6 was still in play and those totals are provisional:
+
+```bash
+scp ops/sync-aa-to-surge.js urbanpadel:/opt/september-surge-api/
+ssh urbanpadel 'cd /opt/september-surge-api && DRY=1 node sync-aa-to-surge.js'   # preview
+ssh urbanpadel 'cd /opt/september-surge-api && node sync-aa-to-surge.js'
+```
+
 **Carried over from Vol.6 and NOT yet reviewed for Vol.7:** the 402 OMR prize
 pool, `sessionsTotal = 9`, the `[75, 45, 30]` season prizes, 7 OMR entry, and
 `DOUBLE_FROM_SESSION = 8`. These ship as Vol.6's numbers — confirm before the

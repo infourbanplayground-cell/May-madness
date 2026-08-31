@@ -21,25 +21,37 @@ DST = os.path.join(HERE, "september-surge-index.html")
 # ── Palette: Attack (red-led, court black) -> Surge (cyan-led, deep current) ──
 # Two passes via sentinels, because the old secondary (#3DE1FF) and the new
 # primary (#00E5FF) are both cyans — a naive sequential replace would collide.
+# Tokens are read out of surge-index.html's :root, which is the page built to
+# the September Surge design language — not invented here. Surge is a two-colour
+# system: cyan leads, amber supports. August's red was the lead, so red -> cyan;
+# August's cyan was its second voice (crowns, trophies, badges, the glitch pair),
+# so it becomes amber. No third accent is introduced.
 COLOURS = [
     # was                     sentinel      becomes      what it is
-    ("#FF2E43", "@@P@@", "#00E5FF"),   # primary accent: Attack Red -> Surge Cyan
-    ("#3DE1FF", "@@S@@", "#7FF0FF"),   # second voice stays in the cyan family
-    ("#1FA8C4", "@@S2@@", "#0FB9D6"),  # deep variant of the second voice
-    ("#8DE8F5", "@@S3@@", "#B8F5FF"),  # soft variant
+    ("#FF2E43", "@@P@@", "#00E5FF"),   # lead: Attack Red -> Surge Cyan
+    ("#3DE1FF", "@@S@@", "#FF9E1B"),   # support: Ice -> Strike Amber
+    ("#1FA8C4", "@@S2@@", "#C77A12"),  # deep variant of the support accent
+    ("#8DE8F5", "@@S3@@", "#FFC46B"),  # soft variant of the support accent
     ("#0A0C12", "@@BG@@", "#0A0F14"),  # Court Black -> Deep Current
     ("#06070B", "@@BG2@@", "#050709"), # Deep Black -> Void
     ("#F4F6FA", "@@FG@@", "#F4F9FA"),  # Chalk -> Voltage White
-    ("#8B95A7", "@@MU@@", "#8A9BA8"),  # Steel -> Deep Steel
+    ("#8B95A7", "@@MU@@", "#8A9BA8"),  # Steel -> Deep Steel (prose weight)
 ]
 # The same colours again as rgb() triples, which the app uses inside rgba().
 RGBS = [
     ("255,46,67", "@@RP@@", "0,229,255"),
-    ("61,225,255", "@@RS@@", "127,240,255"),
+    ("61,225,255", "@@RS@@", "255,158,27"),
     ("10,12,18", "@@RBG@@", "10,15,20"),
     ("6,7,11", "@@RBG2@@", "5,7,9"),
     ("244,246,250", "@@RFG@@", "244,249,250"),
     ("139,149,167", "@@RMU@@", "138,155,168"),
+]
+# Motion and depth also differ. Surge overshoots slightly where Attack eased
+# flat, and its glow is wider and softer than Attack's tight 14px halo.
+MOTION = [
+    ("cubic-bezier(.23,1,.32,1)", "cubic-bezier(.34,1.56,.64,1)"),
+    ("0 0 14px rgba(0,229,255,.32)",
+     "0 0 40px rgba(0,229,255,.24), 0 0 90px rgba(0,229,255,.12)"),
 ]
 
 # ── Assets. The Surge lockup replaces the Attack wordmark; the cyan Urban
@@ -77,10 +89,12 @@ TEXT = [
     # Vol.6 shipped with Vol.5 as its "previous series"; Vol.7's is Vol.6.
     ('"June Fury", "July Heat"]', '"June Fury", "July Heat", "August Attack"]'),
     ("July Heat is done and dusted", "August Attack is done and dusted"),
-    # Vol.7 starts on a clean board, so the carry-over promise has to go —
-    # shipping it would tell every player their points transfer when they don't.
+    # Vol.6 told players their previous *series* points carried over. For Vol.7
+    # only the all-time total does: the series table starts at zero, while
+    # prevSeriesPts keeps every earlier volume alive in the all-time ranking.
+    # Saying either half alone would be wrong, so the line says both.
     ("Your *July Heat* points carry over — but the throne is wide open 👑",
-     "Everyone starts from *zero* — the board is wiped, the throne is wide open 👑"),
+     "Series points reset to *zero* — your *all-time* total carries over 👑"),
     ("🏆 *July Heat final standings:*\nheat.urbanpadel.om → Leaderboard",
      "🏆 *August Attack final standings:*\nattack.urbanpadel.om → Leaderboard"),
 ]
@@ -101,6 +115,12 @@ def main():
             s = s.replace(sent, new)
             if n:
                 report.append(f"  colour {old:<12} -> {new:<12} {n:>5}")
+
+    for old, new in MOTION:
+        n = s.count(old)
+        if n:
+            s = s.replace(old, new)
+            report.append(f"  motion {old[:34]:<34} -> {new[:26]:<26} {n:>3}")
 
     # The three copies of the emblem carried inline as base64 are ~950KB of a
     # 1.6MB file (DESIGN.md flags this). Vol.7 points them at the asset instead,

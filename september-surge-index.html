@@ -79,10 +79,10 @@
     --orange-br: #00E5FF;
     --red: #00E5FF;
     --ember: #1a0006;
-    --blue: #7FF0FF;
-    --blue-deep: #0FB9D6;
-    --blue-soft: #B8F5FF;
-    --gold: #7FF0FF;
+    --blue: #FF9E1B;
+    --blue-deep: #C77A12;
+    --blue-soft: #FFC46B;
+    --gold: #FF9E1B;
     --cream: #F4F9FA;
     --muted: #8A9BA8;
     --muted2: rgba(138,155,168,.5);
@@ -101,7 +101,7 @@
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
     background:
-      radial-gradient(ellipse 90% 55% at 12% 6%, rgba(127,240,255,.09), transparent),
+      radial-gradient(ellipse 90% 55% at 12% 6%, rgba(255,158,27,.09), transparent),
       radial-gradient(ellipse 80% 55% at 88% 10%, rgba(0,229,255,.18), transparent),
       radial-gradient(ellipse 60% 50% at 50% 94%, rgba(0,229,255,.10), transparent),
       linear-gradient(180deg, #050709 0%, #0A0F14 60%, #050609 100%);
@@ -142,7 +142,7 @@
   ::-webkit-scrollbar-thumb { background: #44403c; border-radius: 3px; }
   .court-motif { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: var(--court); background-repeat: no-repeat; background-position: center 16%; background-size: 90% auto; opacity: .045; }
   .screen-bg { background:
-      radial-gradient(ellipse 90% 55% at 12% 6%, rgba(127,240,255,.09), transparent),
+      radial-gradient(ellipse 90% 55% at 12% 6%, rgba(255,158,27,.09), transparent),
       radial-gradient(ellipse 80% 55% at 88% 10%, rgba(0,229,255,.18), transparent),
       linear-gradient(180deg, #050709 0%, #0A0F14 60%, #050609 100%); }
   .splash { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 22px; align-items: center; justify-content: center; z-index: 999;
@@ -153,9 +153,9 @@
   .splash .splash-logo { width: 260px; max-width: 70vw; display: block; filter: drop-shadow(0 0 14px rgba(0,229,255,.5)) drop-shadow(0 0 34px rgba(0,229,255,.3)); }
   .splash .splash-chip { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 5px; color: #F4F9FA; background: rgba(0,229,255,.12); border: 1.5px solid rgba(0,229,255,.8); box-shadow: 0 0 14px rgba(0,229,255,.55), inset 0 0 10px rgba(0,229,255,.2); padding: 8px 18px 7px; text-shadow: 0 0 8px rgba(0,229,255,.6); }
   @keyframes splashPop { 0%,100% { transform: scale(1); opacity:.92 } 50% { transform: scale(1.04); opacity:1 } }
-  .heat-grad { background: linear-gradient(135deg, #00E5FF 0%, #FF6B7A 50%, #7FF0FF 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  .heat-grad { background: linear-gradient(135deg, #00E5FF 0%, #FF6B7A 50%, #FF9E1B 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
   .kicker { font-family: 'Archivo', sans-serif; font-weight: 800; letter-spacing: .34em; text-transform: uppercase; color: var(--blue); font-size: 11px; display: inline-flex; align-items: center; gap: 10px; }
-  .kicker::before { content: ''; width: 28px; height: 2px; background: var(--blue); box-shadow: 0 0 14px rgba(127,240,255,.6); border-radius: 2px; }
+  .kicker::before { content: ''; width: 28px; height: 2px; background: var(--blue); box-shadow: 0 0 14px rgba(255,158,27,.6); border-radius: 2px; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   @keyframes jhRankIn { from { opacity: 0; } to { opacity: 1; } }
   .jh-rank-in { animation: jhRankIn .4s ease both; }
@@ -168,7 +168,7 @@
   body::before {
     content: ""; position: fixed; inset: 0; z-index: 0;
     pointer-events: none;
-    background-image: radial-gradient(rgba(127,240,255,.08) 20%, transparent 22%);
+    background-image: radial-gradient(rgba(255,158,27,.08) 20%, transparent 22%);
     background-size: 24px 24px;
   }
   body::after { mix-blend-mode: overlay; opacity: .3; }
@@ -182,7 +182,7 @@
   .kicker::before { background: var(--orange); box-shadow: 0 0 14px rgba(0,229,255,.7); }
 
   /* ── Header brand ── */
-  header { border-bottom-color: rgba(127,240,255,.15) !important; }
+  header { border-bottom-color: rgba(255,158,27,.15) !important; }
 
   /* ── Bottom nav ── */
   nav.fixed { border-top-color: rgba(255,224,61,.25) !important; }
@@ -237,8 +237,8 @@
   .focus\:border-orange-500:focus { border-color: #00E5FF !important; }
 
   /* ── Stat highlight chips ── */
-  .bg-orange-500\/10 { background: rgba(127,240,255,.1) !important; }
-  .border-orange-500\/20 { border-color: rgba(127,240,255,.25) !important; }
+  .bg-orange-500\/10 { background: rgba(255,158,27,.1) !important; }
+  .border-orange-500\/20 { border-color: rgba(255,158,27,.25) !important; }
   .bg-red-600\/15, .bg-red-600\/10 { background: rgba(255,46,154,.12) !important; }
   .border-red-600\/30 { border-color: rgba(255,46,154,.3) !important; }
 
@@ -257,7 +257,7 @@
 /* ── Halftone + rays bg ── */
 body::before{
   content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
-  background-image:radial-gradient(rgba(127,240,255,.09) 20%,transparent 22%);
+  background-image:radial-gradient(rgba(255,158,27,.09) 20%,transparent 22%);
   background-size:24px 24px;
 }
 
@@ -284,7 +284,7 @@ nav.fixed button[style*="color:var(--orange-br)"]{
 /* ── HEADER ── */
 header.sticky{
   background:rgba(11,8,20,.95) !important;
-  border-bottom:4px solid rgba(127,240,255,.2) !important;
+  border-bottom:4px solid rgba(255,158,27,.2) !important;
   backdrop-filter:blur(18px) !important;
 }
 
@@ -378,7 +378,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
 .bg-emerald-500/15{background:rgba(31,217,196,.12) !important;border-color:rgba(31,217,196,.4) !important;}
 .bg-red-500/15{background:rgba(255,46,154,.12) !important;border-color:rgba(255,46,154,.35) !important;}
 .bg-cyan-400/15{background:rgba(255,224,61,.12) !important;border-color:rgba(255,224,61,.35) !important;}
-.bg-blue-500/15{background:rgba(127,240,255,.12) !important;border-color:rgba(127,240,255,.3) !important;}
+.bg-blue-500/15{background:rgba(255,158,27,.12) !important;border-color:rgba(255,158,27,.3) !important;}
 
 /* Group label gold squares */
 .w-7.h-7.rounded-md.flex.items-center.justify-center{border-radius:0 !important;border:1px solid rgba(244,249,250,.14) !important;}
@@ -478,7 +478,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
   color:var(--blue) !important;
   font-weight:900 !important;
 }
-.kicker::before{background:var(--blue) !important;box-shadow:0 0 14px rgba(127,240,255,.7) !important;}
+.kicker::before{background:var(--blue) !important;box-shadow:0 0 14px rgba(255,158,27,.7) !important;}
 
 /* ── BORDER RADIUS NUKE ── */
 .rounded-xl,.rounded-2xl,.rounded-t-2xl,.rounded-lg,.rounded-md{border-radius:0 !important;}
@@ -518,7 +518,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 /* Background: dark ink paper */
 body{
   background:
-    radial-gradient(ellipse 90% 55% at 10% 8%, rgba(127,240,255,.14), transparent),
+    radial-gradient(ellipse 90% 55% at 10% 8%, rgba(255,158,27,.14), transparent),
     radial-gradient(ellipse 70% 55% at 88% 12%, rgba(0,229,255,.11), transparent),
     radial-gradient(ellipse 50% 50% at 50% 92%, rgba(0,229,255,.07), transparent),
     linear-gradient(180deg,#080808 0%,#0a0a0a 60%,#060606 100%) !important;
@@ -526,7 +526,7 @@ body{
 
 /* Global halftone — neon cyan dots */
 body::before{
-  background-image:radial-gradient(rgba(127,240,255,.12) 20%,transparent 22%) !important;
+  background-image:radial-gradient(rgba(255,158,27,.12) 20%,transparent 22%) !important;
   background-size:22px 22px !important;
 }
 
@@ -546,7 +546,7 @@ body::before{
 }
 .jh-hero .halftone{
   position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.6;
-  background-image:radial-gradient(rgba(127,240,255,.13) 20%,transparent 22%);
+  background-image:radial-gradient(rgba(255,158,27,.13) 20%,transparent 22%);
   background-size:20px 20px;
 }
 .jh-hero .frame{display:none;}
@@ -557,8 +557,8 @@ body::before{
 
 /* SEPTEMBER SURGE lockup */
 @keyframes logo-glow{
-  0%,100%{filter:drop-shadow(0 0 24px rgba(127,240,255,.7)) drop-shadow(0 0 50px rgba(0,229,255,.4));}
-  50%{filter:drop-shadow(0 0 42px rgba(127,240,255,1)) drop-shadow(0 0 80px rgba(0,229,255,.7)) drop-shadow(0 0 120px rgba(0,229,255,.3));}
+  0%,100%{filter:drop-shadow(0 0 24px rgba(255,158,27,.7)) drop-shadow(0 0 50px rgba(0,229,255,.4));}
+  50%{filter:drop-shadow(0 0 42px rgba(255,158,27,1)) drop-shadow(0 0 80px rgba(0,229,255,.7)) drop-shadow(0 0 120px rgba(0,229,255,.3));}
 }
 .jh-lockup{margin:0 0 16px;}
 .jh-logo-img{width:340px;max-width:96%;display:block;margin:0 auto 2px;
@@ -611,7 +611,7 @@ body::before{
 
 /* section footer strip */
 .jh-strip{background:#111111;border:3px solid var(--blue);
-  box-shadow:0 0 18px rgba(127,240,255,.4);color:var(--cream);
+  box-shadow:0 0 18px rgba(255,158,27,.4);color:var(--cream);
   padding:12px 20px;display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
 .jh-strip .b{font-family:'Anton',cursive;letter-spacing:2px;font-size:22px;color:var(--blue);}
 .jh-strip .c{font-family:'Anton',cursive;letter-spacing:1px;font-size:20px;color:var(--cream);}
@@ -684,10 +684,10 @@ body::before{
    neon panel. Nothing from the comic theme survives this.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --yellow:#7FF0FF; --paper:#0A0F14;
+  --yellow:#FF9E1B; --paper:#0A0F14;
   --panel:rgba(20,24,36,.82); --panel-2:rgba(30,36,50,.9);
   --hair:rgba(244,249,250,.12); --neon:rgba(0,229,255,.55);
-  --glow:0 0 14px rgba(0,229,255,.32);
+  --glow:0 0 40px rgba(0,229,255,.24), 0 0 90px rgba(0,229,255,.12);
 }
 /* kill the comic halftone dot field → faint tactical grid */
 body::before{
@@ -738,7 +738,7 @@ body::after{opacity:.28 !important;}
 /* session number tile */
 .jh-srow .sx{border:1px solid var(--hair) !important;color:var(--cream) !important;}
 .jh-srow.active .sx{background:rgba(0,229,255,.18) !important;color:var(--red) !important;border-color:var(--neon) !important;}
-.jh-srow.done .sx{background:rgba(127,240,255,.12) !important;color:var(--blue) !important;}
+.jh-srow.done .sx{background:rgba(255,158,27,.12) !important;color:var(--blue) !important;}
 .jh-srow.upcoming .sx{background:rgba(255,255,255,.04) !important;color:var(--muted) !important;}
 /* flags / pills → outlined neon, no solid comic blocks */
 .jh-flag,.jh-pill,.jh-vol{
@@ -747,8 +747,8 @@ body::after{opacity:.28 !important;}
   background:rgba(0,229,255,.12) !important;
   color:var(--cream) !important;
 }
-.jh-flag.blue,.jh-pill.done{background:rgba(127,240,255,.12) !important;border-color:rgba(127,240,255,.6) !important;color:var(--blue) !important;}
-.jh-flag.yel{background:rgba(127,240,255,.12) !important;border-color:rgba(127,240,255,.6) !important;color:var(--blue) !important;}
+.jh-flag.blue,.jh-pill.done{background:rgba(255,158,27,.12) !important;border-color:rgba(255,158,27,.6) !important;color:var(--blue) !important;}
+.jh-flag.yel{background:rgba(255,158,27,.12) !important;border-color:rgba(255,158,27,.6) !important;color:var(--blue) !important;}
 .jh-pool-note .teams{background:rgba(0,229,255,.12) !important;border:1px solid var(--neon) !important;
   box-shadow:var(--glow) !important;color:var(--cream) !important;}
 /* hero + strip */
@@ -763,7 +763,7 @@ body::after{opacity:.28 !important;}
   border:1.5px solid var(--neon) !important;box-shadow:var(--glow),inset 0 0 18px rgba(0,229,255,.15) !important;
   background:rgba(0,229,255,.08) !important;}
 /* section headings */
-.jh-sec-kicker{background:rgba(127,240,255,.12) !important;border:1px solid rgba(127,240,255,.5) !important;color:var(--blue) !important;}
+.jh-sec-kicker{background:rgba(255,158,27,.12) !important;border:1px solid rgba(255,158,27,.5) !important;color:var(--blue) !important;}
 .jh-sec-title,.jh-round-title{color:var(--cream) !important;text-shadow:0 0 18px rgba(0,229,255,.35) !important;}
 .jh-sec-title em{color:var(--red) !important;}
 /* display type: tactical caps, never comic */
@@ -1235,7 +1235,7 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
   // cap in resizeToBase64 is the avatar path, not this one), so the frame is
   // sized in units of min(w,h)/1080 and holds at full resolution.
   const s = Math.min(w, h) / 1080;
-  const ink = "#0A0F14", ice = "#7FF0FF", chalk = "#F4F9FA", red = "#00E5FF";
+  const ink = "#0A0F14", ice = "#FF9E1B", chalk = "#F4F9FA", red = "#00E5FF";
   const pad = 26 * s;
 
   // ── court black base + faint tactical grid ──
@@ -1795,7 +1795,7 @@ function Btn({ children, onClick, variant = "primary", size = "md", className = 
     secondary: { background:"rgba(20,24,36,.85)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
     ghost: { background:"transparent", color:"var(--blue)", border:"3px solid var(--blue)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
     danger: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"14px", paddingRight:"14px" },
-    gold: { background:"rgba(127,240,255,.14)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
+    gold: { background:"rgba(255,158,27,.14)", color:"#F4F9FA", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", borderRadius:0, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
   };
   return <button type={type} onClick={onClick} disabled={disabled} className={`inline-flex items-center justify-center gap-2 ${className}`} style={{...styles[variant]||styles.primary,opacity:disabled?.5:1,cursor:disabled?"not-allowed":"pointer",transition:"transform .1s, box-shadow .1s"}} onMouseEnter={e=>{if(!disabled){e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow="none";}}} onMouseLeave={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=styles[variant]?.boxShadow||"none";}} onMouseDown={e=>{e.currentTarget.style.transform="translate(3px,3px)";e.currentTarget.style.boxShadow="none";}} onMouseUp={e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow=styles[variant]?.boxShadow||"none";}}>{children}</button>;
 }
@@ -2037,7 +2037,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/surge-lockup.png" alt="September Surge" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
-          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#7FF0FF", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>VOL. 7 · SERIES STANDINGS</div>
+          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>VOL. 7 · SERIES STANDINGS</div>
         </div>
         {top.length === 0
           ? <div className="text-center text-stone-500 py-12">No standings yet</div>
@@ -2078,13 +2078,13 @@ function PublicPhotosPage({ state }) {
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/surge-lockup.png" alt="September Surge" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
-          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#7FF0FF", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
+          <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
         </div>
         {sessions.length === 0
           ? <div className="text-center text-stone-500 py-12">No photos yet — check back after the next session</div>
           : sessions.map(s => (
             <div key={s.id} style={{ marginBottom: 22 }}>
-              <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(127,240,255,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
+              <div style={{ display: "inline-block", fontFamily: "'Anton',cursive", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
                 {s.name.toUpperCase()}{s.date ? ` · ${new Date(s.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </div>
               <div className="grid grid-cols-2 gap-2 aa-wall">
@@ -2280,7 +2280,7 @@ function App() {
             {canScore && <SyncIndicator status={sync} errMsg={syncErr} />}
             
             {canScore && (
-              <button onClick={() => isAdmin ? setTab("settings") : logout()} className="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-lg" style={{ background: isAdmin ? "rgba(0,229,255,.14)" : "rgba(127,240,255,.14)", border: `1px solid ${isAdmin ? "rgba(0,229,255,.3)" : "rgba(127,240,255,.3)"}` }} aria-label={isAdmin ? "Settings" : "Sign out scorer"}>
+              <button onClick={() => isAdmin ? setTab("settings") : logout()} className="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-lg" style={{ background: isAdmin ? "rgba(0,229,255,.14)" : "rgba(255,158,27,.14)", border: `1px solid ${isAdmin ? "rgba(0,229,255,.3)" : "rgba(255,158,27,.3)"}` }} aria-label={isAdmin ? "Settings" : "Sign out scorer"}>
                 {isAdmin ? <I.shield size={14} className="text-orange-400" /> : <I.whistle size={14} className="text-blue-400" />}
                 <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: isAdmin ? "var(--orange-br)" : "var(--blue)" }}>{isAdmin ? "Admin" : "Scorer"}</span>
               </button>
@@ -2423,7 +2423,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             <div style={{width:150,background:"rgba(20,24,36,.85)",border:"1px solid rgba(244,249,250,.10)",padding:"12px 14px"}}>
               <div style={{fontFamily:"Verdana,sans-serif",fontSize:9,fontWeight:"bold",letterSpacing:".18em",color:"#8A9BA8",textTransform:"uppercase"}}>Prize pool</div>
               <div style={{fontFamily:"'Anton',cursive",fontSize:26,color:"#F4F9FA",lineHeight:1,margin:"6px 0 8px"}}>{pool}<span style={{fontSize:13,color:"#8A9BA8"}}> OMR</span></div>
-              <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".1em",color:"#7FF0FF"}}>2X ON THE LAST TWO</div>
+              <div style={{fontFamily:"Verdana,sans-serif",fontSize:8.5,fontWeight:"bold",letterSpacing:".1em",color:"#FF9E1B"}}>2X ON THE LAST TWO</div>
             </div>
           );
         })()}
@@ -2541,7 +2541,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                   <span style={{ fontFamily:"'Anton',cursive", fontSize:"28px", color, WebkitTextStroke:"0", letterSpacing:"1px" }}>{pts}</span>
                 </div>
               ))}
-              <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"rgba(127,240,255,.14)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", marginBottom:8 }}>
+              <div style={{ display:"flex", alignItems:"center", gap:10, padding:"10px 14px", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.10)", boxShadow:"none", marginBottom:8 }}>
                 <Icon d='<path d="M11.562 3.266a.5.5 0 01.876 0L15.39 8.87a1 1 0 001.516.294L21.183 5.5a.5.5 0 01.798.519l-2.834 10.246a1 1 0 01-.956.734H5.81a1 1 0 01-.957-.734L2.02 6.02a.5.5 0 01.798-.519l4.276 3.664a1 1 0 001.516-.294z"/><path d="M5 21h14"/>' size={13} style={{ color:"#F4F9FA" }} />
                 <span style={{ flex:1, fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>TOP OF GROUP</span>
                 <span style={{ fontFamily:"'Anton',cursive", fontSize:"28px", color:"#F4F9FA", WebkitTextStroke:"0", letterSpacing:"1px" }}>+1</span>
@@ -2786,8 +2786,8 @@ function WhatsAppImportModal({ onClose, onAdd, existing }) {
         <div className="space-y-1.5 max-h-72 overflow-y-auto">
           {parsed.map(p => (
             <div key={p.name} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm" style={{
-              background: p.status === "existing" ? "rgba(16,185,129,0.06)" : p.status === "fuzzy" ? "rgba(127,240,255,0.06)" : "var(--surface)",
-              border: p.status === "existing" ? "1px solid rgba(16,185,129,0.2)" : p.status === "fuzzy" ? "1px solid rgba(127,240,255,0.25)" : "1px solid rgba(68,64,60,0.5)"
+              background: p.status === "existing" ? "rgba(16,185,129,0.06)" : p.status === "fuzzy" ? "rgba(255,158,27,0.06)" : "var(--surface)",
+              border: p.status === "existing" ? "1px solid rgba(16,185,129,0.2)" : p.status === "fuzzy" ? "1px solid rgba(255,158,27,0.25)" : "1px solid rgba(68,64,60,0.5)"
             }}>
               {p.status === "existing" ? (
                 <><Icon d='<path d="M20 6L9 17l-5-5"/>' size={14} style={{color:"#10b981"}} /><span className="flex-1 text-stone-400 line-through">{p.name}</span><span className="text-[10px] text-emerald-500">already in</span></>
@@ -2962,7 +2962,7 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
       <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Date</label><Input type="date" value={date} onChange={setDate} /></div>
       <div className="flex items-center justify-between p-3 bg-stone-900 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="px-1.5 py-0.5 rounded font-display text-[10px] font-bold" style={{ background:"rgba(127,240,255,.14)", color:"#2b1d16" }}>2X</div>
+          <div className="px-1.5 py-0.5 rounded font-display text-[10px] font-bold" style={{ background:"rgba(255,158,27,.14)", color:"#2b1d16" }}>2X</div>
           <span className="text-sm text-stone-200">Double Points</span>
         </div>
         <button onClick={() => setDoublePoints(v => !v)} className={`relative w-11 h-6 rounded-full ${doublePoints ? "bg-red-600" : "bg-stone-700"}`}>
@@ -3029,7 +3029,7 @@ August Attack is done and dusted — new season, new partners, new rivalries �
 💰 *402 OMR prize pool* up for grabs
 
 ━━━━━━━━━━━━━━━━━━━━
-Everyone starts from *zero* — the board is wiped, the throne is wide open 👑
+Series points reset to *zero* — your *all-time* total carries over 👑
 
 🏆 *August Attack final standings:*
 attack.urbanpadel.om → Leaderboard
@@ -3082,7 +3082,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
             </div>
             <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:5,flex:"0 0 auto"}}>
               <span style={{fontFamily:"'Anton',cursive",fontSize:13,letterSpacing:1,color:"#F4F9FA",background:s.completed?"#0A0F14":"#00E5FF",border:"1px solid rgba(244,249,250,.14)",boxShadow:"none",padding:"2px 8px 1px",transform:"none"}}>{s.completed ? "DONE" : "LIVE"}</span>
-              {s.doublePoints && <span style={{fontFamily:"'Anton',cursive",fontSize:12,letterSpacing:1,color:"#F4F9FA",background:"rgba(127,240,255,.14)",border:"1px solid rgba(244,249,250,.14)",padding:"2px 7px 1px",transform:"none"}}>2X PTS</span>}
+              {s.doublePoints && <span style={{fontFamily:"'Anton',cursive",fontSize:12,letterSpacing:1,color:"#F4F9FA",background:"rgba(255,158,27,.14)",border:"1px solid rgba(244,249,250,.14)",padding:"2px 7px 1px",transform:"none"}}>2X PTS</span>}
             </div>
           </div>
         );})}
@@ -3204,14 +3204,14 @@ function CreateSessionModal({ onClose, onCreate, count }) {
 const CIc = {
   crown: ({ size = 26, style }) => (
     <svg width={size} height={size * 0.85} viewBox="0 0 24 20" style={style}>
-      <path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#7FF0FF" stroke="#0A0F14" strokeWidth="1.8" strokeLinejoin="round"/>
-      <rect x="4.8" y="15.8" width="14.4" height="2.6" fill="#7FF0FF" stroke="#0A0F14" strokeWidth="1.5"/>
+      <path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#FF9E1B" stroke="#0A0F14" strokeWidth="1.8" strokeLinejoin="round"/>
+      <rect x="4.8" y="15.8" width="14.4" height="2.6" fill="#FF9E1B" stroke="#0A0F14" strokeWidth="1.5"/>
     </svg>
   ),
   flame: ({ size = 14, style }) => (
     <svg width={size} height={size * 1.25} viewBox="0 0 20 25" style={style}>
       <path d="M10 1.5C6.5 7 4 8.5 5.2 14c.8 3.6 3.4 6.5 4.8 8 1.4-1.5 4-4.4 4.8-8C16 8.5 13.5 7 10 1.5Z" fill="#00E5FF" stroke="#0A0F14" strokeWidth="1.6" strokeLinejoin="round"/>
-      <path d="M10 9c-1.6 3-2.2 4.5-1.4 7.2.5 1.7 1 2.8 1.4 3.5.4-.7.9-1.8 1.4-3.5.8-2.7.2-4.2-1.4-7.2Z" fill="#7FF0FF"/>
+      <path d="M10 9c-1.6 3-2.2 4.5-1.4 7.2.5 1.7 1 2.8 1.4 3.5.4-.7.9-1.8 1.4-3.5.8-2.7.2-4.2-1.4-7.2Z" fill="#FF9E1B"/>
     </svg>
   ),
   clipboard: ({ size = 13 }) => (
@@ -3478,7 +3478,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
               ? <div style={{ fontFamily:"'Anton',cursive", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>🔒 FULL</div>
               : <div style={{ fontFamily:"'Anton',cursive", fontSize:20, color:"var(--orange)", border:"1px solid rgba(244,249,250,.14)", padding:"3px 10px", boxShadow:"none" }}>{MAX_TEAMS - filledSlots} OPEN</div>
             }
-            <button onClick={onRemind} style={{ fontFamily:"'Anton',cursive", fontSize:15, color:"#F4F9FA", background:"rgba(127,240,255,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
+            <button onClick={onRemind} style={{ fontFamily:"'Anton',cursive", fontSize:15, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
           </div>
         </div>
         <div style={{ height:7, background:"rgba(11,8,20,.12)", border:"1px solid rgba(244,249,250,.14)" }}>
@@ -3542,7 +3542,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
         <div className="flex-1 min-w-0 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="font-display text-xl text-stone-100 truncate">{session.name}</div>
-            {session.doublePoints && <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold shrink-0" style={{ background:"rgba(127,240,255,.14)", color: "#2b1d16" }}>2X</div>}
+            {session.doublePoints && <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold shrink-0" style={{ background:"rgba(255,158,27,.14)", color: "#2b1d16" }}>2X</div>}
           </div>
           <div className="text-[10px] text-stone-500 uppercase tracking-wider flex items-center justify-center gap-2">
             {session.date ? new Date(session.date).toLocaleDateString() : "No date"}
@@ -3554,7 +3554,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           {isAdmin ? <button onClick={() => setShowEdit(true)} className="text-stone-400 hover:text-orange-500 p-1"><I.dots size={20} /></button> : <div className="w-7" />}
         </div>
       </div>
-      <div className="sticky top-[57px] z-10 px-4 py-2" style={{ background:"rgba(127,240,255,.14)", borderBottom: "1px solid rgba(244,249,250,.10)", backgroundImage: "radial-gradient(rgba(0,0,0,.07) 20%, transparent 22%)", backgroundSize: "7px 7px" }}>
+      <div className="sticky top-[57px] z-10 px-4 py-2" style={{ background:"rgba(255,158,27,.14)", borderBottom: "1px solid rgba(244,249,250,.10)", backgroundImage: "radial-gradient(rgba(0,0,0,.07) 20%, transparent 22%)", backgroundSize: "7px 7px" }}>
         <div className="max-w-3xl mx-auto flex gap-2 overflow-x-auto">
           {[{id:"teams",label:"Teams",Ic:I.users},{id:"groups",label:"Groups",Ic:I.bar},{id:"bracket",label:"Knockouts",Ic:I.swords}].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === t.id ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}>
@@ -3653,7 +3653,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           </div>
           <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: session.doublePoints ? "linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(249, 115, 22, 0.08))" : "#1c1917", border: session.doublePoints ? "1px solid rgba(220, 38, 38, 0.3)" : "1px solid transparent" }}>
             <div className="flex items-center gap-2">
-              <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold" style={{ background:"rgba(127,240,255,.14)", color: "#2b1d16" }}>2X</div>
+              <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold" style={{ background:"rgba(255,158,27,.14)", color: "#2b1d16" }}>2X</div>
               <div>
                 <div className="text-sm text-stone-200 font-semibold">Double Points</div>
                 <div className="text-[10px] text-stone-500">Everything ×2 except streak</div>
@@ -3792,7 +3792,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
                   </select>
 
                   {voterPick && alreadyVoted && (
-                    <div style={{ background: "#7FF0FF", border: "1px solid rgba(244,249,250,.10)", padding: "14px", marginBottom: 14, fontFamily: "'Anton',cursive", fontSize: 17, color:"#F4F9FA" }}>
+                    <div style={{ background: "#FF9E1B", border: "1px solid rgba(244,249,250,.10)", padding: "14px", marginBottom: 14, fontFamily: "'Anton',cursive", fontSize: 17, color:"#F4F9FA" }}>
                       🚫 {state.players.find(p => p.id === voterPick)?.name} already voted tonight!
                     </div>
                   )}
@@ -3816,7 +3816,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
           )}
 
           {!session.mvpVotingOpen && session.mvpId && mvpPlayer && (
-            <div style={{ background:"rgba(127,240,255,.14)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "24px 18px", textAlign: "center" }}>
+            <div style={{ background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "24px 18px", textAlign: "center" }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><CIc.crown size={40} /></div>
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color:"#F4F9FA", textTransform: "uppercase" }}>MVP of the Night</div>
               <div style={{ fontFamily: "'Anton',cursive", fontSize: 40, color:"#F4F9FA", marginTop: 4 }}>{mvpPlayer.name}</div>
@@ -3924,7 +3924,7 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
         <Card key={g} className="p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(127,240,255,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
+              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
               <span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span>
             </div>
             <span className="text-xs text-stone-500 font-mono">{byGroup[g].length} / 4</span>
@@ -4025,7 +4025,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
   return (
     <div className="space-y-4">
       {isUneven && (
-        <div className="flex gap-2.5 p-3" style={{ background:"rgba(127,240,255,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none" }}>
+        <div className="flex gap-2.5 p-3" style={{ background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none" }}>
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#F4F9FA" }} />
           <div>
             <div className="text-xs font-bold" style={{ color:"#F4F9FA" }}>Uneven Groups</div>
@@ -4051,7 +4051,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
         return (
           <Card key={g} className="p-3">
             <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2"><div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(127,240,255,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div><span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span></div>
+              <div className="flex items-center gap-2"><div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Anton',cursive", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div><span style={{fontFamily:"'Anton',cursive",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span></div>
               {isAdmin && teams.length >= 2 && <Btn size="sm" variant="secondary" onClick={() => setAdd(g)}><I.plus size={12} /> Match</Btn>}
             </div>
             {standings.length > 0 && <div className="mb-3">
@@ -4067,7 +4067,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
                 const p1 = state.players.find(p => p.id === s.team.p1Id);
                 const p2 = state.players.find(p => p.id === s.team.p2Id);
                 const isTop = s.team.id === top;
-                return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(127,240,255,.13)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #0A0F14" : "2px solid transparent" }}>
+                return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(255,158,27,.13)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #0A0F14" : "2px solid transparent" }}>
                   <span className="font-mono text-xs text-stone-500 w-4">{i + 1}</span>
                   <span className="flex-1 min-w-0 flex items-center gap-1">
                     {isTop && <I.crown size={12} className="text-cyan-300 shrink-0" />}
@@ -4583,7 +4583,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
             {top && <> Top seed plays the lowest (1 v 8). <span className="text-cyan-300 font-bold">#1 seed: {lbl(top.id)}.</span></>}
           </div>
           <div className="space-y-1">{rows.map(r => (
-            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(127,240,255,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #0A0F14" : "2px solid transparent" }}>
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(255,158,27,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #0A0F14" : "2px solid transparent" }}>
               {r.seed
                 ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#00E5FF" : "#0A0F14", color: "#F4F9FA", border: "1px solid rgba(244,249,250,.14)" }}>{r.seed}</span>
                 : <span style={{ width: 22 }} className="shrink-0" />}
@@ -4658,7 +4658,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
               <div className="space-y-1.5">{b.sf.map(m => <BracketRow key={m.id} match={m} lbl={lbl} onClick={() => canScore && setEdit({ ...m, round: "sf" })} />)}</div>
             </Card>}
             {b.final && <Card className="p-3" style={{ borderColor: "rgba(251, 191, 36, 0.3)" }}>
-              <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title" style={{textShadow:"none",display:"inline-flex",alignItems:"center",gap:6}}><svg width="18" height="18" viewBox="0 0 24 24" fill="#7FF0FF" stroke="#0A0F14" strokeWidth="1.8"><path d="M7 3h10v6a5 5 0 01-10 0z"/><path d="M7 5H4a3 3 0 003 5M17 5h3a3 3 0 01-3 5M12 14v4M8 21h8M9 18h6" fill="none"/></svg> FINAL</h3><Pill color="amber">+3 reach · +5 win · W+3 TB+2 L+1</Pill></div>
+              <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title" style={{textShadow:"none",display:"inline-flex",alignItems:"center",gap:6}}><svg width="18" height="18" viewBox="0 0 24 24" fill="#FF9E1B" stroke="#0A0F14" strokeWidth="1.8"><path d="M7 3h10v6a5 5 0 01-10 0z"/><path d="M7 5H4a3 3 0 003 5M17 5h3a3 3 0 01-3 5M12 14v4M8 21h8M9 18h6" fill="none"/></svg> FINAL</h3><Pill color="amber">+3 reach · +5 win · W+3 TB+2 L+1</Pill></div>
               <BracketRow match={b.final} lbl={lbl} onClick={() => canScore && setEdit({ ...b.final, round: "final" })} big />
             </Card>}
           </>
@@ -4724,11 +4724,11 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
         onClick={() => canScore && !isPlaceholder && setEdit({ ...m, round })}
         style={{
           position: "absolute", top, left, width: COL_W, height: CARD_H,
-          background: isEmpty ? "rgba(244,249,250,.03)" : isFinal ? "rgba(127,240,255,.09)" : "rgba(5,7,9,.72)",
+          background: isEmpty ? "rgba(244,249,250,.03)" : isFinal ? "rgba(255,158,27,.09)" : "rgba(5,7,9,.72)",
           border: isEmpty ? "1px dashed rgba(244,249,250,.16)" : "1px solid rgba(244,249,250,.10)",
           borderRadius: 0,
           // the decided side carries the accent; the final is the one cyan card
-          boxShadow: w ? `inset 3px 0 0 ${isFinal ? "#7FF0FF" : "#00E5FF"}` : "none",
+          boxShadow: w ? `inset 3px 0 0 ${isFinal ? "#FF9E1B" : "#00E5FF"}` : "none",
           padding: "7px 8px", textAlign: "left",
           cursor: canScore && !isPlaceholder ? "pointer" : "default",
           display: "flex", flexDirection: "column", justifyContent: isEmpty ? "center" : "space-between",
@@ -4774,7 +4774,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
   const sfWon = (i) => sfData[i]?.winner;
   // the advancing path lights up: red through the QFs, cyan into the final
   const qfConnColor = (i) => qfWon(i) ? "#00E5FF" : "rgba(244,249,250,.16)";
-  const sfConnColor = (i) => sfWon(i) ? "#7FF0FF" : "rgba(244,249,250,.16)";
+  const sfConnColor = (i) => sfWon(i) ? "#FF9E1B" : "rgba(244,249,250,.16)";
 
   return (
     <div style={{ background: "rgba(16,20,32,.92)", border: "1px solid rgba(244,249,250,.10)", borderRadius: 0, overflow: "hidden" }}>
@@ -4785,7 +4785,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
           <span style={{ color:"#8A9BA8" }}>→</span>
           <span style={{ color: "#00E5FF" }}>SF</span>
           <span style={{ color:"#8A9BA8" }}>→</span>
-          <span style={{ color: "#7FF0FF" }}>Final</span>
+          <span style={{ color: "#FF9E1B" }}>Final</span>
         </div>
       </div>
       <div style={{ overflowX: "auto", overflowY: "hidden", padding: "0 10px 12px", WebkitOverflowScrolling: "touch" }}>
@@ -4831,7 +4831,7 @@ function SeedBadge({ seed }) {
   const cfg = n === 1
     ? { bg: "rgba(0,229,255,.9)",   color: "#F4F9FA" }
     : n === 2
-    ? { bg: "rgba(127,240,255,.16)", color: "#7FF0FF" }
+    ? { bg: "rgba(255,158,27,.16)", color: "#FF9E1B" }
     : { bg: "rgba(244,249,250,.10)", color: "#8A9BA8" };
   return <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold font-mono shrink-0" style={{ background: cfg.bg, color: cfg.color, border: "1px solid rgba(244,249,250,.14)", borderRadius: 0 }}>{seed}</span>;
 }
@@ -5135,7 +5135,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
         </Card>
         {hasLifetime && mode === "season" && (
           <div style={{textAlign:"center",marginTop:14}}>
-            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Anton',cursive",fontSize:14,letterSpacing:2,color:"#0A0F14",background:"#7FF0FF",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 22px rgba(127,240,255,.35)"}}>SEE ALL-TIME RANKINGS →</button>
+            <button onClick={() => setMode("lifetime")} style={{fontFamily:"'Anton',cursive",fontSize:14,letterSpacing:2,color:"#0A0F14",background:"#FF9E1B",border:"none",padding:"10px 20px 8px",cursor:"pointer",boxShadow:"0 0 22px rgba(255,158,27,.35)"}}>SEE ALL-TIME RANKINGS →</button>
           </div>
         )}
         </>
@@ -5143,7 +5143,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
         <>
           {climber && (
             <div style={{display:"flex",alignItems:"center",gap:8,background:"none",border:"none",borderTop:"1px solid rgba(244,249,250,.10)",boxShadow:"none",padding:"10px 2px 0",transform:"none"}}>
-              <I.bolt size={18} style={{color:"#7FF0FF"}} strokeWidth={2.5} />
+              <I.bolt size={18} style={{color:"#FF9E1B"}} strokeWidth={2.5} />
               <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:11,letterSpacing:".16em",color:"#8A9BA8",textShadow:"none"}}>BIGGEST CLIMBER · <span style={{color:"#F4F9FA"}}>{climber.e.player.name.toUpperCase()}</span> <span style={{color:"#00E5FF"}}>▲{climber.n}</span></span>
             </div>
           )}
@@ -5263,7 +5263,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
     <div className="space-y-4">
       {canScore && <div className="flex justify-end -mt-1 -mb-2"><SyncIndicator status={sync} errMsg={syncErr} /></div>}
       {(() => {
-        const rankRing = rank === 1 ? "#7FF0FF" : rank === 2 ? "#C9C9C9" : rank === 3 ? "#8A9BA8" : null;
+        const rankRing = rank === 1 ? "#FF9E1B" : rank === 2 ? "#C9C9C9" : rank === 3 ? "#8A9BA8" : null;
         const form = recentForm(playerId, state.sessions);
         const dec = entry.stats.groupPlayed + entry.stats.qfReached + entry.stats.sfReached + entry.stats.finalsReached;
         const wins = entry.stats.groupWins + entry.stats.qfWins + entry.stats.sfWins + entry.stats.finalsWon;
@@ -5555,9 +5555,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 /* semantic accents stay */
 [class*="bg-stone-9"] .text-orange-400,[class*="bg-stone-9"] .text-orange-500{color:#00E5FF !important;}
 [class*="bg-stone-9"] .text-emerald-400,[class*="bg-stone-9"] .text-emerald-300{color:#27E08A !important;}
-[class*="bg-stone-9"] .text-cyan-300,[class*="bg-stone-9"] .text-cyan-300{color:#7FF0FF !important;}
+[class*="bg-stone-9"] .text-cyan-300,[class*="bg-stone-9"] .text-cyan-300{color:#FF9E1B !important;}
 [class*="bg-stone-9"] .text-red-400,[class*="bg-stone-9"] .text-red-500{color:#00E5FF !important;}
-[class*="bg-stone-9"] .text-blue-400{color:#7FF0FF !important;}
+[class*="bg-stone-9"] .text-blue-400{color:#FF9E1B !important;}
 
 /* ── card borders: thin hairlines, not ink slabs ── */
 .border.border-stone-800,.border-stone-800\/80,.border-stone-700{
@@ -5567,7 +5567,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
 /* ── point-structure rows → tinted dark ── */
 .rounded-lg[style*="rgba(16,185,129"]{background:rgba(39,224,138,.08) !important;border:1px solid rgba(39,224,138,.45) !important;box-shadow:none !important;}
-.rounded-lg[style*="rgba(251,191,36"]{background:rgba(127,240,255,.08) !important;border:1px solid rgba(127,240,255,.45) !important;box-shadow:none !important;}
+.rounded-lg[style*="rgba(251,191,36"]{background:rgba(255,158,27,.08) !important;border:1px solid rgba(255,158,27,.45) !important;box-shadow:none !important;}
 .rounded-lg[style*="rgba(249,115,22"]{background:rgba(0,229,255,.08) !important;border:1px solid rgba(244,249,250,.10) !important;box-shadow:none !important;}
 .rounded-lg[style*="transparent"]{background:rgba(255,255,255,.03) !important;border:1px solid rgba(244,249,250,.1) !important;}
 [style*="rgba(28,25,23"]{background:rgba(20,24,36,.85) !important;border:1px solid rgba(244,249,250,.12) !important;}
@@ -5623,13 +5623,13 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 
 /* ── bracket tree cards ── */
 [style*="background: rgba(20,18,16"]{background:rgba(20,24,36,.85) !important;border:1px solid rgba(244,249,250,.12) !important;}
-[style*="background: rgba(127,240,255,0.06)"]{background:rgba(127,240,255,.08) !important;border:1px solid rgba(127,240,255,.45) !important;}
+[style*="background: rgba(255,158,27,0.06)"]{background:rgba(255,158,27,.08) !important;border:1px solid rgba(255,158,27,.45) !important;}
 </style>
 
 <script>
 // Runtime comic forcer — patches inline styles React applies
 (function(){
-  const INK = '#0A0A0A', CREAM = '#F4F9FA', YELLOW = '#7FF0FF', RED = '#00E5FF', ORANGE = '#00E5FF', BLUE = '#1B8EE0';
+  const INK = '#0A0A0A', CREAM = '#F4F9FA', YELLOW = '#FF9E1B', RED = '#00E5FF', ORANGE = '#00E5FF', BLUE = '#1B8EE0';
   
   // Patch elements with known inline style patterns
   function patch(el){
@@ -5660,7 +5660,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
       el.style.color = INK;
     }
     // double points 2X badge inside toggle
-    if(bg.includes('var(--blue)') || bg.includes('#7FF0FF')){
+    if(bg.includes('var(--blue)') || bg.includes('#FF9E1B')){
       el.style.border = '2px solid '+INK;
       el.style.borderRadius = '0';
     }
@@ -5897,9 +5897,9 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .jh-bubble::before,.jh-bubble::after{display:none !important;content:none !important;}
 /* accent edge per panel type */
 .jh-fill-red{border-left:2px solid #00E5FF !important;}
-.jh-fill-blue{border-left:2px solid #7FF0FF !important;}
+.jh-fill-blue{border-left:2px solid #FF9E1B !important;}
 .jh-fill-green{border-left:2px solid #27E08A !important;}
-.jh-fill-yellow{border-left:2px solid #7FF0FF !important;}
+.jh-fill-yellow{border-left:2px solid #FF9E1B !important;}
 /* every bit of text inside a panel reads on dark */
 .jh-panel *,.jh-mock-row *,.jh-mock-sess *{color:#F4F9FA;}
 .jh-panel [style*="color:#F4F9FA"],.jh-panel [style*="color:#F4F9FA"],
@@ -5932,7 +5932,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .jh-pow{font-family:'Anton',Impact,sans-serif !important;transform:none !important;
   -webkit-text-stroke:0 !important;text-shadow:0 0 12px currentColor !important;
   font-size:20px !important;letter-spacing:2px !important;}
-.jh-crown{color:#7FF0FF !important;filter:drop-shadow(0 0 8px rgba(127,240,255,.6));}
+.jh-crown{color:#FF9E1B !important;filter:drop-shadow(0 0 8px rgba(255,158,27,.6));}
 /* buttons/chips inside panels */
 .jh-mock-btn,.jh-mock-chip,.jh-chipbtn{
   background:rgba(0,229,255,.14) !important;border:1px solid rgba(0,229,255,.65) !important;
@@ -5997,9 +5997,9 @@ nav.fixed button[style*="var(--orange-br)"],nav.fixed button[style*="#00E5FF"]{
 /* one-time glitch-in reveal */
 @keyframes aaGlitchIn{
   0%{opacity:0;transform:translate(-8px,0) skewX(5deg);
-     filter:drop-shadow(5px 0 #00E5FF) drop-shadow(-5px 0 #7FF0FF);clip-path:inset(45% 0 45% 0)}
+     filter:drop-shadow(5px 0 #00E5FF) drop-shadow(-5px 0 #FF9E1B);clip-path:inset(45% 0 45% 0)}
   18%{opacity:1;transform:translate(7px,-2px) skewX(-3deg);clip-path:inset(0 0 70% 0)}
-  36%{transform:translate(-6px,2px);filter:drop-shadow(-4px 0 #7FF0FF);clip-path:inset(60% 0 6% 0)}
+  36%{transform:translate(-6px,2px);filter:drop-shadow(-4px 0 #FF9E1B);clip-path:inset(60% 0 6% 0)}
   54%{transform:translate(4px,-1px);filter:drop-shadow(4px 0 #00E5FF);clip-path:inset(12% 0 34% 0)}
   72%{transform:translate(-2px,0);clip-path:inset(30% 0 0 0)}
   100%{opacity:1;transform:none;clip-path:none}
@@ -6039,9 +6039,9 @@ nav.fixed button[style*="var(--orange-br)"],nav.fixed button[style*="#00E5FF"]{
 }
 /* accent bars instead of outlines: leader / active / qualified */
 .jh-lbrow.r1,.jh-srow.active,.jh-fill-red{border-left:2px solid #00E5FF !important;}
-.jh-fill-blue{border-left:2px solid #7FF0FF !important;}
+.jh-fill-blue{border-left:2px solid #FF9E1B !important;}
 .jh-fill-green{border-left:2px solid #27E08A !important;}
-.jh-fill-yellow{border-left:2px solid #7FF0FF !important;}
+.jh-fill-yellow{border-left:2px solid #FF9E1B !important;}
 /* hover: subtle lift, not a glow bomb */
 .jh-srow:hover,.jh-lbrow:hover,.jh-mock-row:hover,.jh-mock-sess:hover{
   border-color:rgba(0,229,255,.4) !important;background:rgba(0,229,255,.05) !important;
@@ -6091,12 +6091,12 @@ nav.fixed .grid > button[style*="var(--orange-br)"]{
 span[style*="background:var(--blue)"],span[style*="background: var(--blue)"],
 .jh-panel span[style*="background:var(--blue)"],
 .jh-panel span[style*="background: var(--blue)"]{
-  background:rgba(127,240,255,.10) !important;color:#7FF0FF !important;
-  border:1px solid rgba(127,240,255,.35) !important;box-shadow:none !important;
+  background:rgba(255,158,27,.10) !important;color:#FF9E1B !important;
+  border:1px solid rgba(255,158,27,.35) !important;box-shadow:none !important;
 }
 /* top-of-group / highlighted rows: tint + gold left bar, never a muddy fill */
-[style*="rgba(127,240,255,.13)"],[style*="rgba(127,240,255,.14)"]{
-  background:rgba(127,240,255,.07) !important;border-left:2px solid #7FF0FF !important;
+[style*="rgba(255,158,27,.13)"],[style*="rgba(255,158,27,.14)"]{
+  background:rgba(255,158,27,.07) !important;border-left:2px solid #FF9E1B !important;
 }
 /* bottom nav active: red text + top rule (beat the html:not(.light) rules) */
 html:not(.light) nav.fixed .grid > button,
@@ -6143,7 +6143,7 @@ html:not(.light) nav.fixed .grid > button[style*="var(--orange-br)"] svg{color:#
 }
 /* meaning through tick colour */
 .jh-fill-red,.jh-lbrow.r1,.jh-srow.active{ --tick:#00E5FF; }
-.jh-fill-blue,.jh-fill-yellow{ --tick:#7FF0FF; }
+.jh-fill-blue,.jh-fill-yellow{ --tick:#FF9E1B; }
 .jh-fill-green{ --tick:#27E08A; }
 .jh-lbrow.r2{ --tick:#C9CFDA; }
 .jh-lbrow.r3{ --tick:#8A9BA8; }
@@ -6204,7 +6204,7 @@ html:not(.light) nav.fixed .grid > button[style*="var(--orange-br)"] svg{color:#
       text-splits, not just .glitch-in.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-out:cubic-bezier(.34,1.56,.64,1);
   --ease-in-out:cubic-bezier(.77,0,.175,1);
 }
 
@@ -6225,7 +6225,7 @@ html:not(.light) nav.fixed.bottom-0{
   border-top:1px solid rgba(0,229,255,.35) !important;
   /* corner ticks, drawn as backgrounds so no pseudo-element clash */
   background-image:
-    linear-gradient(#7FF0FF,#7FF0FF), linear-gradient(#7FF0FF,#7FF0FF),
+    linear-gradient(#FF9E1B,#FF9E1B), linear-gradient(#FF9E1B,#FF9E1B),
     linear-gradient(#00E5FF,#00E5FF), linear-gradient(#00E5FF,#00E5FF) !important;
   background-size:14px 2px, 2px 14px, 14px 2px, 2px 14px !important;
   background-position:0 0, 0 0, 100% 100%, 100% 100% !important;
@@ -6417,21 +6417,21 @@ html:not(.light) nav.fixed.bottom-0 .grid > a{
    ═══════════════════════════════════════════════════════════ */
 
 /* 1 · SPLASH — the mark glitches in, then breathes as it always did */
-.splash .splash-logo{ animation:aaBootMark 720ms cubic-bezier(.23,1,.32,1) both; }
+.splash .splash-logo{ animation:aaBootMark 720ms cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes aaBootMark{
   0%{opacity:0;transform:translateX(-24px) skewX(7deg) scale(1.06);
-     filter:drop-shadow(15px 0 rgba(0,229,255,.9)) drop-shadow(-15px 0 rgba(127,240,255,.9));
+     filter:drop-shadow(15px 0 rgba(0,229,255,.9)) drop-shadow(-15px 0 rgba(255,158,27,.9));
      clip-path:inset(42% 0 42% 0)}
   22%{opacity:1;transform:translateX(16px) skewX(-4deg) scale(1.03);clip-path:inset(0 0 58% 0)}
   46%{transform:translateX(-9px) skewX(2deg);clip-path:inset(8% 0 0 0)}
   68%{transform:translateX(5px);clip-path:inset(0 0 0 0);
-      filter:drop-shadow(4px 0 rgba(0,229,255,.6)) drop-shadow(-4px 0 rgba(127,240,255,.6))}
+      filter:drop-shadow(4px 0 rgba(0,229,255,.6)) drop-shadow(-4px 0 rgba(255,158,27,.6))}
   100%{transform:none;filter:drop-shadow(0 0 14px rgba(0,229,255,.5)) drop-shadow(0 0 34px rgba(0,229,255,.3))}
 }
-.splash .splash-chip{ animation:aaBootIn 420ms 260ms cubic-bezier(.23,1,.32,1) both; }
+.splash .splash-chip{ animation:aaBootIn 420ms 260ms cubic-bezier(.34,1.56,.64,1) both; }
 
 /* 2 · HERO TAGLINE — resolves out of blur, tracking tightening as it lands */
-html.aa-boot .aa-tagline{ animation:aaBootTag 620ms 120ms cubic-bezier(.23,1,.32,1) both; }
+html.aa-boot .aa-tagline{ animation:aaBootTag 620ms 120ms cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes aaBootTag{
   0%{opacity:0;letter-spacing:.28em;filter:blur(6px)}
   60%{opacity:1;letter-spacing:.05em;filter:blur(0)}
@@ -6441,7 +6441,7 @@ html.aa-boot .aa-tagline{ animation:aaBootTag 620ms 120ms cubic-bezier(.23,1,.32
 /* 3 · PRIZE PANEL — the slam. Safe to animate transform here: the panel
    carries an inline transform:none, so landing on none changes nothing. */
 html.aa-boot .jh-panel.jh-fill-green{
-  animation:aaBootSlam 620ms 340ms cubic-bezier(.23,1,.32,1);
+  animation:aaBootSlam 620ms 340ms cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes aaBootSlam{
   0%{opacity:0;transform:scale(.92)}
@@ -6557,7 +6557,7 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
   background:#050709;
   /* corner ticks: cyan opens, red closes — same grammar as the cards */
   background-image:
-    linear-gradient(#7FF0FF,#7FF0FF), linear-gradient(#7FF0FF,#7FF0FF),
+    linear-gradient(#FF9E1B,#FF9E1B), linear-gradient(#FF9E1B,#FF9E1B),
     linear-gradient(#00E5FF,#00E5FF), linear-gradient(#00E5FF,#00E5FF);
   background-size:18px 3px, 3px 18px, 18px 3px, 3px 18px;
   background-position:0 0, 0 0, 100% 100%, 100% 100%;
@@ -6574,7 +6574,7 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
 .aa-wall > div::after{
   content:"";position:absolute;inset:5px;pointer-events:none;
   background:repeating-linear-gradient(0deg,rgba(0,0,0,.20) 0 1px,transparent 1px 3px);
-  box-shadow:inset 3px 0 0 rgba(0,229,255,.85), inset -3px 0 0 rgba(127,240,255,.7);
+  box-shadow:inset 3px 0 0 rgba(0,229,255,.85), inset -3px 0 0 rgba(255,158,27,.7);
 }
 @media (hover:hover){
   .aa-wall > div:hover{ transform:translateY(-2px); }
