@@ -90,10 +90,17 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
-### September Surge (Vol.7 preview)
+### September Surge (Vol.7 — live)
 - URL: https://surge.urbanpadel.om
 - Local copy: `surge-index.html` — static, deploy by copying straight to
-  `/var/www/surge.urbanpadel.om/public/index.html` (+ `assets/up-logo-cyan*.png`)
+  `/var/www/surge.urbanpadel.om/public/index.html` (+ `assets/surge-lockup.{webp,png}`,
+  `assets/up-logo-cyan*.png`)
+- The hero is the **series lockup** (`brand/september-surge/`), which carries
+  SEPTEMBER / SURGE / URBAN PLAYGROUND itself — it replaced the separate emblem
+  and the type-set headline. Served WebP-first with a PNG fallback: the art is
+  glow and particle heavy, which PNG encodes badly (1.1MB vs 233KB for a
+  difference of 0.45/255 on this background). Master art is
+  `brand/september-surge/surge-lockup.png` at 1982x929.
 - Standings are **not stored here**. The page has its own dedicated nginx vhost
   (`/etc/nginx/sites-available/surge.urbanpadel.om`, not the wildcard) that
   proxies `GET /state`, `/photos`, `/session-photos` straight through to the

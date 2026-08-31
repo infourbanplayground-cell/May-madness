@@ -7,7 +7,7 @@
 <title>September Surge · Urban Playground</title>
 <meta name="description" content="September Surge — Urban Social Series Vol.7. Live standings, carried over from August Attack.">
 <meta property="og:title" content="September Surge">
-<meta property="og:description" content="Urban Social Series Vol.7 — coming September. Live standings, synced from August Attack.">
+<meta property="og:description" content="Urban Social Series Vol.7 — now live. Standings synced from the series in real time.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://surge.urbanpadel.om/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,24 +118,15 @@
     letter-spacing:.26em; color:var(--void); background:var(--cyan);
     padding:7px 13px 6px; box-shadow:var(--glow);
   }
-  /* Display face: Archivo pushed wide + heavy + italic instead of a
-     separate display font — the forward lean IS the brand move here. */
-  /* "SEPTEMBER" is one unbreakable word — unlike a multi-word headline, a
-     vw-scaled clamp doesn't protect it, because there is no earlier break
-     point for the browser to wrap at before it overflows. Sized against the
-     word's measured ink at this exact font-stretch/weight/style (wdth:125
-     runs ~8.15px of ink per 1px of font-size for this string), not guessed:
-     max container width here is min(100vw-32, 788px), so font-size is
-     capped at container-width / 8.15 with a safety margin, both ends. */
-  h1 {
-    margin-top:20px;
-    font-family:'Archivo', sans-serif; font-style:italic;
-    font-variation-settings:'wdth' 125,'wght' 900;
-    font-size:clamp(34px,10.2vw,90px); line-height:.86; letter-spacing:-.01em;
-    text-transform:uppercase;
-    text-shadow:0 0 50px rgba(0,229,255,.32);
+  /* The series lockup. It replaced a type-set headline whose one unbreakable
+     word ("SEPTEMBER") had to be hand-sized against its measured ink to stop
+     it overflowing narrow viewports — an image has no such problem, it just
+     scales. Width is capped so it never outgrows the reading column, and the
+     art already carries its own glow, so no text-shadow is added on top. */
+  .hero img.lockup {
+    display:block; margin:20px auto 0;
+    width:min(100%, 620px); height:auto;
   }
-  h1 em { font-style:italic; color:var(--cyan); }
   .tagline {
     margin-top:14px; font-family:'Archivo',sans-serif; font-style:italic;
     font-variation-settings:'wdth' 112,'wght' 700;
@@ -154,13 +145,18 @@
      wrap onto the same line whenever there's room, which put this chip
      crowding right up against .sub on wider screens. Forcing its own line
      removes that ambiguity regardless of viewport width. */
-  .soon {
+  .live {
     margin:18px auto 0; width:fit-content; display:flex; align-items:center; gap:8px;
     font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
-    letter-spacing:.18em; color:var(--steel-p);
-    border:1px solid var(--hair); padding:7px 12px;
+    letter-spacing:.18em; color:var(--cyan);
+    border:1px solid rgba(0,229,255,.34); padding:7px 12px;
   }
-  .soon i { width:6px; height:6px; background:var(--steel-p); display:block; }
+  .live i {
+    width:6px; height:6px; background:var(--cyan); display:block;
+    box-shadow:0 0 8px var(--cyan); animation:livepulse 2s var(--ease-out) infinite;
+  }
+  @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  @media (prefers-reduced-motion: reduce) { .live i { animation:none } }
 
   /* ── SECTION RULE ── */
   .sec { display:flex; align-items:center; gap:14px; margin:0 0 16px; }
@@ -358,12 +354,25 @@
   </div>
 
   <div class="hero">
-    <img class="mark" src="/assets/up-logo-cyan.png" alt="Urban Playground">
     <span class="vol">VOL. 7</span>
-    <h1>SEPTEMBER<br><em>SURGE</em></h1>
+    <!-- The lockup carries SEPTEMBER / SURGE / URBAN PLAYGROUND itself, so it
+         replaces both the separate emblem and the type headline that used to
+         sit here. alt text keeps the name available to screen readers and to
+         anyone the image fails for.
+         WebP first: this is a glow-and-particle heavy image, which PNG encodes
+         badly — 1.1MB as PNG against 233KB as WebP for a difference invisible
+         on the page (mean 0.45/255 composited on this background). The PNG
+         stays as the fallback source. Eager + high priority because it is the
+         largest paint on the page and sits above the fold. -->
+    <picture>
+      <source srcset="/assets/surge-lockup.webp" type="image/webp">
+      <img class="lockup" src="/assets/surge-lockup.png" width="1982" height="929"
+           fetchpriority="high" decoding="async"
+           alt="September Surge — Urban Playground">
+    </picture>
     <div class="tagline">Ride the surge.</div>
     <div class="sub">Urban Social Series · Muscat</div>
-    <div class="soon"><i></i>COMING SEPTEMBER</div>
+    <div class="live"><i></i>SERIES LIVE</div>
   </div>
 
   <div class="sec"><span>SERIES STANDINGS</span><div class="line"></div></div>
