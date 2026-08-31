@@ -90,36 +90,34 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
-### September Surge (Vol.7 — live)
-- URL: https://surge.urbanpadel.om
-- Local copy: `surge-index.html` — static, deploy by copying straight to
-  `/var/www/surge.urbanpadel.om/public/index.html` (+ `assets/surge-lockup.{webp,png}`,
-  `assets/up-logo-cyan*.png`)
-- The hero is the **series lockup** (`brand/september-surge/`), which carries
-  SEPTEMBER / SURGE / URBAN PLAYGROUND itself — it replaced the separate emblem
-  and the type-set headline. Served WebP-first with a PNG fallback: the art is
-  glow and particle heavy, which PNG encodes badly (1.1MB vs 233KB for a
-  difference of 0.45/255 on this background). Master art is
-  `brand/september-surge/surge-lockup.png` at 1982x929.
-- Standings are **not stored here**. The page has its own dedicated nginx vhost
-  (`/etc/nginx/sites-available/surge.urbanpadel.om`, not the wildcard) that
-  proxies `GET /state`, `/photos`, `/session-photos` straight through to the
-  August Attack API on `127.0.0.1:3005` — the same backend `attack.urbanpadel.om`
-  itself talks to. That's the live sync: same data, same request, no copy to
-  drift out of date.
-- **Read-only by construction, not by convention.** `/login`, `/save`,
-  `/photo-upload`, `/history`, `/restore`, `/recovery-dump` are deliberately
-  absent from the vhost's proxy regex, so there is no route from this
-  subdomain to writing a score or reading admin data — nginx serves the
-  static page for anything else, it never reaches the API for those paths.
-  If a future volume needs write access here, that is a new decision, not a
-  regex tweak.
-- The in-page leaderboard math is a byte-for-byte copy of `calcPlayerStats`
-  and its dependencies from `aa_score.cjs` (the app's own scoring engine),
-  not a re-implementation — verified against it player-by-player before
-  shipping. If the app's scoring rules ever change, re-sync this copy by
-  diffing against `aa_score.cjs`; the comment at the top of the `<script>`
-  block in `surge-index.html` says the same.
+### September Surge (Vol.7 — LIVE APP)
+- URL: https://surge.urbanpadel.om — the full tournament app, at the root
+- Local copy: `september-surge-index.html`, **generated** by
+  `build-september-surge-app.py` from `august-attack-index.html`. Do not hand-edit
+  it: fix Vol.6 and re-run the script, which is how a volume inherits the previous
+  one's markup (July Heat → August Attack → September Surge). Every rename is
+  asserted, so a string that stops matching fails the build rather than shipping
+  a half-rebranded app.
+- API: `/opt/september-surge-api/api.js` — systemd: `september-surge-api` — port **3008**
+- Tables: **`ss_*`** (`ss_tournament_state`, `ss_state_history`, `ss_player_photos`,
+  `ss_session_photos`, `ss_recovery_dumps`) — same database, own rows. Vol.6's
+  `aa_*` tables and port 3005 are completely separate and untouched.
+- Same admin/scorer/photographer PINs as August Attack (`.env` copied, port changed).
+- Deploy app: `scp september-surge-index.html urbanpadel:/tmp/ss.html && ssh urbanpadel 'cp /tmp/ss.html /var/www/surge.urbanpadel.om/public/index.html && date +%Y%m%d_%H%M%S > /var/www/surge.urbanpadel.om/public/version.txt'`
+- Deploy API: `scp api.js urbanpadel:/opt/september-surge-api/ && ssh urbanpadel 'systemctl restart september-surge-api'`
+- Brand art: `brand/september-surge/` — the lockup carries SEPTEMBER / SURGE /
+  URBAN PLAYGROUND, served WebP-first (233KB vs 1.1MB as PNG). The Vol.6 app
+  carried its emblem inline as base64 three times; Vol.7 points at
+  `assets/up-logo-cyan.png` instead, which halves the page (0.79MB → 0.38MB).
+- The old read-only landing page is kept at
+  `/var/www/surge.urbanpadel.om/public/index.html.landing-preview-20260901`.
+  The vhost no longer proxies read-only into 3005 — it proxies the full route
+  set into 3008, because Surge now writes its own scores.
+
+**Carried over from Vol.6 and NOT yet reviewed for Vol.7:** the 402 OMR prize
+pool, `sessionsTotal = 9`, the `[75, 45, 30]` season prizes, 7 OMR entry, and
+`DOUBLE_FROM_SESSION = 8`. These ship as Vol.6's numbers — confirm before the
+signup post goes out.
 
 ## Common Commands
 
