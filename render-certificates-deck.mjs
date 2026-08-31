@@ -49,7 +49,13 @@ for (const n of names) {
     };
   });
 
-  await pg.pdf({ path: path.join(OUT, `aa-certificate-${n}.pdf`),
+  // NOTE: the PDF is NOT produced here. Chromium's vector PDF export tiles
+  // large blurred shadows and the tile seams show as hard-edged rectangular
+  // blocks — very visible around the giant placement numeral's 90px glow,
+  // though the same page screenshots perfectly cleanly. This design is
+  // glow-heavy throughout, so the PDF is assembled from the 300 DPI raster
+  // instead; see pack-certificate-pdfs.py.
+  await pg.pdf({ path: path.join(OUT, `_vector-${n}.pdf`),
                  width: `${W_MM}mm`, height: `${H_MM}mm`, printBackground: true,
                  scale: PDF_SCALE, pageRanges: '1' });
   await pg.close();
