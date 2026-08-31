@@ -4,12 +4,20 @@
 // crop or letterbox it, the PDF page is set to 297 x 167.06mm — full A4
 // landscape width at the design's own aspect — so it prints on A4 with an even
 // margin top and bottom and every proportion is exactly as designed.
+//
+// page.pdf does NOT scale content to fit the page: it lays the document out at
+// its CSS size and paginates. A 1920px-wide artboard is 1440pt = 508mm, so on a
+// 297mm page it silently spills off the right edge and pageRanges:'1' keeps only
+// the cropped first page. The `scale` below maps 1920 CSS px onto the page width
+// so the whole artboard lands on one page.
 import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 
 const OUT = path.resolve('brand/certificates-deck');
 const W_MM = 297, H_MM = +(297 * 1080 / 1920).toFixed(2);   // 167.06
+const CSS_PX_PER_MM = 96 / 25.4;
+const PDF_SCALE = (W_MM * CSS_PX_PER_MM) / 1920;            // ~0.5846
 const names = process.argv.slice(2).length ? process.argv.slice(2) : ['1st','2nd','3rd','4th','5th'];
 
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
@@ -42,7 +50,8 @@ for (const n of names) {
   });
 
   await pg.pdf({ path: path.join(OUT, `aa-certificate-${n}.pdf`),
-                 width: `${W_MM}mm`, height: `${H_MM}mm`, printBackground: true, pageRanges: '1' });
+                 width: `${W_MM}mm`, height: `${H_MM}mm`, printBackground: true,
+                 scale: PDF_SCALE, pageRanges: '1' });
   await pg.close();
 
   // 300 DPI raster: 1920 CSS px across 297mm => scale so 297mm lands at 300dpi.
