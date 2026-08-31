@@ -18,7 +18,8 @@ motif change.
 | Vol | Series | Theme | Status |
 |---|---|---|---|
 | 5 | July Heat | Comic book — halftone, hard offset shadows, cream paper | Archived (banner on `heat.urbanpadel.om`) |
-| 6 | August Attack | Neon night — court black, glitch, tactical grid | **Live** at `attack.urbanpadel.om` |
+| 6 | August Attack | Neon night — court black, glitch, tactical grid | Archived at `attack.urbanpadel.om` |
+| 7 | September Surge | Rising current — deep current, waveform, forward lean | **Live** at `surge.urbanpadel.om` |
 
 Because a new series inherits the previous one's markup, **class names lie**.
 `.jh-*` classes (July Heat) are all over the August app. `--yellow` holds cyan.
@@ -106,6 +107,60 @@ green = live, steel = quiet. **No rounded corners anywhere.** `border-radius: 0`
 
 Long list rows are *not* cards — they get a plate plus a hairline bottom rule,
 no ticks. Ticks are for cards only, or the page turns into noise.
+
+---
+
+## 2b. September Surge tokens (Vol.7)
+
+Vol.7 is built by `build-september-surge-app.py`, which re-skins the Vol.6 file
+and appends `ops/surge-skin.css` as the last style block. **Do not hand-edit
+`september-surge-index.html`** — fix Vol.6 or the skin and re-run.
+
+Attack was a single hard strike. Surge is a rising current, and the temperature
+**inverts**: cyan leads, amber supports, at the same ~3:1 ratio August ran red
+over cyan.
+
+| Token | Hex | Use |
+|---|---|---|
+| Deep Current | `#0A0F14` | Page base. Cooler and darker than Court Black |
+| Void | `#050709` | Nav, gradient floor, card plate |
+| **Surge Cyan** | `#00E5FF` | Primary accent — the lead, not the support |
+| Voltage White | `#F4F9FA` | Primary text |
+| Deep Steel | `#5C6B78` | Labels, inactive, letterspaced kickers |
+| Steel Text | `#8A9BA8` | Prose-length secondary text |
+| Strike Amber | `#FF9E1B` | The single warm accent. **Live-now and urgency only** |
+
+**Contrast:** Deep Steel on Deep Current is ~3.3:1 — fine for bold letterspaced
+kickers, under the floor for sentences. Anything prose-length uses `#8A9BA8`.
+Green is retired: `#27E08A` → cyan absorbs it. Gold stays out, as in August;
+medal chips use cyan / `#C3D0D8` / steel.
+
+### What changes beyond colour
+
+| | Vol.6 | Vol.7 |
+|---|---|---|
+| Display face | Anton, standing tall | Archivo `wdth 125` `wght 900` **italic** |
+| Card marker | 4 corner ticks, `16×2px` | 1 rising bar, `3px × 100%`, bright top |
+| Page texture | 46px tactical grid | horizontal surge trace, drifting 26s |
+| Glow | `0 0 14px red/.32` | `0 0 40px cyan/.28, 0 0 90px cyan/.14` |
+| Easing | `.23,1,.32,1` | `.34,1.56,.64,1` — overshoots and settles |
+| View transition | `translateY(6px)` up | `translateX(-10px)` in |
+| Boot | glitch — a signal cut | pulse and ripple — a signal sent |
+| Arrows | `→` | `▶` (rank movement stays ▲▼) |
+| Tagline | Serve first. Strike hard. | Ride the surge. |
+
+The easing swap is the single highest-leverage line: one custom property, and
+every press goes from landing a hit to building energy.
+
+### Three exceptions to the blanket swap
+
+The red→cyan and cyan→amber sweeps produce the wrong answer in three places:
+
+1. **Signup-state pill** — stays warm; it is the clearest use of the amber accent.
+2. **Pinned YOU row on RANK** — amber, so it stays distinct on a now-cyan screen.
+   It is the only amber on that screen.
+3. **"See all-time rankings" CTA** — was August's cyan, so the sweep made it
+   amber; but amber is urgency-only and this is navigation, so it takes cyan.
 
 ---
 

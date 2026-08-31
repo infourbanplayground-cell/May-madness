@@ -35,8 +35,17 @@ COLOURS = [
     ("#0A0C12", "@@BG@@", "#0A0F14"),  # Court Black -> Deep Current
     ("#06070B", "@@BG2@@", "#050709"), # Deep Black -> Void
     ("#F4F6FA", "@@FG@@", "#F4F9FA"),  # Chalk -> Voltage White
-    ("#8B95A7", "@@MU@@", "#8A9BA8"),  # Steel -> Deep Steel (prose weight)
+    ("#8B95A7", "@@MU@@", "#8A9BA8"),  # Steel -> Steel Text (see note below)
+    # "cyan absorbs green" — the spec retires the separate live/done green.
+    ("#27E08A", "@@G1@@", "#00E5FF"),
+    ("#1FD9C4", "@@G2@@", "#00E5FF"),
 ]
+# NOTE ON --muted. The handoff's JSX table says #8B95A7 -> #5C6B78, but its own
+# contrast note says #5C6B78 is ~3.3:1 on the base and is for bold letterspaced
+# kickers only, with #8A9BA8 as "the second steel for body-length secondary
+# text". These inline styles are mostly prose-length, so they take #8A9BA8 and
+# stay above 4.5:1; the skin layer still re-points the CSS --muted token to
+# #5C6B78 for the labels and kickers it was specified for.
 # The same colours again as rgb() triples, which the app uses inside rgba().
 RGBS = [
     ("255,46,67", "@@RP@@", "0,229,255"),
@@ -67,11 +76,11 @@ DISPLAY_RE = [
     # CSS:  font-family:'Anton',cursive   /   font-family: 'Anton', Impact, sans-serif
     (re.compile(r"font-family:\s*'Anton'[^;}\"']*"),
      "font-family:'Archivo',sans-serif;font-style:italic;"
-     "font-variation-settings:'wdth' 118,'wght' 900"),
+     "font-variation-settings:'wdth' 125,'wght' 900"),
     # JSX:  fontFamily: "'Anton',cursive"
     (re.compile(r'fontFamily:\s*"\'Anton\'[^"]*"'),
      'fontFamily:"\'Archivo\',sans-serif",fontStyle:"italic",'
-     'fontVariationSettings:"\'wdth\' 118,\'wght\' 900"'),
+     'fontVariationSettings:"\'wdth\' 125,\'wght\' 900"'),
     # The splash preloads the display face by name before first paint.
     (re.compile(r'document\.fonts\.load\("(\d+)px \'Anton\'"\)'),
      r'document.fonts.load("italic \1px Archivo")'),
@@ -92,6 +101,7 @@ DISPLAY = [
     # one URL just fetches a second overlapping face.
     ("family=Anton&", "family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&"),
     ("family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&", ""),
+    ("family=JetBrains+Mono:wght@500;700", "family=JetBrains+Mono:wght@400;500;700"),
 ]
 
 # ── Assets. The Surge lockup replaces the Attack wordmark; the cyan Urban
@@ -138,6 +148,80 @@ TEXT = [
     ("🏆 *July Heat final standings:*\nheat.urbanpadel.om → Leaderboard",
      "🏆 *August Attack final standings:*\nattack.urbanpadel.om → Leaderboard"),
 ]
+
+# Direction. The spec makes everything that can imply direction point right:
+# navigational and call-to-action arrows become ▶. Rank movement arrows are
+# already ▲▼ and are deliberately left alone.
+ARROWS = [("→", "▶")]
+
+# A third place where the blanket swap gives the wrong answer, alongside the two
+# the handoff names. This button was August's cyan (its support accent), so the
+# #3DE1FF -> amber rule turned it amber — but the spec is explicit that Strike
+# Amber is for "live-now and urgency states only", and "see all-time rankings"
+# is neither. It is a navigation CTA, so it takes the lead colour.
+POST_SWEEP = [
+    ('color:"#0A0F14",background:"#FF9E1B",border:"none",padding:"10px 20px 8px",'
+     'cursor:"pointer",boxShadow:"0 0 22px rgba(255,158,27,.35)"',
+     'color:"#050709",background:"#00E5FF",border:"none",padding:"10px 20px 8px",'
+     'cursor:"pointer",boxShadow:"0 0 30px rgba(0,229,255,.4)"'),
+]
+
+
+SKIN = os.path.join(HERE, "ops", "surge-skin.css")
+
+
+def apply_skin(s, report):
+    """Append the handoff's surge-skin.css as the last <style> block.
+
+    The August skin is itself a stack of append-only override layers; the
+    handoff is explicit that Surge is one more layer in that shape and that
+    nothing above it should be deleted.
+
+    Two selectors in the file are rewritten on the way in. They target August's
+    literal values — button[style*="FF2E43"] and [style*="Anton"] — which the
+    JSX sweep above has already replaced, so pasted verbatim they would match
+    nothing. Retargeting them at the post-sweep values keeps the rules doing
+    the job they were written to do.
+    """
+    css = open(SKIN).read()
+    css = css.replace('button[style*="FF2E43"]', 'button[style*="00E5FF"]')
+    css = css.replace('[style*="Anton"]', '[style*="wdth"]')
+    # This build renames Vol.6's .aa-* classes (DESIGN.md's "class names lie"
+    # complaint), so the skin's lockup selectors have to follow or its rules
+    # would silently match nothing.
+    css = css.replace('.aa-wordmark', '.surge-lockup-img').replace('.aa-emblem', '.surge-emblem')
+
+    # The spec's two documented exceptions to the blanket cyan swap.
+    css += """
+
+/* ── 6 · THE TWO EXCEPTIONS THE HANDOFF CALLS OUT ──────────────────────
+   Both are places where the blanket red->cyan sweep produces the wrong
+   answer, named explicitly in the handoff's JSX table.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* The signup-state pill is the clearest use of the warm accent in the app,
+   so it takes Strike Amber rather than following red into cyan. */
+.jh-signup-pill,.jh-chipbtn.signup,[data-signup-state]{
+  background:var(--surge-amber) !important;
+  color:var(--surge-void) !important;
+  box-shadow:0 0 24px rgba(255,158,27,.35) !important;
+}
+
+/* The pinned YOU row on RANK is already cyan-bordered and would lose its
+   distinction against a now-cyan screen, so it goes amber — and it is the
+   only amber on that screen. */
+.jh-lbrow.is-me,.jh-lbrow.me,[data-me="1"]{
+  --tick:var(--surge-amber) !important;
+  border-color:rgba(255,158,27,.55) !important;
+}
+"""
+    marker = "</style>"
+    i = s.rindex(marker)
+    block = ("\n<style>\n/* ══ SEPTEMBER SURGE · VOL.7 SKIN — appended last, per the handoff ══ */\n"
+             + css + "\n</style>\n")
+    s = s[:i + len(marker)] + block + s[i + len(marker):]
+    report.append(f"  skin   surge-skin.css appended as last style block ({len(css)/1024:.0f}KB)")
+    return s
 
 
 def main():
@@ -206,6 +290,19 @@ def main():
         s = s.replace(old, new)
         report.append(f"  text   {old:<22} -> {new:<22} {n:>3}")
 
+    for old, new in ARROWS:
+        n = s.count(old)
+        if n:
+            s = s.replace(old, new)
+            report.append(f"  arrows {old} -> {new}{'':<34} {n:>4}")
+
+    for old, new in POST_SWEEP:
+        n = s.count(old)
+        if n != 1:
+            sys.exit(f"BUILD FAILED: post-sweep fix expected 1 match, found {n}")
+        s = s.replace(old, new)
+        report.append("  fix    all-time CTA amber -> cyan (amber is urgency-only)")
+
     # Anything left over would ship as Vol.6 branding on a Vol.7 site.
     #
     # Two Vol.6 references are legitimate and deliberate: Vol.7 names Vol.6 as
@@ -225,6 +322,11 @@ def main():
             sys.exit(f"BUILD FAILED: expected exactly {want} reference(s) to {p!r} "
                      f"(Vol.7 citing its predecessor), found {got}")
     report.append(f"  kept   {EXPECTED} as predecessor references")
+
+    # Appended after the guard: the handoff's CSS carries its own commentary
+    # ("Anton can then be dropped", "Serve first. Strike hard." as the line
+    # being replaced), which is documentation of the change, not a leftover.
+    s = apply_skin(s, report)
 
     open(DST, "w").write(s)
     print("\n".join(report))
