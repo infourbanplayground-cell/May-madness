@@ -441,6 +441,20 @@ def apply_skin(s, report):
     # would silently match nothing.
     css = css.replace('.aa-wordmark', '.surge-lockup-img').replace('.aa-emblem', '.surge-emblem')
 
+    # The waveform's drift was frozen by its own rule. Section 1 pins
+    # `background-position:0 0 !important` on body::before and then animates
+    # that same property with surgeTrace — and a CSS animation cannot override
+    # an !important declaration, so the animation ran while the background sat
+    # still. The !important is there to beat August's grid, which sets
+    # background-image and background-size but never position, so dropping it
+    # on this one declaration costs nothing and lets the trace actually move.
+    frozen = "  background-position:0 0 !important;"
+    if css.count(frozen) != 1:
+        sys.exit(f"BUILD FAILED: expected exactly 1 pinned background-position in the "
+                 f"skin's waveform rule, found {css.count(frozen)}")
+    css = css.replace(frozen, "  background-position:0 0;")
+    report.append("  fix    waveform background-position un-pinned (!important froze surgeTrace)")
+
     # The spec's two documented exceptions to the blanket cyan swap.
     css += """
 
