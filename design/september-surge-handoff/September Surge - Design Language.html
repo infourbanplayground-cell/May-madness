@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/july-heat/styles.css">
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/styles.css">
+<script src="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#050709; }
+  a { color:#00E5FF; text-decoration:none; }
+  a:hover { color:#FF9E1B; }
+  @keyframes surgeSweep { 0% { background-position:-140% 0 } 100% { background-position:240% 0 } }
+  @keyframes surgeRipple { 0% { transform:scale(.6); opacity:.55 } 100% { transform:scale(2.4); opacity:0 } }
+  @keyframes surgeTrace { 0% { transform:translateX(0) } 100% { transform:translateX(-50%) } }
+</style>
+</helmet>
+
+<div style="background:#050709; color:#F4F9FA; font-family:Archivo, system-ui, sans-serif; padding:0 0 140px; display:flex; flex-direction:column; align-items:center">
+
+  <div style="width:100%; max-width:1180px; padding:0 40px; display:flex; flex-direction:column; gap:96px">
+
+    <header style="position:relative; overflow:hidden; padding:96px 0 56px; border-bottom:1px solid rgba(92,107,120,.3)">
+      <div style="position:absolute; inset:0; opacity:.4; pointer-events:none; display:flex; align-items:center">
+        <svg width="200%" height="180" viewBox="0 0 2400 180" preserveAspectRatio="none" style="animation:surgeTrace 18s linear infinite">
+          <path d="M0 90 Q 50 90 75 90 T 150 90 Q 180 90 200 40 T 240 140 Q 260 90 300 90 T 420 90 Q 450 90 470 20 T 520 160 Q 545 90 600 90 T 760 90 Q 800 90 820 55 T 870 125 Q 900 90 960 90 T 1150 90 Q 1180 90 1200 90 T 1200 90 Q 1250 90 1275 90 T 1350 90 Q 1380 90 1400 40 T 1440 140 Q 1460 90 1500 90 T 1620 90 Q 1650 90 1670 20 T 1720 160 Q 1745 90 1800 90 T 1960 90 Q 2000 90 2020 55 T 2070 125 Q 2100 90 2160 90 T 2400 90" fill="none" stroke="#00E5FF" stroke-width="1.5" opacity=".55"></path>
+        </svg>
+      </div>
+      <div style="position:relative; display:flex; flex-direction:column; gap:22px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.26em; color:#00E5FF">URBAN PLAYGROUND · VOL.7 · DESIGN LANGUAGE</div>
+        <h1 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:clamp(52px,8.4vw,104px); line-height:.86; margin:0; text-transform:uppercase; letter-spacing:-.01em">September<br>Surge</h1>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:.2em; color:#5C6B78">RIDE THE SURGE.</div>
+      </div>
+    </header>
+
+    <section style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:64px; align-items:start">
+      <div style="display:flex; flex-direction:column; gap:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">THE IDEA</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(26px,3.2vw,38px); line-height:1.02; margin:0; text-transform:uppercase">A current, not a hit</h2>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:18px; font-size:17px; line-height:1.65; color:#C3D0D8; text-wrap:pretty">
+        <p style="margin:0">Attack was a single hard strike: static plates, corner ticks, a tactical grid, warm red over cool cyan. Surge inverts the temperature and the tense. It is energy building rather than landing, so the language becomes directional — waveform instead of grid, a rising bar instead of four ticks, a sweep instead of a halo.</p>
+        <p style="margin:0">Structure and scoring do not move. This is a palette, type and motif substitution on the same app, and someone glancing at a screenshot should be able to name the volume without reading a word.</p>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">01</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Colour</h2>
+        <div style="font-size:15px; color:#5C6B78">Cyan leads, amber supports, at 3:1 — the reverse of August</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:20px">
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#0A0F14; border:1px solid rgba(92,107,120,.3)"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Deep Current</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#0A0F14</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">Page base. Cooler and darker than Court Black, almost teal-black.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#050709; border:1px solid rgba(92,107,120,.3)"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Void</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#050709</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">Nav bar, gradient floor.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#00E5FF; box-shadow:0 0 44px rgba(0,229,255,.35)"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Surge Cyan</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#00E5FF</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">The lead colour now, not the supporting one. Brighter and more saturated than August's Ice.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#F4F9FA"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Voltage White</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#F4F9FA</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">Primary text. Cooler than Chalk, leaning toward the cyan.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#5C6B78"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Deep Steel</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#5C6B78</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">Secondary text, inactive states.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column">
+          <div style="height:140px; background:#FF9E1B; box-shadow:0 0 44px rgba(255,158,27,.22)"></div>
+          <div style="padding:14px 2px; display:flex; flex-direction:column; gap:5px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:19px; text-transform:uppercase">Strike Amber</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; color:#00E5FF">#FF9E1B</div>
+            <div style="font-size:14px; line-height:1.5; color:#5C6B78">The single warm accent. Live-now and urgency states only.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:18px 20px; background:#0A0F14; background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.1)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+        <div style="padding-left:8px; display:flex; flex-direction:column; gap:6px">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF9E1B">ONE ADJUSTMENT I'D MAKE</div>
+          <div style="font-size:15px; line-height:1.6; color:#C3D0D8; max-width:800px">Deep Steel on Deep Current lands at about 3.3:1 — fine for the bold letterspaced kickers it's specified for, under the 4.5:1 floor for anything running as sentences. Add <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">#8A9BA8</span> as a second steel for body-length secondary text and keep #5C6B78 for labels and inactive states. Everything else in the palette clears comfortably.</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#5C6B78">RATIO IN PRACTICE — ONE SCREEN'S WORTH OF ACCENT</div>
+        <div style="display:flex; height:34px; width:100%">
+          <div style="flex:9; background:#00E5FF"></div>
+          <div style="flex:3; background:#FF9E1B"></div>
+          <div style="flex:24; background:#0A0F14; border:1px solid rgba(92,107,120,.3); border-left:none"></div>
+        </div>
+        <div style="display:flex; gap:26px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#5C6B78">
+          <span>CYAN 3</span><span>AMBER 1</span><span>SURFACE — EVERYTHING ELSE</span><span style="color:#FF9E1B">GOLD STAYS OUT, SAME RULE AS AUGUST</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">02</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Type</h2>
+        <div style="font-size:15px; color:#5C6B78">Letterforms that look like they're moving right</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:56px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:34px">
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#5C6B78">DISPLAY · ARCHIVO EXPANDED 900 ITALIC</div>
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:clamp(38px,5.4vw,66px); line-height:.9; text-transform:uppercase">Rankings</div>
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:clamp(38px,5.4vw,66px); line-height:.9; text-transform:uppercase; color:#00E5FF">Session 3</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78; max-width:520px; margin-top:4px">Anton's blocky verticals go. Archivo at width 125 and weight 900, italicised, gives the forward lean without adding a family — it's the same variable face the body text already uses, so it costs one extra axis on a font already being loaded.</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#5C6B78">BODY / UI · ARCHIVO 400–800, NORMAL WIDTH</div>
+            <div style="font-size:19px; line-height:1.55; color:#F4F9FA; max-width:560px">Nine sessions, Mondays and Wednesdays. Points follow the player, not the team.</div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#5C6B78">NUMBERS / DATA · JETBRAINS MONO</div>
+            <div style="display:flex; gap:26px; align-items:baseline; font-family:'JetBrains Mono',monospace; font-weight:700">
+              <span style="font-size:44px">45</span><span style="font-size:44px; color:#00E5FF">12</span><span style="font-size:22px; color:#5C6B78">83%</span><span style="font-size:22px; color:#FF9E1B">▲14</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:18px; background:#0A0F14; padding:26px; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.08)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+          <div style="padding-left:10px; display:flex; flex-direction:column; gap:18px">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#00E5FF">KICKERS</div>
+            <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:#00E5FF">Next session</div>
+            <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:#00E5FF">Series standings</div>
+            <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:11px; letter-spacing:.34em; text-transform:uppercase; color:#5C6B78">Your standing</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">Archivo 800 at .34em tracking. Cyan for the live one, steel for the rest — August ran these in red with a glowing 3px pip, and that pip is what the rising bar replaces.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">03</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Motif</h2>
+        <div style="font-size:15px; color:#5C6B78">Directional and kinetic, where August was architectural</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:24px">
+
+        <div style="display:flex; flex-direction:column; gap:0">
+          <div style="height:190px; background:#0A0F14; position:relative; overflow:hidden; border:1px solid rgba(92,107,120,.2)">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; opacity:.5">
+              <svg width="200%" height="120" viewBox="0 0 2400 120" preserveAspectRatio="none" style="animation:surgeTrace 22s linear infinite">
+                <path d="M0 60 L 180 60 Q 200 60 215 22 T 250 98 Q 268 60 300 60 L 520 60 Q 545 60 560 14 T 600 106 Q 620 60 660 60 L 900 60 Q 920 60 935 38 T 975 82 Q 990 60 1030 60 L 1200 60 L 1380 60 Q 1400 60 1415 22 T 1450 98 Q 1468 60 1500 60 L 1720 60 Q 1745 60 1760 14 T 1800 106 Q 1820 60 1860 60 L 2100 60 Q 2120 60 2135 38 T 2175 82 Q 2190 60 2230 60 L 2400 60" fill="none" stroke="#00E5FF" stroke-width="1.5"></path>
+              </svg>
+            </div>
+          </div>
+          <div style="padding:16px 2px; display:flex; flex-direction:column; gap:6px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:20px; text-transform:uppercase">Waveform, not grid</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">The 46px tactical grid behind every screen becomes a single low-opacity surge trace. Same job, same cost — one repeating SVG instead of two linear-gradients. Drifting is optional; the shape alone carries it.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0">
+          <div style="height:190px; background:#0A0F14; border:1px solid rgba(92,107,120,.2); display:flex; align-items:center; justify-content:center; gap:18px; padding:20px">
+            <div style="flex:1; height:104px; background:#050709; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat; display:flex; align-items:center; padding-left:18px">
+              <span style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:22px; text-transform:uppercase">Charging</span>
+            </div>
+            <div style="flex:1; height:104px; background:#050709; background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat; display:flex; align-items:center; padding-left:18px">
+              <span style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:22px; text-transform:uppercase; color:#FF9E1B">Live</span>
+            </div>
+          </div>
+          <div style="padding:16px 2px; display:flex; flex-direction:column; gap:6px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:20px; text-transform:uppercase">Rising bar, not corner ticks</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">One vertical gradient block on the left edge, bright at the top and fading down. Same background-gradient trick August used for its four ticks, reduced to one — and the bar's colour carries state exactly as the tick colour did.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0">
+          <div style="height:190px; background:#0A0F14; border:1px solid rgba(92,107,120,.2); display:flex; align-items:center; justify-content:center; gap:36px">
+            <div style="width:96px; height:96px; background:#050709; border:1px solid rgba(0,229,255,.4); box-shadow:0 0 40px rgba(0,229,255,.28), 0 0 90px rgba(0,229,255,.14); display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:#00E5FF">1</div>
+            <div style="display:flex; flex-direction:column; gap:8px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#5C6B78; line-height:1.7">
+              <div>AUGUST — 0 0 14px rgba(255,46,67,.32)</div>
+              <div style="color:#00E5FF">SURGE — 0 0 40px rgba(0,229,255,.28),<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 0 90px rgba(0,229,255,.14)</div>
+            </div>
+          </div>
+          <div style="padding:16px 2px; display:flex; flex-direction:column; gap:6px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:20px; text-transform:uppercase">Glow, not shadow</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">A wider, cooler bloom in two layers instead of one tight halo. Less hot metal, more screen static.</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0">
+          <div style="height:190px; background:#0A0F14; border:1px solid rgba(92,107,120,.2); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; padding:20px">
+            <div style="width:100%; height:44px; background:linear-gradient(90deg,rgba(0,229,255,0) 0%,rgba(0,229,255,.35) 45%,rgba(0,229,255,0) 70%); background-size:240% 100%; animation:surgeSweep 2.6s linear infinite; display:flex; align-items:center; padding-left:16px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.18em; color:#F4F9FA">GRADIENTS SWEEP LEFT TO RIGHT</div>
+            <div style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:#5C6B78">
+              <span style="color:#00E5FF; font-size:18px">▶</span><span>ARROWS POINT RIGHT BY DEFAULT</span>
+            </div>
+            <div style="display:flex; gap:12px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:#5C6B78">
+              <span style="color:#00E5FF; font-size:18px">⟶</span><span>CARDS ENTER FROM THE LEFT</span>
+            </div>
+          </div>
+          <div style="padding:16px 2px; display:flex; flex-direction:column; gap:6px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:20px; text-transform:uppercase">Left-to-right bias</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">Everything that can imply direction does. August's view transition rose 6px on entry; Surge's slides 10px in from the left instead.</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">04</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Motion</h2>
+        <div style="font-size:15px; color:#5C6B78">Same discipline, different character</div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:48px; align-items:start">
+        <div style="display:flex; flex-direction:column; gap:20px">
+          <div style="display:flex; gap:26px; align-items:flex-start">
+            <div style="display:flex; flex-direction:column; gap:8px; align-items:center">
+              <svg width="120" height="120" viewBox="0 0 100 100" style="border:1px solid rgba(92,107,120,.25); background:#0A0F14">
+                <path d="M0 100 C 23 0, 32 0, 100 0" fill="none" stroke="#5C6B78" stroke-width="2"></path>
+              </svg>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">AUGUST · .23,1,.32,1</div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px; align-items:center">
+              <svg width="120" height="120" viewBox="-8 -22 116 144" style="border:1px solid rgba(0,229,255,.35); background:#0A0F14">
+                <path d="M0 100 C 34 -56, 64 0, 100 0" fill="none" stroke="#00E5FF" stroke-width="2"></path>
+              </svg>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#00E5FF">SURGE · .34,1.56,.64,1</div>
+            </div>
+          </div>
+          <div style="font-size:15px; line-height:1.65; color:#C3D0D8; text-wrap:pretty">The single highest-leverage change in the whole skin. August's curve is a decisive settle; Surge's overshoots its target and comes back, so every press and every panel reads as energy building rather than a hit landing. One custom property, applied everywhere at once.</div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:0; background:#0A0F14; border:1px solid rgba(92,107,120,.2)">
+          <div style="height:200px; position:relative; overflow:hidden; display:grid; place-items:center">
+            <div style="position:absolute; width:80px; height:80px; border-radius:50%; border:2px solid #00E5FF; animation:surgeRipple 2.4s cubic-bezier(.34,1.56,.64,1) infinite"></div>
+            <div style="position:absolute; width:80px; height:80px; border-radius:50%; border:2px solid #00E5FF; animation:surgeRipple 2.4s cubic-bezier(.34,1.56,.64,1) .8s infinite"></div>
+            <div style="position:absolute; width:80px; height:80px; border-radius:50%; border:2px solid #00E5FF; animation:surgeRipple 2.4s cubic-bezier(.34,1.56,.64,1) 1.6s infinite"></div>
+            <div style="position:relative; width:80px; height:80px; background:#050709; border:1px solid rgba(0,229,255,.5); display:grid; place-items:center; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:30px; color:#00E5FF">S</div>
+          </div>
+          <div style="padding:18px 20px; display:flex; flex-direction:column; gap:6px; border-top:1px solid rgba(92,107,120,.2)">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#00E5FF">THE ONE RARE MOMENT</div>
+            <div style="font-size:14px; line-height:1.6; color:#5C6B78">August's boot glitched the mark, like a signal being cut. Surge pulses and ripples outward instead — a signal being sent. Splash only; it never appears in the app.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:34px; flex-wrap:wrap; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; color:#5C6B78; padding-top:6px">
+        <span>NOTHING OVER 320MS</span><span>TRANSFORM + OPACITY ONLY</span><span>:ACTIVE ON EVERYTHING PRESSABLE</span><span>HOVER GATED TO HOVER DEVICES</span><span style="color:#00E5FF">REDUCED-MOTION KILLS THE TRACE DRIFT AND THE RIPPLE</span>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">05</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">On screen</h2>
+        <div style="font-size:15px; color:#5C6B78">The same HOME, in August's tokens and Surge's</div>
+      </div>
+
+      <div style="display:flex; gap:52px; align-items:flex-start; flex-wrap:wrap">
+
+        <div style="display:flex; flex-direction:column; gap:14px">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.2em; color:#5C6B78">VOL.6 — AUGUST ATTACK</div>
+          <div style="width:390px; height:844px; background:#0A0C12; border:1px solid rgba(139,149,167,.28); display:flex; flex-direction:column; overflow:hidden; opacity:.62">
+            <div style="height:48px; flex:none; background:#06070B; border-bottom:2px solid #FF2E43; display:flex; align-items:center; justify-content:space-between; padding:0 14px">
+              <div style="font-family:Archivo,sans-serif; font-weight:900; letter-spacing:.1em; font-size:13px">URBAN PLAYGROUND</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">VOL.6</div>
+            </div>
+            <div style="flex:none; padding:16px 14px 18px; background:linear-gradient(180deg,rgba(255,46,67,.16),rgba(10,12,18,0))">
+              <div style="font-family:Archivo,sans-serif; font-weight:900; font-size:38px; line-height:.9; letter-spacing:.03em">AUGUST ATTACK</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em; color:#8B95A7; margin-top:8px">SERVE FIRST. STRIKE HARD.</div>
+            </div>
+            <div style="flex:none; margin:0 14px; background:#06070B; border:1px solid rgba(255,46,67,.5); padding:14px; display:flex; flex-direction:column; gap:12px">
+              <div style="display:flex; justify-content:space-between"><span style="font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.2em; color:#FF2E43">NEXT SESSION</span><span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:#27E08A">SIGNUP OPEN</span></div>
+              <div style="font-family:Archivo,sans-serif; font-weight:900; font-size:32px; line-height:.9">SESSION 3</div>
+              <div style="height:48px; background:#FF2E43; color:#06070B; font-family:Archivo,sans-serif; font-weight:900; font-size:17px; letter-spacing:.06em; display:grid; place-items:center">OPEN SESSION →</div>
+            </div>
+            <div style="flex:none; margin:12px 14px 0; background:#06070B; padding:14px; background-image:linear-gradient(#3DE1FF,#3DE1FF),linear-gradient(#3DE1FF,#3DE1FF),linear-gradient(#FF2E43,#FF2E43),linear-gradient(#FF2E43,#FF2E43); background-size:16px 2px,2px 16px,16px 2px,2px 16px; background-position:left top,left top,right bottom,right bottom; background-repeat:no-repeat; display:flex; flex-direction:column; gap:10px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700; letter-spacing:.2em; color:#8B95A7">YOUR STANDING</div>
+              <div style="display:flex; align-items:center; gap:12px">
+                <div style="width:46px; height:46px; border:1px solid rgba(139,149,167,.4); display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700">12</div>
+                <div style="flex:1; font-family:Archivo,sans-serif; font-weight:900; font-size:21px">EATHAR</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:26px; font-weight:700">20</div>
+              </div>
+            </div>
+            <div style="flex:1; margin:12px 14px 0; display:flex; flex-direction:column; gap:6px">
+              <div style="display:flex; align-items:center; gap:10px; background:#06070B; padding:8px 11px; border-left:2px solid #FF2E43"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#FF2E43; width:16px">1</span><span style="flex:1; font-family:Archivo,sans-serif; font-weight:900; font-size:15px">MUNTHER RAHBI</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">45</span></div>
+              <div style="display:flex; align-items:center; gap:10px; background:#06070B; padding:8px 11px"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#8B95A7; width:16px">2</span><span style="flex:1; font-family:Archivo,sans-serif; font-weight:900; font-size:15px">MAZIN</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">40</span></div>
+              <div style="display:flex; align-items:center; gap:10px; background:#06070B; padding:8px 11px"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#8B95A7; width:16px">3</span><span style="flex:1; font-family:Archivo,sans-serif; font-weight:900; font-size:15px">HUSAM RAWAHI</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">29</span></div>
+            </div>
+            <div style="height:58px; flex:none; background:#06070B; border-top:1px solid rgba(139,149,167,.25); display:flex; align-items:center">
+              <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em; color:#FF2E43">HOME</div>
+              <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em; color:#8B95A7">SESSIONS</div>
+              <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.16em; color:#8B95A7">RANK</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.2em; color:#00E5FF">VOL.7 — SEPTEMBER SURGE</div>
+          <div style="width:390px; height:844px; background:#0A0F14; border:1px solid rgba(0,229,255,.3); display:flex; flex-direction:column; overflow:hidden; position:relative">
+            <div style="position:absolute; inset:0; opacity:.16; pointer-events:none; display:flex; align-items:center">
+              <svg width="200%" height="200" viewBox="0 0 2400 200" preserveAspectRatio="none" style="animation:surgeTrace 26s linear infinite">
+                <path d="M0 100 L 180 100 Q 200 100 215 40 T 250 160 Q 268 100 300 100 L 520 100 Q 545 100 560 30 T 600 170 Q 620 100 660 100 L 900 100 Q 920 100 935 66 T 975 134 Q 990 100 1030 100 L 1200 100 L 1380 100 Q 1400 100 1415 40 T 1450 160 Q 1468 100 1500 100 L 1720 100 Q 1745 100 1760 30 T 1800 170 Q 1820 100 1860 100 L 2100 100 Q 2120 100 2135 66 T 2175 134 Q 2190 100 2230 100 L 2400 100" fill="none" stroke="#00E5FF" stroke-width="2"></path>
+              </svg>
+            </div>
+
+            <div style="position:relative; height:48px; flex:none; background:#050709; border-bottom:1px solid rgba(0,229,255,.45); display:flex; align-items:center; justify-content:space-between; padding:0 14px; box-shadow:0 0 26px rgba(0,229,255,.14)">
+              <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; letter-spacing:.06em; font-size:13px; text-transform:uppercase">Urban Playground</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#5C6B78">VOL.7</div>
+            </div>
+
+            <div style="position:relative; flex:none; padding:18px 14px 20px; background:linear-gradient(90deg,rgba(0,229,255,.2),rgba(0,229,255,.04) 55%,transparent)">
+              <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:40px; line-height:.88; text-transform:uppercase">September<br>Surge</div>
+              <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:10px; letter-spacing:.34em; color:#5C6B78; margin-top:10px; text-transform:uppercase">Mon &amp; Wed · 5:30 PM · Ride the surge.</div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:0 14px; background:#050709; padding:14px 14px 16px 18px; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat; box-shadow:0 0 34px rgba(0,229,255,.12)">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px">
+                <span style="font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.34em; color:#00E5FF; text-transform:uppercase">Next session</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:#FF9E1B">SIGNUP OPEN</span>
+              </div>
+              <div style="display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap">
+                <span style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 125,'wght' 900; font-style:italic; font-size:32px; line-height:.9; text-transform:uppercase">Session 3</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.1em; color:#5C6B78; padding-bottom:3px">MON 7 SEP</span>
+              </div>
+              <div style="display:flex; gap:8px; margin-top:13px">
+                <div style="flex:1; height:48px; background:#00E5FF; color:#050709; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 900; font-style:italic; font-size:17px; letter-spacing:.04em; display:grid; place-items:center; text-transform:uppercase; box-shadow:0 0 30px rgba(0,229,255,.4)">Open session ▶</div>
+                <div style="width:104px; border:1px solid rgba(92,107,120,.4); display:flex; flex-direction:column; align-items:center; justify-content:center">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700">14</div>
+                  <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:8px; letter-spacing:.24em; color:#5C6B78; text-transform:uppercase">Teams in</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:12px 14px 0; background:#050709; padding:14px 14px 14px 18px; background-image:linear-gradient(180deg,#5C6B78,rgba(92,107,120,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px">
+                <span style="font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.34em; color:#5C6B78; text-transform:uppercase">Your standing</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; color:#00E5FF">NOT YOU?</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px">
+                <div style="width:46px; height:46px; flex:none; border:1px solid rgba(0,229,255,.35); display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700; color:#00E5FF">12</div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px">
+                  <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 900; font-style:italic; font-size:21px; line-height:1; text-transform:uppercase">Eathar</div>
+                  <div style="display:flex; gap:4px">
+                    <span style="width:16px; height:16px; display:grid; place-items:center; background:rgba(92,107,120,.28); color:#5C6B78; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700">L</span>
+                    <span style="width:16px; height:16px; display:grid; place-items:center; background:#00E5FF; color:#050709; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700">W</span>
+                    <span style="width:16px; height:16px; display:grid; place-items:center; background:#00E5FF; color:#050709; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700">W</span>
+                    <span style="width:16px; height:16px; display:grid; place-items:center; background:rgba(92,107,120,.28); color:#5C6B78; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700">L</span>
+                    <span style="width:16px; height:16px; display:grid; place-items:center; background:rgba(92,107,120,.28); color:#5C6B78; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:700">L</span>
+                  </div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:27px; font-weight:700; line-height:1">20</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#FF9E1B">▲ 3</div>
+                </div>
+              </div>
+              <div style="margin-top:10px; font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.2em; color:#5C6B78; text-transform:uppercase">3 pts off the top ten · 1 session missed</div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:12px 14px 0; display:flex; gap:8px">
+              <div style="flex:1; background:#050709; padding:11px 13px; display:flex; flex-direction:column; gap:7px">
+                <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:8.5px; letter-spacing:.24em; color:#5C6B78; text-transform:uppercase">Series progress</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700">2 <span style="color:#5C6B78">/ 9</span></div>
+                <div style="height:4px; background:rgba(92,107,120,.3)"><div style="width:22%; height:4px; background:linear-gradient(90deg,rgba(0,229,255,.4),#00E5FF)"></div></div>
+              </div>
+              <div style="width:142px; background:#050709; padding:11px 13px; display:flex; flex-direction:column; gap:6px">
+                <div style="font-family:Archivo,sans-serif; font-weight:800; font-size:8.5px; letter-spacing:.24em; color:#5C6B78; text-transform:uppercase">Prize pool</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700">402 <span style="font-size:11px; color:#5C6B78">OMR</span></div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.1em; color:#FF9E1B">2× ON THE LAST TWO</div>
+              </div>
+            </div>
+
+            <div style="position:relative; flex:1; margin:12px 14px 0; display:flex; flex-direction:column; gap:6px; min-height:0">
+              <div style="display:flex; justify-content:space-between; align-items:baseline">
+                <span style="font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.34em; color:#5C6B78; text-transform:uppercase">Leaderboard</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.12em; color:#00E5FF">ALL 48 ▶</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; background:#050709; padding:8px 11px 8px 14px; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.08)); background-size:2px 100%; background-position:left top; background-repeat:no-repeat"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#00E5FF; width:16px">1</span><span style="flex:1; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-style:italic; font-size:15px; text-transform:uppercase">Munther Rahbi</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">45</span></div>
+              <div style="display:flex; align-items:center; gap:10px; background:#050709; padding:8px 11px 8px 14px"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#5C6B78; width:16px">2</span><span style="flex:1; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-style:italic; font-size:15px; text-transform:uppercase">Mazin</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">40</span></div>
+              <div style="display:flex; align-items:center; gap:10px; background:#050709; padding:8px 11px 8px 14px"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#5C6B78; width:16px">3</span><span style="flex:1; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-style:italic; font-size:15px; text-transform:uppercase">Husam Rawahi</span><span style="font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:700">29</span></div>
+            </div>
+
+            <div style="position:relative; height:58px; flex:none; background:#050709; border-top:1px solid rgba(92,107,120,.28); display:flex; align-items:center">
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.24em; color:#00E5FF; text-transform:uppercase; border-top:2px solid #00E5FF; padding-top:8px; margin-top:-10px">Home</div>
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.24em; color:#5C6B78; text-transform:uppercase">Sessions</div>
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; font-size:9px; letter-spacing:.24em; color:#5C6B78; text-transform:uppercase">Rank</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:24px; padding-top:38px">
+          <div style="display:flex; flex-direction:column; gap:7px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:18px; text-transform:uppercase">What actually moved</div>
+            <div style="font-size:14px; line-height:1.65; color:#5C6B78">Not a single element changed position. Every difference here is a token, a font axis, or a background-image swap.</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:14px; font-size:14px; line-height:1.6; color:#C3D0D8">
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">01</span><span>The primary button is cyan, so the loudest thing on the screen is now cool. Amber holds signup state.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">02</span><span>Four corner ticks became one rising bar. Cheaper, and the card silhouette is unmistakably a different volume.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">03</span><span>The hero gradient runs left-to-right rather than top-down.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">04</span><span>Arrows are ▶ not →, everywhere.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">05</span><span>Kickers are Archivo 800 at .34em in cyan, with the glowing red pip removed — the rising bar does that job now.</span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:32px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">06</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Leaderboard</h2>
+        <div style="font-size:15px; color:#5C6B78">The densest screen in the app, and the one the skin has to survive</div>
+      </div>
+
+      <div style="display:flex; gap:52px; align-items:flex-start; flex-wrap:wrap">
+
+        <div style="display:flex; flex-direction:column; gap:14px">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.2em; color:#00E5FF">VOL.7 — RANK</div>
+          <div style="width:390px; height:844px; background:#0A0F14; border:1px solid rgba(0,229,255,.3); display:flex; flex-direction:column; overflow:hidden; position:relative">
+            <div style="position:absolute; inset:0; opacity:.12; pointer-events:none; display:flex; align-items:center">
+              <svg width="200%" height="200" viewBox="0 0 2400 200" preserveAspectRatio="none" style="animation:surgeTrace 26s linear infinite">
+                <path d="M0 100 L 180 100 Q 200 100 215 40 T 250 160 Q 268 100 300 100 L 520 100 Q 545 100 560 30 T 600 170 Q 620 100 660 100 L 900 100 Q 920 100 935 66 T 975 134 Q 990 100 1030 100 L 1200 100 L 1380 100 Q 1400 100 1415 40 T 1450 160 Q 1468 100 1500 100 L 1720 100 Q 1745 100 1760 30 T 1800 170 Q 1820 100 1860 100 L 2100 100 Q 2120 100 2135 66 T 2175 134 Q 2190 100 2230 100 L 2400 100" fill="none" stroke="#00E5FF" stroke-width="2"></path>
+              </svg>
+            </div>
+
+            <div style="position:relative; height:48px; flex:none; background:#050709; border-bottom:1px solid rgba(0,229,255,.45); display:flex; align-items:center; justify-content:space-between; padding:0 14px; box-shadow:0 0 26px rgba(0,229,255,.14)">
+              <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; letter-spacing:.06em; font-size:13px; text-transform:uppercase">Urban Playground</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#5C6B78">VOL.7</div>
+            </div>
+
+            <div style="position:relative; flex:none; padding:18px 14px 10px; display:flex; align-items:flex-end; justify-content:space-between">
+              <div style="display:flex; flex-direction:column; gap:5px">
+                <div style="font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:9px; color:#5C6B78">Series standings</div>
+                <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-variation-settings:'wdth' 125,'wght' 900; font-size:38px; line-height:.88; text-transform:uppercase">Rankings</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; color:#5C6B78; border:1px solid rgba(92,107,120,.3); padding:5px 8px">48 RANKED</div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:8px 14px 0; display:flex; border:1px solid rgba(92,107,120,.3)">
+              <div style="flex:1; text-align:center; padding:10px 0; background:#00E5FF; color:#050709; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:14px; text-transform:uppercase; box-shadow:0 0 24px rgba(0,229,255,.3)">This series</div>
+              <div style="flex:1; text-align:center; padding:10px 0; color:#5C6B78; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:14px; text-transform:uppercase">All-time</div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:10px 14px 0; border:1px solid rgba(92,107,120,.3); padding:10px 13px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#5C6B78">FIND A PLAYER…</div>
+
+            <div style="position:relative; flex:none; margin:10px 14px 0; background:#050709; padding:10px 12px 10px 15px; background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.08)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat; display:flex; align-items:center; gap:11px">
+              <div style="font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:8.5px; color:#FF9E1B">You</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#5C6B78">12</div>
+              <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:17px; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Eathar</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#FF9E1B">▲3</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700">20</div>
+            </div>
+
+            <div style="position:relative; flex:none; margin:14px 14px 0; display:flex; flex-direction:column; gap:7px">
+              <div style="display:flex; align-items:center; gap:11px; background:#050709; padding:12px 12px 12px 15px; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat; box-shadow:0 0 30px rgba(0,229,255,.12)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#00E5FF">1</div>
+                <div style="width:38px; height:38px; flex:none; background:rgba(92,107,120,.16)"></div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+                  <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:19px; line-height:1; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Munther Rahbi</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; color:#5C6B78">2 SESS · 82% WIN · WWWWW</div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:23px; font-weight:700; color:#00E5FF">45</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:11px; background:#050709; padding:12px 12px 12px 15px; background-image:linear-gradient(180deg,#5C6B78,rgba(92,107,120,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#5C6B78">2</div>
+                <div style="width:38px; height:38px; flex:none; background:rgba(92,107,120,.16)"></div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+                  <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:19px; line-height:1; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Mazin</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; color:#5C6B78">2 SESS · 80% WIN · ▲14 BIGGEST CLIMBER</div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:23px; font-weight:700; color:#F4F9FA">40</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:11px; background:#050709; padding:12px 12px 12px 15px; background-image:linear-gradient(180deg,#5C6B78,rgba(92,107,120,.06)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#5C6B78">3</div>
+                <div style="width:38px; height:38px; flex:none; background:rgba(92,107,120,.16)"></div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+                  <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:19px; line-height:1; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Husam Rawahi</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:9.5px; color:#5C6B78">1 SESS · 83% WIN · ▼2</div>
+                </div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:23px; font-weight:700; color:#F4F9FA">29</div>
+              </div>
+            </div>
+
+            <div style="position:relative; flex:1; margin:12px 14px 0; display:flex; flex-direction:column; min-height:0">
+              <div style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid rgba(92,107,120,.18)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5C6B78">4</div>
+                <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-weight:800; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Ibrahim</div>
+                <div style="width:32px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">83%</div>
+                <div style="width:30px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">29</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid rgba(92,107,120,.18)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5C6B78">5</div>
+                <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-weight:800; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Muntaser Hasni</div>
+                <div style="width:32px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">67%</div>
+                <div style="width:30px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">28</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid rgba(92,107,120,.18)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5C6B78">6</div>
+                <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-weight:800; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Said Habsi</div>
+                <div style="width:32px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">67%</div>
+                <div style="width:30px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">28</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid rgba(92,107,120,.18)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5C6B78">7</div>
+                <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-weight:800; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Faisal Al Harthi</div>
+                <div style="width:32px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">60%</div>
+                <div style="width:30px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">25</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px; padding:10px 4px; border-top:1px solid rgba(92,107,120,.18)">
+                <div style="width:20px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#5C6B78">8</div>
+                <div style="flex:1; min-width:0; font-family:Archivo,sans-serif; font-weight:800; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">Nooh Amri</div>
+                <div style="width:32px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:#5C6B78">83%</div>
+                <div style="width:30px; text-align:right; font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">23</div>
+              </div>
+              <div style="font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:9px; color:#00E5FF; padding:13px 4px; border-top:1px solid rgba(92,107,120,.18)">Show 12 more on 3 pts or fewer ▶</div>
+            </div>
+
+            <div style="position:relative; height:58px; flex:none; background:#050709; border-top:1px solid rgba(92,107,120,.28); display:flex; align-items:center">
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:9px; letter-spacing:.24em; color:#5C6B78">Home</div>
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:9px; letter-spacing:.24em; color:#5C6B78">Sessions</div>
+              <div style="flex:1; text-align:center; font-family:Archivo,sans-serif; font-weight:800; letter-spacing:.34em; text-transform:uppercase; font-size:9px; letter-spacing:.24em; color:#00E5FF; border-top:2px solid #00E5FF; padding-top:8px; margin-top:-10px">Rank</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="flex:1; min-width:300px; display:flex; flex-direction:column; gap:26px; padding-top:38px">
+          <div style="display:flex; flex-direction:column; gap:7px">
+            <div style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 112,'wght' 800; font-size:18px; text-transform:uppercase">Where the skin earns itself</div>
+            <div style="font-size:14.5px; line-height:1.65; color:#8A9BA8; text-wrap:pretty">This screen is 48 rows deep. It is where August's language broke down — every row carried corner ticks, a photo, a pill strip and a big red total, so the accent marked nothing and the podium meant nothing.</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:16px; font-size:14.5px; line-height:1.6; color:#C3D0D8">
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">01</span><span>Only the top three carry a rising bar, and only first place carries the bloom. Ranks 4+ are a plain table. One card signature, spent where it means something.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">02</span><span>The pinned <span style="color:#FF9E1B">YOU</span> row is the one place amber appears on this screen. It is the only row that is about the person holding the phone, so it gets the warm accent and nothing else does.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">03</span><span>The active segment of the series toggle is a solid cyan fill — the same treatment as the primary button on HOME, so "the filled cyan thing is the live one" holds across the app.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">04</span><span>Biggest climber is a fact inside Mazin's row rather than a striped banner above the list. In August it was the heaviest object on the screen and it was decoration.</span></div>
+            <div style="display:flex; gap:12px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#00E5FF; padding-top:3px">05</span><span>Thin rows run about 42pt against August's 88. The ranked field now fits in roughly three screens instead of ten, and the 0–3 point tail collapses behind a disclosure.</span></div>
+          </div>
+          <div style="font-size:14px; line-height:1.6; color:#5C6B78; border-top:1px solid rgba(92,107,120,.22); padding-top:18px">Structure here is Part A of the handoff, already built in <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">index-v2.html</span>. Only the colour, type and bar are new.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:20px; border-bottom:1px solid rgba(92,107,120,.3); padding-bottom:16px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.26em; color:#00E5FF">07</div>
+        <h2 style="font-family:Archivo,sans-serif; font-variation-settings:'wdth' 118,'wght' 800; font-style:italic; font-size:clamp(24px,2.9vw,34px); margin:0; text-transform:uppercase">Substitution table</h2>
+        <div style="font-size:15px; color:#5C6B78">August value on the left, Surge value on the right</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; font-family:'JetBrains Mono',monospace; font-size:13px">
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.3); font-size:10px; letter-spacing:.18em; color:#5C6B78">
+          <span>TOKEN</span><span>VOL.6</span><span>VOL.7</span>
+        </div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--red / lead</span><span>#FF2E43</span><span style="color:#00E5FF">#00E5FF</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--ice / support</span><span>#3DE1FF</span><span style="color:#00E5FF">#FF9E1B</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--paper</span><span>#0A0C12</span><span style="color:#00E5FF">#0A0F14</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">nav / floor</span><span>#06070B</span><span style="color:#00E5FF">#050709</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--cream</span><span>#F4F6FA</span><span style="color:#00E5FF">#F4F9FA</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--muted</span><span>#8B95A7</span><span style="color:#00E5FF">#5C6B78 · #8A9BA8 for prose</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--glow</span><span>0 0 14px red/.32</span><span style="color:#00E5FF">0 0 40px cyan/.28, 0 0 90px cyan/.14</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">--ease-out</span><span>.23,1,.32,1</span><span style="color:#00E5FF">.34,1.56,.64,1</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">display face</span><span>Anton</span><span style="color:#00E5FF">Archivo wdth 125 · wght 900 · italic</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">card signature</span><span>4 corner ticks, 16×2px</span><span style="color:#00E5FF">1 rising bar, 3px × 100%</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">page texture</span><span>46px tactical grid</span><span style="color:#00E5FF">horizontal surge trace</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">view transition</span><span>translateY(6px) up</span><span style="color:#00E5FF">translateX(-10px) in</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px; border-bottom:1px solid rgba(92,107,120,.14)"><span style="color:#5C6B78">boot moment</span><span>glitch</span><span style="color:#00E5FF">pulse and ripple</span></div>
+        <div style="display:grid; grid-template-columns:200px minmax(0,1fr) minmax(0,1fr); gap:24px; padding:11px 4px"><span style="color:#5C6B78">tagline</span><span>Serve first. Strike hard.</span><span style="color:#00E5FF">Ride the surge.</span></div>
+      </div>
+
+      <div style="display:flex; gap:14px; align-items:flex-start; padding:20px 22px; background:#0A0F14; background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.08)); background-size:3px 100%; background-position:left top; background-repeat:no-repeat">
+        <div style="padding-left:10px; display:flex; flex-direction:column; gap:8px; max-width:860px">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#00E5FF">HOW THIS LANDS IN CODE</div>
+          <div style="font-size:15px; line-height:1.65; color:#C3D0D8">The August skin is already a stack of override layers at the bottom of the file, each one a commented block that re-points a handful of custom properties and a few background-image rules. Surge is the same shape: one more layer that redefines <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">--red</span>, <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">--tick</span>, <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">--glow</span> and <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">--ease-out</span>, swaps the four tick gradients for one bar, replaces the grid on <span style="font-family:'JetBrains Mono',monospace; color:#F4F9FA">body::before</span>, and adds the display-font axis. Component JSX does not need to change — the only literal hex values sitting inline are in the screens I rewrote last turn, and those are a short find-and-replace.</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}"></script>
+</body>
+</html>

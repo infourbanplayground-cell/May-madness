@@ -1,0 +1,14 @@
+/* ============================================================
+   Urban Playground — Urban Social Series · DESIGN SYSTEM ROOT
+   ------------------------------------------------------------
+   Single canonical entry point for consumers. Link THIS file:
+       <link rel="stylesheet" href="styles.css">
+
+   It pulls in the current active campaign's full token set +
+   component styles (JULY HEAT · Vol. 5). Past campaigns keep
+   their own self-contained stylesheets in their folders
+   (site/ = JUNE FURY Vol. 4) and are not imported here to
+   avoid :root token collisions — swap the @import below when
+   a new series becomes current.
+   ============================================================ */
+@import url("./july-heat/styles.css");

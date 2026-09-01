@@ -1,0 +1,264 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   SEPTEMBER SURGE · VOL.7 SKIN
+   ───────────────────────────────────────────────────────────────────────
+   Append this as the LAST style block in index.html, after every existing
+   August Attack override layer. It re-points tokens and swaps four motifs;
+   it does not touch layout, structure, or scoring.
+
+   The August skin is itself a stack of append-only override layers, so
+   this follows the same convention. Nothing above it needs to be deleted.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 0 · FONT ──────────────────────────────────────────────────────────
+   Archivo is already loaded. Surge needs its width + italic axes, so the
+   existing Google Fonts <link> in <head> must be widened to:
+
+   https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap
+
+   Anton can then be dropped from the URL entirely — nothing below uses it.
+   ────────────────────────────────────────────────────────────────────── */
+
+:root{
+  /* palette */
+  --surge-cyan:#00E5FF;
+  --surge-amber:#FF9E1B;
+  --surge-base:#0A0F14;
+  --surge-void:#050709;
+  --surge-white:#F4F9FA;
+  --surge-steel:#5C6B78;      /* labels, inactive, letterspaced kickers */
+  --surge-steel-text:#8A9BA8; /* prose-length secondary text — 4.5:1 on base */
+
+  /* re-point August's tokens. Cyan leads, amber supports: the inverse of Vol.6. */
+  --red:var(--surge-cyan);
+  --yellow:var(--surge-amber);
+  --ice:var(--surge-amber);
+  --paper:var(--surge-base);
+  --cream:var(--surge-white);
+  --muted:var(--surge-steel);
+  --tick:var(--surge-cyan);
+  --neon:rgba(0,229,255,.5);
+  --plate:rgba(7,12,17,.94);
+  --plate-2:rgba(255,255,255,.03);
+  --hair:rgba(92,107,120,.28);
+
+  /* glow: wider and cooler in two layers, not one tight halo */
+  --glow:0 0 40px rgba(0,229,255,.28), 0 0 90px rgba(0,229,255,.14);
+
+  /* the single highest-leverage line in the file — every interaction
+     now overshoots and settles instead of landing decisively */
+  --ease-out:cubic-bezier(.34,1.56,.64,1);
+
+  --surge-display:'Archivo',system-ui,sans-serif;
+}
+
+/* display face: expanded, heavy, italic. One face, three axes. */
+.aa-display,
+h1,h2,.jh-sec-title,.jh-round-title,
+[style*="Anton"]{
+  font-family:var(--surge-display) !important;
+  font-variation-settings:'wdth' 125,'wght' 900 !important;
+  font-style:italic !important;
+  letter-spacing:-.005em !important;
+}
+
+body{ background:var(--surge-base) !important; color:var(--surge-white); }
+
+
+/* ── 1 · WAVEFORM, NOT GRID ────────────────────────────────────────────
+   Replaces the 46px tactical grid on body::before with one horizontal
+   surge trace. Same job, same cost. The SVG is inline-encoded so the
+   file stays self-contained.
+   ────────────────────────────────────────────────────────────────────── */
+
+body::before{
+  background-image:url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='200' viewBox='0 0 1200 200' preserveAspectRatio='none'>\
+<path d='M0 100 L 180 100 Q 200 100 215 40 T 250 160 Q 268 100 300 100 L 520 100 Q 545 100 560 30 T 600 170 Q 620 100 660 100 L 900 100 Q 920 100 935 66 T 975 134 Q 990 100 1030 100 L 1200 100' \
+fill='none' stroke='%2300E5FF' stroke-width='2' opacity='0.13'/></svg>") !important;
+  background-size:1200px 200px !important;
+  background-repeat:repeat !important;
+  background-position:0 0 !important;
+  animation:surgeTrace 26s linear infinite;
+}
+@keyframes surgeTrace{ to{ background-position:-1200px 0 } }
+
+body::after{ opacity:.18 !important; }
+
+
+/* ── 2 · RISING BAR, NOT CORNER TICKS ──────────────────────────────────
+   August drew four L-shaped ticks with four background-gradients. Surge
+   draws one vertical bar with one, bright at the top and fading down.
+   The bar's colour carries state exactly as the tick colour did, so the
+   .jh-fill-* / .r1 / .r2 / .r3 ladder below still works unchanged.
+   ────────────────────────────────────────────────────────────────────── */
+
+.jh-panel,.jh-srow,.jh-lbrow,.jh-mock-sess,.jh-mock-row,
+[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
+  clip-path:none !important;
+  border:none !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  background-color:var(--plate) !important;
+  background-image:linear-gradient(180deg,var(--tick),color-mix(in srgb,var(--tick) 6%,transparent)) !important;
+  background-size:3px 100% !important;
+  background-position:left top !important;
+  background-repeat:no-repeat !important;
+  padding-left:18px !important;
+}
+
+/* nested rows: quieter plate, steel bar so they don't compete */
+.jh-panel .jh-mock-row,.jh-panel .jh-mock-sess,
+[class*="bg-stone-9"] [class*="bg-stone-9"]{
+  --tick:var(--surge-steel);
+  background-color:var(--plate-2) !important;
+  background-size:2px 100% !important;
+  padding-left:14px !important;
+}
+
+/* meaning through bar colour — same ladder, new hues */
+.jh-fill-red,.jh-lbrow.r1,.jh-srow.active{ --tick:var(--surge-cyan); }
+.jh-fill-blue,.jh-fill-yellow{ --tick:var(--surge-amber); }
+.jh-fill-green{ --tick:var(--surge-cyan); }
+.jh-lbrow.r2{ --tick:#C3D0D8; }
+.jh-lbrow.r3{ --tick:var(--surge-steel); }
+
+/* hover: cool wash instead of warm */
+@media (hover:hover){
+  .jh-srow:hover,.jh-lbrow:hover,.jh-mock-row:hover,.jh-mock-sess:hover{
+    background-color:rgba(0,229,255,.06) !important;
+  }
+}
+
+/* the hero is the one full-bleed surface. Gradient now sweeps
+   left-to-right rather than blooming from the top. */
+.jh-hero{
+  background-color:rgba(5,7,9,.96) !important;
+  background-image:
+    linear-gradient(90deg,rgba(0,229,255,.20),rgba(0,229,255,.04) 55%,transparent),
+    linear-gradient(180deg,var(--surge-cyan),rgba(0,229,255,.06)) !important;
+  background-size:auto, 3px 100% !important;
+  background-position:center, left top !important;
+  background-repeat:no-repeat !important;
+  border:none !important;
+}
+
+/* medal chips follow the ladder — gold stays out, same rule as August */
+.jh-lbrow.r1 .jh-rank{background:rgba(0,229,255,.16) !important;color:var(--surge-cyan) !important;}
+.jh-lbrow.r2 .jh-rank{background:rgba(195,208,216,.12) !important;color:#C3D0D8 !important;}
+.jh-lbrow.r3 .jh-rank{background:rgba(92,107,120,.16) !important;color:var(--surge-steel) !important;}
+.jh-crown{color:var(--surge-cyan) !important;filter:drop-shadow(0 0 10px rgba(0,229,255,.65)) !important;}
+
+
+/* ── 3 · KICKERS ───────────────────────────────────────────────────────
+   Archivo 800 at .34em in cyan. The glowing red pip goes: the rising bar
+   is the card marker now, and two markers on one card is one too many.
+   ────────────────────────────────────────────────────────────────────── */
+
+.aa-kicker,.jh-burst2,.jh-sec-kicker,.jh-round-title{
+  display:block !important;
+  background:none !important;border:none !important;box-shadow:none !important;
+  font-family:'Archivo',sans-serif !important;
+  font-weight:800 !important;font-style:normal !important;
+  font-size:10px !important;letter-spacing:.34em !important;
+  text-transform:uppercase !important;
+  color:var(--surge-cyan) !important;
+  padding-left:0 !important;
+  margin-bottom:12px !important;
+}
+.aa-kicker::before,.jh-burst2::before,.jh-sec-kicker::before{ content:none !important; }
+
+
+/* ── 4 · BRAND LOCKUP ──────────────────────────────────────────────────
+   The Attack wordmark and emblem PNGs must be re-cut for Surge. Until
+   they exist, these rules keep the slots working with the cyan bloom.
+   ────────────────────────────────────────────────────────────────────── */
+
+.aa-emblem{ filter:drop-shadow(0 0 18px rgba(0,229,255,.5)) drop-shadow(0 0 44px rgba(0,229,255,.26)) !important; }
+.aa-wordmark{ filter:drop-shadow(0 0 16px rgba(0,229,255,.45)) !important; }
+.aa-presents{ font-family:'Archivo',sans-serif !important; font-weight:800 !important;
+  letter-spacing:.34em !important; font-size:10px !important; color:var(--surge-steel) !important; }
+.aa-tag{ font-family:'Archivo',sans-serif !important; font-weight:800 !important;
+  letter-spacing:.24em !important; font-size:11px !important; color:var(--surge-white) !important; }
+.aa-tag b{ color:var(--surge-cyan) !important; text-shadow:0 0 16px rgba(0,229,255,.7) !important; }
+.aa-tagline{
+  background:linear-gradient(90deg,rgba(0,229,255,.22),rgba(0,229,255,.04) 60%,transparent) !important;
+  border-top:1px solid rgba(0,229,255,.35) !important;
+  border-bottom:1px solid rgba(0,229,255,.35) !important;
+  font-family:var(--surge-display) !important;
+  font-variation-settings:'wdth' 118,'wght' 800 !important;
+  font-style:italic !important;
+  text-align:left !important;
+}
+.aa-tagline b{ color:var(--surge-cyan) !important; text-shadow:0 0 14px rgba(0,229,255,.7) !important; }
+
+/* TAGLINE COPY — "Serve first. Strike hard." is Attack's line specifically.
+   Replace every occurrence in the JSX with:  RIDE THE <b>SURGE.</b>        */
+
+
+/* ── 5 · DIRECTION + MOTION ────────────────────────────────────────────
+   Everything that can imply direction does. Nothing over 320ms,
+   transform/opacity only — the August discipline is unchanged, only
+   the character of the curve and the axis of travel.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* view transition: enters from the left instead of rising */
+main > div{ animation:surgeViewIn 200ms var(--ease-out) !important; }
+@keyframes surgeViewIn{ from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+
+/* the glitch reveal becomes a surge-in: overshoot from the left, no chroma split */
+.glitch-in{ animation:surgeIn 520ms 80ms var(--ease-out) both !important; }
+@keyframes surgeIn{
+  0%{opacity:0;transform:translateX(-26px) scaleX(.94)}
+  100%{opacity:1;transform:none}
+}
+.glitch-in.d2{ animation-delay:.24s !important; }
+.glitch-in.d3{ animation-delay:.42s !important; }
+
+/* the one rare moment: splash pulses and ripples outward — a signal
+   being sent, where August's glitch was a signal being cut */
+.splash .splash-logo{ animation:surgeBootMark 720ms var(--ease-out) both !important; }
+@keyframes surgeBootMark{
+  0%{opacity:0;transform:scale(.82)}
+  100%{opacity:1;transform:none}
+}
+.splash .splash-logo-wrap{ position:relative; }
+.splash .splash-logo-wrap::after{
+  content:"";position:absolute;inset:0;margin:auto;
+  width:120px;height:120px;border-radius:50%;
+  border:2px solid var(--surge-cyan);
+  animation:surgeRipple 2s var(--ease-out) infinite;
+  pointer-events:none;
+}
+@keyframes surgeRipple{
+  0%{transform:scale(.6);opacity:.55}
+  100%{transform:scale(2.4);opacity:0}
+}
+
+/* primary action: cyan, with the bloom */
+button[style*="FF2E43"],.jh-chipbtn.red{
+  background:var(--surge-cyan) !important;
+  color:var(--surge-void) !important;
+  box-shadow:0 0 30px rgba(0,229,255,.4) !important;
+  font-family:var(--surge-display) !important;
+  font-variation-settings:'wdth' 118,'wght' 900 !important;
+  font-style:italic !important;
+}
+
+/* nav: cyan rule, cyan active label */
+nav.fixed.bottom-0{ background:var(--surge-void) !important; }
+nav.fixed.bottom-0 .active,nav.fixed.bottom-0 [aria-current="page"]{
+  color:var(--surge-cyan) !important;
+  border-top-color:var(--surge-cyan) !important;
+}
+
+/* ARROWS — replace → with ▶ throughout the JSX. Rank movement arrows
+   already point up/down and stay as they are; navigational and
+   call-to-action arrows all point right.                              */
+
+/* reduced motion: the drift and the ripple are the two things to kill */
+@media (prefers-reduced-motion:reduce){
+  body::before{ animation:none !important; }
+  .splash .splash-logo-wrap::after{ display:none !important; }
+  .glitch-in,main > div{ animation:surgeFade 200ms ease both !important; }
+  @keyframes surgeFade{ from{opacity:0} to{opacity:1} }
+}

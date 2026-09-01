@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/july-heat/styles.css">
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/styles.css">
+<script src="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#06070B; }
+  a { color:#3DE1FF; text-decoration:none; }
+  a:hover { color:#FF2E43; }
+</style>
+</helmet>
+
+<div style="background:#06070B; color:#F4F6FA; font-family:Archivo, system-ui, sans-serif; padding:72px 40px 120px; display:flex; flex-direction:column; align-items:center; gap:64px">
+
+  <div style="width:100%; max-width:1120px; display:flex; flex-direction:column; gap:64px">
+
+    <header style="display:flex; flex-direction:column; gap:20px; border-bottom:1px solid rgba(139,149,167,.22); padding-bottom:32px">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; letter-spacing:.24em; color:#FF2E43">DESIGN REVIEW · 10 AUG 2026</div>
+      <h1 style="font-family:Anton, sans-serif; letter-spacing:.06em; font-size:76px; line-height:.92; margin:0; text-transform:uppercase">August Attack<br><span style="color:#8B95A7">What I'd change</span></h1>
+      <div style="display:flex; flex-wrap:wrap; gap:28px; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.1em; color:#8B95A7">
+        <span>attack.urbanpadel.om</span>
+        <span>3 SCREENS REVIEWED</span>
+        <span>TARGET: 430×932</span>
+        <span>VOL.6 · 9 SESSIONS</span>
+      </div>
+    </header>
+
+    <section style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:56px; align-items:start">
+      <div style="display:flex; flex-direction:column; gap:20px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.24em; color:#3DE1FF">THE CORE PROBLEM</div>
+        <h2 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:40px; line-height:1.02; margin:0; text-transform:uppercase">It's built like a poster.<br>It's used like a scoreboard.</h2>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:18px; font-size:17px; line-height:1.6; color:#C7CEDA; text-wrap:pretty">
+        <p style="margin:0">The visual language is genuinely good — square plates, corner ticks, Anton over mono numerals, red leading cyan. Nothing here needs a restyle.</p>
+        <p style="margin:0">What it needs is a change of job. A player opens this between games with one of two questions: <em style="color:#F4F6FA; font-style:normal; font-weight:700">when do I play next</em>, and <em style="color:#F4F6FA; font-style:normal; font-weight:700">where do I stand</em>. Right now the first viewport of HOME answers neither — it spends all 932 points on branding, and the answers sit 800 and 3,400 points down. Everything below follows from that.</p>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:0; border-top:1px solid rgba(139,149,167,.22)">
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">01</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#06070B; background:#FF2E43; padding:4px 8px">BLOCKER</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">HOME</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">The first screen is two logos and a tagline</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">The header mark and the hero mark are the same lockup within 700 points of each other. Below them: "Urban Playground presents", the Attack lockup, "Serve first. Strike hard.", a schedule chip. Then the fold ends. The tagline appears three times on the page.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #FF2E43">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Compress the hero to a 96pt band — Attack lockup, dates, nothing else. Drop the duplicate mark from the hero and keep it in the header. One tagline, in the band. The poster already exists as the IG carousel; the app doesn't need to repeat it every visit.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">02</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#06070B; background:#FF2E43; padding:4px 8px">BLOCKER</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">HOME · SESSIONS</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">"Next up" is showing a session marked done</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">HOME's NEXT UP card is Session 2 with a green DONE badge. SESSIONS lists two of the nine, both DONE, then 1,200 points of empty black. A nine-session series is presenting itself as finished, and the one question players actually came with has no answer anywhere in the app.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #FF2E43">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Publish all nine session slots up front with three states — done, next, scheduled. NEXT UP points at the first non-done slot and carries date, time, countdown and signup state. The empty screen becomes a schedule, and the series reads as 2 of 9 rather than over.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">03</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#06070B; background:#FF2E43; padding:4px 8px">HIGH</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">ALL SCREENS</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">There is no "me" anywhere</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">Points follow the player, not the team — that's the whole hook of the format. Yet nothing in the app knows who is holding the phone. Every player gets the same broadcast, and rank 33 scrolls past 32 strangers to find their own row.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #FF2E43">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">One tap: pick your name from the 48, store it locally, no account. HOME then leads with your rank, points, movement and gap to the next place. RANK pins your row to the top of the list. Cheap to build, and it converts a noticeboard into a personal tracker.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">04</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#06070B; background:#FF2E43; padding:4px 8px">HIGH</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">HOME</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">Half of HOME is a rulebook</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">HOW TO SCORE runs roughly 1,500 points: five group rows, four knockout rows, the streak ladder, comeback bonus, the 2× rule, loyalty lockout. It's well made and it is read once. It sits permanently between the standings and the bottom of the page.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #FF2E43">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Move it behind the FORMAT sheet that already exists on SESSIONS, and leave a one-line "How points work →" on HOME. Keep only the live parts inline — the 2× flag on sessions 8 and 9 belongs on those session cards, where it changes a decision.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">05</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#06070B; background:#FF2E43; padding:4px 8px">HIGH</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">RANK</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">48 rows, all shouting equally</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">4,400 points with no search, no filter, no jump. Every row carries red corner ticks, a photo, a five-game strip and a large red total — including ranks 39–48, who sit on 0–3 points with grey pills. When the accent is on everything it marks nothing, and the tail dilutes the top.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #FF2E43">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Search at the top, your row pinned under it. Corner ticks and red totals reserved for the top three; ranks 4+ get a thin mono row. Collapse everyone on 3 points or fewer behind "Show 12 more". The list drops to about a third of its height and the podium means something again.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">06</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#8B95A7; border:1px solid rgba(139,149,167,.5); padding:3px 8px">MEDIUM</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">RANK · SESSIONS</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">The palette is losing its own argument</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">RANK reads cyan-first: a cyan title, a cyan crown, a cyan count chip. The heaviest object on the screen is a striped dull-green banner about the biggest climber, in a system where green means live. SESSIONS' loudest element is a blue number chip left over from July Heat, and the initials avatars run blue, purple, orange and teal — none of them in the palette.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #3DE1FF">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#3DE1FF">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Title in chalk, count in steel, cyan back to a supporting voice. Climber becomes a one-line note under the podium, not a banner. Convert the six blue chips and seven off-green values, and render initials avatars as steel on Court Black — red only inside the top ten. That restores the 3:1 ratio without touching layout.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0; border-bottom:1px solid rgba(139,149,167,.14)">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">07</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#8B95A7; border:1px solid rgba(139,149,167,.5); padding:3px 8px">MEDIUM</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">SESSIONS</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">Admin controls sit above player content</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">ANNOUNCE, SIGNUP and FORMAT are the first thing on SESSIONS, styled as the primary actions of the screen. Two of the three are yours, not the players'. There's also a back arrow at the top of a bottom-nav tab, which has nothing to go back to.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #3DE1FF">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#3DE1FF">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Admin actions into a single control behind the existing admin token; FORMAT stays visible as a quiet link since it's for everyone. Delete the back arrow on tab roots.</p>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:64px minmax(0,1fr) minmax(0,1fr); gap:32px; padding:36px 0">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#FF2E43">08</div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.16em; color:#8B95A7; border:1px solid rgba(139,149,167,.5); padding:3px 8px">MEDIUM</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">DELIVERY</span>
+          </div>
+          <h3 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:26px; line-height:1.1; margin:0; text-transform:uppercase">Half the payload is one logo, three times</h3>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#8B95A7">The same 0.41MB PNG is base64'd three times inside a 1.67MB file. Players load this on venue wifi between games, and the page shows the word LOADING until React, Tailwind and Babel have all arrived and compiled. Rajdhani is referenced in three rules and never loaded, so those rules quietly render as Archivo.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; padding-left:28px; border-left:2px solid #3DE1FF">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#3DE1FF">FIX</div>
+          <p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Reference the embedded logo once and reuse it — that alone removes about 0.8MB. Delete the Rajdhani rules. Then replace LOADING with the header band and skeleton rows in plain HTML, so the first paint is branded rather than blank. All three are inside the single-file constraint.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:36px; border-top:1px solid rgba(139,149,167,.22); padding-top:56px">
+      <div style="display:flex; flex-direction:column; gap:14px; max-width:640px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.24em; color:#3DE1FF">PROPOSED FIRST VIEWPORTS</div>
+        <h2 style="font-family:Anton,sans-serif; letter-spacing:.04em; font-size:40px; line-height:1.02; margin:0; text-transform:uppercase">Same system, different priorities</h2>
+        <p style="margin:0; font-size:16px; line-height:1.6; color:#8B95A7">Sketches at 430×932 using the existing tokens, plates and corner ticks. No new colours, no new type. Only what earns the first screen has changed.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:430px minmax(0,1fr); gap:48px; align-items:start">
+        <div style="width:430px; height:932px; background:#0A0C12; border:1px solid rgba(139,149,167,.28); display:flex; flex-direction:column; overflow:hidden">
+          <div style="height:52px; flex:none; background:#06070B; border-bottom:2px solid #FF2E43; display:flex; align-items:center; justify-content:space-between; padding:0 16px">
+            <div style="font-family:Anton,sans-serif; letter-spacing:.1em; font-size:15px">URBAN PLAYGROUND</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">VOL.6</div>
+          </div>
+          <div style="flex:none; padding:18px 16px 20px; background:linear-gradient(180deg,rgba(255,46,67,.16),rgba(10,12,18,0)); display:flex; flex-direction:column; gap:6px">
+            <div style="font-family:Anton,sans-serif; font-size:44px; line-height:.9; letter-spacing:.05em; font-style:italic">AUGUST ATTACK</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.14em; color:#8B95A7">MON &amp; WED · 5:30 PM · SERVE FIRST. STRIKE HARD.</div>
+          </div>
+          <div style="flex:none; margin:0 16px; background:#06070B; border:1px solid rgba(255,46,67,.5); padding:16px; display:flex; flex-direction:column; gap:14px">
+            <div style="display:flex; justify-content:space-between; align-items:baseline">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#FF2E43">NEXT SESSION</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.14em; color:#27E08A">SIGNUP OPEN</div>
+            </div>
+            <div style="display:flex; align-items:flex-end; gap:14px">
+              <div style="font-family:Anton,sans-serif; font-size:38px; line-height:.9; letter-spacing:.04em">SESSION 3</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#8B95A7; padding-bottom:4px">MON 10 AUG</div>
+            </div>
+            <div style="display:flex; gap:10px; align-items:stretch">
+              <div style="flex:1; background:#FF2E43; color:#06070B; font-family:Anton,sans-serif; font-size:19px; letter-spacing:.06em; height:52px; display:flex; align-items:center; justify-content:center">SIGN ME UP</div>
+              <div style="width:118px; border:1px solid rgba(139,149,167,.4); display:flex; flex-direction:column; align-items:center; justify-content:center">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:19px; font-weight:700">6</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.14em; color:#8B95A7">SPOTS LEFT</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:none; margin:14px 16px 0; background:#06070B; padding:16px; display:flex; flex-direction:column; gap:12px; background-image:linear-gradient(#3DE1FF,#3DE1FF),linear-gradient(#3DE1FF,#3DE1FF),linear-gradient(#FF2E43,#FF2E43),linear-gradient(#FF2E43,#FF2E43); background-size:16px 2px,2px 16px,16px 2px,2px 16px; background-position:left top,left top,right bottom,right bottom; background-repeat:no-repeat">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#8B95A7">YOUR STANDING</div>
+            <div style="display:flex; align-items:center; gap:14px">
+              <div style="width:52px; height:52px; border:1px solid rgba(139,149,167,.4); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono',monospace; font-size:21px; font-weight:700">12</div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:5px">
+                <div style="font-family:Anton,sans-serif; font-size:23px; letter-spacing:.04em">EATHAR</div>
+                <div style="display:flex; gap:4px">
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; width:17px; height:17px; display:flex; align-items:center; justify-content:center; background:rgba(139,149,167,.25); color:#8B95A7">L</span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; width:17px; height:17px; display:flex; align-items:center; justify-content:center; background:#27E08A; color:#06070B">W</span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; width:17px; height:17px; display:flex; align-items:center; justify-content:center; background:#27E08A; color:#06070B">W</span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; width:17px; height:17px; display:flex; align-items:center; justify-content:center; background:rgba(139,149,167,.25); color:#8B95A7">L</span>
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; width:17px; height:17px; display:flex; align-items:center; justify-content:center; background:rgba(139,149,167,.25); color:#8B95A7">L</span>
+                </div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:30px; font-weight:700; line-height:1">20</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.1em; color:#27E08A">▲ 3</div>
+              </div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:#8B95A7">3 PTS OFF THE TOP TEN · 1 SESSION MISSED</div>
+          </div>
+          <div style="flex:none; margin:14px 16px 0; display:flex; gap:10px">
+            <div style="flex:1; background:#06070B; padding:12px 14px; display:flex; flex-direction:column; gap:8px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">SERIES PROGRESS</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700">2 <span style="color:#8B95A7">/ 9</span></div>
+              <div style="height:4px; background:rgba(139,149,167,.25)"><div style="width:22%; height:4px; background:#FF2E43"></div></div>
+            </div>
+            <div style="width:150px; background:#06070B; padding:12px 14px; display:flex; flex-direction:column; gap:6px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">PRIZE POOL</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:700">402 <span style="font-size:11px; color:#8B95A7">OMR</span></div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:.1em; color:#3DE1FF">2× ON S8 &amp; S9</div>
+            </div>
+          </div>
+          <div style="flex:1; margin:14px 16px 0; display:flex; flex-direction:column; gap:8px; min-height:0">
+            <div style="display:flex; justify-content:space-between; align-items:baseline">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#8B95A7">LEADERBOARD</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; color:#3DE1FF">ALL 48 →</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:9px 12px; border-left:2px solid #FF2E43">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#FF2E43; width:18px">1</div>
+              <div style="flex:1; font-family:Anton,sans-serif; font-size:17px; letter-spacing:.04em">MUNTHER RAHBI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">45</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:9px 12px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#8B95A7; width:18px">2</div>
+              <div style="flex:1; font-family:Anton,sans-serif; font-size:17px; letter-spacing:.04em">MAZIN</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">40</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:9px 12px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#8B95A7; width:18px">3</div>
+              <div style="flex:1; font-family:Anton,sans-serif; font-size:17px; letter-spacing:.04em">HUSAM RAWAHI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700">29</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.1em; color:#8B95A7; padding:6px 2px">HOW POINTS WORK →</div>
+          </div>
+          <div style="height:64px; flex:none; background:#06070B; border-top:1px solid rgba(139,149,167,.25); display:flex; align-items:center">
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#FF2E43; border-top:2px solid #FF2E43; padding-top:8px; margin-top:-10px">HOME</div>
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">SESSIONS</div>
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">RANK</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:26px; padding-top:8px">
+          <div style="font-family:Anton,sans-serif; font-size:24px; letter-spacing:.04em; text-transform:uppercase">Home</div>
+          <div style="display:flex; flex-direction:column; gap:20px">
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">A</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Hero down from ~700pt to 100pt. The mark appears once, in the header. Tagline once, as a subtitle.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">B</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Next session is the first thing and the only red button on the screen — date, signup state, spots remaining. The one decision this app can drive.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">C</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Your standing, with the gap to the next tier spelled out. This is the line people screenshot and send to the group.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">D</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">"2 of 9" replaces the 2 / 48 / 32 trio — 32 teams was a per-night constant, not a series stat. Prize pool keeps its number and picks up the 2× flag.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">E</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Top three only, then out to RANK. Rules become a link. Below this fold: recent results and the photo wall — the content people scroll for pleasure, not for answers.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:430px minmax(0,1fr); gap:48px; align-items:start; padding-top:24px">
+        <div style="width:430px; height:932px; background:#0A0C12; border:1px solid rgba(139,149,167,.28); display:flex; flex-direction:column; overflow:hidden">
+          <div style="height:52px; flex:none; background:#06070B; border-bottom:2px solid #FF2E43; display:flex; align-items:center; justify-content:space-between; padding:0 16px">
+            <div style="font-family:Anton,sans-serif; letter-spacing:.1em; font-size:15px">URBAN PLAYGROUND</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">VOL.6</div>
+          </div>
+          <div style="flex:none; padding:20px 16px 12px; display:flex; align-items:flex-end; justify-content:space-between">
+            <div style="display:flex; flex-direction:column; gap:4px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.2em; color:#8B95A7">SERIES STANDINGS</div>
+              <div style="font-family:Anton,sans-serif; font-size:40px; line-height:.9; letter-spacing:.05em">RANKINGS</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; color:#8B95A7; padding-bottom:4px">48 RANKED</div>
+          </div>
+          <div style="flex:none; margin:8px 16px 0; display:flex; border:1px solid rgba(139,149,167,.3)">
+            <div style="flex:1; text-align:center; padding:11px 0; background:#FF2E43; color:#06070B; font-family:Anton,sans-serif; font-size:15px; letter-spacing:.06em">THIS SERIES</div>
+            <div style="flex:1; text-align:center; padding:11px 0; color:#8B95A7; font-family:Anton,sans-serif; font-size:15px; letter-spacing:.06em">ALL-TIME</div>
+          </div>
+          <div style="flex:none; margin:12px 16px 0; border:1px solid rgba(139,149,167,.3); padding:11px 14px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7">FIND A PLAYER…</div>
+          <div style="flex:none; margin:12px 16px 0; background:#06070B; border:1px solid rgba(61,225,255,.45); padding:11px 14px; display:flex; align-items:center; gap:12px">
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#3DE1FF">YOU</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:#8B95A7">12</div>
+            <div style="flex:1; font-family:Anton,sans-serif; font-size:18px; letter-spacing:.04em">EATHAR</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#27E08A">▲3</div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700">20</div>
+          </div>
+          <div style="flex:none; margin:18px 16px 0; display:flex; flex-direction:column; gap:8px">
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:13px 14px; border-left:3px solid #FF2E43; background-image:linear-gradient(#FF2E43,#FF2E43),linear-gradient(#FF2E43,#FF2E43); background-size:14px 2px,2px 14px; background-position:right bottom,right bottom; background-repeat:no-repeat">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#FF2E43; width:22px">1</div>
+              <div style="width:40px; height:40px; background:rgba(139,149,167,.18)"></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px">
+                <div style="font-family:Anton,sans-serif; font-size:21px; letter-spacing:.04em">MUNTHER RAHBI</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">2 SESS · 82% WIN · WWWWW</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700; color:#FF2E43">45</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:13px 14px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#F4F6FA; width:22px">2</div>
+              <div style="width:40px; height:40px; background:rgba(139,149,167,.18)"></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px">
+                <div style="font-family:Anton,sans-serif; font-size:21px; letter-spacing:.04em">MAZIN</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">2 SESS · 80% WIN · ▲14 BIGGEST CLIMBER</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700">40</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; background:#06070B; padding:13px 14px">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:#8B95A7; width:22px">3</div>
+              <div style="width:40px; height:40px; background:rgba(139,149,167,.18)"></div>
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px">
+                <div style="font-family:Anton,sans-serif; font-size:21px; letter-spacing:.04em">HUSAM RAWAHI</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">1 SESS · 83% WIN · ▼2</div>
+              </div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:24px; font-weight:700">29</div>
+            </div>
+          </div>
+          <div style="flex:1; margin:14px 16px 0; display:flex; flex-direction:column; min-height:0">
+            <div style="display:flex; align-items:center; gap:14px; padding:11px 4px; border-top:1px solid rgba(139,149,167,.16)">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7; width:22px">4</div>
+              <div style="flex:1; font-family:Archivo,sans-serif; font-weight:700; font-size:16px">IBRAHIM</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">83%</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; width:32px; text-align:right">29</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:11px 4px; border-top:1px solid rgba(139,149,167,.16)">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7; width:22px">5</div>
+              <div style="flex:1; font-family:Archivo,sans-serif; font-weight:700; font-size:16px">MUNTASER HASNI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">67%</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; width:32px; text-align:right">28</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:11px 4px; border-top:1px solid rgba(139,149,167,.16)">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7; width:22px">6</div>
+              <div style="flex:1; font-family:Archivo,sans-serif; font-weight:700; font-size:16px">SAID HABSI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">67%</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; width:32px; text-align:right">28</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:11px 4px; border-top:1px solid rgba(139,149,167,.16)">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7; width:22px">7</div>
+              <div style="flex:1; font-family:Archivo,sans-serif; font-weight:700; font-size:16px">FAISAL AL HARTHI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">60%</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; width:32px; text-align:right">25</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px; padding:11px 4px; border-top:1px solid rgba(139,149,167,.16)">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#8B95A7; width:22px">8</div>
+              <div style="flex:1; font-family:Archivo,sans-serif; font-weight:700; font-size:16px">NOOH AMRI</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#8B95A7">83%</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; width:32px; text-align:right">23</div>
+            </div>
+            <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.12em; color:#3DE1FF; padding:14px 4px; border-top:1px solid rgba(139,149,167,.16)">SHOW 12 MORE ON 3 PTS OR FEWER</div>
+          </div>
+          <div style="height:64px; flex:none; background:#06070B; border-top:1px solid rgba(139,149,167,.25); display:flex; align-items:center">
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">HOME</div>
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#8B95A7">SESSIONS</div>
+            <div style="flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:#FF2E43; border-top:2px solid #FF2E43; padding-top:8px; margin-top:-10px">RANK</div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:26px; padding-top:8px">
+          <div style="font-family:Anton,sans-serif; font-size:24px; letter-spacing:.04em; text-transform:uppercase">Rank</div>
+          <div style="display:flex; flex-direction:column; gap:20px">
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">A</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Title in chalk, count in steel. Cyan now appears twice on the screen — your row and the disclosure — instead of leading it.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">B</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Search, then your row pinned under it. Nobody scrolls 4,400 points to find themselves again.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">C</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Podium as three ranked rows rather than a stepped chart — the same hierarchy, half the height, and it doesn't imply a bar scale that isn't there. Biggest climber folds into Mazin's row, where the fact belongs.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">D</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">Ranks 4+ are a table: rank, name, win rate, points. No corner ticks, no photos, no pill strips. Roughly 46pt a row instead of 88 — the ranked field fits in three screens instead of ten.</p></div>
+            <div style="display:flex; gap:14px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:#FF2E43; padding-top:3px">E</span><p style="margin:0; font-size:15px; line-height:1.6; color:#C7CEDA">The 0–3 point tail collapses. Still reachable, no longer the majority of the page.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="border-top:1px solid rgba(139,149,167,.22); padding-top:56px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:56px">
+      <div style="display:flex; flex-direction:column; gap:18px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.24em; color:#3DE1FF">IF YOU ONLY DO THREE THINGS</div>
+        <ol style="margin:0; padding-left:26px; display:flex; flex-direction:column; gap:14px; font-size:16px; line-height:1.6; color:#C7CEDA">
+          <li>Put the next session and a working signup at the top of HOME, and publish all nine slots.</li>
+          <li>Let a player say who they are, once, and lead with their standing.</li>
+          <li>Add search to RANK and thin the rows below third place.</li>
+        </ol>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:18px">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; letter-spacing:.24em; color:#8B95A7">WORTH SAYING</div>
+        <p style="margin:0; font-size:16px; line-height:1.6; color:#C7CEDA; text-wrap:pretty">None of this asks for a toolchain, a rename of any storage key, or an edit to an existing style block. The identity, the plates and the corner-tick motif all stay exactly as they are — they're the strongest part of the product. The changes are about what occupies the top of each screen, and how much of the screen each fact is allowed to take.</p>
+      </div>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
