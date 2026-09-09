@@ -966,7 +966,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
           <div>
             <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
-            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points count your best 3 group results and this group only plays {plays}, so every team in it gets a notional 6&ndash;0 bye win — the draw costs nobody points. The table below and the knockout seeding both use real matches only.</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points and knockout seeding both count your best 3 group results, and this group only plays {plays} — so every team in it gets a notional 6&ndash;0 bye win. The draw costs nobody points or seeding. The table below still shows real matches only.</div>
           </div>
         </div>;
       })()}
@@ -1512,3 +1512,27 @@ GHOST_NOTE_NEW = '''      {(() => {
         </div>;
       })()}
       {isUneven && ('''
+
+# ── THE BYE ALSO COUNTS FOR KNOCKOUT SEEDING ───────────────────────────────
+# Owner's call, reversing the limit above.
+#
+# The seeding path used to cut every group down to the smallest group's match
+# count. With a group of 3 present that meant everyone was seeded on their best
+# 2, dragging the whole field down to the smallest group. Now every team is
+# seeded on its best GROUP_COUNTED_GAMES results with byes topping up the
+# undersized groups — lifting the small group up instead of pulling everyone
+# else down, and matching exactly how series points are counted.
+#
+# This only behaves differently when a group smaller than 4 exists. For 5/4/4 —
+# the only uneven shape that has ever run — the old rule already kept 3, which
+# is what .counted returns, so nothing about past or present seeding moves.
+SEEDNORM_OLD = '''  const keep = Math.max(1, Math.min(...sizes) - 1);
+  const rows = teams.map(team => {
+    const best = teamGroupResults(session, team.id).all.slice(0, keep);'''
+SEEDNORM_NEW = '''  // Seed on the same results the series points count: best
+  // GROUP_COUNTED_GAMES, with an undersized group's 6-0 byes making up the
+  // difference. The old rule cut everyone to the smallest group's match count,
+  // which levelled down; this levels up, and keeps one definition of "your
+  // results" for both the leaderboard and the bracket.
+  const rows = teams.map(team => {
+    const best = teamGroupResults(session, team.id).counted;'''

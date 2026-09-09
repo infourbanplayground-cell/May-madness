@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "245b94791192";
+  var V = "852a3936e9e1";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1599,9 +1599,13 @@ function calcGroupStandingsNormalized(session, group) {
     .filter(n => n > 0);
   const uneven = sizes.length > 1 && new Set(sizes).size > 1;
   if (!uneven) return calcGroupStandings(session, group);
-  const keep = Math.max(1, Math.min(...sizes) - 1);
+  // Seed on the same results the series points count: best
+  // GROUP_COUNTED_GAMES, with an undersized group's 6-0 byes making up the
+  // difference. The old rule cut everyone to the smallest group's match count,
+  // which levelled down; this levels up, and keeps one definition of "your
+  // results" for both the leaderboard and the bracket.
   const rows = teams.map(team => {
-    const best = teamGroupResults(session, team.id).all.slice(0, keep);
+    const best = teamGroupResults(session, team.id).counted;
     let pts = 0, wins = 0, gf = 0, ga = 0;
     best.forEach(r => { pts += r.pts; wins += r.w; gf += r.gf; ga += r.ga; });
     return { team, pts, wins, played: best.length, gf, ga, gd: gf - ga };
@@ -4152,7 +4156,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
           <div>
             <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
-            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points count your best 3 group results and this group only plays {plays}, so every team in it gets a notional 6&ndash;0 bye win — the draw costs nobody points. The table below and the knockout seeding both use real matches only.</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points and knockout seeding both count your best 3 group results, and this group only plays {plays} — so every team in it gets a notional 6&ndash;0 bye win. The draw costs nobody points or seeding. The table below still shows real matches only.</div>
           </div>
         </div>;
       })()}
