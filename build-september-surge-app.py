@@ -408,10 +408,6 @@ UX_SCRIPT = SCREENS.UX_SCRIPT
 QUALIFY = [
     ('function getQualifyCount(session) {\n  return session?.qualifyCount || 2;  // default: top 2 per group qualify\n}',
      'function getQualifyCount(session) {\n  return session?.qualifyCount || 2;  // default: top 2 per group qualify\n}\n\n// Which teams are currently on course to qualify — the same rule seedQF uses,\n// so a group table can never promise a spot the bracket won\'t honour. There is\n// no single "top N" in this series: it is qualifyCount per group (1, 2 or 4),\n// except that 3 groups is fixed at top-2 plus the two best thirds, and\n// 4-groups/all-thirds sends every third through to a round of 16.\nfunction qualifyingTeamIds(session) {\n  const groups = getSessionGroups(session);\n  const N = groups.length;\n  const stand = groups.map(g => calcGroupStandingsNormalized(session, g));\n  const ids = new Set();\n  const take = (rows, n) => rows.slice(0, n).forEach(r => r && r.team && r.team.id && ids.add(r.team.id));\n\n  if (N === 4 && session && session.thirdPlaceMode === "all4r16") {\n    stand.forEach(rows => take(rows, 3));\n    return ids;\n  }\n  if (N === 3) {\n    stand.forEach(rows => take(rows, 2));\n    // the two best thirds, ranked exactly the way the bracket ranks them\n    const thirds = stand.map(rows => rows[2]).filter(r => r && r.team && r.team.id)\n      .map(r => ({ id: r.team.id, pts: r.pts, wins: r.wins, gd: r.gd || 0, gf: r.gf || 0 }));\n    thirds.sort(compareThirds).slice(0, 2).forEach(t => ids.add(t.id));\n    return ids;\n  }\n  stand.forEach(rows => take(rows, getQualifyCount(session)));\n  return ids;\n}', 1),
-    ('  const groups = getSessionGroups(session);\n  const groupSizes = groups.map(g => (session.teams || []).filter(t => t.group === g).length);',
-     '  const groups = getSessionGroups(session);\n  // Recomputed every render, so the marks track the scores as results go in\n  // rather than freezing at whatever was true when the bracket was seeded.\n  const qualIds = qualifyingTeamIds(session);\n  const groupSizes = groups.map(g => (session.teams || []).filter(t => t.group === g).length);', 1),
-    ('                const isTop = s.team.id === top;\n                return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md"',
-     '                const isTop = s.team.id === top;\n                const isQual = qualIds.has(s.team.id);\n                return <div key={s.team.id} data-qual={isQual ? "1" : "0"} className="sg-standrow flex items-center gap-2 px-2 py-1.5 rounded-md"', 1),
 ]
 
 
@@ -453,6 +449,7 @@ def rebuild_screens(s, report):
     s = replace_fn(s, "LeaderboardView", SCREENS.RANK_FN, report, "RANK")
 
     s = replace_fn(s, "SessionsView", SCREENS.SESSIONS_FN, report, "SESSIONS")
+    s = replace_fn(s, "GroupsTab", SCREENS.GROUPS_FN, report, "SESSION · GROUPS")
 
     # Faces on the team rows inside a session.
     if s.count(SCREENS.SESSION_FACES_OLD) != 1:

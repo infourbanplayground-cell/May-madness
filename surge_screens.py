@@ -910,3 +910,206 @@ UX_SCRIPT = """
 })();
 </script>
 """
+
+
+# ── SESSION DETAIL · GROUPS ────────────────────────────────────────────────
+# One group at a time, per the canvas. Every scoring handler is carried over
+# unchanged — setAdd/setEdit and MatchEditorModal are the same objects the old
+# view used, so entering a result behaves exactly as it did.
+#
+# The canvas's "COURT BOARD · WHO IS ON NOW" panel is not built: it needs a
+# court number per match, and nothing in this app records one.
+GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
+  const [edit, setEdit] = useState(null);
+  const [add, setAdd] = useState(null);
+  const groups = getSessionGroups(session);
+  const [pick, setPick] = useState(groups[0] || "A");
+  const g = groups.includes(pick) ? pick : groups[0];
+  const groupSizes = groups.map(x => (session.teams || []).filter(t => t.group === x).length);
+  const isUneven = groupSizes.length > 1 && new Set(groupSizes).size > 1;
+  const [showRules, setShowRules] = useState(false);
+  // Same rule the bracket seeds from, so the table cannot promise a spot the
+  // knockout won't honour.
+  const qualIds = qualifyingTeamIds(session);
+
+  const teams = (session.teams || []).filter(t => t.group === g);
+  const matches = (session.groupMatches || []).filter(m =>
+    teams.find(t => t.id === m.team1Id) && teams.find(t => t.id === m.team2Id));
+  const standings = calcGroupStandings(session, g);
+  const top = getTopOfGroup(session, g);
+  const first = (id) => { const p = state.players.find(x => x.id === id); return p ? p.name.split(" ")[0] : "?"; };
+  const lbl = (t) => t ? `${first(t.p1Id)} & ${first(t.p2Id)}` : "?";
+  const inits = (t) => t ? [t.p1Id, t.p2Id].map(id => {
+    const p = state.players.find(x => x.id === id);
+    return p ? (p.name[0] || "?").toUpperCase() : "?";
+  }) : ["?", "?"];
+
+  // What qualification actually is for THIS session, said plainly.
+  const N = groups.length;
+  const qLabel = N === 4 && session.thirdPlaceMode === "all4r16" ? "ALL THIRDS QUALIFY"
+    : N === 3 ? "TOP 2 + BEST THIRDS QUALIFY"
+    : `TOP ${getQualifyCount(session)} QUALIFY`;
+
+  const played = matches.filter(m => m.winner).length;
+
+  return (
+    <div className="space-y-4">
+      {isUneven && (
+        <div className="flex gap-2.5 p-3" style={{ background:"rgba(255,158,27,.10)", border:"1px solid rgba(255,158,27,.35)" }}>
+          <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#FF9E1B" }} />
+          <div>
+            <div className="text-xs font-bold" style={{ color:"#FF9E1B" }}>Uneven groups</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Groups have different team counts ({groupSizes.join(" / ")}). For knockout seeding every team is ranked on the same number of matches — the smallest group's ({Math.min(...groupSizes)} played) — so larger groups drop their lowest result. The tables below still show every match played.</div>
+          </div>
+        </div>
+      )}
+
+      {/* ── GROUP CHIPS — one group at a time ── */}
+      <div style={{display:"grid",gridTemplateColumns:`repeat(${Math.max(1, groups.length)},minmax(0,1fr))`,gap:6}}>
+        {groups.map(x => {
+          const on = x === g;
+          const n = (session.teams || []).filter(t => t.group === x).length;
+          const ms = (session.groupMatches || []).filter(m => {
+            const ts = (session.teams || []).filter(t => t.group === x);
+            return ts.find(t => t.id === m.team1Id) && ts.find(t => t.id === m.team2Id);
+          });
+          return <div key={x} onClick={() => setPick(x)}
+            style={{cursor:"pointer",minHeight:52,padding:"9px 4px",textAlign:"center",
+                    background:on ? "rgba(0,229,255,.12)" : "rgba(9,14,20,.94)",
+                    border:`1px solid ${on ? "rgba(0,229,255,.55)" : "rgba(92,107,120,.3)"}`}}>
+            <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+                 fontSize:21,lineHeight:1,color:on ? "#00E5FF" : "#9FB0BC"}}>{x}</div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,marginTop:4,
+                 color:on ? "#00E5FF" : "#9FB0BC"}}>{ms.filter(m => m.winner).length}/{ms.length} · {n}</div>
+          </div>;
+        })}
+      </div>
+
+      {/* ── STANDINGS ── */}
+      <div style={{marginTop:14,padding:16,background:"rgba(9,14,20,.94)",
+           backgroundImage:"linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06))",
+           backgroundSize:"3px 100%",backgroundRepeat:"no-repeat",position:"relative",overflow:"hidden"}}>
+        <div style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:96,lineHeight:1,
+             color:"rgba(244,249,250,.035)",pointerEvents:"none"}}>{g}</div>
+        <div style={{position:"relative",display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:36,height:36,display:"grid",placeItems:"center",background:"rgba(0,229,255,.12)",
+               border:"1px solid rgba(0,229,255,.45)",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+               fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:20,color:"#00E5FF"}}>{g}</div>
+          <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+               fontSize:20,lineHeight:1,color:"#F4F9FA"}}>GROUP {g}</div>
+          <div style={{marginLeft:"auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+               letterSpacing:".18em",color:"#9FB0BC"}}>{played}/{matches.length} PLAYED</div>
+        </div>
+
+        {standings.length === 0
+          ? <div style={{position:"relative",marginTop:12,padding:16,textAlign:"center",
+                 border:"1px dashed rgba(0,229,255,.22)",fontFamily:"'Archivo',sans-serif",fontWeight:800,
+                 fontSize:11,letterSpacing:".12em",color:"#9FB0BC"}}>NO RESULTS YET</div>
+          : <div style={{position:"relative",display:"grid",gridTemplateColumns:"1fr 40px 44px 56px",marginTop:12}}>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#9FB0BC",paddingBottom:8}}>TEAM</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#9FB0BC",textAlign:"center",paddingBottom:8}}>W</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#9FB0BC",textAlign:"center",paddingBottom:8}}>GD</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#9FB0BC",textAlign:"right",paddingBottom:8}}>PTS</div>
+              {standings.map((r) => {
+                const q = qualIds.has(r.team.id);
+                const isTop = r.team.id === top;
+                const [i1, i2] = inits(r.team);
+                const cell = { borderTop:"1px solid rgba(92,107,120,.16)", padding:"10px 0" };
+                return <React.Fragment key={r.team.id}>
+                  <div style={{...cell, display:"flex",alignItems:"center",gap:8,paddingLeft:10,
+                       boxShadow:q ? "inset 3px 0 0 var(--surge-cyan)" : "none"}}>
+                    <div style={{display:"flex",flex:"0 0 auto",gap:2}}>
+                      {[i1, i2].map((c, n2) => <div key={n2} style={{width:23,height:23,display:"grid",placeItems:"center",
+                           background:q ? "rgba(0,229,255,.10)" : "rgba(255,255,255,.04)",
+                           border:`1px solid ${q ? "rgba(0,229,255,.28)" : "rgba(92,107,120,.28)"}`,
+                           fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,
+                           color:q ? "#00E5FF" : "#9FB0BC"}}>{c}</div>)}
+                    </div>
+                    <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
+                         color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                      {isTop && <span style={{color:"#00E5FF",marginRight:4}}>&#9650;</span>}{lbl(r.team)}</div>
+                  </div>
+                  <div style={{...cell, display:"grid",placeItems:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:"#F4F9FA"}}>{r.wins}</div>
+                  <div style={{...cell, display:"grid",placeItems:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"#9FB0BC"}}>{r.gd > 0 ? "+" : ""}{r.gd}</div>
+                  <div style={{...cell, display:"flex",alignItems:"center",justifyContent:"flex-end",
+                       fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
+                       fontSize:20,color:q ? "#00E5FF" : "#F4F9FA"}}>{r.pts}</div>
+                </React.Fragment>;
+              })}
+            </div>}
+
+        <div style={{position:"relative",display:"flex",alignItems:"center",gap:8,marginTop:12,paddingTop:12,
+             borderTop:"1px solid rgba(92,107,120,.16)"}}>
+          <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:"#00E5FF"}}>{qLabel} &#9654;</div>
+          <div style={{flex:1,height:2,background:"linear-gradient(90deg,rgba(0,229,255,.5),transparent)"}} />
+        </div>
+      </div>
+
+      {/* ── MATCHES ── */}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginTop:20}}>
+        <div className="sg-kicker">Group {g} matches</div>
+        {isAdmin && teams.length >= 2 && <div style={{marginLeft:"auto"}}>
+          <Btn size="sm" variant="secondary" onClick={() => setAdd(g)}><I.plus size={12} /> Match</Btn></div>}
+      </div>
+      {matches.length === 0
+        ? <div style={{marginTop:10,padding:18,textAlign:"center",border:"1px dashed rgba(0,229,255,.22)",
+               fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:11,letterSpacing:".12em",color:"#9FB0BC"}}>NO MATCHES YET</div>
+        : <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:10}}>
+            {matches.map((m, mi) => {
+              const t1 = (session.teams || []).find(t => t.id === m.team1Id);
+              const t2 = (session.teams || []).find(t => t.id === m.team2Id);
+              const done = !!m.winner;
+              const w1 = m.winner === "team1", w2 = m.winner === "team2";
+              const bar = done ? "#00E5FF" : "#5C6B78";
+              return <div key={m.id} onClick={() => isAdmin && setEdit({ ...m, group: g })}
+                style={{cursor:isAdmin ? "pointer" : "default",padding:14,background:"rgba(9,14,20,.94)",
+                        backgroundImage:`linear-gradient(180deg,${bar},rgba(92,107,120,.05))`,
+                        backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:"#9FB0BC"}}>MATCH {mi + 1}</div>
+                  <div style={{marginLeft:"auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+                       letterSpacing:".22em",color:done ? "#00E5FF" : "#9FB0BC"}}>{done ? "FINAL" : isAdmin ? "TAP TO SCORE" : "TO PLAY"}</div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",gap:10,marginTop:10}}>
+                  <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,textAlign:"right",
+                       color:w1 ? "#00E5FF" : "#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t1)}</div>
+                  <div style={{flex:"0 0 auto",display:"flex",alignItems:"center",gap:7,padding:"5px 11px",
+                       background:done ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+                       border:`1px solid ${done ? "rgba(0,229,255,.35)" : "rgba(92,107,120,.3)"}`}}>
+                    <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
+                          fontSize:25,lineHeight:1,color:w1 ? "#00E5FF" : "#9FB0BC"}}>{m.score ? m.score.t1 : "–"}</span>
+                    <span style={{fontSize:13,color:"#9FB0BC"}}>/</span>
+                    <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
+                          fontSize:25,lineHeight:1,color:w2 ? "#00E5FF" : "#9FB0BC"}}>{m.score ? m.score.t2 : "–"}</span>
+                  </div>
+                  <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
+                       color:w2 ? "#00E5FF" : "#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t2)}</div>
+                </div>
+                {!m.score && m.lossType && <div style={{marginTop:9,fontFamily:"'Archivo',sans-serif",fontWeight:800,
+                     fontSize:10,letterSpacing:".14em",color:"#9FB0BC"}}>
+                  {(LOSS_TYPES.find(lt => lt.id === m.lossType) || {}).label}</div>}
+              </div>;
+            })}
+          </div>}
+
+      {/* ── HOW STANDINGS WORK — folded away; it is read once ── */}
+      <button onClick={() => setShowRules(v => !v)}
+        style={{width:"100%",textAlign:"left",background:"none",border:"none",
+                borderTop:"1px solid rgba(92,107,120,.18)",padding:"14px 4px",marginTop:20,cursor:"pointer",
+                fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,letterSpacing:".14em",
+                color:"#00E5FF",textTransform:"uppercase"}}>
+        {showRules ? "Hide" : "How standings work"} &#9654;
+      </button>
+      {showRules && <Card className="p-3">
+        <div className="text-[11px] leading-relaxed space-y-1" style={{color:"#9FB0BC"}}>
+          <div><span className="font-bold" style={{color:"#F4F9FA"}}>Ranked by:</span> Wins › Game difference (GD) › Games won › Head-to-head. (Most wins first — not total points.)</div>
+          <div><span className="font-bold" style={{color:"#F4F9FA"}}>Points:</span> Win <span className="font-mono" style={{color:"#00E5FF"}}>+3</span> · Tiebreak loss <span className="font-mono">+2</span> · Close loss <span className="font-mono">+1</span> · Blowout loss <span className="font-mono">0</span></div>
+          <div><span className="font-bold" style={{color:"#F4F9FA"}}>Series points:</span> this table counts every match played. For the series leaderboard only, each team's best 3 group results count — so a 5-team group drops its lowest game and cannot out-earn a group of 4. Knockout and playoff matches never count as group games.</div>
+        </div>
+      </Card>}
+
+      {(edit || add) && <MatchEditorModal session={session} state={state} group={edit?.group || add} match={edit} onClose={() => { setEdit(null); setAdd(null); }} onSave={(d) => { if (edit) updateSession(s => ({ ...s, groupMatches: s.groupMatches.map(m => m.id === edit.id ? { ...m, ...d } : m) })); else updateSession(s => ({ ...s, groupMatches: [...(s.groupMatches || []), { id: uid("m"), ...d }] })); }} onDelete={edit ? () => updateSession(s => ({ ...s, groupMatches: s.groupMatches.filter(m => m.id !== edit.id) })) : null} />}
+    </div>
+  );
+}'''
