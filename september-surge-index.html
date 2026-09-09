@@ -22,14 +22,35 @@
 </script>
 <script>
 (function(){
-  var V = "20260701_000001";
+  // Self-healing update check.
+  //
+  // The version this document was BUILT as — stamped by
+  // build-september-surge-app.py from the file's own content hash, and
+  // written to version.txt by the same deploy. So the comparison below is
+  // "is the page I am running the page the server now has", which is the
+  // actual question. It replaces a localStorage marker that could not
+  // answer it: the old code wrote the new version to localStorage BEFORE
+  // reloading, so if that reload came back out of a cache the marker said
+  // "current" while the page was stale — and it never checked again.
+  // A phone could sit on a superseded build indefinitely.
+  var V = "7dd159776bb7";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
       v = v.trim();
-      var stored = localStorage.getItem("jh-build");
-      if (stored && stored !== v) { localStorage.setItem("jh-build", v); location.reload(true); }
-      else { localStorage.setItem("jh-build", v); }
+      localStorage.setItem("jh-build", v);
+      if (!v || v === V) return;
+      // One reload per server version, so a mismatch we cannot fix — a
+      // version.txt that never matches any build — degrades to serving the
+      // stale page rather than reloading forever.
+      try {
+        if (sessionStorage.getItem("jh-reloaded") === v) return;
+        sessionStorage.setItem("jh-reloaded", v);
+      } catch (e) { return; }
+      // Reload through a changed URL: a plain reload can be answered from
+      // the browser's cache, and that cache is exactly what is stale.
+      var u = location.pathname + "?b=" + encodeURIComponent(v) + location.hash;
+      location.replace(u);
     }).catch(function(){});
 })();
 </script>

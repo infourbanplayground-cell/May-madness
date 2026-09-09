@@ -12,7 +12,7 @@ contract. Vol.7 runs the same rules on its own data (ss_* tables, port 3008).
 
   python3 build-september-surge-app.py
 """
-import os, re, sys
+import hashlib, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "august-attack-index.html")
@@ -414,6 +414,10 @@ QUALIFY = [
 ]
 
 
+VERSION_CHECK = ('(function(){\n  var V = "20260701_000001";\n  fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })\n    .then(function(r){ return r.text(); })\n    .then(function(v){\n      v = v.trim();\n      var stored = localStorage.getItem("jh-build");\n      if (stored && stored !== v) { localStorage.setItem("jh-build", v); location.reload(true); }\n      else { localStorage.setItem("jh-build", v); }\n    }).catch(function(){});\n})();',
+                 '(function(){\n  // Self-healing update check.\n  //\n  // The version this document was BUILT as — stamped by\n  // build-september-surge-app.py from the file\'s own content hash, and\n  // written to version.txt by the same deploy. So the comparison below is\n  // "is the page I am running the page the server now has", which is the\n  // actual question. It replaces a localStorage marker that could not\n  // answer it: the old code wrote the new version to localStorage BEFORE\n  // reloading, so if that reload came back out of a cache the marker said\n  // "current" while the page was stale — and it never checked again.\n  // A phone could sit on a superseded build indefinitely.\n  var V = "__BUILD_ID__";\n  fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })\n    .then(function(r){ return r.text(); })\n    .then(function(v){\n      v = v.trim();\n      localStorage.setItem("jh-build", v);\n      if (!v || v === V) return;\n      // One reload per server version, so a mismatch we cannot fix — a\n      // version.txt that never matches any build — degrades to serving the\n      // stale page rather than reloading forever.\n      try {\n        if (sessionStorage.getItem("jh-reloaded") === v) return;\n        sessionStorage.setItem("jh-reloaded", v);\n      } catch (e) { return; }\n      // Reload through a changed URL: a plain reload can be answered from\n      // the browser\'s cache, and that cache is exactly what is stale.\n      var u = location.pathname + "?b=" + encodeURIComponent(v) + location.hash;\n      location.replace(u);\n    }).catch(function(){});\n})();')
+
+
 def rebuild_rank(s, report):
     """Replace LeaderboardView's render with the design language's RANK screen."""
     i = s.find(RANK_ANCHOR)
@@ -675,6 +679,15 @@ def main():
         s = s.replace(old, new)
     report.append("  fix    panel bars amber -> cyan, medal chips -> cyan/steel ladder")
 
+    # Stamp this build's identity into the page and make the update check
+    # self-healing. The hash is computed after every other transform, over the
+    # file with the stamp itself blanked, so it is stable and depends only on
+    # what actually ships.
+    vc_old, vc_new = VERSION_CHECK
+    if s.count(vc_old) != 1:
+        sys.exit(f"BUILD FAILED: expected 1 version-check block, found {s.count(vc_old)}")
+    s = s.replace(vc_old, vc_new)
+
     for old, new, want in QUALIFY:
         if s.count(old) != want:
             sys.exit(f"BUILD FAILED: qualifying-row patch expected {want} match(es), "
@@ -685,7 +698,12 @@ def main():
     s = rebuild_rank(s, report)
     s = apply_skin(s, report)
 
+    build_id = hashlib.sha256(s.encode()).hexdigest()[:12]
+    s = s.replace("__BUILD_ID__", build_id)
     open(DST, "w").write(s)
+    with open(DST + ".version", "w") as f:
+        f.write(build_id + "\n")
+    report.append(f"  build  id {build_id} -> stamped in page + {os.path.basename(DST)}.version")
     print("\n".join(report))
     print(f"\nwrote {os.path.basename(DST)}  {orig_len/1024/1024:.2f}MB -> {len(s)/1024/1024:.2f}MB")
 

@@ -103,7 +103,15 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   `ss_session_photos`, `ss_recovery_dumps`) — same database, own rows. Vol.6's
   `aa_*` tables and port 3005 are completely separate and untouched.
 - Same admin/scorer/photographer PINs as August Attack (`.env` copied, port changed).
-- Deploy app: `scp september-surge-index.html urbanpadel:/tmp/ss.html && ssh urbanpadel 'cp /tmp/ss.html /var/www/surge.urbanpadel.om/public/index.html && date +%Y%m%d_%H%M%S > /var/www/surge.urbanpadel.om/public/version.txt'`
+- Deploy app: version.txt must carry the build id the page was stamped with,
+  not a timestamp — the update check compares the two, so a mismatch makes every
+  visitor reload once, forever:
+  ```bash
+  scp september-surge-index.html urbanpadel:/tmp/ss.html
+  scp september-surge-index.html.version urbanpadel:/tmp/ss.version
+  ssh urbanpadel 'cp /tmp/ss.html /var/www/surge.urbanpadel.om/public/index.html && \
+                  cp /tmp/ss.version /var/www/surge.urbanpadel.om/public/version.txt'
+  ```
 - Deploy API: `scp api.js urbanpadel:/opt/september-surge-api/ && ssh urbanpadel 'systemctl restart september-surge-api'`
 - Brand art: `brand/september-surge/` — the lockup carries SEPTEMBER / SURGE /
   URBAN PLAYGROUND, served WebP-first (233KB vs 1.1MB as PNG). The Vol.6 app
