@@ -451,6 +451,13 @@ def rebuild_screens(s, report):
     s = replace_fn(s, "SessionsView", SCREENS.SESSIONS_FN, report, "SESSIONS")
     s = replace_fn(s, "GroupsTab", SCREENS.GROUPS_FN, report, "SESSION · GROUPS")
 
+    # The bracket tree, redrawn to the canvas. BracketTreeView is what the app
+    # already uses whenever there are four quarter-finals — the three round
+    # Cards below it are only the fallback for non-standard sizes, so those are
+    # left alone. seedQF, the qualification control, the "who qualified" panel
+    # and BracketEditModal are all untouched: this is rendering, not logic.
+    s = replace_fn(s, "BracketTreeView", SCREENS.BRACKET_TREE_FN, report, "SESSION · BRACKET")
+
     # Faces on the team rows inside a session.
     if s.count(SCREENS.SESSION_FACES_OLD) != 1:
         sys.exit("BUILD FAILED: session team-row anchor matched %d times"

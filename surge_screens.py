@@ -1113,3 +1113,122 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
     </div>
   );
 }'''
+
+
+# ── SESSION DETAIL · KNOCKOUTS ─────────────────────────────────────────────
+# Only the three round Cards are replaced. seedQF, the qualification control,
+# the "who qualified" panel, the manual seeding modal and BracketEditModal are
+# all left alone — this is the round rendering, not the bracket logic.
+
+# ── SESSION DETAIL · THE BRACKET ───────────────────────────────────────────
+# Redrawn to the canvas: three labelled columns, cards carrying both names and
+# their scores, and connectors that light up as each round resolves. Positions
+# are computed, not hardcoded, so a bracket with fewer than four quarter-finals
+# still lays out correctly.
+#
+# Same props and the same setEdit call as before, so tapping a match opens the
+# same editor it always did.
+BRACKET_TREE_FN = r'''function BracketTreeView({ b, lbl, canScore, setEdit }) {
+  const QFW = 176, SFW = 168, FW = 176, CARD = 78, GAP = 18;
+  const qf = b.qf || [];
+  const n = Math.max(1, qf.length);
+  const qTop = (i) => 22 + i * (CARD + GAP);
+  const qMid = (i) => qTop(i) + CARD / 2;
+  const sfCount = Math.max(1, Math.ceil(n / 2));
+  const sMid = (i) => (qMid(i * 2) + qMid(Math.min(n - 1, i * 2 + 1))) / 2;
+  const fMid = sfCount > 1 ? (sMid(0) + sMid(sfCount - 1)) / 2 : sMid(0);
+  const H = qTop(n - 1) + CARD + 26;
+  const X1 = QFW, X2 = QFW + 18, X3 = QFW + 36;
+  const Y1 = X3 + SFW, Y2 = Y1 + 18, Y3 = Y1 + 36;
+  const W = Y3 + FW;
+
+  // Placeholders so all three columns are visible from the start.
+  const sf = b.sf && b.sf.length ? b.sf
+    : Array.from({ length: sfCount }, (_, i) => ({ id: "sfp" + i, slot: i + 1, team1Id: null, team2Id: null, winner: null }));
+  const fin = b.final || { id: "fp", team1Id: null, team2Id: null, winner: null };
+
+  const nameOf = (id) => id && !String(id).includes("TBD") ? lbl(id) : "—";
+  const won = (m, k) => !!(m && m.winner === k);
+  const line = (key, l, t, w, h, on) => <div key={key} style={{position:"absolute",left:l,top:t,width:w,height:h,
+    background:on ? "rgba(0,229,255,.55)" : "rgba(92,107,120,.3)"}} />;
+
+  const Card2 = ({ m, round, label, l, t, w, accent, live, big }) => {
+    const done = !!(m && m.winner);
+    const real = !!(m && (m.team1Id || m.team2Id));
+    return <div onClick={() => real && canScore && setEdit({ ...m, round })}
+      style={{position:"absolute",left:l,top:t,width:w,padding:big ? 12 : "9px 10px",
+              background:big ? "rgba(16,23,31,.96)" : "rgba(9,14,20,.94)",
+              cursor:real && canScore ? "pointer" : "default",
+              border:`1px solid ${done ? (big ? "rgba(255,158,27,.5)" : "rgba(0,229,255,.45)") : "rgba(92,107,120,.3)"}`,
+              borderLeft:`3px solid ${accent}`}}>
+      <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".22em",
+           color:big ? "#FF9E1B" : "#9FB0BC"}}>{label}</div>
+      {["team1", "team2"].map((k, ki) => (
+        <div key={k} style={{display:"flex",alignItems:"center",gap:8,marginTop:ki ? (big ? 5 : 4) : (big ? 8 : 6),
+             paddingTop:ki ? (big ? 5 : 4) : 0,
+             borderTop:ki ? "1px solid rgba(92,107,120,.18)" : "none"}}>
+          <div style={{flex:"1 1 auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,
+               fontSize:big ? 14 : 13,color:won(m, k) ? live : "#F4F9FA",
+               whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nameOf(m && m[k + "Id"])}</div>
+          <div style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
+               color:won(m, k) ? live : "#9FB0BC"}}>{m && m.score ? m.score[k === "team1" ? "t1" : "t2"] : "–"}</div>
+        </div>
+      ))}
+    </div>;
+  };
+
+  const champId = b.final && b.final.winner
+    ? (b.final.winner === "team1" ? b.final.team1Id : b.final.team2Id) : null;
+  const label = (txt, l, colour) => <div style={{position:"absolute",left:l,top:0,
+    fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:colour}}>{txt}</div>;
+
+  return (
+    <div>
+      <div style={{overflowX:"auto",overscrollBehaviorX:"contain",paddingBottom:4}}>
+        <div style={{position:"relative",width:W,height:H}}>
+          {label("QUARTER-FINALS", 0, "#9FB0BC")}
+          {label("SEMI-FINALS", X3, "#9FB0BC")}
+          {label("FINAL", Y3, "#FF9E1B")}
+
+          {/* connectors — each lights when its round has a result */}
+          {qf.map((m, i) => line("q" + i, X1, qMid(i) - 1, 18, 2, !!m.winner))}
+          {Array.from({ length: sfCount }).map((_, i) => {
+            const a = qMid(i * 2), c = qMid(Math.min(n - 1, i * 2 + 1));
+            const on = !!(sf[i] && (sf[i].team1Id || sf[i].team2Id));
+            return <React.Fragment key={"j" + i}>
+              {line("v" + i, X2, Math.min(a, c), 2, Math.abs(c - a) || 2, on)}
+              {line("h" + i, X2, sMid(i) - 1, 18, 2, on)}
+            </React.Fragment>;
+          })}
+          {sf.map((m, i) => line("s" + i, Y1, sMid(i) - 1, 18, 2, !!m.winner))}
+          {sfCount > 1 && line("fv", Y2, Math.min(sMid(0), sMid(sfCount - 1)), 2,
+                               Math.abs(sMid(sfCount - 1) - sMid(0)) || 2, !!(fin.team1Id || fin.team2Id))}
+          {line("fh", Y2, fMid - 1, 18, 2, !!(fin.team1Id || fin.team2Id))}
+
+          {/* cards */}
+          {qf.map((m, i) => <Card2 key={"qf" + m.id} m={m} round="qf" label={`QF${i + 1}`}
+            l={0} t={qTop(i)} w={QFW} accent={m.winner ? "#00E5FF" : "#5C6B78"} live="#00E5FF" />)}
+          {sf.map((m, i) => <Card2 key={"sf" + m.id} m={m} round="sf" label={`SF${i + 1}`}
+            l={X3} t={sMid(i) - CARD / 2} w={SFW} accent={m.winner ? "#00E5FF" : "#5C6B78"} live="#00E5FF" />)}
+          <Card2 m={fin} round="final" label="FINAL" l={Y3} t={fMid - CARD / 2 - 8} w={FW}
+            accent="#FF9E1B" live="#FF9E1B" big />
+        </div>
+      </div>
+
+      {champId && <div style={{marginTop:12,display:"flex",alignItems:"center",gap:8,padding:"11px 13px",
+           background:"rgba(255,158,27,.08)",borderLeft:"3px solid #FF9E1B"}}>
+        <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".26em",color:"#FF9E1B"}}>CHAMPION</div>
+        <div style={{marginLeft:"auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 112,'wght' 900",fontSize:18,color:"#FF9E1B",
+             whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(champId)}</div>
+      </div>}
+
+      <div style={{marginTop:12,padding:"13px 14px",background:"rgba(0,229,255,.06)",borderLeft:"3px solid #00E5FF",
+           fontSize:12.5,lineHeight:1.5,color:"#9FB0BC"}}>
+        Group winners cross over against runners-up from another group, so a group-stage rematch is avoided
+        wherever the seeding allows. Swipe sideways to follow it through{canScore ? "; tap a match to score it" : ""}.
+        Reaching the quarter-final is worth +1, the semi +2, the final +3, and winning it +5 more.
+      </div>
+    </div>
+  );
+}'''
