@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/styles.css">
+<script src="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+  body { margin:0; background:#050709; color:#F4F9FA; font-family:'Archivo',system-ui,sans-serif; }
+  a { color:#00E5FF; text-decoration:none; }
+  a:hover { color:#FF9E1B; }
+  @keyframes sgIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes sgSlide { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+  @keyframes sgBar { 0%,100%{opacity:.55} 50%{opacity:1} }
+  @keyframes sgSheen { 0%,72%{transform:translateX(-130%)} 100%{transform:translateX(130%)} }
+  @keyframes sgPop { 0%{opacity:0;transform:translate(-50%,10px) scale(.86)} 26%{opacity:1;transform:translate(-50%,0) scale(1.06)} 40%{transform:translate(-50%,0) scale(1)} 84%{opacity:1} 100%{opacity:0;transform:translate(-50%,-8px) scale(1)} }
+  @keyframes sgRing { from{opacity:.85;transform:translate(-50%,-50%) scale(.4)} to{opacity:0;transform:translate(-50%,-50%) scale(2.6)} }
+  @keyframes sgRip { to{transform:scale(7);opacity:0} }
+  @keyframes sgRowIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+  @keyframes sgDrift { 0%,100%{transform:translate3d(0,0,0)} 50%{transform:translate3d(-10px,8px,0)} }
+  @keyframes sgWord { 0%,62%{background-position:-140% 0} 100%{background-position:240% 0} }
+  @keyframes sgPulseRing { 0%{opacity:.7;transform:scale(.7)} 100%{opacity:0;transform:scale(2.4)} }
+  @keyframes sgStreakScroll { to{background-position:-276px -620px} }
+  @keyframes sgTick { 0%,100%{opacity:.45;transform:scaleY(.7)} 50%{opacity:1;transform:scaleY(1)} }
+  .sg-rip { position:fixed;z-index:9999;pointer-events:none;border-radius:50%;width:16px;height:16px;margin:-8px 0 0 -8px;background:radial-gradient(circle,rgba(0,229,255,.55),rgba(0,229,255,0) 70%);animation:sgRip 460ms ease-out forwards; }
+  @media (prefers-reduced-motion:reduce){ *{animation:none !important} }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#050709;position:relative;overflow-x:hidden;">
+  <div style="position:fixed;inset:0;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.10) 0 1px,transparent 1px 92px),repeating-linear-gradient(66deg,rgba(0,229,255,.05) 0 2px,transparent 2px 31px);"></div>
+
+  <div style="position:sticky;top:0;z-index:30;background:rgba(5,7,9,.94);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,229,255,.2);">
+    <div style="max-width:430px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+      <div style="min-width:0;">
+        <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:20px;line-height:1;color:#F4F9FA;">SEPTEMBER SURGE</div>
+        <div style="font-weight:800;font-size:8px;letter-spacing:.3em;color:#9FB0BC;margin-top:3px;">URBAN SOCIAL SERIES · VOL.7</div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div style="width:7px;height:7px;border-radius:50%;background:#00E5FF;box-shadow:0 0 8px #00E5FF;"></div>
+          <span style="font-weight:800;font-size:8px;letter-spacing:.2em;color:#9FB0BC;">SYNCED</span>
+        </div>
+        <div style="padding:5px 9px;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.35);font-weight:800;font-size:9px;letter-spacing:.18em;color:#00E5FF;">ADMIN</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:relative;max-width:430px;margin:0 auto;padding:0 16px 110px;">
+
+    <!-- ══════════ HOME ══════════ -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:sgSlide 200ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="position:relative;margin-top:16px;padding:26px 18px;background:rgba(5,7,9,.9);border:1px solid rgba(0,229,255,.28);overflow:hidden;animation:sgRowIn 420ms cubic-bezier(.34,1.4,.64,1) both;">
+          <div style="position:absolute;inset:-40px;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.09) 0 1px,transparent 1px 74px);animation:sgStreakScroll 18s linear infinite;"></div>
+          <div style="position:absolute;right:-16px;top:-40px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:170px;line-height:1;color:rgba(0,229,255,.06);pointer-events:none;animation:sgDrift 14s ease-in-out infinite;">07</div>
+          <div style="position:relative;font-weight:800;font-size:9px;letter-spacing:.34em;color:#00E5FF;">MON &amp; WED · 5:30 PM · ALL SEPTEMBER</div>
+          <div style="position:relative;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:46px;line-height:.9;color:#F4F9FA;margin-top:10px;">RIDE THE<br><span style="color:#00E5FF;background-image:linear-gradient(100deg,transparent 42%,rgba(244,249,250,.85) 50%,transparent 58%);background-size:240% 100%;background-repeat:no-repeat;-webkit-background-clip:text;background-clip:text;animation:sgWord 5.5s ease-in-out infinite;">SURGE.</span></div>
+          <div style="position:relative;display:flex;gap:8px;margin-top:16px;">
+            <div style="flex:1;padding:10px 12px;background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.3);">
+              <div style="font-weight:800;font-size:8px;letter-spacing:.22em;color:#9FB0BC;">PRIZE POOL</div>
+              <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:22px;color:#00E5FF;margin-top:2px;">{{ prizeLive }}</div>
+            </div>
+            <div style="flex:1;padding:10px 12px;background:rgba(255,158,27,.08);border:1px solid rgba(255,158,27,.3);">
+              <div style="font-weight:800;font-size:8px;letter-spacing:.22em;color:#9FB0BC;">PLAYERS</div>
+              <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:22px;color:#FF9E1B;margin-top:2px;">{{ playersLive }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#9FB0BC;">Next up</div>
+        <div onClick="{{ openLive }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;margin-top:10px;padding:16px;background:rgba(16,23,31,.96);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#00E5FF;">{{ liveDate }}</div>
+            <div style="margin-left:auto;display:flex;align-items:center;gap:7px;">
+              <div style="position:relative;width:7px;height:7px;">
+                <div style="position:absolute;inset:0;border-radius:50%;background:#00E5FF;animation:sgBar 2s ease-in-out infinite;"></div>
+                <div style="position:absolute;inset:0;border-radius:50%;border:1px solid #00E5FF;animation:sgPulseRing 2s ease-out infinite;"></div>
+              </div>
+              <span style="font-weight:800;font-size:9px;letter-spacing:.2em;color:#00E5FF;">LIVE NOW</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:12px;">
+            <div style="flex:0 0 auto;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:{{ ringBg }}">
+              <div style="width:44px;height:44px;border-radius:50%;background:#050709;display:grid;place-items:center;">
+                <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:16px;color:#00E5FF;">{{ playedLive }}</div>
+              </div>
+            </div>
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:26px;line-height:1;color:#F4F9FA;">SESSION 6</div>
+              <div style="font-weight:800;font-size:10px;letter-spacing:.16em;color:#9FB0BC;margin-top:5px;white-space:nowrap;">{{ playedLabel }} · 4 COURTS</div>
+            </div>
+            <div style="flex:0 0 auto;font-weight:800;font-size:11px;color:#00E5FF;">OPEN ▶</div>
+          </div>
+        </div>
+
+        <!-- PODIUM -->
+        <div style="margin-top:20px;display:flex;align-items:baseline;gap:10px;">
+          <div style="font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#9FB0BC;">Top of the series</div>
+          <div onClick="{{ goRank }}" data-tap="1" style="cursor:pointer;margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.2em;color:#00E5FF;">FULL TABLE ▶</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
+          <sc-for list="{{ podium }}" as="k" hint-placeholder-count="3">
+            <div onClick="{{ k.open }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);animation:sgRowIn 420ms cubic-bezier(.34,1.4,.64,1) both;animation-delay:{{ k.delay }};cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 14px;background:{{ k.plate }};background-image:linear-gradient(180deg,{{ k.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+              <div style="flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;background:{{ k.badgeBg }};border:1px solid {{ k.badgeBorder }};font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;line-height:1;color:{{ k.badgeColor }};">{{ k.rank }}</div>
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:800;font-size:16px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ k.name }}</div>
+                <div style="font-weight:800;font-size:9px;letter-spacing:.18em;color:#9FB0BC;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ k.meta }}</div>
+              </div>
+              <div style="flex:0 0 auto;text-align:right;">
+                <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:24px;line-height:1;color:{{ k.ptsColor }};">{{ k.pts }}</div>
+                <div style="font-weight:800;font-size:8px;letter-spacing:.24em;color:#9FB0BC;margin-top:2px;">PTS</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- SPOTLIGHT -->
+        <div style="margin-top:20px;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#9FB0BC;">Worth watching</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;">
+          <sc-for list="{{ spotlight }}" as="sp" hint-placeholder-count="2">
+            <div onClick="{{ sp.open }}" data-tap="1" style-active="transform:scale(.975)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);animation:sgRowIn 460ms cubic-bezier(.34,1.4,.64,1) both;animation-delay:{{ sp.delay }};cursor:pointer;padding:14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,{{ sp.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+              <div style="font-weight:800;font-size:8px;letter-spacing:.2em;color:{{ sp.accent }};">{{ sp.kicker }}</div>
+              <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:34px;line-height:1;color:{{ sp.accent }};margin-top:7px;">{{ sp.figure }}</div>
+              <div style="font-weight:800;font-size:14px;color:#F4F9FA;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ sp.name }}</div>
+              <div style="font-size:12px;line-height:1.4;color:#9FB0BC;margin-top:5px;">{{ sp.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- SCORING LADDER -->
+        <div style="margin-top:20px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#FF9E1B;">HOW POINTS ARE EARNED</div>
+          <div style="display:grid;grid-template-columns:1fr auto;margin-top:12px;">
+            <sc-for list="{{ ladder }}" as="l" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid rgba(92,107,120,.16);">
+                <div style="width:3px;height:16px;background:{{ l.tick }};animation:sgTick 2.6s ease-in-out infinite;animation-delay:{{ l.delay }};"></div>
+                <div style="font-weight:800;font-size:14px;color:{{ l.color }};">{{ l.label }}</div>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding-left:12px;border-top:1px solid rgba(92,107,120,.16);font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:{{ l.ptsColor }};">{{ l.pts }}</div>
+            </sc-for>
+          </div>
+          <div style="font-size:12.5px;line-height:1.5;color:#9FB0BC;margin-top:11px;">Only your best three group results count, so a bigger group can never out-earn a smaller one. A double-points night doubles everything above.</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══════════ SESSIONS ══════════ -->
+    <sc-if value="{{ isSessions }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:sgSlide 200ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="padding:18px 0 6px;">
+          <div style="font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Nine nights · Vol.7</div>
+          <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:44px;line-height:.9;color:#F4F9FA;margin-top:6px;">SESSIONS</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+          <sc-for list="{{ sessionList }}" as="s" hint-placeholder-count="9">
+            <div onClick="{{ s.open }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;display:flex;align-items:center;gap:14px;padding:14px;background:{{ s.bg }};background-image:linear-gradient(180deg,{{ s.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+              <div style="flex:0 0 auto;width:48px;height:48px;display:grid;place-items:center;background:{{ s.tileBg }};border:1px solid {{ s.tileBorder }};font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;color:{{ s.tileColor }};">{{ s.no }}</div>
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-weight:800;font-size:9px;letter-spacing:.24em;color:#9FB0BC;">{{ s.date }}</div>
+                <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;line-height:1.05;color:#F4F9FA;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.title }}</div>
+                <div style="font-weight:800;font-size:10px;letter-spacing:.14em;color:{{ s.noteColor }};margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.note }}</div>
+              </div>
+              <div style="flex:0 0 auto;padding:4px 9px;background:{{ s.pillBg }};border:1px solid {{ s.pillBorder }};font-weight:800;font-size:9px;letter-spacing:.18em;color:{{ s.pillColor }};">{{ s.pill }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══════════ RANK ══════════ -->
+    <sc-if value="{{ isRank }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:sgSlide 200ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="position:relative;padding:20px 0 12px;overflow:hidden;">
+          <div style="position:absolute;right:-14px;top:-30px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:150px;line-height:1;color:rgba(0,229,255,.06);pointer-events:none;">07</div>
+          <div style="position:relative;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Series standings · {{ playerCount }} players</div>
+          <div style="position:relative;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:50px;line-height:.88;color:#F4F9FA;margin-top:8px;">RANKINGS</div>
+          <div style="position:relative;height:3px;margin-top:12px;background:linear-gradient(90deg,#00E5FF,rgba(0,229,255,0));"></div>
+        </div>
+
+        <!-- sort -->
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
+          <sc-for list="{{ sortChips }}" as="c" hint-placeholder-count="3">
+            <div onClick="{{ c.pick }}" data-tap="1" style-active="transform:scale(.96)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;min-height:40px;display:grid;place-items:center;background:{{ c.bg }};border:1px solid {{ c.border }};font-weight:800;font-size:10px;letter-spacing:.16em;color:{{ c.color }};">{{ c.label }}</div>
+          </sc-for>
+        </div>
+
+        <!-- leader -->
+        <div onClick="{{ openLeader }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;position:relative;margin-top:12px;padding:16px 14px;background:rgba(16,23,31,.96);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;overflow:hidden;">
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(0,229,255,.12) 50%,transparent 62%);transform:translateX(-130%);animation:sgSheen 6s ease-in-out infinite;"></div>
+          <div style="position:relative;display:flex;align-items:center;gap:12px;">
+            <div style="flex:0 0 auto;width:48px;height:48px;display:grid;place-items:center;background:rgba(0,229,255,.14);border:1px solid rgba(0,229,255,.5);box-shadow:0 0 26px rgba(0,229,255,.22);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:22px;color:#00E5FF;">1</div>
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:19px;line-height:1.05;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ leaderName }}</div>
+              <div style="display:flex;gap:8px;margin-top:5px;">
+                <span style="white-space:nowrap;font-weight:800;font-size:9px;letter-spacing:.16em;color:#9FB0BC;">{{ leaderSessions }}</span>
+                <span style="white-space:nowrap;font-weight:800;font-size:9px;letter-spacing:.16em;color:#00E5FF;">{{ leaderStreak }}</span>
+              </div>
+            </div>
+            <div style="flex:0 0 auto;text-align:right;">
+              <div style="white-space:nowrap;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:28px;line-height:.9;color:#00E5FF;">{{ leaderPts }}</div>
+              <div style="font-weight:800;font-size:8px;letter-spacing:.26em;color:#9FB0BC;">PTS</div>
+            </div>
+          </div>
+          <div style="position:relative;display:flex;align-items:center;gap:6px;margin-top:12px;padding-top:11px;border-top:1px solid rgba(92,107,120,.2);">
+            <span style="font-weight:800;font-size:9px;letter-spacing:.26em;color:#9FB0BC;">FORM</span>
+            <sc-for list="{{ leaderForm }}" as="d" hint-placeholder-count="8">
+              <div style="width:14px;height:6px;background:{{ d.bg }};"></div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- you, in context -->
+        <div style="margin-top:14px;padding:13px 14px;background:rgba(16,23,31,.96);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;border:1px solid rgba(255,158,27,.4);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;background:rgba(255,158,27,.12);border:1px solid rgba(255,158,27,.5);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:18px;color:#FF9E1B;">{{ meRank }}</div>
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#FF9E1B;">YOU</div>
+              <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:18px;line-height:1.05;color:#F4F9FA;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ meName }}</div>
+              <div style="font-weight:800;font-size:9px;letter-spacing:.18em;color:{{ meStreakColor }};margin-top:4px;">{{ meStreak }}</div>
+            </div>
+            <div style="flex:0 0 auto;text-align:right;">
+              <div style="font-weight:800;font-size:10px;color:{{ meMoveColor }};">{{ meMove }}</div>
+              <div style="white-space:nowrap;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:26px;line-height:1;color:#FF9E1B;margin-top:2px;">{{ mePts }}</div>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(92,107,120,.22);">
+            <sc-for list="{{ nearRows }}" as="n" hint-placeholder-count="5">
+              <div style="display:flex;align-items:center;gap:10px;padding:5px 0;">
+                <div style="flex:0 0 auto;width:20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#9FB0BC;">{{ n.rank }}</div>
+                <div style="flex:0 0 auto;width:2px;height:14px;background:{{ n.edge }};"></div>
+                <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:13px;color:{{ n.color }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.name }}</div>
+                <div style="flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ n.color }};">{{ n.pts }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- full table -->
+        <div style="margin-top:18px;display:grid;grid-template-columns:34px 1fr 56px 74px;font-weight:800;font-size:10px;letter-spacing:.2em;color:#9FB0BC;">
+          <div style="padding-bottom:8px;">#</div>
+          <div style="padding-bottom:8px;">PLAYER</div>
+          <div style="padding-bottom:8px;text-align:center;">STREAK</div>
+          <div style="padding-bottom:8px;text-align:right;">PTS</div>
+          <sc-for list="{{ rankRows }}" as="r" hint-placeholder-count="14">
+            <div onClick="{{ r.open }}" data-tap="1" style="cursor:pointer;display:flex;align-items:center;gap:4px;border-top:1px solid rgba(92,107,120,.16);">
+              <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0BC;">{{ r.rank }}</span>
+              <span style="font-size:9px;color:{{ r.moveColor }};">{{ r.move }}</span>
+            </div>
+            <div onClick="{{ r.open }}" data-tap="1" style="cursor:pointer;padding:9px 0;border-top:1px solid rgba(92,107,120,.16);min-width:0;">
+              <div style="font-weight:800;font-size:15px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.name }}</div>
+              <div style="height:4px;margin-top:5px;width:{{ r.barWidth }};background:linear-gradient(90deg,rgba(0,229,255,.7),rgba(0,229,255,.12));"></div>
+            </div>
+            <div onClick="{{ r.open }}" data-tap="1" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;border-top:1px solid rgba(92,107,120,.16);">
+              <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;color:{{ r.streakColor }};">{{ r.streak }}</span>
+            </div>
+            <div onClick="{{ r.open }}" data-tap="1" style="cursor:pointer;display:flex;align-items:center;justify-content:flex-end;border-top:1px solid rgba(92,107,120,.16);font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:#F4F9FA;">{{ r.pts }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ══════════ PLAYERS ══════════ -->
+    <sc-if value="{{ isPlayers }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:sgSlide 200ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="padding:18px 0 6px;">
+          <div style="font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Roster · tap a card for the full profile</div>
+          <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:44px;line-height:.9;color:#F4F9FA;margin-top:6px;">PLAYERS</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;">
+          <sc-for list="{{ roster }}" as="pl" hint-placeholder-count="16">
+            <div onClick="{{ pl.open }}" data-tap="1" style-active="transform:scale(.975)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,{{ pl.bar }},rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;padding-left:3px;">
+              <div style="position:relative;width:100%;height:140px;">
+                <image-slot id="{{ pl.slot }}" shape="rect" fit="cover" placeholder="Drop photo"></image-slot>
+                <div style="position:absolute;left:0;top:0;padding:3px 7px;background:rgba(5,7,9,.86);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#9FB0BC;">{{ pl.rank }}</div>
+                <div style="position:absolute;right:0;top:0;padding:3px 7px;background:{{ pl.streakBg }};font-weight:800;font-size:10px;letter-spacing:.1em;color:{{ pl.streakColor }};">{{ pl.streak }}</div>
+              </div>
+              <div style="padding:10px 12px;">
+                <div style="font-weight:800;font-size:15px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ pl.name }}</div>
+                <div style="display:flex;align-items:center;gap:3px;margin-top:7px;">
+                  <sc-for list="{{ pl.form }}" as="d" hint-placeholder-count="8">
+                    <div style="width:8px;height:5px;background:{{ d.bg }};"></div>
+                  </sc-for>
+                  <span style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:17px;color:#00E5FF;">{{ pl.pts }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ══════════ BOTTOM NAV ══════════ -->
+  <div style="position:fixed;bottom:0;left:0;right:0;z-index:30;background:#050709;border-top:3px solid #00E5FF;">
+    <div style="max-width:430px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="4">
+        <div onClick="{{ n.pick }}" data-tap="1" style-active="transform:scale(.94)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;position:relative;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:{{ n.bg }};">
+          <div style="width:26px;height:3px;background:{{ n.tick }};"></div>
+          <div style="font-weight:800;font-size:10px;letter-spacing:.16em;color:{{ n.color }};">{{ n.label }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ══════════ SESSION DETAIL ══════════ -->
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:50;background:#050709;overflow-y:auto;">
+      <div style="position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.10) 0 1px,transparent 1px 92px),repeating-linear-gradient(66deg,rgba(0,229,255,.05) 0 2px,transparent 2px 31px);"></div>
+
+      <div style="position:sticky;top:0;z-index:10;background:rgba(5,7,9,.96);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,229,255,.22);">
+        <div style="max-width:430px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <div onClick="{{ closeDetail }}" data-tap="1" style="cursor:pointer;font-size:20px;color:#9FB0BC;padding:4px 6px;">◀</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#00E5FF;">{{ detailDate }}</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;line-height:1;color:#F4F9FA;margin-top:2px;">{{ detailTitle }}</div>
+          </div>
+          <div style="flex:0 0 auto;padding:4px 9px;background:{{ detailPillBg }};border:1px solid {{ detailPillBorder }};font-weight:800;font-size:9px;letter-spacing:.18em;color:{{ detailPillColor }};">{{ detailPill }}</div>
+        </div>
+        <div style="max-width:430px;margin:0 auto;padding:0 16px 10px;">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;background:rgba(255,255,255,.04);padding:2px;">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.pick }}" data-tap="1" style="cursor:pointer;min-height:40px;display:grid;place-items:center;padding:8px 2px;background:{{ t.bg }};font-weight:800;font-size:11px;letter-spacing:.08em;color:{{ t.color }};">{{ t.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;overflow-x:auto;">
+            <sc-for list="{{ actions }}" as="a" hint-placeholder-count="2">
+              <div onClick="{{ a.pick }}" data-tap="1" style="cursor:pointer;flex:0 0 auto;min-height:36px;display:flex;align-items:center;padding:8px 12px;background:{{ a.bg }};border:1px solid {{ a.border }};font-weight:800;font-size:10px;letter-spacing:.14em;color:{{ a.color }};white-space:nowrap;">{{ a.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:relative;max-width:430px;margin:0 auto;padding:14px 16px 40px;">
+
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="flex:0 0 auto;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:{{ ringBg }}">
+            <div style="width:41px;height:41px;border-radius:50%;background:#050709;display:grid;place-items:center;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:16px;color:#00E5FF;">{{ playedLive }}</div>
+            </div>
+          </div>
+          <div style="flex:1 1 auto;min-width:0;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#00E5FF;">GROUP STAGE</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:21px;line-height:1.05;color:#F4F9FA;margin-top:2px;white-space:nowrap;">{{ playedLabel }}</div>
+          </div>
+        </div>
+
+        <!-- TEAMS -->
+        <sc-if value="{{ isTeams }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px;">
+            <sc-for list="{{ allGroupTeams }}" as="G" hint-placeholder-count="4">
+              <div style="padding:14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;position:relative;overflow:hidden;">
+                <div style="position:absolute;right:8px;bottom:-22px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:96px;line-height:1;color:rgba(244,249,250,.035);pointer-events:none;">{{ G.name }}</div>
+                <div style="position:relative;display:flex;align-items:center;gap:10px;">
+                  <div style="width:36px;height:36px;display:grid;place-items:center;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.45);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:20px;color:#00E5FF;">{{ G.name }}</div>
+                  <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;line-height:1;color:#F4F9FA;">{{ G.title }}</div>
+                  <div style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.18em;color:#9FB0BC;">{{ G.court }}</div>
+                </div>
+                <div style="position:relative;margin-top:10px;">
+                  <sc-for list="{{ G.teams }}" as="t" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 0;border-top:1px solid rgba(92,107,120,.16);">
+                      <div style="flex:0 0 auto;min-width:36px;padding:4px 6px;text-align:center;background:{{ t.seedBg }};border:1px solid {{ t.seedBorder }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;color:{{ t.seedColor }};">{{ t.seed }}</div>
+                      <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:16px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ t.name }}</div>
+                      <div style="flex:0 0 auto;font-weight:800;font-size:9px;letter-spacing:.14em;color:{{ t.tagColor }};">{{ t.tag }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- GROUPS — one group at a time -->
+        <sc-if value="{{ isGroups }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:14px;">
+            <sc-for list="{{ groupChips }}" as="g" hint-placeholder-count="4">
+              <div onClick="{{ g.pick }}" data-tap="1" style-active="transform:scale(.95)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;min-height:52px;padding:9px 4px;text-align:center;background:{{ g.bg }};border:1px solid {{ g.border }};">
+                <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:21px;line-height:1;color:{{ g.color }};">{{ g.name }}</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:4px;color:{{ g.subColor }};">{{ g.sub }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:14px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;position:relative;overflow:hidden;">
+            <div style="position:absolute;right:-36px;top:26px;width:210px;height:132px;border:1.5px solid rgba(0,229,255,.14);pointer-events:none;">
+              <div style="position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:rgba(0,229,255,.14);"></div>
+              <div style="position:absolute;left:0;right:0;top:26%;height:1.5px;background:rgba(0,229,255,.1);"></div>
+              <div style="position:absolute;left:0;right:0;bottom:26%;height:1.5px;background:rgba(0,229,255,.1);"></div>
+            </div>
+            <div style="position:relative;display:flex;align-items:center;gap:12px;">
+              <div style="flex:0 0 auto;width:42px;height:42px;display:grid;place-items:center;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.45);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;color:#00E5FF;">{{ group }}</div>
+              <div style="flex:1 1 auto;min-width:0;">
+                <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:27px;line-height:1;color:#F4F9FA;">{{ groupTitle }}</div>
+                <div style="font-weight:800;font-size:9px;letter-spacing:.18em;color:#9FB0BC;margin-top:4px;">{{ groupPlayed }} PLAYED</div>
+              </div>
+              <div onClick="{{ cycleCourt }}" data-tap="1" style-active="transform:scale(.94)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;flex:0 0 auto;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 11px;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.45);">
+                <div style="font-weight:800;font-size:8px;letter-spacing:.2em;color:#9FB0BC;">COURT</div>
+                <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;line-height:1;color:#00E5FF;">{{ groupCourt }}</div>
+              </div>
+            </div>
+            <div style="position:relative;display:grid;grid-template-columns:1fr 28px 34px 38px;margin-top:12px;">
+              <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#9FB0BC;padding-bottom:8px;">TEAM</div>
+              <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#9FB0BC;text-align:center;padding-bottom:8px;">W</div>
+              <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#9FB0BC;text-align:center;padding-bottom:8px;">GD</div>
+              <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#9FB0BC;text-align:right;padding-bottom:8px;">PTS</div>
+              <sc-for list="{{ standings }}" as="row" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:8px;padding:10px 0 10px 10px;border-top:1px solid rgba(92,107,120,.16);box-shadow:{{ row.edge }}">
+                  <div style="display:flex;flex:0 0 auto;gap:2px;">
+                    <div style="width:23px;height:23px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#00E5FF;">{{ row.i1 }}</div>
+                    <div style="width:23px;height:23px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#00E5FF;">{{ row.i2 }}</div>
+                  </div>
+                  <div style="font-weight:800;font-size:14px;color:{{ row.nameColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div>
+                </div>
+                <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#F4F9FA;border-top:1px solid rgba(92,107,120,.16);">{{ row.w }}</div>
+                <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:13px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">{{ row.gd }}</div>
+                <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:{{ row.ptsColor }};border-top:1px solid rgba(92,107,120,.16);">{{ row.pts }}</div>
+              </sc-for>
+            </div>
+            <div style="position:relative;display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(92,107,120,.16);">
+              <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#00E5FF;">TOP 2 QUALIFY ▶</div>
+              <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,229,255,.5),transparent);"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#9FB0BC;">{{ matchHeading }}</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+            <sc-for list="{{ matches }}" as="m" hint-placeholder-count="6">
+              <div onClick="{{ m.open }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;padding:14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,{{ m.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#9FB0BC;">MATCH {{ m.no }}</div>
+                  <div style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.22em;color:{{ m.stateColor }};">{{ m.stateLabel }}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:10px;">
+                  <div style="min-width:0;font-weight:800;font-size:14px;text-align:right;color:{{ m.c1 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n1 }}</div>
+                  <div style="flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:5px 11px;background:{{ m.capsuleBg }};border:1px solid {{ m.capsuleBorder }};">
+                    <span style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:25px;line-height:1;color:{{ m.s1Color }};">{{ m.s1 }}</span>
+                    <span style="font-size:13px;color:#9FB0BC;">/</span>
+                    <span style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:25px;line-height:1;color:{{ m.s2Color }};">{{ m.s2 }}</span>
+                  </div>
+                  <div style="min-width:0;font-weight:800;font-size:14px;color:{{ m.c2 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n2 }}</div>
+                </div>
+                <div style="margin-top:9px;font-weight:800;font-size:10px;letter-spacing:.14em;color:{{ m.noteColor }};">{{ m.note }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:20px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#FF9E1B;">COURT BOARD · WHO IS ON NOW</div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
+              <sc-for list="{{ courtBoard }}" as="c" hint-placeholder-count="4">
+                <div style="padding:11px;background:{{ c.bg }};border:1px solid {{ c.border }};">
+                  <div style="display:flex;align-items:baseline;gap:6px;">
+                    <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:18px;line-height:1;color:{{ c.color }};">C{{ c.no }}</div>
+                    <div style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.16em;color:{{ c.color }};">GROUP {{ c.group }}</div>
+                  </div>
+                  <div style="font-weight:800;font-size:12px;line-height:1.3;color:#F4F9FA;margin-top:7px;">{{ c.line1 }}</div>
+                  <div style="font-weight:800;font-size:12px;line-height:1.3;color:#9FB0BC;margin-top:2px;">{{ c.line2 }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- KNOCKOUTS — bracket -->
+        <sc-if value="{{ isKO }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#FF9E1B;">{{ koState }}</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;line-height:1;color:#F4F9FA;margin-top:6px;">THE BRACKET</div>
+            <div style="font-size:13px;line-height:1.5;color:#9FB0BC;margin-top:8px;">Eight teams: group winners cross over against runners-up from the opposite group, so a group-stage rematch is avoided wherever the seeding allows. Swipe the bracket sideways.</div>
+          </div>
+
+          <div style="margin-top:12px;overflow-x:auto;overscroll-behavior-x:contain;">
+            <div style="position:relative;width:648px;height:404px;">
+              <!-- round labels -->
+              <div style="position:absolute;left:0;top:0;width:196px;font-weight:800;font-size:9px;letter-spacing:.28em;color:#9FB0BC;">QUARTER-FINALS</div>
+              <div style="position:absolute;left:236px;top:0;width:180px;font-weight:800;font-size:9px;letter-spacing:.28em;color:#9FB0BC;">SEMI-FINALS</div>
+              <div style="position:absolute;left:456px;top:0;width:180px;font-weight:800;font-size:9px;letter-spacing:.28em;color:#FF9E1B;">FINAL</div>
+
+              <!-- connectors: QF pairs into SF -->
+              <sc-for list="{{ bracketLines }}" as="ln" hint-placeholder-count="12">
+                <div style="position:absolute;left:{{ ln.left }};top:{{ ln.top }};width:{{ ln.w }};height:{{ ln.h }};background:{{ ln.bg }};"></div>
+              </sc-for>
+
+              <!-- quarter-finals -->
+              <sc-for list="{{ bracketQF }}" as="m" hint-placeholder-count="4">
+                <div style="position:absolute;left:0;top:{{ m.top }};width:196px;padding:9px 10px;background:rgba(9,14,20,.94);border:1px solid {{ m.border }};border-left:3px solid {{ m.bar }};">
+                  <div style="font-weight:800;font-size:8px;letter-spacing:.22em;color:#9FB0BC;">{{ m.label }}</div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                    <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:13px;color:{{ m.c1 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n1 }}</div>
+                    <div style="flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:13px;color:{{ m.sc1Color }};">{{ m.sc1 }}</div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;padding-top:4px;border-top:1px solid rgba(92,107,120,.16);">
+                    <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:13px;color:{{ m.c2 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n2 }}</div>
+                    <div style="flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:13px;color:{{ m.sc2Color }};">{{ m.sc2 }}</div>
+                  </div>
+                </div>
+              </sc-for>
+
+              <!-- semi-finals -->
+              <sc-for list="{{ bracketSF }}" as="m" hint-placeholder-count="2">
+                <div style="position:absolute;left:236px;top:{{ m.top }};width:180px;padding:9px 10px;background:rgba(9,14,20,.94);border:1px solid {{ m.border }};border-left:3px solid {{ m.bar }};">
+                  <div style="font-weight:800;font-size:8px;letter-spacing:.22em;color:#9FB0BC;">{{ m.label }}</div>
+                  <div style="font-weight:800;font-size:13px;color:{{ m.c1 }};margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n1 }}</div>
+                  <div style="font-weight:800;font-size:13px;color:{{ m.c2 }};margin-top:4px;padding-top:4px;border-top:1px solid rgba(92,107,120,.16);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n2 }}</div>
+                </div>
+              </sc-for>
+
+              <!-- final -->
+              <div style="position:absolute;left:456px;top:146px;width:186px;padding:12px;background:rgba(16,23,31,.96);border:1px solid rgba(255,158,27,.5);border-left:3px solid #FF9E1B;overflow:hidden;">
+                <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(255,158,27,.12) 50%,transparent 62%);transform:translateX(-130%);animation:sgSheen 6s ease-in-out infinite;"></div>
+                <div style="position:relative;font-weight:800;font-size:8px;letter-spacing:.24em;color:#FF9E1B;">FINAL · CENTRE COURT</div>
+                <div style="position:relative;font-weight:800;font-size:14px;color:#9FB0BC;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ finalN1 }}</div>
+                <div style="position:relative;font-weight:800;font-size:14px;color:#9FB0BC;margin-top:5px;padding-top:5px;border-top:1px solid rgba(92,107,120,.2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ finalN2 }}</div>
+                <div style="position:relative;display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,158,27,.25);">
+                  <div style="font-weight:800;font-size:8px;letter-spacing:.22em;color:#FF9E1B;">CHAMPION</div>
+                  <div style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:15px;color:#FF9E1B;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ champion }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:13px 14px;background:rgba(0,229,255,.06);border-left:3px solid #00E5FF;font-size:12.5px;line-height:1.5;color:#9FB0BC;">{{ koHint }}</div>
+        </sc-if>
+
+        <!-- LIST -->
+        <sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div>
+                <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#FF9E1B;">SIGN-UP LIST</div>
+                <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;line-height:1;color:#F4F9FA;margin-top:5px;">16 / 16 FULL</div>
+              </div>
+              <div style="margin-left:auto;padding:5px 10px;background:rgba(255,158,27,.14);border:1px solid rgba(255,158,27,.5);font-weight:800;font-size:9px;letter-spacing:.18em;color:#FF9E1B;">CLOSED</div>
+            </div>
+            <div style="height:8px;margin-top:12px;background:repeating-linear-gradient(90deg,#FF9E1B 0 14px,transparent 14px 18px);"></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;margin-top:12px;">
+            <sc-for list="{{ signups }}" as="s" hint-placeholder-count="16">
+              <div style="display:flex;align-items:center;gap:10px;min-height:48px;padding:10px 12px;background:rgba(9,14,20,.9);border-left:2px solid {{ s.edge }};">
+                <div style="flex:0 0 auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#9FB0BC;width:22px;">{{ s.no }}</div>
+                <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:15px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ s.name }}</div>
+                <div style="flex:0 0 auto;font-weight:800;font-size:9px;letter-spacing:.16em;color:{{ s.tagColor }};">{{ s.tag }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- MVP -->
+        <sc-if value="{{ isMVP }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#FF9E1B;">VOTING OPEN · {{ voteTotal }} VOTES IN</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:32px;line-height:1;color:#F4F9FA;margin-top:6px;">MVP OF THE NIGHT</div>
+            <div style="font-size:13px;line-height:1.5;color:#9FB0BC;margin-top:8px;">{{ voteHint }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px;">
+            <sc-for list="{{ mvpRows }}" as="v" hint-placeholder-count="6">
+              <div onClick="{{ v.vote }}" data-tap="1" style-active="transform:scale(.985)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;position:relative;padding:14px;background:rgba(9,14,20,.94);border:1px solid {{ v.border }};overflow:hidden;">
+                <div style="position:absolute;left:0;top:0;bottom:0;width:{{ v.barWidth }};background:rgba(255,158,27,.12);"></div>
+                <div style="position:relative;display:flex;align-items:center;gap:10px;">
+                  <div style="flex:0 0 auto;width:30px;height:30px;display:grid;place-items:center;background:rgba(255,158,27,.12);border:1px solid rgba(255,158,27,.35);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:#FF9E1B;">{{ v.init }}</div>
+                  <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:16px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ v.name }}</div>
+                  <div style="flex:0 0 auto;font-weight:800;font-size:10px;letter-spacing:.14em;color:#FF9E1B;">{{ v.tag }}</div>
+                  <div style="flex:0 0 auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:24px;color:{{ v.ptsColor }};">{{ v.votes }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- PHOTOS -->
+        <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:14px;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.32em;color:#00E5FF;">PHOTO WALL</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;line-height:1;color:#F4F9FA;margin-top:6px;">SESSION 6 NIGHT</div>
+            <div style="font-size:13px;line-height:1.5;color:#9FB0BC;margin-top:8px;">Drop shots straight onto the wall. Each one keeps the Surge frame when it is shared back to the group.</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;">
+            <sc-for list="{{ wall }}" as="w" hint-placeholder-count="6">
+              <div style="position:relative;width:100%;height:150px;border:1px solid rgba(0,229,255,.22);">
+                <image-slot id="{{ w.slot }}" shape="rect" fit="cover" placeholder="Drop a photo"></image-slot>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ══════════ PLAYER CARD ══════════ -->
+  <sc-if value="{{ cardOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeCard }}" style="position:fixed;inset:0;z-index:65;background:rgba(3,5,7,.86);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;">
+      <div onClick="{{ stop }}" style="box-sizing:border-box;width:100%;max-width:430px;max-height:94vh;overflow-y:auto;overscroll-behavior:contain;background:#080D13;border-top:3px solid {{ cardAccent }};animation:sgIn 240ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;background:#050709;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#9FB0BC;">PLAYER CARD</div>
+          <div onClick="{{ closeCard }}" data-tap="1" style="margin-left:auto;cursor:pointer;width:34px;height:34px;display:grid;place-items:center;background:rgba(255,255,255,.05);font-size:16px;color:#F4F9FA;">✕</div>
+        </div>
+        <div style="width:100%;height:210px;background:#0A1017;">
+          <image-slot id="{{ cardSlot }}" shape="rect" fit="cover" placeholder="Drop this player's photo"></image-slot>
+        </div>
+        <div style="padding:14px 16px;background:#050709;border-top:1px solid {{ cardAccentSoft }};">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="padding:4px 9px;background:rgba(255,255,255,.05);border:1px solid {{ cardAccentSoft }};font-weight:800;font-size:9px;letter-spacing:.2em;color:{{ cardAccent }};">RANK {{ cardRank }}</div>
+            <div style="padding:4px 9px;background:{{ cardStreakBg }};font-weight:800;font-size:9px;letter-spacing:.16em;color:{{ cardStreakColor }};">{{ cardStreakLabel }}</div>
+          </div>
+          <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:32px;line-height:.95;color:#F4F9FA;margin-top:9px;">{{ cardName }}</div>
+        </div>
+
+        <div style="padding:16px;">
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ cardStats }}" as="st" hint-placeholder-count="3">
+              <div style="padding:11px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,{{ st.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+                <div style="font-weight:800;font-size:8px;letter-spacing:.2em;color:#9FB0BC;">{{ st.label }}</div>
+                <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:24px;line-height:1;color:{{ st.color }};margin-top:5px;">{{ st.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="margin-top:14px;padding:14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="display:flex;align-items:baseline;gap:8px;">
+              <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#00E5FF;">FORM · LAST 8</div>
+              <div style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.16em;color:{{ cardStreakColor }};">{{ cardStreakLabel }}</div>
+            </div>
+            <div style="display:flex;gap:5px;margin-top:11px;">
+              <sc-for list="{{ cardForm }}" as="d" hint-placeholder-count="8">
+                <div style="flex:1;height:30px;display:grid;place-items:center;background:{{ d.cellBg }};border:1px solid {{ d.cellBorder }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;color:{{ d.textColor }};">{{ d.label }}</div>
+              </sc-for>
+            </div>
+            <div style="font-size:12.5px;line-height:1.5;color:#9FB0BC;margin-top:10px;">{{ cardFormNote }}</div>
+          </div>
+
+          <div style="margin-top:12px;padding:14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#FF9E1B;">SERIES RECORD</div>
+            <div style="margin-top:10px;">
+              <sc-for list="{{ cardRecord }}" as="r" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid rgba(92,107,120,.16);">
+                  <div style="flex:1 1 auto;min-width:0;font-weight:800;font-size:13px;color:#9FB0BC;">{{ r.label }}</div>
+                  <div style="flex:0 0 auto;font-weight:800;font-size:14px;color:#F4F9FA;white-space:nowrap;">{{ r.value }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;padding:14px;background:rgba(0,229,255,.06);border-left:3px solid #00E5FF;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#00E5FF;">NEXT SESSION</div>
+            <div style="font-size:13px;line-height:1.5;color:#F4F9FA;margin-top:6px;">{{ cardNext }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ══════════ SCORE SHEET ══════════ -->
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:fixed;inset:0;z-index:60;background:rgba(3,5,7,.82);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;">
+      <div onClick="{{ stop }}" style="box-sizing:border-box;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;background:#080D13;border-top:3px solid #00E5FF;padding:0 16px 26px;animation:sgIn 220ms cubic-bezier(.34,1.56,.64,1) both;">
+        <div style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:16px 0 10px;background:#080D13;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.34em;color:#00E5FF;">{{ sheetKicker }}</div>
+          <div onClick="{{ close }}" data-tap="1" style="margin-left:auto;cursor:pointer;font-size:18px;color:#9FB0BC;padding:4px 6px;">✕</div>
+        </div>
+
+        <div style="padding:12px;background:{{ side1Bg }};border:1px solid {{ side1Border }};">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ draftIa }}</div>
+            <div style="min-width:0;font-weight:800;font-size:15px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ draftN1 }}</div>
+            <div style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:30px;line-height:1;color:{{ v1Color }};">{{ v1 }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:10px;">
+            <sc-for list="{{ padA }}" as="n" hint-placeholder-count="8">
+              <div onClick="{{ n.pick }}" data-tap="1" style-active="transform:scale(.9)" style="transition:transform 140ms cubic-bezier(.2,.7,.3,1);cursor:pointer;height:46px;display:grid;place-items:center;background:{{ n.bg }};border:1px solid {{ n.border }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:{{ n.color }};">{{ n.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:10px;padding:12px;background:{{ side2Bg }};border:1px solid {{ side2Border }};">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ draftIb }}</div>
+            <div style="min-width:0;font-weight:800;font-size:15px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ draftN2 }}</div>
+            <div style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:30px;line-height:1;color:{{ v2Color }};">{{ v2 }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:10px;">
+            <sc-for list="{{ padB }}" as="n" hint-placeholder-count="8">
+              <div onClick="{{ n.pick }}" data-tap="1" style-active="transform:scale(.9)" style="transition:transform 140ms cubic-bezier(.2,.7,.3,1);cursor:pointer;height:46px;display:grid;place-items:center;background:{{ n.bg }};border:1px solid {{ n.border }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:{{ n.color }};">{{ n.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;font-weight:800;font-size:9px;letter-spacing:.3em;color:#9FB0BC;">HOW THE LOSS WENT</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;">
+          <sc-for list="{{ lossTypes }}" as="l" hint-placeholder-count="3">
+            <div onClick="{{ l.pick }}" data-tap="1" style-active="transform:scale(.95)" style="transition:transform 140ms cubic-bezier(.2,.7,.3,1);cursor:pointer;min-height:56px;padding:11px 6px;text-align:center;background:{{ l.bg }};border:1px solid {{ l.border }};">
+              <div style="font-weight:800;font-size:10px;letter-spacing:.14em;color:{{ l.color }};">{{ l.label }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ l.ptsColor }};margin-top:3px;">{{ l.pts }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:rgba(0,229,255,.06);border-left:3px solid #00E5FF;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#00E5FF;">SERIES POINTS FROM THIS MATCH</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:7px;">
+            <span style="min-width:0;font-weight:800;font-size:13px;color:#F4F9FA;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ prevLabel1 }}</span>
+            <span style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:#00E5FF;">{{ prevPts1 }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="min-width:0;font-weight:800;font-size:13px;color:#9FB0BC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ prevLabel2 }}</span>
+            <span style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:#9FB0BC;">{{ prevPts2 }}</span>
+          </div>
+        </div>
+
+        <div onClick="{{ save }}" data-tap="1" style-active="transform:scale(.97)" style="transition:transform 170ms cubic-bezier(.2,.7,.3,1);cursor:pointer;margin-top:16px;padding:17px;text-align:center;background:{{ saveBg }};box-shadow:{{ saveShadow }};font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;letter-spacing:.04em;color:{{ saveColor }};">{{ saveLabel }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ flash }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:70;pointer-events:none;">
+      <div style="position:absolute;left:50%;top:26%;width:120px;height:120px;border:2px solid rgba(0,229,255,.7);border-radius:50%;animation:sgRing 900ms ease-out both;"></div>
+      <div style="position:absolute;left:50%;top:26%;width:120px;height:120px;border:2px solid rgba(0,229,255,.45);border-radius:50%;animation:sgRing 900ms 140ms ease-out both;"></div>
+      <div style="position:absolute;left:50%;top:22%;transform:translateX(-50%);padding:16px 24px;text-align:center;background:rgba(5,7,9,.94);border:1px solid rgba(0,229,255,.6);box-shadow:0 0 44px rgba(0,229,255,.32);animation:sgPop 1.6s ease both;">
+        <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:24px;line-height:1;color:#00E5FF;white-space:nowrap;">{{ flashText }}</div>
+        <div style="font-weight:800;font-size:10px;letter-spacing:.24em;color:#9FB0BC;margin-top:7px;white-space:nowrap;">{{ flashSub }}</div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900}}">
+const NAMES = [
+  "Sami","Faisal","Omar","Talal","Yousef","Nadir","Hamed","Zaid",
+  "Khalid","Rashid","Salim","Marwan","Ahmed","Bader","Hilal","Qais",
+  "Saif","Majid","Tariq","Ali","Nasser","Fahad","Jassim","Waleed",
+  "Adil","Basim","Hisham","Idris","Karim","Laith","Munir","Osama",
+];
+const SURNAMES = ["Al Balushi","Al Riyami","Al Hinai","Al Zadjali","Al Lawati","Al Harthy","Al Kindi","Al Maskari"];
+const GROUPS = ["A","B","C","D"];
+const PAD = [0,1,2,3,4,5,6,7];
+const PRIZE_TOTAL = 402;
+const LADDER = [
+  { label:"Group win",        pts:"+3", accent:true  },
+  { label:"Tiebreak loss",    pts:"+2", accent:false },
+  { label:"Close loss",       pts:"+1", accent:false },
+  { label:"Blowout loss",     pts:"0",  accent:false },
+  { label:"Knockout win",     pts:"+5", accent:true  },
+  { label:"Session champion", pts:"+8", accent:true  },
+];
+const LOSS = [
+  { id:"tiebreak",    label:"TIEBREAK", pts:"+2 pts" },
+  { id:"competitive", label:"CLOSE",    pts:"+1 pt"  },
+  { id:"blowout",     label:"BLOWOUT",  pts:"0 pts"  },
+];
+
+// Deterministic history: eight past sessions of W / L / — (didn't play).
+function history(i){
+  const out = [];
+  for (let k = 0; k < 8; k++) {
+    const v = (i * 7 + k * 11 + (k % 3) * 5) % 10;
+    out.push(v > 6 ? "L" : v < 1 ? "-" : "W");
+  }
+  return out;
+}
+const PLAYERS = NAMES.map((n, i) => {
+  const form = history(i);
+  const played = form.filter(x => x !== "-").length;
+  const wins = form.filter(x => x === "W").length;
+  return {
+    id: "p" + (i + 1),
+    first: n,
+    name: n + " " + SURNAMES[i % SURNAMES.length],
+    base: 560 + ((i * 53) % 340) + (i < 6 ? 220 : 0),
+    form,
+    sessions: played,
+    wins,
+    win: Math.round((wins / Math.max(1, played)) * 100),
+    titles: i % 7 === 0 ? 2 : i % 4 === 0 ? 1 : 0,
+  };
+});
+const P = {};
+PLAYERS.forEach(p => { P[p.id] = p; });
+
+// Current streak from the most recent session backwards.
+function streakOf(p){
+  const seq = p.form.slice().reverse().filter(x => x !== "-");
+  if (!seq.length) return { n:0, kind:"none" };
+  const kind = seq[0];
+  let n = 0;
+  for (const v of seq) { if (v !== kind) break; n++; }
+  return { n, kind: kind === "W" ? "win" : "loss" };
+}
+
+const TEAMS = [];
+GROUPS.forEach((g, gi) => {
+  for (let k = 0; k < 4; k++) {
+    const idx = gi * 4 + k;
+    TEAMS.push({ id:"t" + (idx + 1), group:g, seed: idx + 1, p1:"p" + (idx * 2 + 1), p2:"p" + (idx * 2 + 2) });
+  }
+});
+const FIXTURES = [];
+GROUPS.forEach(g => {
+  const t = TEAMS.filter(x => x.group === g);
+  [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]].forEach((pair, i) => {
+    FIXTURES.push({ id: g + (i + 1), group:g, no: i + 1, a: t[pair[0]].id, b: t[pair[1]].id });
+  });
+});
+
+const SESSIONS = [
+  { no:1, date:"MON 1 SEP",  state:"done", champion:"Sami & Faisal" },
+  { no:2, date:"WED 3 SEP",  state:"done", champion:"Khalid & Rashid" },
+  { no:3, date:"MON 8 SEP",  state:"done", champion:"Omar & Talal", x2:true },
+  { no:4, date:"WED 10 SEP", state:"done", champion:"Ahmed & Bader" },
+  { no:5, date:"MON 15 SEP", state:"done", champion:"Sami & Faisal" },
+  { no:6, date:"MON 22 SEP", state:"live" },
+  { no:7, date:"WED 24 SEP", state:"soon" },
+  { no:8, date:"MON 29 SEP", state:"soon", x2:true },
+  { no:9, date:"WED 1 OCT",  state:"soon", final:true },
+];
+
+class Component extends DCLogic {
+  state = {
+    screen: "home",
+    detail: null,
+    tab: "groups",
+    group: "A",
+    sort: "points",
+    card: null,
+    courts: { A:1, B:2, C:3, D:4 },
+    open: null,
+    draft: null,
+    flash: false,
+    flashText: "",
+    flashSub: "",
+    myVote: null,
+    results: {
+      A1:{a:6,b:3,loss:"competitive"}, A2:{a:4,b:6,loss:"tiebreak"}, A3:{a:6,b:2,loss:"competitive"},
+      B1:{a:6,b:4,loss:"tiebreak"},    B2:{a:2,b:6,loss:"blowout"},
+      C1:{a:6,b:5,loss:"tiebreak"},
+    },
+    votes: { p1:4, p5:3, p9:2, p13:1, p17:1, p21:0 },
+  };
+
+  // ── number animation ────────────────────────────────────────────────
+  // num() returns the value currently on screen for a key and eases it
+  // toward the real one, so every figure counts rather than jumps.
+  num(key, value){
+    this._disp = this._disp || {};
+    this._tgt = this._tgt || {};
+    if (!(key in this._disp)) { this._disp[key] = value; this._tgt[key] = value; return value; }
+    if (this._tgt[key] !== value) { this._tgt[key] = value; this._pending = true; }
+    return this._disp[key];
+  }
+  startLoop(){
+    if (this._loop) return;
+    const step = () => {
+      let live = false;
+      Object.keys(this._tgt).forEach(k => {
+        const t = this._tgt[k], d = this._disp[k];
+        if (d !== t) {
+          const diff = t - d;
+          this._disp[k] = d + Math.sign(diff) * Math.max(1, Math.ceil(Math.abs(diff) * 0.16));
+          live = true;
+        }
+      });
+      if (live) { this.forceUpdate(); this._loop = requestAnimationFrame(step); }
+      else { this._loop = null; }
+    };
+    this._loop = requestAnimationFrame(step);
+  }
+  componentDidMount(){
+    this._rip = (e) => {
+      if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+      const t = e.target.closest && e.target.closest("[data-tap]");
+      if (!t) return;
+      const r = document.createElement("span");
+      r.className = "sg-rip";
+      r.style.left = e.clientX + "px";
+      r.style.top = e.clientY + "px";
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 470);
+    };
+    document.addEventListener("pointerdown", this._rip, { passive: true });
+    // intro: everything on screen counts up from zero
+    if (!matchMedia("(prefers-reduced-motion:reduce)").matches) {
+      Object.keys(this._disp || {}).forEach(k => { this._disp[k] = 0; });
+      this.startLoop();
+    }
+  }
+  componentDidUpdate(){
+    if (this._pending) { this._pending = false; this.startLoop(); }
+  }
+  componentWillUnmount(){
+    document.removeEventListener("pointerdown", this._rip);
+    if (this._loop) cancelAnimationFrame(this._loop);
+  }
+
+  // ── model ───────────────────────────────────────────────────────────
+  team(id){ return TEAMS.find(t => t.id === id); }
+  tname(id){ const t = this.team(id); return P[t.p1].first + " & " + P[t.p2].first; }
+  inits(id){ const t = this.team(id); return P[t.p1].first[0] + P[t.p2].first[0]; }
+  gPlayed(g){ return FIXTURES.filter(f => f.group === g && this.state.results[f.id]).length; }
+
+  table(g){
+    const rows = TEAMS.filter(t => t.group === g).map(t => ({ t, w:0, p:0, gf:0, ga:0, pts:0 }));
+    const find = id => rows.find(r => r.t.id === id);
+    FIXTURES.filter(f => f.group === g).forEach(f => {
+      const r = this.state.results[f.id];
+      if (!r) return;
+      const A = find(f.a), B = find(f.b);
+      A.p++; B.p++; A.gf += r.a; A.ga += r.b; B.gf += r.b; B.ga += r.a;
+      const lp = r.loss === "tiebreak" ? 2 : r.loss === "competitive" ? 1 : 0;
+      if (r.a > r.b) { A.w++; A.pts += 3; B.pts += lp; }
+      else if (r.b > r.a) { B.w++; B.pts += 3; A.pts += lp; }
+    });
+    // Points lead the order — losses pay in this series, so wins alone
+    // would contradict the PTS column and the qualify edge.
+    rows.sort((x,y) => y.pts - x.pts || y.w - x.w || (y.gf-y.ga) - (x.gf-x.ga) || y.gf - x.gf);
+    return rows;
+  }
+
+  livePts(){
+    const add = {};
+    FIXTURES.forEach(f => {
+      const r = this.state.results[f.id];
+      if (!r) return;
+      const lp = r.loss === "tiebreak" ? 2 : r.loss === "competitive" ? 1 : 0;
+      const win = r.a > r.b ? f.a : f.b, lose = r.a > r.b ? f.b : f.a;
+      [this.team(win).p1, this.team(win).p2].forEach(p => { add[p] = (add[p] || 0) + 36; });
+      [this.team(lose).p1, this.team(lose).p2].forEach(p => { add[p] = (add[p] || 0) + lp * 12; });
+    });
+    return add;
+  }
+  ranking(){
+    const add = this.livePts();
+    return PLAYERS
+      .map(p => ({ p, pts: p.base + (add[p.id] || 0) }))
+      .sort((x, y) => y.pts - x.pts || x.p.name.localeCompare(y.p.name));
+  }
+  meId(){
+    const byBase = PLAYERS.slice().sort((x, y) => y.base - x.base || x.name.localeCompare(y.name));
+    return byBase[Math.floor(byBase.length / 2)].id;
+  }
+
+  nextFixture(g){
+    return FIXTURES.find(f => f.group === g && !this.state.results[f.id]) || null;
+  }
+  openMatch(f){
+    if (!f) return;
+    const r = this.state.results[f.id];
+    this.setState({ open: f.id, draft: r ? { a:r.a, b:r.b, loss:r.loss } : { a:null, b:null, loss:"competitive" } });
+  }
+  setDraft(patch){ this.setState(s => ({ draft: { ...s.draft, ...patch } })); }
+  cycleCourt(g){
+    this.setState(s => {
+      const cur = s.courts[g];
+      const next = (cur % 4) + 1;
+      const holder = GROUPS.find(x => s.courts[x] === next);
+      const courts = { ...s.courts, [g]: next };
+      if (holder) courts[holder] = cur;
+      return { courts };
+    });
+  }
+  flashNow(text, sub){
+    this.setState({ flash:true, flashText:text, flashSub: sub || "" });
+    setTimeout(() => this.setState({ flash:false }), 1650);
+  }
+  save(){
+    const id = this.state.open, d = this.state.draft;
+    if (!id || !d || d.a === null || d.b === null || d.a === d.b) return;
+    const f = FIXTURES.find(x => x.id === id);
+    const me = this.meId();
+    const lp = d.loss === "tiebreak" ? 2 : d.loss === "competitive" ? 1 : 0;
+    const winner = this.tname(d.a > d.b ? f.a : f.b);
+    const before = this.ranking().findIndex(r => r.p.id === me);
+    this.setState(s => ({ results: { ...s.results, [id]: { a:d.a, b:d.b, loss:d.loss } }, open:null, draft:null }));
+    setTimeout(() => {
+      const moved = before - this.ranking().findIndex(r => r.p.id === me);
+      this.flashNow(
+        winner.toUpperCase() + " TAKE IT",
+        moved > 0 ? "+3 · you climbed " + moved + " in the series" : "winner +3 · loser +" + lp
+      );
+    }, 20);
+  }
+  vote(pid){
+    if (this.state.myVote) return;
+    this.setState(s => ({ myVote: pid, votes: { ...s.votes, [pid]: (s.votes[pid] || 0) + 1 } }));
+    this.flashNow("VOTE LOCKED", P[pid].name.toUpperCase() + " FOR MVP");
+  }
+
+  formBars(p, w){
+    return p.form.map(v => ({
+      bg: v === "W" ? "#00E5FF" : v === "L" ? "rgba(255,255,255,.14)" : "rgba(255,255,255,.06)",
+    }));
+  }
+
+  renderVals(){
+    const s = this.state;
+    const played = Object.keys(s.results).length;
+    const pct = played / FIXTURES.length;
+    const rank = this.ranking();
+    const ME = this.meId();
+    const me = rank.findIndex(r => r.p.id === ME);
+    const byBase = PLAYERS.slice().sort((x, y) => y.base - x.base || x.name.localeCompare(y.name));
+    const meDelta = byBase.findIndex(p => p.id === ME) - me;
+    const topPts = rank[0].pts;
+
+    const navItems = [
+      { id:"home", label:"HOME" }, { id:"sessions", label:"SESSIONS" },
+      { id:"rank", label:"RANK" }, { id:"players", label:"PLAYERS" },
+    ].map(n => {
+      const on = s.screen === n.id;
+      return {
+        label: n.label, pick: () => this.setState({ screen: n.id }),
+        bg: on ? "rgba(0,229,255,.07)" : "transparent",
+        tick: on ? "#00E5FF" : "transparent",
+        color: on ? "#00E5FF" : "#9FB0BC",
+      };
+    });
+
+    // podium — the actual top three of the series
+    const podium = rank.slice(0, 3).map((r, i) => {
+      const st = streakOf(r.p);
+      return {
+        rank: String(i + 1),
+        name: r.p.name,
+        meta: r.p.sessions + " NIGHTS · " + r.p.win + "% WIN · " + (st.kind === "win" ? "W" : "L") + st.n,
+        pts: String(this.num("pod-" + r.p.id, r.pts)),
+        plate: i === 0 ? "rgba(16,23,31,.96)" : "rgba(9,14,20,.94)",
+        bar: i === 0 ? "#00E5FF" : i === 1 ? "#C3D0D8" : "#5C6B78",
+        badgeBg: i === 0 ? "rgba(0,229,255,.14)" : "rgba(255,255,255,.05)",
+        badgeBorder: i === 0 ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.08)",
+        badgeColor: i === 0 ? "#00E5FF" : i === 1 ? "#C3D0D8" : "#9FB0BC",
+        ptsColor: i === 0 ? "#00E5FF" : "#F4F9FA",
+        delay: (60 + i * 70) + "ms",
+        open: () => this.setState({ card: r.p.id }),
+      };
+    });
+
+    // spotlight — two players outside the podium, each on a different axis,
+    // so the pair changes as the series moves rather than always being streaks.
+    const outside = rank.slice(3);
+    const pick = (arr, fn) => arr.slice().sort(fn)[0];
+    const climber = pick(outside, (a, b) => {
+      const da = byBase.findIndex(p => p.id === a.p.id) - rank.findIndex(r => r.p.id === a.p.id);
+      const db = byBase.findIndex(p => p.id === b.p.id) - rank.findIndex(r => r.p.id === b.p.id);
+      return db - da;
+    });
+    const climbBy = climber
+      ? byBase.findIndex(p => p.id === climber.p.id) - rank.findIndex(r => r.p.id === climber.p.id)
+      : 0;
+    const candidates = [
+      climbBy > 0 && climber ? {
+        id: climber.p.id, kicker:"BIGGEST CLIMBER",
+        figure: "▲" + this.num("sp-climb", climbBy), name: climber.p.name,
+        note: "Up " + climbBy + " places since the series opened, now " + climber.p.win + "% on the night.",
+        accent:"#00E5FF", bar:"#00E5FF",
+      } : null,
+      (() => {
+        const best = pick(outside.filter(r => r.p.sessions >= 6), (a, b) => b.p.win - a.p.win);
+        return best ? {
+          id: best.p.id, kicker:"BEST WIN RATE",
+          figure: this.num("sp-win", best.p.win) + "%",
+          name: best.p.name,
+          note: best.p.wins + " wins from " + best.p.sessions + " nights — the highest outside the top three.",
+          accent:"#FF9E1B", bar:"#FF9E1B",
+        } : null;
+      })(),
+      (() => {
+        const iron = pick(outside.filter(r => r.p.sessions === 8), (a, b) => b.pts - a.pts);
+        return iron ? {
+          id: iron.p.id, kicker:"NEVER MISSED A NIGHT",
+          figure: this.num("sp-iron", iron.p.sessions) + "/8",
+          name: iron.p.name,
+          note: "Played every session of Vol.7 and sits on " + iron.pts + " points.",
+          accent:"#00E5FF", bar:"#00E5FF",
+        } : null;
+      })(),
+      (() => {
+        const t = pick(outside.filter(r => r.p.titles > 0), (a, b) => b.p.titles - a.p.titles || b.pts - a.pts);
+        return t ? {
+          id: t.p.id, kicker:"SESSION TITLES",
+          figure: String(this.num("sp-title", t.p.titles)),
+          name: t.p.name,
+          note: t.p.titles + " night" + (t.p.titles === 1 ? "" : "s") + " won outright, still chasing the series lead.",
+          accent:"#FF9E1B", bar:"#FF9E1B",
+        } : null;
+      })(),
+    ].filter(Boolean);
+    const seen = new Set();
+    const spotlight = candidates.filter(c => !seen.has(c.id) && seen.add(c.id)).slice(0, 2)
+      .map((c, i) => ({ ...c, delay: (280 + i * 90) + "ms", open: () => this.setState({ card: c.id }) }));
+
+    const detail = s.detail ? SESSIONS.find(x => x.no === s.detail) : null;
+    const isLiveDetail = !!detail && detail.state === "live";
+
+    const tabs = [
+      { id:"teams", label:"TEAMS" }, { id:"groups", label:"GROUPS" },
+      { id:"ko", label:"KO" }, { id:"list", label:"LIST" },
+    ].map(t => {
+      const on = s.tab === t.id;
+      return {
+        label: t.label, pick: () => this.setState({ tab: t.id }),
+        bg: on ? "#00E5FF" : "transparent",
+        color: on ? "#050709" : "#9FB0BC",
+      };
+    });
+    const actions = [
+      { id:"photos", label:"PHOTOS 6" },
+      { id:"mvp", label:"MVP " + Object.values(s.votes).reduce((a,b) => a + b, 0) },
+    ].map(a => {
+      const on = s.tab === a.id;
+      return {
+        label: a.label, pick: () => this.setState({ tab: a.id }),
+        bg: on ? "rgba(0,229,255,.10)" : "rgba(255,255,255,.04)",
+        border: on ? "rgba(0,229,255,.45)" : "transparent",
+        color: on ? "#00E5FF" : "#9FB0BC",
+      };
+    });
+
+    const courtBoard = [1,2,3,4].map(no => {
+      const g = GROUPS.find(x => s.courts[x] === no);
+      const nf = g ? this.nextFixture(g) : null;
+      const live = !!nf;
+      return {
+        no: String(no), group: g || "—",
+        line1: nf ? this.tname(nf.a) : "Group complete",
+        line2: nf ? "vs " + this.tname(nf.b) : "court free",
+        bg: live ? "rgba(0,229,255,.07)" : "rgba(255,255,255,.03)",
+        border: live ? "rgba(0,229,255,.4)" : "rgba(255,255,255,.07)",
+        color: live ? "#00E5FF" : "#9FB0BC",
+      };
+    });
+
+    const allGroupTeams = GROUPS.map(g => ({
+      name: g,
+      title: "GROUP " + g,
+      court: "COURT " + s.courts[g],
+      teams: TEAMS.filter(t => t.group === g).map(t => {
+        const top = t.seed <= 4;
+        return {
+          seed: "S" + t.seed,
+          name: this.tname(t.id),
+          seedBg: top ? "rgba(0,229,255,.14)" : "rgba(255,255,255,.04)",
+          seedBorder: top ? "rgba(0,229,255,.45)" : "rgba(255,255,255,.07)",
+          seedColor: top ? "#00E5FF" : "#9FB0BC",
+          tag: top ? "SEEDED" : "DRAWN",
+          tagColor: top ? "#00E5FF" : "#9FB0BC",
+        };
+      }),
+    }));
+
+    const qual = {};
+    GROUPS.forEach(x => {
+      const t = this.table(x), done = this.gPlayed(x) === 6;
+      qual[x] = { first: done ? this.tname(t[0].t.id) : null, second: done ? this.tname(t[1].t.id) : null };
+    });
+    // ── bracket geometry: 4 QF → 2 SF → 1 final, laid out on a 648×404 board
+    const QF_TOP = [34, 128, 222, 316];   // box tops
+    const QF_H = 76;
+    const PAIRS = [["A","B"],["C","D"],["B","A"],["D","C"]];
+    const bracketQF = PAIRS.map((pair, i) => {
+      const n1 = qual[pair[0]].first, n2 = qual[pair[1]].second;
+      const set = !!(n1 && n2);
+      return {
+        top: QF_TOP[i] + "px",
+        label: "QF " + (i + 1) + " · " + pair[0] + "1 v " + pair[1] + "2 · COURT " + (i + 1),
+        n1: n1 || (pair[0] + "1 — TBD"),
+        n2: n2 || (pair[1] + "2 — TBD"),
+        c1: n1 ? "#F4F9FA" : "#9FB0BC",
+        c2: n2 ? "#F4F9FA" : "#9FB0BC",
+        sc1: set ? "–" : "",
+        sc2: set ? "–" : "",
+        sc1Color: "#9FB0BC",
+        sc2Color: "#9FB0BC",
+        bar: set ? "#FF9E1B" : "#5C6B78",
+        border: set ? "rgba(255,158,27,.4)" : "rgba(92,107,120,.28)",
+      };
+    });
+    // SF box centred between the two QF boxes it feeds from
+    const qfMid = QF_TOP.map(t => t + QF_H / 2);
+    const SF_H = 74;
+    const sfMid = [(qfMid[0] + qfMid[1]) / 2, (qfMid[2] + qfMid[3]) / 2];
+    const bracketSF = sfMid.map((mid, i) => ({
+      top: (mid - SF_H / 2) + "px",
+      label: "SEMI-FINAL " + (i + 1),
+      n1: "QF " + (i * 2 + 1) + " winner",
+      n2: "QF " + (i * 2 + 2) + " winner",
+      c1: "#9FB0BC", c2: "#9FB0BC",
+      bar: "#5C6B78",
+      border: "rgba(92,107,120,.28)",
+    }));
+    const finalMid = (sfMid[0] + sfMid[1]) / 2;
+
+    // connector segments, drawn from the same coordinates as the boxes
+    const LINE = "rgba(159,176,188,.4)";
+    const bracketLines = [];
+    [[0,1],[2,3]].forEach((pair, pi) => {
+      const a = qfMid[pair[0]], b = qfMid[pair[1]];
+      bracketLines.push({ left:"196px", top: a + "px", w:"20px", h:"1px", bg: LINE });
+      bracketLines.push({ left:"196px", top: b + "px", w:"20px", h:"1px", bg: LINE });
+      bracketLines.push({ left:"216px", top: a + "px", w:"1px", h: (b - a) + "px", bg: LINE });
+      bracketLines.push({ left:"216px", top: sfMid[pi] + "px", w:"20px", h:"1px", bg: LINE });
+    });
+    bracketLines.push({ left:"416px", top: sfMid[0] + "px", w:"20px", h:"1px", bg: LINE });
+    bracketLines.push({ left:"416px", top: sfMid[1] + "px", w:"20px", h:"1px", bg: LINE });
+    bracketLines.push({ left:"436px", top: sfMid[0] + "px", w:"1px", h: (sfMid[1] - sfMid[0]) + "px", bg: LINE });
+    bracketLines.push({ left:"436px", top: finalMid + "px", w:"20px", h:"1px", bg:"#FF9E1B" });
+
+    const groupsDone = GROUPS.filter(g => this.gPlayed(g) === 6).length;
+
+    const voteTotal = Object.values(s.votes).reduce((a,b) => a + b, 0);
+    const maxVotes = Math.max(1, ...Object.values(s.votes));
+
+    // rankings, sortable
+    const sorted = rank.slice().sort((a, b) => {
+      if (s.sort === "winrate") return b.p.win - a.p.win || b.pts - a.pts;
+      if (s.sort === "streak") {
+        const sa = streakOf(a.p), sb = streakOf(b.p);
+        const va = sa.kind === "win" ? sa.n : -sa.n, vb = sb.kind === "win" ? sb.n : -sb.n;
+        return vb - va || b.pts - a.pts;
+      }
+      return 0;
+    });
+    const rankRows = sorted.slice(0, 14).map((r, i) => {
+      const st = streakOf(r.p);
+      const truePos = rank.findIndex(x => x.p.id === r.p.id);
+      const baseP = byBase.findIndex(p => p.id === r.p.id);
+      const dv = baseP - truePos;
+      return {
+        rank: String(truePos + 1),
+        name: r.p.name,
+        pts: String(this.num("rk-" + r.p.id, r.pts)),
+        barWidth: Math.round((r.pts / topPts) * 100) + "%",
+        streak: (st.kind === "win" ? "W" : "L") + st.n,
+        streakColor: st.kind === "win" ? (st.n >= 3 ? "#FF9E1B" : "#00E5FF") : "#9FB0BC",
+        move: dv > 0 ? "▲" : dv < 0 ? "▼" : "",
+        moveColor: dv > 0 ? "#00E5FF" : "#FF9E1B",
+        open: () => this.setState({ card: r.p.id }),
+      };
+    });
+
+    const sortChips = [
+      { id:"points", label:"POINTS" },
+      { id:"winrate", label:"WIN RATE" },
+      { id:"streak", label:"STREAK" },
+    ].map(c => {
+      const on = s.sort === c.id;
+      return {
+        label: c.label, pick: () => this.setState({ sort: c.id }),
+        bg: on ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+        border: on ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.06)",
+        color: on ? "#00E5FF" : "#9FB0BC",
+      };
+    });
+
+    const leader = rank[0];
+    const leadSt = streakOf(leader.p);
+    const meSt = streakOf(rank[me].p);
+
+    // player card
+    const cp = s.card ? P[s.card] : null;
+    const cpRank = cp ? rank.findIndex(r => r.p.id === cp.id) : -1;
+    const cpPts = cp ? rank[cpRank].pts : 0;
+    const cpSt = cp ? streakOf(cp) : null;
+    const cpHot = cp && cpSt.kind === "win" && cpSt.n >= 3;
+
+    const f = FIXTURES.find(x => x.id === s.open);
+    const d = s.draft;
+    const lossPts = d ? (d.loss === "tiebreak" ? 2 : d.loss === "competitive" ? 1 : 0) : 0;
+    const ready = !!(d && d.a !== null && d.b !== null && d.a !== d.b);
+    const aWins = !!(d && d.a !== null && d.b !== null && d.a > d.b);
+    const bWins = !!(d && d.a !== null && d.b !== null && d.b > d.a);
+    const pad = (side) => PAD.map(n => {
+      const on = d && d[side] === n;
+      return {
+        label: String(n),
+        bg: on ? "#00E5FF" : "rgba(255,255,255,.05)",
+        border: on ? "#00E5FF" : "rgba(255,255,255,.07)",
+        color: on ? "#050709" : "#9FB0BC",
+        pick: () => this.setDraft({ [side]: n }),
+      };
+    });
+
+    return {
+      isHome: s.screen === "home",
+      isSessions: s.screen === "sessions",
+      isRank: s.screen === "rank",
+      isPlayers: s.screen === "players",
+      navItems,
+
+      playerCount: String(PLAYERS.length),
+      prizeLive: this.num("prize", PRIZE_TOTAL) + " OMR",
+      playersLive: String(this.num("plcount", PLAYERS.length)),
+      playedLive: String(this.num("played", played)),
+      playedLabel: played + " OF " + FIXTURES.length + " PLAYED",
+      ringBg: "conic-gradient(#00E5FF 0turn " + pct.toFixed(3) + "turn, rgba(255,255,255,.07) " + pct.toFixed(3) + "turn 1turn)",
+      liveDate: "MON 22 SEP · 5:30 PM",
+      openLive: () => this.setState({ detail: 6, tab: "groups" }),
+      goRank: () => this.setState({ screen: "rank" }),
+      podium, spotlight,
+      ladder: LADDER.map((l, i) => ({
+        label: l.label, pts: l.pts,
+        delay: (i * 180) + "ms",
+        tick: l.accent ? "#00E5FF" : "rgba(159,176,188,.6)",
+        color: l.accent ? "#F4F9FA" : "#9FB0BC",
+        ptsColor: l.accent ? "#00E5FF" : "#9FB0BC",
+      })),
+
+      sessionList: SESSIONS.map(x => {
+        const live = x.state === "live", done = x.state === "done";
+        return {
+          no: String(x.no), date: x.date,
+          title: x.final ? "GRAND FINALE" : "SESSION " + x.no,
+          note: live ? "Group stage in progress" : done ? "Champions · " + x.champion : x.x2 ? "Double points night" : "Sign-ups open Monday",
+          noteColor: live ? "#00E5FF" : "#9FB0BC",
+          pill: live ? "LIVE" : done ? "FINAL" : x.x2 ? "2X" : "SOON",
+          pillBg: live ? "rgba(0,229,255,.12)" : x.x2 && !done ? "rgba(255,158,27,.12)" : "rgba(255,255,255,.04)",
+          pillBorder: live ? "rgba(0,229,255,.5)" : x.x2 && !done ? "rgba(255,158,27,.5)" : "rgba(255,255,255,.07)",
+          pillColor: live ? "#00E5FF" : x.x2 && !done ? "#FF9E1B" : "#9FB0BC",
+          bg: live ? "rgba(16,23,31,.96)" : "rgba(9,14,20,.94)",
+          bar: live ? "#00E5FF" : done ? "#5C6B78" : "rgba(92,107,120,.45)",
+          tileBg: live ? "rgba(0,229,255,.14)" : "rgba(255,255,255,.04)",
+          tileBorder: live ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.07)",
+          tileColor: live ? "#00E5FF" : "#9FB0BC",
+          open: () => this.setState({ detail: x.no, tab: x.state === "live" ? "groups" : "teams" }),
+        };
+      }),
+
+      sortChips, rankRows,
+      openLeader: () => this.setState({ card: leader.p.id }),
+      leaderName: leader.p.name,
+      leaderSessions: leader.p.sessions + " SESSIONS · " + leader.p.win + "% WIN",
+      leaderStreak: (leadSt.kind === "win" ? "W" : "L") + leadSt.n + " STREAK",
+      leaderPts: String(this.num("leadpts", leader.pts)),
+      leaderForm: this.formBars(leader.p),
+      meRank: String(me + 1),
+      meName: rank[me].p.name,
+      mePts: String(this.num("mepts", rank[me].pts)),
+      meStreak: (meSt.kind === "win" ? "W" : "L") + meSt.n + " · " + rank[me].p.win + "% WIN",
+      meStreakColor: meSt.kind === "win" ? "#00E5FF" : "#9FB0BC",
+      meMove: meDelta > 0 ? "▲ " + meDelta : meDelta < 0 ? "▼ " + Math.abs(meDelta) : "HOLDING",
+      meMoveColor: meDelta > 0 ? "#00E5FF" : meDelta < 0 ? "#FF9E1B" : "#9FB0BC",
+      nearRows: rank.slice(Math.max(0, me - 2), Math.min(rank.length, me + 3)).map((r, i) => ({
+        rank: String(Math.max(0, me - 2) + i + 1),
+        name: r.p.name,
+        pts: String(r.pts),
+        color: r.p.id === ME ? "#FF9E1B" : "#9FB0BC",
+        edge: r.p.id === ME ? "#FF9E1B" : "rgba(159,176,188,.35)",
+      })),
+
+      roster: rank.slice(0, 16).map((r, i) => {
+        const st = streakOf(r.p);
+        const hot = st.kind === "win" && st.n >= 3;
+        return {
+          slot: "sg-roster-" + r.p.id,
+          name: r.p.name,
+          rank: "#" + (i + 1),
+          pts: String(this.num("ro-" + r.p.id, r.pts)),
+          streak: (st.kind === "win" ? "W" : "L") + st.n,
+          streakBg: hot ? "rgba(255,158,27,.9)" : st.kind === "win" ? "rgba(0,229,255,.85)" : "rgba(5,7,9,.86)",
+          streakColor: st.kind === "win" ? "#050709" : "#9FB0BC",
+          bar: hot ? "#FF9E1B" : "#00E5FF",
+          form: this.formBars(r.p),
+          open: () => this.setState({ card: r.p.id }),
+        };
+      }),
+
+      // session detail
+      detailOpen: !!detail,
+      detailTitle: detail ? (detail.final ? "GRAND FINALE" : "SESSION " + detail.no) : "",
+      detailDate: detail ? detail.date : "",
+      detailPill: detail ? (detail.state === "live" ? "LIVE" : detail.state === "done" ? "FINAL" : "UPCOMING") : "",
+      detailPillBg: isLiveDetail ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+      detailPillBorder: isLiveDetail ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.07)",
+      detailPillColor: isLiveDetail ? "#00E5FF" : "#9FB0BC",
+      closeDetail: () => this.setState({ detail: null }),
+      tabs, actions,
+      isTeams: s.tab === "teams",
+      isGroups: s.tab === "groups",
+      isKO: s.tab === "ko",
+      isList: s.tab === "list",
+      isMVP: s.tab === "mvp",
+      isPhotos: s.tab === "photos",
+      courtBoard, allGroupTeams,
+      bracketQF, bracketSF, bracketLines,
+      finalN1: "SF 1 winner", finalN2: "SF 2 winner",
+      champion: "TBD",
+      koState: groupsDone === 4 ? "GROUPS COMPLETE · DRAW SET" : "WAITING ON GROUP RESULTS",
+      koHint: groupsDone === 4
+        ? "All four groups are in. Quarter-finals are seeded and ready to score."
+        : groupsDone + " of 4 groups complete — the bracket fills in as each group finishes.",
+
+      // one group at a time
+      group: s.group,
+      groupTitle: "GROUP " + s.group,
+      groupPlayed: this.gPlayed(s.group) + " OF 6",
+      groupCourt: String(s.courts[s.group]),
+      cycleCourt: () => this.cycleCourt(s.group),
+      matchHeading: "Group " + s.group + " match card · tap to score",
+      groupChips: GROUPS.map(x => {
+        const on = x === s.group, c = this.gPlayed(x);
+        return {
+          name: x, sub: c + "/6",
+          pick: () => this.setState({ group: x }),
+          bg: on ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+          border: on ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.06)",
+          color: on ? "#00E5FF" : "#9FB0BC",
+          subColor: c === 6 ? "#00E5FF" : "#9FB0BC",
+        };
+      }),
+      standings: this.table(s.group).map((r, i) => ({
+        name: this.tname(r.t.id),
+        i1: P[r.t.p1].first[0], i2: P[r.t.p2].first[0],
+        w: r.p ? String(this.num("w-" + r.t.id, r.w)) : "–",
+        gd: r.p ? (r.gf - r.ga > 0 ? "+" + (r.gf - r.ga) : String(r.gf - r.ga)) : "–",
+        pts: r.p ? String(this.num("gp-" + r.t.id, r.pts)) : "–",
+        edge: i < 2 && r.p ? "inset 3px 0 0 #00E5FF" : "none",
+        nameColor: i < 2 && r.p ? "#F4F9FA" : "#9FB0BC",
+        ptsColor: i < 2 && r.p ? "#00E5FF" : "#9FB0BC",
+      })),
+      matches: FIXTURES.filter(f => f.group === s.group).map(f => {
+        const r = s.results[f.id];
+        const w1 = r && r.a > r.b, w2 = r && r.b > r.a;
+        return {
+          no: String(f.no),
+          n1: this.tname(f.a), n2: this.tname(f.b),
+          s1: r ? String(r.a) : "–", s2: r ? String(r.b) : "–",
+          s1Color: w1 ? "#00E5FF" : r ? "#9FB0BC" : "#5C6B78",
+          s2Color: w2 ? "#00E5FF" : r ? "#9FB0BC" : "#5C6B78",
+          c1: w1 ? "#F4F9FA" : "#9FB0BC",
+          c2: w2 ? "#F4F9FA" : "#9FB0BC",
+          bar: r ? "#5C6B78" : "#00E5FF",
+          capsuleBg: r ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+          capsuleBorder: r ? "rgba(0,229,255,.35)" : "rgba(0,229,255,.28)",
+          stateLabel: r ? "FINAL" : "AWAITING SCORE",
+          stateColor: r ? "#9FB0BC" : "#00E5FF",
+          note: r
+            ? (r.loss === "tiebreak" ? "Tiebreak loss · loser +2" : r.loss === "competitive" ? "Close loss · loser +1" : "Blowout · loser 0")
+            : "Tap to enter the result",
+          noteColor: r ? "#9FB0BC" : "#00E5FF",
+          open: () => this.openMatch(f),
+        };
+      }),
+      signups: TEAMS.map((t, i) => ({
+        no: String(i + 1),
+        name: this.tname(t.id),
+        edge: i < 8 ? "#00E5FF" : "rgba(159,176,188,.4)",
+        tag: "GROUP " + t.group,
+        tagColor: i < 8 ? "#00E5FF" : "#9FB0BC",
+      })),
+      voteTotal: String(this.num("votes", voteTotal)),
+      voteHint: s.myVote ? "Your vote is in — one per phone." : "Tap a player to lock your vote. One per phone.",
+      mvpRows: Object.keys(s.votes).map(pid => {
+        const mine = s.myVote === pid, v = s.votes[pid];
+        return {
+          name: P[pid].name, init: P[pid].first[0],
+          votes: String(this.num("mv-" + pid, v)),
+          barWidth: Math.round((v / maxVotes) * 100) + "%",
+          border: mine ? "rgba(255,158,27,.6)" : "rgba(92,107,120,.2)",
+          tag: mine ? "YOUR VOTE" : "",
+          ptsColor: v === maxVotes ? "#FF9E1B" : "#9FB0BC",
+          vote: () => this.vote(pid),
+        };
+      }).sort((a,b) => Number(b.votes) - Number(a.votes)),
+      wall: [1,2,3,4,5,6].map(n => ({ slot: "sg-wall-" + n })),
+
+      // player card
+      cardOpen: !!cp,
+      closeCard: () => this.setState({ card: null }),
+      cardSlot: cp ? "sg-roster-" + cp.id : "sg-roster-none",
+      cardName: cp ? cp.name.toUpperCase() : "",
+      cardRank: cp ? String(cpRank + 1) : "",
+      cardAccent: cpHot ? "#FF9E1B" : "#00E5FF",
+      cardAccentSoft: cpHot ? "rgba(255,158,27,.5)" : "rgba(0,229,255,.5)",
+      cardStreakLabel: cp ? (cpSt.kind === "win" ? "W" + cpSt.n + " STREAK" : "L" + cpSt.n + " · REBUILDING") : "",
+      cardStreakBg: cpHot ? "rgba(255,158,27,.9)" : cp && cpSt.kind === "win" ? "rgba(0,229,255,.85)" : "rgba(5,7,9,.85)",
+      cardStreakColor: cp && cpSt.kind === "win" ? "#050709" : "#9FB0BC",
+      cardStats: cp ? [
+        { label:"SERIES PTS", value: String(this.num("cd-pts", cpPts)), color:"#00E5FF", bar:"#00E5FF" },
+        { label:"WIN RATE",   value: this.num("cd-win", cp.win) + "%",  color:"#F4F9FA", bar:"#5C6B78" },
+        { label:"SESSIONS",   value: String(this.num("cd-ses", cp.sessions)), color:"#F4F9FA", bar:"#5C6B78" },
+      ] : [],
+      cardForm: cp ? cp.form.map((v, i) => ({
+        label: v === "-" ? "·" : v,
+        cellBg: v === "W" ? "rgba(0,229,255,.16)" : v === "L" ? "rgba(255,255,255,.05)" : "transparent",
+        cellBorder: v === "W" ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.07)",
+        textColor: v === "W" ? "#00E5FF" : "#9FB0BC",
+      })) : [],
+      cardFormNote: cp
+        ? (cpSt.kind === "win"
+            ? "Won the last " + cpSt.n + " session" + (cpSt.n === 1 ? "" : "s") + " played. " + cp.wins + " wins from " + cp.sessions + " nights."
+            : "Lost the last " + cpSt.n + ". " + cp.wins + " wins from " + cp.sessions + " nights.")
+        : "",
+      cardRecord: cp ? [
+        { label:"Nights played",     value: String(cp.sessions) + " of 8" },
+        { label:"Session titles",    value: cp.titles ? cp.titles + " × champion" : "none yet" },
+        { label:"Current streak",    value: (cpSt.kind === "win" ? "W" : "L") + cpSt.n },
+        { label:"Best series finish", value: "#" + Math.max(1, cpRank - 2) },
+      ] : [],
+      cardNext: cp
+        ? (cpHot
+            ? "Seeded high on Wednesday — a fourth straight win puts " + cp.first + " in title contention."
+            : "Signed up for Wednesday. A win night moves " + cp.first + " up the table fast.")
+        : "",
+
+      // score sheet
+      sheetOpen: !!f,
+      flash: s.flash, flashText: s.flashText, flashSub: s.flashSub,
+      sheetKicker: f ? "GROUP " + f.group + " · MATCH " + f.no + " · COURT " + s.courts[f.group] : "",
+      draftN1: f ? this.tname(f.a) : "",
+      draftN2: f ? this.tname(f.b) : "",
+      draftIa: f ? this.inits(f.a) : "",
+      draftIb: f ? this.inits(f.b) : "",
+      v1: d && d.a !== null ? String(d.a) : "–",
+      v2: d && d.b !== null ? String(d.b) : "–",
+      v1Color: aWins ? "#00E5FF" : "#9FB0BC",
+      v2Color: bWins ? "#00E5FF" : "#9FB0BC",
+      side1Bg: aWins ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+      side2Bg: bWins ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+      side1Border: aWins ? "rgba(0,229,255,.45)" : "rgba(255,255,255,.07)",
+      side2Border: bWins ? "rgba(0,229,255,.45)" : "rgba(255,255,255,.07)",
+      padA: pad("a"), padB: pad("b"),
+      lossTypes: LOSS.map(l => {
+        const on = d && d.loss === l.id;
+        return {
+          label: l.label, pts: l.pts,
+          bg: on ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+          border: on ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.06)",
+          color: on ? "#00E5FF" : "#9FB0BC",
+          ptsColor: on ? "#00E5FF" : "#9FB0BC",
+          pick: () => this.setDraft({ loss: l.id }),
+        };
+      }),
+      prevLabel1: !f ? "" : !ready ? "Winner — pick both scores" : (aWins ? this.tname(f.a) : this.tname(f.b)) + " · winner",
+      prevLabel2: !f ? "" : !ready ? "Loser" : (aWins ? this.tname(f.b) : this.tname(f.a)) + " · loser",
+      prevPts1: ready ? "+3" : "–",
+      prevPts2: ready ? "+" + lossPts : "–",
+      saveLabel: ready ? "LOCK RESULT ▶" : (d && d.a !== null && d.a === d.b ? "SCORES CAN'T BE LEVEL" : "PICK BOTH SCORES"),
+      saveBg: ready ? "#00E5FF" : "rgba(255,255,255,.06)",
+      saveColor: ready ? "#050709" : "#9FB0BC",
+      saveShadow: ready ? "0 0 34px rgba(0,229,255,.38)" : "none",
+      stop: (e) => e.stopPropagation(),
+      close: () => this.setState({ open:null, draft:null }),
+      save: () => this.save(),
+    };
+  }
+}
+</script>
+</body>
+</html>

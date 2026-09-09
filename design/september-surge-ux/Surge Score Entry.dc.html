@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/styles.css">
+<script src="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<style>
+  body { margin:0; background:#050709; color:#F4F9FA; font-family:'Archivo',system-ui,sans-serif; }
+  a { color:#00E5FF; text-decoration:none; }
+  a:hover { color:#FF9E1B; }
+  @keyframes sgIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
+  @keyframes sgFlash { 0%{opacity:0;transform:scale(.9)} 20%{opacity:1;transform:none} 80%{opacity:1} 100%{opacity:0} }
+  @keyframes sgBar { 0%,100%{opacity:.55} 50%{opacity:1} }
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:#050709;position:relative;overflow-x:hidden;">
+  <div style="position:fixed;inset:0;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.10) 0 1px,transparent 1px 92px),repeating-linear-gradient(66deg,rgba(0,229,255,.05) 0 2px,transparent 2px 31px);"></div>
+
+  <div style="position:relative;max-width:430px;margin:0 auto;padding:0 16px 120px;">
+
+    <div style="display:flex;align-items:center;gap:12px;padding:18px 0 14px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:800;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Mon 22 Sep · 16 teams · 4 groups</div>
+        <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;line-height:1;color:#F4F9FA;margin-top:4px;">SESSION 6</div>
+      </div>
+      <div style="flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.4);">
+        <div style="width:7px;height:7px;border-radius:50%;background:#00E5FF;animation:sgBar 2s ease-in-out infinite;"></div>
+        <span style="font-weight:800;font-size:9px;letter-spacing:.24em;color:#00E5FF;">LIVE</span>
+      </div>
+    </div>
+
+    <!-- whole-session progress -->
+    <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+      <div style="flex:0 0 auto;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:{{ ringBg }}">
+        <div style="width:44px;height:44px;border-radius:50%;background:#050709;display:grid;place-items:center;">
+          <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:17px;color:#00E5FF;">{{ played }}</div>
+        </div>
+      </div>
+      <div style="flex:1 1 auto;min-width:0;">
+        <div style="font-weight:800;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Group stage</div>
+        <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;line-height:1.05;color:#F4F9FA;margin-top:2px;white-space:nowrap;">{{ playedLabel }}</div>
+      </div>
+    </div>
+
+    <!-- GROUP SWITCHER — one group on screen at a time -->
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:14px;">
+      <sc-for list="{{ groupChips }}" as="g" hint-placeholder-count="4">
+        <div onClick="{{ g.pick }}" style="cursor:pointer;padding:10px 4px 9px;text-align:center;background:{{ g.bg }};border:1px solid {{ g.border }};">
+          <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;line-height:1;color:{{ g.color }};">{{ g.name }}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;margin-top:4px;color:{{ g.subColor }};">{{ g.sub }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- active group standings -->
+    <div style="margin-top:14px;padding:18px 16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;position:relative;overflow:hidden;">
+      <div style="position:absolute;right:-36px;top:30px;width:220px;height:140px;border:1.5px solid rgba(0,229,255,.14);pointer-events:none;">
+        <div style="position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:rgba(0,229,255,.14);"></div>
+        <div style="position:absolute;left:0;right:0;top:26%;height:1.5px;background:rgba(0,229,255,.1);"></div>
+        <div style="position:absolute;left:0;right:0;bottom:26%;height:1.5px;background:rgba(0,229,255,.1);"></div>
+      </div>
+      <div style="position:relative;display:flex;align-items:center;gap:12px;">
+        <div style="width:44px;height:44px;display:grid;place-items:center;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.45);box-shadow:0 0 24px rgba(0,229,255,.18);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:26px;color:#00E5FF;">{{ group }}</div>
+        <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:28px;line-height:1;color:#F4F9FA;">{{ groupTitle }}</div>
+        <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5C6B78;">{{ groupPlayed }}</div>
+      </div>
+
+      <div style="position:relative;display:grid;grid-template-columns:1fr 30px 36px 40px;margin-top:14px;">
+        <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;padding-bottom:8px;">TEAM</div>
+        <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:center;padding-bottom:8px;">W</div>
+        <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:center;padding-bottom:8px;">GD</div>
+        <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:right;padding-bottom:8px;">PTS</div>
+        <sc-for list="{{ standings }}" as="row" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 0 10px 10px;border-top:1px solid rgba(92,107,120,.16);box-shadow:{{ row.edge }}">
+            <div style="display:flex;flex:0 0 auto;gap:2px;">
+              <div style="width:24px;height:24px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ row.i1 }}</div>
+              <div style="width:24px;height:24px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ row.i2 }}</div>
+            </div>
+            <div style="font-weight:800;font-size:15px;color:{{ row.nameColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ row.name }}</div>
+          </div>
+          <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#F4F9FA;border-top:1px solid rgba(92,107,120,.16);">{{ row.w }}</div>
+          <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">{{ row.gd }}</div>
+          <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:21px;color:{{ row.ptsColor }};border-top:1px solid rgba(92,107,120,.16);">{{ row.pts }}</div>
+        </sc-for>
+      </div>
+      <div style="position:relative;display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(92,107,120,.16);">
+        <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#00E5FF;">TOP 2 QUALIFY ▶</div>
+        <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,229,255,.5),transparent);"></div>
+      </div>
+    </div>
+
+    <!-- active group matches -->
+    <div style="margin-top:22px;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#5C6B78;">{{ matchHeading }}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
+      <sc-for list="{{ matches }}" as="m" hint-placeholder-count="6">
+        <div onClick="{{ m.open }}" style="cursor:pointer;padding:14px 14px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,{{ m.bar }},rgba(92,107,120,.05));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#5C6B78;">MATCH {{ m.no }}</div>
+            <div style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.22em;color:{{ m.stateColor }};">{{ m.stateLabel }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:10px;">
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;">
+              <div style="font-weight:800;font-size:14px;text-align:right;color:{{ m.c1 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n1 }}</div>
+              <div style="flex:0 0 auto;width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ m.i1 }}</div>
+            </div>
+            <div style="flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:5px 11px;background:{{ m.capsuleBg }};border:1px solid {{ m.capsuleBorder }};">
+              <span style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:26px;line-height:1;color:{{ m.s1Color }};">{{ m.s1 }}</span>
+              <span style="font-size:14px;color:#5C6B78;">/</span>
+              <span style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:26px;line-height:1;color:{{ m.s2Color }};">{{ m.s2 }}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;">
+              <div style="flex:0 0 auto;width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ m.i2 }}</div>
+              <div style="font-weight:800;font-size:14px;color:{{ m.c2 }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ m.n2 }}</div>
+            </div>
+          </div>
+          <div style="margin-top:9px;font-weight:800;font-size:10px;letter-spacing:.16em;color:{{ m.noteColor }};">{{ m.note }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:26px;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#5C6B78;">{{ rosterHeading }}</div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;">
+      <sc-for list="{{ roster }}" as="pl" hint-placeholder-count="8">
+        <div style="background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;padding-left:3px;">
+          <div style="position:relative;width:100%;height:150px;">
+            <image-slot id="{{ pl.slot }}" shape="rect" fit="cover" placeholder="Drop photo"></image-slot>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;">
+            <div style="font-weight:800;font-size:15px;color:#F4F9FA;">{{ pl.name }}</div>
+            <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:#5C6B78;">{{ pl.team }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ══ SCORE SHEET — tap the number for each team ══ -->
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position:fixed;inset:0;z-index:60;background:rgba(3,5,7,.82);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;">
+      <div onClick="{{ stop }}" style="box-sizing:border-box;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;background:#080D13;border-top:3px solid #00E5FF;padding:0 16px 26px;animation:sgIn 220ms cubic-bezier(.34,1.56,.64,1) both;">
+
+        <div style="position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:16px 0 10px;background:#080D13;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.34em;color:#00E5FF;">{{ sheetKicker }}</div>
+          <div onClick="{{ close }}" style="margin-left:auto;cursor:pointer;font-size:18px;color:#9FB0BC;padding:2px 6px;">✕</div>
+        </div>
+
+        <!-- side 1 -->
+        <div style="padding:12px;background:{{ side1Bg }};border:1px solid {{ side1Border }};">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ draftIa }}</div>
+            <div style="font-weight:800;font-size:15px;color:#F4F9FA;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ draftN1 }}</div>
+            <div style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:30px;line-height:1;color:{{ v1Color }};">{{ v1 }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:10px;">
+            <sc-for list="{{ padA }}" as="n" hint-placeholder-count="8">
+              <div onClick="{{ n.pick }}" style="cursor:pointer;height:46px;display:grid;place-items:center;background:{{ n.bg }};border:1px solid {{ n.border }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:{{ n.color }};">{{ n.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- side 2 -->
+        <div style="margin-top:10px;padding:12px;background:{{ side2Bg }};border:1px solid {{ side2Border }};">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;display:grid;place-items:center;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.28);font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#00E5FF;">{{ draftIb }}</div>
+            <div style="font-weight:800;font-size:15px;color:#F4F9FA;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ draftN2 }}</div>
+            <div style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:30px;line-height:1;color:{{ v2Color }};">{{ v2 }}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin-top:10px;">
+            <sc-for list="{{ padB }}" as="n" hint-placeholder-count="8">
+              <div onClick="{{ n.pick }}" style="cursor:pointer;height:46px;display:grid;place-items:center;background:{{ n.bg }};border:1px solid {{ n.border }};font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:{{ n.color }};">{{ n.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;font-weight:800;font-size:9px;letter-spacing:.3em;color:#5C6B78;">HOW THE LOSS WENT</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;">
+          <sc-for list="{{ lossTypes }}" as="l" hint-placeholder-count="3">
+            <div onClick="{{ l.pick }}" style="cursor:pointer;padding:11px 6px;text-align:center;background:{{ l.bg }};border:1px solid {{ l.border }};">
+              <div style="font-weight:800;font-size:10px;letter-spacing:.14em;color:{{ l.color }};">{{ l.label }}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:{{ l.ptsColor }};margin-top:3px;">{{ l.pts }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top:16px;padding:12px 14px;background:rgba(0,229,255,.06);border-left:3px solid #00E5FF;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#00E5FF;">SERIES POINTS FROM THIS MATCH</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:7px;">
+            <span style="font-weight:800;font-size:13px;color:#F4F9FA;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ prevLabel1 }}</span>
+            <span style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:#00E5FF;">{{ prevPts1 }}</span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-weight:800;font-size:13px;color:#9FB0BC;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ prevLabel2 }}</span>
+            <span style="margin-left:auto;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:20px;color:#9FB0BC;">{{ prevPts2 }}</span>
+          </div>
+        </div>
+
+        <div onClick="{{ save }}" style="cursor:pointer;margin-top:16px;padding:17px;text-align:center;background:{{ saveBg }};box-shadow:{{ saveShadow }};font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;letter-spacing:.04em;color:{{ saveColor }};">{{ saveLabel }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ flash }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;left:50%;top:22%;transform:translateX(-50%);z-index:70;padding:14px 22px;background:rgba(0,229,255,.14);border:1px solid rgba(0,229,255,.6);box-shadow:0 0 40px rgba(0,229,255,.3);font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:24px;color:#00E5FF;animation:sgFlash 1.5s ease both;">RESULT LOCKED ✓</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900}}">
+const NAMES = [
+  "Sami","Faisal","Omar","Talal","Yousef","Nadir","Hamed","Zaid",
+  "Khalid","Rashid","Salim","Marwan","Ahmed","Bader","Hilal","Qais",
+  "Saif","Majid","Tariq","Ali","Nasser","Fahad","Jassim","Waleed",
+  "Adil","Basim","Hisham","Idris","Karim","Laith","Munir","Osama",
+];
+const GROUPS = ["A","B","C","D"];
+const PLAYERS = {};
+NAMES.forEach((n, i) => { PLAYERS["p" + (i + 1)] = n; });
+
+// 16 teams, four per group, seeded 1..16 in snake order across the groups.
+const TEAMS = [];
+GROUPS.forEach((g, gi) => {
+  for (let k = 0; k < 4; k++) {
+    const idx = gi * 4 + k;
+    TEAMS.push({
+      id: "t" + (idx + 1),
+      group: g,
+      seed: idx + 1,
+      p1: "p" + (idx * 2 + 1),
+      p2: "p" + (idx * 2 + 2),
+    });
+  }
+});
+
+// Round robin inside each group: 6 matches per group, 24 in the session.
+const FIXTURES = [];
+GROUPS.forEach(g => {
+  const t = TEAMS.filter(x => x.group === g);
+  [[0,1],[2,3],[0,2],[1,3],[0,3],[1,2]].forEach((pair, i) => {
+    FIXTURES.push({ id: g + (i + 1), group: g, no: i + 1, a: t[pair[0]].id, b: t[pair[1]].id });
+  });
+});
+
+const LOSS = [
+  { id:"tiebreak",    label:"TIEBREAK", pts:"+2 pts" },
+  { id:"competitive", label:"CLOSE",    pts:"+1 pt"  },
+  { id:"blowout",     label:"BLOWOUT",  pts:"0 pts"  },
+];
+const PAD = [0,1,2,3,4,5,6,7];
+
+class Component extends DCLogic {
+  state = {
+    group: "A",
+    results: {
+      A1: { a:6, b:3, loss:"competitive" },
+      A2: { a:4, b:6, loss:"tiebreak" },
+      A3: { a:6, b:2, loss:"competitive" },
+      B1: { a:6, b:4, loss:"tiebreak" },
+      B2: { a:2, b:6, loss:"blowout" },
+      C1: { a:6, b:5, loss:"tiebreak" },
+    },
+    open: null,
+    draft: null,
+    flash: false,
+  };
+
+  team(id){ return TEAMS.find(t => t.id === id); }
+  tname(id){ const t = this.team(id); return PLAYERS[t.p1] + " & " + PLAYERS[t.p2]; }
+  inits(id){ const t = this.team(id); return PLAYERS[t.p1][0] + PLAYERS[t.p2][0]; }
+  groupPlayedCount(g){ return FIXTURES.filter(f => f.group === g && this.state.results[f.id]).length; }
+
+  table(g){
+    const rows = TEAMS.filter(t => t.group === g).map(t => ({ t, w:0, p:0, gf:0, ga:0, pts:0 }));
+    const find = id => rows.find(r => r.t.id === id);
+    FIXTURES.filter(f => f.group === g).forEach(f => {
+      const r = this.state.results[f.id];
+      if (!r) return;
+      const A = find(f.a), B = find(f.b);
+      A.p++; B.p++; A.gf += r.a; A.ga += r.b; B.gf += r.b; B.ga += r.a;
+      const lossPts = r.loss === "tiebreak" ? 2 : r.loss === "competitive" ? 1 : 0;
+      if (r.a > r.b) { A.w++; A.pts += 3; B.pts += lossPts; }
+      else if (r.b > r.a) { B.w++; B.pts += 3; A.pts += lossPts; }
+    });
+    rows.sort((x,y) => y.w - x.w || (y.gf-y.ga) - (x.gf-x.ga) || y.gf - x.gf);
+    return rows;
+  }
+
+  openMatch(f){
+    const r = this.state.results[f.id];
+    this.setState({ open: f.id, draft: r ? { a:r.a, b:r.b, loss:r.loss } : { a:null, b:null, loss:"competitive" } });
+  }
+  setDraft(patch){ this.setState(s => ({ draft: { ...s.draft, ...patch } })); }
+
+  save(){
+    const id = this.state.open, d = this.state.draft;
+    if (!id || !d || d.a === null || d.b === null || d.a === d.b) return;
+    this.setState(s => ({
+      results: { ...s.results, [id]: { a:d.a, b:d.b, loss:d.loss } },
+      open: null, draft: null, flash: true,
+    }));
+    setTimeout(() => this.setState({ flash:false }), 1500);
+  }
+
+  renderVals(){
+    const s = this.state, g = s.group;
+    const played = Object.keys(s.results).length;
+    const pct = played / FIXTURES.length;
+    const rows = this.table(g);
+    const gPlayed = this.groupPlayedCount(g);
+
+    const standings = rows.map((r, i) => ({
+      name: this.tname(r.t.id),
+      i1: PLAYERS[r.t.p1][0], i2: PLAYERS[r.t.p2][0],
+      w: r.p ? String(r.w) : "–",
+      gd: r.p ? (r.gf - r.ga > 0 ? "+" + (r.gf - r.ga) : String(r.gf - r.ga)) : "–",
+      pts: r.p ? String(r.pts) : "–",
+      edge: i < 2 && r.p ? "inset 3px 0 0 #00E5FF" : "none",
+      nameColor: i < 2 && r.p ? "#F4F9FA" : "#9FB0BC",
+      ptsColor: i < 2 && r.p ? "#00E5FF" : "#9FB0BC",
+    }));
+
+    const matches = FIXTURES.filter(f => f.group === g).map(f => {
+      const r = s.results[f.id];
+      const win1 = r && r.a > r.b, win2 = r && r.b > r.a;
+      return {
+        no: String(f.no),
+        n1: this.tname(f.a), n2: this.tname(f.b),
+        i1: this.inits(f.a), i2: this.inits(f.b),
+        s1: r ? String(r.a) : "–", s2: r ? String(r.b) : "–",
+        s1Color: win1 ? "#00E5FF" : r ? "#9FB0BC" : "#5C6B78",
+        s2Color: win2 ? "#00E5FF" : r ? "#9FB0BC" : "#5C6B78",
+        c1: win1 ? "#F4F9FA" : "#9FB0BC",
+        c2: win2 ? "#F4F9FA" : "#9FB0BC",
+        bar: r ? "#5C6B78" : "#00E5FF",
+        capsuleBg: r ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+        capsuleBorder: r ? "rgba(0,229,255,.35)" : "rgba(0,229,255,.28)",
+        stateLabel: r ? "FINAL" : "AWAITING SCORE",
+        stateColor: r ? "#5C6B78" : "#00E5FF",
+        note: r
+          ? (r.loss === "tiebreak" ? "Tiebreak loss · loser +2" : r.loss === "competitive" ? "Close loss · loser +1" : "Blowout · loser 0")
+          : "Tap to enter the result",
+        noteColor: r ? "#5C6B78" : "#00E5FF",
+        open: () => this.openMatch(f),
+      };
+    });
+
+    const groupChips = GROUPS.map(x => {
+      const on = x === g;
+      const c = this.groupPlayedCount(x);
+      return {
+        name: x,
+        sub: c + "/6",
+        pick: () => this.setState({ group: x }),
+        bg: on ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+        border: on ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.06)",
+        color: on ? "#00E5FF" : "#9FB0BC",
+        subColor: c === 6 ? "#00E5FF" : "#5C6B78",
+      };
+    });
+
+    const f = FIXTURES.find(x => x.id === s.open);
+    const d = s.draft;
+    const lossPts = d ? (d.loss === "tiebreak" ? 2 : d.loss === "competitive" ? 1 : 0) : 0;
+    const ready = !!(d && d.a !== null && d.b !== null && d.a !== d.b);
+
+    const pad = (side) => PAD.map(n => {
+      const on = d && d[side] === n;
+      return {
+        label: String(n),
+        bg: on ? "#00E5FF" : "rgba(255,255,255,.05)",
+        border: on ? "#00E5FF" : "rgba(255,255,255,.07)",
+        color: on ? "#050709" : "#9FB0BC",
+        pick: () => this.setDraft({ [side]: n }),
+      };
+    });
+
+    const lossTypes = LOSS.map(l => {
+      const on = d && d.loss === l.id;
+      return {
+        label: l.label, pts: l.pts,
+        bg: on ? "rgba(0,229,255,.12)" : "rgba(255,255,255,.04)",
+        border: on ? "rgba(0,229,255,.5)" : "rgba(255,255,255,.06)",
+        color: on ? "#00E5FF" : "#9FB0BC",
+        ptsColor: on ? "#00E5FF" : "#5C6B78",
+        pick: () => this.setDraft({ loss: l.id }),
+      };
+    });
+
+    const aWins = d && d.a !== null && d.b !== null && d.a > d.b;
+
+    return {
+      played: String(played),
+      playedLabel: played + " OF " + FIXTURES.length + " PLAYED",
+      ringBg: "conic-gradient(#00E5FF 0turn " + pct.toFixed(3) + "turn, rgba(255,255,255,.07) " + pct.toFixed(3) + "turn 1turn)",
+      group: g,
+      groupTitle: "GROUP " + g,
+      groupPlayed: gPlayed + "/6",
+      groupChips, standings, matches,
+      matchHeading: "Group " + g + " match card · tap to score",
+      rosterHeading: "Group " + g + " roster · drop a photo on any card",
+      roster: TEAMS.filter(t => t.group === g).flatMap(t => [t.p1, t.p2].map(pid => ({
+        slot: "sg-roster-" + pid,
+        name: PLAYERS[pid],
+        team: "SEED " + t.seed,
+      }))),
+
+      sheetOpen: !!f,
+      flash: s.flash,
+      sheetKicker: f ? "GROUP " + f.group + " · MATCH " + f.no : "",
+      draftN1: f ? this.tname(f.a) : "",
+      draftN2: f ? this.tname(f.b) : "",
+      draftIa: f ? this.inits(f.a) : "",
+      draftIb: f ? this.inits(f.b) : "",
+      v1: d && d.a !== null ? String(d.a) : "–",
+      v2: d && d.b !== null ? String(d.b) : "–",
+      v1Color: aWins ? "#00E5FF" : "#9FB0BC",
+      v2Color: d && d.a !== null && d.b !== null && d.b > d.a ? "#00E5FF" : "#9FB0BC",
+      side1Bg: aWins ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+      side2Bg: d && d.a !== null && d.b !== null && d.b > d.a ? "rgba(0,229,255,.08)" : "rgba(255,255,255,.03)",
+      side1Border: aWins ? "rgba(0,229,255,.45)" : "rgba(255,255,255,.07)",
+      side2Border: d && d.a !== null && d.b !== null && d.b > d.a ? "rgba(0,229,255,.45)" : "rgba(255,255,255,.07)",
+      padA: pad("a"), padB: pad("b"), lossTypes,
+      prevLabel1: !f ? "" : !ready ? "Winner — pick both scores" : (aWins ? this.tname(f.a) : this.tname(f.b)) + " · winner",
+      prevLabel2: !f ? "" : !ready ? "Loser" : (aWins ? this.tname(f.b) : this.tname(f.a)) + " · loser",
+      prevPts1: ready ? "+3" : "–",
+      prevPts2: ready ? "+" + lossPts : "–",
+      saveLabel: ready ? "LOCK RESULT ▶" : (d && d.a !== null && d.a === d.b ? "SCORES CAN'T BE LEVEL" : "PICK BOTH SCORES"),
+      saveBg: ready ? "#00E5FF" : "rgba(255,255,255,.06)",
+      saveColor: ready ? "#050709" : "#5C6B78",
+      saveShadow: ready ? "0 0 34px rgba(0,229,255,.38)" : "none",
+
+      stop: (e) => e.stopPropagation(),
+      close: () => this.setState({ open:null, draft:null }),
+      save: () => this.save(),
+    };
+  }
+}
+</script>
+</body>
+</html>

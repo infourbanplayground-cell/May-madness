@@ -1178,34 +1178,6 @@ function getQualifyCount(session) {
   return session?.qualifyCount || 2;  // default: top 2 per group qualify
 }
 
-// Which teams are currently on course to qualify — the same rule seedQF uses,
-// so a group table can never promise a spot the bracket won't honour. There is
-// no single "top N" in this series: it is qualifyCount per group (1, 2 or 4),
-// except that 3 groups is fixed at top-2 plus the two best thirds, and
-// 4-groups/all-thirds sends every third through to a round of 16.
-function qualifyingTeamIds(session) {
-  const groups = getSessionGroups(session);
-  const N = groups.length;
-  const stand = groups.map(g => calcGroupStandingsNormalized(session, g));
-  const ids = new Set();
-  const take = (rows, n) => rows.slice(0, n).forEach(r => r && r.team && r.team.id && ids.add(r.team.id));
-
-  if (N === 4 && session && session.thirdPlaceMode === "all4r16") {
-    stand.forEach(rows => take(rows, 3));
-    return ids;
-  }
-  if (N === 3) {
-    stand.forEach(rows => take(rows, 2));
-    // the two best thirds, ranked exactly the way the bracket ranks them
-    const thirds = stand.map(rows => rows[2]).filter(r => r && r.team && r.team.id)
-      .map(r => ({ id: r.team.id, pts: r.pts, wins: r.wins, gd: r.gd || 0, gf: r.gf || 0 }));
-    thirds.sort(compareThirds).slice(0, 2).forEach(t => ids.add(t.id));
-    return ids;
-  }
-  stand.forEach(rows => take(rows, getQualifyCount(session)));
-  return ids;
-}
-
 function resizeToBase64(file, size = 200) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -2334,7 +2306,7 @@ function App() {
                 <A size={20} /><span className="text-[10px] font-semibold tracking-wide uppercase">{t.label}</span>
               </a>
             );
-            return <button key={t.id} onClick={() => setTab(t.id)} className={`flex flex-col items-center gap-0.5 py-2 rounded-lg transition-colors ${tab === t.id ? "" : "text-stone-500"}`} style={tab === t.id ? { color: "var(--orange-br)" } : {}}>
+            return <button key={t.id} onClick={() => setTab(t.id)} data-navon={tab === t.id ? "1" : "0"} className={`sg-nav-btn flex flex-col items-center gap-0.5 py-2 rounded-lg transition-colors ${tab === t.id ? "" : "text-stone-500"}`} style={tab === t.id ? { color: "var(--orange-br)" } : {}}>
               <A size={20} /><span className="text-[10px] font-semibold tracking-wide uppercase">{t.label}</span>
             </button>;
           })}
@@ -3582,25 +3554,27 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           {isAdmin ? <button onClick={() => setShowEdit(true)} className="text-stone-400 hover:text-orange-500 p-1"><I.dots size={20} /></button> : <div className="w-7" />}
         </div>
       </div>
-      <div className="sticky top-[57px] z-10 px-4 py-2" style={{ background:"rgba(255,158,27,.14)", borderBottom: "1px solid rgba(244,249,250,.10)", backgroundImage: "radial-gradient(rgba(0,0,0,.07) 20%, transparent 22%)", backgroundSize: "7px 7px" }}>
-        <div className="max-w-3xl mx-auto flex gap-2 overflow-x-auto">
+      <div className="sticky top-[57px] z-10 sg-tabbar">
+        <div className="max-w-3xl mx-auto sg-seg">
           {[{id:"teams",label:"Teams",Ic:I.users},{id:"groups",label:"Groups",Ic:I.bar},{id:"bracket",label:"Knockouts",Ic:I.swords}].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === t.id ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}>
+            <button key={t.id} onClick={() => setTab(t.id)} className="sg-seg-btn" data-on={tab === t.id ? "1" : "0"}>
               <t.Ic size={14} /> {t.label}
             </button>
           ))}
           {(() => {
             const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
             const isFull = cnt >= MAX_TEAMS;
-            return <button onClick={() => setTab("signups")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "signups" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : isFull ? { background:"rgba(20,24,36,.85)", color: "#00E5FF", borderColor: "rgba(0,229,255,.5)" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}>
-              <CIc.clipboard size={13} /> List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
+            return <button onClick={() => setTab("signups")} className="sg-seg-btn" data-on={tab === "signups" ? "1" : "0"} data-full={isFull ? "1" : "0"}>
+              <CIc.clipboard size={13} /> List{cnt > 0 ? <span className="sg-count">{cnt}/{MAX_TEAMS}</span> : null}
             </button>;
           })()}
-          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.dice size={13} /> Draw</button>}
-          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color: "#1467A8", borderColor: "rgba(0,229,255,.5)" }}><CIc.megaphone size={13} /> Remind</button>}
-          <button onClick={() => setTab("photos")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "photos" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.camera size={13} /> {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
-          {canScore && <button onClick={() => setTab("mvp")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "mvp" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.crown size={13} /> MVP{session.mvpVotingOpen ? ` ${Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0)}` : ""}</button>}
-          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color: "#1F8A24", borderColor: "rgba(0,229,255,.5)" }}><CIc.share size={13} /> Share</button>}
+        </div>
+        <div className="max-w-3xl mx-auto sg-act">
+          <button onClick={() => setTab("photos")} className="sg-act-btn" data-on={tab === "photos" ? "1" : "0"}><CIc.camera size={13} /> Photos{sessionPhotos.length > 0 ? <span className="sg-count">{sessionPhotos.length}</span> : null}</button>
+          {canScore && <button onClick={() => setTab("mvp")} className="sg-act-btn" data-on={tab === "mvp" ? "1" : "0"}><CIc.crown size={13} /> MVP{session.mvpVotingOpen ? <span className="sg-count">{Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0)}</span> : null}</button>}
+          {isAdmin && <button onClick={() => setShowDraw(true)} className="sg-act-btn"><CIc.dice size={13} /> Draw</button>}
+          {isAdmin && <button onClick={() => setShowRemind(true)} className="sg-act-btn"><CIc.megaphone size={13} /> Remind</button>}
+          {session.completed && <button onClick={() => setShowShare(true)} className="sg-act-btn" data-accent="amber"><CIc.share size={13} /> Share</button>}
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
@@ -4048,9 +4022,6 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
   const [edit, setEdit] = useState(null);
   const [add, setAdd] = useState(null);
   const groups = getSessionGroups(session);
-  // Recomputed every render, so the marks track the scores as results go in
-  // rather than freezing at whatever was true when the bracket was seeded.
-  const qualIds = qualifyingTeamIds(session);
   const groupSizes = groups.map(g => (session.teams || []).filter(t => t.group === g).length);
   const isUneven = groupSizes.length > 1 && new Set(groupSizes).size > 1;
   return (
@@ -4098,8 +4069,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
                 const p1 = state.players.find(p => p.id === s.team.p1Id);
                 const p2 = state.players.find(p => p.id === s.team.p2Id);
                 const isTop = s.team.id === top;
-                const isQual = qualIds.has(s.team.id);
-                return <div key={s.team.id} data-qual={isQual ? "1" : "0"} className="sg-standrow flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(255,158,27,.13)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #0A0F14" : "2px solid transparent" }}>
+                return <div key={s.team.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: isTop ? "rgba(255,158,27,.13)" : i % 2 === 0 ? "rgba(19,19,19,.06)" : "transparent", border: isTop ? "2px solid #0A0F14" : "2px solid transparent" }}>
                   <span className="font-mono text-xs text-stone-500 w-4">{i + 1}</span>
                   <span className="flex-1 min-w-0 flex items-center gap-1">
                     {isTop && <I.crown size={12} className="text-cyan-300 shrink-0" />}
@@ -5109,7 +5079,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
     const en = enrich(e);
     const isMe = e.player.id === meId;
     return (
-      <div onClick={() => setOpenPlayerId(e.player.id)} className="sg-thin"
+      <div onClick={() => setOpenPlayerId(e.player.id)}
         style={{display:"flex",alignItems:"center",gap:10,padding:"10px 4px",
                 borderTop:"1px solid rgba(92,107,120,.18)",cursor:"pointer",
                 background:isMe ? "rgba(255,158,27,.07)" : "none"}}>
@@ -5139,7 +5109,6 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
     const isClimber = climber && climber.e.player.id === e.player.id;
     return (
       <div onClick={() => setOpenPlayerId(e.player.id)}
-        className="sg-top" data-lead={lead ? "1" : "0"}
         style={{display:"flex",alignItems:"center",gap:11,cursor:"pointer",
                 background:"#050709",padding:"12px 12px 12px 15px",
                 backgroundImage:`linear-gradient(180deg,${bar},${lead ? "rgba(0,229,255,.06)" : "rgba(92,107,120,.06)"})`,
@@ -5168,7 +5137,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
               : en.form.length > 0 && <span style={{letterSpacing:".08em"}}>&middot; {en.form.join("")}</span>}
           </div>
         </div>
-        <div className="sg-top-pts" style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:23,fontWeight:700,
+        <div style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:23,fontWeight:700,
                      color:lead ? "#00E5FF" : "#F4F9FA"}}>{ptsOf(e)}</div>
       </div>
     );
@@ -7006,239 +6975,7 @@ nav.fixed{ border-top-color:var(--surge-cyan) !important; }
    orange sliver in its top-left corner. Same rule: amber is urgency-only. */
 nav.fixed.bottom-0{ background-image:none !important; }
 
-
-/* ══ 9 · UX REFINEMENT LAYER (Vol.7, second pass) ═══════════════════════
-   Applied from the UI/UX enhancement bundle. Visual only: no scoring, no
-   API, no routing. Three things from that bundle were deliberately NOT
-   taken, and are recorded here so the next volume does not "restore" them:
-
-     · the session tab-bar rebuild (4-up grid + action row) — an IA change,
-       and the owner chose to keep the single scrolling chip row;
-     · every `table` / `tbody` / `td` / `th` rule — this app has no <table>
-       anywhere; group standings are divs, so those rules matched nothing;
-     · `tbody tr:nth-child(-n+2)` as "the qualifiers" — qualification here
-       is 1, 2 or 4 per group, or top-2-plus-best-thirds, or all thirds.
-       Rebuilt below against the real rule instead.
-   ────────────────────────────────────────────────────────────────────── */
-
-:root{
-  --sg-plate-1:rgba(9,14,20,.94);
-  --sg-plate-2:rgba(16,23,31,.96);
-  --sg-text-2:#9FB0BC;            /* secondary prose — 4.5:1 on the base */
-  --sg-hit:44px;
-  --sg-t:170ms cubic-bezier(.2,.7,.3,1);
-}
-
-/* ── 9.1 HIERARCHY ─────────────────────────────────────────────────── */
-.text-stone-400,.text-stone-500,[class*="bg-stone-9"] .text-stone-400,
-[class*="bg-stone-9"] .text-stone-500{ color:var(--sg-text-2) !important; }
-.text-stone-600{ color:#7C8B98 !important; }
-
-.jh-panel,[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
-  padding-top:16px !important; padding-bottom:16px !important;
-  padding-right:16px !important;
-  background-color:var(--sg-plate-1) !important;
-}
-.jh-panel .jh-mock-row,.jh-panel .jh-mock-sess,
-[class*="bg-stone-9"] [class*="bg-stone-9"]{
-  padding-top:11px !important; padding-bottom:11px !important;
-}
-
-label,.uppercase.tracking-wider,.uppercase.tracking-wide{
-  font-family:'Archivo',sans-serif !important; font-style:normal !important;
-  font-weight:800 !important; letter-spacing:.2em !important;
-  color:var(--surge-steel) !important;
-}
-.font-mono,.sg-top-pts,.sg-thin-pts{ font-variant-numeric:tabular-nums; }
-.jh-sec-title{ margin-bottom:14px !important; }
-
-/* ── 9.2 ENERGY ─────────────────────────────────────────────────────
-   Retargeted. The bundle aimed these at .jh-srow / .jh-lbrow, which this
-   build stopped using when RANK was rebuilt to the design language —
-   they matched nothing. The real hooks are the classes below.        */
-.sg-top{ position:relative; }
-.sg-top[data-lead="1"]{ overflow:hidden; }
-.sg-top[data-lead="1"]::after{
-  content:"";position:absolute;inset:0;pointer-events:none;
-  background:linear-gradient(105deg,transparent 38%,rgba(0,229,255,.10) 50%,transparent 62%);
-  transform:translateX(-120%);animation:sgSheen 6s ease-in-out infinite;
-}
-@keyframes sgSheen{ 0%,72%{transform:translateX(-120%)} 100%{transform:translateX(120%)} }
-
-.jh-mock-sess[data-live="1"]{
-  background-color:rgba(0,229,255,.07) !important;
-  box-shadow:inset 0 0 0 1px rgba(0,229,255,.22) !important;
-}
-
-button[style*="00E5FF"]{
-  background-image:linear-gradient(100deg,rgba(255,255,255,.22),transparent 46%) !important;
-  transition:transform var(--sg-t),box-shadow var(--sg-t),filter var(--sg-t) !important;
-}
-
-/* ── 9.3 FEEDBACK — every tap answers ──────────────────────────────── */
-button,[role="button"],.jh-mock-row,.jh-mock-sess,.jh-chipbtn,.sg-top,.sg-thin{
-  transition:transform var(--sg-t),background-color var(--sg-t),
-             box-shadow var(--sg-t),color var(--sg-t),opacity var(--sg-t);
-  -webkit-tap-highlight-color:transparent;
-}
-button:active,[role="button"]:active,.jh-chipbtn:active{ transform:scale(.955); }
-.jh-mock-row:active,.jh-mock-sess:active,.sg-top:active,.sg-thin:active{
-  transform:scale(.99);background-color:rgba(0,229,255,.10) !important;
-}
-button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,
-textarea:focus-visible{ outline:2px solid var(--surge-cyan) !important;outline-offset:2px !important; }
-nav.fixed button{ min-height:var(--sg-hit); }
-
-/* a value that just changed says so. No display change: the bundle set
-   display:inline-block here, which would have collapsed any flex or grid
-   child it landed on, and every number in this app is one. */
-@keyframes sgBump{ 0%{transform:none} 34%{transform:scale(1.16);filter:brightness(1.5)} 100%{transform:none} }
-.sg-bump{ animation:sgBump 420ms var(--ease-out); }
-
-.sg-ripple{
-  position:fixed;z-index:9999;pointer-events:none;border-radius:50%;
-  width:16px;height:16px;margin:-8px 0 0 -8px;
-  background:radial-gradient(circle,rgba(0,229,255,.5),rgba(0,229,255,0) 70%);
-  animation:sgRip 460ms ease-out forwards;
-}
-@keyframes sgRip{ to{ transform:scale(7);opacity:0 } }
-
-/* staggered entrance, first screenful only */
-main .sg-top,main .jh-panel,main .jh-mock-sess{ animation:sgRowIn 320ms var(--ease-out) both; }
-@keyframes sgRowIn{ from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
-main .sg-top:nth-child(2){animation-delay:40ms}
-main .sg-top:nth-child(3){animation-delay:80ms}
-
-/* ── 9.4 BOTTOM NAV — the active tab reads at a glance ─────────────── */
-nav.fixed button[style*="color: var(--orange-br)"],
-nav.fixed button[style*="color:var(--orange-br)"]{ position:relative; }
-nav.fixed button[style*="color: var(--orange-br)"]::before,
-nav.fixed button[style*="color:var(--orange-br)"]::before{
-  content:"";position:absolute;top:-6px;left:22%;right:22%;height:3px;
-  background:var(--surge-cyan);box-shadow:0 0 14px rgba(0,229,255,.7);
-}
-nav.fixed button[style*="color: var(--orange-br)"] svg,
-nav.fixed button[style*="color:var(--orange-br)"] svg{
-  filter:drop-shadow(0 0 8px rgba(0,229,255,.55));
-}
-
-/* ── 9.5 BACKGROUND MOTIF — diagonal speed streaks ──────────────────
-   Replaces the surge trace from section 1. Same single cyan at the same
-   weight; the read is forward motion rather than an oscilloscope line.
-   Two layers so the rhythm is not uniform. Chosen by the owner over the
-   trace. Note the position is NOT !important — pinning it is what froze
-   the trace's drift the first time round.                            */
-html body::before{
-  background-image:
-    repeating-linear-gradient(66deg,
-      rgba(0,229,255,.10) 0 1px, transparent 1px 92px),
-    repeating-linear-gradient(66deg,
-      rgba(0,229,255,.05) 0 2px, transparent 2px 31px) !important;
-  background-size:auto !important;
-  background-repeat:repeat !important;
-  background-position:0 0;
-  animation:sgStreaks 22s linear infinite !important;
-}
-@keyframes sgStreaks{ to{ background-position:-276px -620px, -138px -310px } }
-
-/* ── 9.6 MEDIA ──────────────────────────────────────────────────────── */
-.aa-wall > div{ transition:transform var(--sg-t),box-shadow var(--sg-t); }
-.aa-wall > div:active{ transform:scale(.98); }
-@media (hover:hover){
-  .aa-wall > div:hover{ box-shadow:0 0 0 1px rgba(0,229,255,.5),0 0 30px rgba(0,229,255,.2); }
-}
-
-/* ── 9.7 QUALIFYING ROWS — the real rule ────────────────────────────
-   Driven by data-qual, which GroupsTab sets from qualifyingTeamIds() —
-   the same computation seedQF uses. So this marks 1, 2 or 4 rows per
-   group, or top-2-plus-the-two-best-thirds, or all three, according to
-   the session's own format, and it follows the scores live.         */
-.sg-standrow[data-qual="1"]{
-  box-shadow:inset 3px 0 0 var(--surge-cyan);
-  background-color:rgba(0,229,255,.05) !important;
-}
-
-/* ── 9.8 SESSION SCREEN — scale and presence ────────────────────────
-   The overlay carried a whole night's scoring at 11–14px. Scoped to the
-   session overlay so nothing else shifts. The bundle's table rules are
-   dropped (no tables exist); the group-heading rules are retargeted at
-   the markup this app actually renders.                             */
-.fixed.inset-0.z-40 .text-sm{ font-size:15px !important; line-height:1.35 !important; }
-.fixed.inset-0.z-40 .text-xs{ font-size:13px !important; line-height:1.4 !important; }
-.fixed.inset-0.z-40 .text-\[11px\]{ font-size:12.5px !important; line-height:1.45 !important; }
-.fixed.inset-0.z-40 .text-\[10px\]{ font-size:11px !important; letter-spacing:.16em !important; }
-.fixed.inset-0.z-40 .text-\[9px\]{ font-size:11px !important; }
-.fixed.inset-0.z-40 .font-display.text-xl{ font-size:26px !important; line-height:1 !important; }
-
-.fixed.inset-0.z-40 button.w-full.flex.items-center{
-  min-height:56px !important; padding:10px 12px !important;
-  border-bottom:1px solid rgba(92,107,120,.16) !important;
-}
-.fixed.inset-0.z-40 button.w-full.flex.items-center .truncate{
-  font-family:'Archivo',sans-serif !important; font-weight:800 !important;
-  font-size:17px !important; letter-spacing:-.005em !important; color:var(--surge-white) !important;
-}
-.fixed.inset-0.z-40 .font-mono{ font-variant-numeric:tabular-nums; font-size:14px !important; }
-.fixed.inset-0.z-40 .sg-standrow{ padding-top:9px !important; padding-bottom:9px !important; }
-.fixed.inset-0.z-40 .border-dashed{
-  font-size:13px !important; padding:18px !important;
-  border-color:rgba(0,229,255,.22) !important; color:var(--sg-text-2) !important;
-  letter-spacing:.12em !important; text-transform:uppercase !important;
-}
-
-@media (prefers-reduced-motion:reduce){
-  html body::before{ animation:none !important; }
-  .sg-top[data-lead="1"]::after{ animation:none !important; }
-  main .sg-top,main .jh-panel,main .jh-mock-sess,.sg-bump{ animation:none !important; }
-  .sg-ripple{ display:none !important; }
-}
-
 </style>
-
-<script>
-/* Presentational only — a press ripple and a bump on numbers that change.
-   Reads no state, writes no state, touches no React props. */
-(function(){
-  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-
-  document.addEventListener("pointerdown", function(e){
-    var t = e.target.closest && e.target.closest(
-      "button,[role='button'],.jh-mock-row,.jh-mock-sess,.sg-top,.sg-thin,.jh-chipbtn");
-    if (!t) return;
-    var r = document.createElement("span");
-    r.className = "sg-ripple";
-    r.style.left = e.clientX + "px";
-    r.style.top  = e.clientY + "px";
-    document.body.appendChild(r);
-    setTimeout(function(){ r.remove(); }, 480);
-  }, { passive: true });
-
-  // Bump whichever number just changed. Guarded three ways: not during the
-  // first paint, not inside a field the user is typing in, and never more
-  // than a handful at once — a full-table re-render after a server sync
-  // would otherwise flash the whole screen.
-  var boot = Date.now();
-  var mo = new MutationObserver(function(muts){
-    if (Date.now() - boot < 1500) return;
-    if (muts.length > 12) return;
-    muts.forEach(function(m){
-      var el = m.target.nodeType === 3 ? m.target.parentElement : m.target;
-      if (!el || !el.classList) return;
-      if (!/^[\d\s.,:+\-–]+$/.test((el.textContent || "").trim())) return;
-      if (el.closest("input,textarea,nav")) return;
-      el.classList.remove("sg-bump");
-      void el.offsetWidth;
-      el.classList.add("sg-bump");
-      setTimeout(function(){ el.classList.remove("sg-bump"); }, 460);
-    });
-  });
-  (function start(){
-    var root = document.getElementById("root");
-    if (!root) return setTimeout(start, 400);
-    mo.observe(root, { subtree: true, characterData: true });
-  })();
-})();
-</script>
 
 
 <script>
@@ -7354,6 +7091,330 @@ html body::before{
   window.alert = show;
 })();
 </script>
+
+<style>
+/* ══ SEPTEMBER SURGE · VOL.7 — UX REFINEMENT LAYER (appended last) ══
+   Visual only. Same palette (cyan leads, amber supports), same rising-bar
+   card signature, same expanded italic display face. What changes:
+   hierarchy tiers, a real touch-feedback system, and a calmer session
+   tab bar (4 primary destinations + a secondary action row).           */
+
+:root{
+  --sg-plate-1:rgba(9,14,20,.94);      /* base card      */
+  --sg-plate-2:rgba(16,23,31,.96);     /* raised / focus */
+  --sg-text-2:#9FB0BC;                 /* secondary prose, 4.5:1 on base */
+  --sg-hit:44px;
+  --sg-t:170ms cubic-bezier(.2,.7,.3,1);
+}
+
+/* ── 1 · HIERARCHY ─────────────────────────────────────────────────── */
+/* secondary prose was 8A9BA8 on near-black in bright daylight — lift it */
+.text-stone-400,.text-stone-500,[class*="bg-stone-9"] .text-stone-400,
+[class*="bg-stone-9"] .text-stone-500,.jh-lbsub{ color:var(--sg-text-2) !important; }
+.text-stone-600{ color:#7C8B98 !important; }
+
+/* card interiors get air; the rising bar keeps its 18px gutter */
+.jh-panel,[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
+  padding-top:16px !important; padding-bottom:16px !important;
+  padding-right:16px !important;
+  background-color:var(--sg-plate-1) !important;
+}
+/* nested rows sit one tier down and never restate the outer padding */
+.jh-panel .jh-mock-row,.jh-panel .jh-mock-sess,
+[class*="bg-stone-9"] [class*="bg-stone-9"]{
+  padding-top:11px !important; padding-bottom:11px !important;
+}
+
+/* one voice per level: display italic for titles, letterspaced 800 for labels */
+label,.uppercase.tracking-wider,.uppercase.tracking-wide{
+  font-family:'Archivo',sans-serif !important; font-style:normal !important;
+  font-weight:800 !important; letter-spacing:.2em !important;
+  color:var(--surge-steel) !important;
+}
+/* numbers align in columns */
+.font-mono,.jh-pts,.jh-rank{ font-variant-numeric:tabular-nums; }
+
+/* section rhythm — titles own the space above them, not below */
+.jh-sec-title{ margin-bottom:14px !important; }
+main > div > * + *{ margin-top:14px; }
+
+/* ── 2 · ENERGY (no new colours) ───────────────────────────────────── */
+/* the live/active card is the only surface that moves */
+.jh-srow.active,[data-live="1"]{
+  background-color:rgba(0,229,255,.07) !important;
+  box-shadow:inset 0 0 0 1px rgba(0,229,255,.22) !important;
+}
+.jh-srow.active::after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--surge-cyan);animation:sgBarPulse 2.2s ease-in-out infinite;
+}
+.jh-srow{ position:relative; }
+@keyframes sgBarPulse{ 0%,100%{opacity:.55} 50%{opacity:1} }
+
+/* first place gets one slow sheen instead of a permanent glow */
+.jh-lbrow.r1{ position:relative;overflow:hidden; }
+.jh-lbrow.r1::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 38%,rgba(0,229,255,.10) 50%,transparent 62%);
+  transform:translateX(-120%);animation:sgSheen 6s ease-in-out infinite;
+}
+@keyframes sgSheen{ 0%,72%{transform:translateX(-120%)} 100%{transform:translateX(120%)} }
+
+/* primary buttons: a directional sweep on the cyan, matching the wave motif */
+button[style*="00E5FF"],.jh-chipbtn.red{
+  background-image:linear-gradient(100deg,rgba(255,255,255,.22),transparent 46%) !important;
+  transition:transform var(--sg-t),box-shadow var(--sg-t),filter var(--sg-t) !important;
+}
+
+/* ── 3 · FEEDBACK — every tap answers ──────────────────────────────── */
+button,[role="button"],label[class*="cursor-pointer"],.jh-srow,.jh-lbrow,
+.jh-mock-row,.jh-mock-sess,.jh-chipbtn{
+  transition:transform var(--sg-t),background-color var(--sg-t),
+             box-shadow var(--sg-t),color var(--sg-t),opacity var(--sg-t);
+  -webkit-tap-highlight-color:transparent;
+}
+button:active,[role="button"]:active,.jh-chipbtn:active{ transform:scale(.955); }
+.jh-srow:active,.jh-lbrow:active,.jh-mock-row:active,.jh-mock-sess:active{
+  transform:scale(.99);background-color:rgba(0,229,255,.10) !important;
+}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible{ outline:2px solid var(--surge-cyan) !important;outline-offset:2px !important; }
+
+/* phone-first hit targets */
+nav.fixed button,nav.fixed a,.sg-act-btn,.sg-seg-btn{ min-height:var(--sg-hit); }
+
+/* a value that changed says so */
+@keyframes sgBump{ 0%{transform:none} 34%{transform:scale(1.16);filter:brightness(1.5)} 100%{transform:none} }
+.sg-bump{ animation:sgBump 420ms var(--ease-out); display:inline-block; }
+
+/* ripple on press — pure presentation, injected by the script below */
+.sg-ripple{
+  position:fixed;z-index:9999;pointer-events:none;border-radius:50%;
+  width:16px;height:16px;margin:-8px 0 0 -8px;
+  background:radial-gradient(circle,rgba(0,229,255,.5),rgba(0,229,255,0) 70%);
+  animation:sgRip 460ms ease-out forwards;
+}
+@keyframes sgRip{ to{ transform:scale(7);opacity:0 } }
+
+/* staggered entrance for the first screenful of rows */
+main .jh-srow,main .jh-lbrow,main .jh-panel{ animation:sgRowIn 320ms var(--ease-out) both; }
+main .jh-srow:nth-child(n+9),main .jh-lbrow:nth-child(n+9){ animation:none; }
+@keyframes sgRowIn{ from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+main .jh-lbrow:nth-child(2){animation-delay:40ms}
+main .jh-lbrow:nth-child(3){animation-delay:80ms}
+main .jh-lbrow:nth-child(4){animation-delay:120ms}
+main .jh-lbrow:nth-child(5){animation-delay:160ms}
+main .jh-lbrow:nth-child(6){animation-delay:200ms}
+main .jh-lbrow:nth-child(7){animation-delay:240ms}
+main .jh-lbrow:nth-child(8){animation-delay:280ms}
+
+/* ── 4 · SESSION TAB BAR — 4 destinations, then actions ────────────── */
+.sg-tabbar{
+  background:rgba(5,7,9,.97) !important;
+  border-bottom:1px solid rgba(0,229,255,.22) !important;
+  backdrop-filter:blur(18px);
+  padding:8px 16px 10px;
+}
+.sg-seg{ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;
+  background:rgba(255,255,255,.04);padding:2px; }
+.sg-seg-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:8px 4px;font-family:'Archivo',sans-serif;font-weight:800;
+  font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--sg-text-2);background:transparent;border:none;cursor:pointer;
+  white-space:nowrap;
+}
+.sg-seg-btn[data-on="1"]{
+  background:var(--surge-cyan);color:var(--surge-void);
+  box-shadow:0 0 24px rgba(0,229,255,.35);
+}
+.sg-seg-btn[data-on="0"][data-full="1"]{ color:var(--surge-amber); }
+.sg-count{
+  font-size:10px;font-weight:800;letter-spacing:.04em;padding:1px 5px;
+  background:rgba(0,229,255,.16);color:var(--surge-cyan);
+}
+.sg-seg-btn[data-on="1"] .sg-count{ background:rgba(5,7,9,.22);color:var(--surge-void); }
+.sg-act{ display:flex;gap:8px;margin-top:8px;overflow-x:auto;scrollbar-width:none; }
+.sg-act::-webkit-scrollbar{ display:none; }
+.sg-act-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 12px;
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;
+  color:var(--sg-text-2);background:rgba(255,255,255,.04);
+  border:1px solid transparent;cursor:pointer;
+}
+.sg-act-btn[data-on="1"]{
+  color:var(--surge-cyan);border-color:rgba(0,229,255,.45);
+  background:rgba(0,229,255,.10);
+}
+.sg-act-btn[data-accent="amber"]{ color:var(--surge-amber);border-color:rgba(255,158,27,.4); }
+
+/* ── 5 · BOTTOM NAV — active state reads at a glance ───────────────── */
+nav.fixed .sg-nav-btn{ position:relative;justify-content:center; }
+nav.fixed .sg-nav-btn[data-navon="1"]{ color:var(--surge-cyan) !important; }
+nav.fixed .sg-nav-btn[data-navon="1"]::before{
+  content:"";position:absolute;top:-6px;left:22%;right:22%;height:3px;
+  background:var(--surge-cyan);box-shadow:0 0 14px rgba(0,229,255,.7);
+}
+nav.fixed .sg-nav-btn[data-navon="1"] svg{ filter:drop-shadow(0 0 8px rgba(0,229,255,.55)); }
+nav.fixed .sg-nav-btn[data-navon="0"]{ color:var(--surge-steel) !important; }
+
+/* ── 5b · BACKGROUND MOTIF — diagonal speed streaks, not a waveform ──
+   Same single cyan at the same weight; the read is forward motion rather
+   than an oscilloscope trace. Two layers so the rhythm isn't uniform.   */
+html body::before{
+  background-image:
+    repeating-linear-gradient(66deg,
+      rgba(0,229,255,.10) 0 1px, transparent 1px 92px),
+    repeating-linear-gradient(66deg,
+      rgba(0,229,255,.05) 0 2px, transparent 2px 31px) !important;
+  background-size:auto !important;
+  background-repeat:repeat !important;
+  animation:sgStreaks 22s linear infinite !important;
+}
+@keyframes sgStreaks{ to{ background-position:-276px -620px, -138px -310px } }
+@media (prefers-reduced-motion:reduce){ html body::before{ animation:none !important; } }
+
+/* ── 6 · MEDIA + MODALS ────────────────────────────────────────────── */
+.aa-wall img{ transition:transform var(--sg-t),box-shadow var(--sg-t); }
+.aa-wall img:active{ transform:scale(.98); }
+@media (hover:hover){ .aa-wall img:hover{ box-shadow:0 0 0 1px rgba(0,229,255,.5),0 0 30px rgba(0,229,255,.2); } }
+
+@media (prefers-reduced-motion:reduce){
+  .jh-srow.active::after,.jh-lbrow.r1::after{ animation:none !important; }
+  main .jh-srow,main .jh-lbrow,main .jh-panel,.sg-bump{ animation:none !important; }
+  .sg-ripple{ display:none !important; }
+}
+</style>
+
+<script>
+/* Presentational only: press ripple + a bump on any number that changes.
+   Nothing here reads or writes app state. */
+(function(){
+  var reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
+  if (reduce) return;
+
+  document.addEventListener("pointerdown", function(e){
+    var t = e.target.closest && e.target.closest("button,[role='button'],.jh-srow,.jh-lbrow,.jh-mock-row,.jh-mock-sess,.sg-act-btn,.sg-seg-btn");
+    if (!t) return;
+    var r = document.createElement("span");
+    r.className = "sg-ripple";
+    r.style.left = e.clientX + "px";
+    r.style.top  = e.clientY + "px";
+    document.body.appendChild(r);
+    setTimeout(function(){ r.remove(); }, 480);
+  }, { passive: true });
+
+  // Bump the element whose text just changed (points, scores, counts).
+  var boot = Date.now();
+  var mo = new MutationObserver(function(muts){
+    if (Date.now() - boot < 1500) return;   // ignore first paint
+    muts.forEach(function(m){
+      var el = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+      if (!el || !el.classList) return;
+      if (!/^[\d\s.,:+\-–]+$/.test((el.textContent || "").trim())) return;
+      if (el.closest("input,textarea,nav")) return;
+      el.classList.remove("sg-bump");
+      void el.offsetWidth;
+      el.classList.add("sg-bump");
+      setTimeout(function(){ el.classList.remove("sg-bump"); }, 460);
+    });
+  });
+  var start = function(){
+    var root = document.getElementById("root");
+    if (!root) return setTimeout(start, 400);
+    mo.observe(root, { subtree: true, characterData: true });
+  };
+  start();
+})();
+</script>
+
+<style>
+/* ══ SESSION SCREEN — SCALE + PRESENCE ══════════════════════════════
+   The session overlay carried the whole night at 11–14px on identical
+   plates. Same palette and same rising-bar language, turned up: bigger
+   type, a real heading tier per group, and scores that read across a
+   court. Scoped to the session overlay so nothing else shifts.     */
+.fixed.inset-0.z-40{ --sg-s:1; }
+
+/* base + secondary text */
+.fixed.inset-0.z-40 .text-sm{ font-size:15px !important; line-height:1.35 !important; }
+.fixed.inset-0.z-40 .text-xs{ font-size:13px !important; line-height:1.4 !important; }
+.fixed.inset-0.z-40 .text-\[11px\]{ font-size:12.5px !important; line-height:1.45 !important; }
+.fixed.inset-0.z-40 .text-\[10px\]{ font-size:11px !important; letter-spacing:.16em !important; }
+.fixed.inset-0.z-40 .text-\[9px\]{ font-size:11px !important; }
+
+/* session title in the sticky header */
+.fixed.inset-0.z-40 .font-display.text-xl{ font-size:26px !important; line-height:1 !important; }
+
+/* GROUP heading tier — a heading, not another row */
+.fixed.inset-0.z-40 [style*="'wght' 900"][style*="font-size: 20px"],
+.fixed.inset-0.z-40 [style*="'wght' 900"][style*="fontSize: 20"]{
+  font-size:30px !important; letter-spacing:-.01em !important;
+}
+.fixed.inset-0.z-40 [style*="width: 32px"][style*="height: 32px"]{
+  width:44px !important; height:44px !important; font-size:26px !important;
+  background:rgba(0,229,255,.12) !important;
+  border:1px solid rgba(0,229,255,.45) !important;
+  box-shadow:0 0 24px rgba(0,229,255,.18) !important;
+  color:var(--surge-cyan) !important;
+}
+
+/* team rows: thumb-sized, named loud, ranked quietly */
+.fixed.inset-0.z-40 button.w-full.flex.items-center{
+  min-height:56px !important; padding:10px 12px !important;
+  border-bottom:1px solid rgba(92,107,120,.16) !important;
+}
+.fixed.inset-0.z-40 button.w-full.flex.items-center .truncate{
+  font-family:'Archivo',sans-serif !important; font-weight:800 !important;
+  font-size:17px !important; letter-spacing:-.005em !important; color:var(--surge-white) !important;
+}
+/* seed chip */
+.fixed.inset-0.z-40 [style*="min-width: 28px"]{
+  min-width:38px !important; padding:5px 6px !important;
+  font-size:13px !important; font-weight:800 !important; letter-spacing:.04em !important;
+}
+
+/* scores + table numbers read at arm's length */
+.fixed.inset-0.z-40 .font-mono{ font-variant-numeric:tabular-nums; font-size:14px !important; }
+.fixed.inset-0.z-40 table .font-mono,
+.fixed.inset-0.z-40 td,.fixed.inset-0.z-40 th{ font-size:15px !important; }
+.fixed.inset-0.z-40 th{ font-size:11px !important; letter-spacing:.2em !important; color:var(--surge-steel) !important; }
+.fixed.inset-0.z-40 .text-2xl,.fixed.inset-0.z-40 .text-3xl{
+  font-family:'Archivo',sans-serif !important; font-style:italic !important;
+  font-variation-settings:'wdth' 118,'wght' 900 !important;
+}
+.fixed.inset-0.z-40 .text-2xl{ font-size:34px !important; }
+.fixed.inset-0.z-40 .text-3xl{ font-size:42px !important; }
+
+/* qualifying rows in a group table earn the cyan edge; the rest stay steel */
+.fixed.inset-0.z-40 tbody tr:nth-child(-n+2) td:first-child{
+  box-shadow:inset 3px 0 0 var(--surge-cyan);
+}
+.fixed.inset-0.z-40 tbody tr{ border-bottom:1px solid rgba(92,107,120,.14); }
+.fixed.inset-0.z-40 tbody tr td{ padding-top:10px !important; padding-bottom:10px !important; }
+
+/* cards get one tier of separation instead of all reading the same */
+.fixed.inset-0.z-40 [class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
+  padding-top:18px !important; padding-bottom:18px !important;
+}
+/* empty states stop whispering */
+.fixed.inset-0.z-40 .border-dashed{
+  font-size:13px !important; padding:18px !important;
+  border-color:rgba(0,229,255,.22) !important; color:var(--sg-text-2) !important;
+  font-style:normal !important; letter-spacing:.12em !important; text-transform:uppercase !important;
+}
+
+/* bracket cards: the name is the object, the seed is the annotation */
+.fixed.inset-0.z-40 [style*="var(--surface)"] .truncate,
+.fixed.inset-0.z-40 [style*="var(--surface)"] .text-stone-100,
+.fixed.inset-0.z-40 [style*="var(--surface)"] .text-stone-200{
+  font-family:'Archivo',sans-serif !important; font-weight:800 !important; font-size:14px !important;
+}
+
+/* action buttons in the session overlay match the new scale */
+.fixed.inset-0.z-40 button[class*="rounded-lg"]{ letter-spacing:.06em; }
+</style>
 
 </body>
 </html>

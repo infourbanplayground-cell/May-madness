@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/styles.css">
+<script src="_ds/design-system-2a11abc2-9895-4fbd-9f49-c7cfd9e5dd1b/_ds_bundle.js"></script>
+<style>
+  body { margin:0; background:#0A0F14; }
+  a { color:#00E5FF; text-decoration:none; }
+  a:hover { color:#FF9E1B; }
+  @keyframes sgSheen { 0%,72%{transform:translateX(-130%)} 100%{transform:translateX(130%)} }
+  @keyframes sgBar { 0%,100%{opacity:.5} 50%{opacity:1} }
+</style>
+</helmet>
+
+<section style="display:flex;flex-direction:column;gap:22px;padding:40px;background:#0A0F14;font-family:'Archivo',system-ui,sans-serif;">
+  <div style="display:flex;align-items:baseline;gap:14px;">
+    <div style="font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Turn 1 · Enhanced mockups</div>
+    <div style="font-size:13px;color:#9FB0BC;">Session screen (<a href="#1a">1a</a>) and Rankings (<a href="#1b">1b</a>) — same Vol.7 palette, new motifs.</div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:34px;align-items:flex-start;">
+
+    <!-- ══════════ 1a · SESSION ══════════ -->
+    <div id="1a" style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.1em;color:#050709;background:#00E5FF;padding:3px 8px;">1a</span>
+        <span style="font-weight:800;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#9FB0BC;">Session · group stage</span>
+      </div>
+
+      <div style="position:relative;width:390px;background:#050709;overflow:hidden;border:1px solid rgba(0,229,255,.22);">
+        <!-- diagonal streak field -->
+        <div style="position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.10) 0 1px,transparent 1px 92px),repeating-linear-gradient(66deg,rgba(0,229,255,.05) 0 2px,transparent 2px 31px);"></div>
+
+        <!-- header -->
+        <div style="position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(5,7,9,.9);border-bottom:1px solid rgba(0,229,255,.22);">
+          <div style="font-size:20px;color:#9FB0BC;">◀</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Mon 22 Sep · 5:30 PM</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:27px;line-height:1;color:#F4F9FA;">SESSION 6</div>
+              <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:13px;color:#050709;background:#FF9E1B;padding:2px 6px 1px;">2X</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#00E5FF;box-shadow:0 0 10px #00E5FF;"></div>
+            <div style="font-weight:800;font-size:9px;letter-spacing:.2em;color:#9FB0BC;">LIVE</div>
+          </div>
+        </div>
+
+        <!-- segmented destinations -->
+        <div style="position:relative;padding:10px 16px 0;">
+          <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;background:rgba(255,255,255,.04);padding:2px;">
+            <div style="text-align:center;padding:9px 2px;font-weight:800;font-size:12px;letter-spacing:.08em;color:#9FB0BC;">TEAMS</div>
+            <div style="text-align:center;padding:9px 2px;font-weight:800;font-size:12px;letter-spacing:.08em;color:#050709;background:#00E5FF;box-shadow:0 0 24px rgba(0,229,255,.35);">GROUPS</div>
+            <div style="text-align:center;padding:9px 2px;font-weight:800;font-size:12px;letter-spacing:.08em;color:#9FB0BC;">KO</div>
+            <div style="text-align:center;padding:9px 2px;font-weight:800;font-size:12px;letter-spacing:.08em;color:#FF9E1B;">LIST 12/12</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(255,255,255,.04);font-weight:800;font-size:11px;letter-spacing:.14em;color:#9FB0BC;">PHOTOS <span style="color:#00E5FF;">12</span></div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(255,255,255,.04);font-weight:800;font-size:11px;letter-spacing:.14em;color:#9FB0BC;">MVP <span style="color:#00E5FF;">8</span></div>
+            <div style="display:flex;align-items:center;gap:6px;padding:6px 11px;background:rgba(255,255,255,.04);font-weight:800;font-size:11px;letter-spacing:.14em;color:#9FB0BC;">DRAW</div>
+          </div>
+        </div>
+
+        <!-- progress strip: chevron motif + completion ring -->
+        <div style="position:relative;display:flex;align-items:center;gap:14px;margin:14px 16px 0;padding:14px 16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="width:56px;height:56px;flex:0 0 auto;border-radius:50%;background:conic-gradient(#00E5FF 0turn .75turn, rgba(255,255,255,.07) .75turn 1turn);display:grid;place-items:center;">
+            <div style="width:44px;height:44px;border-radius:50%;background:#050709;display:grid;place-items:center;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:17px;color:#00E5FF;">9</div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Group stage</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;line-height:1.05;color:#F4F9FA;margin-top:3px;">9 OF 12 PLAYED</div>
+            <div style="height:8px;margin-top:8px;background:repeating-linear-gradient(90deg,#00E5FF 0 12px,transparent 12px 16px);opacity:.85;"></div>
+          </div>
+        </div>
+
+        <!-- GROUP A card with court-line motif -->
+        <div style="position:relative;margin:14px 16px 0;padding:18px 16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;overflow:hidden;">
+          <!-- court motif -->
+          <div style="position:absolute;right:-40px;top:26px;width:230px;height:150px;border:1.5px solid rgba(0,229,255,.16);pointer-events:none;">
+            <div style="position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:rgba(0,229,255,.16);"></div>
+            <div style="position:absolute;left:0;right:0;top:26%;height:1.5px;background:rgba(0,229,255,.12);"></div>
+            <div style="position:absolute;left:0;right:0;bottom:26%;height:1.5px;background:rgba(0,229,255,.12);"></div>
+          </div>
+          <!-- ghost numeral -->
+          <div style="position:absolute;right:8px;bottom:-26px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:120px;line-height:1;color:rgba(244,249,250,.035);pointer-events:none;">A</div>
+
+          <div style="position:relative;display:flex;align-items:center;gap:12px;">
+            <div style="width:44px;height:44px;display:grid;place-items:center;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.45);box-shadow:0 0 24px rgba(0,229,255,.18);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:26px;color:#00E5FF;">A</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;line-height:1;color:#F4F9FA;">GROUP A</div>
+            <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5C6B78;">3/3</div>
+          </div>
+
+          <div style="position:relative;display:grid;grid-template-columns:1fr 34px 34px 40px;gap:0;margin-top:14px;">
+            <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;padding-bottom:8px;">TEAM</div>
+            <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:center;padding-bottom:8px;">W</div>
+            <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:center;padding-bottom:8px;">GD</div>
+            <div style="font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;text-align:right;padding-bottom:8px;">PTS</div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:11px 0 11px 10px;box-shadow:inset 3px 0 0 #00E5FF;border-top:1px solid rgba(92,107,120,.16);"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#00E5FF;">S1</span><span style="font-weight:800;font-size:16px;color:#F4F9FA;">Sami &amp; Faisal</span></div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#F4F9FA;border-top:1px solid rgba(92,107,120,.16);">3</div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">+8</div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#00E5FF;border-top:1px solid rgba(92,107,120,.16);">9</div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:11px 0 11px 10px;box-shadow:inset 3px 0 0 #00E5FF;border-top:1px solid rgba(92,107,120,.16);"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#00E5FF;">S4</span><span style="font-weight:800;font-size:16px;color:#F4F9FA;">Omar &amp; Talal</span></div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#F4F9FA;border-top:1px solid rgba(92,107,120,.16);">2</div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">+2</div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#00E5FF;border-top:1px solid rgba(92,107,120,.16);">7</div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:11px 0 11px 10px;border-top:1px solid rgba(92,107,120,.16);"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5C6B78;">S5</span><span style="font-weight:800;font-size:16px;color:#9FB0BC;">Yousef &amp; Nadir</span></div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">1</div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">−3</div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">4</div>
+
+            <div style="display:flex;align-items:center;gap:8px;padding:11px 0 11px 10px;border-top:1px solid rgba(92,107,120,.16);"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#5C6B78;">S8</span><span style="font-weight:800;font-size:16px;color:#9FB0BC;">Hamed &amp; Zaid</span></div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">0</div>
+            <div style="display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:15px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">−7</div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#9FB0BC;border-top:1px solid rgba(92,107,120,.16);">1</div>
+          </div>
+
+          <div style="position:relative;display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(92,107,120,.16);">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#00E5FF;">QUALIFY ▶</div>
+            <div style="flex:1;height:2px;background:linear-gradient(90deg,rgba(0,229,255,.5),transparent);"></div>
+          </div>
+        </div>
+
+        <!-- match result: score capsule -->
+        <div style="position:relative;margin:14px 16px 0;padding:16px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#5C6B78,rgba(92,107,120,.06));background-size:3px 100%;background-repeat:no-repeat;">
+          <div style="font-weight:800;font-size:9px;letter-spacing:.34em;text-transform:uppercase;color:#5C6B78;">Group A · Match 3</div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:12px;">
+            <div style="font-weight:800;font-size:15px;color:#F4F9FA;text-align:right;">Sami &amp; Faisal</div>
+            <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(0,229,255,.10);border:1px solid rgba(0,229,255,.4);">
+              <span style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;line-height:1;color:#00E5FF;">6</span>
+              <span style="font-size:16px;color:#5C6B78;">/</span>
+              <span style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;line-height:1;color:#9FB0BC;">3</span>
+            </div>
+            <div style="font-weight:800;font-size:15px;color:#9FB0BC;">Hamed &amp; Zaid</div>
+          </div>
+        </div>
+
+        <!-- bottom nav -->
+        <div style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px;padding:10px 8px 14px;background:#050709;border-top:3px solid #00E5FF;">
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">HOME</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#00E5FF;">SESSIONS</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">RANK</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">PLAYERS</div>
+        </div>
+      </div>
+
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:#9FB0BC;">
+        <li>Court-line watermark + ghost group letter behind each group card</li>
+        <li>Completion ring and a dashed progress rule: the night has a state</li>
+        <li>Qualify edge on the top two rows, greyed-out below the line</li>
+        <li>Scores in a bordered capsule, winner cyan, loser steel</li>
+      </ul>
+    </div>
+
+    <!-- ══════════ 1b · RANKINGS ══════════ -->
+    <div id="1b" style="display:flex;flex-direction:column;gap:12px;width:390px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-family:'JetBrains Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.1em;color:#050709;background:#00E5FF;padding:3px 8px;">1b</span>
+        <span style="font-weight:800;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#9FB0BC;">Rankings · series standings</span>
+      </div>
+
+      <div style="position:relative;width:390px;background:#050709;overflow:hidden;border:1px solid rgba(0,229,255,.22);">
+        <div style="position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(66deg,rgba(0,229,255,.10) 0 1px,transparent 1px 92px),repeating-linear-gradient(66deg,rgba(0,229,255,.05) 0 2px,transparent 2px 31px);"></div>
+
+        <!-- title block with ghost 07 -->
+        <div style="position:relative;padding:22px 16px 16px;overflow:hidden;">
+          <div style="position:absolute;right:-14px;top:-34px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:170px;line-height:1;color:rgba(0,229,255,.06);pointer-events:none;">07</div>
+          <div style="position:relative;font-weight:800;font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:#00E5FF;">Series standings · 48 players</div>
+          <div style="position:relative;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:52px;line-height:.88;color:#F4F9FA;margin-top:8px;">RANKINGS</div>
+          <div style="position:relative;height:3px;margin-top:12px;background:linear-gradient(90deg,#00E5FF,rgba(0,229,255,0));"></div>
+        </div>
+
+        <!-- leader feature card -->
+        <div style="position:relative;margin:0 16px;padding:18px 16px;background:rgba(16,23,31,.96);background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));background-size:3px 100%;background-repeat:no-repeat;overflow:hidden;">
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 38%,rgba(0,229,255,.12) 50%,transparent 62%);transform:translateX(-130%);animation:sgSheen 6s ease-in-out infinite;"></div>
+          <div style="position:absolute;right:10px;top:-18px;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:96px;line-height:1;color:rgba(244,249,250,.04);pointer-events:none;">1</div>
+          <div style="position:relative;display:flex;align-items:center;gap:12px;">
+            <div style="width:50px;height:50px;display:grid;place-items:center;background:rgba(0,229,255,.14);border:1px solid rgba(0,229,255,.5);box-shadow:0 0 26px rgba(0,229,255,.22);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;color:#00E5FF;">1</div>
+            <div style="flex:1 1 auto;min-width:0;">
+              <div style="font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:18px;line-height:1.06;color:#F4F9FA;white-space:nowrap;">SAMI<br>AL BALUSHI</div>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                <span style="white-space:nowrap;font-weight:800;font-size:10px;letter-spacing:.14em;color:#5C6B78;">8 SESSIONS</span>
+                <span style="white-space:nowrap;font-weight:800;font-size:10px;letter-spacing:.14em;color:#00E5FF;">76% WIN</span>
+              </div>
+            </div>
+            <div style="flex:0 0 auto;text-align:right;">
+              <div style="white-space:nowrap;font-style:italic;font-variation-settings:'wdth' 112,'wght' 900;font-size:28px;line-height:.9;color:#00E5FF;">1240</div>
+              <div style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#5C6B78;">PTS</div>
+            </div>
+          </div>
+          <!-- form strip motif -->
+          <div style="position:relative;display:flex;align-items:center;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(92,107,120,.2);">
+            <span style="font-weight:800;font-size:9px;letter-spacing:.28em;color:#5C6B78;">FORM</span>
+            <div style="display:flex;gap:4px;margin-left:4px;">
+              <div style="width:22px;height:6px;background:#00E5FF;"></div>
+              <div style="width:22px;height:6px;background:#00E5FF;"></div>
+              <div style="width:22px;height:6px;background:rgba(255,255,255,.12);"></div>
+              <div style="width:22px;height:6px;background:#00E5FF;"></div>
+              <div style="width:22px;height:6px;background:#00E5FF;"></div>
+            </div>
+            <span style="margin-left:auto;font-weight:800;font-size:9px;letter-spacing:.2em;color:#FF9E1B;">2 TITLES</span>
+          </div>
+        </div>
+
+        <!-- 2nd / 3rd -->
+        <div style="position:relative;display:flex;gap:10px;margin:10px 16px 0;">
+          <div style="flex:1;padding:14px 12px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#C3D0D8,rgba(195,208,216,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;color:#C3D0D8;">2</span><span style="font-weight:800;font-size:14px;color:#F4F9FA;">Omar K.</span></div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:26px;color:#C3D0D8;margin-top:4px;">1105</div>
+          </div>
+          <div style="flex:1;padding:14px 12px;background:rgba(9,14,20,.94);background-image:linear-gradient(180deg,#5C6B78,rgba(92,107,120,.06));background-size:3px 100%;background-repeat:no-repeat;">
+            <div style="display:flex;align-items:baseline;gap:6px;"><span style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;color:#9FB0BC;">3</span><span style="font-weight:800;font-size:14px;color:#F4F9FA;">Talal S.</span></div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:26px;color:#9FB0BC;margin-top:4px;">1032</div>
+          </div>
+        </div>
+
+        <!-- pinned YOU row, amber -->
+        <div style="position:relative;display:flex;align-items:center;gap:12px;margin:14px 16px 0;padding:14px 14px;background:rgba(16,23,31,.96);background-image:linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06));background-size:3px 100%;background-repeat:no-repeat;border:1px solid rgba(255,158,27,.4);">
+          <div style="width:44px;height:44px;display:grid;place-items:center;background:rgba(255,158,27,.12);border:1px solid rgba(255,158,27,.5);font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:20px;color:#FF9E1B;">11</div>
+          <div style="flex:1 1 auto;min-width:0;">
+            <div style="font-weight:800;font-size:9px;letter-spacing:.3em;color:#FF9E1B;">YOU</div>
+            <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:19px;line-height:1.05;color:#F4F9FA;margin-top:2px;">NADIR<br>AL HINAI</div>
+            <div style="display:flex;gap:4px;margin-top:7px;">
+              <div style="width:18px;height:5px;background:#FF9E1B;"></div>
+              <div style="width:18px;height:5px;background:rgba(255,255,255,.12);"></div>
+              <div style="width:18px;height:5px;background:#FF9E1B;"></div>
+              <div style="width:18px;height:5px;background:#FF9E1B;"></div>
+              <div style="width:18px;height:5px;background:rgba(255,255,255,.12);"></div>
+            </div>
+          </div>
+          <div style="flex:0 0 auto;text-align:right;">
+            <div style="font-weight:800;font-size:11px;color:#00E5FF;">▲ 3</div>
+            <div style="white-space:nowrap;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:28px;line-height:1;color:#FF9E1B;margin-top:2px;">742</div>
+          </div>
+        </div>
+
+        <!-- table with proportional points bars -->
+        <div style="position:relative;margin:16px 16px 0;">
+          <div style="display:grid;grid-template-columns:30px 1fr 44px 58px;font-weight:800;font-size:10px;letter-spacing:.2em;color:#5C6B78;padding-bottom:8px;">
+            <div>#</div><div>PLAYER</div><div style="text-align:center;">WIN</div><div style="text-align:right;">PTS</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:30px 1fr 44px 58px;align-items:center;padding:10px 0;border-top:1px solid rgba(92,107,120,.16);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">4</div>
+            <div>
+              <div style="font-weight:800;font-size:15px;color:#F4F9FA;">Faisal Al Riyami</div>
+              <div style="height:4px;margin-top:5px;width:78%;background:linear-gradient(90deg,rgba(0,229,255,.75),rgba(0,229,255,.15));"></div>
+            </div>
+            <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">61%</div>
+            <div style="text-align:right;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#F4F9FA;">968</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:30px 1fr 44px 58px;align-items:center;padding:10px 0;border-top:1px solid rgba(92,107,120,.16);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">5</div>
+            <div>
+              <div style="font-weight:800;font-size:15px;color:#F4F9FA;">Yousef Al Zadjali</div>
+              <div style="height:4px;margin-top:5px;width:71%;background:linear-gradient(90deg,rgba(0,229,255,.7),rgba(0,229,255,.12));"></div>
+            </div>
+            <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">58%</div>
+            <div style="text-align:right;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#F4F9FA;">881</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:30px 1fr 44px 58px;align-items:center;padding:10px 0;border-top:1px solid rgba(92,107,120,.16);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">6</div>
+            <div>
+              <div style="font-weight:800;font-size:15px;color:#F4F9FA;">Hamed Al Lawati</div>
+              <div style="height:4px;margin-top:5px;width:66%;background:linear-gradient(90deg,rgba(0,229,255,.65),rgba(0,229,255,.12));"></div>
+            </div>
+            <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">54%</div>
+            <div style="text-align:right;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#F4F9FA;">834</div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:30px 1fr 44px 58px;align-items:center;padding:10px 0;border-top:1px solid rgba(92,107,120,.16);">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">7</div>
+            <div>
+              <div style="font-weight:800;font-size:15px;color:#F4F9FA;">Zaid Al Harthy</div>
+              <div style="height:4px;margin-top:5px;width:60%;background:linear-gradient(90deg,rgba(0,229,255,.6),rgba(0,229,255,.1));"></div>
+            </div>
+            <div style="text-align:center;font-family:'JetBrains Mono',monospace;font-size:14px;color:#9FB0BC;">50%</div>
+            <div style="text-align:right;font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:22px;color:#F4F9FA;">790</div>
+          </div>
+        </div>
+
+        <!-- prize strip -->
+        <div style="position:relative;display:flex;align-items:center;justify-content:space-between;margin:18px 16px 0;padding:14px 16px;background:#050709;border:1px solid rgba(0,229,255,.4);box-shadow:0 0 30px rgba(0,229,255,.14);">
+          <div style="font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;font-size:20px;color:#00E5FF;">402 OMR</div>
+          <div style="font-weight:800;font-size:10px;letter-spacing:.28em;color:#9FB0BC;">PRIZE POOL · VOL.7</div>
+        </div>
+
+        <div style="position:relative;display:grid;grid-template-columns:repeat(4,1fr);margin-top:18px;padding:10px 8px 14px;background:#050709;border-top:3px solid #00E5FF;">
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">HOME</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">SESSIONS</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#00E5FF;">RANK</div>
+          <div style="text-align:center;font-weight:800;font-size:10px;letter-spacing:.16em;color:#5C6B78;">PLAYERS</div>
+        </div>
+      </div>
+
+      <ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.6;color:#9FB0BC;">
+        <li>Ghost "07" numeral behind the page title — series identity, no new colour</li>
+        <li>Leader gets a feature card with a slow sheen; 2nd/3rd compress to a pair</li>
+        <li>Form strip (last five sessions) replaces a second points number</li>
+        <li>Proportional points bar under each name gives the long list rhythm</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>
