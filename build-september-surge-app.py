@@ -458,6 +458,17 @@ def rebuild_screens(s, report):
     # and BracketEditModal are all untouched: this is rendering, not logic.
     s = replace_fn(s, "BracketTreeView", SCREENS.BRACKET_TREE_FN, report, "SESSION · BRACKET")
 
+    # The player card's header. Bounded in the live stream because the block
+    # carries colours the sweep has already rewritten, so it cannot be matched
+    # as a literal from the Vol.6 source.
+    pa = s.find("      {(() => {\n        const rankRing = rank === 1")
+    if pa < 0:
+        sys.exit("BUILD FAILED: could not find the player card header")
+    pb = s.index("      })()}", pa) + len("      })()}")
+    report.append("  screen PLAYER CARD header (%.0fKB -> %.0fKB)"
+                  % ((pb - pa) / 1024, len(SCREENS.PLAYER_HEAD_NEW) / 1024))
+    s = s[:pa] + "      " + SCREENS.PLAYER_HEAD_NEW + s[pb:]
+
     # Faces on the team rows inside a session.
     if s.count(SCREENS.SESSION_FACES_OLD) != 1:
         sys.exit("BUILD FAILED: session team-row anchor matched %d times"

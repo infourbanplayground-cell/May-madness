@@ -1232,3 +1232,92 @@ BRACKET_TREE_FN = r'''function BracketTreeView({ b, lbl, canScore, setEdit }) {
     </div>
   );
 }'''
+
+# ── PLAYER CARD ────────────────────────────────────────────────────────────
+# Only the header of PlayerDetail is replaced — the canvas's card is simpler
+# than what this app already shows, and swapping it in wholesale would have
+# thrown away the rivalries, badges, loyalty lockout and the WhatsApp card,
+# which are real features and not in the canvas at all. So the head becomes
+# the canvas card (rank and streak chips, the name, three stat tiles, form as
+# a last-8 grid) and everything below it stays.
+#
+# The admin photo-upload control is carried over; it is how the roster's
+# photos get there in the first place.
+PLAYER_HEAD_NEW = r'''{(() => {
+        const form = recentForm(playerId, state.sessions);
+        const dec = entry.stats.groupPlayed + entry.stats.qfReached + entry.stats.sfReached + entry.stats.finalsReached;
+        const wins = entry.stats.groupWins + entry.stats.qfWins + entry.stats.sfWins + entry.stats.finalsWon;
+        const winRate = dec ? Math.round(wins / dec * 100) : 0;
+        const streak = currentStreak(form);
+        const accent = streak >= 3 ? "#FF9E1B" : "#00E5FF";
+        const last8 = form.slice(-8);
+        const STATS = [
+          ["POINTS", entry.totalPts, "#00E5FF"],
+          ["WIN %", winRate + "%", "#F4F9FA"],
+          ["NIGHTS", entry.stats.sessionsPlayed, "#F4F9FA"],
+        ];
+        return <div>
+          {/* photo */}
+          <div style={{position:"relative",width:"100%",height:200,background:"#0A1017",overflow:"hidden",
+               display:"grid",placeItems:"center"}}>
+            {player.photoUrl
+              ? <img src={player.photoUrl} alt={player.name}
+                     style={{width:"100%",height:"100%",objectFit:"cover",objectPosition:"center 28%"}} />
+              : <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+                     fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:64,color:"rgba(159,176,188,.25)"}}>
+                  {(player.name || "?").split(" ").map(x => x[0]).join("").slice(0, 2).toUpperCase()}</div>}
+            {canScore && <label style={{position:"absolute",right:10,bottom:10,width:36,height:36,
+                 display:"grid",placeItems:"center",background:"rgba(0,229,255,.9)",cursor:"pointer"}}>
+              {uploading ? <span style={{fontSize:9,color:"#050709"}}>…</span> : <I.camera size={15} style={{color:"#050709"}} />}
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+            </label>}
+          </div>
+
+          {/* identity */}
+          <div style={{padding:"14px 2px",borderTop:`1px solid ${accent}55`}}>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <div style={{padding:"4px 9px",background:"rgba(255,255,255,.05)",border:`1px solid ${accent}55`,
+                   fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".2em",color:accent}}>RANK {rank}</div>
+              {streak > 0 && <div style={{padding:"4px 9px",background:streak >= 3 ? "rgba(255,158,27,.14)" : "rgba(0,229,255,.12)",
+                   fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".16em",
+                   color:streak >= 3 ? "#FF9E1B" : "#00E5FF"}}>W{streak} STREAK</div>}
+            </div>
+            <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
+                 fontSize:32,lineHeight:.95,color:"#F4F9FA",marginTop:9}}>{player.name.toUpperCase()}</div>
+          </div>
+
+          {/* three tiles */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+            {STATS.map(([label, value, colour]) => (
+              <div key={label} style={{padding:11,background:"rgba(9,14,20,.94)",
+                   backgroundImage:`linear-gradient(180deg,${colour},rgba(92,107,120,.05))`,
+                   backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".2em",color:"#9FB0BC"}}>{label}</div>
+                <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
+                     fontSize:24,lineHeight:1,color:colour,marginTop:5}}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* form */}
+          {last8.length > 0 && <div style={{marginTop:14,padding:14,background:"rgba(9,14,20,.94)",
+               backgroundImage:"linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06))",
+               backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:8}}>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".3em",color:"#00E5FF"}}>
+                FORM · LAST {last8.length}</div>
+              {streak > 0 && <div style={{marginLeft:"auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+                   letterSpacing:".16em",color:accent}}>W{streak}</div>}
+            </div>
+            <div style={{display:"flex",gap:5,marginTop:11}}>
+              {last8.map((r, i) => <div key={i} style={{flex:1,height:30,display:"grid",placeItems:"center",
+                   background:r === "W" ? "rgba(0,229,255,.14)" : "rgba(255,255,255,.03)",
+                   border:`1px solid ${r === "W" ? "rgba(0,229,255,.45)" : "rgba(92,107,120,.3)"}`,
+                   fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:11,
+                   color:r === "W" ? "#00E5FF" : "#9FB0BC"}}>{r}</div>)}
+            </div>
+            <div style={{fontSize:12.5,lineHeight:1.5,color:"#9FB0BC",marginTop:10}}>
+              Most recent on the right. {wins} wins from {dec} decided matches.</div>
+          </div>}
+        </div>;
+      })()}'''
