@@ -1321,3 +1321,115 @@ PLAYER_HEAD_NEW = r'''{(() => {
           </div>}
         </div>;
       })()}'''
+
+# ── 3-GROUP SEEDING FIX ────────────────────────────────────────────────────
+# In a 3-group night with a thirds playoff, tier 3 is [best third, PLAYOFF_TBD]
+# and the code's own comment states the invariant: "the known best third takes
+# seed 7, the still-undecided qualifier seed 8".
+#
+# The rematch guard broke it. grp() returns null for the placeholder — it has
+# no group yet — and the swap loop accepted that null as "compatible with
+# everyone", so whenever seed 2 clashed with the best third the guard swapped
+# the two tier-3 entries. That put the KNOWN best third at seed 8, against the
+# top seed, and the unknown at seed 7.
+#
+# Two things wrong with that. It inverts the documented seeding, giving the
+# best third the hardest draw it could get. And it does not actually fix the
+# clash: the playoff winner can come from seed 2's group too, so the rematch
+# simply reappears once the playoff resolves — the swap hides it rather than
+# resolving it.
+#
+# A slot with no group is therefore not a valid swap partner.
+SEED_GUARD_OLD = '''    for (let k = lo; k < hi; k++) {
+      if (k === y) continue;
+      // Swapping y and k must leave BOTH pairings clash-free.
+      if (grp(seeded[k]) !== gx && grp(seeded[y]) !== grp(seeded[partnerOf(k)])) {'''
+SEED_GUARD_NEW = '''    for (let k = lo; k < hi; k++) {
+      if (k === y) continue;
+      // Never trade places with a slot that has no group yet (the thirds-
+      // playoff winner). It looks like a free fix because an unknown cannot
+      // clash, but it demotes the known best third to seed 8 against the top
+      // seed, and the clash returns anyway if the playoff is won by a team
+      // from that same group.
+      if (!grp(seeded[k])) continue;
+      // Swapping y and k must leave BOTH pairings clash-free.
+      if (grp(seeded[k]) !== gx && grp(seeded[y]) !== grp(seeded[partnerOf(k)])) {'''
+
+# And the "who qualified" panel dropped any id containing TBD, so the seed
+# number belonging to the undecided slot vanished from the list entirely —
+# which is what the owner saw as "position 7 doesn't exist".
+PANEL_OLD = '''        const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
+          const id = m[tk];
+          if (id && !String(id).includes("TBD") && !seen.has(id)) { const r = rankOf(id); if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank, seed: seedByTeam[id] || null }); } }
+        }); };'''
+PANEL_NEW = '''        const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
+          const id = m[tk];
+          if (!id || seen.has(id)) return;
+          // A slot still waiting on the thirds playoff gets a row of its own.
+          // Skipping it silently removed its seed number from the list, so the
+          // panel read 1,2,3,4,5,6,8 and the missing seed looked like a bug in
+          // the draw rather than a match that has not been played yet.
+          if (String(id).includes("TBD")) {
+            seen.add(id);
+            rows.push({ id, g: null, rank: null, seed: seedByTeam[id] || null, pending: true });
+            return;
+          }
+          const r = rankOf(id);
+          if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank, seed: seedByTeam[id] || null }); }
+        }); };'''
+
+
+# The panel's row, taught to render a pending slot. Bounded in the live stream
+# at build time because it carries colours the sweep has already rewritten.
+PANEL_ROW_FROM = '<div className="space-y-1">{rows.map(r => ('
+PANEL_ROW_TO = '))}</div>'
+PANEL_ROW_NEW = """<div className="space-y-1">{rows.map(r => (
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(0,229,255,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #0A0F14" : "2px solid transparent" }}>
+              {r.seed
+                ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#00E5FF" : "#0A0F14", color: "#F4F9FA", border: "1px solid rgba(244,249,250,.14)" }}>{r.seed}</span>
+                : <span style={{ width: 22 }} className="shrink-0" />}
+              {r.pending
+                ? <span className="shrink-0" style={{ minWidth: 30, textAlign: "center", padding: "2px 5px", border: "1px dashed rgba(255,158,27,.5)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 700, color: "#FF9E1B" }}>?</span>
+                : <SeedBadge seed={r.g + r.rank} />}
+              <span className="flex-1 text-xs truncate font-semibold" style={{ color: r.pending ? "#9FB0BC" : "#F4F9FA" }}>
+                {r.pending ? "Winner of the 3rds playoff" : lbl(r.id)}</span>
+              <span className="text-[10px] font-mono uppercase tracking-wide" style={{ color: r.pending ? "#FF9E1B" : "#9FB0BC" }}>
+                {r.pending ? "To be played" : why(r.rank)}</span>
+            </div>
+          ))}</div>"""
+
+# ── AUTO-CLOSE THE NIGHT ───────────────────────────────────────────────────
+# The last score of a session is the final's. When it lands, the session marks
+# itself complete and the MVP is crowned, so nobody has to remember two extra
+# taps while packing up.
+AUTOCLOSE_OLD = '''  const mvpPlayer = state.players.find(p => p.id === session.mvpId);
+  const sessionPhotos = session.photos || [];'''
+AUTOCLOSE_NEW = '''  const mvpPlayer = state.players.find(p => p.id === session.mvpId);
+  const sessionPhotos = session.photos || [];
+
+  // ── When the final is scored, close the night ──
+  // Three guards, each earning its place:
+  //   canScore   — every phone in the club has this session open. Without it
+  //                they would all race to write the same change.
+  //   autoClosed — a latch, so an admin who deliberately re-opens a finished
+  //                session is not overruled a second later by this effect.
+  //   the vote   — crowning is only done from what the vote actually decided.
+  //                No votes means no MVP and voting is left OPEN, because on
+  //                most nights the voting starts after the final is played;
+  //                closing it here would end a vote before it began. A tie at
+  //                the top is left to a human rather than settled by whichever
+  //                key happened to come first.
+  const finalWinner = (session.bracket && session.bracket.final && session.bracket.final.winner) || null;
+  useEffect(() => {
+    if (!canScore || !finalWinner || session.autoClosed) return;
+    updateSession(s => {
+      const next = { ...s, completed: true, autoClosed: true };
+      const tally = Object.entries(s.mvpVotes || {}).sort((a, b) => b[1] - a[1]);
+      const tied = tally.length > 1 && tally[0][1] === tally[1][1];
+      if (tally.length && !s.mvpId && !tied) {
+        next.mvpId = tally[0][0];
+        next.mvpVotingOpen = false;
+      }
+      return next;
+    });
+  }, [canScore, finalWinner, session.autoClosed]);'''

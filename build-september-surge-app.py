@@ -456,6 +456,26 @@ def rebuild_screens(s, report):
     # Cards below it are only the fallback for non-standard sizes, so those are
     # left alone. seedQF, the qualification control, the "who qualified" panel
     # and BracketEditModal are all untouched: this is rendering, not logic.
+    # The night closes itself once the final is scored.
+    if s.count(SCREENS.AUTOCLOSE_OLD) != 1:
+        sys.exit("BUILD FAILED: auto-close anchor matched %d times" % s.count(SCREENS.AUTOCLOSE_OLD))
+    s = s.replace(SCREENS.AUTOCLOSE_OLD, SCREENS.AUTOCLOSE_NEW)
+    report.append("  close  session completes + crowns the MVP when the final is scored")
+
+    # ── 3-group seeding: keep the placeholder out of the rematch guard, and
+    # give it a row in the "who qualified" panel instead of dropping it.
+    for label, o, n in (("guard", SCREENS.SEED_GUARD_OLD, SCREENS.SEED_GUARD_NEW),
+                        ("panel", SCREENS.PANEL_OLD, SCREENS.PANEL_NEW)):
+        if s.count(o) != 1:
+            sys.exit("BUILD FAILED: seeding %s anchor matched %d times" % (label, s.count(o)))
+        s = s.replace(o, n)
+    ra = s.find(SCREENS.PANEL_ROW_FROM)
+    if ra < 0:
+        sys.exit("BUILD FAILED: could not find the seeding panel row")
+    rb = s.index(SCREENS.PANEL_ROW_TO, ra) + len(SCREENS.PANEL_ROW_TO)
+    s = s[:ra] + SCREENS.PANEL_ROW_NEW + s[rb:]
+    report.append("  seed   3-group placeholder pinned to seed 8; panel shows the pending slot")
+
     s = replace_fn(s, "BracketTreeView", SCREENS.BRACKET_TREE_FN, report, "SESSION · BRACKET")
 
     # The player card's header. Bounded in the live stream because the block

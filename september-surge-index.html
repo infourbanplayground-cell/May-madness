@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "adcf0823d6cf";
+  var V = "9f26181c873b";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1654,6 +1654,12 @@ function seedStandardBracket(tiers) {
     const [lo, hi] = bounds[tierOf(y)];
     for (let k = lo; k < hi; k++) {
       if (k === y) continue;
+      // Never trade places with a slot that has no group yet (the thirds-
+      // playoff winner). It looks like a free fix because an unknown cannot
+      // clash, but it demotes the known best third to seed 8 against the top
+      // seed, and the clash returns anyway if the playoff is won by a team
+      // from that same group.
+      if (!grp(seeded[k])) continue;
       // Swapping y and k must leave BOTH pairings clash-free.
       if (grp(seeded[k]) !== gx && grp(seeded[y]) !== grp(seeded[partnerOf(k)])) {
         const t = seeded[y]; seeded[y] = seeded[k]; seeded[k] = t;
@@ -3577,6 +3583,33 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const mvpPlayer = state.players.find(p => p.id === session.mvpId);
   const sessionPhotos = session.photos || [];
+
+  // ── When the final is scored, close the night ──
+  // Three guards, each earning its place:
+  //   canScore   — every phone in the club has this session open. Without it
+  //                they would all race to write the same change.
+  //   autoClosed — a latch, so an admin who deliberately re-opens a finished
+  //                session is not overruled a second later by this effect.
+  //   the vote   — crowning is only done from what the vote actually decided.
+  //                No votes means no MVP and voting is left OPEN, because on
+  //                most nights the voting starts after the final is played;
+  //                closing it here would end a vote before it began. A tie at
+  //                the top is left to a human rather than settled by whichever
+  //                key happened to come first.
+  const finalWinner = (session.bracket && session.bracket.final && session.bracket.final.winner) || null;
+  useEffect(() => {
+    if (!canScore || !finalWinner || session.autoClosed) return;
+    updateSession(s => {
+      const next = { ...s, completed: true, autoClosed: true };
+      const tally = Object.entries(s.mvpVotes || {}).sort((a, b) => b[1] - a[1]);
+      const tied = tally.length > 1 && tally[0][1] === tally[1][1];
+      if (tally.length && !s.mvpId && !tied) {
+        next.mvpId = tally[0][0];
+        next.mvpVotingOpen = false;
+      }
+      return next;
+    });
+  }, [canScore, finalWinner, session.autoClosed]);
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto screen-bg">
       <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 flex items-center justify-between gap-3" style={{ background: "rgba(10,10,10,0.96)" }}>
@@ -4711,7 +4744,18 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         const seen = new Set(); const rows = [];
         const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
           const id = m[tk];
-          if (id && !String(id).includes("TBD") && !seen.has(id)) { const r = rankOf(id); if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank, seed: seedByTeam[id] || null }); } }
+          if (!id || seen.has(id)) return;
+          // A slot still waiting on the thirds playoff gets a row of its own.
+          // Skipping it silently removed its seed number from the list, so the
+          // panel read 1,2,3,4,5,6,8 and the missing seed looked like a bug in
+          // the draw rather than a match that has not been played yet.
+          if (String(id).includes("TBD")) {
+            seen.add(id);
+            rows.push({ id, g: null, rank: null, seed: seedByTeam[id] || null, pending: true });
+            return;
+          }
+          const r = rankOf(id);
+          if (r) { seen.add(id); rows.push({ id, g: r.g, rank: r.rank, seed: seedByTeam[id] || null }); }
         }); };
         (b.qf || []).forEach(collect); (b.r16 || []).forEach(collect); collect(b.thirdsPlayoff);
         if (!rows.length) return null;
@@ -4729,13 +4773,17 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
             {top && <> Top seed plays the lowest (1 v 8). <span className="text-cyan-300 font-bold">#1 seed: {lbl(top.id)}.</span></>}
           </div>
           <div className="space-y-1">{rows.map(r => (
-            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(255,158,27,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #0A0F14" : "2px solid transparent" }}>
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(0,229,255,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #0A0F14" : "2px solid transparent" }}>
               {r.seed
                 ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#00E5FF" : "#0A0F14", color: "#F4F9FA", border: "1px solid rgba(244,249,250,.14)" }}>{r.seed}</span>
                 : <span style={{ width: 22 }} className="shrink-0" />}
-              <SeedBadge seed={r.g + r.rank} />
-              <span className="flex-1 text-xs text-stone-200 truncate font-semibold">{lbl(r.id)}</span>
-              <span className="text-[10px] text-stone-400 font-mono uppercase tracking-wide">{why(r.rank)}</span>
+              {r.pending
+                ? <span className="shrink-0" style={{ minWidth: 30, textAlign: "center", padding: "2px 5px", border: "1px dashed rgba(255,158,27,.5)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 700, color: "#FF9E1B" }}>?</span>
+                : <SeedBadge seed={r.g + r.rank} />}
+              <span className="flex-1 text-xs truncate font-semibold" style={{ color: r.pending ? "#9FB0BC" : "#F4F9FA" }}>
+                {r.pending ? "Winner of the 3rds playoff" : lbl(r.id)}</span>
+              <span className="text-[10px] font-mono uppercase tracking-wide" style={{ color: r.pending ? "#FF9E1B" : "#9FB0BC" }}>
+                {r.pending ? "To be played" : why(r.rank)}</span>
             </div>
           ))}</div>
         </Card>;
