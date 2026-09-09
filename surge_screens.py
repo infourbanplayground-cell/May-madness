@@ -966,7 +966,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
           <div>
             <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
-            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points and knockout seeding both count your best 3 group results, and this group only plays {plays} — so every team in it gets a notional 6&ndash;0 bye win. The draw costs nobody points or seeding. The table below still shows real matches only.</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Your best 3 group results count, and this group only plays {plays} — so every team in it carries a notional 6&ndash;0 bye win, marked +BYE below. It counts the same in the table, in your series points and in the knockout seeding, so the draw costs nobody anything.</div>
           </div>
         </div>;
       })()}
@@ -1042,9 +1042,15 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
                            fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,
                            color:q ? "#00E5FF" : "#9FB0BC"}}>{c}</div>)}
                     </div>
-                    <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
-                         color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                      {isTop && <span style={{color:"#00E5FF",marginRight:4}}>&#9650;</span>}{lbl(r.team)}</div>
+                    <div style={{minWidth:0,display:"flex",alignItems:"center",gap:6}}>
+                      <span style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
+                           color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                        {isTop && <span style={{color:"#00E5FF",marginRight:4}}>&#9650;</span>}{lbl(r.team)}</span>
+                      {r.byes > 0 && <span title="Notional 6-0 bye — this group is too small to play three matches"
+                           style={{flex:"0 0 auto",padding:"1px 5px",background:"rgba(255,158,27,.14)",
+                                   border:"1px solid rgba(255,158,27,.4)",fontFamily:"'JetBrains Mono',monospace",
+                                   fontSize:9,fontWeight:700,color:"#FF9E1B"}}>+BYE</span>}
+                    </div>
                   </div>
                   <div style={{...cell, display:"grid",placeItems:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:"#F4F9FA"}}>{r.wins}</div>
                   <div style={{...cell, display:"grid",placeItems:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"#9FB0BC"}}>{r.gd > 0 ? "+" : ""}{r.gd}</div>
@@ -1121,7 +1127,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
         <div className="text-[11px] leading-relaxed space-y-1" style={{color:"#9FB0BC"}}>
           <div><span className="font-bold" style={{color:"#F4F9FA"}}>Ranked by:</span> Wins › Game difference (GD) › Games won › Head-to-head. (Most wins first — not total points.)</div>
           <div><span className="font-bold" style={{color:"#F4F9FA"}}>Points:</span> Win <span className="font-mono" style={{color:"#00E5FF"}}>+3</span> · Tiebreak loss <span className="font-mono">+2</span> · Close loss <span className="font-mono">+1</span> · Blowout loss <span className="font-mono">0</span></div>
-          <div><span className="font-bold" style={{color:"#F4F9FA"}}>Series points:</span> this table counts every match played. For the series leaderboard only, each team's best 3 group results count — so a 5-team group drops its lowest game and cannot out-earn a group of 4. Knockout and playoff matches never count as group games.</div>
+          <div><span className="font-bold" style={{color:"#F4F9FA"}}>Series points:</span> each team's best 3 group results count, so a 5-team group drops its lowest game and cannot out-earn a group of 4. A group too small to play 3 gets notional 6&ndash;0 byes instead, marked <span style={{color:"#FF9E1B"}}>+BYE</span> above — they count here, in your series points and in the knockout seeding alike, so the draw costs nobody. Knockout and playoff matches never count as group games.</div>
         </div>
       </Card>}
 
@@ -1536,3 +1542,30 @@ SEEDNORM_NEW = '''  // Seed on the same results the series points count: best
   // results" for both the leaderboard and the bracket.
   const rows = teams.map(team => {
     const best = teamGroupResults(session, team.id).counted;'''
+
+# ── THE BYE APPEARS IN THE GROUP TABLE TOO ─────────────────────────────────
+# Owner's correction, and a fair one: the bye affects the points, so a table
+# that omitted it was showing a PTS figure that is not what the player earns.
+#
+# The bye is now first-class in all three places that read a team's record —
+# the group table, the series points and the knockout seeding — so there is one
+# number, not three. Each row of an undersized group carries +1 win, +3 points
+# and a 6-0 game difference, and the row says so rather than leaving a player
+# to wonder why the count exceeds the matches they remember playing.
+#
+# Order within the group is untouched: every team in the group gets the same
+# bye, so top-of-group and who qualifies are exactly as before.
+GROUPTABLE_OLD = '''    return { team, pts, wins, played, gf, ga, gd: gf - ga };
+  });
+  const h2h = {};'''
+GROUPTABLE_NEW = '''    // An undersized group cannot offer GROUP_COUNTED_GAMES matches, so each of
+    // its teams carries notional 6-0 bye wins to make up the difference —
+    // the same ones the series points and the seeding count. Awarded only to a
+    // team that has actually played, so a group that never took the court
+    // banks nothing.
+    const gSize = teams.length;
+    const byes = played > 0 ? Math.max(0, GROUP_COUNTED_GAMES - Math.max(0, gSize - 1)) : 0;
+    if (byes) { pts += 3 * byes; wins += byes; played += byes; gf += 6 * byes; }
+    return { team, pts, wins, played, gf, ga, gd: gf - ga, byes };
+  });
+  const h2h = {};'''

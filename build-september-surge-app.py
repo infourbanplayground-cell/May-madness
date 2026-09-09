@@ -463,6 +463,13 @@ def rebuild_screens(s, report):
     s = s.replace(SCREENS.SEEDNORM_OLD, SCREENS.SEEDNORM_NEW)
     report.append("  bye    counts for knockout seeding as well as points")
 
+    # ...and it shows in the group table, so the PTS column is the number the
+    # player actually earns.
+    if s.count(SCREENS.GROUPTABLE_OLD) != 1:
+        sys.exit("BUILD FAILED: group-table anchor matched %d times" % s.count(SCREENS.GROUPTABLE_OLD))
+    s = s.replace(SCREENS.GROUPTABLE_OLD, SCREENS.GROUPTABLE_NEW)
+    report.append("  bye    shown in the group table (one number everywhere)")
+
     # A group of 3 tops each team up with a 6-0 bye for series points.
     if s.count(SCREENS.GHOST_OLD) != 1:
         sys.exit("BUILD FAILED: ghost-bye anchor matched %d times" % s.count(SCREENS.GHOST_OLD))
