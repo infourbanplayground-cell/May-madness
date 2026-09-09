@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "9f26181c873b";
+  var V = "245b94791192";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1522,7 +1522,17 @@ function teamGroupResults(session, teamId) {
   });
   const playedActual = out.length;
   out.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
-  return { all: out, counted: out.slice(0, GROUP_COUNTED_GAMES), playedActual };
+  // A group too small to offer GROUP_COUNTED_GAMES matches tops each of its
+  // teams up with notional 6-0 bye wins, so the draw cannot cost a player
+  // points. Appended after the sort, so a ghost can only ever fill a slot no
+  // real result reached — and only for a team that actually played.
+  const gTeam = (session.teams || []).find(t => t.id === teamId);
+  const gSize = gTeam ? (session.teams || []).filter(t => t.group === gTeam.group).length : 0;
+  const ghosts = out.length > 0 ? Math.max(0, GROUP_COUNTED_GAMES - Math.max(0, gSize - 1)) : 0;
+  const withByes = ghosts
+    ? out.concat(Array.from({ length: ghosts }, () => ({ pts: 3, w: 1, gf: 6, ga: 0, bye: true })))
+    : out;
+  return { all: out, counted: withByes.slice(0, GROUP_COUNTED_GAMES), playedActual, byes: ghosts };
 }
 
 // GROUP TABLE — every match played counts. This is the real standing and it is
@@ -4130,6 +4140,22 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
 
   return (
     <div className="space-y-4">
+      {(() => {
+        // Say it on the screen, so nobody wonders where the points came from.
+        const small = groups.filter(x => {
+          const n = (session.teams || []).filter(t => t.group === x).length;
+          return n > 0 && n <= GROUP_COUNTED_GAMES;
+        });
+        if (!small.length) return null;
+        const plays = Math.max(0, (session.teams || []).filter(t => t.group === small[0]).length - 1);
+        return <div className="flex gap-2.5 p-3" style={{ background:"rgba(0,229,255,.08)", border:"1px solid rgba(0,229,255,.35)" }}>
+          <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
+          <div>
+            <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points count your best 3 group results and this group only plays {plays}, so every team in it gets a notional 6&ndash;0 bye win — the draw costs nobody points. The table below and the knockout seeding both use real matches only.</div>
+          </div>
+        </div>;
+      })()}
       {isUneven && (
         <div className="flex gap-2.5 p-3" style={{ background:"rgba(255,158,27,.10)", border:"1px solid rgba(255,158,27,.35)" }}>
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#FF9E1B" }} />

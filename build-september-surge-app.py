@@ -456,6 +456,12 @@ def rebuild_screens(s, report):
     # Cards below it are only the fallback for non-standard sizes, so those are
     # left alone. seedQF, the qualification control, the "who qualified" panel
     # and BracketEditModal are all untouched: this is rendering, not logic.
+    # A group of 3 tops each team up with a 6-0 bye for series points.
+    if s.count(SCREENS.GHOST_OLD) != 1:
+        sys.exit("BUILD FAILED: ghost-bye anchor matched %d times" % s.count(SCREENS.GHOST_OLD))
+    s = s.replace(SCREENS.GHOST_OLD, SCREENS.GHOST_NEW)
+    report.append("  bye    undersized groups get a 6-0 bye (series points only)")
+
     # The night closes itself once the final is scored.
     if s.count(SCREENS.AUTOCLOSE_OLD) != 1:
         sys.exit("BUILD FAILED: auto-close anchor matched %d times" % s.count(SCREENS.AUTOCLOSE_OLD))

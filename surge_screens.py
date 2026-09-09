@@ -954,6 +954,22 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
 
   return (
     <div className="space-y-4">
+      {(() => {
+        // Say it on the screen, so nobody wonders where the points came from.
+        const small = groups.filter(x => {
+          const n = (session.teams || []).filter(t => t.group === x).length;
+          return n > 0 && n <= GROUP_COUNTED_GAMES;
+        });
+        if (!small.length) return null;
+        const plays = Math.max(0, (session.teams || []).filter(t => t.group === small[0]).length - 1);
+        return <div className="flex gap-2.5 p-3" style={{ background:"rgba(0,229,255,.08)", border:"1px solid rgba(0,229,255,.35)" }}>
+          <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
+          <div>
+            <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Series points count your best 3 group results and this group only plays {plays}, so every team in it gets a notional 6&ndash;0 bye win — the draw costs nobody points. The table below and the knockout seeding both use real matches only.</div>
+          </div>
+        </div>;
+      })()}
       {isUneven && (
         <div className="flex gap-2.5 p-3" style={{ background:"rgba(255,158,27,.10)", border:"1px solid rgba(255,158,27,.35)" }}>
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#FF9E1B" }} />
@@ -1433,3 +1449,66 @@ AUTOCLOSE_NEW = '''  const mvpPlayer = state.players.find(p => p.id === session.
       return next;
     });
   }, [canScore, finalWinner, session.autoClosed]);'''
+
+# ── GROUP OF 3 · GHOST BYE ─────────────────────────────────────────────────
+# A group of 3 gives each team only 2 matches, but series points count your
+# best 3 group results — so that group could never reach the cap and every
+# player in it lost up to 3 points (6 on a 2x night) purely for how the draw
+# fell. Each team in an undersized group now receives a notional 6-0 bye win
+# to bring it up to three counted results, the same device equalizeThirds
+# already uses to compare thirds across groups of different sizes.
+#
+# Three deliberate limits:
+#
+#   · The ghost lands in `counted` only, never in `all`. `all` is what
+#     calcGroupStandingsNormalized reads to seed the bracket, and that path
+#     ALREADY equalises, by cutting every group to the smallest group's match
+#     count. A 6-0 would sort to the top and take one of those slots, so a
+#     group-of-3 team would be seeded on one real result plus a free win while
+#     a group-of-4 team is seeded on two real ones. The two mechanisms would
+#     double-count, in opposite directions.
+#
+#   · Wins, matches played and win rate are untouched. They are counted in a
+#     separate loop over real matches, so nobody is credited with a match they
+#     did not play — only the points are made whole.
+#
+#   · You have to turn up. A team with no played matches gets no ghosts,
+#     otherwise a group that never took the court would bank 9 points.
+GHOST_OLD = '''  const playedActual = out.length;
+  out.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+  return { all: out, counted: out.slice(0, GROUP_COUNTED_GAMES), playedActual };'''
+GHOST_NEW = '''  const playedActual = out.length;
+  out.sort((a, b) => b.pts - a.pts || (b.gf - b.ga) - (a.gf - a.ga) || b.gf - a.gf);
+  // A group too small to offer GROUP_COUNTED_GAMES matches tops each of its
+  // teams up with notional 6-0 bye wins, so the draw cannot cost a player
+  // points. Appended after the sort, so a ghost can only ever fill a slot no
+  // real result reached — and only for a team that actually played.
+  const gTeam = (session.teams || []).find(t => t.id === teamId);
+  const gSize = gTeam ? (session.teams || []).filter(t => t.group === gTeam.group).length : 0;
+  const ghosts = out.length > 0 ? Math.max(0, GROUP_COUNTED_GAMES - Math.max(0, gSize - 1)) : 0;
+  const withByes = ghosts
+    ? out.concat(Array.from({ length: ghosts }, () => ({ pts: 3, w: 1, gf: 6, ga: 0, bye: true })))
+    : out;
+  return { all: out, counted: withByes.slice(0, GROUP_COUNTED_GAMES), playedActual, byes: ghosts };'''
+
+# And say so on the screen, so nobody wonders where the points came from.
+GHOST_NOTE_OLD = '''      {isUneven && ('''
+GHOST_NOTE_NEW = '''      {(() => {
+        const small = groups.filter(x => {
+          const n = (session.teams || []).filter(t => t.group === x).length;
+          return n > 0 && n < GROUP_COUNTED_GAMES + 1;
+        });
+        if (!small.length) return null;
+        return <div className="flex gap-2.5 p-3" style={{ background:"rgba(0,229,255,.08)", border:"1px solid rgba(0,229,255,.35)" }}>
+          <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#00E5FF" }} />
+          <div>
+            <div className="text-xs font-bold" style={{ color:"#00E5FF" }}>Bye awarded · group {small.join(" and ")}</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>
+              Series points count your best 3 group results, and this group only plays {Math.max(0, (session.teams || []).filter(t => t.group === small[0]).length - 1)}.
+              Every team in it gets a notional 6&ndash;0 bye win to make up the difference, so the draw costs nobody points.
+              The table below and the knockout seeding both use real matches only.
+            </div>
+          </div>
+        </div>;
+      })()}
+      {isUneven && ('''
