@@ -95,9 +95,17 @@ HOME_FN = r'''function DashboardView({ state, leaderboard, setTab, setOpenSessio
              color:"rgba(0,229,255,.06)",pointerEvents:"none"}}>07</div>
         <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
              letterSpacing:".34em",color:"#00E5FF"}}>MON &amp; WED · 5:30 PM · ALL SEPTEMBER</div>
-        <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
-             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:46,lineHeight:.9,
-             color:"#F4F9FA",marginTop:10}}>RIDE THE<br /><span style={{color:"#00E5FF"}}>SURGE.</span></div>
+        {/* The lockup, back in the hero. The canvas set the volume in type
+            alone; the mark is the brand and it carries the volume better than
+            a headline does, so the headline steps down to a tagline under it. */}
+        <picture>
+          <source type="image/webp" srcSet="assets/surge-lockup.webp" />
+          <img className="surge-lockup-img" src="assets/surge-lockup.png" alt="September Surge"
+               style={{position:"relative",display:"block",width:"100%",maxWidth:330,margin:"12px auto 0"}} />
+        </picture>
+        <div style={{position:"relative",textAlign:"center",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:22,lineHeight:1,
+             color:"#F4F9FA",marginTop:10,letterSpacing:".02em"}}>RIDE <span style={{color:"#00E5FF"}}>THE SURGE.</span></div>
         <div style={{position:"relative",display:"flex",gap:8,marginTop:16}}>
           <div style={{flex:1,padding:"10px 12px",background:"rgba(0,229,255,.08)",border:"1px solid rgba(0,229,255,.3)"}}>
             <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".22em",color:"#9FB0BC"}}>PRIZE POOL</div>
@@ -177,6 +185,7 @@ HOME_FN = r'''function DashboardView({ state, leaderboard, setTab, setOpenSessio
                    border:`1px solid ${lead ? "rgba(0,229,255,.5)" : "rgba(92,107,120,.35)"}`,
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                    fontSize:20,lineHeight:1,color:lead ? "#00E5FF" : "#9FB0BC"}}>{i + 1}</div>
+              <Avatar player={e.player} size={34} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:16,color:"#F4F9FA",
                      whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.player.name}</div>
@@ -329,11 +338,15 @@ RANK_FN = r'''function LeaderboardView({ leaderboard, state, setOpenPlayerId, me
           {mv && <span style={{fontSize:9,color:mv.up ? "#00E5FF" : "#FF9E1B"}}>{mv.up ? "▲" : "▼"}</span>}
         </div>
         <div onClick={() => setOpenPlayerId(e.player.id)}
-             style={{cursor:"pointer",padding:"9px 0",borderTop:"1px solid rgba(92,107,120,.16)",minWidth:0}}>
+             style={{cursor:"pointer",padding:"9px 0",borderTop:"1px solid rgba(92,107,120,.16)",minWidth:0,
+                     display:"flex",alignItems:"center",gap:9}}>
+          <Avatar player={e.player} size={28} />
+          <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:15,color:"#F4F9FA",
                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.player.name}</div>
           <div style={{height:4,marginTop:5,width:`${Math.max(4, Math.round(ptsOf(e) / topPts * 100))}%`,
                background:"linear-gradient(90deg,rgba(0,229,255,.7),rgba(0,229,255,.12))"}} />
+          </div>
         </div>
         <div onClick={() => setOpenPlayerId(e.player.id)}
              style={{cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
@@ -403,6 +416,7 @@ RANK_FN = r'''function LeaderboardView({ leaderboard, state, setOpenPlayerId, me
                    background:"rgba(0,229,255,.14)",border:"1px solid rgba(0,229,255,.5)",
                    boxShadow:"0 0 26px rgba(0,229,255,.22)",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
                    fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:22,color:"#00E5FF"}}>1</div>
+              <Avatar player={leader.player} size={40} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
                      fontSize:19,lineHeight:1.05,color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -443,6 +457,7 @@ RANK_FN = r'''function LeaderboardView({ leaderboard, state, setOpenPlayerId, me
                    background:"rgba(255,158,27,.12)",border:"1px solid rgba(255,158,27,.5)",
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                    fontSize:18,color:"#FF9E1B"}}>{mi + 1}</div>
+              <Avatar player={e.player} size={36} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".3em",color:"#FF9E1B"}}>YOU</span>
@@ -609,3 +624,289 @@ SESSIONS_FN = r'''function SessionsView({ state, update, setOpenSessionId, isAdm
     </div>
   );
 }'''
+
+
+# ── Faces on the team rows inside a session ────────────────────────────────
+# Two overlapping 26px avatars read as "a pair" at a glance, which is what a
+# team is here. Applied to TeamsTab in the session overlay.
+SESSION_FACES_OLD = """                <div className="flex-1 min-w-0"><div className="text-sm text-stone-100 truncate">{p1?.name || "?"} & {p2?.name || "?"}</div></div>"""
+SESSION_FACES_NEW = """                <span className="flex items-center shrink-0" style={{ marginRight: 2 }}>
+                  {p1 && <Avatar player={p1} size={26} />}
+                  {p2 && <span style={{ marginLeft: -6 }}><Avatar player={p2} size={26} /></span>}
+                </span>
+                <div className="flex-1 min-w-0"><div className="text-sm text-stone-100 truncate">{p1?.name || "?"} & {p2?.name || "?"}</div></div>"""
+
+
+# ── The appended CSS layer and its companion script ────────────────────────
+# Held here rather than inside the build script: they are long, multi-line,
+# and were previously kept as one-line escaped literals, which is how a
+# later edit came to inject raw CSS into the middle of a string and break
+# the build outright.
+UX_LAYER = """
+
+/* ══ 9 · UX REFINEMENT LAYER (Vol.7, second pass) ═══════════════════════
+   Applied from the UI/UX enhancement bundle. Visual only: no scoring, no
+   API, no routing. Three things from that bundle were deliberately NOT
+   taken, and are recorded here so the next volume does not "restore" them:
+
+     · the session tab-bar rebuild (4-up grid + action row) — an IA change,
+       and the owner chose to keep the single scrolling chip row;
+     · every `table` / `tbody` / `td` / `th` rule — this app has no <table>
+       anywhere; group standings are divs, so those rules matched nothing;
+     · `tbody tr:nth-child(-n+2)` as "the qualifiers" — qualification here
+       is 1, 2 or 4 per group, or top-2-plus-best-thirds, or all thirds.
+       Rebuilt below against the real rule instead.
+   ────────────────────────────────────────────────────────────────────── */
+
+:root{
+  --sg-plate-1:rgba(9,14,20,.94);
+  --sg-plate-2:rgba(16,23,31,.96);
+  --sg-text-2:#9FB0BC;            /* secondary prose — 4.5:1 on the base */
+  --sg-hit:44px;
+  --sg-t:170ms cubic-bezier(.2,.7,.3,1);
+}
+
+/* ── 9.1 HIERARCHY ─────────────────────────────────────────────────── */
+.text-stone-400,.text-stone-500,[class*="bg-stone-9"] .text-stone-400,
+[class*="bg-stone-9"] .text-stone-500{ color:var(--sg-text-2) !important; }
+.text-stone-600{ color:#7C8B98 !important; }
+
+.jh-panel,[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
+  padding-top:16px !important; padding-bottom:16px !important;
+  padding-right:16px !important;
+  background-color:var(--sg-plate-1) !important;
+}
+.jh-panel .jh-mock-row,.jh-panel .jh-mock-sess,
+[class*="bg-stone-9"] [class*="bg-stone-9"]{
+  padding-top:11px !important; padding-bottom:11px !important;
+}
+
+label,.uppercase.tracking-wider,.uppercase.tracking-wide{
+  font-family:'Archivo',sans-serif !important; font-style:normal !important;
+  font-weight:800 !important; letter-spacing:.2em !important;
+  color:var(--surge-steel) !important;
+}
+.font-mono,.sg-top-pts,.sg-thin-pts{ font-variant-numeric:tabular-nums; }
+.jh-sec-title{ margin-bottom:14px !important; }
+
+/* ── 9.2 ENERGY ─────────────────────────────────────────────────────
+   Retargeted. The bundle aimed these at .jh-srow / .jh-lbrow, which this
+   build stopped using when RANK was rebuilt to the design language —
+   they matched nothing. The real hooks are the classes below.        */
+.sg-top{ position:relative; }
+.sg-top[data-lead="1"]{ overflow:hidden; }
+.sg-top[data-lead="1"]::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(105deg,transparent 38%,rgba(0,229,255,.10) 50%,transparent 62%);
+  transform:translateX(-120%);animation:sgSheen 6s ease-in-out infinite;
+}
+@keyframes sgSheen{ 0%,72%{transform:translateX(-120%)} 100%{transform:translateX(120%)} }
+
+.jh-mock-sess[data-live="1"]{
+  background-color:rgba(0,229,255,.07) !important;
+  box-shadow:inset 0 0 0 1px rgba(0,229,255,.22) !important;
+}
+
+button[style*="00E5FF"]{
+  background-image:linear-gradient(100deg,rgba(255,255,255,.22),transparent 46%) !important;
+  transition:transform var(--sg-t),box-shadow var(--sg-t),filter var(--sg-t) !important;
+}
+
+/* ── 9.3 FEEDBACK — every tap answers ──────────────────────────────── */
+button,[role="button"],.jh-mock-row,.jh-mock-sess,.jh-chipbtn,.sg-top,.sg-thin{
+  transition:transform var(--sg-t),background-color var(--sg-t),
+             box-shadow var(--sg-t),color var(--sg-t),opacity var(--sg-t);
+  -webkit-tap-highlight-color:transparent;
+}
+button:active,[role="button"]:active,.jh-chipbtn:active{ transform:scale(.955); }
+.jh-mock-row:active,.jh-mock-sess:active,.sg-top:active,.sg-thin:active{
+  transform:scale(.99);background-color:rgba(0,229,255,.10) !important;
+}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,
+textarea:focus-visible{ outline:2px solid var(--surge-cyan) !important;outline-offset:2px !important; }
+nav.fixed button{ min-height:var(--sg-hit); }
+
+/* a value that just changed says so. No display change: the bundle set
+   display:inline-block here, which would have collapsed any flex or grid
+   child it landed on, and every number in this app is one. */
+@keyframes sgBump{ 0%{transform:none} 34%{transform:scale(1.16);filter:brightness(1.5)} 100%{transform:none} }
+.sg-bump{ animation:sgBump 420ms var(--ease-out); }
+
+.sg-ripple{
+  position:fixed;z-index:9999;pointer-events:none;border-radius:50%;
+  width:16px;height:16px;margin:-8px 0 0 -8px;
+  background:radial-gradient(circle,rgba(0,229,255,.5),rgba(0,229,255,0) 70%);
+  animation:sgRip 460ms ease-out forwards;
+}
+@keyframes sgRip{ to{ transform:scale(7);opacity:0 } }
+
+/* staggered entrance, first screenful only */
+main .sg-top,main .jh-panel,main .jh-mock-sess{ animation:sgRowIn 320ms var(--ease-out) both; }
+@keyframes sgRowIn{ from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:none} }
+main .sg-top:nth-child(2){animation-delay:40ms}
+main .sg-top:nth-child(3){animation-delay:80ms}
+
+/* ── 9.4 BOTTOM NAV — the active tab reads at a glance ─────────────── */
+nav.fixed button[style*="color: var(--orange-br)"],
+nav.fixed button[style*="color:var(--orange-br)"]{ position:relative; }
+nav.fixed button[style*="color: var(--orange-br)"]::before,
+nav.fixed button[style*="color:var(--orange-br)"]::before{
+  content:"";position:absolute;top:-6px;left:22%;right:22%;height:3px;
+  background:var(--surge-cyan);box-shadow:0 0 14px rgba(0,229,255,.7);
+}
+nav.fixed button[style*="color: var(--orange-br)"] svg,
+nav.fixed button[style*="color:var(--orange-br)"] svg{
+  filter:drop-shadow(0 0 8px rgba(0,229,255,.55));
+}
+
+/* ── 9.5 BACKGROUND MOTIF — diagonal speed streaks ──────────────────
+   Replaces the surge trace from section 1. Same single cyan at the same
+   weight; the read is forward motion rather than an oscilloscope line.
+   Two layers so the rhythm is not uniform. Chosen by the owner over the
+   trace. Note the position is NOT !important — pinning it is what froze
+   the trace's drift the first time round.                            */
+html body::before{
+  background-image:
+    repeating-linear-gradient(66deg,
+      rgba(0,229,255,.10) 0 1px, transparent 1px 92px),
+    repeating-linear-gradient(66deg,
+      rgba(0,229,255,.05) 0 2px, transparent 2px 31px) !important;
+  background-size:auto !important;
+  background-repeat:repeat !important;
+  background-position:0 0;
+  animation:sgStreaks 22s linear infinite !important;
+}
+@keyframes sgStreaks{ to{ background-position:-276px -620px, -138px -310px } }
+
+/* ── 9.6 MEDIA ──────────────────────────────────────────────────────── */
+.aa-wall > div{ transition:transform var(--sg-t),box-shadow var(--sg-t); }
+.aa-wall > div:active{ transform:scale(.98); }
+@media (hover:hover){
+  .aa-wall > div:hover{ box-shadow:0 0 0 1px rgba(0,229,255,.5),0 0 30px rgba(0,229,255,.2); }
+}
+
+/* ── 9.9 SCREEN PRIMITIVES ─────────────────────────────────────────
+   The classes the rebuilt HOME / SESSIONS / RANK views reference. Kept as
+   classes rather than inline styles because they repeat across all three.  */
+
+.sg-kicker{
+  font-family:'Archivo',sans-serif !important;
+  font-weight:800 !important; font-style:normal !important;
+  font-size:10px !important; letter-spacing:.34em !important;
+  text-transform:uppercase !important; color:var(--sg-text-2) !important;
+  margin:0 !important; padding:0 !important; background:none !important;
+  border:none !important; box-shadow:none !important; display:block !important;
+}
+.sg-card{
+  background:rgba(9,14,20,.94);
+  border:none;
+}
+.sg-card-cyan{
+  background:rgba(16,23,31,.96);
+  background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));
+  background-size:3px 100%; background-repeat:no-repeat;
+}
+.sg-livedot{
+  position:relative; display:block; width:7px; height:7px; border-radius:50%;
+  background:var(--surge-cyan); box-shadow:0 0 10px rgba(0,229,255,.8);
+  animation:sgBar 2s ease-in-out infinite;
+}
+@keyframes sgBar{ 0%,100%{opacity:.55} 50%{opacity:1} }
+@keyframes sgSlide{ from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+
+@media (prefers-reduced-motion:reduce){
+  .sg-livedot{ animation:none !important; }
+}
+
+/* ── 9.7 QUALIFYING ROWS — the real rule ────────────────────────────
+   Driven by data-qual, which GroupsTab sets from qualifyingTeamIds() —
+   the same computation seedQF uses. So this marks 1, 2 or 4 rows per
+   group, or top-2-plus-the-two-best-thirds, or all three, according to
+   the session's own format, and it follows the scores live.         */
+.sg-standrow[data-qual="1"]{
+  box-shadow:inset 3px 0 0 var(--surge-cyan);
+  background-color:rgba(0,229,255,.05) !important;
+}
+
+/* ── 9.8 SESSION SCREEN — scale and presence ────────────────────────
+   The overlay carried a whole night's scoring at 11–14px. Scoped to the
+   session overlay so nothing else shifts. The bundle's table rules are
+   dropped (no tables exist); the group-heading rules are retargeted at
+   the markup this app actually renders.                             */
+.fixed.inset-0.z-40 .text-sm{ font-size:15px !important; line-height:1.35 !important; }
+.fixed.inset-0.z-40 .text-xs{ font-size:13px !important; line-height:1.4 !important; }
+.fixed.inset-0.z-40 .text-\\[11px\\]{ font-size:12.5px !important; line-height:1.45 !important; }
+.fixed.inset-0.z-40 .text-\\[10px\\]{ font-size:11px !important; letter-spacing:.16em !important; }
+.fixed.inset-0.z-40 .text-\\[9px\\]{ font-size:11px !important; }
+.fixed.inset-0.z-40 .font-display.text-xl{ font-size:26px !important; line-height:1 !important; }
+
+.fixed.inset-0.z-40 button.w-full.flex.items-center{
+  min-height:56px !important; padding:10px 12px !important;
+  border-bottom:1px solid rgba(92,107,120,.16) !important;
+}
+.fixed.inset-0.z-40 button.w-full.flex.items-center .truncate{
+  font-family:'Archivo',sans-serif !important; font-weight:800 !important;
+  font-size:17px !important; letter-spacing:-.005em !important; color:var(--surge-white) !important;
+}
+.fixed.inset-0.z-40 .font-mono{ font-variant-numeric:tabular-nums; font-size:14px !important; }
+.fixed.inset-0.z-40 .sg-standrow{ padding-top:9px !important; padding-bottom:9px !important; }
+.fixed.inset-0.z-40 .border-dashed{
+  font-size:13px !important; padding:18px !important;
+  border-color:rgba(0,229,255,.22) !important; color:var(--sg-text-2) !important;
+  letter-spacing:.12em !important; text-transform:uppercase !important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  html body::before{ animation:none !important; }
+  .sg-top[data-lead="1"]::after{ animation:none !important; }
+  main .sg-top,main .jh-panel,main .jh-mock-sess,.sg-bump{ animation:none !important; }
+  .sg-ripple{ display:none !important; }
+}
+"""
+
+UX_SCRIPT = """
+<script>
+/* Presentational only — a press ripple and a bump on numbers that change.
+   Reads no state, writes no state, touches no React props. */
+(function(){
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+
+  document.addEventListener("pointerdown", function(e){
+    var t = e.target.closest && e.target.closest(
+      "button,[role='button'],.jh-mock-row,.jh-mock-sess,.sg-top,.sg-thin,.jh-chipbtn");
+    if (!t) return;
+    var r = document.createElement("span");
+    r.className = "sg-ripple";
+    r.style.left = e.clientX + "px";
+    r.style.top  = e.clientY + "px";
+    document.body.appendChild(r);
+    setTimeout(function(){ r.remove(); }, 480);
+  }, { passive: true });
+
+  // Bump whichever number just changed. Guarded three ways: not during the
+  // first paint, not inside a field the user is typing in, and never more
+  // than a handful at once — a full-table re-render after a server sync
+  // would otherwise flash the whole screen.
+  var boot = Date.now();
+  var mo = new MutationObserver(function(muts){
+    if (Date.now() - boot < 1500) return;
+    if (muts.length > 12) return;
+    muts.forEach(function(m){
+      var el = m.target.nodeType === 3 ? m.target.parentElement : m.target;
+      if (!el || !el.classList) return;
+      if (!/^[\\d\\s.,:+\\-–]+$/.test((el.textContent || "").trim())) return;
+      if (el.closest("input,textarea,nav")) return;
+      el.classList.remove("sg-bump");
+      void el.offsetWidth;
+      el.classList.add("sg-bump");
+      setTimeout(function(){ el.classList.remove("sg-bump"); }, 460);
+    });
+  });
+  (function start(){
+    var root = document.getElementById("root");
+    if (!root) return setTimeout(start, 400);
+    mo.observe(root, { subtree: true, characterData: true });
+  })();
+})();
+</script>
+"""

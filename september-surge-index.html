@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "21c7d4d75455";
+  var V = "131d170581fd";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2475,9 +2475,17 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
              color:"rgba(0,229,255,.06)",pointerEvents:"none"}}>07</div>
         <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
              letterSpacing:".34em",color:"#00E5FF"}}>MON &amp; WED · 5:30 PM · ALL SEPTEMBER</div>
-        <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
-             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:46,lineHeight:.9,
-             color:"#F4F9FA",marginTop:10}}>RIDE THE<br /><span style={{color:"#00E5FF"}}>SURGE.</span></div>
+        {/* The lockup, back in the hero. The canvas set the volume in type
+            alone; the mark is the brand and it carries the volume better than
+            a headline does, so the headline steps down to a tagline under it. */}
+        <picture>
+          <source type="image/webp" srcSet="assets/surge-lockup.webp" />
+          <img className="surge-lockup-img" src="assets/surge-lockup.png" alt="September Surge"
+               style={{position:"relative",display:"block",width:"100%",maxWidth:330,margin:"12px auto 0"}} />
+        </picture>
+        <div style={{position:"relative",textAlign:"center",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:22,lineHeight:1,
+             color:"#F4F9FA",marginTop:10,letterSpacing:".02em"}}>RIDE <span style={{color:"#00E5FF"}}>THE SURGE.</span></div>
         <div style={{position:"relative",display:"flex",gap:8,marginTop:16}}>
           <div style={{flex:1,padding:"10px 12px",background:"rgba(0,229,255,.08)",border:"1px solid rgba(0,229,255,.3)"}}>
             <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".22em",color:"#9FB0BC"}}>PRIZE POOL</div>
@@ -2557,6 +2565,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                    border:`1px solid ${lead ? "rgba(0,229,255,.5)" : "rgba(92,107,120,.35)"}`,
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                    fontSize:20,lineHeight:1,color:lead ? "#00E5FF" : "#9FB0BC"}}>{i + 1}</div>
+              <Avatar player={e.player} size={34} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:16,color:"#F4F9FA",
                      whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.player.name}</div>
@@ -3969,6 +3978,10 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
               const seed = getSeedNum(t.id);
               return <button key={t.id} onClick={() => isAdmin && setEdit(t)} className="w-full flex items-center gap-2 p-2 rounded-lg bg-stone-900/50 hover:bg-stone-800/70 text-left">
                 {seed ? <span className="text-[9px] font-bold px-1.5 py-0.5 rounded font-mono shrink-0 text-center" style={{ background: seed <= 4 ? "#00E5FF" : "rgba(244,249,250,.08)", color: seed <= 4 ? "#F4F9FA" : "#8A9BA8", border: "1px solid rgba(244,249,250,.14)", borderRadius: 0, minWidth: 28 }}>S{seed}</span> : <span className="shrink-0" style={{ width: 28 }} aria-hidden="true" />}
+                <span className="flex items-center shrink-0" style={{ marginRight: 2 }}>
+                  {p1 && <Avatar player={p1} size={26} />}
+                  {p2 && <span style={{ marginLeft: -6 }}><Avatar player={p2} size={26} /></span>}
+                </span>
                 <div className="flex-1 min-w-0"><div className="text-sm text-stone-100 truncate">{p1?.name || "?"} & {p2?.name || "?"}</div></div>
                 {isAdmin && <I.edit size={12} className="text-stone-500" />}
               </button>;
@@ -5110,11 +5123,15 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
           {mv && <span style={{fontSize:9,color:mv.up ? "#00E5FF" : "#FF9E1B"}}>{mv.up ? "▲" : "▼"}</span>}
         </div>
         <div onClick={() => setOpenPlayerId(e.player.id)}
-             style={{cursor:"pointer",padding:"9px 0",borderTop:"1px solid rgba(92,107,120,.16)",minWidth:0}}>
+             style={{cursor:"pointer",padding:"9px 0",borderTop:"1px solid rgba(92,107,120,.16)",minWidth:0,
+                     display:"flex",alignItems:"center",gap:9}}>
+          <Avatar player={e.player} size={28} />
+          <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:15,color:"#F4F9FA",
                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.player.name}</div>
           <div style={{height:4,marginTop:5,width:`${Math.max(4, Math.round(ptsOf(e) / topPts * 100))}%`,
                background:"linear-gradient(90deg,rgba(0,229,255,.7),rgba(0,229,255,.12))"}} />
+          </div>
         </div>
         <div onClick={() => setOpenPlayerId(e.player.id)}
              style={{cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",
@@ -5184,6 +5201,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                    background:"rgba(0,229,255,.14)",border:"1px solid rgba(0,229,255,.5)",
                    boxShadow:"0 0 26px rgba(0,229,255,.22)",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
                    fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:22,color:"#00E5FF"}}>1</div>
+              <Avatar player={leader.player} size={40} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
                      fontSize:19,lineHeight:1.05,color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -5224,6 +5242,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                    background:"rgba(255,158,27,.12)",border:"1px solid rgba(255,158,27,.5)",
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                    fontSize:18,color:"#FF9E1B"}}>{mi + 1}</div>
+              <Avatar player={e.player} size={36} />
               <div style={{flex:"1 1 auto",minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <span style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".3em",color:"#FF9E1B"}}>YOU</span>
@@ -7141,6 +7160,39 @@ html body::before{
 .aa-wall > div:active{ transform:scale(.98); }
 @media (hover:hover){
   .aa-wall > div:hover{ box-shadow:0 0 0 1px rgba(0,229,255,.5),0 0 30px rgba(0,229,255,.2); }
+}
+
+/* ── 9.9 SCREEN PRIMITIVES ─────────────────────────────────────────
+   The classes the rebuilt HOME / SESSIONS / RANK views reference. Kept as
+   classes rather than inline styles because they repeat across all three.  */
+
+.sg-kicker{
+  font-family:'Archivo',sans-serif !important;
+  font-weight:800 !important; font-style:normal !important;
+  font-size:10px !important; letter-spacing:.34em !important;
+  text-transform:uppercase !important; color:var(--sg-text-2) !important;
+  margin:0 !important; padding:0 !important; background:none !important;
+  border:none !important; box-shadow:none !important; display:block !important;
+}
+.sg-card{
+  background:rgba(9,14,20,.94);
+  border:none;
+}
+.sg-card-cyan{
+  background:rgba(16,23,31,.96);
+  background-image:linear-gradient(180deg,#00E5FF,rgba(0,229,255,.06));
+  background-size:3px 100%; background-repeat:no-repeat;
+}
+.sg-livedot{
+  position:relative; display:block; width:7px; height:7px; border-radius:50%;
+  background:var(--surge-cyan); box-shadow:0 0 10px rgba(0,229,255,.8);
+  animation:sgBar 2s ease-in-out infinite;
+}
+@keyframes sgBar{ 0%,100%{opacity:.55} 50%{opacity:1} }
+@keyframes sgSlide{ from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+
+@media (prefers-reduced-motion:reduce){
+  .sg-livedot{ animation:none !important; }
 }
 
 /* ── 9.7 QUALIFYING ROWS — the real rule ────────────────────────────
