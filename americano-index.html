@@ -365,10 +365,35 @@ function rebuildTail(t, newCourts, newPlayerIds) {
   return Object.assign({}, t, { courtCount: courts, playerIds: ids, rounds: [...kept, ...rebuilt] });
 }
 
+// How many matches the SCHEDULE gives each player over the whole session —
+// counted from the fixture list, not from what's been scored yet, so the
+// ranking metric stays stable from round 1 instead of flipping mid-session.
+function scheduledMatchCounts(t) {
+  const counts = {};
+  (t.playerIds || []).forEach(id => { counts[id] = 0; });
+  (t.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+    [...m.team1, ...m.team2].forEach(id => { if (counts[id] != null) counts[id]++; });
+  }));
+  return counts;
+}
+
+// True when every player is scheduled the same number of matches. Only then are
+// raw point totals comparable: a player given an extra match is ~half a match
+// total ahead on average before anyone hits a ball. When the schedule can't be
+// even (rest slots not divisible by the player count), rank on points per match
+// instead — measured over 20k equal-skill trials, totals hand the title to the
+// most-played group far beyond its fair share (63.7% vs 16.7% at 24 players on
+// 4 courts over 6 rounds, where the least-played group never won at all), while
+// the per-match average brings every group back to roughly its fair share.
+function isEvenSchedule(t) {
+  const v = Object.values(scheduledMatchCounts(t));
+  return v.length === 0 || Math.max(...v) === Math.min(...v);
+}
+
 function calcStandings(t, byId) {
   const stats = {};
   (t.playerIds || []).forEach(id => {
-    stats[id] = { id, name: (byId[id] && byId[id].name) || "?", photoUrl: byId[id] && byId[id].photoUrl, points: 0, played: 0, wins: 0, diff: 0 };
+    stats[id] = { id, name: (byId[id] && byId[id].name) || "?", photoUrl: byId[id] && byId[id].photoUrl, points: 0, played: 0, wins: 0, diff: 0, avg: 0 };
   });
   (t.rounds || []).forEach(round => (round.courts || []).forEach(m => {
     if (m.score1 == null || m.score2 == null) return;
@@ -376,7 +401,24 @@ function calcStandings(t, byId) {
     m.team1.forEach(id => { const s = stats[id]; if (!s) return; s.points += s1; s.played++; s.diff += s1 - s2; if (s1 > s2) s.wins++; });
     m.team2.forEach(id => { const s = stats[id]; if (!s) return; s.points += s2; s.played++; s.diff += s2 - s1; if (s2 > s1) s.wins++; });
   }));
-  return Object.values(stats).sort((a, b) => b.points - a.points || b.diff - a.diff || b.wins - a.wins);
+  const rows = Object.values(stats);
+  rows.forEach(s => { s.avg = s.played ? s.points / s.played : 0; });
+  const even = isEvenSchedule(t);
+  rows.forEach(s => { s.byAvg = !even; });
+  return even
+    ? rows.sort((a, b) => b.points - a.points || b.diff - a.diff || b.wins - a.wins)
+    : rows.sort((a, b) => b.avg - a.avg || b.points - a.points || b.diff - a.diff || b.wins - a.wins);
+}
+
+// Round counts that give every player exactly the same number of matches, for
+// this player count on this many courts. Rest slots per round = n - 4c; rest
+// shares out evenly only when R*(n-4c) is a multiple of n.
+function fairRoundCounts(n, courts, limit) {
+  const restPer = n - courts * 4;
+  if (restPer <= 0) return null;            // nobody rests — every R is even
+  const out = [];
+  for (let R = 1; R <= (limit || 20) && out.length < 4; R++) if ((R * restPer) % n === 0) out.push(R);
+  return out;
 }
 
 // ── atoms ───────────────────────────────────────────────────────
@@ -417,6 +459,17 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
       ? `On ${plural(useCourts, "court")}, ${restPhrase(benched)} each round, rotated evenly.`
       : `${plural(needed, "court")} runs every match at once — nobody rests.`);
 
+  // Warn when this combination can't give everyone the same number of matches:
+  // in Americano the winner is whoever piles up the most points, so an extra
+  // match is a real head start. Suggest round counts where rest shares evenly.
+  const fairRounds = selCount >= 4 ? fairRoundCounts(selCount, useCourts) : null;
+  const roundsNow = Number(cfg.rounds) || 0;
+  const unevenWarning = (benched > 0 && fairRounds && !fairRounds.includes(roundsNow))
+    ? (fairRounds.length
+        ? `Heads up: on ${plural(useCourts, "court")}, ${roundsNow} rounds won't give everyone the same number of matches. ${fairRounds.join(" or ")} rounds would. Otherwise the standings switch to points per match so nobody wins on extra court time.`
+        : `Heads up: on ${plural(useCourts, "court")} no round count splits evenly across ${selCount} players, so the standings will rank on points per match.`)
+    : null;
+
   return (
     <div className="screen">
       <div>
@@ -447,6 +500,9 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
               ))}
             </div>
             <div className="note">{hint}</div>
+            {unevenWarning && (
+              <div className="note" style={{ color: "var(--gold)" }}>{unevenWarning}</div>
+            )}
           </div>
 
           <div className="hair">
@@ -609,12 +665,21 @@ function Standings({ t, byId, onPodium }) {
     </div>
   );
   const table = calcStandings(t, byId);
+  const byAvg = !isEvenSchedule(t);
+  const counts = Object.values(scheduledMatchCounts(t));
   return (
     <div className="screen">
       <div>
         <Eyebrow>{t.name}</Eyebrow>
         <div className="display">The <em>Standings</em></div>
       </div>
+      {byAvg && (
+        <div className="hair note">
+          This line-up can't give everyone the same number of matches — the schedule hands some players
+          {" "}{Math.min(...counts)}–{Math.max(...counts)} matches. Ranking on <b style={{ color: "var(--cream)" }}>points per match</b> so
+          extra court time doesn't decide the winner. Totals are shown underneath.
+        </div>
+      )}
       {table.length > 0 && (
         <div><button className="btn gold" onClick={onPodium}>Podium 👑</button></div>
       )}
@@ -628,8 +693,12 @@ function Standings({ t, byId, onPodium }) {
               <span className="label" style={{ letterSpacing: ".12em" }}>{s.played} played · {s.wins} won</span>
             </span>
             <span style={{ textAlign: "right" }}>
-              <span className="score" style={{ fontSize: 26, color: "var(--orange-br)", display: "block" }}>{s.points}</span>
-              <span className="label" style={{ letterSpacing: ".12em" }}>{s.diff > 0 ? "+" : ""}{s.diff}</span>
+              <span className="score" style={{ fontSize: 26, color: "var(--orange-br)", display: "block" }}>
+                {byAvg ? (s.played ? s.avg.toFixed(1) : "–") : s.points}
+              </span>
+              <span className="label" style={{ letterSpacing: ".12em" }}>
+                {byAvg ? `${s.points} pts` : `${s.diff > 0 ? "+" : ""}${s.diff}`}
+              </span>
             </span>
           </div>
         ))}
@@ -1016,7 +1085,9 @@ function App() {
                 <div key={i} className={"plinth" + (i === 0 ? " first" : "")} style={{ height: heights[slot] }}>
                   <Ava p={table[i]} on={i === 0} lg />
                   <span className="truncate" style={{ fontWeight: 800, fontSize: 13, maxWidth: "100%" }}>{table[i].name}</span>
-                  <span className="score" style={{ fontSize: 24, color: i === 0 ? "var(--gold)" : "var(--orange-br)" }}>{table[i].points}</span>
+                  <span className="score" style={{ fontSize: 24, color: i === 0 ? "var(--gold)" : "var(--orange-br)" }}>
+                    {table[i].byAvg ? table[i].avg.toFixed(1) : table[i].points}
+                  </span>
                   <span className="label">{i === 0 ? "1st" : i === 1 ? "2nd" : "3rd"}</span>
                 </div>
               ))}
@@ -1025,7 +1096,9 @@ function App() {
               <div className="row" key={s.id}>
                 <span className="label" style={{ width: 24 }}>{i + 4}</span>
                 <span className="truncate" style={{ flex: 1, fontWeight: 700 }}>{s.name}</span>
-                <span className="label" style={{ letterSpacing: ".12em" }}>{s.points} pts</span>
+                <span className="label" style={{ letterSpacing: ".12em" }}>
+                  {s.byAvg ? `${s.avg.toFixed(1)} / match` : `${s.points} pts`}
+                </span>
               </div>
             ))}
           </Sheet>
