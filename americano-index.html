@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <script>
 (function(){
-  var V = "20260822_000001";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -28,166 +27,285 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
 
 <style>
   :root {
-    --ink: #0A0807;
-    --ink2: #140C08;
-    --orange: #FF5E1E;
-    --orange-br: #FF8A3D;
-    --red: #FF2A24;
-    --ember: #8A1E08;
-    --blue: #33A1FF;
-    --blue-deep: #1E63D6;
-    --blue-soft: #7FC4FF;
-    --gold: #FFC24B;
-    --cream: #FFF4EC;
-    --muted: #C7A192;
-    --muted2: #8C7167;
+    --ink:#0A0807; --ink2:#140C08;
+    --orange:#FF5E1E; --orange-br:#FF8A3D; --red:#FF2A24; --ember:#8A1E08;
+    --blue:#33A1FF; --blue-soft:#7FC4FF; --gold:#FFC24B;
+    --cream:#FFF4EC; --muted:#C7A192; --muted2:#8C7167;
+    --line:rgba(255,236,224,.12); --line2:rgba(255,236,224,.09);
+    --tint:rgba(255,236,224,.03);
   }
-  html, body { background: var(--ink); color: var(--cream); font-family: 'Archivo', system-ui, sans-serif; }
-  * { -webkit-tap-highlight-color: transparent; }
-  h1, h2, .display { font-family: 'Anton', sans-serif; letter-spacing: 0.02em; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-thumb { background: var(--ember); border-radius: 8px; }
-  .card {
-    background: linear-gradient(180deg, var(--ink2), var(--ink));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 18px;
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--ink);}
+  body{
+    color:var(--cream);font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
   }
-  .glow-orange { box-shadow: 0 0 0 1px rgba(255,94,30,0.35), 0 8px 30px -8px rgba(255,94,30,0.35); }
-  .glow-blue { box-shadow: 0 0 0 1px rgba(51,161,255,0.35), 0 8px 30px -8px rgba(51,161,255,0.35); }
-  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input,select,button,textarea{font-family:inherit;}
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--ember);border-radius:9px;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+
+  /* ── page frame ─────────────────────────────── */
+  .bg{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(120% 80% at 82% 8%,rgba(255,94,30,.20),transparent 55%),
+      radial-gradient(130% 90% at 18% 108%,rgba(138,30,8,.45),transparent 60%),
+      radial-gradient(80% 60% at 100% 104%,rgba(30,99,214,.15),transparent 55%),
+      linear-gradient(180deg,#0a0a0e 0%,#0A0807 46%,#050405 100%);
+  }
+  .wrap{position:relative;z-index:2;}
+  main{max-width:1160px;margin:0 auto;padding:26px 18px 110px;}
+  .screen{display:flex;flex-direction:column;gap:26px;animation:riseIn .35s ease;}
+
+  header.top{
+    position:sticky;top:0;z-index:40;background:rgba(10,8,7,.86);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);padding:11px 18px;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+  }
+  .brand{display:flex;align-items:center;gap:13px;min-width:0;}
+  .brand .mark{
+    width:36px;height:36px;flex:0 0 auto;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(150deg,var(--orange-br),var(--red));color:#1A0603;font-size:19px;
+  }
+  .brand .name{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.05em;text-transform:uppercase;line-height:1;}
+  .brand .sub{
+    font-size:10px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);
+    margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw;
+  }
+
+  /* ── type ───────────────────────────────────── */
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:12px;font-size:12px;font-weight:800;
+    letter-spacing:.34em;text-transform:uppercase;color:var(--blue);
+  }
+  .eyebrow i{width:30px;height:2px;background:var(--blue);box-shadow:0 0 14px rgba(51,161,255,.6);display:block;}
+  .display{
+    font-family:'Anton',sans-serif;font-size:clamp(44px,8.4vw,70px);line-height:.86;
+    text-transform:uppercase;margin-top:14px;
+  }
+  .display em{font-style:italic;color:var(--orange);}
+  .lede{font-size:16px;font-weight:500;line-height:1.5;color:var(--muted);margin-top:16px;max-width:560px;}
+  .lede b{color:var(--cream);font-weight:800;}
+  .hair{border-top:1px solid var(--line);padding-top:22px;}
+  .label{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--muted2);}
+  .note{font-size:13.5px;line-height:1.55;color:var(--muted2);max-width:640px;}
+  .sect{font-family:'Anton',sans-serif;font-size:26px;text-transform:uppercase;}
+
+  /* ── controls ───────────────────────────────── */
+  .btn{
+    border:0;border-radius:13px;padding:14px 22px;font-size:11.5px;font-weight:900;
+    letter-spacing:.18em;text-transform:uppercase;cursor:pointer;
+    background:linear-gradient(178deg,var(--orange-br),var(--red));color:#1A0603;
+  }
+  .btn:disabled{opacity:.4;cursor:default;}
+  .btn.pill{border-radius:999px;padding:9px 18px;font-size:11px;letter-spacing:.16em;box-shadow:0 12px 30px rgba(255,80,20,.34);}
+  .btn.ghost{
+    background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:999px;padding:7px 14px;font-size:10px;font-weight:800;letter-spacing:.22em;box-shadow:none;
+  }
+  .btn.ghost:hover{border-color:var(--orange);color:var(--orange-br);}
+  .btn.small{border-radius:11px;padding:9px 13px;font-size:10px;letter-spacing:.18em;background:transparent;border:1px solid var(--line);color:var(--muted);}
+  .btn.small:hover{border-color:var(--orange);color:var(--orange-br);}
+  .btn.gold{background:transparent;border:1px solid rgba(255,194,75,.4);color:var(--gold);border-radius:999px;padding:8px 16px;font-size:10px;letter-spacing:.2em;box-shadow:none;}
+
+  .field{
+    width:100%;background:transparent;border:0;border-bottom:1px solid rgba(255,236,224,.16);
+    padding:10px 2px;color:var(--cream);font-size:16px;outline:none;
+  }
+  .field:focus{border-bottom-color:var(--orange);}
+  .field.big{font-family:'Anton',sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:.02em;}
+  .field.num{font-family:'Anton',sans-serif;font-size:34px;color:var(--orange-br);padding:6px 2px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .stack{display:flex;flex-direction:column;gap:8px;}
+
+  .chip{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;cursor:pointer;
+    border:1px solid var(--line);background:var(--tint);color:var(--cream);text-align:left;
+    font-size:14px;font-weight:600;min-width:0;
+  }
+  .chip.on{border-color:var(--orange);background:rgba(255,94,30,.12);}
+  .chipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;}
+
+  .ava{
+    width:34px;height:34px;flex:0 0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Anton',sans-serif;font-size:12px;background:rgba(255,94,30,.18);color:var(--orange-br);overflow:hidden;
+  }
+  .ava.on{background:linear-gradient(150deg,var(--orange-br),var(--red));color:#1A0603;}
+  .ava img{width:100%;height:100%;object-fit:cover;}
+  .ava.lg{width:44px;height:44px;font-size:15px;}
+
+  .row{display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--line2);padding:11px 2px;}
+  .truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
+
+  /* ── round chips ────────────────────────────── */
+  .rchips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;}
+  .rchip{
+    flex:0 0 auto;border:1px solid var(--line);background:var(--tint);color:var(--muted2);
+    border-radius:999px;padding:7px 14px;font-size:11px;font-weight:800;letter-spacing:.12em;cursor:pointer;
+  }
+  .rchip.done{border-color:rgba(51,161,255,.3);background:rgba(51,161,255,.08);color:var(--blue-soft);}
+  .rchip.on{border-color:var(--orange);background:rgba(255,94,30,.15);color:var(--orange-br);}
+
+  /* ── court card ─────────────────────────────── */
+  .court{border:1px solid var(--line);border-radius:18px;padding:16px;background:rgba(20,12,8,.5);}
+  .court.live{border-color:rgba(255,94,30,.30);}
+  .court.final{border-color:rgba(51,161,255,.22);}
+  .courtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
+  .score{font-family:'Anton',sans-serif;font-size:40px;line-height:1;}
+  .teamside{display:flex;flex-direction:column;gap:7px;min-width:0;}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;}
+  input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:transparent;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;
+    background:var(--orange);border:3px solid var(--ink);
+    box-shadow:0 0 0 1px rgba(255,138,61,.6),0 8px 22px rgba(255,94,30,.45);cursor:grab;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:22px;height:22px;border-radius:50%;background:var(--orange);border:3px solid var(--ink);cursor:grab;
+  }
+  .track{height:8px;border-radius:99px;background:rgba(255,236,224,.10);position:relative;margin:10px 0 2px;}
+  .track > i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:linear-gradient(90deg,var(--orange-br),var(--red));display:block;}
+
+  /* ── bottom nav ─────────────────────────────── */
+  nav.bottom{
+    position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;
+    background:rgba(10,8,7,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  nav.bottom button{
+    flex:1;background:transparent;border:0;cursor:pointer;padding:13px 4px 14px;
+    font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);
+    position:relative;
+  }
+  nav.bottom button.on{color:var(--cream);}
+  nav.bottom button.on::before{
+    content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:34px;height:2px;background:var(--orange);box-shadow:0 0 14px rgba(255,94,30,.7);
+  }
+
+  /* ── modal ──────────────────────────────────── */
+  .scrim{position:fixed;inset:0;z-index:60;background:rgba(4,3,3,.72);backdrop-filter:blur(6px);
+    display:flex;align-items:flex-end;justify-content:center;padding:0;}
+  .sheet{
+    width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:#120A07;
+    border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));
+    animation:riseIn .25s ease;
+  }
+  @media(min-width:640px){
+    .scrim{align-items:center;padding:20px;}
+    .sheet{border-radius:22px;}
+  }
+  .sheethead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
+
+  /* ── podium ─────────────────────────────────── */
+  .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:6px 0 18px;}
+  .plinth{
+    flex:1;max-width:150px;border:1px solid var(--line);background:var(--tint);border-radius:16px 16px 0 0;
+    display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding:14px 8px 12px;text-align:center;
+  }
+  .plinth.first{border-color:rgba(255,194,75,.45);background:rgba(255,194,75,.10);}
+  @media(max-width:520px){
+    .grid3{gap:14px;}
+    .field.num{font-size:28px;}
+    .courtgrid{grid-template-columns:1fr;}
+    /* give player names the room the big score would otherwise take */
+    .court .score{font-size:30px;}
+    .court{padding:14px 12px;}
+    .teamside span{font-size:13px;}
+  }
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div class="bg"></div>
+<div id="root" class="wrap"></div>
 
 <script type="text/babel" data-presets="react">
 
-const { useState, useEffect, useMemo, useCallback, useRef } = React;
+const { useState, useEffect, useMemo, useRef, Fragment } = React;
 
-// ── API helpers ──────────────────────────────────────────────────
-const API = ""; // same-origin, nginx routes /state /login /save /photos to the backend
-
-function getToken() { try { return localStorage.getItem("am-token") || ""; } catch (e) { return ""; } }
-function setToken(t) { try { t ? localStorage.setItem("am-token", t) : localStorage.removeItem("am-token"); } catch (e) {} }
-function getRole() { try { return localStorage.getItem("am-role") || ""; } catch (e) { return ""; } }
-function setRole(r) { try { r ? localStorage.setItem("am-role", r) : localStorage.removeItem("am-role"); } catch (e) {} }
-
-async function apiGet(path) {
-  const r = await fetch(API + path);
-  return r.json();
-}
-async function apiPost(path, body, auth) {
-  const headers = { "Content-Type": "application/json" };
-  if (auth) headers["Authorization"] = "Bearer " + getToken();
-  const r = await fetch(API + path, { method: "POST", headers, body: JSON.stringify(body || {}) });
-  return r.json();
-}
-
-// ── IDs ──────────────────────────────────────────────────────────
-function uid(prefix) {
-  return prefix + "_" + Math.random().toString(36).slice(2, 10);
-}
+// ── storage / small helpers ──────────────────────────────────────
+const LS = {
+  get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
+  set(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
+};
+const uid = p => p + "_" + Math.random().toString(36).slice(2, 10);
+const initials = n => (n || "?").split(" ").filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
+const restPhrase = n => (n === 1 ? "1 player rests" : n + " players rest");
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
 
 // ── Americano scheduling: circle method ─────────────────────────
-// Produces a 1-factorization of the player set: over (n-1) rounds (n even,
-// padded with a bye slot if odd) every pair of players appears together as
-// PARTNERS exactly once. This is the same rotation math used by classic
-// Americano generators (padelution etc). Courts are formed by combining two
-// partner-pairs per round, with the grouping offset rotated each round to
-// spread opponent variety too.
+// Over (n-1) rounds (n even; padded with a bye slot if odd) every pair of
+// players appears together as PARTNERS exactly once — the rotation math used
+// by classic Americano generators. Courts are formed by combining two partner
+// pairs, with the grouping offset rotated each round for opponent variety.
 function circlePairRounds(n) {
   const arr = Array.from({ length: n }, (_, i) => i);
-  if (n % 2 === 1) arr.push(-1); // bye slot
-  const total = arr.length;
-  const cycles = total - 1;
+  if (n % 2 === 1) arr.push(-1);
+  const total = arr.length, cycles = total - 1;
   let cur = arr.slice();
   const rounds = [];
   for (let r = 0; r < cycles; r++) {
     const pairs = [];
     for (let i = 0; i < total / 2; i++) pairs.push([cur[i], cur[total - 1 - i]]);
     rounds.push(pairs);
-    const fixed = cur[0];
-    const rest = cur.slice(1);
+    const fixed = cur[0], rest = cur.slice(1);
     rest.unshift(rest.pop());
     cur = [fixed, ...rest];
   }
   return rounds;
 }
+const maxCourtsFor = pc => Math.max(1, Math.floor(Math.floor(pc / 2) / 2));
 
-// Courts physically needed to run every pair at once — the upper bound on the
-// "courts available" setting, and its default.
-function maxCourtsFor(playerCount) {
-  return Math.max(1, Math.floor(Math.floor(playerCount / 2) / 2));
-}
-
-// Builds rounds startRound..numRounds-1. `r` indexes the circle cycle globally,
-// so regenerating a tail (when courts change midway) resumes the partner
-// rotation where it left off instead of restarting it — restarting would replay
-// partnerships that have already been used.
-//
 // Capping courts never changes WHO partners WHOM — the circle method decides
-// that alone. It only decides which of those pairs gets a court this round; a
-// benched pair's partnership is skipped, never repeated. `sitOutCounts` carries
-// sit-out history so rest is spread evenly across players.
+// that alone. It only decides which pairs get a court; a benched pair's
+// partnership is skipped, never repeated. `sitOutCounts` carries sit-out
+// history so rest spreads evenly. `cycleShift` rotates the starting point in
+// the cycle (used when the player set changes mid-session).
 function generateSchedule(playerIds, numRounds, maxCourts, opts) {
   const n = playerIds.length;
   if (n < 4) return [];
-  const startRound = opts?.startRound || 0;
-  const sitOutCounts = { ...(opts?.sitOutCounts || {}) };
+  const startRound = (opts && opts.startRound) || 0;
+  const cycleShift = (opts && opts.cycleShift) || 0;
+  const sitOutCounts = Object.assign({}, (opts && opts.sitOutCounts) || {});
   const courtCap = Math.max(1, Number(maxCourts) || maxCourtsFor(n));
-  const cyclePairs = circlePairRounds(n); // index-based, cycles = (n even ? n-1 : n)
-  const cycles = cyclePairs.length;
+  const cyclePairs = circlePairRounds(n), cycles = cyclePairs.length;
   const rounds = [];
   for (let r = startRound; r < numRounds; r++) {
-    const pairsIdx = cyclePairs[r % cycles];
-    const realPairs = [];
-    const byePlayers = [];
+    const pairsIdx = cyclePairs[(r + cycleShift) % cycles];
+    const realPairs = [], byePlayers = [];
     pairsIdx.forEach(([a, b]) => {
       if (a === -1 && b !== -1) byePlayers.push(playerIds[b]);
       else if (b === -1 && a !== -1) byePlayers.push(playerIds[a]);
       else if (a !== -1 && b !== -1) realPairs.push([playerIds[a], playerIds[b]]);
     });
-    // rotate grouping offset each round for opponent variety
     const offset = r % Math.max(1, realPairs.length);
     let playing = realPairs.slice(offset).concat(realPairs.slice(0, offset));
-
-    // More pairs than courts can hold → bench the pairs whose members have sat
-    // out least so far, so rest evens out over the tournament.
     const capacity = courtCap * 2;
     if (playing.length > capacity) {
-      const ranked = playing.map((pair, i) => ({
-        i,
-        load: (sitOutCounts[pair[0]] || 0) + (sitOutCounts[pair[1]] || 0),
-      }));
+      const ranked = playing.map((pair, i) => ({ i, load: (sitOutCounts[pair[0]] || 0) + (sitOutCounts[pair[1]] || 0) }));
       ranked.sort((x, y) => x.load - y.load || x.i - y.i);
       const benched = new Set(ranked.slice(0, playing.length - capacity).map(x => x.i));
       playing.forEach((pair, i) => { if (benched.has(i)) byePlayers.push(pair[0], pair[1]); });
       playing = playing.filter((_, i) => !benched.has(i));
     }
-    // a leftover odd pair has no opponent
     if (playing.length % 2 === 1) {
       const last = playing[playing.length - 1];
       byePlayers.push(last[0], last[1]);
       playing = playing.slice(0, -1);
     }
-
     const courts = [];
     for (let i = 0; i + 1 < playing.length; i += 2) {
-      courts.push({
-        court: courts.length + 1,
-        team1: playing[i],
-        team2: playing[i + 1],
-        score1: null,
-        score2: null,
-      });
+      courts.push({ court: courts.length + 1, team1: playing[i], team2: playing[i + 1], score1: null, score2: null });
     }
     byePlayers.forEach(id => { sitOutCounts[id] = (sitOutCounts[id] || 0) + 1; });
     rounds.push({ roundNum: r + 1, sitOuts: byePlayers, courts });
@@ -195,505 +313,725 @@ function generateSchedule(playerIds, numRounds, maxCourts, opts) {
   return rounds;
 }
 
-// Rebuild a tournament's remaining rounds for a new court count. Rounds that
-// already have any score entered are left exactly as played.
-function rescheduleForCourts(t, newCourts) {
-  let cut = t.rounds.findIndex(r => r.courts.every(m => m.score1 == null && m.score2 == null));
-  if (cut === -1) cut = t.rounds.length; // everything played — nothing to rebuild
+function firstUnplayedIndex(t) {
+  const cut = t.rounds.findIndex(r => r.courts.every(m => m.score1 == null && m.score2 == null));
+  return cut === -1 ? t.rounds.length : cut;
+}
+const pairKey = (a, b) => [a, b].sort().join("|");
+function playedPairs(rounds) {
+  const used = new Set();
+  rounds.forEach(r => r.courts.forEach(m => { used.add(pairKey(m.team1[0], m.team1[1])); used.add(pairKey(m.team2[0], m.team2[1])); }));
+  return used;
+}
+
+// Rebuild the not-yet-scored rounds — for a new court count, a new player set,
+// or both. Rounds with any score entered are kept exactly as played.
+//
+// Changing the COURT count keeps the same circle cycle, so the partner
+// rotation simply carries on and no pairing repeats. Changing the PLAYER set
+// (a late arrival) necessarily builds a *different* cycle, which could replay
+// a partnership already used. To limit that we try every starting offset in
+// the new cycle and keep whichever produces the fewest repeats.
+function rebuildTail(t, newCourts, newPlayerIds) {
+  const cut = firstUnplayedIndex(t);
   const kept = t.rounds.slice(0, cut);
   const sitOutCounts = {};
   kept.forEach(r => (r.sitOuts || []).forEach(id => { sitOutCounts[id] = (sitOutCounts[id] || 0) + 1; }));
-  const rebuilt = generateSchedule(t.playerIds, t.rounds.length, newCourts, { startRound: cut, sitOutCounts });
-  return { ...t, courtCount: newCourts, rounds: [...kept, ...rebuilt] };
+  const ids = newPlayerIds || t.playerIds;
+  const courts = Math.max(1, Math.min(Number(newCourts) || t.courtCount, maxCourtsFor(ids.length)));
+  const build = shift => generateSchedule(ids, t.rounds.length, courts, { startRound: cut, sitOutCounts, cycleShift: shift });
+
+  let rebuilt;
+  const sameRoster = !newPlayerIds || (newPlayerIds.length === t.playerIds.length
+    && newPlayerIds.every(id => t.playerIds.includes(id)));
+  if (sameRoster) {
+    rebuilt = build(0);
+  } else {
+    const used = playedPairs(kept);
+    const cycles = Math.max(1, (ids.length % 2 === 0 ? ids.length - 1 : ids.length));
+    let best = null;
+    for (let s = 0; s < cycles; s++) {
+      const cand = build(s);
+      let clashes = 0;
+      cand.forEach(r => r.courts.forEach(m => {
+        if (used.has(pairKey(m.team1[0], m.team1[1]))) clashes++;
+        if (used.has(pairKey(m.team2[0], m.team2[1]))) clashes++;
+      }));
+      if (!best || clashes < best.clashes) best = { rounds: cand, clashes };
+      if (clashes === 0) break;
+    }
+    rebuilt = best.rounds;
+  }
+  return Object.assign({}, t, { courtCount: courts, playerIds: ids, rounds: [...kept, ...rebuilt] });
 }
 
-// ── Standings ────────────────────────────────────────────────────
-function calcStandings(tournament, players) {
-  const byId = {};
-  players.forEach(p => { byId[p.id] = p; });
+function calcStandings(t, byId) {
   const stats = {};
-  (tournament.playerIds || []).forEach(id => {
-    stats[id] = { id, name: byId[id]?.name || "?", photoUrl: byId[id]?.photoUrl || "", points: 0, played: 0, wins: 0, diff: 0 };
+  (t.playerIds || []).forEach(id => {
+    stats[id] = { id, name: (byId[id] && byId[id].name) || "?", photoUrl: byId[id] && byId[id].photoUrl, points: 0, played: 0, wins: 0, diff: 0 };
   });
-  (tournament.rounds || []).forEach(round => {
-    (round.courts || []).forEach(m => {
-      if (m.score1 == null || m.score2 == null) return;
-      const s1 = Number(m.score1), s2 = Number(m.score2);
-      m.team1.forEach(id => {
-        if (!stats[id]) return;
-        stats[id].points += s1; stats[id].played += 1; stats[id].diff += (s1 - s2);
-        if (s1 > s2) stats[id].wins += 1;
-      });
-      m.team2.forEach(id => {
-        if (!stats[id]) return;
-        stats[id].points += s2; stats[id].played += 1; stats[id].diff += (s2 - s1);
-        if (s2 > s1) stats[id].wins += 1;
-      });
-    });
-  });
+  (t.rounds || []).forEach(round => (round.courts || []).forEach(m => {
+    if (m.score1 == null || m.score2 == null) return;
+    const s1 = Number(m.score1), s2 = Number(m.score2);
+    m.team1.forEach(id => { const s = stats[id]; if (!s) return; s.points += s1; s.played++; s.diff += s1 - s2; if (s1 > s2) s.wins++; });
+    m.team2.forEach(id => { const s = stats[id]; if (!s) return; s.points += s2; s.played++; s.diff += s2 - s1; if (s2 > s1) s.wins++; });
+  }));
   return Object.values(stats).sort((a, b) => b.points - a.points || b.diff - a.diff || b.wins - a.wins);
 }
 
-// ── Small UI atoms ───────────────────────────────────────────────
-function Btn({ children, onClick, variant = "orange", className = "", disabled, type = "button" }) {
-  const styles = {
-    orange: "bg-gradient-to-b from-[var(--orange-br)] to-[var(--orange)] text-[var(--ink)] glow-orange",
-    blue: "bg-gradient-to-b from-[var(--blue-soft)] to-[var(--blue)] text-[var(--ink)] glow-blue",
-    ghost: "bg-white/5 text-[var(--cream)] border border-white/10",
-    danger: "bg-gradient-to-b from-[var(--red)] to-[var(--ember)] text-white",
-  };
+// ── atoms ───────────────────────────────────────────────────────
+function Eyebrow({ children }) { return <div className="eyebrow"><i /> {children}</div>; }
+function Ava({ p, on, lg }) {
   return (
-    <button type={type} disabled={disabled} onClick={onClick}
-      className={`px-4 py-2.5 rounded-xl font-bold text-sm active:scale-95 transition disabled:opacity-40 disabled:active:scale-100 ${styles[variant]} ${className}`}>
-      {children}
-    </button>
+    <span className={"ava" + (on ? " on" : "") + (lg ? " lg" : "")}>
+      {p && p.photoUrl ? <img src={p.photoUrl} alt="" /> : initials(p && p.name)}
+    </span>
   );
 }
-function Card({ children, className = "" }) { return <div className={`card p-4 ${className}`}>{children}</div>; }
-function Input(props) {
-  return <input {...props} className={`w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-[var(--cream)] placeholder-[var(--muted2)] outline-none focus:border-[var(--orange)] ${props.className || ""}`} />;
-}
-function Avatar({ player, size = 40 }) {
-  const initials = (player?.name || "?").split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
-  return player?.photoUrl
-    ? <img src={player.photoUrl} style={{ width: size, height: size }} className="rounded-full object-cover border border-white/10" />
-    : <div style={{ width: size, height: size }} className="rounded-full flex items-center justify-center bg-gradient-to-br from-[var(--orange)] to-[var(--red)] text-[var(--ink)] font-black text-xs">{initials}</div>;
-}
-function Modal({ title, onClose, children, wide }) {
+function Sheet({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className={`card w-full ${wide ? "sm:max-w-2xl" : "sm:max-w-md"} max-h-[90vh] overflow-y-auto rounded-b-none sm:rounded-b-[18px]`}>
-        <div className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-[var(--ink2)] z-10">
-          <h2 className="display text-lg">{title}</h2>
-          <button onClick={onClose} className="text-[var(--muted)] text-2xl leading-none px-2">×</button>
+    <div className="scrim" onClick={onClose}>
+      <div className="sheet" onClick={e => e.stopPropagation()}>
+        <div className="sheethead">
+          <span className="sect">{title}</span>
+          <button className="btn small" onClick={onClose}>Close</button>
         </div>
-        <div className="p-4">{children}</div>
+        {children}
       </div>
     </div>
   );
 }
-function Pill({ children, tone = "orange" }) {
-  const tones = { orange: "bg-[var(--orange)]/15 text-[var(--orange-br)] border-[var(--orange)]/30", blue: "bg-[var(--blue)]/15 text-[var(--blue-soft)] border-[var(--blue)]/30", muted: "bg-white/5 text-[var(--muted)] border-white/10" };
-  return <span className={`text-[11px] font-bold uppercase tracking-wide px-2 py-1 rounded-full border ${tones[tone]}`}>{children}</span>;
-}
 
-// ── Login modal ──────────────────────────────────────────────────
-function LoginModal({ onClose, onLoggedIn }) {
-  const [pin, setPin] = useState("");
-  const [err, setErr] = useState("");
-  const [busy, setBusy] = useState(false);
-  async function submit() {
-    setBusy(true); setErr("");
-    const r = await apiPost("/login", { pin });
-    setBusy(false);
-    if (r.ok) { setToken(r.token); setRole(r.role); onLoggedIn(r.role); onClose(); }
-    else setErr("Wrong PIN");
-  }
-  return (
-    <Modal title="Scorer / Admin Login" onClose={onClose}>
-      <div className="space-y-3">
-        <Input type="password" inputMode="numeric" placeholder="Enter PIN" value={pin}
-          onChange={e => setPin(e.target.value)} onKeyDown={e => e.key === "Enter" && submit()} autoFocus />
-        {err && <div className="text-[var(--red)] text-sm">{err}</div>}
-        <Btn onClick={submit} disabled={busy || !pin} className="w-full">{busy ? "..." : "Login"}</Btn>
-      </div>
-    </Modal>
-  );
-}
+// ── setup ───────────────────────────────────────────────────────
+function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
+  const selCount = Object.values(sel).filter(Boolean).length;
+  const suggested = selCount >= 4 ? (selCount % 2 === 0 ? selCount - 1 : selCount) : 0;
+  const needed = selCount >= 4 ? maxCourtsFor(selCount) : 0;
+  const useCourts = Math.max(1, Math.min(Number(cfg.courts) || 1, needed || 1));
+  const benched = selCount >= 4 ? Math.max(0, selCount - useCourts * 4) : 0;
+  const roster = useMemo(() => people.slice().sort((a, b) => a.name.localeCompare(b.name)), [people]);
 
-// ── Players view ─────────────────────────────────────────────────
-function PlayersView({ state }) {
-  const [q, setQ] = useState("");
-  const players = (state.players || []).filter(p => p.name.toLowerCase().includes(q.toLowerCase()))
-    .sort((a, b) => a.name.localeCompare(b.name));
-  return (
-    <div className="space-y-4">
-      <Input placeholder="Search players…" value={q} onChange={e => setQ(e.target.value)} />
-      <div className="text-sm text-[var(--muted)]">{players.length} players · synced from August Attack's roster</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {players.map(p => (
-          <Card key={p.id} className="flex items-center gap-3 !p-3">
-            <Avatar player={p} />
-            <div className="flex-1 min-w-0">
-              <div className="font-bold truncate">{p.name}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-// ── New tournament setup ─────────────────────────────────────────
-function SetupView({ state, canEdit, onStart }) {
-  const [selected, setSelected] = useState({});
-  const [points, setPoints] = useState(32);
-  const [rounds, setRounds] = useState(7);
-  const [courts, setCourts] = useState(2);
-  const [name, setName] = useState("");
-  const players = (state.players || []).slice().sort((a, b) => a.name.localeCompare(b.name));
-  const n = Object.values(selected).filter(Boolean).length;
-  const suggestedRounds = n >= 4 ? (n % 2 === 0 ? n - 1 : n) : 0;
-  const courtsNeeded = n >= 4 ? maxCourtsFor(n) : 0;
-  const benchedPerRound = courtsNeeded > 0 ? Math.max(0, (courtsNeeded - Math.min(Number(courts) || 1, courtsNeeded)) * 4) : 0;
-
-  useEffect(() => { if (suggestedRounds) setRounds(Math.min(suggestedRounds, 8)); }, [n]);
-  useEffect(() => { if (courtsNeeded) setCourts(courtsNeeded); }, [courtsNeeded]);
-
-  function toggle(id) { setSelected(s => ({ ...s, [id]: !s[id] })); }
-
-  function start() {
-    const ids = Object.keys(selected).filter(id => selected[id]);
-    if (ids.length < 4) return;
-    const courtCount = Math.max(1, Math.min(Number(courts) || 1, maxCourtsFor(ids.length)));
-    onStart({
-      id: uid("t"),
-      name: name.trim() || `Americano ${new Date().toLocaleDateString()}`,
-      createdAt: Date.now(),
-      pointsPerMatch: Number(points) || 32,
-      playerIds: ids,
-      numRounds: Number(rounds) || 1,
-      courtCount,
-      rounds: generateSchedule(ids, Number(rounds) || 1, courtCount),
-      status: "active",
-    });
-  }
+  const hint = selCount < 4
+    ? "Check in at least 4 players to start."
+    : `Full partner rotation for ${selCount} players covers ${suggested} rounds. ` + (benched > 0
+      ? `On ${plural(useCourts, "court")}, ${restPhrase(benched)} each round, rotated evenly.`
+      : `${plural(needed, "court")} runs every match at once — nobody rests.`);
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <h2 className="display text-xl mb-2">🎾 Classic Americano</h2>
-        <p className="text-sm text-[var(--muted)] leading-relaxed">
-          Partners rotate every round — there are no fixed teams. Each point your pair wins
-          adds to <b className="text-[var(--cream)]">your own</b> individual total. After all
-          rounds, individual point totals decide the final ranking.
+    <div className="screen">
+      <div>
+        <Eyebrow>New Session</Eyebrow>
+        <div className="display">Classic <em>Americano</em></div>
+        <p className="lede">
+          Partners rotate every round — no fixed teams. Every point your pair wins adds to <b>your own</b> total,
+          and individual totals decide the final ranking.
         </p>
-        <div className="flex flex-wrap gap-2 mt-3">
-          <Pill>Recommended: 32 points/match</Pill>
-          <Pill tone="blue">Best with player count ÷ 4</Pill>
-          <Pill tone="muted">8 players ≈ 2 hours</Pill>
-        </div>
-      </Card>
+      </div>
 
       {!canEdit ? (
-        <Card className="text-center text-[var(--muted)]">Login as scorer/admin to set up a tournament.</Card>
+        <div className="hair" style={{ fontSize: 15, color: "var(--muted)" }}>
+          Log in as scorer or admin to set up a session.
+        </div>
       ) : (
-        <>
-          <Card className="space-y-3">
-            <Input placeholder="Tournament name (optional)" value={name} onChange={e => setName(e.target.value)} />
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-xs text-[var(--muted)] block mb-1">Points per match</label>
-                <Input type="number" value={points} onChange={e => setPoints(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-xs text-[var(--muted)] block mb-1">Rounds</label>
-                <Input type="number" min="1" value={rounds} onChange={e => setRounds(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-xs text-[var(--muted)] block mb-1">Courts</label>
-                <Input type="number" min="1" max={courtsNeeded || 1} value={courts} onChange={e => setCourts(e.target.value)} />
-              </div>
+        <Fragment>
+          <div className="hair" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <input className="field big" placeholder="Session name" value={cfg.name}
+              onChange={e => setCfg(c => ({ ...c, name: e.target.value }))} />
+            <div className="grid3">
+              {[["Points", "points"], ["Rounds", "rounds"], ["Courts", "courts"]].map(([lab, key]) => (
+                <label className="stack" key={key}>
+                  <span className="label">{lab}</span>
+                  <input className="field num" type="number" min="1" value={cfg[key]}
+                    onChange={e => setCfg(c => ({ ...c, [key]: e.target.value }))} />
+                </label>
+              ))}
             </div>
-            {n > 0 && suggestedRounds > 0 && (
-              <div className="text-xs text-[var(--muted)]">Full partner rotation for {n} players covers {suggestedRounds} rounds.</div>
-            )}
-            {courtsNeeded > 0 && (
-              <div className="text-xs text-[var(--muted)]">
-                {benchedPerRound > 0
-                  ? `${courtsNeeded} courts would run everyone at once — on ${courts} court${Number(courts) === 1 ? "" : "s"}, ${benchedPerRound} players sit out each round (rotated evenly).`
-                  : `${courtsNeeded} court${courtsNeeded === 1 ? "" : "s"} runs every match at once — nobody sits out.`}
-              </div>
-            )}
-          </Card>
+            <div className="note">{hint}</div>
+          </div>
 
-          <Card>
-            <div className="flex items-center justify-between mb-3">
-              <div className="font-bold">Select players</div>
-              <div className="text-sm text-[var(--muted)]">{n} selected{n % 4 !== 0 && n > 0 ? ` (${n % 4} will sit out some rounds)` : ""}</div>
+          <div className="hair">
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14, marginBottom: 14 }}>
+              <span className="sect">Check In</span>
+              <span className="label">{selCount} checked in</span>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-96 overflow-y-auto">
-              {players.map(p => (
-                <button key={p.id} onClick={() => toggle(p.id)}
-                  className={`flex items-center gap-2 p-2 rounded-xl border text-left ${selected[p.id] ? "border-[var(--orange)] bg-[var(--orange)]/10" : "border-white/10 bg-white/5"}`}>
-                  <Avatar player={p} size={28} />
-                  <span className="text-sm truncate">{p.name}</span>
+            <div className="note" style={{ marginBottom: 12 }}>Tap everyone who showed up.</div>
+            <div className="chipgrid">
+              {roster.map(p => (
+                <button key={p.id} className={"chip" + (sel[p.id] ? " on" : "")}
+                  onClick={() => setSel(s => ({ ...s, [p.id]: !s[p.id] }))}>
+                  <Ava p={p} on={!!sel[p.id]} />
+                  <span className="truncate">{p.name}</span>
                 </button>
               ))}
             </div>
-          </Card>
+          </div>
 
-          <Btn onClick={start} disabled={n < 4} className="w-full">Start Tournament ({n} players)</Btn>
-        </>
+          <button className="btn" disabled={selCount < 4} onClick={onStart}>
+            {selCount < 4 ? "Check in 4+ players" : `Start session · ${selCount} players`}
+          </button>
+        </Fragment>
       )}
     </div>
   );
 }
 
-// ── Live round view ──────────────────────────────────────────────
-function LiveView({ tournament, players, canEdit, onScore, onFinish, onCourtsChange }) {
-  const byId = {}; players.forEach(p => { byId[p.id] = p; });
-  const [roundIdx, setRoundIdx] = useState(() => {
-    const firstOpen = tournament.rounds.findIndex(r => r.courts.some(m => m.score1 == null));
-    return firstOpen === -1 ? tournament.rounds.length - 1 : firstOpen;
-  });
-  const [courtsOpen, setCourtsOpen] = useState(false);
-  const round = tournament.rounds[roundIdx];
-  const allScored = tournament.rounds.every(r => r.courts.every(m => m.score1 != null && m.score2 != null));
-  const courtCount = tournament.courtCount || maxCourtsFor(tournament.playerIds.length);
-
-  function Name({ id }) {
-    const p = byId[id];
-    return <div className="flex items-center gap-2"><Avatar player={p} size={32} /><span className="font-bold text-sm">{p?.name || "?"}</span></div>;
-  }
+// ── live board ──────────────────────────────────────────────────
+function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, editing, setEditing,
+                 onCommit, onFinish, onOpenCourts, onOpenJoin }) {
+  const ri = Math.min(roundIdx, t.rounds.length - 1);
+  const round = t.rounds[ri];
+  const pts = t.pointsPerMatch || 32;
+  const scored = round.courts.filter(m => m.score1 != null).length;
+  const sitOutNames = (round.sitOuts || []).map(id => (byId[id] && byId[id].name) || "?").join(", ");
+  const canFinish = canEdit && t.rounds.every(r => r.courts.every(m => m.score1 != null && m.score2 != null));
+  const nameOf = id => (byId[id] && byId[id].name) || "?";
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <button disabled={roundIdx === 0} onClick={() => setRoundIdx(i => i - 1)} className="px-3 py-2 rounded-xl bg-white/5 disabled:opacity-30">‹</button>
-        <div className="text-center">
-          <div className="display text-xl">ROUND {round.roundNum}</div>
-          <div className="text-xs text-[var(--muted)]">of {tournament.rounds.length}</div>
+    <div className="screen">
+      <div>
+        <Eyebrow>Live</Eyebrow>
+        <div className="display">Round <em>{round.roundNum}</em></div>
+        <div className="note" style={{ marginTop: 12 }}>
+          of {t.rounds.length} · {scored}/{round.courts.length} courts scored
         </div>
-        <button disabled={roundIdx === tournament.rounds.length - 1} onClick={() => setRoundIdx(i => i + 1)} className="px-3 py-2 rounded-xl bg-white/5 disabled:opacity-30">›</button>
+      </div>
+
+      <div className="rchips">
+        {t.rounds.map((r, i) => {
+          const done = r.courts.every(m => m.score1 != null);
+          return (
+            <button key={i} className={"rchip" + (i === ri ? " on" : done ? " done" : "")}
+              onClick={() => setRoundIdx(i)}>R{r.roundNum}</button>
+          );
+        })}
       </div>
 
       {canEdit && (
-        <button onClick={() => setCourtsOpen(true)} className="w-full text-left">
-          <Card className="!p-3 flex items-center justify-between">
-            <span className="text-sm text-[var(--muted)]">Courts in use</span>
-            <span className="flex items-center gap-2">
-              <span className="display text-lg">{courtCount}</span>
-              <span className="text-[var(--orange-br)] text-xs font-bold">CHANGE</span>
-            </span>
-          </Card>
-        </button>
+        <div className="hair" style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <div className="label">Courts in use</div>
+            <div className="sect" style={{ marginTop: 6 }}>{plural(t.courtCount, "court")}</div>
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn small" onClick={onOpenCourts}>Change courts</button>
+            <button className="btn small" onClick={onOpenJoin}>Late arrival</button>
+          </div>
+        </div>
       )}
 
-      {courtsOpen && (
-        <CourtsModal tournament={tournament} current={courtCount}
-          onClose={() => setCourtsOpen(false)}
-          onApply={c => { onCourtsChange(c); setCourtsOpen(false); }} />
+      {sitOutNames && (
+        <div className="hair">
+          <div className="label">Resting</div>
+          <div className="note" style={{ marginTop: 8, color: "var(--muted)" }}>{sitOutNames}</div>
+        </div>
       )}
 
-      {round.sitOuts.length > 0 && (
-        <Card className="!p-3 text-sm text-[var(--muted)]">
-          Sitting out: {round.sitOuts.map(id => byId[id]?.name || "?").join(", ")}
-        </Card>
-      )}
+      <div className="courtgrid">
+        {round.courts.map((m, mi) => {
+          const key = ri + "-" + mi;
+          const done = m.score1 != null && m.score2 != null;
+          const isEditing = !!editing[key];
+          const show = canEdit && (!done || isEditing);
+          const slide = drafts[key] != null ? drafts[key] : (done ? Number(m.score1) : Math.round(pts / 2));
+          const s1 = done && !isEditing ? m.score1 : show ? slide : "–";
+          const s2 = done && !isEditing ? m.score2 : show ? pts - slide : "–";
+          const presets = [pts, Math.round(pts * 0.75), Math.round(pts * 0.625), Math.round(pts / 2)];
+          return (
+            <div key={key} className={"court" + (done && !isEditing ? " final" : show ? " live" : "")}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span className="label">Court {m.court}</span>
+                <span className="label" style={{ color: done ? "var(--blue-soft)" : show ? "var(--orange-br)" : "var(--muted2)" }}>
+                  {done ? "Final" : show ? "Scoring" : "Awaiting"}
+                </span>
+              </div>
 
-      <div className="space-y-3">
-        {round.courts.map((m, mi) => (
-          <Card key={`${roundIdx}-${mi}`} className={m.score1 != null ? "opacity-80" : ""}>
-            <div className="text-xs text-[var(--muted)] mb-2">Court {m.court}</div>
-            <div className="grid grid-cols-[1fr,auto,1fr] items-center gap-3">
-              <div className="space-y-1">{m.team1.map(id => <Name key={id} id={id} />)}</div>
-              <ScoreEntry m={m} canEdit={canEdit} pointsPerMatch={tournament.pointsPerMatch}
-                onSubmit={(s1, s2) => onScore(roundIdx, mi, s1, s2)} />
-              <div className="space-y-1 text-right">{m.team2.map(id => <Name key={id} id={id} />)}</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 10, alignItems: "center" }}>
+                <div className="teamside">
+                  {m.team1.map(id => (
+                    <span key={id} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                      <Ava p={byId[id]} /><span className="truncate" style={{ fontWeight: 700, fontSize: 14 }}>{nameOf(id)}</span>
+                    </span>
+                  ))}
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div className="score" style={{ color: "var(--cream)" }}>
+                    {s1}<span style={{ color: "var(--muted2)", fontSize: 20 }}> · </span>{s2}
+                  </div>
+                </div>
+                <div className="teamside" style={{ alignItems: "flex-end" }}>
+                  {m.team2.map(id => (
+                    <span key={id} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexDirection: "row-reverse" }}>
+                      <Ava p={byId[id]} /><span className="truncate" style={{ fontWeight: 700, fontSize: 14 }}>{nameOf(id)}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {show && (
+                <div style={{ marginTop: 14 }}>
+                  <div className="track"><i style={{ width: Math.round((slide / pts) * 100) + "%" }} /></div>
+                  <input type="range" min="0" max={pts} value={slide}
+                    onChange={e => setDrafts(d => ({ ...d, [key]: Number(e.target.value) }))} />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
+                    {presets.map(v => (
+                      <button key={v} className="btn small" onClick={() => setDrafts(d => ({ ...d, [key]: v }))}>
+                        {v}-{pts - v}
+                      </button>
+                    ))}
+                    <button className="btn" style={{ marginLeft: "auto", padding: "10px 18px" }}
+                      onClick={() => onCommit(ri, mi, slide, pts - slide, key)}>
+                      {done ? "Update score" : "Confirm score"}
+                    </button>
+                  </div>
+                </div>
+              )}
+              {done && canEdit && !isEditing && (
+                <div style={{ marginTop: 12, textAlign: "right" }}>
+                  <button className="btn small" onClick={() => setEditing(e => ({ ...e, [key]: true }))}>Edit score</button>
+                </div>
+              )}
             </div>
-          </Card>
+          );
+        })}
+      </div>
+
+      {canFinish && <button className="btn" onClick={onFinish}>Finish session 🏆</button>}
+    </div>
+  );
+}
+
+// ── standings ───────────────────────────────────────────────────
+function Standings({ t, byId, onPodium }) {
+  if (!t) return (
+    <div className="screen">
+      <div><Eyebrow>Standings</Eyebrow><div className="display">No <em>session</em></div>
+        <p className="lede">Start a session and scores will show up here.</p></div>
+    </div>
+  );
+  const table = calcStandings(t, byId);
+  return (
+    <div className="screen">
+      <div>
+        <Eyebrow>{t.name}</Eyebrow>
+        <div className="display">The <em>Standings</em></div>
+      </div>
+      {table.length > 0 && (
+        <div><button className="btn gold" onClick={onPodium}>Podium 👑</button></div>
+      )}
+      <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
+        {table.map((s, i) => (
+          <div className="row" key={s.id} style={i === 0 ? { background: "rgba(255,194,75,.07)", borderRadius: 12 } : null}>
+            <span className="score" style={{ fontSize: 22, width: 34, textAlign: "center", color: i === 0 ? "var(--gold)" : "var(--muted2)" }}>{i + 1}</span>
+            <Ava p={s} on={i === 0} />
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="truncate" style={{ display: "block", fontWeight: 800 }}>{s.name}</span>
+              <span className="label" style={{ letterSpacing: ".12em" }}>{s.played} played · {s.wins} won</span>
+            </span>
+            <span style={{ textAlign: "right" }}>
+              <span className="score" style={{ fontSize: 26, color: "var(--orange-br)", display: "block" }}>{s.points}</span>
+              <span className="label" style={{ letterSpacing: ".12em" }}>{s.diff > 0 ? "+" : ""}{s.diff}</span>
+            </span>
+          </div>
         ))}
       </div>
-
-      {canEdit && roundIdx === tournament.rounds.length - 1 && allScored && (
-        <Btn variant="blue" onClick={onFinish} className="w-full">Finish Tournament</Btn>
-      )}
     </div>
   );
 }
-function CourtsModal({ tournament, current, onClose, onApply }) {
-  const [val, setVal] = useState(current);
-  const maxC = maxCourtsFor(tournament.playerIds.length);
-  const chosen = Math.max(1, Math.min(Number(val) || 1, maxC));
-  const benched = Math.max(0, (maxC - chosen) * 4);
-  const played = tournament.rounds.filter(r => r.courts.some(m => m.score1 != null)).length;
-  const remaining = tournament.rounds.length - played;
+
+// ── players ─────────────────────────────────────────────────────
+function Players({ people, tournaments, query, setQuery, onOpenStats }) {
+  const q = query.toLowerCase();
+  const cards = people.filter(p => p.name.toLowerCase().includes(q))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(p => {
+      let played = 0, pointsTotal = 0;
+      tournaments.forEach(tt => (tt.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+        if (m.score1 == null) return;
+        if (m.team1.includes(p.id)) { played++; pointsTotal += Number(m.score1); }
+        else if (m.team2.includes(p.id)) { played++; pointsTotal += Number(m.score2); }
+      })));
+      return { ...p, sub: played ? `${played} matches · ${pointsTotal} pts` : "No matches yet" };
+    });
   return (
-    <Modal title="Courts in use" onClose={onClose}>
-      <div className="space-y-3">
-        <div>
-          <label className="text-xs text-[var(--muted)] block mb-1">Courts available (max {maxC})</label>
-          <Input type="number" min="1" max={maxC} value={val} onChange={e => setVal(e.target.value)} autoFocus />
-        </div>
-        <div className="text-sm text-[var(--muted)] leading-relaxed">
-          {benched > 0
-            ? `${benched} players sit out each round, rotated so rest is spread evenly.`
-            : "Every match runs at once — nobody sits out."}
-        </div>
-        <Card className="!p-3 text-xs text-[var(--muted)] leading-relaxed">
-          The {played} round{played === 1 ? "" : "s"} already scored stay exactly as played.
-          The remaining {remaining} will be rebuilt — partners carry on rotating from where
-          they left off, so nobody gets a repeat partner.
-        </Card>
-        <div className="flex gap-2">
-          <Btn variant="ghost" onClick={onClose} className="flex-1">Cancel</Btn>
-          <Btn onClick={() => onApply(chosen)} disabled={chosen === current} className="flex-1">Apply</Btn>
-        </div>
+    <div className="screen">
+      <div>
+        <Eyebrow>{plural(people.length, "player")}</Eyebrow>
+        <div className="display">The <em>Roster</em></div>
       </div>
-    </Modal>
-  );
-}
-function ScoreEntry({ m, canEdit, pointsPerMatch, onSubmit }) {
-  const [s1, setS1] = useState(m.score1 ?? "");
-  const [s2, setS2] = useState(m.score2 ?? "");
-  const done = m.score1 != null;
-  if (!canEdit && !done) return <div className="text-[var(--muted)] text-xs text-center">vs</div>;
-  return (
-    <div className="flex items-center gap-1">
-      <Input type="number" disabled={!canEdit} value={s1} onChange={e => setS1(e.target.value)}
-        onBlur={() => s1 !== "" && s2 !== "" && onSubmit(Number(s1), Number(s2))}
-        className="!w-14 text-center !px-1" placeholder="0" />
-      <span className="text-[var(--muted)] text-xs">-</span>
-      <Input type="number" disabled={!canEdit} value={s2} onChange={e => setS2(e.target.value)}
-        onBlur={() => s1 !== "" && s2 !== "" && onSubmit(Number(s1), Number(s2))}
-        className="!w-14 text-center !px-1" placeholder="0" />
-    </div>
-  );
-}
-
-// ── Standings view ───────────────────────────────────────────────
-function StandingsView({ tournament, players }) {
-  if (!tournament) return <Card className="text-center text-[var(--muted)]">No active tournament yet.</Card>;
-  const standings = calcStandings(tournament, players);
-  return (
-    <div className="space-y-2">
-      <div className="text-sm text-[var(--muted)] mb-2">{tournament.name}</div>
-      {standings.map((s, i) => (
-        <Card key={s.id} className={`flex items-center gap-3 !p-3 ${i === 0 ? "glow-orange" : ""}`}>
-          <div className={`display text-lg w-6 text-center ${i === 0 ? "text-[var(--orange-br)]" : "text-[var(--muted)]"}`}>{i + 1}</div>
-          <Avatar player={s} />
-          <div className="flex-1 min-w-0">
-            <div className="font-bold truncate">{s.name}</div>
-            <div className="text-xs text-[var(--muted)]">{s.played} played · {s.wins} won</div>
-          </div>
-          <div className="text-right">
-            <div className="display text-lg mono">{s.points}</div>
-            <div className="text-xs text-[var(--muted)]">pts</div>
-          </div>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-// ── History view ─────────────────────────────────────────────────
-function HistoryView({ state, players }) {
-  const [openId, setOpenId] = useState(null);
-  const done = (state.tournaments || []).filter(t => t.status === "completed").sort((a, b) => b.createdAt - a.createdAt);
-  if (!done.length) return <Card className="text-center text-[var(--muted)]">No completed tournaments yet.</Card>;
-  const open = done.find(t => t.id === openId);
-  if (open) {
-    return (
-      <div className="space-y-3">
-        <button onClick={() => setOpenId(null)} className="text-sm text-[var(--muted)]">‹ Back to history</button>
-        <StandingsView tournament={open} players={players} />
+      <input className="field" placeholder="Search players…" value={query} onChange={e => setQuery(e.target.value)} />
+      <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
+        {cards.map(p => (
+          <button key={p.id} className="row" onClick={() => onOpenStats(p.id)}
+            style={{ background: "transparent", border: 0, borderBottom: "1px solid var(--line2)", cursor: "pointer", color: "inherit", textAlign: "left", width: "100%" }}>
+            <Ava p={p} />
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span className="truncate" style={{ display: "block", fontWeight: 700 }}>{p.name}</span>
+              <span className="label" style={{ letterSpacing: ".12em" }}>{p.sub}</span>
+            </span>
+            {p.guest && <span className="label" style={{ color: "var(--blue-soft)" }}>Guest</span>}
+          </button>
+        ))}
       </div>
-    );
-  }
-  return (
-    <div className="space-y-2">
-      {done.map(t => (
-        <button key={t.id} onClick={() => setOpenId(t.id)} className="w-full text-left">
-          <Card className="flex items-center justify-between !p-3">
-            <div>
-              <div className="font-bold">{t.name}</div>
-              <div className="text-xs text-[var(--muted)]">{new Date(t.createdAt).toLocaleDateString()} · {t.playerIds.length} players · {t.rounds.length} rounds</div>
-            </div>
-            <span className="text-[var(--muted)]">›</span>
-          </Card>
-        </button>
-      ))}
     </div>
   );
 }
 
-// ── App ──────────────────────────────────────────────────────────
+// ── admin (guests only) ─────────────────────────────────────────
+function Admin({ guests, newName, setNewName, onAdd, onRename, onDelete }) {
+  return (
+    <div className="screen">
+      <div>
+        <Eyebrow>Admin</Eyebrow>
+        <div className="display">Manage <em>Guests</em></div>
+        <p className="lede">
+          The main roster is synced from <b>August Attack</b> and is read-only here — add or edit those players there.
+          Guests below are local to Americano, for one-off drop-ins.
+        </p>
+      </div>
+      <div className="hair" style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+        <input className="field" placeholder="Add a guest player…" value={newName}
+          onChange={e => setNewName(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && onAdd()} />
+        <button className="btn" onClick={onAdd}>Add</button>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        {guests.length === 0 && <div className="note">No guest players yet.</div>}
+        {guests.map(p => (
+          <div className="row" key={p.id}>
+            <Ava p={p} />
+            <input className="field" style={{ borderBottom: 0, fontWeight: 700 }} value={p.name}
+              onChange={e => onRename(p.id, e.target.value)} />
+            <button className="btn small" style={{ borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+              onClick={() => onDelete(p.id)}>Del</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── history ─────────────────────────────────────────────────────
+function History({ tournaments, byId, onOpen }) {
+  const done = tournaments.filter(x => x.status === "completed").sort((a, b) => b.createdAt - a.createdAt);
+  return (
+    <div className="screen">
+      <div>
+        <Eyebrow>Archive</Eyebrow>
+        <div className="display">Past <em>Sessions</em></div>
+      </div>
+      {done.length === 0
+        ? <div className="hair note">No completed sessions yet.</div>
+        : (
+          <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
+            {done.map(tt => {
+              const s = calcStandings(tt, byId);
+              return (
+                <button key={tt.id} className="row" onClick={() => onOpen(tt.id)}
+                  style={{ background: "transparent", border: 0, borderBottom: "1px solid var(--line2)", cursor: "pointer", color: "inherit", textAlign: "left", width: "100%" }}>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <span className="truncate" style={{ display: "block", fontWeight: 800, fontSize: 16 }}>{tt.name}</span>
+                    <span className="label" style={{ letterSpacing: ".12em" }}>
+                      {new Date(tt.createdAt).toLocaleDateString()} · {tt.playerIds.length} players · {tt.rounds.length} rounds
+                    </span>
+                  </span>
+                  <span style={{ textAlign: "right" }}>
+                    <span className="label" style={{ color: "var(--gold)" }}>Winner</span>
+                    <span className="truncate" style={{ display: "block", fontWeight: 700 }}>{s.length ? s[0].name : "—"}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+    </div>
+  );
+}
+
+// ── app ─────────────────────────────────────────────────────────
 function App() {
-  const [state, setState] = useState({ players: [], tournaments: [] });
-  const [loading, setLoading] = useState(true);
-  const [role, setRoleState] = useState(getRole());
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [tab, setTab] = useState("play");
+  const [data, setData] = useState({ players: [], guests: [], tournaments: [] });
+  const [loaded, setLoaded] = useState(false);
+  const [role, setRole] = useState(LS.get("am-role"));
+  const [token, setTokenState] = useState(LS.get("am-token"));
+  const [view, setView] = useState("board");
+  const [modal, setModal] = useState(null);
+  const [pin, setPin] = useState("");
+  const [loginErr, setLoginErr] = useState(false);
+  const [sel, setSel] = useState({});
+  const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2 });
+  const [roundIdx, setRoundIdx] = useState(0);
+  const [drafts, setDrafts] = useState({});
+  const [editing, setEditing] = useState({});
+  const [courtsPick, setCourtsPick] = useState(null);
+  const [query, setQuery] = useState("");
+  const [newName, setNewName] = useState("");
+  const [statsId, setStatsId] = useState(null);
+  const [historyId, setHistoryId] = useState(null);
+  const [podiumId, setPodiumId] = useState(null);
   const saveTimer = useRef(null);
 
   useEffect(() => {
-    apiGet("/state").then(r => {
-      if (r.ok) setState(prev => ({ players: [], tournaments: [], ...r.state }));
-      setLoading(false);
-    });
+    fetch("/state").then(r => r.json()).then(r => {
+      if (r && r.ok) setData(d => ({ players: [], guests: [], tournaments: [], ...r.state }));
+      setLoaded(true);
+    }).catch(() => setLoaded(true));
   }, []);
 
   const canEdit = role === "admin" || role === "scorer";
+  const guests = data.guests || [];
+  const people = useMemo(
+    () => [...(data.players || []), ...guests.map(g => ({ ...g, guest: true }))],
+    [data.players, guests]
+  );
+  const byId = useMemo(() => { const m = {}; people.forEach(p => { m[p.id] = p; }); return m; }, [people]);
+  const tournaments = data.tournaments || [];
+  const active = tournaments.find(t => t.status === "active");
 
   function persist(next) {
-    setState(next);
+    setData(next);
     clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => { apiPost("/save", { state: next }, true); }, 400);
+    saveTimer.current = setTimeout(() => {
+      fetch("/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + LS.get("am-token") },
+        body: JSON.stringify({ state: next })
+      }).catch(() => {});
+    }, 400);
   }
+  const saveT = nextT => persist({ ...data, tournaments: tournaments.map(x => x.id === nextT.id ? nextT : x) });
 
-  const activeTournament = (state.tournaments || []).find(t => t.status === "active");
-
-  function startTournament(t) {
-    persist({ ...state, tournaments: [...(state.tournaments || []), t] });
+  function startSession() {
+    const ids = Object.keys(sel).filter(id => sel[id]);
+    if (ids.length < 4) return;
+    const courts = Math.max(1, Math.min(Number(cfg.courts) || 1, maxCourtsFor(ids.length)));
+    const rounds = Number(cfg.rounds) || 1;
+    const nt = {
+      id: uid("t"), name: cfg.name.trim() || "Americano " + new Date().toLocaleDateString(),
+      createdAt: Date.now(), pointsPerMatch: Number(cfg.points) || 32,
+      playerIds: ids, numRounds: rounds, courtCount: courts,
+      rounds: generateSchedule(ids, rounds, courts), status: "active"
+    };
+    persist({ ...data, tournaments: [...tournaments, nt] });
+    setRoundIdx(0); setView("board");
   }
-  function scoreMatch(roundIdx, matchIdx, s1, s2) {
-    const t = activeTournament; if (!t) return;
-    const rounds = t.rounds.map((r, ri) => ri !== roundIdx ? r : {
-      ...r, courts: r.courts.map((m, mi) => mi !== matchIdx ? m : { ...m, score1: s1, score2: s2 }),
+  function commitScore(ri, mi, s1, s2, key) {
+    if (!active) return;
+    const rounds = active.rounds.map((r, i) => i !== ri ? r : {
+      ...r, courts: r.courts.map((mm, j) => j !== mi ? mm : { ...mm, score1: s1, score2: s2 })
     });
-    const nextT = { ...t, rounds };
-    persist({ ...state, tournaments: state.tournaments.map(x => x.id === t.id ? nextT : x) });
+    saveT({ ...active, rounds });
+    setEditing(e => ({ ...e, [key]: false }));
   }
-  function finishTournament() {
-    const t = activeTournament; if (!t) return;
-    persist({ ...state, tournaments: state.tournaments.map(x => x.id === t.id ? { ...x, status: "completed", completedAt: Date.now() } : x) });
-    setTab("history");
+  function finishSession() {
+    if (!active) return;
+    saveT({ ...active, status: "completed", completedAt: Date.now() });
+    setPodiumId(active.id); setSel({}); setModal("podium");
   }
-  function changeCourts(newCourts) {
-    const t = activeTournament; if (!t) return;
-    const nextT = rescheduleForCourts(t, newCourts);
-    persist({ ...state, tournaments: state.tournaments.map(x => x.id === t.id ? nextT : x) });
+  function submitLogin() {
+    fetch("/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin }) })
+      .then(r => r.json()).then(r => {
+        if (r && r.ok) {
+          LS.set("am-token", r.token); LS.set("am-role", r.role);
+          setTokenState(r.token); setRole(r.role); setModal(null); setLoginErr(false); setPin("");
+        } else setLoginErr(true);
+      }).catch(() => setLoginErr(true));
+  }
+  function logout() {
+    LS.set("am-role", ""); LS.set("am-token", "");
+    setRole(""); setTokenState(""); setView("board");
+  }
+  function addGuest() {
+    const n = newName.trim(); if (!n) return;
+    persist({ ...data, guests: [...guests, { id: uid("g"), name: n }] });
+    setNewName("");
   }
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-[var(--muted)]">Loading…</div>;
+  if (!loaded) return <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted2)" }}>Loading…</div>;
 
-  const tabs = [
-    { id: "play", label: "🎾 Play" },
-    { id: "standings", label: "🏆 Standings" },
-    { id: "players", label: "👥 Players" },
-    { id: "history", label: "📜 History" },
+  const shownT = historyId ? tournaments.find(x => x.id === historyId) : active;
+  const podiumT = podiumId ? tournaments.find(x => x.id === podiumId) : shownT;
+  const navDefs = [
+    { id: "board", label: active ? "Board" : "Setup" },
+    { id: "standings", label: "Standings" },
+    { id: "players", label: "Players" },
+    { id: "history", label: "History" }
   ];
+  if (role === "admin") navDefs.push({ id: "admin", label: "Admin" });
+  const headerSub = active ? active.name : (canEdit ? "Ready to set up" : "Guest view");
 
   return (
-    <div className="min-h-screen pb-24">
-      <header className="sticky top-0 z-30 bg-[var(--ink)]/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <h1 className="display text-xl tracking-wide">🎾 AMERICANO</h1>
+    <Fragment>
+      <header className="top">
+        <div className="brand">
+          <span className="mark">🎾</span>
+          <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <span className="name">Americano</span>
+            <span className="sub">{headerSub}</span>
+          </span>
+        </div>
         {canEdit
-          ? <Pill tone={role === "admin" ? "orange" : "blue"}>{role}</Pill>
-          : <button onClick={() => setLoginOpen(true)} className="text-sm text-[var(--muted)] underline">Login</button>}
+          ? <button className="btn ghost" onClick={logout}>{role}</button>
+          : <button className="btn pill" onClick={() => { setModal("login"); setPin(""); setLoginErr(false); }}>Login</button>}
       </header>
 
-      <main className="max-w-2xl mx-auto p-4">
-        {tab === "play" && (activeTournament
-          ? <LiveView tournament={activeTournament} players={state.players} canEdit={canEdit}
-              onScore={scoreMatch} onFinish={finishTournament} onCourtsChange={changeCourts} />
-          : <SetupView state={state} canEdit={canEdit} onStart={startTournament} />)}
-        {tab === "standings" && <StandingsView tournament={activeTournament} players={state.players} />}
-        {tab === "players" && <PlayersView state={state} />}
-        {tab === "history" && <HistoryView state={state} players={state.players} />}
+      <main>
+        {view === "board" && (active
+          ? <Board t={active} byId={byId} canEdit={canEdit} roundIdx={roundIdx} setRoundIdx={setRoundIdx}
+              drafts={drafts} setDrafts={setDrafts} editing={editing} setEditing={setEditing}
+              onCommit={commitScore} onFinish={finishSession}
+              onOpenCourts={() => { setCourtsPick(active.courtCount); setModal("courts"); }}
+              onOpenJoin={() => setModal("join")} />
+          : <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />)}
+
+        {view === "standings" && <Standings t={shownT} byId={byId}
+          onPodium={() => { setPodiumId(shownT ? shownT.id : null); setModal("podium"); }} />}
+
+        {view === "players" && <Players people={people} tournaments={tournaments} query={query} setQuery={setQuery}
+          onOpenStats={id => { setStatsId(id); setModal("stats"); }} />}
+
+        {view === "history" && <History tournaments={tournaments} byId={byId}
+          onOpen={id => { setHistoryId(id); setView("standings"); }} />}
+
+        {view === "admin" && role === "admin" && (
+          <Admin guests={guests} newName={newName} setNewName={setNewName} onAdd={addGuest}
+            onRename={(id, name) => persist({ ...data, guests: guests.map(g => g.id === id ? { ...g, name } : g) })}
+            onDelete={id => persist({ ...data, guests: guests.filter(g => g.id !== id) })} />
+        )}
       </main>
 
-      <nav className="fixed bottom-0 inset-x-0 bg-[var(--ink2)] border-t border-white/10 flex z-30">
-        {tabs.map(tb => (
-          <button key={tb.id} onClick={() => setTab(tb.id)}
-            className={`flex-1 py-3 text-xs font-bold ${tab === tb.id ? "text-[var(--orange-br)]" : "text-[var(--muted)]"}`}>
-            {tb.label}
-          </button>
+      <nav className="bottom">
+        {navDefs.map(n => (
+          <button key={n.id} className={view === n.id ? "on" : ""}
+            onClick={() => { if (n.id === "standings") setHistoryId(null); setView(n.id); }}>{n.label}</button>
         ))}
       </nav>
 
-      {loginOpen && <LoginModal onClose={() => setLoginOpen(false)} onLoggedIn={r => setRoleState(r)} />}
-    </div>
+      {modal === "login" && (
+        <Sheet title="Scorer login" onClose={() => setModal(null)}>
+          <input className="field big" type="password" inputMode="numeric" placeholder="PIN" value={pin} autoFocus
+            onChange={e => setPin(e.target.value)} onKeyDown={e => e.key === "Enter" && submitLogin()} />
+          {loginErr && <div className="note" style={{ color: "var(--red)", marginTop: 10 }}>Wrong PIN.</div>}
+          <button className="btn" style={{ width: "100%", marginTop: 18 }} onClick={submitLogin}>Log in</button>
+        </Sheet>
+      )}
+
+      {modal === "courts" && active && (() => {
+        const maxC = maxCourtsFor(active.playerIds.length);
+        const pick = courtsPick == null ? active.courtCount : courtsPick;
+        const playedRounds = firstUnplayedIndex(active);
+        return (
+          <Sheet title="Courts in use" onClose={() => setModal(null)}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {Array.from({ length: maxC }, (_, i) => i + 1).map(v => (
+                <button key={v} className={"rchip" + (v === pick ? " on" : "")} style={{ minWidth: 52, fontSize: 15 }}
+                  onClick={() => setCourtsPick(v)}>{v}</button>
+              ))}
+            </div>
+            <div className="note" style={{ marginTop: 14 }}>
+              {restPhrase(Math.max(0, active.playerIds.length - pick * 4))} each round on {plural(pick, "court")}.
+              The {playedRounds} {playedRounds === 1 ? "round already scored stays" : "rounds already scored stay"} as
+              played; partners keep rotating from there, so nobody repeats a partner.
+            </div>
+            <button className="btn" style={{ width: "100%", marginTop: 18 }} disabled={pick === active.courtCount}
+              onClick={() => { saveT(rebuildTail(active, pick, null)); setModal(null); }}>Apply</button>
+          </Sheet>
+        );
+      })()}
+
+      {modal === "join" && active && (() => {
+        const cands = people.filter(p => !active.playerIds.includes(p.id)).sort((a, b) => a.name.localeCompare(b.name));
+        return (
+          <Sheet title="Add a late arrival" onClose={() => setModal(null)}>
+            <div className="note" style={{ marginBottom: 14 }}>
+              They join from the next unplayed round. Scored rounds stay as played — but note that changing the
+              line-up mid-session rebuilds the rotation, so a repeat partner is possible where it can't be avoided.
+            </div>
+            {cands.length === 0 && <div className="note">Everyone on the roster is already in this session.</div>}
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {cands.map(p => (
+                <div className="row" key={p.id}>
+                  <Ava p={p} />
+                  <span className="truncate" style={{ flex: 1, fontWeight: 700 }}>{p.name}</span>
+                  <button className="btn small" onClick={() => {
+                    saveT(rebuildTail(active, active.courtCount, [...active.playerIds, p.id]));
+                    setModal(null);
+                  }}>Join</button>
+                </div>
+              ))}
+            </div>
+          </Sheet>
+        );
+      })()}
+
+      {modal === "stats" && statsId && (() => {
+        const me = statsId, agg = {};
+        let played = 0, won = 0, ptsTotal = 0;
+        tournaments.forEach(tt => (tt.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+          if (m.score1 == null || m.score2 == null) return;
+          const inT1 = m.team1.includes(me), inT2 = m.team2.includes(me);
+          if (!inT1 && !inT2) return;
+          const mine = inT1 ? Number(m.score1) : Number(m.score2);
+          const theirs = inT1 ? Number(m.score2) : Number(m.score1);
+          const mate = (inT1 ? m.team1 : m.team2).find(id => id !== me);
+          played++; ptsTotal += mine;
+          const win = mine > theirs; if (win) won++;
+          if (!agg[mate]) agg[mate] = { w: 0, l: 0 };
+          win ? agg[mate].w++ : agg[mate].l++;
+        })));
+        const partners = Object.keys(agg).map(id => ({
+          name: (byId[id] && byId[id].name) || "?", record: agg[id].w + "W – " + agg[id].l + "L"
+        })).sort((a, b) => a.name.localeCompare(b.name));
+        return (
+          <Sheet title={(byId[me] && byId[me].name) || "Player"} onClose={() => setModal(null)}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+              {[[played, "Matches"], [won, "Wins"], [ptsTotal, "Points"]].map(([v, l]) => (
+                <div key={l} style={{ border: "1px solid var(--line)", borderRadius: 14, padding: "14px 10px", textAlign: "center" }}>
+                  <div className="score" style={{ fontSize: 28, color: "var(--orange-br)" }}>{v}</div>
+                  <div className="label" style={{ marginTop: 4 }}>{l}</div>
+                </div>
+              ))}
+            </div>
+            <div className="hair" style={{ marginTop: 18 }}>
+              <div className="label" style={{ marginBottom: 8 }}>Partners</div>
+              {partners.length === 0
+                ? <div className="note">No matches played yet.</div>
+                : partners.map(p => (
+                  <div className="row" key={p.name}>
+                    <span className="truncate" style={{ flex: 1, fontWeight: 700 }}>{p.name}</span>
+                    <span className="label" style={{ letterSpacing: ".12em" }}>{p.record}</span>
+                  </div>
+                ))}
+            </div>
+          </Sheet>
+        );
+      })()}
+
+      {modal === "podium" && podiumT && (() => {
+        const table = calcStandings(podiumT, byId);
+        const heights = [150, 185, 125], order = [1, 0, 2];
+        return (
+          <Sheet title="Podium 👑" onClose={() => setModal(null)}>
+            <div className="podium">
+              {order.filter(i => table[i]).map((i, slot) => (
+                <div key={i} className={"plinth" + (i === 0 ? " first" : "")} style={{ height: heights[slot] }}>
+                  <Ava p={table[i]} on={i === 0} lg />
+                  <span className="truncate" style={{ fontWeight: 800, fontSize: 13, maxWidth: "100%" }}>{table[i].name}</span>
+                  <span className="score" style={{ fontSize: 24, color: i === 0 ? "var(--gold)" : "var(--orange-br)" }}>{table[i].points}</span>
+                  <span className="label">{i === 0 ? "1st" : i === 1 ? "2nd" : "3rd"}</span>
+                </div>
+              ))}
+            </div>
+            {table.slice(3).map((s, i) => (
+              <div className="row" key={s.id}>
+                <span className="label" style={{ width: 24 }}>{i + 4}</span>
+                <span className="truncate" style={{ flex: 1, fontWeight: 700 }}>{s.name}</span>
+                <span className="label" style={{ letterSpacing: ".12em" }}>{s.points} pts</span>
+              </div>
+            ))}
+          </Sheet>
+        );
+      })()}
+    </Fragment>
   );
 }
 
