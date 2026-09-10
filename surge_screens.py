@@ -80,9 +80,9 @@ HOME_FN = r'''function DashboardView({ state, leaderboard, setTab, setOpenSessio
     ["Win the final",        "+5", "#FF9E1B"],
   ];
 
-  const liveMatches = live ? (live.groupMatches || []) : [];
-  const donePct = liveMatches.length
-    ? Math.round(liveMatches.filter(m => m.winner).length / liveMatches.length * 100) : 0;
+  // Against the night's scheduled fixtures, not the records entered so far.
+  const liveFx = live ? sessionFixtures(live) : { total: 0, played: 0, left: 0 };
+  const donePct = liveFx.total ? Math.round(liveFx.played / liveFx.total * 100) : 0;
 
   return (
     <div className="space-y-4" style={{animation:"sgSlide 200ms var(--ease-out) both"}}>
@@ -145,7 +145,8 @@ HOME_FN = r'''function DashboardView({ state, leaderboard, setTab, setOpenSessio
                    fontSize:26,lineHeight:1,color:"#F4F9FA"}}>{(live.name||"").toUpperCase()}</div>
               <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".16em",
                    color:"#9FB0BC",marginTop:5,whiteSpace:"nowrap"}}>
-                {liveMatches.filter(m => m.winner).length} OF {liveMatches.length} PLAYED
+                {liveFx.played} OF {liveFx.total} PLAYED
+                {liveFx.left > 0 ? ` · ${liveFx.left} LEFT` : ""}
                 {live.doublePoints ? " · 2X POINTS" : ""}</div>
             </div>
             <div style={{flex:"0 0 auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:11,color:"#00E5FF"}}>OPEN &#9654;</div>
@@ -950,7 +951,11 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
     : N === 3 ? "TOP 2 + BEST THIRDS QUALIFY"
     : `TOP ${getQualifyCount(session)} QUALIFY`;
 
-  const played = matches.filter(m => m.winner).length;
+  // Played against SCHEDULED, not against whatever has been entered. A group
+  // of 3 plays three fixtures; with one entered the old count read 1/1, which
+  // says finished when two are still to come.
+  const fx = groupFixtures(session, g);
+  const played = fx.played;
 
   return (
     <div className="space-y-4">
@@ -975,7 +980,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
           <I.alert size={16} className="shrink-0 mt-0.5" style={{ color:"#FF9E1B" }} />
           <div>
             <div className="text-xs font-bold" style={{ color:"#FF9E1B" }}>Uneven groups</div>
-            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Groups have different team counts ({groupSizes.join(" / ")}). For knockout seeding every team is ranked on the same number of matches — the smallest group's ({Math.min(...groupSizes)} played) — so larger groups drop their lowest result. The tables below still show every match played.</div>
+            <div className="text-[11px] mt-0.5" style={{ color:"#9FB0BC" }}>Groups have different team counts ({groupSizes.join(" / ")}). Everyone is still ranked on the same number of results — the best {GROUP_COUNTED_GAMES} — so a larger group drops its lowest and a group too small to play {GROUP_COUNTED_GAMES} carries byes to make them up. That holds for the table, the series points and the knockout seeding alike.</div>
           </div>
         </div>
       )}
@@ -985,10 +990,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
         {groups.map(x => {
           const on = x === g;
           const n = (session.teams || []).filter(t => t.group === x).length;
-          const ms = (session.groupMatches || []).filter(m => {
-            const ts = (session.teams || []).filter(t => t.group === x);
-            return ts.find(t => t.id === m.team1Id) && ts.find(t => t.id === m.team2Id);
-          });
+          const fx = groupFixtures(session, x);
           return <div key={x} onClick={() => setPick(x)}
             style={{cursor:"pointer",minHeight:52,padding:"9px 4px",textAlign:"center",
                     background:on ? "rgba(0,229,255,.12)" : "rgba(9,14,20,.94)",
@@ -996,7 +998,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
             <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                  fontSize:21,lineHeight:1,color:on ? "#00E5FF" : "#9FB0BC"}}>{x}</div>
             <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,marginTop:4,
-                 color:on ? "#00E5FF" : "#9FB0BC"}}>{ms.filter(m => m.winner).length}/{ms.length} · {n}</div>
+                 color:on ? "#00E5FF" : "#9FB0BC"}}>{fx.played}/{fx.total} · {n}</div>
           </div>;
         })}
       </div>
@@ -1015,7 +1017,7 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                fontSize:20,lineHeight:1,color:"#F4F9FA"}}>GROUP {g}</div>
           <div style={{marginLeft:"auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
-               letterSpacing:".18em",color:"#9FB0BC"}}>{played}/{matches.length} PLAYED</div>
+               letterSpacing:".18em",color:fx.played === fx.total ? "#9FB0BC" : "#00E5FF"}}>{played}/{fx.total} PLAYED</div>
         </div>
 
         {standings.length === 0
@@ -1114,6 +1116,38 @@ GROUPS_FN = r'''function GroupsTab({ session, state, updateSession, isAdmin }) {
               </div>;
             })}
           </div>}
+
+      {/* ── STILL TO PLAY ──
+          The point of the fix: not just a truthful count, but the actual
+          fixtures outstanding. A scorer can see what is left without holding
+          the round robin in their head, and tap one to enter it. */}
+      {(() => {
+        const left = fx.pairs.filter(p => !p.played);
+        if (!left.length) return null;
+        return <div style={{marginTop:20}}>
+          <div style={{display:"flex",alignItems:"baseline",gap:10}}>
+            <div className="sg-kicker">Still to play</div>
+            <div style={{marginLeft:"auto",fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:"#00E5FF"}}>
+              {left.length} left</div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:6,marginTop:10}}>
+            {left.map(pr => (
+              <div key={pr.a.id + pr.b.id}
+                onClick={() => { if (!isAdmin) return; if (pr.match) setEdit({ ...pr.match, group: g }); else setAdd(g); }}
+                style={{cursor:isAdmin ? "pointer" : "default",display:"flex",alignItems:"center",gap:10,
+                        padding:"11px 12px",background:"rgba(9,14,20,.9)",
+                        borderLeft:`2px solid ${pr.match ? "#00E5FF" : "rgba(92,107,120,.5)"}`}}>
+                <div style={{flex:1,minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:13,
+                     color:"#F4F9FA",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                  {lbl(pr.a)} <span style={{color:"#5C6B78"}}>v</span> {lbl(pr.b)}</div>
+                <div style={{flex:"0 0 auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+                     letterSpacing:".16em",color:pr.match ? "#00E5FF" : "#9FB0BC"}}>
+                  {pr.match ? "NO SCORE" : isAdmin ? "ADD" : "TO PLAY"}</div>
+              </div>
+            ))}
+          </div>
+        </div>;
+      })()}
 
       {/* ── HOW STANDINGS WORK — folded away; it is read once ── */}
       <button onClick={() => setShowRules(v => !v)}
@@ -1717,3 +1751,108 @@ MVP_CARD = (
     'style={{ background:"rgba(16,23,31,.96)", backgroundImage:"linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06))", '
     'backgroundSize:"3px 100%", backgroundRepeat:"no-repeat", border:"1px solid rgba(255,158,27,.4)", '
     'boxShadow:"0 0 40px rgba(255,158,27,.10)", padding: "24px 18px 24px 22px", textAlign: "center" }}')
+
+# ── WHAT IS ACTUALLY LEFT TO PLAY ──────────────────────────────────────────
+# The counts read played/created, not played/scheduled. Matches are added by
+# hand, so a group of 3 with one match entered showed "1/1" — finished, when
+# two of its three fixtures had not been created yet. The denominator was
+# counting the wrong thing.
+#
+# A group plays a full round robin: every pair meets once, n(n-1)/2 matches.
+# Checked against every group on record — 100 of 101 match that exactly, the
+# one exception being the known duplicate fixture in August Session 9.
+#
+# So the fixture list is derived from the teams rather than read off whatever
+# happens to have been entered, and the screen can then say which pairings are
+# still outstanding instead of only how many.
+FIXTURES_HELPER = '''function groupFixtures(session, group) {
+  const teams = (session.teams || []).filter(t => t.group === group);
+  const all = session.groupMatches || [];
+  const pairs = [];
+  for (let i = 0; i < teams.length; i++)
+    for (let j = i + 1; j < teams.length; j++) {
+      const a = teams[i], b = teams[j];
+      const recs = all.filter(m =>
+        (m.team1Id === a.id && m.team2Id === b.id) || (m.team1Id === b.id && m.team2Id === a.id));
+      const done = recs.find(m => m.winner) || null;
+      pairs.push({ a, b, match: done || recs[0] || null, played: !!done, extra: Math.max(0, recs.length - 1) });
+    }
+  return { pairs, total: pairs.length, played: pairs.filter(p => p.played).length };
+}
+
+// Every group's fixtures at once — what the whole night amounts to.
+function sessionFixtures(session) {
+  let total = 0, played = 0;
+  getSessionGroups(session).forEach(g => {
+    const f = groupFixtures(session, g);
+    total += f.total; played += f.played;
+  });
+  return { total, played, left: total - played };
+}'''
+
+FIXTURES_ANCHOR = '''function qualifyingTeamIds(session) {'''
+
+
+# ── The helpers injected beside getQualifyCount ────────────────────────────
+# Held here rather than as escaped one-liners in the build script, which is
+# how an earlier edit came to corrupt one.
+QUALIFY_ANCHOR = """function getQualifyCount(session) {
+  return session?.qualifyCount || 2;  // default: top 2 per group qualify
+}"""
+
+QUALIFY_PAYLOAD = """function getQualifyCount(session) {
+  return session?.qualifyCount || 2;  // default: top 2 per group qualify
+}
+
+// Which teams are currently on course to qualify — the same rule seedQF uses,
+// so a group table can never promise a spot the bracket won't honour. There is
+// no single "top N" in this series: it is qualifyCount per group (1, 2 or 4),
+// except that 3 groups is fixed at top-2 plus the two best thirds, and
+// 4-groups/all-thirds sends every third through to a round of 16.
+function qualifyingTeamIds(session) {
+  const groups = getSessionGroups(session);
+  const N = groups.length;
+  const stand = groups.map(g => calcGroupStandingsNormalized(session, g));
+  const ids = new Set();
+  const take = (rows, n) => rows.slice(0, n).forEach(r => r && r.team && r.team.id && ids.add(r.team.id));
+
+  if (N === 4 && session && session.thirdPlaceMode === "all4r16") {
+    stand.forEach(rows => take(rows, 3));
+    return ids;
+  }
+  if (N === 3) {
+    stand.forEach(rows => take(rows, 2));
+    // the two best thirds, ranked exactly the way the bracket ranks them
+    const thirds = stand.map(rows => rows[2]).filter(r => r && r.team && r.team.id)
+      .map(r => ({ id: r.team.id, pts: r.pts, wins: r.wins, gd: r.gd || 0, gf: r.gf || 0 }));
+    thirds.sort(compareThirds).slice(0, 2).forEach(t => ids.add(t.id));
+    return ids;
+  }
+  stand.forEach(rows => take(rows, getQualifyCount(session)));
+  return ids;
+}
+
+function groupFixtures(session, group) {
+  const teams = (session.teams || []).filter(t => t.group === group);
+  const all = session.groupMatches || [];
+  const pairs = [];
+  for (let i = 0; i < teams.length; i++)
+    for (let j = i + 1; j < teams.length; j++) {
+      const a = teams[i], b = teams[j];
+      const recs = all.filter(m =>
+        (m.team1Id === a.id && m.team2Id === b.id) || (m.team1Id === b.id && m.team2Id === a.id));
+      const done = recs.find(m => m.winner) || null;
+      pairs.push({ a, b, match: done || recs[0] || null, played: !!done, extra: Math.max(0, recs.length - 1) });
+    }
+  return { pairs, total: pairs.length, played: pairs.filter(p => p.played).length };
+}
+
+// Every group's fixtures at once — what the whole night amounts to.
+function sessionFixtures(session) {
+  let total = 0, played = 0;
+  getSessionGroups(session).forEach(g => {
+    const f = groupFixtures(session, g);
+    total += f.total; played += f.played;
+  });
+  return { total, played, left: total - played };
+}"""
