@@ -41,6 +41,17 @@ COLOURS = [
     # "cyan absorbs green" — the spec retires the separate live/done green.
     ("#27E08A", "@@G1@@", "#00E5FF"),
     ("#1FD9C4", "@@G2@@", "#00E5FF"),
+    # Strays the first sweep never listed, and the reason parts of the app
+    # still read as August: a Tailwind orange on the active format toggles, a
+    # July-era blue on Remind and the all-thirds note, and a green/red pair on
+    # the form strip and rank movement. Vol.7 is a two-colour system — cyan
+    # leads, amber supports — so these all land on one or the other.
+    ("#ea580c", "@@X1@@", "#00E5FF"),   # active toggle: Tailwind orange-600
+    ("#1467A8", "@@X2@@", "#00E5FF"),   # Remind / all-thirds note: July blue
+    ("#1F8A24", "@@X3@@", "#00E5FF"),   # form-strip win / Share: green
+    ("#C0392B", "@@X4@@", "#FF9E1B"),   # form-strip loss / rank drop: red
+    ("#a8a29e", "@@X5@@", "#9FB0BC"),   # Tailwind stone-400 -> steel text
+    ("#44403c", "@@X6@@", "#38444E"),   # stone-700 border -> a cool hairline
 ]
 # NOTE ON --muted. The handoff's JSX table says #8B95A7 -> #5C6B78, but its own
 # contrast note says #5C6B78 is ~3.3:1 on the base and is for bold letterspaced
@@ -469,6 +480,53 @@ def rebuild_screens(s, report):
         sys.exit("BUILD FAILED: group-table anchor matched %d times" % s.count(SCREENS.GROUPTABLE_OLD))
     s = s.replace(SCREENS.GROUPTABLE_OLD, SCREENS.GROUPTABLE_NEW)
     report.append("  bye    shown in the group table (one number everywhere)")
+
+    # The MVP winner card: amber bar on a dark plate, not an amber field.
+    o, nw = SCREENS.MVP_CARD
+    if s.count(o) != 1:
+        sys.exit("BUILD FAILED: MVP card anchor matched %d times" % s.count(o))
+    s = s.replace(o, nw)
+    report.append("  chrome MVP winner card -> bar on a dark plate")
+
+    # The 2x badge: an invisible label made legible.
+    d = 0
+    for o, nw in SCREENS.DOUBLE_BADGE:
+        c = s.count(o)
+        if c:
+            s = s.replace(o, nw)
+            d += c
+    if d != 3:
+        sys.exit("BUILD FAILED: expected 3 double-points badges, fixed %d" % d)
+    report.append("  chrome 2X badge made legible (was brown-on-brown)")
+
+    # Group-letter and seed badges: amber wash -> cyan.
+    n = 0
+    for o, nw in SCREENS.BROWN_BADGES:
+        c = s.count(o)
+        if c:
+            s = s.replace(o, nw)
+            n += c
+    if not n:
+        sys.exit("BUILD FAILED: no brown badge tints found — has the markup changed?")
+    report.append("  chrome %d badge tints amber -> cyan" % n)
+
+    # Emoji out of the button labels (the WhatsApp builders keep theirs).
+    hit = 0
+    for o, n in SCREENS.UI_EMOJI:
+        c = s.count(o)
+        if c:
+            s = s.replace(o, n)
+            hit += c
+    report.append("  chrome %d emoji removed from UI labels" % hit)
+
+    # The session tab bar: four destinations, then the actions.
+    ta = s.find(SCREENS.TABBAR_FROM)
+    if ta < 0:
+        sys.exit("BUILD FAILED: could not find the session tab bar")
+    tb = s.index(SCREENS.TABBAR_TO, ta) + len(SCREENS.TABBAR_TO)
+    report.append("  screen SESSION tab bar -> 4 destinations + action row (%.0fKB -> %.0fKB)"
+                  % ((tb - ta) / 1024, len(SCREENS.TABBAR_NEW) / 1024))
+    s = s[:ta] + SCREENS.TABBAR_NEW + s[tb:]
 
     # A group of 3 tops each team up with a 6-0 bye for series points.
     if s.count(SCREENS.GHOST_OLD) != 1:

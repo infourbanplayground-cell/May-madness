@@ -1569,3 +1569,151 @@ GROUPTABLE_NEW = '''    // An undersized group cannot offer GROUP_COUNTED_GAMES 
     return { team, pts, wins, played, gf, ga, gd: gf - ga, byes };
   });
   const h2h = {};'''
+
+# ── SESSION TAB BAR ────────────────────────────────────────────────────────
+# Reverses the "keep the single row" answer from the skin pass, on the owner's
+# later note that the sessions page UX still is not right. It was the single
+# worst thing on that screen: nine bordered chips wrapping onto three rows,
+# taking a third of the viewport before a single score was visible, with the
+# four places you actually go given no more weight than Draw or Remind.
+#
+# This is the canvas's own fix — four destinations in an equal grid, then the
+# occasional actions on one quiet scrolling row beneath.
+TABBAR_FROM = '<div className="sticky top-[57px] z-10 px-4 py-2"'
+TABBAR_TO = '</div>\n      </div>'
+TABBAR_NEW = r'''<div className="sticky top-[57px] z-10" style={{ background:"rgba(5,7,9,.97)",
+           borderBottom:"1px solid rgba(0,229,255,.22)", backdropFilter:"blur(18px)", padding:"8px 16px 10px" }}>
+        {/* four destinations, equal weight, never scrolling off */}
+        <div className="max-w-3xl mx-auto" style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))",
+             gap:2, background:"rgba(255,255,255,.04)", padding:2 }}>
+          {(() => {
+            const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
+            const isFull = cnt >= MAX_TEAMS;
+            const DESTS = [
+              { id:"teams",   label:"Teams",  Ic:I.users },
+              { id:"groups",  label:"Groups", Ic:I.bar },
+              { id:"bracket", label:"KO",     Ic:I.swords },
+              { id:"signups", label:"List",   Ic:CIc.clipboard, count:cnt > 0 ? `${cnt}/${MAX_TEAMS}` : null, warm:isFull },
+            ];
+            return DESTS.map(t => {
+              const on = tab === t.id;
+              return <button key={t.id} onClick={() => setTab(t.id)}
+                style={{ minHeight:44, display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                         padding:"8px 2px", border:"none", cursor:"pointer",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:12, letterSpacing:".08em",
+                         textTransform:"uppercase", whiteSpace:"nowrap",
+                         background:on ? "#00E5FF" : "transparent",
+                         color:on ? "#050709" : (t.warm && !on ? "#FF9E1B" : "#9FB0BC"),
+                         boxShadow:on ? "0 0 24px rgba(0,229,255,.35)" : "none" }}>
+                <t.Ic size={13} /> {t.label}
+                {t.count && <span style={{ fontSize:10, fontWeight:800, letterSpacing:".04em", padding:"1px 5px",
+                     background:on ? "rgba(5,7,9,.22)" : "rgba(0,229,255,.16)",
+                     color:on ? "#050709" : "#00E5FF" }}>{t.count}</span>}
+              </button>;
+            });
+          })()}
+        </div>
+        {/* the occasional actions, one quiet row, scrolls if it must */}
+        <div className="max-w-3xl mx-auto" style={{ display:"flex", gap:8, marginTop:8,
+             overflowX:"auto", scrollbarWidth:"none" }}>
+          {(() => {
+            const votes = Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0);
+            const ACTS = [
+              { key:"photos", label:"Photos", Ic:CIc.camera, on:tab === "photos",
+                count:sessionPhotos.length > 0 ? sessionPhotos.length : null, go:() => setTab("photos"), show:true },
+              { key:"mvp", label:"MVP", Ic:CIc.crown, on:tab === "mvp",
+                count:session.mvpVotingOpen && votes ? votes : null, go:() => setTab("mvp"), show:canScore },
+              { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },
+              { key:"remind", label:"Remind", Ic:CIc.megaphone, go:() => setShowRemind(true), show:isAdmin },
+              { key:"share", label:"Share", Ic:CIc.share, go:() => setShowShare(true), show:!!session.completed, warm:true },
+            ].filter(a => a.show);
+            return ACTS.map(a => (
+              <button key={a.key} onClick={a.go}
+                style={{ flex:"0 0 auto", minHeight:36, display:"inline-flex", alignItems:"center", gap:6,
+                         padding:"8px 12px", cursor:"pointer", whiteSpace:"nowrap",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",
+                         textTransform:"uppercase",
+                         background:a.on ? "rgba(0,229,255,.10)" : "rgba(255,255,255,.04)",
+                         border:`1px solid ${a.on ? "rgba(0,229,255,.45)" : a.warm ? "rgba(255,158,27,.4)" : "transparent"}`,
+                         color:a.on ? "#00E5FF" : a.warm ? "#FF9E1B" : "#9FB0BC" }}>
+                <a.Ic size={13} /> {a.label}
+                {a.count ? <span style={{ fontSize:10, padding:"1px 5px", background:"rgba(0,229,255,.16)",
+                     color:"#00E5FF" }}>{a.count}</span> : null}
+              </button>
+            ));
+          })()}
+        </div>
+      </div>'''
+
+
+
+
+# ── EMOJI OUT OF THE CHROME ──────────────────────────
+# Emoji in a button label is the most August thing left in the app. Every
+# entry here is UI chrome; the WhatsApp builders keep theirs, because there
+# the emoji is the point and the message would read oddly without it.
+UI_EMOJI = [
+    ('📣 Copy List', 'Copy list'),
+    ('🔄 Reopen Voting', 'Reopen voting'),
+    ('✅ Copied!', 'Copied'),
+    ('📋 Copy for WhatsApp', 'Copy for WhatsApp'),
+    ('📜 Copy My Player Card', 'Copy my player card'),
+    ('🔗 Copy Public Leaderboard URL', 'Copy public leaderboard URL'),
+    ('📸 PHOTO WALL', 'PHOTO WALL'),
+    ('🗳️ MVP VOTE!', 'MVP vote'),
+    ('🎉 VOTE LOCKED!', 'Vote locked'),
+    ('🙈 Hide Tally', 'Hide tally'),
+    ('📊 View Tally', 'View tally'),
+    ('🎲 Draw ', 'Draw '),
+    ('🔒 FULL', 'FULL'),
+    ('📤 Share', 'Share'),
+    ('⭐ MVP: ', 'MVP · '),
+]
+
+
+# ── THE BROWN BADGES ───────────────────────────────────────────────────────
+# August tinted its group-letter and seed badges with its ice accent,
+# rgba(61,225,255,.14). The palette sweep sends that family to Strike Amber —
+# right for the accents it was mostly used on (crowns, trophies, flags), wrong
+# here: a 14% amber wash on a near-black plate reads as mud, and it was the
+# most visibly August thing left on the session screens.
+#
+# Amber is urgency-only in Vol.7 and a group letter is not urgent, so these
+# surfaces go cyan. Matched on the full declaration — tint plus the chalk
+# border it always carries — so the deliberate ambers elsewhere (the streak
+# chip, the YOU row, the 2x pill) are untouched.
+BROWN_BADGES = [
+    ('background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)"',
+     'background:"rgba(0,229,255,.12)", border: "1px solid rgba(0,229,255,.4)"'),
+    ('background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)"',
+     'background:"rgba(0,229,255,.12)", border:"1px solid rgba(0,229,255,.4)"'),
+]
+
+
+# ── THE INVISIBLE 2X BADGE ─────────────────────────────────────────────────
+# Not just an August tint — a legibility bug. The badge is a 14% amber wash
+# carrying #2b1d16 text, a near-black brown. On July Heat's pale plates that
+# read; on Vol.7's near-black ground the wash disappears and the label with
+# it, leaving an unlabelled brown square beside the session title. A
+# double-points night is exactly the thing that should be legible at a glance.
+#
+# A 2x night is genuine urgency, so this is the one place amber belongs:
+# solid amber, void text.
+DOUBLE_BADGE = [
+    ('style={{ background:"rgba(255,158,27,.14)", color:"#2b1d16" }}>2X<',
+     'style={{ background:"#FF9E1B", color:"#050709", letterSpacing:".08em" }}>2X<'),
+    ('style={{ background:"rgba(255,158,27,.14)", color: "#2b1d16" }}>2X<',
+     'style={{ background:"#FF9E1B", color:"#050709", letterSpacing:".08em" }}>2X<'),
+]
+
+
+# ── THE MVP WINNER CARD ────────────────────────────────────────────────────
+# The last brown plate: a 14% amber wash over the whole card, which on a
+# near-black ground reads as mud rather than celebration. Vol.7 marks a
+# surface with a 3px bar and keeps the plate dark, so the crowning gets the
+# amber bar and an amber glow instead of an amber field.
+MVP_CARD = (
+    'style={{ background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "24px 18px", textAlign: "center" }}',
+    'style={{ background:"rgba(16,23,31,.96)", backgroundImage:"linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06))", '
+    'backgroundSize:"3px 100%", backgroundRepeat:"no-repeat", border:"1px solid rgba(255,158,27,.4)", '
+    'boxShadow:"0 0 40px rgba(255,158,27,.10)", padding: "24px 18px 24px 22px", textAlign: "center" }}')

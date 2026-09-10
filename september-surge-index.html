@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "9cd86e7d185f";
+  var V = "dc054e5545f4";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -160,7 +160,7 @@
   input, textarea, select { -webkit-user-select: text; user-select: text; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #1c1917; }
-  ::-webkit-scrollbar-thumb { background: #44403c; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #38444E; border-radius: 3px; }
   .court-motif { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: var(--court); background-repeat: no-repeat; background-position: center 16%; background-size: 90% auto; opacity: .045; }
   .screen-bg { background:
       radial-gradient(ellipse 90% 55% at 12% 6%, rgba(255,158,27,.09), transparent),
@@ -508,7 +508,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar-track{background:#1c1917;}
-::-webkit-scrollbar-thumb{background:#44403c;}
+::-webkit-scrollbar-thumb{background:#38444E;}
 
 /* ── SYNC INDICATOR GLOW ── */
 .w-2.h-2.rounded-full{border-radius:50% !important;}
@@ -2086,7 +2086,7 @@ function Avatar({ player, size = 40, className = "", ring = null }) {
   }
   // Deterministic tinted initials background instead of flat black, so avatars
   // without photos still read as distinct people.
-  const palette = ["#1467A8", "#B31414", "#1F8A24", "#C77800", "#6B2FB3", "#0E7C7B"];
+  const palette = ["#00E5FF", "#B31414", "#00E5FF", "#C77800", "#6B2FB3", "#0E7C7B"];
   const tint = palette[Math.abs((player.id || player.name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   return (
     <div className={`flex items-center justify-center shrink-0 font-bold ${className}`}
@@ -2099,7 +2099,7 @@ function Avatar({ player, size = 40, className = "", ring = null }) {
 // Small W/L form strip, shared by the rankings and player profile.
 function FormStrip({ form }) {
   return <span style={{ display: "inline-flex", gap: 2 }}>
-    {form.map((r, i) => <span key={i} title={r === "W" ? "Win" : "Loss"} style={{ width: 12, height: 12, borderRadius: 2, background: r === "W" ? "#1F8A24" : "#C0392B", color: "#fff", fontSize: 8, fontWeight: "bold", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Verdana,sans-serif" }}>{r}</span>)}
+    {form.map((r, i) => <span key={i} title={r === "W" ? "Win" : "Loss"} style={{ width: 12, height: 12, borderRadius: 2, background: r === "W" ? "#00E5FF" : "#FF9E1B", color: "#fff", fontSize: 8, fontWeight: "bold", display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: "Verdana,sans-serif" }}>{r}</span>)}
   </span>;
 }
 
@@ -2155,20 +2155,20 @@ function PublicPhotosPage({ state }) {
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/surge-lockup.png" alt="September Surge" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
-          <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>📸 PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
+          <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 16, letterSpacing: 2, background: "#00E5FF", color: "#FF9E1B", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "5px 14px 3px", transform:"none" }}>PHOTO WALL{totalPhotos > 0 ? ` · ${totalPhotos}` : ""}</div>
         </div>
         {sessions.length === 0
           ? <div className="text-center text-stone-500 py-12">No photos yet — check back after the next session</div>
           : sessions.map(s => (
             <div key={s.id} style={{ marginBottom: 22 }}>
-              <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
+              <div style={{ display: "inline-block", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 20, letterSpacing: 1, color:"#F4F9FA", background:"rgba(0,229,255,.12)", border: "1px solid rgba(0,229,255,.4)", boxShadow: "none", padding: "4px 14px 2px", transform:"none", marginBottom: 10 }}>
                 {s.name.toUpperCase()}{s.date ? ` · ${new Date(s.date + "T12:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""}
               </div>
               <div className="grid grid-cols-2 gap-2 aa-wall">
                 {(s.photos || []).map((src, i) => (
                   <div key={i} className="relative">
                     <img src={src} alt={`${s.name} photo ${i + 1}`} className="w-full cursor-pointer" style={{ aspectRatio: "4/3", objectFit: "cover", border: "1px solid rgba(244,249,250,.14)", boxShadow: "none" }} onClick={() => sharePhoto(src, i)} />
-                    <div className="absolute bottom-1 right-1 px-2 py-0.5 text-[10px] font-bold text-white flex items-center gap-1 pointer-events-none" style={{ background: "rgba(0,0,0,.55)" }}>📤 Share</div>
+                    <div className="absolute bottom-1 right-1 px-2 py-0.5 text-[10px] font-bold text-white flex items-center gap-1 pointer-events-none" style={{ background: "rgba(0,0,0,.55)" }}>Share</div>
                   </div>
                 ))}
               </div>
@@ -2404,7 +2404,7 @@ function SyncIndicator({ status, errMsg }) {
     saved:   { color: "#10b981", label: "Saved ✓" },
     syncing: { color: "#f59e0b", label: "Saving…" },
     error:   { color: "#ef4444", label: "Retrying…" },
-    offline: { color: "#a8a29e", label: "Offline" },
+    offline: { color: "#9FB0BC", label: "Offline" },
   };
   const s = map[status] || map.idle;
   const onClick = () => { if (status === "error" && errMsg) alert("Sync error:\n\n" + errMsg + "\n\n(Auto-retrying — your changes are safe on this device meanwhile.)"); };
@@ -2996,7 +2996,7 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
       <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Date</label><Input type="date" value={date} onChange={setDate} /></div>
       <div className="flex items-center justify-between p-3 bg-stone-900 rounded-lg">
         <div className="flex items-center gap-2">
-          <div className="px-1.5 py-0.5 rounded font-display text-[10px] font-bold" style={{ background:"rgba(255,158,27,.14)", color:"#2b1d16" }}>2X</div>
+          <div className="px-1.5 py-0.5 rounded font-display text-[10px] font-bold" style={{ background:"#FF9E1B", color:"#050709", letterSpacing:".08em" }}>2X</div>
           <span className="text-sm text-stone-200">Double Points</span>
         </div>
         <button onClick={() => setDoublePoints(v => !v)} className={`relative w-11 h-6 rounded-full ${doublePoints ? "bg-red-600" : "bg-stone-700"}`}>
@@ -3004,7 +3004,7 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
         </button>
       </div>
       <textarea readOnly rows={16} value={text} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
-      <Btn className="w-full" onClick={copy}>{copied ? "✅ Copied!" : "📋 Copy for WhatsApp"}</Btn>
+      <Btn className="w-full" onClick={copy}>{copied ? "Copied" : "Copy for WhatsApp"}</Btn>
     </div>
   </Modal>;
 }
@@ -3164,13 +3164,13 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
         <Modal open={true} onClose={() => setShowFormat(false)} title="HOW IT WORKS">
         <div className="space-y-3">
           <textarea readOnly rows={18} value={txt} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
-          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(txt); setShowFormat(false); }}>📋 Copy for WhatsApp</Btn>
+          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(txt); setShowFormat(false); }}>Copy for WhatsApp</Btn>
         </div>
         </Modal>); })()}
       {showAnnounce && <Modal open={true} onClose={() => setShowAnnounce(false)} title="SEASON ANNOUNCEMENT">
         <div className="space-y-3">
           <textarea readOnly rows={18} value={SEASON_ANNOUNCEMENT} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
-          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(SEASON_ANNOUNCEMENT); setShowAnnounce(false); }}>📋 Copy for WhatsApp</Btn>
+          <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(SEASON_ANNOUNCEMENT); setShowAnnounce(false); }}>Copy for WhatsApp</Btn>
         </div>
       </Modal>}
     </div>
@@ -3500,7 +3500,7 @@ function PartnerDrawModal({ onClose, state, session, onAddTeams }) {
       {selected.length % 2 !== 0 && selected.length > 0 && <div className="text-[11px] text-cyan-300">Odd number — one player will be left out of draw</div>}
       <div className="flex gap-2 pt-1">
         <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
-        <Btn className="flex-1" onClick={draw} disabled={selected.length < 2}>🎲 Draw {Math.floor(selected.length / 2)} Pairs</Btn>
+        <Btn className="flex-1" onClick={draw} disabled={selected.length < 2}>Draw {Math.floor(selected.length / 2)} Pairs</Btn>
       </div>
     </div>
   </Modal>;
@@ -3545,10 +3545,10 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
           </div>
           <div style={{ display:"flex", flexDirection:"column", gap:6, alignItems:"flex-end" }}>
             {isFull
-              ? <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>🔒 FULL</div>
+              ? <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:20, color:"#ef4444", border:"3px solid #ef4444", padding:"3px 10px" }}>FULL</div>
               : <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:20, color:"var(--orange)", border:"1px solid rgba(244,249,250,.14)", padding:"3px 10px", boxShadow:"none" }}>{MAX_TEAMS - filledSlots} OPEN</div>
             }
-            <button onClick={onRemind} style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:15, color:"#F4F9FA", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>📣 Copy List</button>
+            <button onClick={onRemind} style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:15, color:"#F4F9FA", background:"rgba(0,229,255,.12)", border:"1px solid rgba(0,229,255,.4)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>Copy list</button>
           </div>
         </div>
         <div style={{ height:7, background:"rgba(11,8,20,.12)", border:"1px solid rgba(244,249,250,.14)" }}>
@@ -3639,11 +3639,11 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
         <div className="flex-1 min-w-0 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="font-display text-xl text-stone-100 truncate">{session.name}</div>
-            {session.doublePoints && <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold shrink-0" style={{ background:"rgba(255,158,27,.14)", color: "#2b1d16" }}>2X</div>}
+            {session.doublePoints && <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold shrink-0" style={{ background:"#FF9E1B", color:"#050709", letterSpacing:".08em" }}>2X</div>}
           </div>
           <div className="text-[10px] text-stone-500 uppercase tracking-wider flex items-center justify-center gap-2">
             {session.date ? new Date(session.date).toLocaleDateString() : "No date"}
-            {mvpPlayer && <span className="text-cyan-300 font-bold">⭐ MVP: {mvpPlayer.name.split(" ")[0]}</span>}
+            {mvpPlayer && <span className="text-cyan-300 font-bold">MVP · {mvpPlayer.name.split(" ")[0]}</span>}
           </div>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -3651,25 +3651,67 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           {isAdmin ? <button onClick={() => setShowEdit(true)} className="text-stone-400 hover:text-orange-500 p-1"><I.dots size={20} /></button> : <div className="w-7" />}
         </div>
       </div>
-      <div className="sticky top-[57px] z-10 px-4 py-2" style={{ background:"rgba(255,158,27,.14)", borderBottom: "1px solid rgba(244,249,250,.10)", backgroundImage: "radial-gradient(rgba(0,0,0,.07) 20%, transparent 22%)", backgroundSize: "7px 7px" }}>
-        <div className="max-w-3xl mx-auto flex gap-2 overflow-x-auto">
-          {[{id:"teams",label:"Teams",Ic:I.users},{id:"groups",label:"Groups",Ic:I.bar},{id:"bracket",label:"Knockouts",Ic:I.swords}].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === t.id ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}>
-              <t.Ic size={14} /> {t.label}
-            </button>
-          ))}
+      <div className="sticky top-[57px] z-10" style={{ background:"rgba(5,7,9,.97)",
+           borderBottom:"1px solid rgba(0,229,255,.22)", backdropFilter:"blur(18px)", padding:"8px 16px 10px" }}>
+        {/* four destinations, equal weight, never scrolling off */}
+        <div className="max-w-3xl mx-auto" style={{ display:"grid", gridTemplateColumns:"repeat(4,minmax(0,1fr))",
+             gap:2, background:"rgba(255,255,255,.04)", padding:2 }}>
           {(() => {
             const cnt = (session.signupSlots||[]).filter(s=>s.trim()).length;
             const isFull = cnt >= MAX_TEAMS;
-            return <button onClick={() => setTab("signups")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "signups" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : isFull ? { background:"rgba(20,24,36,.85)", color: "#00E5FF", borderColor: "rgba(0,229,255,.5)" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}>
-              <CIc.clipboard size={13} /> List{cnt > 0 ? ` ${cnt}/${MAX_TEAMS}` : ""}
-            </button>;
+            const DESTS = [
+              { id:"teams",   label:"Teams",  Ic:I.users },
+              { id:"groups",  label:"Groups", Ic:I.bar },
+              { id:"bracket", label:"KO",     Ic:I.swords },
+              { id:"signups", label:"List",   Ic:CIc.clipboard, count:cnt > 0 ? `${cnt}/${MAX_TEAMS}` : null, warm:isFull },
+            ];
+            return DESTS.map(t => {
+              const on = tab === t.id;
+              return <button key={t.id} onClick={() => setTab(t.id)}
+                style={{ minHeight:44, display:"flex", alignItems:"center", justifyContent:"center", gap:6,
+                         padding:"8px 2px", border:"none", cursor:"pointer",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:12, letterSpacing:".08em",
+                         textTransform:"uppercase", whiteSpace:"nowrap",
+                         background:on ? "#00E5FF" : "transparent",
+                         color:on ? "#050709" : (t.warm && !on ? "#FF9E1B" : "#9FB0BC"),
+                         boxShadow:on ? "0 0 24px rgba(0,229,255,.35)" : "none" }}>
+                <t.Ic size={13} /> {t.label}
+                {t.count && <span style={{ fontSize:10, fontWeight:800, letterSpacing:".04em", padding:"1px 5px",
+                     background:on ? "rgba(5,7,9,.22)" : "rgba(0,229,255,.16)",
+                     color:on ? "#050709" : "#00E5FF" }}>{t.count}</span>}
+              </button>;
+            });
           })()}
-          {isAdmin && <button onClick={() => setShowDraw(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.dice size={13} /> Draw</button>}
-          {isAdmin && <button onClick={() => setShowRemind(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color: "#1467A8", borderColor: "rgba(0,229,255,.5)" }}><CIc.megaphone size={13} /> Remind</button>}
-          <button onClick={() => setTab("photos")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "photos" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.camera size={13} /> {sessionPhotos.length > 0 ? sessionPhotos.length : ""} Photos</button>
-          {canScore && <button onClick={() => setTab("mvp")} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2 transition-all" style={tab === "mvp" ? { background: "#00E5FF", color: "#F4F9FA", borderColor: "rgba(0,229,255,.5)", boxShadow: "none" } : { background:"rgba(20,24,36,.85)", color:"#F4F9FA", borderColor: "rgba(0,229,255,.5)" }}><CIc.crown size={13} /> MVP{session.mvpVotingOpen ? ` ${Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0)}` : ""}</button>}
-          {session.completed && <button onClick={() => setShowShare(true)} className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold whitespace-nowrap border-2" style={{ background:"rgba(20,24,36,.85)", color: "#1F8A24", borderColor: "rgba(0,229,255,.5)" }}><CIc.share size={13} /> Share</button>}
+        </div>
+        {/* the occasional actions, one quiet row, scrolls if it must */}
+        <div className="max-w-3xl mx-auto" style={{ display:"flex", gap:8, marginTop:8,
+             overflowX:"auto", scrollbarWidth:"none" }}>
+          {(() => {
+            const votes = Object.values(session.mvpVotes||{}).reduce((a,b)=>a+b,0);
+            const ACTS = [
+              { key:"photos", label:"Photos", Ic:CIc.camera, on:tab === "photos",
+                count:sessionPhotos.length > 0 ? sessionPhotos.length : null, go:() => setTab("photos"), show:true },
+              { key:"mvp", label:"MVP", Ic:CIc.crown, on:tab === "mvp",
+                count:session.mvpVotingOpen && votes ? votes : null, go:() => setTab("mvp"), show:canScore },
+              { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },
+              { key:"remind", label:"Remind", Ic:CIc.megaphone, go:() => setShowRemind(true), show:isAdmin },
+              { key:"share", label:"Share", Ic:CIc.share, go:() => setShowShare(true), show:!!session.completed, warm:true },
+            ].filter(a => a.show);
+            return ACTS.map(a => (
+              <button key={a.key} onClick={a.go}
+                style={{ flex:"0 0 auto", minHeight:36, display:"inline-flex", alignItems:"center", gap:6,
+                         padding:"8px 12px", cursor:"pointer", whiteSpace:"nowrap",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",
+                         textTransform:"uppercase",
+                         background:a.on ? "rgba(0,229,255,.10)" : "rgba(255,255,255,.04)",
+                         border:`1px solid ${a.on ? "rgba(0,229,255,.45)" : a.warm ? "rgba(255,158,27,.4)" : "transparent"}`,
+                         color:a.on ? "#00E5FF" : a.warm ? "#FF9E1B" : "#9FB0BC" }}>
+                <a.Ic size={13} /> {a.label}
+                {a.count ? <span style={{ fontSize:10, padding:"1px 5px", background:"rgba(0,229,255,.16)",
+                     color:"#00E5FF" }}>{a.count}</span> : null}
+              </button>
+            ));
+          })()}
         </div>
       </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
@@ -3750,7 +3792,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           </div>
           <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: session.doublePoints ? "linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(249, 115, 22, 0.08))" : "#1c1917", border: session.doublePoints ? "1px solid rgba(220, 38, 38, 0.3)" : "1px solid transparent" }}>
             <div className="flex items-center gap-2">
-              <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold" style={{ background:"rgba(255,158,27,.14)", color: "#2b1d16" }}>2X</div>
+              <div className="px-1.5 py-0.5 rounded font-display text-stone-950 text-[10px] font-bold" style={{ background:"#FF9E1B", color:"#050709", letterSpacing:".08em" }}>2X</div>
               <div>
                 <div className="text-sm text-stone-200 font-semibold">Double Points</div>
                 <div className="text-[10px] text-stone-500">Everything ×2 except streak</div>
@@ -3779,7 +3821,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           <textarea readOnly rows={12} value={generateReminderText(session, state, leaderboard || [])}
             className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
           <Btn className="w-full" onClick={() => navigator.clipboard?.writeText(generateReminderText(session, state, leaderboard || []))}>
-            📋 Copy for WhatsApp
+            Copy for WhatsApp
           </Btn>
         </div>
       </Modal>}
@@ -3790,7 +3832,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           <textarea readOnly rows={14} value={generateSessionShareText(session, state, leaderboard || [])}
             className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 font-mono text-xs leading-relaxed" />
           <Btn className="w-full" onClick={() => { navigator.clipboard?.writeText(generateSessionShareText(session, state, leaderboard || [])); }}>
-            📋 Copy for WhatsApp
+            Copy for WhatsApp
           </Btn>
         </div>
       </Modal>}
@@ -3855,7 +3897,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
     <div className="space-y-4">
       <div className="jh-panel jh-fill-yellow" style={{ transform:"none" }}>
         <div style={{ padding: "16px 14px 20px", position: "relative", zIndex: 2 }}>
-          <div className="aa-kicker">🗳️ MVP VOTE!</div>
+          <div className="aa-kicker">MVP vote</div>
 
           {!session.mvpVotingOpen && !session.mvpId && (
             <div style={{ background:"rgba(20,24,36,.85)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center" }}>
@@ -3874,7 +3916,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
             <div style={{ background:"rgba(20,24,36,.85)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center", position: "relative" }}>
               {justVoted ? (
                 <div style={{ padding: "20px 0" }}>
-                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 30, color: "#3FA33C" }}>🎉 VOTE LOCKED!</div>
+                  <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 30, color: "#3FA33C" }}>Vote locked</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color:"#F4F9FA", marginTop: 6 }}>Thanks for repping <b>{justVoted}</b></div>
                   <div style={{ fontSize: 11, fontWeight: 700, color:"#8A9BA8", marginTop: 10, textTransform: "uppercase", letterSpacing: 1 }}>Pass it to the next voter ▶</div>
                 </div>
@@ -3913,17 +3955,17 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
           )}
 
           {!session.mvpVotingOpen && session.mvpId && mvpPlayer && (
-            <div style={{ background:"rgba(255,158,27,.14)", border: "1px solid rgba(244,249,250,.10)", boxShadow: "none", padding: "24px 18px", textAlign: "center" }}>
+            <div style={{ background:"rgba(16,23,31,.96)", backgroundImage:"linear-gradient(180deg,#FF9E1B,rgba(255,158,27,.06))", backgroundSize:"3px 100%", backgroundRepeat:"no-repeat", border:"1px solid rgba(255,158,27,.4)", boxShadow:"0 0 40px rgba(255,158,27,.10)", padding: "24px 18px 24px 22px", textAlign: "center" }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><CIc.crown size={40} /></div>
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color:"#F4F9FA", textTransform: "uppercase" }}>MVP of the Night</div>
               <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 40, color:"#F4F9FA", marginTop: 4 }}>{mvpPlayer.name}</div>
-              {canScore && <button className="jh-chipbtn" style={{ marginTop: 14 }} onClick={reopenVoting}>🔄 Reopen Voting</button>}
+              {canScore && <button className="jh-chipbtn" style={{ marginTop: 14 }} onClick={reopenVoting}>Reopen voting</button>}
             </div>
           )}
 
           {canScore && session.mvpVotingOpen && (
             <div style={{ marginTop: 14 }}>
-              <button className="jh-chipbtn" onClick={() => setShowTally(v => !v)}>{showTally ? "🙈 Hide Tally" : "📊 View Tally"}</button>
+              <button className="jh-chipbtn" onClick={() => setShowTally(v => !v)}>{showTally ? "Hide tally" : "View tally"}</button>
               {showTally && (
                 <div style={{ marginTop: 10 }}>
                   {tally.length === 0
@@ -4021,7 +4063,7 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
         <Card key={g} className="p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,158,27,.14)", border:"1px solid rgba(244,249,250,.14)", boxShadow:"none", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
+              <div style={{ width:32, height:32, display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(0,229,255,.12)", border:"1px solid rgba(0,229,255,.4)", boxShadow:"none", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"20px", letterSpacing:"1px", color:"#F4F9FA" }}>{g}</div>
               <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:20,letterSpacing:1,color:"#F4F9FA"}}>GROUP {g}</span>
             </div>
             <span className="text-xs text-stone-500 font-mono">{byGroup[g].length} / 4</span>
@@ -4388,8 +4430,8 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
                       <button key={n} type="button" onClick={() => { setS(n); setConfirmed(false); }}
                         className="h-11 rounded-lg font-bold text-base active:scale-90 transition-transform"
                         style={sval === n
-                          ? { background: "#ea580c", color: "#fff", border: "1px solid rgba(244,249,250,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
-                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #44403c" }}>{n}</button>
+                          ? { background: "#00E5FF", color: "#fff", border: "1px solid rgba(244,249,250,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
+                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #38444E" }}>{n}</button>
                     ))}
                   </div>
                 </div>
@@ -4730,7 +4772,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Last 3rd-place spot</div>
             <div className="flex gap-1.5">
-              {[["best2", "Best 2 thirds"], ["playoff", "3rds playoff"]].map(([m, label]) => <button key={m} type="button" onClick={() => changeThirdMode(m)} className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 active:scale-95" style={m === thirdPlaceMode ? { background: "#ea580c", color: "#fff", borderColor: "rgba(0,229,255,.5)" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>{label}</button>)}
+              {[["best2", "Best 2 thirds"], ["playoff", "3rds playoff"]].map(([m, label]) => <button key={m} type="button" onClick={() => changeThirdMode(m)} className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 active:scale-95" style={m === thirdPlaceMode ? { background: "#00E5FF", color: "#fff", borderColor: "rgba(0,229,255,.5)" } : { background: "transparent", color: "#9FB0BC", borderColor: "#38444E" }}>{label}</button>)}
             </div>
           </div>
         </div>
@@ -4741,7 +4783,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
             <div className="text-[11px] text-stone-600 mt-0.5">{numGroups * currentQC} teams{numGroups * currentQC >= 4 ? " ▶ quarterfinals" : ""} · changing re-seeds</div>
           </div>
           <div className="flex gap-1.5">
-            {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#ea580c", color: "#fff", borderColor: "rgba(0,229,255,.5)" } : { background: "transparent", color: "#a8a29e", borderColor: "#44403c" }}>Top {q}</button>)}
+            {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#00E5FF", color: "#fff", borderColor: "rgba(0,229,255,.5)" } : { background: "transparent", color: "#9FB0BC", borderColor: "#38444E" }}>Top {q}</button>)}
           </div>
         </div>
       )}
@@ -4843,7 +4885,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         <Card className="p-3" style={{ borderColor: "rgba(167,139,250,0.35)" }}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="jh-round-title" style={{fontSize:20}}>ROUND OF 16</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#1467A8" }}>All thirds qualify</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#00E5FF" }}>All thirds qualify</span>
           </div>
           <div className="space-y-1.5">
             {b.r16.map(m => (
@@ -4859,7 +4901,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore }) {
         <Card className="p-3" style={{ borderColor: "rgba(167,139,250,0.35)" }}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="jh-round-title" style={{fontSize:20}}>3RDS QUALIFIER</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#1467A8" }}>For 8th QF spot</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#00E5FF" }}>For 8th QF spot</span>
           </div>
           <BracketRow match={b.thirdsPlayoff} lbl={lbl} onClick={() => canScore && setEdit({ ...b.thirdsPlayoff, round: "thirdsPlayoff" })} />
         </Card>
@@ -5100,8 +5142,8 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
                       <button key={n} type="button" onClick={() => { setS(n); setConfirmed(false); }}
                         className="h-10 rounded-lg font-bold text-sm active:scale-90 transition-transform"
                         style={sval === n
-                          ? { background: "#ea580c", color: "#fff", border: "1px solid rgba(244,249,250,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
-                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #44403c" }}>{n}</button>
+                          ? { background: "#00E5FF", color: "#fff", border: "1px solid rgba(244,249,250,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
+                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #38444E" }}>{n}</button>
                     ))}
                   </div>
                 </div>
@@ -5647,7 +5689,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
         const txt = generatePlayerCard(entry, state);
         navigator.clipboard?.writeText(txt);
         alert("Player card copied — paste it in WhatsApp.");
-      }}>📜 Copy My Player Card</Btn>
+      }}>Copy my player card</Btn>
     </div>
   </Modal>;
 }
@@ -5750,7 +5792,7 @@ function SettingsView({ state, update, setTab, logout }) {
           const url = window.location.origin + window.location.pathname + "?public";
           navigator.clipboard?.writeText(url);
           alert("Copied: " + url);
-        }}>🔗 Copy Public Leaderboard URL</Btn>
+        }}>Copy public leaderboard URL</Btn>
       </Card>
       <Card className="p-4">
         <h3 className="font-display text-lg text-stone-200 mb-3">DATA</h3>
@@ -6152,7 +6194,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .jh-chipbtn:active{transform:translate(2px,2px);box-shadow:none;}
 
 /* winners ▶ comic green */
-.text-emerald-400,.text-emerald-300{color:#1F8A24 !important;}
+.text-emerald-400,.text-emerald-300{color:#00E5FF !important;}
 .bg-emerald-500{background:#3FA33C !important;}
 /* round titles */
 .jh-round-title{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;letter-spacing:1.5px;color:#F4F9FA;text-shadow:none;}
