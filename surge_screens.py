@@ -1856,3 +1856,30 @@ function sessionFixtures(session) {
   });
   return { total, played, left: total - played };
 }"""
+
+
+# ---------------------------------------------------------------------------
+# Two groups, top four from each: seed the quarter-finals as a straight
+# cross-group ladder (A1 v B4, B2 v A3, A2 v B3, B1 v A4) instead of ranking
+# the two groups against each other tier by tier.
+# ---------------------------------------------------------------------------
+
+CROSS2_OLD = """      // Four tiers of two: both group winners, then both 2nds, both 3rds, both
+      // 4ths — each pair ranked against each other by wins ▶ GD ▶ GF, so seed 1
+      // is the stronger of the two group winners rather than whichever is "A".
+      const tiers = [0, 1, 2, 3].map(i => [at(a, i, groups[0]), at(b, i, groups[1])].sort(compareThirds));
+      const qf = qfFromTiers(tiers);"""
+
+CROSS2_NEW = """      // Seeds alternate by group in placement order -- A1, B1, A2, B2, A3, B3,
+      // A4, B4 -- which the standard 1v8 / 4v5 / 3v6 / 2v7 template turns into
+      // exactly A1vB4, B2vA3, A2vB3, B1vA4. Every quarter-final is therefore
+      // A against B, so no pair that already met in the group stage can be
+      // drawn together and the clash-swap never has to fire.
+      //
+      // The old behaviour sorted each tier of two on its own (wins, GD, GF),
+      // so the stronger group winner took seed 1 -- but with the tiers sorted
+      // independently the ladder could come apart: a group that owned both the
+      // better 2nd and the better 3rd put them on the same side of the draw and
+      // produced a same-group quarter-final, which is what happened last time.
+      const tiers = [0, 1, 2, 3].map(i => [at(a, i, groups[0]), at(b, i, groups[1])]);
+      const qf = qfFromTiers(tiers);"""
