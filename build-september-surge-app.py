@@ -487,6 +487,13 @@ def rebuild_screens(s, report):
     s = s.replace(SCREENS.CROSS2_OLD, SCREENS.CROSS2_NEW)
     report.append("  seeding 2 groups x top 4 -> cross-group ladder (A1vB4, B2vA3, A2vB3, B1vA4)")
 
+    # Champion and runner-up split into two cells, each saying what it counts.
+    if s.count(SCREENS.CHAMPROW_OLD) != 1:
+        sys.exit("BUILD FAILED: champ/final row anchor matched %d times"
+                 % s.count(SCREENS.CHAMPROW_OLD))
+    s = s.replace(SCREENS.CHAMPROW_OLD, SCREENS.CHAMPROW_NEW)
+    report.append("  card   Champ / Final -> separate Champion and Runner-up counts")
+
     # The MVP winner card: amber bar on a dark plate, not an amber field.
     o, nw = SCREENS.MVP_CARD
     if s.count(o) != 1:

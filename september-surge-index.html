@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "5c5a00b71617";
+  var V = "ba270489221e";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -5703,7 +5703,8 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           <div><span className="text-stone-500">Group: </span><span className="text-stone-200 font-mono">{entry.stats.groupWins}W / {entry.stats.groupPlayed}P</span></div>
           <div><span className="text-stone-500">QF: </span><span className="text-stone-200 font-mono">{entry.stats.qfWins}W / {entry.stats.qfReached}P</span></div>
           <div><span className="text-stone-500">SF: </span><span className="text-stone-200 font-mono">{entry.stats.sfWins}W / {entry.stats.sfReached}P</span></div>
-          <div><span className="text-stone-500">Champ / Final: </span><span className="text-cyan-300 font-mono font-bold">{entry.stats.finalsWon} / {entry.stats.finalsReached - entry.stats.finalsWon}</span></div>
+          <div><span className="text-stone-500">🏆 Champion: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsWon}</span></div>
+          <div><span className="text-stone-500">🥈 Runner-up: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsReached - entry.stats.finalsWon}</span></div>
         </div>
       </Card>
       {lockedNames.length > 0 && <Card className="p-3" style={{ borderColor: "rgba(220, 38, 38, 0.3)" }}>

@@ -1883,3 +1883,15 @@ CROSS2_NEW = """      // Seeds alternate by group in placement order -- A1, B1, 
       // produced a same-group quarter-final, which is what happened last time.
       const tiers = [0, 1, 2, 3].map(i => [at(a, i, groups[0]), at(b, i, groups[1])]);
       const qf = qfFromTiers(tiers);"""
+
+
+# ---------------------------------------------------------------------------
+# Player card: "Champ / Final" read as wins/played like the three rows above it,
+# but its second number was finals reached MINUS finals won -- runners-up. Split
+# it into two labelled cells so each number says what it is.
+# ---------------------------------------------------------------------------
+
+CHAMPROW_OLD = """          <div><span className="text-stone-500">Champ / Final: </span><span className="text-cyan-300 font-mono font-bold">{entry.stats.finalsWon} / {entry.stats.finalsReached - entry.stats.finalsWon}</span></div>"""
+
+CHAMPROW_NEW = """          <div><span className="text-stone-500">\U0001F3C6 Champion: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsWon}</span></div>
+          <div><span className="text-stone-500">\U0001F948 Runner-up: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsReached - entry.stats.finalsWon}</span></div>"""
