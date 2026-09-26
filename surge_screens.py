@@ -536,7 +536,7 @@ SESSIONS_FN = r'''function SessionsView({ state, update, setOpenSessionId, isAdm
       <div className="flex items-end justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:18}}>
         <div>
           <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".34em",
-               textTransform:"uppercase",color:"#00E5FF"}}>{state.sessions.length || 9} nights · Vol.7</div>
+               textTransform:"uppercase",color:"#00E5FF"}}>{state.sessions.length || SESSIONS_TOTAL} nights · Vol.7</div>
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                fontSize:44,lineHeight:.9,color:"#F4F9FA",marginTop:6}}>SESSIONS</div>
         </div>
@@ -1895,3 +1895,50 @@ CHAMPROW_OLD = """          <div><span className="text-stone-500">Champ / Final:
 
 CHAMPROW_NEW = """          <div><span className="text-stone-500">\U0001F3C6 Champion: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsWon}</span></div>
           <div><span className="text-stone-500">\U0001F948 Runner-up: </span><span className="text-cyan-300 font-mono font-bold">×{entry.stats.finalsReached - entry.stats.finalsWon}</span></div>"""
+
+
+# ---------------------------------------------------------------------------
+# Vol.7 series shape: eight nights, not nine. Session 9 was dropped, so the two
+# double-points nights move to 7 and 8, and the season pot is lifted from 150 to
+# 178 OMR to hold the advertised 402 pool now that a night of vouchers is gone.
+#
+# Every count now reads one constant. The four call sites used to carry their
+# own literal 9, which is how the app could advertise a pool it no longer paid.
+# ---------------------------------------------------------------------------
+
+SERIES_OLD = """const DOUBLE_FROM_SESSION = 8;"""
+
+SERIES_NEW = """const DOUBLE_FROM_SESSION = 7;
+// \u2500\u2500 VOL.7 SERIES SHAPE \u2014 THIS SEASON ONLY \u2500\u2500
+// These three are Vol.7's numbers, not the standing format. Session 9 was
+// dropped mid-series, so Vol.7 runs eight nights (Mondays and Wednesdays) and
+// the two double-points nights are 7 and 8 -- the last two, as always.
+// A later volume SETS these for itself; it does not inherit them. Nine nights
+// with doubles on 8 & 9 and a 75/45/30 season pot is what Vol.6 ran, and is
+// what the next one should start from unless it decides otherwise.
+const SESSIONS_TOTAL = 8;
+// Losing a night costs 28 OMR of winners' vouchers (14 x 2). The season pot is
+// lifted 150 -> 178 for Vol.7 only, so the 402 OMR pool already on the signup
+// post, the site meta and the format post stays true. 3rd at 35 also settles
+// the 30-vs-35 disagreement with the certificate deck.
+const SEASON_PRIZES = [88, 55, 35];"""
+
+POOL1_OLD = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9, season = [75, 45, 30];"""
+POOL1_NEW = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL, season = SEASON_PRIZES;"""
+
+POOL2_OLD = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9;
+  const season = [75, 45, 30];"""
+POOL2_NEW = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL;
+  const season = SEASON_PRIZES;"""
+
+LEFT_OLD = """  const sessionsLeft = Math.max(0, 9 - sessionsTotal);"""
+LEFT_NEW = """  const sessionsLeft = Math.max(0, SESSIONS_TOTAL - sessionsTotal);"""
+
+DBL_TEXT = [
+    ("⚡ *Sessions 8 & 9 pay DOUBLE points*",
+     "⚡ *Sessions 7 & 8 pay DOUBLE points*"),
+    ("\U0001F5D3️ 9 sessions total · Sessions 8 & 9 pay *DOUBLE POINTS* \U0001F525",
+     "\U0001F5D3️ 8 sessions total · Sessions 7 & 8 pay *DOUBLE POINTS* \U0001F525"),
+    ("`On by default from Session ${DOUBLE_FROM_SESSION} — turn off to override.`",
+     "`On by default from Session ${DOUBLE_FROM_SESSION} — the last two nights. Turn off to override.`"),
+]

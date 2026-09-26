@@ -487,6 +487,24 @@ def rebuild_screens(s, report):
     s = s.replace(SCREENS.CROSS2_OLD, SCREENS.CROSS2_NEW)
     report.append("  seeding 2 groups x top 4 -> cross-group ladder (A1vB4, B2vA3, A2vB3, B1vA4)")
 
+    # Vol.7 only: eight nights instead of nine, doubles on 7 & 8, season pot
+    # raised to hold the advertised pool. These anchors carry Vol.6's numbers,
+    # so when a later volume is generated from Vol.7 they will not match and the
+    # build fails here — which is the point. The next volume states its own
+    # series shape rather than quietly inheriting this one's mid-season patch.
+    for name in ("SERIES", "POOL1", "POOL2", "LEFT"):
+        o = getattr(SCREENS, name + "_OLD")
+        if s.count(o) != 1:
+            sys.exit("BUILD FAILED: %s anchor matched %d times — if this is a new "
+                     "volume, set its own SESSIONS_TOTAL / SEASON_PRIZES / "
+                     "DOUBLE_FROM_SESSION instead of reusing Vol.7's" % (name, s.count(o)))
+        s = s.replace(o, getattr(SCREENS, name + "_NEW"))
+    for o, nw in SCREENS.DBL_TEXT:
+        if s.count(o) != 1:
+            sys.exit("BUILD FAILED: double-points copy %r matched %d times" % (o[:32], s.count(o)))
+        s = s.replace(o, nw)
+    report.append("  series Vol.7 = 8 nights, doubles on 7 & 8, season pot 150 -> 178, pool held at 402")
+
     # Champion and runner-up split into two cells, each saying what it counts.
     if s.count(SCREENS.CHAMPROW_OLD) != 1:
         sys.exit("BUILD FAILED: champ/final row anchor matched %d times"

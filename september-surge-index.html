@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "ba270489221e";
+  var V = "e354864724ff";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1082,7 +1082,20 @@ const GROUPS = ["A", "B", "C", "D"];
 // on the night — Sessions 1-7 ran with the flag unset because it lived only in
 // session settings and had to be remembered after the fact. It stays a normal
 // toggle: turn it off in the create dialog or in session settings to override.
-const DOUBLE_FROM_SESSION = 8;
+const DOUBLE_FROM_SESSION = 7;
+// ── VOL.7 SERIES SHAPE — THIS SEASON ONLY ──
+// These three are Vol.7's numbers, not the standing format. Session 9 was
+// dropped mid-series, so Vol.7 runs eight nights (Mondays and Wednesdays) and
+// the two double-points nights are 7 and 8 -- the last two, as always.
+// A later volume SETS these for itself; it does not inherit them. Nine nights
+// with doubles on 8 & 9 and a 75/45/30 season pot is what Vol.6 ran, and is
+// what the next one should start from unless it decides otherwise.
+const SESSIONS_TOTAL = 8;
+// Losing a night costs 28 OMR of winners' vouchers (14 x 2). The season pot is
+// lifted 150 -> 178 for Vol.7 only, so the 402 OMR pool already on the signup
+// post, the site meta and the format post stays true. 3rd at 35 also settles
+// the 30-vs-35 disagreement with the certificate deck.
+const SEASON_PRIZES = [88, 55, 35];
 const LOSS_TYPES = [
   { id: "tiebreak", label: "Tiebreak Loss", pts: 2, emoji: "🎯" },
   { id: "competitive", label: "Competitive Loss", pts: 1, emoji: "🤝" },
@@ -2467,7 +2480,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
   // not the roster, which carries every August name across with its points.
   const played = leaderboard.filter(l => l.stats.groupPlayed > 0 || l.stats.qfReached > 0);
   const podium = played.slice(0, 3);
-  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9, season = [75, 45, 30];
+  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL, season = SEASON_PRIZES;
   const pool = sessionVoucher * perTeam * sessionsTotal + season.reduce((a, b) => a + b, 0);
 
   const enrich = (e) => {
@@ -3043,8 +3056,8 @@ function DraftReminderModal({ onClose, state, leaderboard }) {
 function generateFormatText(state) {
   const seriesName = state.seasonName || "SEPTEMBER SURGE";
   const vol = state.seasonSubtitle?.match(/VOL\.\s*\d+/i)?.[0] || "Vol. 7";
-  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9;
-  const season = [75, 45, 30];
+  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL;
+  const season = SEASON_PRIZES;
   const pool = sessionVoucher * perTeam * sessionsTotal + season.reduce((a, b) => a + b, 0);
 
   let t = `🔥 *${seriesName} · HOW IT WORKS* 🔥\n`;
@@ -3066,7 +3079,7 @@ function generateFormatText(state) {
   t += `━━━━━━━━━━━━━━━━━━━━\n*💰 PRIZES — ${pool} OMR*\n\n`;
   t += `*Every session*\n🏆 Winners take a *${sessionVoucher} OMR voucher each*\n\n`;
   t += `*End of season*\n🥇 1st — *${season[0]} OMR*\n🥈 2nd — *${season[1]} OMR*\n🥉 3rd — *${season[2]} OMR*\n\n`;
-  t += `⚡ *Sessions 8 & 9 pay DOUBLE points* — the table can still flip on the last night, so it's never too late to join.\n\n`;
+  t += `⚡ *Sessions 7 & 8 pay DOUBLE points* — the table can still flip on the last night, so it's never too late to join.\n\n`;
   t += `━━━━━━━━━━━━━━━━━━━━\n📊 Live table: https://surge.urbanpadel.om\n`;
   t += `💥 *Ride the surge.* 👑`;
   return t;
@@ -3085,7 +3098,7 @@ August Attack is done and dusted — new season, new partners, new rivalries �
 💸 7 OMR per player
 ━━━━━━━━━━━━━━━━━━━━
 
-🗓️ 9 sessions total · Sessions 8 & 9 pay *DOUBLE POINTS* 🔥
+🗓️ 8 sessions total · Sessions 7 & 8 pay *DOUBLE POINTS* 🔥
 💰 *402 OMR prize pool* up for grabs
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -3113,7 +3126,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
       <div className="flex items-end justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:18}}>
         <div>
           <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".34em",
-               textTransform:"uppercase",color:"#00E5FF"}}>{state.sessions.length || 9} nights · Vol.7</div>
+               textTransform:"uppercase",color:"#00E5FF"}}>{state.sessions.length || SESSIONS_TOTAL} nights · Vol.7</div>
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                fontSize:44,lineHeight:.9,color:"#F4F9FA",marginTop:6}}>SESSIONS</div>
         </div>
@@ -3224,7 +3237,7 @@ function CreateSessionModal({ onClose, onCreate, count }) {
           <div className="text-sm font-bold text-stone-100">⚡ Double points</div>
           <div className="text-[10px] text-stone-400 mt-0.5">
             {sessionNo >= DOUBLE_FROM_SESSION
-              ? `On by default from Session ${DOUBLE_FROM_SESSION} — turn off to override.`
+              ? `On by default from Session ${DOUBLE_FROM_SESSION} — the last two nights. Turn off to override.`
               : "2× wins, knockouts and top of group. Streak is never doubled."}
           </div>
         </div>
@@ -3395,7 +3408,7 @@ function generateReminderText(session, state, leaderboard) {
   const seriesName = state.seasonName || "SEPTEMBER SURGE";
   const vol = state.seasonSubtitle?.match(/VOL\.\s*\d+/i)?.[0] || "Vol. 7";
   const sessionsTotal = (state.sessions || []).length;
-  const sessionsLeft = Math.max(0, 9 - sessionsTotal);
+  const sessionsLeft = Math.max(0, SESSIONS_TOTAL - sessionsTotal);
   const top5 = [...(leaderboard || [])].filter(e => e.stats.groupPlayed > 0 || e.stats.qfReached > 0).slice(0, 5);
   const rankEmoji = ["🥇","🥈","🥉","4️⃣","5️⃣"];
 
