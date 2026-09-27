@@ -34,3 +34,29 @@ ffmpeg build (`apt-get install ffmpeg`), not `/opt/pw-browsers/ffmpeg-*`.
   than each element animating on its own.
 - Palette and motion follow `DESIGN.md`: cyan leads, amber is urgency only
   (here: DOUBLE POINTS and the leader's row), easing overshoots and settles.
+
+## Music
+
+`score.py` writes `score.wav` — an original score, synthesised from scratch with
+numpy. No samples and no library music, so the track is ours: nothing to licence
+and nothing for Instagram's Content ID to claim.
+
+It is written against the same `BEATS` array the picture uses, so the hits land
+on the frames that already punch rather than merely near them. The contender
+countdown reveals at 0.24s intervals, which is an eighth note at 125 BPM, so the
+score sits at 125 and the edit and the music share one grid.
+
+```bash
+python3 score.py                       # ~3s, writes score.wav
+ffmpeg -y -i surge-hype.mp4 -i score.wav -map 0:v -map 1:a \
+  -c:v copy -c:a aac -b:a 192k -ar 48000 -ac 2 \
+  -shortest -movflags +faststart surge-hype-music.mp4
+```
+
+The video stream is copied, not re-encoded, so muxing costs nothing in quality
+and a new score can be dropped onto the same picture in seconds.
+
+Voices are a kick, a trailer impact (sub drop + noise crack + tail), a noise
+riser, a sub-bass, a detuned saw stab and a pad — all in D minor. Everything the
+picture marks as a beat also ducks the bed by up to 30%, so the impacts read
+through the pulse. Peak lands at -1 dBFS; Instagram normalises anyway.
