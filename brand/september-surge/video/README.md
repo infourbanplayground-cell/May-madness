@@ -63,10 +63,22 @@ ffmpeg -y -i surge-hype.mp4 -i score.wav -map 0:v -map 1:a \
 The video stream is copied, not re-encoded, so muxing costs nothing in quality
 and a new score can be dropped onto the same picture in seconds.
 
-Voices are a kick, a trailer impact (sub drop + noise crack + tail), a noise
-riser, a sub-bass, a detuned saw stab and a pad — all in D minor. Everything the
-picture marks as a beat also ducks the bed by up to 30%, so the impacts read
-through the pulse. Peak lands at -1 dBFS; Instagram normalises anyway.
+Two layers. **The hits** — kick, trailer impact (sub drop + noise crack + tail),
+riser, sub-bass — sit on the beat map. **The bed** underneath is a real backing
+track: sixteenth hats, claps on 2 and 4, a driving eighth-note bass, a sixteenth
+arpeggio and offbeat chord stabs, over a Dm–Bb–F–C loop, one chord per bar.
+
+`ENERGY(t)` is the arrangement in one function, and it follows the picture: the
+titles land dry, the bed enters under the dates, climbs through the countdown,
+**drops to 10% for the breath before the 60**, and returns full on the drop.
+
+Mix gains matter more than they look. The bed is written at conservative
+per-voice levels so nothing clips on its own, which leaves it ~20 dB under the
+impacts and effectively inaudible — the `low += bed * 3.4` / `mid += drums * 9.0`
+lines are what lift it into a backing track, about 7 dB under the hits. If the
+bed ever goes missing after an edit, check those two numbers before anything
+else. Every mapped beat also ducks it by up to 22%, so impacts still cut
+through. Peak lands at -1 dBFS; Instagram normalises anyway.
 
 ## The 9:16 cut
 

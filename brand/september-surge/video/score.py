@@ -4,7 +4,8 @@ Original score for the September Surge hype cut.
 Everything here is synthesised from scratch — no samples, no library music — so
 the track is ours and carries no licence or copyright-claim risk on Instagram.
 
-It is written against the cut's own beat map (BEATS in reel.html), so the hits
+A full bed -- drums, bass, arpeggio and chords on a Dm-Bb-F-C loop -- sits
+under a layer of trailer impacts. The impacts are written against the cut's own beat map (BEATS in reel.html), so the hits
 land on the frames that already punch. The contender countdown reveals at 0.24s
 intervals, which is an eighth note at 125 BPM, so the whole score sits at 125
 and the picture edit and the music share a grid rather than merely coinciding.
@@ -191,12 +192,147 @@ place(low, 20.86, pad(D2, 2.9, 0.34))
 place(mid, 20.86, stab(D3, 1.0, 0.18, 2600))
 place(hi,  22.16, impact(0.34, 1.6))
 
+# ══════════════════════════════════════════════════════════════════════════
+#  THE BED
+#  v1 was hits and drone — correct for the edit, but thin on its own. This is
+#  the music under it: drums, bass, arpeggio and chords, on a Dm–Bb–F–C loop at
+#  125 BPM. One bar is 1.92s, one chord per bar, so the loop turns over every
+#  7.68s and lands three times across the 23.2s cut.
+#
+#  Everything is gated by ENERGY(t), which follows the picture: light under the
+#  titles, half under the dates, building through the chase, out entirely for
+#  the breath before the 60, full on the drop.
+# ══════════════════════════════════════════════════════════════════════════
+
+BAR = BEAT * 4                                   # 1.92 s
+
+# Dm – Bb – F – C.  (root, [chord tones for the arp])
+PROG = [
+    (73.42,  [146.83, 174.61, 220.00, 293.66]),   # Dm : D F A D
+    (58.27,  [116.54, 174.61, 220.00, 293.66]),   # Bb : Bb F A D
+    (87.31,  [174.61, 220.00, 261.63, 349.23]),   # F  : F A C F
+    (65.41,  [130.81, 164.81, 196.00, 261.63]),   # C  : C E G C
+]
+def chord_at(t):
+    return PROG[int(t / BAR) % 4]
+
+# How loud the bed is at any moment — the arrangement, in one curve.
+def ENERGY(t):
+    if t < 1.20:  return 0.00                    # titles land dry
+    if t < 4.20:  return 0.34                    # a pulse arrives under them
+    if t < 7.60:  return 0.62                    # dates
+    if t < 10.98: return 0.78                    # the countdown climbs
+    if t < 15.60: return 1.00                    # leader has landed, full bed
+    if t < 16.62: return 0.10                    # the breath before the 60
+    if t < 20.10: return 1.00                    # the drop
+    if t < 22.30: return 0.86                    # close
+    return 0.30
+
+# ── added voices ───────────────────────────────────────────────────────────
+def hat(d=0.055, bright=7000, a=1.0):
+    n = int(SR * d)
+    return onepole_hp(rng.normal(0, 1, n) * dec(n, d / 4.5), bright) * a
+
+def openhat(d=0.22, a=1.0):
+    n = int(SR * d)
+    return onepole_hp(rng.normal(0, 1, n) * dec(n, d / 3.0), 5600) * a
+
+def clap(a=1.0):
+    n = int(SR * 0.30)
+    body = onepole_hp(rng.normal(0, 1, n), 1100)
+    env = dec(n, 0.055)
+    for off in (0.000, 0.011, 0.021):            # three taps -> a real clap
+        i = int(off * SR)
+        env[i:] = np.maximum(env[i:], dec(n - i, 0.05) * (1 - off * 12))
+    tail = onepole_lp(rng.normal(0, 1, n) * dec(n, 0.12), 2600) * 0.25
+    return (body * env + tail) * a
+
+def bass(note, d, a=1.0, cut=520):
+    """Square-ish bass with a fast filter env — the drive under the loop."""
+    n = int(SR * d); ph = np.arange(n) / SR
+    saw = 2 * ((ph * note) % 1) - 1
+    sq = np.sign(np.sin(2 * np.pi * note * ph)) * 0.45
+    env = np.minimum(1, np.arange(n) / (SR * 0.005)) * dec(n, d / 2.6)
+    fenv = cut + 1500 * np.exp(-np.arange(n) / (SR * 0.05))
+    return sat(onepole_lp((saw * 0.7 + sq) * env, fenv), 1.5) * a
+
+def arp(note, d=0.13, a=1.0, cut=3200):
+    n = int(SR * d); ph = np.arange(n) / SR
+    s = (2 * ((ph * note) % 1) - 1) * 0.6 + np.sin(2 * np.pi * note * 2 * ph) * 0.4
+    env = np.minimum(1, np.arange(n) / (SR * 0.002)) * dec(n, d / 4.0)
+    return onepole_lp(s * env, cut) * a
+
+def chordstab(notes, d=0.30, a=1.0, cut=2000):
+    n = int(SR * d); ph = np.arange(n) / SR
+    s = sum(2 * ((ph * f * r) % 1) - 1 for f in notes for r in (0.996, 1.004))
+    s /= (len(notes) * 2)
+    env = np.minimum(1, np.arange(n) / (SR * 0.010)) * dec(n, d / 2.8)
+    return onepole_lp(s * env, cut) * a
+
+# ── lay the bed, one sixteenth at a time ───────────────────────────────────
+drums, bed = buf(), buf()
+STEP = BEAT / 4                                  # 0.12 s — a sixteenth
+nsteps = int(DUR / STEP)
+
+for k in range(nsteps):
+    t = k * STEP
+    e = ENERGY(t)
+    if e <= 0.02:
+        continue
+    beat16 = k % 16                               # position in the bar
+    root, tones = chord_at(t)
+
+    # hats — sixteenths once the bed is up, eighths below that
+    if e >= 0.60 or beat16 % 2 == 0:
+        acc = 1.0 if beat16 % 4 == 0 else (0.62 if beat16 % 2 == 0 else 0.42)
+        place(drums, t, hat(a=0.090 * acc * e))
+    if beat16 in (6, 14) and e >= 0.62:           # open hat, offbeat lift
+        place(drums, t, openhat(a=0.075 * e))
+
+    # clap on 2 and 4
+    if beat16 in (4, 12) and e >= 0.55:
+        place(drums, t, clap(0.115 * e))
+
+    # bass — driving eighths, with a push on the offbeat before the bar
+    if beat16 % 2 == 0 and e >= 0.30:
+        note = root * (2 if beat16 == 8 and e >= 0.95 else 1)
+        place(bed, t, bass(note, STEP * 1.85, 0.30 * e))
+    elif beat16 == 15 and e >= 0.78:
+        place(bed, t, bass(root, STEP * 0.9, 0.22 * e))
+
+    # arpeggio — sixteenths, up and back down the chord
+    if e >= 0.55:
+        pat = [0, 1, 2, 3, 2, 1, 2, 3, 0, 1, 2, 3, 3, 2, 1, 2][beat16]
+        oct_ = 2 if (e >= 0.95 and beat16 % 8 >= 4) else 1
+        place(bed, t, arp(tones[pat] * oct_, 0.13,
+                          (0.052 + 0.020 * (beat16 % 4 == 0)) * e))
+
+    # chord stabs on the offbeats — the lift
+    if beat16 in (2, 10) and e >= 0.62:
+        place(bed, t, chordstab(tones[:3], 0.34, 0.085 * e))
+
+# a sustained pad under the whole loop, so the harmony never drops out
+tb = 0.0
+while tb < DUR:
+    e = ENERGY(tb + BAR * 0.5)
+    if e > 0.25:
+        _, tones = chord_at(tb)
+        place(bed, tb, pad(tones[0] / 2, BAR * 1.02, 0.10 * e, 1100))
+    tb += BAR
+
+drums = onepole_hp(drums, 220)                   # keep the kit out of the sub
+# The bed is built at conservative per-voice levels so nothing clips on its own,
+# which leaves it ~20dB under the impact layer -- inaudible. These gains lift it
+# into a real backing track, roughly 7dB under the hits: present the whole way
+# through, still out of the way when something lands.
+low += bed * 3.4
+mid += drums * 9.0 + bed * 3.2
 # ── mix ────────────────────────────────────────────────────────────────────
 low = onepole_lp(low, 320)                 # keep the weight under the mids
 mid = onepole_hp(mid, 140)
 hi  = onepole_hp(hi, 45)
 
-mono = low*1.00 + mid*0.85 + hi*0.80
+mono = low*0.92 + mid*0.85 + hi*0.62
 
 # duck the bed a touch on every hit, so the impacts read
 duck = np.ones(N)
@@ -204,7 +340,7 @@ for bt, a in BEATS:
     i = int(bt*SR); n = int(SR*0.28)
     if i >= N: continue
     n = min(n, N-i)
-    duck[i:i+n] = np.minimum(duck[i:i+n], 1 - 0.30*a*np.exp(-np.arange(n)/(SR*0.055)))
+    duck[i:i+n] = np.minimum(duck[i:i+n], 1 - 0.22*a*np.exp(-np.arange(n)/(SR*0.055)))
 mono *= duck
 
 mono = sat(mono * 1.25, 1.1)               # glue
