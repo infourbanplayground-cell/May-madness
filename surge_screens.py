@@ -1917,8 +1917,8 @@ SERIES_NEW = """const DOUBLE_FROM_SESSION = 7;
 // with doubles on 8 & 9 and a 75/45/30 season pot is what Vol.6 ran, and is
 // what the next one should start from unless it decides otherwise.
 const SESSIONS_TOTAL = 8;
-// Season prizes, set by the owner for Vol.7: 75 / 50 / 35 OMR.
-const SEASON_PRIZES = [75, 50, 35];"""
+// Season prizes, set by the owner for Vol.7: 75 / 50 / 30 OMR.
+const SEASON_PRIZES = [75, 50, 30];"""
 
 POOL1_OLD = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9, season = [75, 45, 30];"""
 POOL1_NEW = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL, season = SEASON_PRIZES;"""
@@ -1943,11 +1943,30 @@ DBL_TEXT = [
 
 # ---------------------------------------------------------------------------
 # The pool figure is hardcoded in four places the generator cannot derive: three
-# meta tags and the signup post. 8 nights x 2 winners x 14 + 75/50/35 = 384.
+# meta tags and the signup post. 8 nights x 2 winners x 14 + 75/50/30 = 379.
 # ---------------------------------------------------------------------------
 
 POOL_TEXT = [
-    ("everyone ranked, 402 OMR prize pool.", "everyone ranked, 384 OMR prize pool."),
-    ("all September. 402 OMR prize pool.", "all September. 384 OMR prize pool."),
-    ("\U0001F4B0 *402 OMR prize pool* up for grabs", "\U0001F4B0 *384 OMR prize pool* up for grabs"),
+    ("everyone ranked, 402 OMR prize pool.", "everyone ranked, 379 OMR prize pool."),
+    ("all September. 402 OMR prize pool.", "all September. 379 OMR prize pool."),
+    ("\U0001F4B0 *402 OMR prize pool* up for grabs", "\U0001F4B0 *379 OMR prize pool* up for grabs"),
 ]
+
+
+# ---------------------------------------------------------------------------
+# The voucher is 14 OMR flat on every night. Vol.6 doubled it on double-points
+# nights, which is what made the signup post promise 28 while the prize pool was
+# still summing 14 x 2 x sessions. Points double; the voucher does not.
+# ---------------------------------------------------------------------------
+
+VOUCHER_OLD = """  if (session.doublePoints) {
+    text += `\U0001F3C6 Win = 28 OMR voucher per player\\n`;
+    text += `\U0001F525\U0001F525 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* \U0001F525\U0001F525\\n`;
+  } else {
+    text += `\U0001F3C6 Win = 14 OMR voucher per player\\n`;
+  }"""
+
+VOUCHER_NEW = """  text += `\U0001F3C6 Win = 14 OMR voucher per player\\n`;
+  if (session.doublePoints) {
+    text += `\U0001F525\U0001F525 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* \U0001F525\U0001F525\\n`;
+  }"""

@@ -505,6 +505,12 @@ def rebuild_screens(s, report):
         s = s.replace(o, nw)
     report.append("  series Vol.7 = 8 nights, doubles on 7 & 8")
 
+    # One voucher rate, every night: points double, the voucher does not.
+    if s.count(SCREENS.VOUCHER_OLD) != 1:
+        sys.exit("BUILD FAILED: voucher branch matched %d times" % s.count(SCREENS.VOUCHER_OLD))
+    s = s.replace(SCREENS.VOUCHER_OLD, SCREENS.VOUCHER_NEW)
+    report.append("  prizes voucher 14 OMR flat (was 28 on double nights)")
+
     # The advertised pool, in the places no formula reaches.
     hit = 0
     for o, nw in SCREENS.POOL_TEXT:
@@ -514,7 +520,7 @@ def rebuild_screens(s, report):
         s = s.replace(o, nw); hit += c
     if hit != 4:
         sys.exit("BUILD FAILED: expected 4 pool figures, replaced %d" % hit)
-    report.append("  prizes season 75/50/35, pool 402 -> 384 in %d places" % hit)
+    report.append("  prizes season 75/50/30, pool -> 379 in %d places" % hit)
 
     # Champion and runner-up split into two cells, each saying what it counts.
     if s.count(SCREENS.CHAMPROW_OLD) != 1:
