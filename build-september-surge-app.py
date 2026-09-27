@@ -503,7 +503,18 @@ def rebuild_screens(s, report):
         if s.count(o) != 1:
             sys.exit("BUILD FAILED: double-points copy %r matched %d times" % (o[:32], s.count(o)))
         s = s.replace(o, nw)
-    report.append("  series Vol.7 = 8 nights, doubles on 7 & 8, season pot 150 -> 178, pool held at 402")
+    report.append("  series Vol.7 = 8 nights, doubles on 7 & 8")
+
+    # The advertised pool, in the places no formula reaches.
+    hit = 0
+    for o, nw in SCREENS.POOL_TEXT:
+        c = s.count(o)
+        if not c:
+            sys.exit("BUILD FAILED: pool text %r not found" % o[:40])
+        s = s.replace(o, nw); hit += c
+    if hit != 4:
+        sys.exit("BUILD FAILED: expected 4 pool figures, replaced %d" % hit)
+    report.append("  prizes season 75/50/35, pool 402 -> 384 in %d places" % hit)
 
     # Champion and runner-up split into two cells, each saying what it counts.
     if s.count(SCREENS.CHAMPROW_OLD) != 1:

@@ -1917,11 +1917,8 @@ SERIES_NEW = """const DOUBLE_FROM_SESSION = 7;
 // with doubles on 8 & 9 and a 75/45/30 season pot is what Vol.6 ran, and is
 // what the next one should start from unless it decides otherwise.
 const SESSIONS_TOTAL = 8;
-// Losing a night costs 28 OMR of winners' vouchers (14 x 2). The season pot is
-// lifted 150 -> 178 for Vol.7 only, so the 402 OMR pool already on the signup
-// post, the site meta and the format post stays true. 3rd at 35 also settles
-// the 30-vs-35 disagreement with the certificate deck.
-const SEASON_PRIZES = [88, 55, 35];"""
+// Season prizes, set by the owner for Vol.7: 75 / 50 / 35 OMR.
+const SEASON_PRIZES = [75, 50, 35];"""
 
 POOL1_OLD = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = 9, season = [75, 45, 30];"""
 POOL1_NEW = """  const sessionVoucher = 14, perTeam = 2, sessionsTotal = SESSIONS_TOTAL, season = SEASON_PRIZES;"""
@@ -1941,4 +1938,16 @@ DBL_TEXT = [
      "\U0001F5D3️ 8 sessions total · Sessions 7 & 8 pay *DOUBLE POINTS* \U0001F525"),
     ("`On by default from Session ${DOUBLE_FROM_SESSION} — turn off to override.`",
      "`On by default from Session ${DOUBLE_FROM_SESSION} — the last two nights. Turn off to override.`"),
+]
+
+
+# ---------------------------------------------------------------------------
+# The pool figure is hardcoded in four places the generator cannot derive: three
+# meta tags and the signup post. 8 nights x 2 winners x 14 + 75/50/35 = 384.
+# ---------------------------------------------------------------------------
+
+POOL_TEXT = [
+    ("everyone ranked, 402 OMR prize pool.", "everyone ranked, 384 OMR prize pool."),
+    ("all September. 402 OMR prize pool.", "all September. 384 OMR prize pool."),
+    ("\U0001F4B0 *402 OMR prize pool* up for grabs", "\U0001F4B0 *384 OMR prize pool* up for grabs"),
 ]
