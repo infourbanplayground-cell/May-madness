@@ -1,5 +1,12 @@
 # Double Points hype video — Vol.7, sessions 7 & 8
 
+Two cuts from one design:
+
+| File | Output | Where |
+|---|---|---|
+| `double-points-reel.html` | 1080×1350 (4:5) | Instagram feed |
+| `story-reel-9x16.html` | 1080×1920 (9:16) | Stories, Reels |
+
 `double-points-reel.html` is the source. It is a 1080×1350 stage driven by
 `window.__seek(t)` — no CSS animations, so every frame is deterministic and the
 render is reproducible.
@@ -60,3 +67,26 @@ Voices are a kick, a trailer impact (sub drop + noise crack + tail), a noise
 riser, a sub-bass, a detuned saw stab and a pad — all in D minor. Everything the
 picture marks as a beat also ducks the bed by up to 30%, so the impacts read
 through the pulse. Peak lands at -1 dBFS; Instagram normalises anyway.
+
+## The 9:16 cut
+
+`story-reel-9x16.html` is the same design re-flowed for a full vertical frame,
+not a crop and not a letterbox. Three differences from the 4:5 source:
+
+- **The background fills all 1920.** Trace, band, vignette and flashes sit at
+  stage level, so the frame is full-bleed; only the composition is inset.
+- **The type-led scenes scale 1.2× about their centre** via a `.zoom` layer that
+  sits between `.scene` (which `seek()` transforms for the blow-past) and the
+  content (which `seek()` addresses by id), so nothing the script writes is
+  touched. 1.2 is the ceiling: DOUBLE POINTS is the widest line at ~840px, and
+  1.2 puts it at 1008 inside a 1080 frame.
+- **The chase gets its own box**, `#s3{top:250px;height:1420px}`, because it is
+  the one height-bound scene. Rows grow to 108/87/8 and the avatars with them.
+
+Instagram lays its own chrome over roughly the top 250px and bottom 250px of a
+story — profile row above, reply bar and action rail below. Every cut keeps its
+content inside 250..1670. That is also why the composition is **not** scaled to
+fill the height: the contender rows already span the full 1080 width, so any
+uniform upscale crops them.
+
+The score is unchanged between the two cuts — same beat map, same 23.2s.
