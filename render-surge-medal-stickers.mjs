@@ -53,7 +53,9 @@ for (const f of files) {
   const dpi = Math.round(width / (artMm / 25.4));
   const bad = [];
   if (!checks.display) bad.push('display face missing');
-  if (!checks.mono) bad.push('mono missing');
+  // Only the 50mm cut sets arc text; at 25mm mono is deliberately absent,
+  // so requiring it there flags every small sticker as broken.
+  if (artMm > 40 && !checks.mono) bad.push('mono missing');
   if (!checks.images) bad.push('emblem failed');
   if (!checks.svg) bad.push('no svg');
   if (Math.abs(dpi - 300) > 4) bad.push(`${dpi} DPI, expected 300`);

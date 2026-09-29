@@ -38,15 +38,26 @@ VOLTAGE      = "#F4F9FA"
 LIGHT_STEEL  = "#C3D0D8"
 STEEL_TX     = "#8A9BA8"
 
+# Bronze is a deliberate exception to DESIGN.md's warm-accent rule, which
+# reserves Strike Amber for urgency. These go onto physical medals, where third
+# place is bronze by convention and steel would read as a mistake. It is a
+# metal, not the series' amber: cooler and darker, so it cannot be confused
+# with a live-now marker anywhere else in the system.
+BRONZE = "#C3813F"
+
 SERIES = {
     1: dict(ord_="1", suf="ST", accent=SURGE_CYAN),
     2: dict(ord_="2", suf="ND", accent=LIGHT_STEEL),
-    3: dict(ord_="3", suf="RD", accent=STEEL_TX),
+    3: dict(ord_="3", suf="RD", accent=BRONZE),
 }
-# Only if these have to sit beside conventional medal ribbons.
-METAL = {1: "#E3B341", 2: "#C9CDD2", 3: "#C08457"}
+# Full metal set, if first and second have to match bronze rather than lead
+# with the series colour.
+METAL = {1: "#E3B341", 2: "#C9CDD2", 3: BRONZE}
 
 BLEED_MM = 3.0
+# surge-lockup@1600.png is 1600x750; the height follows the width so the
+# mark is never squashed by a change to the disc size.
+LOCKUP_RATIO = 750 / 1600
 
 
 def b64(path):
@@ -54,7 +65,7 @@ def b64(path):
         return base64.b64encode(f.read()).decode()
 
 
-def svg(place, size_mm, accent, emblem_b64, bleed=True):
+def svg(place, size_mm, accent, lockup_b64, bleed=True):
     """One sticker. Units are 0.1mm, so a 50mm disc is 500 units across."""
     b = BLEED_MM if bleed else 0.0
     art = size_mm + 2 * b          # artboard edge in mm
@@ -99,36 +110,38 @@ def svg(place, size_mm, accent, emblem_b64, bleed=True):
         f'</defs>')
 
     if big:
+        # The September Surge lockup is the mark, not the bare emblem. It already
+        # says SEPTEMBER SURGE, so the top arc that used to repeat it is gone —
+        # the lockup fills that space instead, and the one remaining arc carries
+        # what the lockup does not: the club and the volume.
+        lw = R * 1.06
+        lh = lw * LOCKUP_RATIO
+        parts.append(f'<image href="data:image/png;base64,{lockup_b64}" '
+                     f'x="{c-lw/2:.1f}" y="{c - R*0.70:.1f}" '
+                     f'width="{lw:.1f}" height="{lh:.1f}" '
+                     f'preserveAspectRatio="xMidYMid meet"/>')
         parts.append(
             f'<text font-family="JetBrains Mono, monospace" font-weight="700" '
-            f'font-size="{R*0.108:.1f}" letter-spacing="{R*0.044:.2f}" fill="{VOLTAGE}" '
-            f'fill-opacity=".92"><textPath href="#top{place}" startOffset="50%" '
-            f'text-anchor="middle">URBAN PLAYGROUND</textPath></text>')
-        parts.append(
-            f'<text font-family="JetBrains Mono, monospace" font-weight="700" '
-            f'font-size="{R*0.098:.1f}" letter-spacing="{R*0.036:.2f}" fill="{accent}" '
+            f'font-size="{R*0.100:.1f}" letter-spacing="{R*0.038:.2f}" fill="{accent}" '
             f'><textPath href="#bot{place}" startOffset="50%" '
-            f'text-anchor="middle">SEPTEMBER SURGE · VOL.7</textPath></text>')
-        # diamonds at 3 and 9 o'clock, separating the two arcs
+            f'text-anchor="middle">URBAN PLAYGROUND · VOL.7</textPath></text>')
+        # diamonds at 3 and 9 o'clock, closing the arc
         for sx in (-1, 1):
             x = c + sx * r_text
             parts.append(f'<rect x="{x - R*0.026:.1f}" y="{c - R*0.026:.1f}" '
                          f'width="{R*0.052:.1f}" height="{R*0.052:.1f}" fill="{accent}" '
                          f'transform="rotate(45 {x:.1f} {c:.1f})"/>')
-        # the emblem above the numeral
-        ew, eh = R * 0.30, R * 0.44
-        parts.append(f'<image href="data:image/png;base64,{emblem_b64}" '
-                     f'x="{c-ew/2:.1f}" y="{c - R*0.62:.1f}" width="{ew:.1f}" height="{eh:.1f}" '
-                     f'preserveAspectRatio="xMidYMid meet"/>')
-        num_y, num_size, suf_size = c + R * 0.44, R * 0.80, R * 0.26
+        num_y, num_size, suf_size = c + R * 0.50, R * 0.72, R * 0.24
     else:
-        # 25mm: one arc only, and the numeral carries the disc.
-        parts.append(
-            f'<text font-family="JetBrains Mono, monospace" font-weight="700" '
-            f'font-size="{R*0.125:.1f}" letter-spacing="{R*0.050:.2f}" fill="{accent}" '
-            f'><textPath href="#bot{place}" startOffset="50%" '
-            f'text-anchor="middle">SEPTEMBER SURGE</textPath></text>')
-        num_y, num_size, suf_size = c + R * 0.34, R * 1.00, R * 0.32
+        # 25mm: the lockup and the numeral, nothing else. Arc text at this
+        # diameter is under a millimetre tall and prints as grey fuzz.
+        lw = R * 1.16
+        lh = lw * LOCKUP_RATIO
+        parts.append(f'<image href="data:image/png;base64,{lockup_b64}" '
+                     f'x="{c-lw/2:.1f}" y="{c - R*0.66:.1f}" '
+                     f'width="{lw:.1f}" height="{lh:.1f}" '
+                     f'preserveAspectRatio="xMidYMid meet"/>')
+        num_y, num_size, suf_size = c + R * 0.54, R * 0.86, R * 0.28
 
     # The numeral, in Vol.7's display face. The ordinal suffix rides high beside
     # it rather than sitting on the baseline, so "1ST" reads as one mark.
@@ -163,7 +176,7 @@ def svg(place, size_mm, accent, emblem_b64, bleed=True):
             + "".join(parts) + '</g></svg>')
 
 
-def build_html(place, size_mm, accent, emblem_b64, bleed):
+def build_html(place, size_mm, accent, lockup_b64, bleed):
     art = size_mm + (2 * BLEED_MM if bleed else 0)
     faces = open(FONT_BUNDLE).read()
     body_bg = VOID if bleed else "transparent"
@@ -175,7 +188,7 @@ html,body{{width:{art}mm;height:{art}mm;background:{body_bg};overflow:hidden;
   -webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 svg{{display:block;}}
 </style></head><body>
-{svg(place, size_mm, accent, emblem_b64, bleed)}
+{svg(place, size_mm, accent, lockup_b64, bleed)}
 </body></html>"""
 
 
@@ -187,7 +200,7 @@ def main():
                     help="Use gold/silver/bronze instead of the series ladder")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
-    emblem = b64(os.path.join(BRAND, "up-logo-cyan-2x.png"))
+    lockup = b64(os.path.join(BRAND, "surge-lockup@1600.png"))
 
     for size in a.sizes:
         for place in a.places:
@@ -196,7 +209,7 @@ def main():
                 tag = "bleed" if bleed else "disc"
                 h = os.path.join(OUT, f"ss-medal-{int(size)}mm-{place}-{tag}.html")
                 with open(h, "w") as f:
-                    f.write(build_html(place, size, accent, emblem, bleed))
+                    f.write(build_html(place, size, accent, lockup, bleed))
             print(f"built {int(size)}mm · {place} · {accent}")
     print("\nnow render:  node render-surge-medal-stickers.mjs")
 

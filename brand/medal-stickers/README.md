@@ -7,10 +7,15 @@ because arc text that reads at 50mm turns to mush at half the diameter.
 | | 50mm | 25mm |
 |---|---|---|
 | Outer ring | yes | yes |
-| `URBAN PLAYGROUND` top arc | yes | — |
-| `SEPTEMBER SURGE · VOL.7` bottom arc | yes | `SEPTEMBER SURGE` only |
-| Emblem | yes | — |
-| Numeral | 0.80 × radius | 1.00 × radius |
+| September Surge lockup | yes | yes |
+| `URBAN PLAYGROUND · VOL.7` arc | yes | — |
+| Numeral | 0.72 × radius | 0.86 × radius |
+
+The **lockup is the mark**, not the bare emblem. Because it already reads
+SEPTEMBER SURGE, the top arc that used to repeat it is gone — the lockup fills
+that space, and the one remaining arc carries what the lockup does not: the club
+and the volume. At 25mm there is no arc at all: mono text on a 25mm disc is
+under a millimetre tall and prints as grey fuzz.
 
 ## Files
 
@@ -34,11 +39,19 @@ python3 pack-surge-medal-pdfs.py           # -> print-ready PDF
 
 ## Design notes
 
-Colours follow the series ladder — **cyan, light steel, steel** — not
-gold/silver/bronze. `DESIGN.md` is explicit that gold is out of this palette and
-the app's medal chips already use this ladder, so the sticker matches what a
-player sees next to their name in the table. **`--metal` switches to
-gold/silver/bronze** if these have to sit beside conventional medal ribbons.
+**Cyan, light steel, bronze.** First keeps the series' own colour, which is what
+a player sees next to their name in the table; second reads as silver; third is
+bronze `#C3813F`.
+
+Bronze is a deliberate exception to `DESIGN.md`, which reserves warm accents for
+urgency. These go onto physical medals, where third place is bronze by
+convention and steel would read as a mistake. It is a metal, not the series'
+Strike Amber — cooler and darker, so it cannot be confused with a live-now
+marker anywhere else in the system. `--metal` switches first and second to gold
+and silver too, if they have to match rather than lead with cyan.
+
+The lockup stays its own colour on all three. A brand mark does not restyle
+itself per placement; the ring, the numeral and the arc carry that.
 
 The centre is Vol.7's ripple, faint, behind the numeral — the same pulse motif
 the certificates use.
