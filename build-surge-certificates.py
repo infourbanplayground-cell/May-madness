@@ -35,6 +35,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 FONT_BUNDLE = "/tmp/certs/fonts/bundle.css"
 BRAND = os.path.join(HERE, "brand", "september-surge")
 OUT = os.path.join(HERE, "brand", "certificates-surge")
+# Vol.7 closes on session 8. The certificates are dated the night they are
+# awarded, not the day they happen to be generated.
+FINALE_DATE = "30 September 2026"
 
 # ── Palette (DESIGN.md, Vol.7) ────────────────────────────────────────────
 DEEP_CURRENT = "#0A0F14"
@@ -120,7 +123,7 @@ def seal(accent, emblem_b64):
 </svg>"""
 
 
-def build_html(place, name=None):
+def build_html(place, name=None, date_str=FINALE_DATE):
     p = PLACES[place]
     acc = p["accent"]
     faces = open(FONT_BUNDLE).read()
@@ -208,7 +211,7 @@ body{{
   padding:2.2mm 7mm;border:.6pt solid rgba(244,249,250,.22);
   background:rgba(244,249,250,.045);}}
 
-.awarded{{font-size:9.5pt;color:{STEEL_TX};margin-top:9.5mm;letter-spacing:.04em;}}
+.awarded{{font-size:9.5pt;color:{STEEL_TX};margin-top:7mm;letter-spacing:.04em;}}
 
 .plate{{position:relative;background:{PLATE};border:.6pt solid {PLATE_EDGE};}}
 /* A cap bar in the placement colour along the top edge. Corner ticks were tried
@@ -219,7 +222,7 @@ body{{
 
 /* Sized to be written in, not to dominate: a 16mm band takes a signature
    comfortably while leaving the placement the largest thing on the sheet. */
-.nameplate{{width:172mm;height:16mm;margin:6mm auto 0;}}
+.nameplate{{width:172mm;height:16mm;margin:5mm auto 0;}}
 .namehint{{font-family:'JetBrains Mono',monospace;font-size:6.4pt;letter-spacing:.32em;
   color:rgba(138,155,168,.75);margin-top:2.4mm;text-transform:uppercase;}}
 
@@ -230,23 +233,23 @@ body{{
   font-variation-settings:'wdth' 112,'wght' 900;
   font-size:21pt;line-height:1;color:{INK};white-space:nowrap;}}
 
-.body{{font-size:9.2pt;color:{STEEL_TX};margin-top:8mm;max-width:172mm;line-height:1.7;}}
+.body{{font-size:9.2pt;color:{STEEL_TX};margin-top:6mm;max-width:164mm;line-height:1.7;}}
 .body b{{color:{VOLTAGE};font-weight:800;}}
 
-.sealsvg{{position:absolute;left:50%;bottom:16mm;transform:translateX(-50%);
-  width:42mm;height:42mm;}}
-.foot{{position:absolute;left:26mm;right:26mm;bottom:20mm;display:flex;
-  align-items:flex-end;justify-content:space-between;}}
-.sig{{width:74mm;text-align:center;}}
-.sigplate{{height:11mm;}}
-.sigcap{{font-family:'JetBrains Mono',monospace;font-size:6.4pt;letter-spacing:.28em;
-  color:{STEEL_TX};margin-top:2.4mm;text-transform:uppercase;}}
+/* The foot was a date plate and a director plate flanking the seal, and the
+   three crowded each other — the director plate ran almost to the frame. The
+   date is known, so it is printed; the director box is gone. What is left is a
+   single centred stack: seal, then the award date, then the imprint. */
+.sealsvg{{position:absolute;left:50%;bottom:28mm;transform:translateX(-50%);
+  width:32mm;height:32mm;}}
+.issued{{position:absolute;left:0;right:0;bottom:16mm;text-align:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:7.4pt;
+  letter-spacing:.30em;color:{VOLTAGE};text-transform:uppercase;}}
+.issued span{{color:{acc};}}
 
-.serial{{position:absolute;left:0;right:0;bottom:8.6mm;text-align:center;
+.serial{{position:absolute;left:0;right:0;bottom:9.4mm;text-align:center;
   font-family:'JetBrains Mono',monospace;font-size:6pt;letter-spacing:.3em;
   color:rgba(138,155,168,.55);text-transform:uppercase;}}
-.nochip{{display:inline-block;width:22mm;height:3.2mm;vertical-align:-.6mm;
-  margin-left:1.6mm;background:{PLATE};border:.5pt solid {PLATE_EDGE};}}
 </style></head><body>
 <div class="layer trace"></div>
 <div class="layer pulse"></div>
@@ -281,12 +284,9 @@ body{{
   </div>
 </div>
 
-<div class="foot">
-  <div class="sig"><div class="plate sigplate"></div><div class="sigcap">Date</div></div>
-  <div class="sig"><div class="plate sigplate"></div><div class="sigcap">Tournament Director</div></div>
-</div>
 {seal(acc, emblem)}
-<div class="serial">September Surge · Vol.7 · Muscat, Oman · No.<span class="nochip"></span></div>
+<div class="issued">Awarded <span>{date_str}</span></div>
+<div class="serial">September Surge · Vol.7 · Urban Playground · Muscat, Oman</div>
 </body></html>"""
 
 
@@ -295,15 +295,17 @@ def main():
     ap.add_argument("--places", nargs="*", type=int, default=[1, 2, 3, 4, 5])
     ap.add_argument("--names", nargs="*", default=[],
                     help="Winner names in placement order. Omit for blank name lines.")
+    ap.add_argument("--date", default=FINALE_DATE,
+                    help=f"Award date printed on the sheet (default: {FINALE_DATE})")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     for i, place in enumerate(a.places):
         name = a.names[i] if i < len(a.names) else None
-        html = build_html(place, name)
+        html = build_html(place, name, a.date)
         h = os.path.join(OUT, f"ss-certificate-{place}.html")
         with open(h, "w") as f:
             f.write(html)
-        print(f"built {os.path.basename(h)}  ({len(html)/1024:.0f}KB)"
+        print(f"built {os.path.basename(h)}  ({len(html)/1024:.0f}KB)  {a.date}"
               + (f"  — {name}" if name else "  — blank name line"))
     print("\nnow render:  node render-surge-certificates.mjs")
 

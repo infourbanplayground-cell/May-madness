@@ -65,8 +65,15 @@ along its top edge: corner ticks were tried first and read as glitches against
 a light field, whereas a cap makes the plate look like a labelled field that
 belongs to the frame.
 
-The plates are 16mm for the name and 11mm for the signatures — enough to write
-in, not so much that they take the eye off the placement.
+The name is the only writable plate left. The date is known — the series closes
+on session 8 — so it is printed rather than ruled, and the Tournament Director
+box is gone. Those two plates used to flank the seal and crowded it, with the
+director plate running nearly to the frame; the foot is now a single centred
+stack: seal, award date, imprint. `--date` overrides the printed date.
+
+The plate is 16mm tall — enough to write a name in, not so much that it takes
+the eye off the placement. A 22mm plate was tried first and read as a blank
+slab.
 
 **Both modes use the same plates.** A typed name (`--names`) prints in ink
 `#0A0F14` on the plate rather than on the dark ground, so a pre-printed
