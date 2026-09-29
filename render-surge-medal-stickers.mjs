@@ -31,6 +31,11 @@ for (const f of files) {
   pg.on('pageerror', e => errs.push(e.message));
   await pg.goto('file://' + path.join(OUT, f), { waitUntil: 'load' });
   await pg.evaluate(() => document.fonts.ready);
+  // The page centres the numeral itself once the font has loaded. Screenshot
+  // before that lands and every sticker ships with the mark off-centre, which
+  // is exactly the bug this pass exists to fix — so wait for it to flag done.
+  await pg.waitForFunction(() => document.querySelector('svg')?.dataset.centred === '1',
+                           null, { timeout: 5000 });
 
   const checks = await pg.evaluate(() => ({
     // The numeral is the whole design at 25mm — if the display face has not
@@ -39,6 +44,7 @@ for (const f of files) {
     mono: document.fonts.check('700 14px "JetBrains Mono"'),
     images: [...document.images].every(i => i.complete && i.naturalWidth > 0),
     svg: !!document.querySelector('svg'),
+    centred: document.querySelector('svg')?.dataset.centred === '1',
   }));
 
   const png = path.join(OUT, f.replace('.html', '.png'));
@@ -58,6 +64,7 @@ for (const f of files) {
   if (artMm > 40 && !checks.mono) bad.push('mono missing');
   if (!checks.images) bad.push('emblem failed');
   if (!checks.svg) bad.push('no svg');
+  if (!checks.centred) bad.push('numeral not centred');
   if (Math.abs(dpi - 300) > 4) bad.push(`${dpi} DPI, expected 300`);
   if (errs.length) bad.push(errs.join('; '));
   console.log(`${path.basename(png)}  ${width}x${height}  ${dpi} DPI`

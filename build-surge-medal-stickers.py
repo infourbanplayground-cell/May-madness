@@ -65,6 +65,17 @@ def b64(path):
         return base64.b64encode(f.read()).decode()
 
 
+def cap_centre(c, font_size):
+    """Baseline that puts a run of capitals' optical centre on the disc's centre.
+
+    The placement numeral is the mark, so it belongs dead centre — it used to
+    hang below it, because the lockup was sized to push it down. Caps sit
+    roughly from baseline-0.72em to the baseline, so their middle is about
+    0.35em above it; the baseline therefore goes 0.35em below centre.
+    """
+    return c + font_size * 0.35
+
+
 def svg(place, size_mm, accent, lockup_b64, bleed=True):
     """One sticker. Units are 0.1mm, so a 50mm disc is 500 units across."""
     b = BLEED_MM if bleed else 0.0
@@ -89,10 +100,13 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
     parts.append(f'<circle cx="{c}" cy="{c}" r="{R}" fill="{DEEP_CURRENT}"/>')
 
     # Vol.7's ripple, faint, behind everything
-    for i, rr in enumerate((r_inner * 0.42, r_inner * 0.66, r_inner * 0.90)):
+    # Four rings now rather than three, and a touch stronger: with the numeral
+    # centred on them they read as a motif radiating from it rather than as
+    # stray circles behind an off-centre mark.
+    for i, rr in enumerate((r_inner * 0.34, r_inner * 0.56, r_inner * 0.78, r_inner * 1.00)):
         parts.append(f'<circle cx="{c}" cy="{c}" r="{rr:.1f}" fill="none" '
-                     f'stroke="{accent}" stroke-opacity="{0.16 - i*0.04:.2f}" '
-                     f'stroke-width="{R*0.012:.1f}"/>')
+                     f'stroke="{accent}" stroke-opacity="{0.22 - i*0.045:.2f}" '
+                     f'stroke-width="{R*0.013:.1f}"/>')
 
     parts.append(f'<circle cx="{c}" cy="{c}" r="{r_ring:.1f}" fill="none" '
                  f'stroke="{accent}" stroke-width="{R*0.052:.1f}"/>')
@@ -114,10 +128,10 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
         # says SEPTEMBER SURGE, so the top arc that used to repeat it is gone —
         # the lockup fills that space instead, and the one remaining arc carries
         # what the lockup does not: the club and the volume.
-        lw = R * 1.06
+        lw = R * 0.86
         lh = lw * LOCKUP_RATIO
         parts.append(f'<image href="data:image/png;base64,{lockup_b64}" '
-                     f'x="{c-lw/2:.1f}" y="{c - R*0.70:.1f}" '
+                     f'x="{c-lw/2:.1f}" y="{c - R*0.76:.1f}" '
                      f'width="{lw:.1f}" height="{lh:.1f}" '
                      f'preserveAspectRatio="xMidYMid meet"/>')
         parts.append(
@@ -131,33 +145,41 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
             parts.append(f'<rect x="{x - R*0.026:.1f}" y="{c - R*0.026:.1f}" '
                          f'width="{R*0.052:.1f}" height="{R*0.052:.1f}" fill="{accent}" '
                          f'transform="rotate(45 {x:.1f} {c:.1f})"/>')
-        num_y, num_size, suf_size = c + R * 0.50, R * 0.72, R * 0.24
+        num_size = R * 0.78
+        num_y, suf_size = cap_centre(c, num_size), R * 0.26
     else:
         # 25mm: the lockup and the numeral, nothing else. Arc text at this
         # diameter is under a millimetre tall and prints as grey fuzz.
-        lw = R * 1.16
+        lw = R * 0.92
         lh = lw * LOCKUP_RATIO
         parts.append(f'<image href="data:image/png;base64,{lockup_b64}" '
-                     f'x="{c-lw/2:.1f}" y="{c - R*0.66:.1f}" '
+                     f'x="{c-lw/2:.1f}" y="{c - R*0.80:.1f}" '
                      f'width="{lw:.1f}" height="{lh:.1f}" '
                      f'preserveAspectRatio="xMidYMid meet"/>')
-        num_y, num_size, suf_size = c + R * 0.54, R * 0.86, R * 0.28
+        num_size = R * 0.86
+        num_y, suf_size = cap_centre(c, num_size), R * 0.28
 
-    # The numeral, in Vol.7's display face. The ordinal suffix rides high beside
-    # it rather than sitting on the baseline, so "1ST" reads as one mark.
+    # The numeral, in Vol.7's display face, with the ordinal riding high beside
+    # it so the pair reads as one mark.
     #
-    # Optical centring: text-anchor centres numeral+suffix together, which puts
-    # the numeral — the thing the eye actually reads as the middle — left of the
-    # disc's centre. Nudging right by a fraction of the suffix width corrects it.
-    # "1" needs more of that correction than "2" or "3" because it is so much
-    # narrower, so the mark's centre of mass sits further from the numeral.
-    dx = suf_size * (0.55 if p["ord_"] == "1" else 0.18)
+    # The numeral is the placement logo, so it sits dead centre — and "centre"
+    # is measured, not guessed. Anchoring numeral+suffix together leaves the
+    # numeral itself well left of centre (the suffix drags the anchor), and
+    # correcting that with a hand-tuned nudge per digit was still 2-6% out
+    # because the right factor depends on the glyph, the size and the font's
+    # actual advance widths. So the two are separate elements and the page
+    # measures the numeral's box once the font has loaded, then places both:
+    # numeral centred on the disc, suffix hugging its right edge.
     parts.append(
-        f'<text x="{c + dx:.1f}" y="{num_y:.1f}" text-anchor="middle" '
+        f'<text id="num" x="{c:.1f}" y="{num_y:.1f}" text-anchor="middle" '
         f'font-family="Archivo" font-style="italic" font-size="{num_size:.1f}" '
         f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
-        f'{p["ord_"]}<tspan font-size="{suf_size:.1f}" dy="{-num_size*0.42:.1f}">{p["suf"]}</tspan>'
-        f'</text>')
+        f'{p["ord_"]}</text>')
+    parts.append(
+        f'<text id="suf" x="{c:.1f}" y="{num_y - num_size*0.42:.1f}" text-anchor="start" '
+        f'font-family="Archivo" font-style="italic" font-size="{suf_size:.1f}" '
+        f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
+        f'{p["suf"]}</text>')
 
     # Cut guide, drawn only on the bleed artboard.
     if bleed:
@@ -178,6 +200,8 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
 
 def build_html(place, size_mm, accent, lockup_b64, bleed):
     art = size_mm + (2 * BLEED_MM if bleed else 0)
+    c_units = art * 10 / 2
+    gap = size_mm * 10 / 2 * 0.03
     faces = open(FONT_BUNDLE).read()
     body_bg = VOID if bleed else "transparent"
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
@@ -189,6 +213,22 @@ html,body{{width:{art}mm;height:{art}mm;background:{body_bg};overflow:hidden;
 svg{{display:block;}}
 </style></head><body>
 {svg(place, size_mm, accent, lockup_b64, bleed)}
+<script>
+// Centre the numeral on the disc and hang the ordinal off its right edge.
+// Done here rather than in the SVG because it needs the font's real advance
+// width, which only exists once the face has loaded.
+document.fonts.ready.then(() => {{
+  const num = document.getElementById('num');
+  const suf = document.getElementById('suf');
+  const svg = document.querySelector('svg');
+  const C = {c_units};
+  const nb = num.getBBox();
+  num.setAttribute('x', (Number(num.getAttribute('x')) + (C - (nb.x + nb.width / 2))).toFixed(2));
+  const nb2 = num.getBBox();
+  suf.setAttribute('x', (nb2.x + nb2.width + {gap:.1f}).toFixed(2));
+  svg.dataset.centred = '1';
+}});
+</script>
 </body></html>"""
 
 

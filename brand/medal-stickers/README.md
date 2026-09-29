@@ -56,6 +56,26 @@ itself per placement; the ring, the numeral and the arc carry that.
 The centre is Vol.7's ripple, faint, behind the numeral — the same pulse motif
 the certificates use.
 
+### Centring the numeral
+
+The placement numeral is the mark, so it sits dead centre — and centre here is
+measured, not eyeballed. `verify-medal-centring.mjs` reports the offset for
+every sticker; it should read 0.00 units on all six.
+
+`text-anchor="middle"` centres the numeral *and* its ordinal suffix together,
+which leaves the numeral itself well left of centre. Correcting that with a
+hand-tuned nudge per digit was still 2–6% out, because the right factor depends
+on the glyph, the size and the font's real advance widths — and tuning it by eye
+made one placement worse while fixing another. So the numeral and suffix are
+separate elements, and the page measures the numeral's box once the font has
+loaded, then puts the numeral on the centre and hangs the suffix off its right
+edge.
+
+**The renderer must wait for that pass.** It screenshots only once the page sets
+`svg[data-centred="1"]`, and fails the sticker if it never appears. Screenshot
+any earlier and every sticker ships with the mark off-centre — the exact bug the
+pass exists to prevent.
+
 ### Two things that bit, worth knowing
 
 - **The bottom arc must start at the LEFT point with sweep-flag 0**
