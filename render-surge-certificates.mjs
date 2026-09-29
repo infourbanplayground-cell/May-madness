@@ -54,7 +54,7 @@ for (const n of places) {
       overflow: de.scrollWidth > de.clientWidth + 1 || de.scrollHeight > de.clientHeight + 1,
       place: document.querySelector('.place')?.textContent,
       label: document.querySelector('.label')?.textContent,
-      name:  document.querySelector('.nameset')?.textContent || '(blank line)',
+      name:  document.querySelector('.nameplate .typed')?.textContent || '(blank line)',
     };
   });
 

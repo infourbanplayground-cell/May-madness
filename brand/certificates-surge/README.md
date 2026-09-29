@@ -55,6 +55,23 @@ steel: stepping 4th and 5th down to Deep Steel was tried and printed washed out,
 which is the wrong thing for something somebody keeps. Placement is carried by
 the numeral and the label, not by fading.
 
+## Writable plates
+
+The sheet is near-black, so a black pen on it is invisible. Every field that
+gets filled in by hand — name, date, signature, certificate number — therefore
+sits on its own light plate (`#EEF2F4`, not pure white, so it does not glare
+against the dark field). Each plate carries a cap bar in the placement colour
+along its top edge: corner ticks were tried first and read as glitches against
+a light field, whereas a cap makes the plate look like a labelled field that
+belongs to the frame.
+
+The plates are 16mm for the name and 11mm for the signatures — enough to write
+in, not so much that they take the eye off the placement.
+
+**Both modes use the same plates.** A typed name (`--names`) prints in ink
+`#0A0F14` on the plate rather than on the dark ground, so a pre-printed
+certificate and a handwritten one are structurally identical.
+
 **Why the PDF page is a raster.** The design leans on large soft glows — the
 placement numeral carries a 4mm and an 18mm shadow. Chromium's vector PDF export
 tiles big blurred shadows and the seams between tiles print as hard-edged

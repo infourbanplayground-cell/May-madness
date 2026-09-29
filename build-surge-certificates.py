@@ -44,6 +44,12 @@ VOLTAGE      = "#F4F9FA"
 STEEL_TX     = "#8A9BA8"
 DEEP_STEEL   = "#5C6B78"
 LIGHT_STEEL  = "#C3D0D8"
+# Every field that gets filled in by hand sits on a light plate, because
+# black pen on Deep Current is invisible. Not pure white: a hair of warmth
+# stops it glaring against the dark field and reads as a label stock.
+PLATE        = "#EEF2F4"
+PLATE_EDGE   = "#B9C6CE"
+INK          = "#0A0F14"
 
 # The ladder: cyan, light steel, steel. 3rd through 5th all sit on the same
 # steel and lean on the numeral rather than inventing two more colours the
@@ -125,9 +131,11 @@ def build_html(place, name=None):
     # A typed name replaces the ruled line; otherwise the line stays blank so
     # the organiser can write it in. Both are deliberate states, not a fallback.
     if name:
-        nameblock = f'<div class="nameset">{name}</div>'
+        nameblock = ('<div class="plate nameplate">'
+                     f'<div class="typed">{name}</div></div>\n'
+                     '  <div class="namehint">Name</div>')
     else:
-        nameblock = ('<div class="nameline"></div>\n'
+        nameblock = ('<div class="plate nameplate"></div>\n'
                      '  <div class="namehint">Name</div>')
 
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
@@ -202,21 +210,25 @@ body{{
 
 .awarded{{font-size:9.5pt;color:{STEEL_TX};margin-top:9.5mm;letter-spacing:.04em;}}
 
-.nameline{{position:relative;width:158mm;margin:6mm auto 0;height:15mm;
-  border-bottom:1pt solid rgba(244,249,250,.44);}}
-.nameline::before,.nameline::after{{content:"";position:absolute;bottom:-1pt;
-  width:.8mm;height:3.4mm;background:{acc};}}
-.nameline::before{{left:0;}} .nameline::after{{right:0;}}
+.plate{{position:relative;background:{PLATE};border:.6pt solid {PLATE_EDGE};}}
+/* A cap bar in the placement colour along the top edge. Corner ticks were tried
+   first and read as glitches against a light field; a cap makes the plate look
+   like a labelled field that belongs to the frame. */
+.plate::before{{content:"";position:absolute;left:0;right:0;top:0;height:.9mm;
+  background:{acc};}}
+
+/* Sized to be written in, not to dominate: a 16mm band takes a signature
+   comfortably while leaving the placement the largest thing on the sheet. */
+.nameplate{{width:172mm;height:16mm;margin:6mm auto 0;}}
 .namehint{{font-family:'JetBrains Mono',monospace;font-size:6.4pt;letter-spacing:.32em;
-  color:rgba(138,155,168,.6);margin-top:2mm;text-transform:uppercase;}}
+  color:rgba(138,155,168,.75);margin-top:2.4mm;text-transform:uppercase;}}
 
 /* A typed name gets the display face at a size that holds a long name on one
    line, with the same ruled underline so printed and handwritten match. */
-.nameset{{width:190mm;margin:7mm auto 0;padding-bottom:4mm;
-  border-bottom:1pt solid rgba(244,249,250,.44);
-  font-style:italic;font-variation-settings:'wdth' 118,'wght' 900;
-  font-size:30pt;line-height:1.1;color:{VOLTAGE};white-space:nowrap;
-  text-shadow:0 0 6mm rgba(0,229,255,.18);}}
+.nameplate .typed{{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-style:italic;
+  font-variation-settings:'wdth' 112,'wght' 900;
+  font-size:21pt;line-height:1;color:{INK};white-space:nowrap;}}
 
 .body{{font-size:9.2pt;color:{STEEL_TX};margin-top:8mm;max-width:172mm;line-height:1.7;}}
 .body b{{color:{VOLTAGE};font-weight:800;}}
@@ -226,13 +238,15 @@ body{{
 .foot{{position:absolute;left:26mm;right:26mm;bottom:20mm;display:flex;
   align-items:flex-end;justify-content:space-between;}}
 .sig{{width:74mm;text-align:center;}}
-.sigline{{border-bottom:.8pt solid rgba(244,249,250,.36);height:10mm;}}
+.sigplate{{height:11mm;}}
 .sigcap{{font-family:'JetBrains Mono',monospace;font-size:6.4pt;letter-spacing:.28em;
-  color:{STEEL_TX};margin-top:2mm;text-transform:uppercase;}}
+  color:{STEEL_TX};margin-top:2.4mm;text-transform:uppercase;}}
 
-.serial{{position:absolute;left:0;right:0;bottom:9.2mm;text-align:center;
+.serial{{position:absolute;left:0;right:0;bottom:8.6mm;text-align:center;
   font-family:'JetBrains Mono',monospace;font-size:6pt;letter-spacing:.3em;
-  color:rgba(138,155,168,.5);text-transform:uppercase;}}
+  color:rgba(138,155,168,.55);text-transform:uppercase;}}
+.nochip{{display:inline-block;width:22mm;height:3.2mm;vertical-align:-.6mm;
+  margin-left:1.6mm;background:{PLATE};border:.5pt solid {PLATE_EDGE};}}
 </style></head><body>
 <div class="layer trace"></div>
 <div class="layer pulse"></div>
@@ -268,11 +282,11 @@ body{{
 </div>
 
 <div class="foot">
-  <div class="sig"><div class="sigline"></div><div class="sigcap">Date</div></div>
-  <div class="sig"><div class="sigline"></div><div class="sigcap">Tournament Director</div></div>
+  <div class="sig"><div class="plate sigplate"></div><div class="sigcap">Date</div></div>
+  <div class="sig"><div class="plate sigplate"></div><div class="sigcap">Tournament Director</div></div>
 </div>
 {seal(acc, emblem)}
-<div class="serial">September Surge · Vol.7 · Muscat, Oman · No. ________</div>
+<div class="serial">September Surge · Vol.7 · Muscat, Oman · No.<span class="nochip"></span></div>
 </body></html>"""
 
 
