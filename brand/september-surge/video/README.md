@@ -102,3 +102,29 @@ fill the height: the contender rows already span the full 1080 width, so any
 uniform upscale crops them.
 
 The score is unchanged between the two cuts — same beat map, same 23.2s.
+
+## The Duel cut (finale, 9:16)
+
+`duel-reel-9x16.html` + `score-duel.py`. A different structure from the
+countdown reels: the finale's story is not a leaderboard, it is two people two
+points apart, so the cut is portrait-led.
+
+Open → **the duel** (split screen, both faces, totals counting) → **tale of the
+tape** (four two-sided bars: points, match wins, win rate, session titles) →
+**the swing** (what each scored on the double night) → **the chasers** → date.
+
+Two things the data gave us for free, and both are in the cut: they are level on
+**27 match wins each**, and Hamed's 60 on session 7 is the *maximum a double
+night can pay* — a perfect night, which is what took the lead off Munther.
+
+Written natively for 1080x1920; there is no 4:5 variant, because the split
+screen needs the height. Beat map and `ENERGY(t)` are re-timed to these scenes.
+
+### Two traps this cut hit, worth knowing
+
+- `punch()` writes `transform`, so any element centred with
+  `transform: translateX(-50%)` loses its centring the moment it animates. The
+  VS drifted right onto a portrait. Centre with a full-width container and
+  animate an inner span instead.
+- Long names wrap and break the two columns' alignment — one player's total sat
+  a line lower than the other's. `.fname` is `white-space:nowrap` for that reason.
