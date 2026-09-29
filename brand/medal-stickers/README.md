@@ -39,16 +39,22 @@ python3 pack-surge-medal-pdfs.py           # -> print-ready PDF
 
 ## Design notes
 
-**Cyan, light steel, bronze.** First keeps the series' own colour, which is what
-a player sees next to their name in the table; second reads as silver; third is
-bronze `#C3813F`.
+**All three are cyan.** The numeral already says which placement a sticker is,
+and `DESIGN.md` has cyan leading the volume, so one colour throughout reads as a
+series rather than as three separate awards.
 
-Bronze is a deliberate exception to `DESIGN.md`, which reserves warm accents for
-urgency. These go onto physical medals, where third place is bronze by
-convention and steel would read as a mistake. It is a metal, not the series'
-Strike Amber — cooler and darker, so it cannot be confused with a live-now
-marker anywhere else in the system. `--metal` switches first and second to gold
-and silver too, if they have to match rather than lead with cyan.
+Two metal colourways are kept one flag away, for if these ever have to sit
+beside conventional ribbons:
+
+```bash
+python3 build-surge-medal-stickers.py --way cyan     # default: all cyan
+python3 build-surge-medal-stickers.py --way ladder   # cyan / silver / bronze
+python3 build-surge-medal-stickers.py --way metal    # gold / silver / bronze
+```
+
+Bronze `#C3813F` appears only in those two. It is a deliberate exception to
+`DESIGN.md`, which reserves warm accents for urgency — it is cooler and darker
+than Strike Amber, so the two cannot be confused elsewhere in the system.
 
 The lockup stays its own colour on all three. A brand mark does not restyle
 itself per placement; the ring, the numeral and the arc carry that.

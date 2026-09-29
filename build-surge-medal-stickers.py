@@ -38,21 +38,28 @@ VOLTAGE      = "#F4F9FA"
 LIGHT_STEEL  = "#C3D0D8"
 STEEL_TX     = "#8A9BA8"
 
-# Bronze is a deliberate exception to DESIGN.md's warm-accent rule, which
-# reserves Strike Amber for urgency. These go onto physical medals, where third
-# place is bronze by convention and steel would read as a mistake. It is a
-# metal, not the series' amber: cooler and darker, so it cannot be confused
-# with a live-now marker anywhere else in the system.
 BRONZE = "#C3813F"
 
 SERIES = {
-    1: dict(ord_="1", suf="ST", accent=SURGE_CYAN),
-    2: dict(ord_="2", suf="ND", accent=LIGHT_STEEL),
-    3: dict(ord_="3", suf="RD", accent=BRONZE),
+    1: dict(ord_="1", suf="ST"),
+    2: dict(ord_="2", suf="ND"),
+    3: dict(ord_="3", suf="RD"),
 }
-# Full metal set, if first and second have to match bronze rather than lead
-# with the series colour.
-METAL = {1: "#E3B341", 2: "#C9CDD2", 3: BRONZE}
+
+# Three colourways. All-cyan is the default: the numeral already says which
+# placement this is, and DESIGN.md has cyan leading the volume, so a set that is
+# one colour throughout reads as a series rather than as three separate awards.
+#
+# The metal ladders are kept because they are one flag away if these ever have
+# to sit next to conventional gold/silver/bronze ribbons. Bronze is the one
+# warm colour in here and a deliberate exception to DESIGN.md's rule that warm
+# accents mean urgency -- it is cooler and darker than Strike Amber, so the two
+# cannot be confused anywhere else in the system.
+WAYS = {
+    "cyan":   {1: SURGE_CYAN, 2: SURGE_CYAN,  3: SURGE_CYAN},
+    "ladder": {1: SURGE_CYAN, 2: LIGHT_STEEL, 3: BRONZE},
+    "metal":  {1: "#E3B341", 2: "#C9CDD2",    3: BRONZE},
+}
 
 BLEED_MM = 3.0
 # surge-lockup@1600.png is 1600x750; the height follows the width so the
@@ -236,21 +243,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--places", nargs="*", type=int, default=[1, 2, 3])
     ap.add_argument("--sizes", nargs="*", type=float, default=[50.0, 25.0])
-    ap.add_argument("--metal", action="store_true",
-                    help="Use gold/silver/bronze instead of the series ladder")
+    ap.add_argument("--way", choices=sorted(WAYS), default="cyan",
+                    help="Colourway: cyan (all three, default), "
+                         "ladder (cyan/silver/bronze), metal (gold/silver/bronze)")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     lockup = b64(os.path.join(BRAND, "surge-lockup@1600.png"))
 
     for size in a.sizes:
         for place in a.places:
-            accent = METAL[place] if a.metal else SERIES[place]["accent"]
+            accent = WAYS[a.way][place]
             for bleed in (True, False):
                 tag = "bleed" if bleed else "disc"
                 h = os.path.join(OUT, f"ss-medal-{int(size)}mm-{place}-{tag}.html")
                 with open(h, "w") as f:
                     f.write(build_html(place, size, accent, lockup, bleed))
-            print(f"built {int(size)}mm · {place} · {accent}")
+            print(f"built {int(size)}mm · {place} · {a.way} · {accent}")
     print("\nnow render:  node render-surge-medal-stickers.mjs")
 
 
