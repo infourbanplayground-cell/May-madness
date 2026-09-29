@@ -11,6 +11,24 @@ because arc text that reads at 50mm turns to mush at half the diameter.
 | `URBAN PLAYGROUND · VOL.7` arc | yes | — |
 | Numeral | 0.72 × radius | 0.86 × radius |
 
+## Two layouts
+
+```bash
+python3 build-surge-medal-stickers.py --layout logo      # default
+python3 build-surge-medal-stickers.py --layout numeral
+```
+
+**logo** — the September Surge lockup sits on the disc's centre and the placement
+is a ghost behind it at 20% opacity, clipped to just inside the hairline ring.
+Unclipped the ghost ran off the disc into the bleed, so the crop read as an
+accident and on the square artboard you could see "1ST" sitting outside its own
+sticker. Because the ghost is decorative, **the arc carries the placement in
+words** — `1ST PLACE · VOL.7`. A sticker whose only statement of "1st" is a
+20%-opacity shape is not one anybody can sort at the prize table.
+
+**numeral** — the placement is the centred mark at full strength and the lockup
+sits above it. Louder about which medal this is, quieter about the series.
+
 The **lockup is the mark**, not the bare emblem. Because it already reads
 SEPTEMBER SURGE, the top arc that used to repeat it is gone — the lockup fills
 that space, and the one remaining arc carries what the lockup does not: the club

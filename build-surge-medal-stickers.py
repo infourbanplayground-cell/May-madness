@@ -83,7 +83,7 @@ def cap_centre(c, font_size):
     return c + font_size * 0.35
 
 
-def svg(place, size_mm, accent, lockup_b64, bleed=True):
+def svg(place, size_mm, accent, lockup_b64, bleed=True, layout='logo'):
     """One sticker. Units are 0.1mm, so a 50mm disc is 500 units across."""
     b = BLEED_MM if bleed else 0.0
     art = size_mm + 2 * b          # artboard edge in mm
@@ -130,7 +130,48 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
         f'<path id="bot{place}" d="M {c-r_text:.1f} {c} A {r_text:.1f} {r_text:.1f} 0 0 0 {c+r_text:.1f} {c}"/>'
         f'</defs>')
 
-    if big:
+    if layout == "logo":
+        # The lockup is the mark and sits on the disc's centre; the placement
+        # becomes a ghost behind it, big enough to fill the field. Because the
+        # ghost is decorative, the arc has to carry the placement in words —
+        # a sticker whose only statement of "1st" is a 16%-opacity shape is
+        # not a sticker anyone can sort at the prize table.
+        # Clipped to just inside the hairline. Unclipped it ran off the disc and
+        # into the bleed, so the crop looked like an accident rather than a
+        # motif — and on the square bleed artboard you could read "1ST" sitting
+        # outside its own sticker.
+        r_field = r_hair - R * 0.012
+        ghost = R * (1.18 if big else 1.30)
+        parts.append(
+            f'<defs><clipPath id="field{place}">'
+            f'<circle cx="{c}" cy="{c}" r="{r_field:.1f}"/></clipPath></defs>'
+            f'<g clip-path="url(#field{place})">'
+            f'<text x="{c:.1f}" y="{cap_centre(c, ghost):.1f}" text-anchor="middle" '
+            f'font-family="Archivo" font-style="italic" font-size="{ghost:.1f}" '
+            f'font-variation-settings="\'wdth\' 125, \'wght\' 900" '
+            f'fill="{accent}" fill-opacity="0.20">{p["ord_"]}{p["suf"]}</text></g>')
+
+        lw = R * (1.34 if big else 1.42)
+        lh = lw * LOCKUP_RATIO
+        parts.append(f'<image href="data:image/png;base64,{lockup_b64}" '
+                     f'x="{c-lw/2:.1f}" y="{c-lh/2:.1f}" '
+                     f'width="{lw:.1f}" height="{lh:.1f}" '
+                     f'preserveAspectRatio="xMidYMid meet"/>')
+
+        parts.append(
+            f'<text font-family="JetBrains Mono, monospace" font-weight="700" '
+            f'font-size="{R*(0.100 if big else 0.118):.1f}" '
+            f'letter-spacing="{R*(0.038 if big else 0.044):.2f}" fill="{accent}" '
+            f'><textPath href="#bot{place}" startOffset="50%" text-anchor="middle">'
+            f'{p["ord_"]}{p["suf"]} PLACE{" · VOL.7" if big else ""}</textPath></text>')
+        if big:
+            for sx in (-1, 1):
+                x = c + sx * r_text
+                parts.append(f'<rect x="{x - R*0.026:.1f}" y="{c - R*0.026:.1f}" '
+                             f'width="{R*0.052:.1f}" height="{R*0.052:.1f}" fill="{accent}" '
+                             f'transform="rotate(45 {x:.1f} {c:.1f})"/>')
+
+    elif big:
         # The September Surge lockup is the mark, not the bare emblem. It already
         # says SEPTEMBER SURGE, so the top arc that used to repeat it is gone —
         # the lockup fills that space instead, and the one remaining arc carries
@@ -167,7 +208,8 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
         num_y, suf_size = cap_centre(c, num_size), R * 0.28
 
     # The numeral, in Vol.7's display face, with the ordinal riding high beside
-    # it so the pair reads as one mark.
+    # it so the pair reads as one mark. Only in the numeral-centred layout — in
+    # the logo layout the placement is the ghost behind the lockup instead.
     #
     # The numeral is the placement logo, so it sits dead centre — and "centre"
     # is measured, not guessed. Anchoring numeral+suffix together leaves the
@@ -177,12 +219,13 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
     # actual advance widths. So the two are separate elements and the page
     # measures the numeral's box once the font has loaded, then places both:
     # numeral centred on the disc, suffix hugging its right edge.
-    parts.append(
+    if layout == "numeral":
+      parts.append(
         f'<text id="num" x="{c:.1f}" y="{num_y:.1f}" text-anchor="middle" '
         f'font-family="Archivo" font-style="italic" font-size="{num_size:.1f}" '
         f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
         f'{p["ord_"]}</text>')
-    parts.append(
+      parts.append(
         f'<text id="suf" x="{c:.1f}" y="{num_y - num_size*0.42:.1f}" text-anchor="start" '
         f'font-family="Archivo" font-style="italic" font-size="{suf_size:.1f}" '
         f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
@@ -205,7 +248,7 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True):
             + "".join(parts) + '</g></svg>')
 
 
-def build_html(place, size_mm, accent, lockup_b64, bleed):
+def build_html(place, size_mm, accent, lockup_b64, bleed, layout='logo'):
     art = size_mm + (2 * BLEED_MM if bleed else 0)
     c_units = art * 10 / 2
     gap = size_mm * 10 / 2 * 0.03
@@ -219,7 +262,7 @@ html,body{{width:{art}mm;height:{art}mm;background:{body_bg};overflow:hidden;
   -webkit-print-color-adjust:exact;print-color-adjust:exact;}}
 svg{{display:block;}}
 </style></head><body>
-{svg(place, size_mm, accent, lockup_b64, bleed)}
+{svg(place, size_mm, accent, lockup_b64, bleed, layout)}
 <script>
 // Centre the numeral on the disc and hang the ordinal off its right edge.
 // Done here rather than in the SVG because it needs the font's real advance
@@ -228,6 +271,10 @@ document.fonts.ready.then(() => {{
   const num = document.getElementById('num');
   const suf = document.getElementById('suf');
   const svg = document.querySelector('svg');
+  // The logo layout has no solid numeral to centre. Flag done anyway — the
+  // renderer blocks on this marker and would otherwise time out on every
+  // sticker that simply does not need the pass.
+  if (!num || !suf) {{ svg.dataset.centred = '1'; return; }}
   const C = {c_units};
   const nb = num.getBBox();
   num.setAttribute('x', (Number(num.getAttribute('x')) + (C - (nb.x + nb.width / 2))).toFixed(2));
@@ -243,6 +290,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--places", nargs="*", type=int, default=[1, 2, 3])
     ap.add_argument("--sizes", nargs="*", type=float, default=[50.0, 25.0])
+    ap.add_argument("--layout", choices=("logo", "numeral"), default="logo",
+                    help="logo: lockup centred, placement ghosted behind it. "
+                         "numeral: placement centred, lockup above it.")
     ap.add_argument("--way", choices=sorted(WAYS), default="cyan",
                     help="Colourway: cyan (all three, default), "
                          "ladder (cyan/silver/bronze), metal (gold/silver/bronze)")
@@ -257,8 +307,8 @@ def main():
                 tag = "bleed" if bleed else "disc"
                 h = os.path.join(OUT, f"ss-medal-{int(size)}mm-{place}-{tag}.html")
                 with open(h, "w") as f:
-                    f.write(build_html(place, size, accent, lockup, bleed))
-            print(f"built {int(size)}mm · {place} · {a.way} · {accent}")
+                    f.write(build_html(place, size, accent, lockup, bleed, a.layout))
+            print(f"built {int(size)}mm · {place} · {a.layout} · {a.way} · {accent}")
     print("\nnow render:  node render-surge-medal-stickers.mjs")
 
 
