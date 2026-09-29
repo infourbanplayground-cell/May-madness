@@ -80,6 +80,18 @@ itself per placement; the ring, the numeral and the arc carry that.
 The centre is Vol.7's ripple, faint, behind the numeral — the same pulse motif
 the certificates use.
 
+### Making the numerals bolder
+
+Archivo's weight axis stops at 900 and its width axis at 125, so the numerals
+were already as bold as the face goes. `BOLD_STROKE` (0.055em) strokes each one
+in its own colour with `paint-order="stroke fill"`, which fattens the glyph
+evenly on every edge while leaving the counters open. Much past 0.08 and the
+"1"'s spur and the "3"'s bowls start to close up.
+
+**The ghost takes its opacity on the group, not on fill and stroke separately.**
+At 20% each they composite to about 36% where they overlap, which gave the glyph
+a lighter rim and made it read as *outlined* rather than as bolder.
+
 ### Centring the numeral
 
 The placement numeral is the mark, so it sits dead centre — and centre here is

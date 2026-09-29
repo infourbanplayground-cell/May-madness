@@ -62,6 +62,14 @@ WAYS = {
 }
 
 BLEED_MM = 3.0
+
+# Archivo's variable weight axis tops out at 900 and the width axis at 125, so
+# the numerals were already as bold as the face goes. To get heavier without
+# leaving the volume's typeface, each numeral is stroked in its own colour with
+# paint-order putting the stroke behind the fill: the glyph fattens evenly on
+# every edge and the counters stay open. 0.055em is about a weight-step; much
+# past 0.08 and the "1"'s spur and the "3"'s bowls start to close up.
+BOLD_STROKE = 0.055
 # surge-lockup@1600.png is 1600x750; the height follows the width so the
 # mark is never squashed by a change to the disc size.
 LOCKUP_RATIO = 750 / 1600
@@ -70,6 +78,13 @@ LOCKUP_RATIO = 750 / 1600
 def b64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+
+def bold(colour, font_size, opacity=None):
+    """Stroke attributes that fatten a glyph without changing its shape."""
+    o = f' stroke-opacity="{opacity}"' if opacity is not None else ""
+    return (f' stroke="{colour}" stroke-width="{font_size*BOLD_STROKE:.2f}"'
+            f' stroke-linejoin="round" paint-order="stroke fill"{o}')
 
 
 def cap_centre(c, font_size):
@@ -145,11 +160,15 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True, layout='logo'):
         parts.append(
             f'<defs><clipPath id="field{place}">'
             f'<circle cx="{c}" cy="{c}" r="{r_field:.1f}"/></clipPath></defs>'
-            f'<g clip-path="url(#field{place})">'
+            # Opacity on the GROUP, not on fill and stroke separately: at 20%
+            # each they composite to ~36% where they overlap, so the glyph got
+            # a lighter rim and read as outlined rather than as bolder.
+            f'<g clip-path="url(#field{place})" opacity="0.20">'
             f'<text x="{c:.1f}" y="{cap_centre(c, ghost):.1f}" text-anchor="middle" '
             f'font-family="Archivo" font-style="italic" font-size="{ghost:.1f}" '
             f'font-variation-settings="\'wdth\' 125, \'wght\' 900" '
-            f'fill="{accent}" fill-opacity="0.20">{p["ord_"]}{p["suf"]}</text></g>')
+            f'fill="{accent}"{bold(accent, ghost)}>'
+            f'{p["ord_"]}{p["suf"]}</text></g>')
 
         lw = R * (1.34 if big else 1.42)
         lh = lw * LOCKUP_RATIO
@@ -223,13 +242,13 @@ def svg(place, size_mm, accent, lockup_b64, bleed=True, layout='logo'):
       parts.append(
         f'<text id="num" x="{c:.1f}" y="{num_y:.1f}" text-anchor="middle" '
         f'font-family="Archivo" font-style="italic" font-size="{num_size:.1f}" '
-        f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
-        f'{p["ord_"]}</text>')
+        f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}"'
+        f'{bold(accent, num_size)}>{p["ord_"]}</text>')
       parts.append(
         f'<text id="suf" x="{c:.1f}" y="{num_y - num_size*0.42:.1f}" text-anchor="start" '
         f'font-family="Archivo" font-style="italic" font-size="{suf_size:.1f}" '
-        f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}">'
-        f'{p["suf"]}</text>')
+        f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}"'
+        f'{bold(accent, suf_size)}>{p["suf"]}</text>')
 
     # Cut guide, drawn only on the bleed artboard.
     if bleed:
