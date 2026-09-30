@@ -24,17 +24,19 @@ VOLS = [("jh", "JULY", "July Heat"),
 
 # Stored names per person. Several are registered twice — merged deliberately,
 # because otherwise one human's record splits in half and both halves look thin.
-# "Aziz" is 7up: the owner confirmed it, and there is no player stored as Aziz.
+# "Aziz" plays as 7up and "Al Khatab" also as KB7 — both confirmed by the owner.
+# A night where two of one person's handles both appear still counts once, since
+# the count is over sessions, not over registrations.
 GROUPS = {
     "Munther Rahbi": ["Munther Rahbi"],
     "Mutaz":         ["Mutaz Zadjali"],
     "Muntaser":      ["Muntaser Hasni"],
-    "Aziz (7up)":    ["7up"],
+    "Aziz":          ["7up"],
     "Muether":       ["Muether Wahaibi"],
     "Mustafa":       ["Mustafa"],
     "Muatasim":      ["Muatasim Sabri", "Muatasim"],
     "Majdi":         ["Majdi"],
-    "Al Khatab":     ["AL khatab"],
+    "Al Khatab":     ["AL khatab", "KB7"],
 }
 
 INK   = "#0A0F14"
