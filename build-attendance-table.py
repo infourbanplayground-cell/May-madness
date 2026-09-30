@@ -34,7 +34,10 @@ GROUPS = {
     "Aziz":          ["7up"],
     "Muether":       ["Muether Wahaibi"],
     "Mustafa":       ["Mustafa"],
-    "Muatasim":      ["Muatasim Sabri", "Muatasim"],
+    # NOT merged with the account stored as plain "Muatasim": the two are on
+    # different teams in the same night twice (aa S8, ss S1), so they are two
+    # people. That other Muatasim has 3 nights of his own.
+    "Muatasim Sabri": ["Muatasim Sabri"],
     "Majdi":         ["Majdi"],
     "Al Khatab":     ["AL khatab", "KB7"],
 }
