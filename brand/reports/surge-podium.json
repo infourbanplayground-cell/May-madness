@@ -1,0 +1,189 @@
+{
+  "volume": "SEPTEMBER SURGE",
+  "vol": "VOL.7",
+  "sessions": 8,
+  "lastDate": "2026-09-30",
+  "podium": [
+    {
+      "id": "p_mptqpbkf_ixqzu",
+      "name": "Hamed Amri",
+      "pts": 189,
+      "prev": 262,
+      "nights": 7,
+      "wins": 21,
+      "finals": 2,
+      "titles": 2,
+      "sf": 6,
+      "qf": 7
+    },
+    {
+      "id": "p_mptqpbkf_hp51i",
+      "name": "Munther Rahbi",
+      "pts": 188,
+      "prev": 557,
+      "nights": 7,
+      "wins": 20,
+      "finals": 3,
+      "titles": 1,
+      "sf": 7,
+      "qf": 7
+    },
+    {
+      "id": "p_mptqpbkf_2yy4w",
+      "name": "Nooh Amri",
+      "pts": 171,
+      "prev": 123,
+      "nights": 6,
+      "wins": 15,
+      "finals": 4,
+      "titles": 1,
+      "sf": 6,
+      "qf": 6
+    }
+  ],
+  "table": [
+    {
+      "id": "p_mptqpbkf_ixqzu",
+      "name": "Hamed Amri",
+      "pts": 189,
+      "prev": 262,
+      "nights": 7,
+      "wins": 21,
+      "finals": 2,
+      "titles": 2,
+      "sf": 6,
+      "qf": 7
+    },
+    {
+      "id": "p_mptqpbkf_hp51i",
+      "name": "Munther Rahbi",
+      "pts": 188,
+      "prev": 557,
+      "nights": 7,
+      "wins": 20,
+      "finals": 3,
+      "titles": 1,
+      "sf": 7,
+      "qf": 7
+    },
+    {
+      "id": "p_mptqpbkf_2yy4w",
+      "name": "Nooh Amri",
+      "pts": 171,
+      "prev": 123,
+      "nights": 6,
+      "wins": 15,
+      "finals": 4,
+      "titles": 1,
+      "sf": 6,
+      "qf": 6
+    },
+    {
+      "id": "p_mptqpbkf_oyp2j",
+      "name": "Faisal Al Harthi",
+      "pts": 139,
+      "prev": 606,
+      "nights": 7,
+      "wins": 17,
+      "finals": 1,
+      "titles": 1,
+      "sf": 3,
+      "qf": 5
+    },
+    {
+      "id": "p_mu198buc_q510g",
+      "name": "amjad",
+      "pts": 131,
+      "prev": 0,
+      "nights": 4,
+      "wins": 9,
+      "finals": 4,
+      "titles": 3,
+      "sf": 4,
+      "qf": 4
+    },
+    {
+      "id": "p_mptqpbkf_q9xn7",
+      "name": "Muntaser Hasni",
+      "pts": 121,
+      "prev": 820,
+      "nights": 6,
+      "wins": 14,
+      "finals": 2,
+      "titles": 0,
+      "sf": 3,
+      "qf": 6
+    },
+    {
+      "id": "p_mu198buc_73ypj",
+      "name": "ismail",
+      "pts": 111,
+      "prev": 0,
+      "nights": 3,
+      "wins": 10,
+      "finals": 2,
+      "titles": 1,
+      "sf": 3,
+      "qf": 3
+    },
+    {
+      "id": "p_mrcb4jvk_knv4b",
+      "name": "Baraa",
+      "pts": 110,
+      "prev": 138,
+      "nights": 5,
+      "wins": 10,
+      "finals": 3,
+      "titles": 2,
+      "sf": 3,
+      "qf": 4
+    },
+    {
+      "id": "p_mptqpbkf_g7bid",
+      "name": "mossa",
+      "pts": 96,
+      "prev": 79,
+      "nights": 6,
+      "wins": 12,
+      "finals": 1,
+      "titles": 1,
+      "sf": 3,
+      "qf": 5
+    },
+    {
+      "id": "p_mptqpbkf_iznki",
+      "name": "Said Habsi",
+      "pts": 80,
+      "prev": 274,
+      "nights": 6,
+      "wins": 9,
+      "finals": 0,
+      "titles": 0,
+      "sf": 2,
+      "qf": 4
+    }
+  ],
+  "margin": 1,
+  "allTime": [
+    {
+      "name": "Muntaser Hasni",
+      "total": 941
+    },
+    {
+      "name": "Hassan Salhi",
+      "total": 886
+    },
+    {
+      "name": "Munther Rahbi",
+      "total": 745
+    },
+    {
+      "name": "Faisal Al Harthi",
+      "total": 745
+    },
+    {
+      "name": "Mustafa",
+      "total": 625
+    }
+  ]
+}
