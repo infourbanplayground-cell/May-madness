@@ -33,6 +33,9 @@
   "finalsCut": false,
 
   "schedule": "Mon & Wed, 5:30 PM, plus a Friday finals night",
+  "nights": ["2026-10-05", "2026-10-07", "2026-10-12", "2026-10-14",
+             "2026-10-19", "2026-10-21", "2026-10-26", "2026-10-28", "2026-10-30"],
+  "finalsDate": "2026-10-30",
   "previousVolumes": ["June Fury", "July Heat", "August Attack", "September Surge"],
   "previousVolume": "September Surge",
   "previousHost": "surge.urbanpadel.om",

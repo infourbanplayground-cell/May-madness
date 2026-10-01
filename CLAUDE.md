@@ -125,14 +125,29 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   ssh urbanpadel 'cd /opt/blackout-api && node sync-surge-to-blackout.js'
   ```
   Already run: 60 players and 22 photos carried, Vol.8 series table empty.
-- **Not yet built from the handover:** the ME screen, per-night points receipts,
-  badges, the share-to-story cards, pull-to-refresh and skeleton loading, and the
-  5-tab bottom nav (it still has 3). The app shipped is Vol.7's screens in
-  Blackout's language, which is what gets the season running; those additions are
-  a separate build.
-- Also worth knowing: the RANK screen gates every tab, including ALL-TIME, behind
-  "first match played", so the carried all-time ladder is invisible until the
-  first Vol.8 result is entered.
+- **Vol.8's own screens** live in `blackout_screens.py` and are spliced in by the
+  builder: the per-event engine (`calcPlayerNights`, `rankByNight`, `calcBadges`),
+  ME + points receipt, badges, the four share-to-story cards, the public roster,
+  the finals countdown, the prize tracker and night-recap sheets, pull-to-refresh
+  and skeleton loading, and the 5-tab nav.
+- **`calcPlayerNights` never re-scores anything.** It walks the same path
+  `calcPlayerStats` walks, records each award as it is made, then checks its own
+  total against `calcPlayerStats` and shows a warning on screen if they disagree.
+  If you change scoring, change it in one place and this follows.
+- Share cards are drawn once at 1080x1920 on a canvas and that same bitmap is the
+  preview, so what people see is the file they post. Canvas cannot set
+  `font-variation-settings`, so the display type on those cards is at Archivo's
+  default width, not `wdth` 125.
+- The schedule is in `blackout-season.json` (`nights`, `finalsDate`): 8 Mon/Wed
+  nights plus Friday 30 Oct. The countdown reads `FINALS_DATE` until the
+  organiser has created the nine sessions, so it works during signup.
+- MVP voting is open to players whenever voting is open (Vol.7 showed it to
+  scorers only, so the "player vote" was whoever held the scoring phone).
+- Still carried from Vol.7 and NOT rebuilt: the session-detail screens (teams,
+  groups, KO bracket, score sheet, photo wall) are Vol.7's, reskinned.
+- Known: the RANK screen gates every tab, including ALL-TIME, behind "first match
+  played", so the carried all-time ladder is invisible until the first Vol.8
+  result is entered.
 
 ### September Surge (Vol.7 — ARCHIVED 1 Oct 2026)
 - **Champion: Hamed Amri, 189. Munther Rahbi 188** — one point, and it came from

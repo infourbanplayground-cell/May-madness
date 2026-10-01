@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "01745fd257da";
+  var V = "270e7922d73d";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1097,6 +1097,9 @@ const DOUBLE_FROM_SESSION = 8;
 const SESSIONS_TOTAL = 9;
 // Season prizes, set by the owner for Vol.8: 75 / 50 / 30 OMR.
 const SEASON_PRIZES = [75, 50, 30];
+// The scheduled finals night, so the countdown works before any session
+// exists -- which is when people are deciding whether to sign up.
+const FINALS_DATE = "2026-10-30";
 const LOSS_TYPES = [
   { id: "tiebreak", label: "Tiebreak Loss", pts: 2, emoji: "🎯" },
   { id: "competitive", label: "Competitive Loss", pts: 1, emoji: "🤝" },
@@ -2496,6 +2499,377 @@ function PublicPhotosPage({ state }) {
 
 
 
+// ══ VOL.8 · LOADING AND REFRESH ═══════════════════════════════════════════
+
+// Six blocks in the shape of the home screen, with a lime sweep across them.
+// Shown on first paint and during a manual refresh, because a blank screen for
+// a second reads as "broken" and a skeleton reads as "coming".
+function Skeleton() {
+  const H = [176, 92, 66, 66, 66, 120];
+  return (
+    <div style={{ padding: "4px 0" }}>
+      {H.map((h, i) => (
+        <div key={i} style={{ height: h, marginBottom: 12, position: "relative",
+          overflow: "hidden", background: "rgba(20,20,20,.96)",
+          border: "1px solid rgba(255,255,255,.05)" }}>
+          <div style={{ position: "absolute", inset: 0, animation: "bo-shimmer 1.1s linear infinite",
+            background: "linear-gradient(90deg, transparent, rgba(198,255,0,.07), transparent)" }} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Pull-to-refresh. Touch only: a mouse has a refresh button and a trackpad
+// gesture already, and binding this to the mouse hijacks text selection.
+function usePullToRefresh(onRefresh, blocked) {
+  const [pull, setPull] = React.useState(0);
+  const start = React.useRef(null);
+  React.useEffect(() => {
+    const TH = 64, MAX = 110;
+    const down = e => {
+      if (blocked() || window.scrollY > 0) { start.current = null; return; }
+      start.current = e.touches[0].clientY;
+    };
+    const move = e => {
+      if (start.current == null) return;
+      const d = e.touches[0].clientY - start.current;
+      if (d <= 0) { setPull(0); return; }
+      // Half the finger travel, capped: a 1:1 strip feels loose and a long drag
+      // on a phone overshoots the whole header.
+      setPull(Math.min(d * 0.5, MAX));
+    };
+    const up = () => {
+      if (start.current == null) return;
+      setPull(p => { if (p >= TH) onRefresh(); return 0; });
+      start.current = null;
+    };
+    document.addEventListener("touchstart", down, { passive: true });
+    document.addEventListener("touchmove", move, { passive: true });
+    document.addEventListener("touchend", up, { passive: true });
+    document.addEventListener("touchcancel", up, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", down);
+      document.removeEventListener("touchmove", move);
+      document.removeEventListener("touchend", up);
+      document.removeEventListener("touchcancel", up);
+    };
+  }, [onRefresh, blocked]);
+  return pull;
+}
+
+function PullStrip({ pull }) {
+  if (pull <= 0) return null;
+  const ready = pull >= 64;
+  return (
+    <div style={{ height: pull, display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+      <div style={{ width: Math.min(90, pull), height: 3, background: "#C6FF00" }} />
+      <div style={{ marginTop: 8, fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+        fontSize: 9, letterSpacing: ".24em", color: ready ? "#C6FF00" : "#6E6E6E" }}>
+        {ready ? "RELEASE TO REFRESH" : "PULL TO REFRESH"}
+      </div>
+    </div>
+  );
+}
+
+// ══ VOL.8 · FINALS COUNTDOWN ══════════════════════════════════════════════
+// Dates come from the sessions themselves, so the countdown cannot drift from
+// the schedule the organiser actually entered.
+function FinalsCountdown({ state, leaderboard, meId, setTab }) {
+  const [now, setNow] = React.useState(Date.now());
+  React.useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const sessions = state.sessions || [];
+  // Before the organiser has created the nine nights there is no session to
+  // read a date from, and the countdown is most wanted exactly then -- during
+  // signup. So it falls back to the scheduled finals date from the season
+  // config, and only prefers a session once one exists at that slot.
+  const finals = sessions.length >= SESSIONS_TOTAL ? sessions[SESSIONS_TOTAL - 1]
+               : sessions.length ? sessions[sessions.length - 1]
+               : { date: FINALS_DATE };
+  if (!finals || !finals.date) return null;
+  // Parsed field by field: the server runs UTC+4, and new Date("2026-10-30")
+  // is parsed as UTC, which puts the night a day early for everyone here.
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(finals.date);
+  if (!m) return null;
+  const target = new Date(+m[1], +m[2] - 1, +m[3], 17, 30, 0).getTime();
+  const left = Math.max(0, target - now);
+  const d = Math.floor(left / 86400000);
+  const h = Math.floor(left / 3600000) % 24;
+  const mi = Math.floor(left / 60000) % 60;
+  const se = Math.floor(left / 1000) % 60;
+  const done = left === 0;
+
+  const myRank = meId ? leaderboard.findIndex(e => e.player.id === meId) + 1 : 0;
+  const myPts = myRank ? leaderboard[myRank - 1].totalPts : 0;
+  const third = leaderboard[2]?.totalPts ?? 0;
+  const fourth = leaderboard[3]?.totalPts ?? 0;
+  const inPrizes = myRank > 0 && myRank <= 3;
+  const gap = inPrizes ? myPts - fourth : third - myPts;
+
+  const Tile = ({ v, l }) => (
+    <div style={{ flex: 1, textAlign: "center", padding: "10px 0",
+                  border: "1px solid rgba(255,46,136,.3)" }}>
+      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+        fontSize: 30, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+        {String(v).padStart(2, "0")}
+      </div>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 8,
+        letterSpacing: ".2em", color: "#9A9A9A", marginTop: 5 }}>{l}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ border: "1px solid rgba(255,46,136,.4)", background: "rgba(20,20,20,.96)",
+                  padding: 16, marginTop: 20 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".26em", color: "#FF2E88" }}>
+          {done ? "FINALS NIGHT · TONIGHT" : "FINALS NIGHT · " + fmtNightDate(finals.date)}
+        </div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+          color: "#C6FF00" }}>{SEASON_PRIZES.join(" · ")} OMR</div>
+      </div>
+      {!done && (
+        <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+          <Tile v={d} l="DAYS" /><Tile v={h} l="HRS" /><Tile v={mi} l="MIN" /><Tile v={se} l="SEC" />
+        </div>
+      )}
+      {myRank > 0 && (
+        <button onClick={() => setTab("me")} style={{ width: "100%", marginTop: 12, padding: "12px",
+          display: "flex", alignItems: "center", gap: 10, cursor: "pointer", color: "inherit",
+          background: "transparent", border: "1px solid rgba(110,110,110,.25)", textAlign: "left" }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 15,
+            padding: "3px 8px", color: "#050505",
+            background: inPrizes ? "#C6FF00" : "#FF2E88" }}>#{myRank}</span>
+          <span style={{ flex: 1, fontSize: 12, color: "#9A9A9A", lineHeight: 1.35 }}>
+            {inPrizes
+              ? <>In the season prizes &middot; <b style={{ color: "#F2F2F2" }}>{gap} pts</b> clear of 4th</>
+              : <><b style={{ color: "#F2F2F2" }}>{Math.max(0, gap)} pts</b> behind 3rd place</>}
+          </span>
+          <span style={{ color: "#6E6E6E" }}>&#9654;</span>
+        </button>
+      )}
+    </div>
+  );
+}
+
+function fmtNightDate(s) {
+  const M = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || "");
+  return m ? (+m[3]) + " " + M[+m[2] - 1] : (s || "").toUpperCase();
+}
+
+// ══ VOL.8 · PRIZE TRACKER ═════════════════════════════════════════════════
+function PrizeSheet({ open, state, leaderboard, onClose }) {
+  if (!open) return null;
+  const sessions = state.sessions || [];
+  const doneNights = sessions.filter(s => s.completed);
+  const voucher = 14, perTeam = 2;
+  const pool = voucher * perTeam * SESSIONS_TOTAL + SEASON_PRIZES.reduce((a, b) => a + b, 0);
+  const paid = doneNights.length * voucher * perTeam;
+  const left = pool - paid;
+  const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
+  const champsOf = s => {
+    const f = s.bracket?.final;
+    if (!f || !f.winner) return null;
+    const tid = f.winner === "team1" ? f.team1Id : f.team2Id;
+    const t = (s.teams || []).find(x => x.id === tid);
+    return t ? [nameOf(t.p1Id), nameOf(t.p2Id)] : null;
+  };
+  const earners = {};
+  doneNights.forEach(s => { (champsOf(s) || []).forEach(n => { earners[n] = (earners[n] || 0) + voucher; }); });
+  const top = Object.entries(earners).sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
+      background: "rgba(5,5,5,.88)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0A0A0A", width: "100%",
+        maxHeight: "90vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
+        <div style={{ background: "#C6FF00", color: "#050505", padding: 18 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+            letterSpacing: ".26em" }}>PLAYING FOR</div>
+          <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+            fontSize: 60, lineHeight: 1 }}>{pool} OMR</div>
+          <div style={{ height: 8, background: "rgba(5,5,5,.2)", marginTop: 14 }}>
+            <div style={{ height: "100%", background: "#050505",
+                          width: Math.round(paid / pool * 100) + "%" }} />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8,
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11 }}>
+            <span>{paid} OMR PAID</span><span>{left} OMR LEFT</span>
+          </div>
+        </div>
+
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>
+          SEASON PRIZES &middot; IF IT ENDED NOW
+        </div>
+        {SEASON_PRIZES.map((amt, i) => {
+          const e = leaderboard[i];
+          return (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0",
+              borderBottom: "1px solid rgba(110,110,110,.16)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 13,
+                color: "#C6FF00", width: 34 }}>{i + 1}{["ST","ND","RD"][i] || "TH"}</span>
+              <span style={{ flex: 1, fontWeight: 800, fontSize: 14 }}>{e ? e.player.name : "—"}</span>
+              <span style={{ fontSize: 12, color: "#9A9A9A" }}>{e ? e.totalPts + " pts" : ""}</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 16,
+                color: "#FF2E88" }}>{amt}</span>
+            </div>
+          );
+        })}
+
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>
+          NIGHTLY VOUCHERS &middot; {voucher} OMR EACH
+        </div>
+        {doneNights.length === 0 && (
+          <div style={{ fontSize: 13, color: "#6E6E6E", marginTop: 10 }}>No nights finished yet.</div>
+        )}
+        {doneNights.map((s, i) => {
+          const c = champsOf(s);
+          return (
+            <div key={s.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "11px 0",
+              borderBottom: "1px solid rgba(110,110,110,.16)" }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+                color: "#6E6E6E", width: 28 }}>{i + 1}</span>
+              <span style={{ flex: 1, fontSize: 13 }}>{c ? c.join(" & ") : "—"}</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 13,
+                color: "#C6FF00" }}>{voucher * perTeam}</span>
+            </div>
+          );
+        })}
+
+        {top.length > 0 && <>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+            letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>TOP EARNERS SO FAR</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
+            {top.map(([n, v]) => (
+              <div key={n} style={{ padding: 10, border: "1px solid rgba(255,255,255,.07)" }}>
+                <div style={{ fontWeight: 800, fontSize: 13, whiteSpace: "nowrap",
+                  overflow: "hidden", textOverflow: "ellipsis" }}>{n}</div>
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 18,
+                  color: "#C6FF00", marginTop: 3 }}>{v} OMR</div>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        <button onClick={onClose} style={{ width: "100%", marginTop: 20, padding: "14px",
+          background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
+      </div>
+    </div>
+  );
+}
+
+// ══ VOL.8 · NIGHT RECAP ═══════════════════════════════════════════════════
+function RecapSheet({ session, state, leaderboard, meId, onClose }) {
+  if (!session) return null;
+  const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
+  const teamName = tid => {
+    const t = (session.teams || []).find(x => x.id === tid);
+    return t ? nameOf(t.p1Id) + " & " + nameOf(t.p2Id) : "—";
+  };
+  const f = session.bracket?.final;
+  const champTid = f && f.winner ? (f.winner === "team1" ? f.team1Id : f.team2Id) : null;
+  const idx = (state.sessions || []).findIndex(s => s.id === session.id);
+
+  // Top scorer on the night, from the same per-event engine the receipts use.
+  const nightOf = pid => {
+    const r = calcPlayerNights(pid, (state.sessions || []).slice(0, idx + 1), () => "");
+    const n = r.nights.find(x => x.idx === idx);
+    return n ? n.nightTotal : 0;
+  };
+  const inIt = (state.players || []).filter(p => getPlayerTeam(session, p.id));
+  const scored = inIt.map(p => ({ p, pts: nightOf(p.id) })).sort((a, b) => b.pts - a.pts);
+  const topScorer = scored[0];
+
+  // Biggest win of the night, by margin.
+  const all = (session.groupMatches || []).concat(session.bracket?.qf || [],
+    session.bracket?.sf || [], f ? [f] : []).filter(m => m && m.winner && m.score);
+  const biggest = all.map(m => {
+    const w = m.winner === "team1" ? m.team1Id : m.team2Id;
+    const a = Math.abs(m.score.t1 - m.score.t2);
+    return { m, w, margin: a };
+  }).sort((x, y) => y.margin - x.margin)[0];
+
+  const votes = session.mvpVotes || {};
+  const mvpId = Object.keys(votes).sort((a, b) => (votes[b] || 0) - (votes[a] || 0))[0];
+
+  const Row = ({ k, v, sub, c }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0",
+      borderBottom: "1px solid rgba(110,110,110,.16)" }}>
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".2em", color: "#9A9A9A", width: 104 }}>{k}</span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ fontWeight: 800, fontSize: 14, display: "block" }}>{v}</span>
+        {sub && <span style={{ fontSize: 12, color: "#9A9A9A" }}>{sub}</span>}
+      </span>
+      {c && <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+        fontSize: 16, color: "#C6FF00" }}>{c}</span>}
+    </div>
+  );
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
+      background: "rgba(5,5,5,.88)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0A0A0A", width: "100%",
+        maxHeight: "90vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".26em", color: "#9A9A9A" }}>
+          SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " · 2X NIGHT" : ""}
+        </div>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+          fontSize: 44, lineHeight: .9, marginTop: 6 }}>SESSION {idx + 1}<br />RECAP</div>
+
+        {champTid && (
+          <div style={{ border: "2px solid #C6FF00", background: "rgba(198,255,0,.06)",
+            padding: 16, marginTop: 18, boxShadow: "0 0 30px rgba(198,255,0,.18)" }}>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+              letterSpacing: ".26em", color: "#C6FF00" }}>CHAMPIONS</div>
+            <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+              fontSize: 26, marginTop: 6 }}>{teamName(champTid)}</div>
+            {f.score && <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 4 }}>
+              Final {f.score.t1}&ndash;{f.score.t2} &middot; {inIt.length} players
+            </div>}
+          </div>
+        )}
+
+        <div style={{ marginTop: 16 }}>
+          {mvpId && <Row k="MVP" v={nameOf(mvpId)} sub="player vote" c={votes[mvpId]} />}
+          {topScorer && topScorer.pts > 0 &&
+            <Row k="TOP SCORER" v={topScorer.p.name} sub="points on the night" c={"+" + topScorer.pts} />}
+          {biggest && <Row k="BIGGEST WIN" v={teamName(biggest.w)}
+            sub={biggest.m.score.t1 + "–" + biggest.m.score.t2} />}
+        </div>
+
+        {meId && getPlayerTeam(session, meId) && (
+          <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 16 }}>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+              letterSpacing: ".24em", color: "#FF2E88" }}>YOUR NIGHT</div>
+            <div style={{ fontSize: 14, fontWeight: 800, marginTop: 5 }}>
+              +{nightOf(meId)} points &middot; open ME for the receipt
+            </div>
+          </div>
+        )}
+
+        <button onClick={onClose} style={{ width: "100%", marginTop: 20, padding: "14px",
+          background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
+      </div>
+    </div>
+  );
+}
+
+
 // ══ VOL.8 · SHARE TO STORY ════════════════════════════════════════════════
 //
 // The handoff describes a 270x480 DOM preview that exports at 1080x1920 "x4".
@@ -3149,6 +3523,39 @@ function App() {
   const retryTimer = useRef();
   const savedFlash = useRef();
   const pollTimer = useRef();
+  // Vol.8: a manual refresh people can reach, and something to look at while it
+  // runs. The poll already keeps the page fresh; this is for the moment someone
+  // wants to KNOW it is fresh, which is every time a score goes in.
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState(null);
+  const refreshNow = React.useCallback(async () => {
+    setRefreshing(true);
+    setSync("syncing");
+    try {
+      const res = await apiGet("getState");
+      if (res?.ok && res.state) {
+        setState(res.state);
+        try { localStorage.setItem(LOCAL_KEY, JSON.stringify(stateForLocalCache(res.state))); } catch (e) {}
+        setSync("idle");
+        setLastSync(new Date());
+      } else { setSync("offline"); }
+    } catch (e) { setSync("offline"); }
+    // Held deliberately: a refresh that returns in 80ms looks like nothing
+    // happened, and people pull again.
+    setTimeout(() => setRefreshing(false), 650);
+  }, []);
+
+  // Installed here, above the loading guard, because hooks must run in the same
+  // order on every render. Below the guard it ran only once state had arrived,
+  // and React counted more hooks on the second render than the first --
+  // "Rendered more hooks than during the previous render", a blank page.
+  //
+  // Blocked while a sheet or a session is open: pulling down inside a
+  // scrollable sheet should scroll it, not refresh the page behind it.
+  const pullBlocked = React.useCallback(
+    () => !!(openSessionId || openPlayerId || showMe || showLogin),
+    [openSessionId, openPlayerId, showMe, showLogin]);
+  const pullY = usePullToRefresh(refreshNow, pullBlocked);
   const initialLoaded = useRef(false);
   const stateRef = useRef(null);
   const tapRef = useRef({ n: 0, t: 0 });
@@ -3258,7 +3665,13 @@ function App() {
   };
   const logout = () => { setRole("guest"); localStorage.removeItem(ADMIN_KEY); setToken(""); if (tab === "players" || tab === "settings") setTab("dashboard"); };
 
-  if (!state) return null;
+  // First paint. A blank screen for a second reads as broken; the skeleton reads
+  // as loading, and it is the shape of what is about to arrive.
+  if (!state) return (
+    <div className="min-h-screen">
+      <main className="max-w-3xl mx-auto px-4 py-4"><Skeleton /></main>
+    </div>
+  );
 
   const isPublicMode = new URLSearchParams(window.location.search).has("public");
   const isPhotosMode = new URLSearchParams(window.location.search).has("photos");
@@ -3316,7 +3729,10 @@ function App() {
         </div>
       </header>
 
+      <PullStrip pull={pullY} />
       <main className="max-w-3xl mx-auto px-4 py-4 pb-24">
+        {refreshing && <Skeleton />}
+        {!refreshing && <>
         {tab === "dashboard" && <DashboardView state={state} leaderboard={leaderboard} setTab={setTab} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} meId={meId} onOpenPicker={() => setShowMe(true)} />}
         {tab === "players" && isAdmin && <PlayersView state={state} update={update} setOpenPlayerId={setOpenPlayerId} isAdmin={isAdmin} />}
         {tab === "me" && <MeView state={state} leaderboard={leaderboard} meId={meId} onOpenPicker={() => setShowMe(true)} setTab={setTab} />}
@@ -3324,6 +3740,7 @@ function App() {
         {tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} />}
         {tab === "leaderboard" && <LeaderboardView leaderboard={leaderboard} state={state} setOpenPlayerId={setOpenPlayerId} meId={meId} onOpenPicker={() => setShowMe(true)} />}
         {tab === "settings" && isAdmin && <SettingsView state={state} update={update} setTab={setTab} logout={logout} />}
+        </>}
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-30 border-t border-stone-800/80 backdrop-blur-xl" style={{ background: "rgba(10,10,10,0.96)" }}>
@@ -3394,6 +3811,8 @@ function LoginModal({ onClose, onLogin }) {
 // VIEWS
 // ═══════════════════════════════════════════════════════════════
 function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, meId, onOpenPicker }) {
+  const [showPrizes, setShowPrizes] = React.useState(false);
+  const [recap, setRecap] = React.useState(null);
   const sessions = state.sessions || [];
   const nextUp  = sessions.find(s => !s.completed);
   const live    = nextUp || sessions[sessions.length - 1];
@@ -3574,6 +3993,9 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
         </div>
       </>}
 
+      {/* ── FINALS COUNTDOWN (Vol.8) ── */}
+      <FinalsCountdown state={state} leaderboard={leaderboard} meId={meId} setTab={setTab} />
+
       {/* ── WORTH WATCHING ── */}
       {(climber || bestRate) && <>
         <div className="sg-kicker" style={{marginTop:20}}>Worth watching</div>
@@ -3598,6 +4020,41 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           </div>}
         </div>
       </>}
+
+      {/* ── LAST NIGHT + PRIZE TRACKER (Vol.8) ── */}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:20}}>
+        <button onClick={() => {
+            const done = (state.sessions || []).filter(s => s.completed);
+            if (done.length) setRecap(done[done.length - 1]);
+          }}
+          style={{textAlign:"left",padding:14,cursor:"pointer",color:"inherit",
+            background:"rgba(14,14,14,.94)",border:"1px solid rgba(198,255,0,.3)"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+            letterSpacing:".2em",color:"#C6FF00"}}>LAST NIGHT</div>
+          <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+            fontSize:22,marginTop:6}}>RECAP</div>
+          <div style={{fontSize:11,color:"#9A9A9A",marginTop:4}}>
+            {(state.sessions || []).filter(s => s.completed).length
+              ? "champions, MVP, top scorer" : "after the first night"}
+          </div>
+        </button>
+        <button onClick={() => setShowPrizes(true)}
+          style={{textAlign:"left",padding:14,cursor:"pointer",color:"inherit",
+            background:"rgba(14,14,14,.94)",border:"1px solid rgba(255,46,136,.35)"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+            letterSpacing:".2em",color:"#FF2E88"}}>PRIZE TRACKER</div>
+          <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+            fontSize:22,marginTop:6}}>{pool} OMR</div>
+          <div style={{fontSize:11,color:"#9A9A9A",marginTop:4}}>
+            {(state.sessions || []).filter(s => s.completed).length * 28} paid so far
+          </div>
+        </button>
+      </div>
+
+      <PrizeSheet open={showPrizes} state={state} leaderboard={leaderboard}
+                  onClose={() => setShowPrizes(false)} />
+      <RecapSheet session={recap} state={state} leaderboard={leaderboard} meId={meId}
+                  onClose={() => setRecap(null)} />
 
       {/* ── HOW POINTS ARE EARNED ──
           The canvas invented values here ("Knockout win +5, Session champion
@@ -4652,7 +5109,12 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
               { key:"photos", label:"Photos", Ic:CIc.camera, on:tab === "photos",
                 count:sessionPhotos.length > 0 ? sessionPhotos.length : null, go:() => setTab("photos"), show:true },
               { key:"mvp", label:"MVP", Ic:CIc.crown, on:tab === "mvp",
-                count:session.mvpVotingOpen && votes ? votes : null, go:() => setTab("mvp"), show:canScore },
+                count:session.mvpVotingOpen && votes ? votes : null, go:() => setTab("mvp"),
+                // Vol.7 showed this to scorers only, so the "player vote" was
+                // whoever was holding the scoring phone. The tab is open to
+                // everyone once voting is; MvpVoteTab already enforces one
+                // vote per device.
+                show:canScore || !!session.mvpVotingOpen },
               { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },
               { key:"remind", label:"Remind", Ic:CIc.megaphone, go:() => setShowRemind(true), show:isAdmin },
               { key:"share", label:"Share", Ic:CIc.share, go:() => setShowShare(true), show:!!session.completed, warm:true },
@@ -8787,6 +9249,8 @@ body::before, body::after { background-image: none !important; }
     scroll-behavior: auto !important;
   }
 }
+
+@keyframes bo-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 
 </style>
 </body>

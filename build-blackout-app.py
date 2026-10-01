@@ -174,7 +174,11 @@ SEASON = [
     ("const SESSIONS_TOTAL = 8;", f"const SESSIONS_TOTAL = {CFG['sessions']};"),
     ("const DOUBLE_FROM_SESSION = 7;", f"const DOUBLE_FROM_SESSION = {CFG['doubleFromSession']};"),
     ("const SEASON_PRIZES = [75, 50, 30];",
-     "const SEASON_PRIZES = [%s];" % ", ".join(str(p) for p in CFG["seasonPrizes"])),
+     "const SEASON_PRIZES = [%s];\n"
+     "// The scheduled finals night, so the countdown works before any session\n"
+     "// exists -- which is when people are deciding whether to sign up.\n"
+     'const FINALS_DATE = "%s";' % (", ".join(str(p) for p in CFG["seasonPrizes"]),
+                                    CFG["finalsDate"])),
     # The prose under those constants describes Vol.7's shape — eight nights,
     # session 9 dropped. Left stale it tells the next maintainer the wrong thing
     # about this volume. (The heading itself already says VOL.8: the rename pass
@@ -275,15 +279,23 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
-    report(f"views: +{len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes before App "
-           f"(share cards + ME + roster)")
+    s = s[:a] + SCREENS.CHROME + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
+    report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
+           f"before App (chrome + share cards + ME + roster)")
 
     for name, old, new in (("icon", SCREENS.ICON_OLD, SCREENS.ICON_NEW),
                            ("nav", SCREENS.NAV_OLD, SCREENS.NAV_NEW),
                            ("nav grid", SCREENS.NAVGRID_OLD, SCREENS.NAVGRID_NEW),
                            ("nav button", SCREENS.NAVBTN_OLD, SCREENS.NAVBTN_NEW),
-                           ("routes", SCREENS.ROUTE_OLD, SCREENS.ROUTE_NEW)):
+                           ("routes", SCREENS.ROUTE_OLD, SCREENS.ROUTE_NEW),
+                           ("app state", SCREENS.APP_STATE_OLD, SCREENS.APP_STATE_NEW),
+                           ("app guard", SCREENS.APP_GUARD_OLD, SCREENS.APP_GUARD_NEW),
+                           ("main open", SCREENS.APP_MAIN_OLD, SCREENS.APP_MAIN_NEW),
+                           ("main close", SCREENS.APP_MAIN_END_OLD, SCREENS.APP_MAIN_END_NEW),
+                           ("dash sig", SCREENS.DASH_SIG_OLD, SCREENS.DASH_SIG_NEW),
+                           ("countdown", SCREENS.DASH_ANCHOR_OLD, SCREENS.DASH_ANCHOR_NEW),
+                           ("recap+prizes", SCREENS.DASH_TAIL_OLD, SCREENS.DASH_TAIL_NEW),
+                           ("mvp open", SCREENS.MVP_OLD, SCREENS.MVP_NEW)):
         assert old in s, f"{name}: anchor no longer matches"
         s = s.replace(old, new, 1)
     report("nav: 5 tabs (HOME / SESSIONS / RANK / ME / PLAYERS)")
@@ -293,7 +305,7 @@ def add_screens(s, report):
 def apply_skin(s, report):
     css = open(SKIN).read()
     block = ("\n<style>\n/* ══ BLACKOUT SERIES · VOL.8 SKIN — appended last ══ */\n"
-             + css + "\n</style>\n")
+             + css + SCREENS.SHIMMER + "\n</style>\n")
     i = s.rfind("</body>")
     assert i > 0, "no </body> to append the skin before"
     report(f"skin: {len(css)} bytes appended as the last style block")
