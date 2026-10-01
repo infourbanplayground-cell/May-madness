@@ -172,6 +172,9 @@ body{{font-family:'Archivo',sans-serif;color:{chalk};-webkit-font-smoothing:anti
     <div class="kick" style="position:absolute;left:0;right:0;top:800px;text-align:center;font-size:28px" id="s1k">URBAN SOCIAL SERIES &middot; VOL.7</div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:860px;text-align:center;font-size:148px" id="s1a">SEPTEMBER</div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font-size:148px;color:{cyan}" id="s1b">SURGE</div>
+    <span id="s1sh" style="position:absolute;left:0;top:840px;width:320px;height:320px;
+      background:linear-gradient(100deg,transparent,rgba(0,229,255,.22),transparent);
+      mix-blend-mode:screen;pointer-events:none;opacity:0"></span>
     <div style="position:absolute;left:50%;top:1190px;width:420px;height:5px;margin-left:-210px;background:{cyan}" id="s1r"></div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:1250px;text-align:center;font-size:84px" id="s1c">THE RECAP</div>
   </div>
@@ -194,6 +197,9 @@ AT THE TOP.</div>
     <div class="kick" style="position:absolute;left:0;right:0;top:400px;text-align:center;font-size:26px;color:{amber}" id="s4k">SESSION 7 &middot; DOUBLE POINTS</div>
     <div class="disp" style="position:absolute;left:0;right:0;top:462px;text-align:center;font-size:110px" id="s4h">SIXTY-TWO
 IN ONE NIGHT.</div>
+    <!-- rays behind the number: flat shapes only, so there is nothing for the
+         encoder to smear and nothing for a PDF writer to tile -->
+    <div id="s4burst" style="position:absolute;left:50%;top:840px;width:0;height:0"></div>
     <div class="mono" style="position:absolute;left:0;right:0;top:740px;text-align:center;font-size:200px;color:{amber};line-height:1" id="s4n">+62</div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:1000px;text-align:center;font-size:76px" id="s4w"></div>
     <div style="position:absolute;left:0;right:0;top:1130px;text-align:center;font-size:30px;color:{steel}" id="s4s"></div>
@@ -203,6 +209,21 @@ IN ONE NIGHT.</div>
     <div class="disp" style="position:absolute;left:0;right:0;top:640px;text-align:center;font-size:124px" id="s5h">ONE NIGHT LEFT.</div>
     <div class="mono" style="position:absolute;left:0;right:0;top:860px;text-align:center;font-size:250px;color:{cyan};line-height:1" id="s5n">2</div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:1140px;text-align:center;font-size:88px" id="s5w">POINTS IN IT.</div>
+    <!-- the two of them, closing -->
+    <div style="position:absolute;left:150px;right:150px;top:1310px" id="s5bars">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <span class="mono" style="width:190px;font-size:22px;color:{steel}">HAMED</span>
+        <span style="flex:1;height:14px;background:rgba(244,249,250,.07)">
+          <i id="s5b1" style="display:block;height:100%;width:0;background:{cyan}"></i></span>
+        <span class="mono" id="s5v1" style="width:90px;text-align:right;font-size:26px;color:{cyan}">0</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="mono" style="width:190px;font-size:22px;color:{steel}">MUNTHER</span>
+        <span style="flex:1;height:14px;background:rgba(244,249,250,.07)">
+          <i id="s5b2" style="display:block;height:100%;width:0;background:{chalk}"></i></span>
+        <span class="mono" id="s5v2" style="width:90px;text-align:right;font-size:26px;color:{chalk}">0</span>
+      </div>
+    </div>
   </div>
 
   <div class="scene" id="s6"></div>
@@ -211,6 +232,8 @@ IN ONE NIGHT.</div>
 
   <div class="scene" id="s9">
     <div class="kick" style="position:absolute;left:0;right:0;top:560px;text-align:center;font-size:28px">EIGHT NIGHTS, DECIDED BY</div>
+    <span id="s9r1" style="position:absolute;left:50%;top:790px;width:240px;height:240px;margin:-120px 0 0 -120px;border:4px solid {cyan};border-radius:50%;opacity:0"></span>
+    <span id="s9r2" style="position:absolute;left:50%;top:790px;width:240px;height:240px;margin:-120px 0 0 -120px;border:3px solid {cyan};border-radius:50%;opacity:0"></span>
     <div class="disp" style="position:absolute;left:0;right:0;top:620px;text-align:center;font-size:300px;color:{cyan}" id="s9n">1</div>
     <div class="disp fit" style="position:absolute;left:0;right:0;top:940px;text-align:center;font-size:104px" id="s9w">POINT.</div>
     <div class="mono" style="position:absolute;left:0;right:0;top:1100px;text-align:center;font-size:46px;color:{steel}" id="s9m"></div>
@@ -310,10 +333,22 @@ function energy(t){{
 document.getElementById('s2w').innerHTML = [
   ["nights","NIGHTS"],["matches","MATCHES"],["players","PLAYERS"],
 ].map(([k,l],i)=>`
-  <div id="n${{i}}" style="border-top:1px solid rgba(244,249,250,.12);padding:34px 0 26px">
+  <div id="n${{i}}" style="position:relative;border-top:1px solid rgba(244,249,250,.12);padding:34px 0 26px">
+    <i id="nb${{i}}" style="position:absolute;left:0;top:0;height:3px;width:0;
+      background:${{i===1?"#FF9E1B":"#00E5FF"}}"></i>
     <div class="mono" id="nv${{i}}" style="font-size:132px;line-height:1;color:${{i===1?"#FF9E1B":"#00E5FF"}}">0</div>
     <div class="mono" style="font-size:24px;letter-spacing:.3em;color:#8A9BA8;margin-top:10px">${{l}}</div>
   </div>`).join('');
+
+/* Rays behind the +62. Drawn once, animated as a group -- twenty elements each
+   with their own transform is twenty style writes a frame for no gain. */
+document.getElementById('s4burst').innerHTML =
+  Array.from({{length:18}},(_,i)=>{{
+    const a=i*(360/18);
+    return `<span style="position:absolute;left:0;top:0;width:4px;height:300px;
+      background:linear-gradient(180deg,rgba(255,158,27,.55),rgba(255,158,27,0));
+      transform-origin:2px 0;transform:rotate(${{a}}deg)"></span>`;
+  }}).join('');
 
 /* ── podium scenes, generated so the three cannot drift ── */
 D.podium.forEach((p,i)=>{{
@@ -321,6 +356,9 @@ D.podium.forEach((p,i)=>{{
   host.innerHTML=`
     <div class="ph" id="ph${{i}}"><img src="${{PH[p.photo]}}" alt=""></div>
     <div class="scrim"></div>
+    <!-- a bar wipes down across the photograph as it arrives, then leaves -->
+    <span id="pw${{i}}" style="position:absolute;left:0;right:0;height:7px;background:#00E5FF;
+      box-shadow:0 0 50px rgba(0,229,255,.7);opacity:0"></span>
     <div class="disp fit" id="pn${{i}}" style="position:absolute;left:0;right:0;top:1250px;text-align:center;font-size:${{i===0?122:104}}px">${{p.name.toUpperCase()}}</div>
     <div class="mono" id="pp${{i}}" style="position:absolute;left:0;right:0;top:1392px;text-align:center;font-size:${{i===0?150:124}}px;line-height:1;color:#00E5FF">0</div>
     <div class="mono" id="pl${{i}}" style="position:absolute;left:0;right:0;top:1562px;text-align:center;font-size:25px;letter-spacing:.2em;color:#8A9BA8">${{p.line.toUpperCase()}}</div>`;
@@ -345,6 +383,13 @@ function drawChart(p){{
   // grid
   CTX.strokeStyle="rgba(244,249,250,.07)"; CTX.lineWidth=2;
   for(let g=0;g<=4;g++){{const y=Y(g*50);CTX.beginPath();CTX.moveTo(0,y);CTX.lineTo(w,y);CTX.stroke();}}
+  const upto0=p*(n-1);
+  // a vertical scrub at the head of the lines
+  if(p>0&&p<1){{
+    const sxp=X(upto0);
+    CTX.strokeStyle="rgba(0,229,255,.35)"; CTX.lineWidth=3;
+    CTX.beginPath(); CTX.moveTo(sxp,0); CTX.lineTo(sxp,h); CTX.stroke();
+  }}
   SER.forEach((s,si)=>{{
     const upto=p*(n-1);
     CTX.strokeStyle=COL[si]; CTX.lineWidth=si===2?4:6; CTX.lineJoin="round"; CTX.lineCap="round";
@@ -367,6 +412,17 @@ function drawChart(p){{
     const nx=Math.min(n-1,i+1);
     const hx=X(i)+(X(nx)-X(i))*f, hy=Y(s[i])+(Y(s[nx])-Y(s[i]))*f;
     if(upto>0){{CTX.fillStyle=COL[si];CTX.beginPath();CTX.arc(hx,hy,si===2?6:9,0,7);CTX.fill();}}
+    // a marker lands on each night as the line passes it, briefly ringed
+    for(let i2=0;i2<=Math.floor(upto);i2++){{
+      const age=upto-i2;
+      CTX.fillStyle=COL[si];
+      CTX.beginPath(); CTX.arc(X(i2),Y(s[i2]),si===2?3.5:5,0,7); CTX.fill();
+      if(age<0.5&&si!==2){{
+        CTX.strokeStyle=COL[si]; CTX.globalAlpha=(1-age*2)*0.8; CTX.lineWidth=3;
+        CTX.beginPath(); CTX.arc(X(i2),Y(s[i2]),6+age*34,0,7); CTX.stroke();
+        CTX.globalAlpha=1;
+      }}
+    }}
   }});
 }}
 
@@ -381,9 +437,23 @@ function seek(t){{
   tr.style.transform=`translateY(${{(t*3.4)%15}}px)`;
   tr.style.opacity=(0.9+e*1.5).toFixed(3);
 
+  // The last Vol.7 scene does not dissolve out -- it gutters. Two stutters and
+  // a dead drop, which is what a failing tube does and what the next volume is
+  // named after.
+  const OUT0=D.sc.s9[1];
+  const flick=(() => {{
+    const d=t-(OUT0-0.46);
+    if(d<0||d>0.46) return null;
+    // on, off, on, off, dead
+    const steps=[[0.00,1],[0.09,0.08],[0.14,0.9],[0.21,0.05],[0.26,0.55],[0.31,0]];
+    let v=0; for(const [a,b] of steps) if(d>=a) v=b;
+    return v;
+  }})();
+
   for(const k of Object.keys(D.sc)){{
     const [a,b]=D.sc[k];
-    const o=Math.min(inv(t,a-XF,a+0.02), 1-inv(t,b,b+XF));
+    let o=Math.min(inv(t,a-XF,a+0.02), 1-inv(t,b,b+XF));
+    if(k!=='s10' && flick!==null) o=Math.min(o,flick);
     const el=document.getElementById(k);
     el.style.opacity=o.toFixed(3);
     el.style.display=o<=0.002?'none':'block';
@@ -399,6 +469,11 @@ function seek(t){{
     const r=document.getElementById('s1r');
     set(r,1,`scaleX(${{outQuint(inv(u,1.46,1.90)).toFixed(3)}})`);
     widen(document.getElementById('s1c'),u,1.60,0.68,{{w0:76}});
+    // one pass of light across the wordmark, after it has finished opening
+    const shq=inv(u,1.72,2.60);
+    const sh=document.getElementById('s1sh');
+    sh.style.opacity=(shq>0&&shq<1 ? 1 : 0).toFixed(3);
+    sh.style.transform=`translateX(${{(-340+shq*({W}+360)).toFixed(0)}}px) skewX(-14deg)`;
     const rail=document.getElementById('rail');
     rail.style.transform=`scaleX(${{outExpo(inv(t,0.02,0.60)).toFixed(3)}})`;
   }}
@@ -410,6 +485,9 @@ function seek(t){{
       set(document.getElementById('n'+i), inv(u,t0,t0+0.26),
           `translateY(${{(18*(1-outQuint(inv(u,t0,t0+0.7)))).toFixed(1)}}px)`);
       document.getElementById('nv'+i).textContent=countTo(u,t0+0.06,0.80,v);
+      // the rule above each number draws itself as the number counts
+      document.getElementById('nb'+i).style.width=
+        (100*outQuint(inv(u,t0,t0+0.75))).toFixed(1)+'%';
     }});
   }}
 
@@ -430,6 +508,11 @@ function seek(t){{
     const n=document.getElementById('s4n');
     n.textContent="+"+countTo(u,0.72,0.95,D.surge.gain);
     set(n, inv(u,0.72,0.96), `scale(${{(0.9+0.1*outBack(inv(u,0.72,1.3))).toFixed(4)}})`);
+    // the rays throw out once on the hit, then hold faintly
+    const bq=inv(u,0.70,1.60);
+    set(document.getElementById('s4burst'),
+        bq>0 ? (0.75*(1-bq)+0.10) : 0,
+        `scale(${{(0.25+1.05*outExpo(bq)).toFixed(3)}}) rotate(${{(u*5).toFixed(2)}}deg)`);
     const w=document.getElementById('s4w'); w.textContent=D.surge.name.toUpperCase();
     widen(w,u,1.30,0.68,{{w0:80,blur:6}});
     const s=document.getElementById('s4s');
@@ -442,6 +525,15 @@ function seek(t){{
     const n=document.getElementById('s5n');
     set(n, inv(u,0.60,0.86), `scale(${{(0.86+0.14*outBack(inv(u,0.60,1.2))).toFixed(4)}})`);
     widen(document.getElementById('s5w'),u,1.00,0.62,{{w0:80,blur:6}});
+    // the two of them after seven nights: 155 and 153, two bars all but level
+    const bp=outQuint(inv(u,1.26,2.10));
+    set(document.getElementById('s5bars'), inv(u,1.26,1.56));
+    const r7=[D.race["Hamed Amri"][6], D.race["Munther Rahbi"][6]];
+    const top=Math.max(...r7);
+    document.getElementById('s5b1').style.width=(bp*100*r7[0]/top).toFixed(1)+'%';
+    document.getElementById('s5b2').style.width=(bp*100*r7[1]/top).toFixed(1)+'%';
+    document.getElementById('s5v1').textContent=countTo(u,1.30,0.80,r7[0]);
+    document.getElementById('s5v2').textContent=countTo(u,1.30,0.80,r7[1]);
   }}
 
   D.podium.forEach((p,i)=>{{
@@ -450,6 +542,12 @@ function seek(t){{
     // a slow push in on the photograph, so the frame is never still
     const z=1.04+0.06*inv(u,0,span);
     set(document.getElementById('ph'+i), inv(u,0.04,0.46), `scale(${{z.toFixed(4)}})`);
+    // a bar sweeps the full height as the photograph arrives, and is gone by the
+    // time the name lands -- a reveal, not a decoration that outstays it
+    const wq=inv(u,0.02,0.70);
+    const wEl=document.getElementById('pw'+i);
+    wEl.style.opacity=(wq>0&&wq<1 ? (1-Math.abs(wq*2-1))*0.9 : 0).toFixed(3);
+    wEl.style.transform=`translateY(${{(wq*{H}).toFixed(0)}}px)`;
     widen(document.getElementById('pn'+i), u, 0.52, 0.74, {{w0:76,blur:8}});
     const pp=document.getElementById('pp'+i);
     pp.textContent=countTo(u,0.84,0.90,p.pts);
@@ -462,6 +560,13 @@ function seek(t){{
     n.textContent=String(D.margin);
     widen(n,u,0.20,0.76,{{w0:70,blur:16}});
     widen(document.getElementById('s9w'),u,0.56,0.62,{{w0:78,blur:8}});
+    // two rings leave the number, 0.22s apart
+    [1,2].forEach(k=>{{
+      const t0=0.24+(k-1)*0.22, q=inv(u,t0,t0+1.15);
+      const el=document.getElementById('s9r'+k);
+      el.style.opacity=(q>0&&q<1 ? (1-q)*0.55 : 0).toFixed(3);
+      el.style.transform=`scale(${{(0.35+2.4*outCubic(q)).toFixed(3)}})`;
+    }});
     const m=document.getElementById('s9m');
     m.textContent=`${{D.podium[0].pts}}  –  ${{D.podium[1].pts}}`;
     set(m, inv(u,0.90,1.20), `translateY(${{(14*(1-outQuint(inv(u,0.90,1.5)))).toFixed(1)}}px)`);
