@@ -125,6 +125,25 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   ssh urbanpadel 'cd /opt/blackout-api && node sync-surge-to-blackout.js'
   ```
   Already run: 60 players and 22 photos carried, Vol.8 series table empty.
+- **Full roster merge** — `build-carryover.py` carries ONE volume and only the
+  people who played in it, which opened Blackout with 60 names. 199 people have
+  played a night since July and 314 have ever signed up, so the rest would have
+  needed re-adding by hand before they could be picked for a session:
+  ```bash
+  python3 ops/build-roster-merge.py blackout
+  scp ops/sync-roster-to-blackout.js urbanpadel:/opt/blackout-api/
+  ssh urbanpadel 'cd /opt/blackout-api && DRY=1 node sync-roster-to-blackout.js'
+  ssh urbanpadel 'cd /opt/blackout-api && node sync-roster-to-blackout.js'
+  ```
+  A player's base record comes from the latest volume they appear in (so they
+  keep their photo and the pre-July volumes that exist only as stored
+  prevSeriesPts), then every volume they actually played is **recomputed with
+  that volume's own engine** — the volumes do not share one, so each is scored
+  by its own rules. `ONLY_PLAYED=1` restricts it to the 199.
+  Already run: **314 players, 17 more photos, 245 holding all-time points.**
+- The PLAYERS roster ranks on **all-time** until the first Vol.8 match is played,
+  because ordering 314 people by a series total that is zero for everyone is no
+  order at all.
 - **Vol.8's own screens** live in `blackout_screens.py` and are spliced in by the
   builder: the per-event engine (`calcPlayerNights`, `rankByNight`, `calcBadges`),
   ME + points receipt, badges, the four share-to-story cards, the public roster,

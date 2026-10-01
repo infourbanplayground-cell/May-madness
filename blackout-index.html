@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "270e7922d73d";
+  var V = "6dab4d62c7a4";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -3456,7 +3456,14 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab }) {
 // gets: who is playing, how they are doing, tap through to their card.
 function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   const [q, setQ] = React.useState("");
-  const rows = leaderboard
+  // Before the season starts nobody has series points, so ordering by them puts
+  // 314 people in an arbitrary order and shows every one of them a zero. Until
+  // the first match is played the roster ranks on all-time instead, which is
+  // the only number that exists and the reason the history was carried over.
+  const started = leaderboard.some(e => e.totalPts > 0);
+  const ranked = started ? leaderboard
+                         : [...leaderboard].sort((a, b) => b.lifetimePts - a.lifetimePts);
+  const rows = ranked
     .map((e, i) => ({ ...e, rank: i + 1 }))
     .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()));
   return (
@@ -3464,6 +3471,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
                     letterSpacing: ".28em", color: "#9A9A9A" }}>
         THE ROSTER &middot; {leaderboard.length} PLAYERS
+        {!started && <span style={{ color: "#6E6E6E" }}> &middot; BY ALL-TIME</span>}
       </div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
                     fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>
@@ -3489,10 +3497,15 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
             <div style={{ fontWeight: 800, fontSize: 14, marginTop: 6, whiteSpace: "nowrap",
                           overflow: "hidden", textOverflow: "ellipsis" }}>{e.player.name}</div>
             <div style={{ fontSize: 11, color: "#9A9A9A", marginTop: 2 }}>
-              {e.stats.sessionsPlayed} night{e.stats.sessionsPlayed === 1 ? "" : "s"}
+              {started
+                ? e.stats.sessionsPlayed + " night" + (e.stats.sessionsPlayed === 1 ? "" : "s")
+                : (e.lifetimePts > 0 ? "all-time" : "new this season")}
             </div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 22,
-                          color: "#C6FF00", marginTop: 8 }}>{e.totalPts}</div>
+                          marginTop: 8,
+                          color: (started ? e.totalPts : e.lifetimePts) > 0 ? "#C6FF00" : "#6E6E6E" }}>
+              {started ? e.totalPts : e.lifetimePts}
+            </div>
           </button>
         ))}
       </div>
