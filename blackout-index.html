@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "6dab4d62c7a4";
+  var V = "cef785b0d96e";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2499,6 +2499,259 @@ function PublicPhotosPage({ state }) {
 
 
 
+// ══ VOL.8 · CELEBRATION ═══════════════════════════════════════════════════
+// Fired when a result is locked. Deliberately short (1.6s) and non-blocking:
+// on a busy night the scorer is already looking at the next match.
+function celebrate(word) {
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const host = document.createElement("div");
+    host.style.cssText = "position:fixed;inset:0;z-index:200;pointer-events:none;" +
+      "display:flex;align-items:center;justify-content:center";
+    host.innerHTML =
+      '<div class="bo-ring"></div><div class="bo-ring" style="animation-delay:.18s"></div>' +
+      '<div class="bo-pop"></div>';
+    host.querySelector(".bo-pop").textContent = word || "";
+    document.body.appendChild(host);
+    setTimeout(() => host.remove(), 1700);
+  } catch (e) {}
+}
+
+
+// ══ VOL.8 · COUNT-UP ══════════════════════════════════════════════════════
+// Headline numbers ease to their value instead of snapping. Stepped rather than
+// time-based so it lands exactly on the target: max(1, ceil(remaining * .16))
+// per frame, which is the handoff's rule.
+function useCountUp(target) {
+  const [n, setN] = React.useState(0);
+  const raf = React.useRef();
+  React.useEffect(() => {
+    const t = Number(target) || 0;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setN(t); return;
+    }
+    let cur = 0;
+    const tick = () => {
+      const diff = t - cur;
+      if (Math.abs(diff) <= 1) { setN(t); return; }
+      cur += Math.sign(diff) * Math.max(1, Math.ceil(Math.abs(diff) * 0.16));
+      setN(cur);
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target]);
+  return n;
+}
+function CountUp({ to, prefix = "", suffix = "" }) {
+  const n = useCountUp(to);
+  return <>{prefix}{n}{suffix}</>;
+}
+
+
+// ══ VOL.8 · SCORE PANEL ═══════════════════════════════════════════════════
+// One team's side of a score sheet: initials, name, big score, and a 4-wide pad
+// of 64px buttons. Shared by the group editor and the knockout editor, because
+// the alternative is two court-side controls that drift apart.
+function ScorePanel({ label, initials, val, setVal, won, lost, max = 7 }) {
+  return (
+    <div style={{ padding: 12, marginBottom: 10,
+      background: won ? "rgba(198,255,0,.08)" : "rgba(14,14,14,.94)",
+      border: "1px solid " + (won ? "rgba(198,255,0,.5)" : "rgba(255,255,255,.07)") }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
+          justifyContent: "center", background: won ? "#C6FF00" : "#1A1A1A",
+          color: won ? "#050505" : "#9A9A9A", fontFamily: "'JetBrains Mono',monospace",
+          fontWeight: 700, fontSize: 14 }}>{initials}</div>
+        <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
+          color: lost ? "#9A9A9A" : "#F2F2F2", whiteSpace: "nowrap", overflow: "hidden",
+          textOverflow: "ellipsis" }}>{label}</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 30,
+          lineHeight: 1, color: won ? "#C6FF00" : lost ? "#9A9A9A" : "#F2F2F2" }}>
+          {val ?? "—"}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginTop: 10 }}>
+        {Array.from({ length: max + 1 }, (_, n) => (
+          <button key={n} type="button" onClick={() => setVal(n)}
+            style={{ height: 64, cursor: "pointer", border: "1px solid",
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
+              transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
+              ...(val === n
+                ? { background: "#C6FF00", color: "#050505", borderColor: "#C6FF00" }
+                : { background: "#111", color: "#CFCFCF", borderColor: "rgba(110,110,110,.3)" }) }}>
+            {n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// How the loss went: a READ-OUT, not a choice. The type is derived from the
+// score, and the scoring rules are not ours to change.
+function LossReadout({ derived }) {
+  return (
+    <>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".24em", color: "#9A9A9A", margin: "14px 0 8px" }}>HOW THE LOSS WENT</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+        {LOSS_TYPES.map(lt => {
+          const on = derived?.lossType === lt.id;
+          return (
+            <div key={lt.id} style={{ minHeight: 72, padding: "10px 8px", textAlign: "center",
+              display: "flex", flexDirection: "column", justifyContent: "center",
+              background: on ? "rgba(255,46,136,.1)" : "transparent",
+              border: "1px solid " + (on ? "rgba(255,46,136,.5)" : "rgba(110,110,110,.2)") }}>
+              <div style={{ fontSize: 12, fontWeight: 800,
+                color: on ? "#F2F2F2" : "#6E6E6E" }}>{lt.label.replace(" Loss", "")}</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 18,
+                marginTop: 4, color: on ? "#FF2E88" : "#6E6E6E" }}>+{lt.pts}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: "#6E6E6E", marginTop: 8, lineHeight: 1.4 }}>
+        Set by the score, not picked: 0 or 1 games is a blowout, 5 is a tiebreak,
+        anything else is close.
+      </div>
+    </>
+  );
+}
+
+function PointsPreview({ derived, winPts = 3 }) {
+  if (!derived) return null;
+  const lp = LOSS_TYPES.find(l => l.id === derived.lossType)?.pts ?? 0;
+  return (
+    <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      <div style={{ flex: 1, padding: 12, background: "rgba(198,255,0,.07)",
+        border: "1px solid rgba(198,255,0,.3)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".2em", color: "#9A9A9A" }}>WINNER</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 24,
+          color: "#C6FF00", marginTop: 3 }}>+{winPts}</div>
+      </div>
+      <div style={{ flex: 1, padding: 12, border: "1px solid rgba(110,110,110,.25)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".2em", color: "#9A9A9A" }}>LOSER</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 24,
+          color: lp ? "#F2F2F2" : "#6E6E6E", marginTop: 3 }}>+{lp}</div>
+      </div>
+    </div>
+  );
+}
+
+function LockButton({ why, onLock }) {
+  return (
+    <button type="button" disabled={!!why} onClick={() => { if (!why) onLock(); }}
+      style={{ flex: 1, padding: "22px 16px", cursor: why ? "default" : "pointer",
+        fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+        letterSpacing: ".2em", border: "none",
+        ...(why ? { background: "#1A1A1A", color: "#6E6E6E" }
+                : { background: "#C6FF00", color: "#050505",
+                    boxShadow: "0 0 30px rgba(198,255,0,.32)" }) }}>
+      {why || "LOCK RESULT ▶"}
+    </button>
+  );
+}
+
+
+// ══ VOL.8 · PLAYER CARD EXTRAS ════════════════════════════════════════════
+// The card showed a points breakdown and stopped there. The handoff asks for the
+// three things that make it worth opening someone else's: where their points
+// came from NIGHT BY NIGHT (each tapping through to that night's receipt),
+// their badges, and the head-to-head against you.
+function PlayerExtras({ player, state, leaderboard, meId }) {
+  const [receipt, setReceipt] = React.useState(null);
+  const players = state.players || [];
+  const sessions = state.sessions || [];
+  const nameOf = React.useCallback((s, teamId, pidDirect) => {
+    if (pidDirect) return (players.find(p => p.id === pidDirect) || {}).name || "?";
+    const t = (s.teams || []).find(x => x.id === teamId);
+    if (!t) return "?";
+    const n = id => ((players.find(p => p.id === id) || {}).name || "?").split(" ")[0];
+    return n(t.p1Id) + " & " + n(t.p2Id);
+  }, [players]);
+
+  const data = calcPlayerNights(player.id, sessions, nameOf);
+  const ranks = React.useMemo(() => rankByNight(players, sessions), [players, sessions]);
+  const best = Math.max(1, ...data.nights.map(n => n.nightTotal));
+
+  // Head to head: every decided match where the two were on opposite teams.
+  const h2h = React.useMemo(() => {
+    if (!meId || meId === player.id) return null;
+    let mine = 0, theirs = 0, last = null;
+    sessions.forEach((s, idx) => {
+      const a = getPlayerTeam(s, meId), b = getPlayerTeam(s, player.id);
+      if (!a || !b || a.id === b.id) return;
+      const all = (s.groupMatches || []).concat(s.bracket?.qf || [], s.bracket?.sf || [],
+                                                s.bracket?.final ? [s.bracket.final] : []);
+      all.forEach(m => {
+        if (!m || !m.winner) return;
+        const ids = [m.team1Id, m.team2Id];
+        if (!ids.includes(a.id) || !ids.includes(b.id)) return;
+        const iWon = teamWon(m, a.id);
+        if (iWon) mine++; else theirs++;
+        last = { idx, iWon, score: m.score, date: s.date };
+      });
+    });
+    return mine + theirs ? { mine, theirs, last } : null;
+  }, [sessions, meId, player.id]);
+
+  if (data.nights.length === 0 && !h2h) return null;
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      {data.nights.length > 0 && <>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".26em", color: "#9A9A9A" }}>WHERE THE POINTS CAME FROM</div>
+        <StackedBar seg={data.seg} total={data.total} />
+        <SegLegend seg={data.seg} />
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6, marginTop: 16 }}>
+          {data.nights.slice(-5).map(n => (
+            <button key={n.id} onClick={() => setReceipt(n)}
+              style={{ padding: "10px 4px", cursor: "pointer", color: "inherit", textAlign: "center",
+                background: "rgba(14,14,14,.94)", border: "1px solid rgba(198,255,0,.25)" }}>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+                color: "#6E6E6E" }}>S{n.no}</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 17,
+                color: "#C6FF00", marginTop: 3 }}>+{n.nightTotal}</div>
+              <div style={{ height: 3, background: "rgba(110,110,110,.25)", marginTop: 6 }}>
+                <div style={{ height: "100%", background: "#C6FF00",
+                  width: Math.round(n.nightTotal / best * 100) + "%" }} />
+              </div>
+            </button>
+          ))}
+        </div>
+      </>}
+
+      {h2h && (
+        <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 20 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+            letterSpacing: ".24em", color: "#FF2E88" }}>HEAD TO HEAD &middot; YOU</div>
+          <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+            fontSize: 26, marginTop: 6 }}>
+            YOU {h2h.mine} &ndash; {h2h.theirs} {(player.name || "").split(" ")[0].toUpperCase()}
+          </div>
+          <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 4 }}>
+            {h2h.mine + h2h.theirs} meeting{h2h.mine + h2h.theirs === 1 ? "" : "s"}
+            {h2h.last && h2h.last.score
+              ? ` · last: ${h2h.last.iWon ? "you won" : "they won"} `
+                + `${h2h.last.score.t1}–${h2h.last.score.t2}`
+              : ""}
+          </div>
+        </div>
+      )}
+
+      <ReceiptSheet night={receipt} player={player}
+        rankAfter={receipt ? (ranks[receipt.idx] || {})[player.id] : null}
+        onClose={() => setReceipt(null)} />
+    </div>
+  );
+}
+
+
 // ══ VOL.8 · LOADING AND REFRESH ═══════════════════════════════════════════
 
 // Six blocks in the shape of the home screen, with a lime sweep across them.
@@ -2770,7 +3023,7 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 }
 
 // ══ VOL.8 · NIGHT RECAP ═══════════════════════════════════════════════════
-function RecapSheet({ session, state, leaderboard, meId, onClose }) {
+function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession }) {
   if (!session) return null;
   const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
   const teamName = tid => {
@@ -2860,7 +3113,13 @@ function RecapSheet({ session, state, leaderboard, meId, onClose }) {
           </div>
         )}
 
-        <button onClick={onClose} style={{ width: "100%", marginTop: 20, padding: "14px",
+        {onOpenSession && (
+          <button onClick={onOpenSession} style={{ width: "100%", marginTop: 16, padding: "14px",
+            background: "transparent", border: "1px solid rgba(198,255,0,.4)", color: "#C6FF00",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+            letterSpacing: ".24em", cursor: "pointer" }}>OPEN THE NIGHT &#9654;</button>
+        )}
+        <button onClick={onClose} style={{ width: "100%", marginTop: 10, padding: "14px",
           background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
@@ -3323,7 +3582,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab }) {
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
                           letterSpacing: ".26em", color: "#9A9A9A" }}>SERIES POINTS</div>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 62,
-                          lineHeight: 1, color: "#C6FF00" }}>{data.total}</div>
+                          lineHeight: 1, color: "#C6FF00" }}><CountUp to={data.total} /></div>
           </div>
           <div style={{ textAlign: "right" }}>
             <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
@@ -3464,7 +3723,10 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   const ranked = started ? leaderboard
                          : [...leaderboard].sort((a, b) => b.lifetimePts - a.lifetimePts);
   const rows = ranked
-    .map((e, i) => ({ ...e, rank: i + 1 }))
+    .map((e, i) => {
+      const form = recentForm(e.player.id, state.sessions || []);
+      return { ...e, rank: i + 1, form, streak: currentStreak(form) };
+    })
     .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()));
   return (
     <div>
@@ -3493,8 +3755,26 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
                 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 8,
                   letterSpacing: ".2em", color: "#FF2E88" }}>YOU</span>
               )}
+              {e.streak >= 3 && (
+                <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace",
+                  fontWeight: 700, fontSize: 8, letterSpacing: ".14em", color: "#FF2E88",
+                  border: "1px solid rgba(255,46,136,.5)", padding: "1px 4px" }}>W{e.streak}</span>
+              )}
             </div>
-            <div style={{ fontWeight: 800, fontSize: 14, marginTop: 6, whiteSpace: "nowrap",
+            {/* A roster of 314 names needs faces. The photo slot keeps its
+                height whether or not there is one, so the grid stays even. */}
+            <div style={{ width: "100%", height: 120, marginTop: 8, background: "#111",
+              border: "1px solid rgba(255,255,255,.05)", overflow: "hidden",
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {e.player.photoUrl
+                ? <img src={e.player.photoUrl} alt="" style={{ width: "100%", height: "100%",
+                    objectFit: "cover", objectPosition: "center 28%" }} />
+                : <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+                    fontSize: 26, color: "#2A2A2A" }}>
+                    {(e.player.name || "?").split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase()}
+                  </span>}
+            </div>
+            <div style={{ fontWeight: 800, fontSize: 14, marginTop: 8, whiteSpace: "nowrap",
                           overflow: "hidden", textOverflow: "ellipsis" }}>{e.player.name}</div>
             <div style={{ fontSize: 11, color: "#9A9A9A", marginTop: 2 }}>
               {started
@@ -3506,6 +3786,14 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
                           color: (started ? e.totalPts : e.lifetimePts) > 0 ? "#C6FF00" : "#6E6E6E" }}>
               {started ? e.totalPts : e.lifetimePts}
             </div>
+            {e.form && e.form.length > 0 && (
+              <div style={{ display: "flex", gap: 2, marginTop: 7 }}>
+                {e.form.slice(-8).map((w, i) => (
+                  <span key={i} style={{ flex: 1, height: 4,
+                    background: w ? "#C6FF00" : "rgba(110,110,110,.3)" }} />
+                ))}
+              </div>
+            )}
           </button>
         ))}
       </div>
@@ -3725,12 +4013,39 @@ function App() {
       <header className="sticky top-0 z-30 backdrop-blur-xl border-b border-stone-800/80" style={{ background: "rgba(10,10,10,0.92)" }}>
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={secretTap} className="shrink-0" aria-label="Blackout Series" style={{lineHeight:0}}>
-              <img src={UP_LOGO_FULL} style={{height:64,width:"auto",display:"block",margin:"-8px 0",filter:"drop-shadow(0 0 10px rgba(198,255,0,.5)) drop-shadow(0 0 14px rgba(198,255,0,.4))"}} alt="Blackout Series" />
+            <button onClick={secretTap} className="shrink-0" aria-label="Urban Playground" style={{lineHeight:0}}>
+              <img src={UP_LOGO_FULL} style={{height:44,width:"auto",display:"block",margin:"-4px 0",filter:"drop-shadow(0 0 10px rgba(198,255,0,.4))"}} alt="Urban Playground" />
             </button>
+            {/* The chrome carried no Blackout branding at all -- a player opened
+                the app and the only mark on screen was the club's. */}
+            <span style={{width:1,height:28,background:"rgba(255,255,255,.14)",flexShrink:0}} />
+            <span style={{width:30,height:30,flexShrink:0,position:"relative",background:"#C6FF00"}}>
+              <span style={{position:"absolute",left:0,right:0,top:14,height:1,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:18,height:2,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:22,height:3,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:27,height:3,background:"#050505"}} />
+              <span style={{position:"absolute",right:4,top:4,width:4,height:4,background:"#FF2E88"}} />
+            </span>
+            <div style={{minWidth:0}}>
+              <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+                fontSize:20,lineHeight:1,whiteSpace:"nowrap"}}>BLACKOUT SERIES</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+                letterSpacing:".2em",color:"#6E6E6E",marginTop:3,whiteSpace:"nowrap"}}>
+                URBAN SOCIAL SERIES &middot; VOL.8</div>
+            </div>
           </div>
           <div className="flex items-center gap-1 shrink-0">
-            {canScore && <SyncIndicator status={sync} errMsg={syncErr} />}
+            {canScore
+              ? <SyncIndicator status={sync} errMsg={syncErr} />
+              : <button onClick={refreshNow} aria-label="Refresh"
+                  style={{display:"flex",alignItems:"center",gap:6,padding:"5px 9px",cursor:"pointer",
+                    background:"transparent",border:"1px solid rgba(110,110,110,.3)"}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",
+                    background: refreshing ? "#FF2E88" : "#C6FF00"}} />
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+                    letterSpacing:".18em",color:"#9A9A9A"}}>
+                    {refreshing ? "SYNCING" : "SYNCED"}</span>
+                </button>}
             
             {canScore && (
               <button onClick={() => isAdmin ? setTab("settings") : logout()} className="flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-lg" style={{ background: isAdmin ? "rgba(198,255,0,.14)" : "rgba(255,46,136,.14)", border: `1px solid ${isAdmin ? "rgba(198,255,0,.3)" : "rgba(255,46,136,.3)"}` }} aria-label={isAdmin ? "Settings" : "Sign out scorer"}>
@@ -3750,7 +4065,7 @@ function App() {
         {tab === "players" && isAdmin && <PlayersView state={state} update={update} setOpenPlayerId={setOpenPlayerId} isAdmin={isAdmin} />}
         {tab === "me" && <MeView state={state} leaderboard={leaderboard} meId={meId} onOpenPicker={() => setShowMe(true)} setTab={setTab} />}
         {tab === "roster" && <RosterView state={state} leaderboard={leaderboard} setOpenPlayerId={setOpenPlayerId} meId={meId} />}
-        {tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} />}
+        {tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} meId={meId} />}
         {tab === "leaderboard" && <LeaderboardView leaderboard={leaderboard} state={state} setOpenPlayerId={setOpenPlayerId} meId={meId} onOpenPicker={() => setShowMe(true)} />}
         {tab === "settings" && isAdmin && <SettingsView state={state} update={update} setTab={setTab} logout={logout} />}
         </>}
@@ -3782,7 +4097,7 @@ function App() {
       </nav>
 
       {currentSession && <SessionDetail session={currentSession} state={state} isAdmin={isAdmin} canScore={canScore} canUploadPhotos={canUploadPhotos} sync={sync} syncErr={syncErr} onClose={() => setOpenSessionId(null)} updateSession={(fn) => updateSession(currentSession.id, fn)} update={update} deleteSession={() => { update(s => ({ ...s, sessions: s.sessions.filter(ss => ss.id !== currentSession.id) })); setOpenSessionId(null); }} leaderboard={leaderboard} />}
-      {openPlayerId && <PlayerDetail playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
+      {openPlayerId && <PlayerDetail meId={meId} playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
       {showMe && <MePicker leaderboard={leaderboard} meId={meId} onPick={pickMe} onClear={clearMe} onClose={() => setShowMe(false)} />}
     </div>
@@ -3869,6 +4184,39 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
     const pool2 = played.map(e => ({ e, en: enrich(e) })).filter(x => x.en.decided >= 5);
     if (!pool2.length) return null;
     return pool2.sort((a, b) => b.en.winRate - a.en.winRate || b.e.totalPts - a.e.totalPts)[0];
+  })();
+
+  // Vol.8: four spotlight axes instead of two, each player used once. Two tiles
+  // that land on the same person waste half the row, which is what happened
+  // whenever the biggest climber also had the best win rate.
+  const spotlights = (() => {
+    const out = [], used = new Set(podium.map(e => e.player.id));
+    const push = (id, sp) => { if (id && !used.has(id)) { used.add(id); out.push(sp); } };
+    const nightsDone = sessions.filter(s => s.completed).length;
+
+    if (climber) push(climber.e.player.id, { key: "climb", colour: "#C6FF00",
+      label: "BIGGEST CLIMBER", value: "▲" + climber.n, name: climber.e.player.name,
+      note: "places gained since last session" });
+
+    if (bestRate) push(bestRate.e.player.id, { key: "rate", colour: "#FF2E88",
+      label: "BEST WIN RATE", value: bestRate.en.winRate + "%", name: bestRate.e.player.name,
+      note: "from " + bestRate.en.decided + " matches" });
+
+    // Never missed a night -- only meaningful once there are nights to miss.
+    if (nightsDone >= 2) {
+      const iron = played.find(e => !used.has(e.player.id) && e.stats.sessionsPlayed >= nightsDone);
+      if (iron) push(iron.player.id, { key: "iron", colour: "#C6FF00",
+        label: "NEVER MISSED A NIGHT", value: nightsDone + "/" + nightsDone,
+        name: iron.player.name, note: "every night so far" });
+    }
+
+    const titled = played.filter(e => !used.has(e.player.id) && e.stats.finalsWon > 0)
+      .sort((a, b) => b.stats.finalsWon - a.stats.finalsWon)[0];
+    if (titled) push(titled.player.id, { key: "titles", colour: "#FF2E88",
+      label: "SESSION TITLES", value: String(titled.stats.finalsWon), name: titled.player.name,
+      note: titled.stats.finalsWon === 1 ? "one night won" : "nights won outright" });
+
+    return out.slice(0, 4);
   })();
 
   const LADDER = [
@@ -4009,28 +4357,26 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
       {/* ── FINALS COUNTDOWN (Vol.8) ── */}
       <FinalsCountdown state={state} leaderboard={leaderboard} meId={meId} setTab={setTab} />
 
-      {/* ── WORTH WATCHING ── */}
-      {(climber || bestRate) && <>
+      {/* ── WORTH WATCHING (Vol.8: four axes, de-duplicated) ── */}
+      {spotlights.length > 0 && <>
         <div className="sg-kicker" style={{marginTop:20}}>Worth watching</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:10}}>
-          {climber && <div onClick={() => setTab("leaderboard")} className="sg-card" style={{cursor:"pointer",padding:14,
-               backgroundImage:"linear-gradient(180deg,#C6FF00,rgba(110,110,110,.05))",backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".2em",color:"#C6FF00"}}>BIGGEST CLIMBER</div>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
-                 fontSize:34,lineHeight:1,color:"#C6FF00",marginTop:7}}>&#9650;{climber.n}</div>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,color:"#F2F2F2",marginTop:8,
-                 whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{climber.e.player.name}</div>
-            <div style={{fontSize:12,lineHeight:1.4,color:"#CFCFCF",marginTop:5}}>places gained since last session</div>
-          </div>}
-          {bestRate && <div onClick={() => setTab("leaderboard")} className="sg-card" style={{cursor:"pointer",padding:14,
-               backgroundImage:"linear-gradient(180deg,#FF2E88,rgba(110,110,110,.05))",backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".2em",color:"#FF2E88"}}>BEST WIN RATE</div>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
-                 fontSize:34,lineHeight:1,color:"#FF2E88",marginTop:7}}>{bestRate.en.winRate}%</div>
-            <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,color:"#F2F2F2",marginTop:8,
-                 whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{bestRate.e.player.name}</div>
-            <div style={{fontSize:12,lineHeight:1.4,color:"#CFCFCF",marginTop:5}}>from {bestRate.en.decided} matches</div>
-          </div>}
+          {spotlights.map(sp => (
+            <div key={sp.key} onClick={() => setTab("leaderboard")} className="sg-card"
+                 style={{cursor:"pointer",padding:14,
+                   backgroundImage:`linear-gradient(180deg,${sp.colour},rgba(110,110,110,.05))`,
+                   backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,
+                   letterSpacing:".2em",color:sp.colour}}>{sp.label}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+                   fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:34,lineHeight:1,
+                   color:sp.colour,marginTop:7}}>{sp.value}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
+                   color:"#F2F2F2",marginTop:8,whiteSpace:"nowrap",overflow:"hidden",
+                   textOverflow:"ellipsis"}}>{sp.name}</div>
+              <div style={{fontSize:12,lineHeight:1.4,color:"#CFCFCF",marginTop:5}}>{sp.note}</div>
+            </div>
+          ))}
         </div>
       </>}
 
@@ -4509,7 +4855,11 @@ Drop your name + partner below to lock your spot 👇
 ⚠️ *16 teams max · first come, first served*
 💥 *Lights out.* 👑`;
 
-function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab }) {
+function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab, meId }) {
+  // A finished night's row used to open the live session screen, which is the
+  // scorer's view of a night nobody is scoring any more. It opens the recap
+  // instead; the session screen is still one tap away from inside it.
+  const [recapSession, setRecapSession] = React.useState(null);
   const [show, setShow] = useState(false);
   const [showDraft, setShowDraft] = useState(false);
   const [showAnnounce, setShowAnnounce] = useState(false);
@@ -4564,7 +4914,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
           const pc = pill === "LIVE" ? "#C6FF00" : pill === "2X" ? "#FF2E88" : "#CFCFCF";
           return (
           <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"}
-               onClick={() => setOpenSessionId(s.id)}
+               onClick={() => s.completed ? setRecapSession(s) : setOpenSessionId(s.id)}
                style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:14,transform:"none",
                        background:s.completed ? "rgba(10,10,10,.94)" : "rgba(16,23,31,.96)",
                        backgroundImage:`linear-gradient(180deg,${liveNow ? "#C6FF00" : "#6E6E6E"},rgba(110,110,110,.05))`,
@@ -4590,6 +4940,9 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
         );})}
       </div>
 
+      <RecapSheet session={recapSession} state={state} leaderboard={leaderboard} meId={meId}
+        onClose={() => setRecapSession(null)}
+        onOpenSession={() => { const s = recapSession; setRecapSession(null); setOpenSessionId(s.id); }} />
       {show && <CreateSessionModal onClose={() => setShow(false)} count={state.sessions.length} onCreate={(name, date, groupCount, qualifyCount, thirdPlaceMode, doublePoints) => { const id = uid("s"); update(s => ({ ...s, sessions: [...s.sessions, { id, name, date, groupCount: groupCount||4, qualifyCount: qualifyCount||2, thirdPlaceMode: thirdPlaceMode||"best2", doublePoints: !!doublePoints, teams: [], groupMatches: [], bracket: { qf: [], sf: [], final: null }, waitlist: [], completed: false }] })); setOpenSessionId(id); }} />}
       {showDraft && <DraftReminderModal onClose={() => setShowDraft(false)} state={state} leaderboard={leaderboard} />}
       {showFormat && (() => { const txt = generateFormatText(state); return (
@@ -5852,7 +6205,10 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
   const initS2 = match?.score?.t2 ?? (match?.winner ? (match.winner === "team2" ? 6 : 3) : null);
   const [s1, setS1] = useState(initS1);
   const [s2, setS2] = useState(initS2);
-  const lbl = (t) => t ? `${state.players.find(p => p.id === t.p1Id)?.name?.split(" ")[0] || "?"} & ${state.players.find(p => p.id === t.p2Id)?.name?.split(" ")[0] || "?"}` : "?";
+
+  const first = id => (state.players.find(p => p.id === id)?.name || "?").split(" ")[0];
+  const lbl = t => t ? `${first(t.p1Id)} & ${first(t.p2Id)}` : "?";
+  const inits = t => t ? (first(t.p1Id)[0] || "?") + (first(t.p2Id)[0] || "?") : "??";
 
   const playedPairs = new Set(
     (session.groupMatches || [])
@@ -5862,71 +6218,100 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
   const hasPlayed = (id1, id2) => id1 && id2 && playedPairs.has([id1, id2].sort().join("|"));
 
   const derived = (s1 !== null && s2 !== null && s1 !== s2) ? scoreToResult(s1, s2) : null;
-  const [confirmed, setConfirmed] = useState(false);
-  const canConfirm = t1 && t2 && derived;
+  const matchNo = (session.groupMatches || []).filter(m => {
+    const t = (session.teams || []).find(x => x.id === m.team1Id);
+    return t && t.group === group;
+  }).findIndex(m => match && m.id === match.id) + 1;
 
-  const ScoreBtn = ({ onClick, children }) => (
-    <button type="button" onClick={onClick}
-      className="w-7 h-7 rounded-md bg-stone-800 border border-stone-700 text-stone-300 text-sm font-bold hover:bg-stone-700 active:scale-95 flex items-center justify-center">{children}</button>
-  );
+  const why = s1 === null || s2 === null ? "PICK BOTH SCORES"
+            : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+            : !t1 || !t2 ? "PICK BOTH TEAMS" : null;
+
+  const Panel = ({ tid, val, setVal, side }) => {
+    const t = teams.find(x => x.id === tid);
+    const won = derived?.winner === side;
+    const lost = derived && !won;
+    return (
+      <div style={{ padding: 12, marginBottom: 10,
+        background: won ? "rgba(198,255,0,.08)" : "rgba(14,14,14,.94)",
+        border: "1px solid " + (won ? "rgba(198,255,0,.5)" : "rgba(255,255,255,.07)") }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
+            justifyContent: "center", background: won ? "#C6FF00" : "#1A1A1A",
+            color: won ? "#050505" : "#9A9A9A", fontFamily: "'JetBrains Mono',monospace",
+            fontWeight: 700, fontSize: 14 }}>{inits(t)}</div>
+          <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
+            color: lost ? "#9A9A9A" : "#F2F2F2", whiteSpace: "nowrap", overflow: "hidden",
+            textOverflow: "ellipsis" }}>{lbl(t)}</div>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 30,
+            lineHeight: 1, color: won ? "#C6FF00" : lost ? "#9A9A9A" : "#F2F2F2" }}>
+            {val ?? "—"}
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginTop: 10 }}>
+          {[0,1,2,3,4,5,6,7].map(n => (
+            <button key={n} type="button" onClick={() => setVal(n)}
+              style={{ height: 64, cursor: "pointer", border: "1px solid",
+                fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
+                transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
+                ...(val === n
+                  ? { background: "#C6FF00", color: "#050505", borderColor: "#C6FF00" }
+                  : { background: "#111", color: "#CFCFCF", borderColor: "rgba(110,110,110,.3)" }) }}>
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return <Modal open={true} onClose={onClose} title={match ? "EDIT MATCH" : `GROUP ${group} MATCH`}>
-    <div className="space-y-3">
-      <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Team 1</label>
-        <select value={t1} onChange={e => { setT1(e.target.value); setConfirmed(false); }} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 focus:outline-none focus:border-orange-500">
-          <option value="">Pick team</option>{teams.filter(t => t.id !== t2 && !hasPlayed(t.id, t2)).map(t => <option key={t.id} value={t.id}>{lbl(t)}</option>)}
-        </select>
+    <div>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+        letterSpacing: ".26em", color: "#9A9A9A", marginBottom: 12 }}>
+        GROUP {group}{matchNo > 0 ? " · MATCH " + matchNo : ""}
       </div>
-      <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Team 2</label>
-        <select value={t2} onChange={e => { setT2(e.target.value); setConfirmed(false); }} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100 focus:outline-none focus:border-orange-500">
-          <option value="">Pick team</option>{teams.filter(t => t.id !== t1 && !hasPlayed(t1, t.id)).map(t => <option key={t.id} value={t.id}>{lbl(t)}</option>)}
-        </select>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+        {[[t1, setT1, t2], [t2, setT2, t1]].map(([val, set, other], i) => (
+          <select key={i} value={val} onChange={e => set(e.target.value)}
+            style={{ width: "100%", padding: "11px 10px", background: "#111", color: "#F2F2F2",
+              border: "1px solid rgba(110,110,110,.3)", fontSize: 13, outline: "none" }}>
+            <option value="">Team {i + 1}</option>
+            {teams.filter(t => t.id !== other && !hasPlayed(t.id, other)).map(t =>
+              <option key={t.id} value={t.id}>{lbl(t)}</option>)}
+          </select>
+        ))}
       </div>
+
       {t1 && t2 && <>
-        {!confirmed ? (
-          <div>
-            <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Score — tap each team's games</label>
-            <div className="space-y-2.5">
-              {[[t1, s1, setS1, "team1"], [t2, s2, setS2, "team2"]].map(([tid, sval, setS, side]) => (
-                <div key={side}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold truncate pr-2" style={{ color: derived?.winner === side ? "#C6FF00" : derived && derived.winner ? "#78716c" : "#e7e5e4" }}>{lbl(teams.find(t => t.id === tid))}</span>
-                    <span className="font-mono text-2xl font-bold w-7 text-center shrink-0" style={{ color: derived?.winner === side ? "#C6FF00" : "#e7e5e4" }}>{sval ?? "—"}</span>
-                  </div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {[0,1,2,3,4,5,6].map(n => (
-                      <button key={n} type="button" onClick={() => { setS(n); setConfirmed(false); }}
-                        className="h-11 rounded-lg font-bold text-base active:scale-90 transition-transform"
-                        style={sval === n
-                          ? { background: "#C6FF00", color: "#fff", border: "1px solid rgba(242,242,242,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
-                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #2A2A2A" }}>{n}</button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 text-center text-xs">
-              {derived ? <span className="text-emerald-400">{lbl(teams.find(t => t.id === (derived.winner === "team1" ? t1 : t2)))} wins · <span className="text-stone-500">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</span></span>
-                : s1 !== null && s1 === s2 ? <span className="text-cyan-300">Tied — adjust score</span>
-                : <span className="text-stone-600">Enter score above</span>}
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl p-4 text-center space-y-1" style={{ background: "rgba(198,255,0,.08)", border: "1px solid rgba(198,255,0,.25)" }}>
-            <div className="font-mono text-3xl font-bold text-stone-100">{s1} — {s2}</div>
-            <div className="text-emerald-400 text-sm font-semibold">{lbl(teams.find(t => t.id === (derived.winner === "team1" ? t1 : t2)))} wins</div>
-            <div className="text-stone-500 text-xs">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</div>
-          </div>
-        )}
+        <Panel tid={t1} val={s1} setVal={setS1} side="team1" />
+        <Panel tid={t2} val={s2} setVal={setS2} side="team2" />
+
+        <LossReadout derived={derived} />
+        <PointsPreview derived={derived} />
       </>}
-      <div className="flex gap-2 pt-2">
+
+      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
         {onDelete && <Btn variant="danger" onClick={() => { onDelete(); onClose(); }}><I.trash size={14} /></Btn>}
-        {confirmed && <Btn variant="ghost" onClick={() => setConfirmed(false)}>← Edit</Btn>}
-        <Btn variant="ghost" onClick={onClose} className={confirmed ? "" : "ml-auto"}>Cancel</Btn>
-        {!confirmed
-          ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm ▶</Btn>
-          : <Btn onClick={() => { onSave({ team1Id: t1, team2Id: t2, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
-        }
+        <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+        <button type="button" disabled={!!why || saving}
+          onClick={() => {
+            if (why) return;
+            setSaving(true);
+            celebrate(lbl(teams.find(t => t.id === (derived.winner === "team1" ? t1 : t2))) + " TAKE IT");
+            onSave({ team1Id: t1, team2Id: t2, ...derived, resultAt: Date.now() });
+            onClose();
+          }}
+          style={{ flex: 1, padding: "22px 16px", cursor: why ? "default" : "pointer",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+            letterSpacing: ".2em", border: "none",
+            ...(why
+              ? { background: "#1A1A1A", color: "#6E6E6E" }
+              : { background: "#C6FF00", color: "#050505",
+                  boxShadow: "0 0 30px rgba(198,255,0,.32)" }) }}>
+          {why || "LOCK RESULT ▶"}
+        </button>
       </div>
     </div>
   </Modal>;
@@ -6603,50 +6988,37 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
         <div><label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Team 2</label><select value={t2} onChange={e => { setT2(e.target.value); setConfirmed(false); }} className="w-full bg-stone-900 border border-stone-700 rounded-lg px-3 py-2.5 text-stone-100"><option value="">— None —</option>{teams.filter(t => t.id !== t1).map(t => <option key={t.id} value={t.id}>{lbl(t.id)} (Group {t.group})</option>)}</select></div>
       </>}
       {t1 && t2 && <>
-        {!confirmed ? (
-          <div>
-            <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Score — tap each team's games{match.round === "final" ? " (up to 9)" : ""}</label>
-            <div className="space-y-2.5">
-              {[[t1, s1, setS1, "team1"], [t2, s2, setS2, "team2"]].map(([tid, sval, setS, side]) => (
-                <div key={side}>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold truncate pr-2" style={{ color: derived?.winner === side ? "#C6FF00" : derived && derived.winner ? "#78716c" : "#e7e5e4" }}>{lbl(tid)}</span>
-                    <span className="font-mono text-2xl font-bold w-7 text-center shrink-0" style={{ color: derived?.winner === side ? "#C6FF00" : "#e7e5e4" }}>{sval ?? "—"}</span>
-                  </div>
-                  <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${maxScore + 1}, minmax(0, 1fr))` }}>
-                    {Array.from({ length: maxScore + 1 }, (_, n) => (
-                      <button key={n} type="button" onClick={() => { setS(n); setConfirmed(false); }}
-                        className="h-10 rounded-lg font-bold text-sm active:scale-90 transition-transform"
-                        style={sval === n
-                          ? { background: "#C6FF00", color: "#fff", border: "1px solid rgba(242,242,242,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
-                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #2A2A2A" }}>{n}</button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-2 text-center text-xs">
-              {derived ? <span className="text-emerald-400">{lbl(derived.winner === "team1" ? t1 : t2)} wins · <span className="text-stone-500">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</span></span>
-                : s1 !== null && s1 === s2 ? <span className="text-cyan-300">Tied — adjust score</span>
-                : <span className="text-stone-600">Enter score above</span>}
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-xl p-4 text-center space-y-1" style={{ background: "rgba(198,255,0,.08)", border: "1px solid rgba(198,255,0,.25)" }}>
-            <div className="font-mono text-3xl font-bold text-stone-100">{s1} — {s2}</div>
-            <div className="text-emerald-400 text-sm font-semibold">{lbl(derived.winner === "team1" ? t1 : t2)} wins</div>
-            <div className="text-stone-500 text-xs">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</div>
-          </div>
-        )}
+        {(() => {
+          const ini = tid => { const t = teams.find(x => x.id === tid); if (!t) return "??";
+            const f = id => (state.players.find(p => p.id === id)?.name || "?")[0];
+            return (f(t.p1Id) || "?") + (f(t.p2Id) || "?"); };
+          return <>
+            <ScorePanel label={lbl(t1)} initials={ini(t1)} val={s1}
+              setVal={n => { setS1(n); setConfirmed(false); }}
+              won={derived?.winner === "team1"} lost={derived && derived.winner !== "team1"} max={maxScore} />
+            <ScorePanel label={lbl(t2)} initials={ini(t2)} val={s2}
+              setVal={n => { setS2(n); setConfirmed(false); }}
+              won={derived?.winner === "team2"} lost={derived && derived.winner !== "team2"} max={maxScore} />
+            <LossReadout derived={derived} />
+            {/* The knockout ladder pays by round, so the preview says which. */}
+            <PointsPreview derived={derived}
+              winPts={match.round === "final" ? 8 : match.round === "sf" ? 3 : 2} />
+          </>;
+        })()}
       </>}
       {isAdmin && match.round === "qf" && <Btn variant="secondary" className="w-full" onClick={() => { onReset(); onClose(); }}>Reset SFs + Final</Btn>}
       <div className="flex gap-2 pt-2">
         {confirmed && <Btn variant="ghost" onClick={() => setConfirmed(false)}>← Edit</Btn>}
         <Btn variant="ghost" onClick={onClose} className={confirmed ? "" : "ml-auto"}>Cancel</Btn>
-        {!confirmed
-          ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm ▶</Btn>
-          : <Btn onClick={() => { onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
-        }
+        <LockButton
+          why={s1 === null || s2 === null ? "PICK BOTH SCORES"
+             : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+             : !canConfirm ? "PICK BOTH TEAMS" : null}
+          onLock={() => {
+            celebrate(lbl(derived.winner === "team1" ? t1 : t2) + " GO THROUGH");
+            onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() });
+            onClose();
+          }} />
       </div>
     </div>
   </Modal>;
@@ -6980,7 +7352,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
   );
 }
 
-function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, update, onClose }) {
+function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, update, onClose, meId }) {
   const player = state.players.find(p => p.id === playerId);
   const entry = leaderboard.find(l => l.player.id === playerId);
   if (!player || !entry) return null;
@@ -7162,6 +7534,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           </Card>
         );
       })()}
+      <PlayerExtras player={entry.player} state={state} leaderboard={leaderboard} meId={meId} />
       <Btn variant="secondary" className="w-full" onClick={() => {
         const txt = generatePlayerCard(entry, state);
         navigator.clipboard?.writeText(txt);
@@ -9264,6 +9637,35 @@ body::before, body::after { background-image: none !important; }
 }
 
 @keyframes bo-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+/* ── Result-locked celebration ── */
+.bo-ring{position:absolute;width:160px;height:160px;border:3px solid #C6FF00;border-radius:50%;
+  opacity:0;animation:bo-ring 1.6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes bo-ring{0%{transform:scale(.3);opacity:.8}100%{transform:scale(4.2);opacity:0}}
+.bo-pop{position:relative;padding:18px 26px;background:#C6FF00;color:#050505;
+  font-family:'Archivo',sans-serif;font-style:italic;
+  font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;line-height:1;
+  animation:bo-pop 1.6s cubic-bezier(.34,1.56,.64,1) forwards;text-align:center}
+@keyframes bo-pop{0%{transform:scale(.7);opacity:0}18%{transform:scale(1);opacity:1}
+  72%{transform:scale(1);opacity:1}100%{transform:scale(.96);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bo-ring,.bo-pop{animation:none;display:none}}
+
+/* ── Leader sheen: a slow diagonal pass, mostly paused ── */
+.bo-sheen{position:relative;overflow:hidden}
+.bo-sheen::after{content:"";position:absolute;top:0;bottom:0;width:40%;
+  background:linear-gradient(100deg,transparent,rgba(198,255,0,.14),transparent);
+  transform:translateX(-160%);animation:bo-sheen 6s ease-in-out infinite}
+@keyframes bo-sheen{0%{transform:translateX(-160%)}28%{transform:translateX(320%)}
+  100%{transform:translateX(320%)}}
+
+/* ── Rows arrive from below, staggered ── */
+.bo-rowin{animation:bo-rowin 420ms cubic-bezier(.34,1.4,.64,1) both}
+@keyframes bo-rowin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .bo-sheen::after{animation:none;display:none}
+  .bo-rowin{animation:none}
+}
 
 </style>
 </body>

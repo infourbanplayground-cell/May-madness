@@ -162,8 +162,25 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   organiser has created the nine sessions, so it works during signup.
 - MVP voting is open to players whenever voting is open (Vol.7 showed it to
   scorers only, so the "player vote" was whoever held the scoring phone).
-- Still carried from Vol.7 and NOT rebuilt: the session-detail screens (teams,
-  groups, KO bracket, score sheet, photo wall) are Vol.7's, reskinned.
+- **Court-side score sheet** is Vol.8's: one `ScorePanel` (4-wide pad of 64px
+  buttons) shared by the group editor and the knockout editor, a `LossReadout`,
+  a points preview and a `LockButton` that says why it is disabled. The loss type
+  stays DERIVED from the score — the handover draws it as three buttons the
+  scorer picks, but buttons that can contradict the score would be a scoring
+  change, so the three are a read-out with the derived one lit. The group pad
+  also goes to 7 now; a 7-5 could not be recorded at all before.
+- Locking a result fires `celebrate()` (two rings + the winning team's name).
+- Header carries the Blackout mark, wordmark and VOL.8, and a SYNCED pill that
+  anyone can tap to refresh (it used to be scorer-only).
+- A finished night's row in SESSIONS opens its **recap**, not the scorer's view
+  of a night nobody is scoring; the session screen is one tap further in.
+- Player card gains where-the-points-came-from, the last five nights as tiles
+  that open each receipt, and head-to-head against you.
+- Roster cards carry a photo slot, a streak chip and form bars.
+- Worth watching runs four axes, de-duplicated against the podium.
+- Still carried from Vol.7 and NOT rebuilt: the KO bracket layout, the teams and
+  groups screens, and the photo wall. **Court assignment was never built** — the
+  owner said it is not needed.
 - Known: the RANK screen gates every tab, including ALL-TIME, behind "first match
   played", so the carried all-time ladder is invisible until the first Vol.8
   result is entered.

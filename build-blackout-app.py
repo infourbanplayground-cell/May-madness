@@ -256,6 +256,40 @@ def plain(s, table, report, label, required=True):
     return s
 
 
+def replace_fn(s, name, new_src, report, label):
+    """Swap a whole top-level function for a new one, matched by brace depth.
+
+    Used where a component is being rewritten rather than tweaked -- an anchored
+    string replace on a 90-line JSX body is a rename away from silently not
+    matching, and this fails loudly on the signature instead.
+    """
+    i = s.find(f"function {name}(")
+    assert i >= 0, f"{label}: function {name} not found"
+    # Walk the PARAMETER list to its closing paren first. A destructured
+    # signature -- function Foo({ a, b }) -- contains braces, and starting the
+    # depth count at the first "{" after the name closes on the parameters,
+    # cutting the function in half and leaving ") {" dangling in the output.
+    pd, k = 0, s.index("(", i)
+    for k in range(k, len(s)):
+        if s[k] == "(":
+            pd += 1
+        elif s[k] == ")":
+            pd -= 1
+            if pd == 0:
+                break
+    d, j = 0, s.index("{", k)
+    for k in range(j, len(s)):
+        if s[k] == "{":
+            d += 1
+        elif s[k] == "}":
+            d -= 1
+            if d == 0:
+                j = k + 1
+                break
+    report(f"{label}: {name} replaced ({j - i} -> {len(new_src)} bytes)")
+    return s[:i] + new_src + s[j:]
+
+
 def add_screens(s, report):
     """Splice in the Vol.8 screens: per-event engine, ME, receipts, badges, roster.
 
@@ -279,7 +313,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CHROME + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -295,17 +329,40 @@ def add_screens(s, report):
                            ("dash sig", SCREENS.DASH_SIG_OLD, SCREENS.DASH_SIG_NEW),
                            ("countdown", SCREENS.DASH_ANCHOR_OLD, SCREENS.DASH_ANCHOR_NEW),
                            ("recap+prizes", SCREENS.DASH_TAIL_OLD, SCREENS.DASH_TAIL_NEW),
-                           ("mvp open", SCREENS.MVP_OLD, SCREENS.MVP_NEW)):
+                           ("mvp open", SCREENS.MVP_OLD, SCREENS.MVP_NEW),
+                           ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
+                           ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
+                           ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),
+                           ("sync pill", SCREENS.SYNCPILL_OLD, SCREENS.SYNCPILL_NEW),
+                           ("sessions sig", SCREENS.SESSVIEW_OLD, SCREENS.SESSVIEW_NEW),
+                           ("sessions row", SCREENS.SESSROW_OLD, SCREENS.SESSROW_NEW),
+                           ("sessions recap", SCREENS.SESSVIEW_TAIL_OLD, SCREENS.SESSVIEW_TAIL_NEW),
+                           ("sessions prop", SCREENS.SESSVIEW_PROP_OLD, SCREENS.SESSVIEW_PROP_NEW),
+                           ("player sig", SCREENS.PLAYEREXTRA_OLD, SCREENS.PLAYEREXTRA_NEW),
+                           ("player prop", SCREENS.PLAYERPROP_OLD, SCREENS.PLAYERPROP_NEW),
+                           ("player extras", SCREENS.PLAYERTAIL_OLD, SCREENS.PLAYERTAIL_NEW),
+                           ("spotlight calc", SCREENS.SPOT_CALC_OLD, SCREENS.SPOT_CALC_NEW),
+                           ("count-up (me)", SCREENS.COUNT_ME_OLD, SCREENS.COUNT_ME_NEW),
+                           ):
         assert old in s, f"{name}: anchor no longer matches"
         s = s.replace(old, new, 1)
+    # The worth-watching block is replaced by span, not by anchored text: it is
+    # 20 lines of JSX and an anchor on its opening lines closes the fragment
+    # early, leaving the old tiles dangling after it ("Adjacent JSX elements").
+    a = s.index("      {/* \u2500\u2500 WORTH WATCHING \u2500\u2500 */}")
+    b = s.index("\n      </>}", a) + len("\n      </>}")
+    report(f"spotlight tiles: replaced {b - a} bytes of the two-tile block")
+    s = s[:a] + SCREENS.SPOT_NEW + s[b:]
+
     report("nav: 5 tabs (HOME / SESSIONS / RANK / ME / PLAYERS)")
+    s = replace_fn(s, "MatchEditorModal", SCREENS.SCORESHEET, report, "score sheet")
     return s
 
 
 def apply_skin(s, report):
     css = open(SKIN).read()
     block = ("\n<style>\n/* ══ BLACKOUT SERIES · VOL.8 SKIN — appended last ══ */\n"
-             + css + SCREENS.SHIMMER + "\n</style>\n")
+             + css + SCREENS.SHIMMER + SCREENS.CELEBRATE_CSS + SCREENS.POLISH_CSS + "\n</style>\n")
     i = s.rfind("</body>")
     assert i > 0, "no </body> to append the skin before"
     report(f"skin: {len(css)} bytes appended as the last style block")

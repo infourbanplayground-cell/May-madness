@@ -655,7 +655,10 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   const ranked = started ? leaderboard
                          : [...leaderboard].sort((a, b) => b.lifetimePts - a.lifetimePts);
   const rows = ranked
-    .map((e, i) => ({ ...e, rank: i + 1 }))
+    .map((e, i) => {
+      const form = recentForm(e.player.id, state.sessions || []);
+      return { ...e, rank: i + 1, form, streak: currentStreak(form) };
+    })
     .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()));
   return (
     <div>
@@ -684,8 +687,26 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
                 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 8,
                   letterSpacing: ".2em", color: "#FF2E88" }}>YOU</span>
               )}
+              {e.streak >= 3 && (
+                <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace",
+                  fontWeight: 700, fontSize: 8, letterSpacing: ".14em", color: "#FF2E88",
+                  border: "1px solid rgba(255,46,136,.5)", padding: "1px 4px" }}>W{e.streak}</span>
+              )}
             </div>
-            <div style={{ fontWeight: 800, fontSize: 14, marginTop: 6, whiteSpace: "nowrap",
+            {/* A roster of 314 names needs faces. The photo slot keeps its
+                height whether or not there is one, so the grid stays even. */}
+            <div style={{ width: "100%", height: 120, marginTop: 8, background: "#111",
+              border: "1px solid rgba(255,255,255,.05)", overflow: "hidden",
+              display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {e.player.photoUrl
+                ? <img src={e.player.photoUrl} alt="" style={{ width: "100%", height: "100%",
+                    objectFit: "cover", objectPosition: "center 28%" }} />
+                : <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+                    fontSize: 26, color: "#2A2A2A" }}>
+                    {(e.player.name || "?").split(" ").map(w => w[0]).join("").slice(0,2).toUpperCase()}
+                  </span>}
+            </div>
+            <div style={{ fontWeight: 800, fontSize: 14, marginTop: 8, whiteSpace: "nowrap",
                           overflow: "hidden", textOverflow: "ellipsis" }}>{e.player.name}</div>
             <div style={{ fontSize: 11, color: "#9A9A9A", marginTop: 2 }}>
               {started
@@ -697,6 +718,14 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
                           color: (started ? e.totalPts : e.lifetimePts) > 0 ? "#C6FF00" : "#6E6E6E" }}>
               {started ? e.totalPts : e.lifetimePts}
             </div>
+            {e.form && e.form.length > 0 && (
+              <div style={{ display: "flex", gap: 2, marginTop: 7 }}>
+                {e.form.slice(-8).map((w, i) => (
+                  <span key={i} style={{ flex: 1, height: 4,
+                    background: w ? "#C6FF00" : "rgba(110,110,110,.3)" }} />
+                ))}
+              </div>
+            )}
           </button>
         ))}
       </div>
@@ -1276,7 +1305,7 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 }
 
 // ══ VOL.8 · NIGHT RECAP ═══════════════════════════════════════════════════
-function RecapSheet({ session, state, leaderboard, meId, onClose }) {
+function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession }) {
   if (!session) return null;
   const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
   const teamName = tid => {
@@ -1366,7 +1395,13 @@ function RecapSheet({ session, state, leaderboard, meId, onClose }) {
           </div>
         )}
 
-        <button onClick={onClose} style={{ width: "100%", marginTop: 20, padding: "14px",
+        {onOpenSession && (
+          <button onClick={onOpenSession} style={{ width: "100%", marginTop: 16, padding: "14px",
+            background: "transparent", border: "1px solid rgba(198,255,0,.4)", color: "#C6FF00",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+            letterSpacing: ".24em", cursor: "pointer" }}>OPEN THE NIGHT &#9654;</button>
+        )}
+        <button onClick={onClose} style={{ width: "100%", marginTop: 10, padding: "14px",
           background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
@@ -1500,3 +1535,682 @@ MVP_NEW = """                count:session.mvpVotingOpen && votes ? votes : null
 SHIMMER = """
 @keyframes bo-shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 """
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 5 · SCORE SHEET — the court-side screen
+# ══════════════════════════════════════════════════════════════════════════
+#
+# Replaces MatchEditorModal wholesale. The handoff's spec: a 4x2 pad of 0-7 with
+# 64px buttons, the winning panel tinted, how-the-loss-went, a points preview and
+# a lock button that says why it is disabled.
+#
+# ONE DELIBERATE DEPARTURE. The handoff draws HOW THE LOSS WENT as three buttons
+# the scorer picks. In this app the loss type is DERIVED from the score
+# (scoreToResult: 0-1 blowout, 5 tiebreak, else close), and the handoff is also
+# explicit that the scoring rules must not change. Buttons that let a scorer
+# contradict the score would be a scoring change, so the three are shown as a
+# read-out with the derived one lit: same information, same place on screen, no
+# way to enter a result that disagrees with itself.
+#
+# The pad also goes to 7 rather than 6. Group matches could not record a 7-5 at
+# all before, which is a legal score and the one that makes a tiebreak loss.
+SCORESHEET = r"""function MatchEditorModal({ session, state, group, match, onClose, onSave, onDelete }) {
+  const teams = (session.teams || []).filter(t => t.group === group);
+  const [t1, setT1] = useState(match?.team1Id || "");
+  const [t2, setT2] = useState(match?.team2Id || "");
+  const initS1 = match?.score?.t1 ?? (match?.winner ? (match.winner === "team1" ? 6 : 3) : null);
+  const initS2 = match?.score?.t2 ?? (match?.winner ? (match.winner === "team2" ? 6 : 3) : null);
+  const [s1, setS1] = useState(initS1);
+  const [s2, setS2] = useState(initS2);
+
+  const first = id => (state.players.find(p => p.id === id)?.name || "?").split(" ")[0];
+  const lbl = t => t ? `${first(t.p1Id)} & ${first(t.p2Id)}` : "?";
+  const inits = t => t ? (first(t.p1Id)[0] || "?") + (first(t.p2Id)[0] || "?") : "??";
+
+  const playedPairs = new Set(
+    (session.groupMatches || [])
+      .filter(m => m.winner && (!match || m.id !== match.id))
+      .map(m => [m.team1Id, m.team2Id].sort().join("|"))
+  );
+  const hasPlayed = (id1, id2) => id1 && id2 && playedPairs.has([id1, id2].sort().join("|"));
+
+  const derived = (s1 !== null && s2 !== null && s1 !== s2) ? scoreToResult(s1, s2) : null;
+  const matchNo = (session.groupMatches || []).filter(m => {
+    const t = (session.teams || []).find(x => x.id === m.team1Id);
+    return t && t.group === group;
+  }).findIndex(m => match && m.id === match.id) + 1;
+
+  const why = s1 === null || s2 === null ? "PICK BOTH SCORES"
+            : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+            : !t1 || !t2 ? "PICK BOTH TEAMS" : null;
+
+  const Panel = ({ tid, val, setVal, side }) => {
+    const t = teams.find(x => x.id === tid);
+    const won = derived?.winner === side;
+    const lost = derived && !won;
+    return (
+      <div style={{ padding: 12, marginBottom: 10,
+        background: won ? "rgba(198,255,0,.08)" : "rgba(14,14,14,.94)",
+        border: "1px solid " + (won ? "rgba(198,255,0,.5)" : "rgba(255,255,255,.07)") }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
+            justifyContent: "center", background: won ? "#C6FF00" : "#1A1A1A",
+            color: won ? "#050505" : "#9A9A9A", fontFamily: "'JetBrains Mono',monospace",
+            fontWeight: 700, fontSize: 14 }}>{inits(t)}</div>
+          <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
+            color: lost ? "#9A9A9A" : "#F2F2F2", whiteSpace: "nowrap", overflow: "hidden",
+            textOverflow: "ellipsis" }}>{lbl(t)}</div>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 30,
+            lineHeight: 1, color: won ? "#C6FF00" : lost ? "#9A9A9A" : "#F2F2F2" }}>
+            {val ?? "—"}
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginTop: 10 }}>
+          {[0,1,2,3,4,5,6,7].map(n => (
+            <button key={n} type="button" onClick={() => setVal(n)}
+              style={{ height: 64, cursor: "pointer", border: "1px solid",
+                fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
+                transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
+                ...(val === n
+                  ? { background: "#C6FF00", color: "#050505", borderColor: "#C6FF00" }
+                  : { background: "#111", color: "#CFCFCF", borderColor: "rgba(110,110,110,.3)" }) }}>
+              {n}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return <Modal open={true} onClose={onClose} title={match ? "EDIT MATCH" : `GROUP ${group} MATCH`}>
+    <div>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+        letterSpacing: ".26em", color: "#9A9A9A", marginBottom: 12 }}>
+        GROUP {group}{matchNo > 0 ? " · MATCH " + matchNo : ""}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
+        {[[t1, setT1, t2], [t2, setT2, t1]].map(([val, set, other], i) => (
+          <select key={i} value={val} onChange={e => set(e.target.value)}
+            style={{ width: "100%", padding: "11px 10px", background: "#111", color: "#F2F2F2",
+              border: "1px solid rgba(110,110,110,.3)", fontSize: 13, outline: "none" }}>
+            <option value="">Team {i + 1}</option>
+            {teams.filter(t => t.id !== other && !hasPlayed(t.id, other)).map(t =>
+              <option key={t.id} value={t.id}>{lbl(t)}</option>)}
+          </select>
+        ))}
+      </div>
+
+      {t1 && t2 && <>
+        <Panel tid={t1} val={s1} setVal={setS1} side="team1" />
+        <Panel tid={t2} val={s2} setVal={setS2} side="team2" />
+
+        <LossReadout derived={derived} />
+        <PointsPreview derived={derived} />
+      </>}
+
+      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+        {onDelete && <Btn variant="danger" onClick={() => { onDelete(); onClose(); }}><I.trash size={14} /></Btn>}
+        <Btn variant="ghost" onClick={onClose}>Cancel</Btn>
+        <button type="button" disabled={!!why || saving}
+          onClick={() => {
+            if (why) return;
+            setSaving(true);
+            celebrate(lbl(teams.find(t => t.id === (derived.winner === "team1" ? t1 : t2))) + " TAKE IT");
+            onSave({ team1Id: t1, team2Id: t2, ...derived, resultAt: Date.now() });
+            onClose();
+          }}
+          style={{ flex: 1, padding: "22px 16px", cursor: why ? "default" : "pointer",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+            letterSpacing: ".2em", border: "none",
+            ...(why
+              ? { background: "#1A1A1A", color: "#6E6E6E" }
+              : { background: "#C6FF00", color: "#050505",
+                  boxShadow: "0 0 30px rgba(198,255,0,.32)" }) }}>
+          {why || "LOCK RESULT ▶"}
+        </button>
+      </div>
+    </div>
+  </Modal>;
+}"""
+
+# The celebration the handoff asks for on a locked result: two expanding rings
+# and a word. Kept as a DOM node rather than React state so it can be fired from
+# anywhere a result is saved, including the knockout editor.
+CELEBRATE = r"""
+
+// ══ VOL.8 · CELEBRATION ═══════════════════════════════════════════════════
+// Fired when a result is locked. Deliberately short (1.6s) and non-blocking:
+// on a busy night the scorer is already looking at the next match.
+function celebrate(word) {
+  try {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const host = document.createElement("div");
+    host.style.cssText = "position:fixed;inset:0;z-index:200;pointer-events:none;" +
+      "display:flex;align-items:center;justify-content:center";
+    host.innerHTML =
+      '<div class="bo-ring"></div><div class="bo-ring" style="animation-delay:.18s"></div>' +
+      '<div class="bo-pop"></div>';
+    host.querySelector(".bo-pop").textContent = word || "";
+    document.body.appendChild(host);
+    setTimeout(() => host.remove(), 1700);
+  } catch (e) {}
+}
+"""
+
+CELEBRATE_CSS = """
+/* ── Result-locked celebration ── */
+.bo-ring{position:absolute;width:160px;height:160px;border:3px solid #C6FF00;border-radius:50%;
+  opacity:0;animation:bo-ring 1.6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes bo-ring{0%{transform:scale(.3);opacity:.8}100%{transform:scale(4.2);opacity:0}}
+.bo-pop{position:relative;padding:18px 26px;background:#C6FF00;color:#050505;
+  font-family:'Archivo',sans-serif;font-style:italic;
+  font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;line-height:1;
+  animation:bo-pop 1.6s cubic-bezier(.34,1.56,.64,1) forwards;text-align:center}
+@keyframes bo-pop{0%{transform:scale(.7);opacity:0}18%{transform:scale(1);opacity:1}
+  72%{transform:scale(1);opacity:1}100%{transform:scale(.96);opacity:0}}
+@media (prefers-reduced-motion:reduce){.bo-ring,.bo-pop{animation:none;display:none}}
+"""
+
+SHARED_SCORE = r"""
+
+// ══ VOL.8 · SCORE PANEL ═══════════════════════════════════════════════════
+// One team's side of a score sheet: initials, name, big score, and a 4-wide pad
+// of 64px buttons. Shared by the group editor and the knockout editor, because
+// the alternative is two court-side controls that drift apart.
+function ScorePanel({ label, initials, val, setVal, won, lost, max = 7 }) {
+  return (
+    <div style={{ padding: 12, marginBottom: 10,
+      background: won ? "rgba(198,255,0,.08)" : "rgba(14,14,14,.94)",
+      border: "1px solid " + (won ? "rgba(198,255,0,.5)" : "rgba(255,255,255,.07)") }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
+          justifyContent: "center", background: won ? "#C6FF00" : "#1A1A1A",
+          color: won ? "#050505" : "#9A9A9A", fontFamily: "'JetBrains Mono',monospace",
+          fontWeight: 700, fontSize: 14 }}>{initials}</div>
+        <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
+          color: lost ? "#9A9A9A" : "#F2F2F2", whiteSpace: "nowrap", overflow: "hidden",
+          textOverflow: "ellipsis" }}>{label}</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 30,
+          lineHeight: 1, color: won ? "#C6FF00" : lost ? "#9A9A9A" : "#F2F2F2" }}>
+          {val ?? "—"}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginTop: 10 }}>
+        {Array.from({ length: max + 1 }, (_, n) => (
+          <button key={n} type="button" onClick={() => setVal(n)}
+            style={{ height: 64, cursor: "pointer", border: "1px solid",
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
+              transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
+              ...(val === n
+                ? { background: "#C6FF00", color: "#050505", borderColor: "#C6FF00" }
+                : { background: "#111", color: "#CFCFCF", borderColor: "rgba(110,110,110,.3)" }) }}>
+            {n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// How the loss went: a READ-OUT, not a choice. The type is derived from the
+// score, and the scoring rules are not ours to change.
+function LossReadout({ derived }) {
+  return (
+    <>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".24em", color: "#9A9A9A", margin: "14px 0 8px" }}>HOW THE LOSS WENT</div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+        {LOSS_TYPES.map(lt => {
+          const on = derived?.lossType === lt.id;
+          return (
+            <div key={lt.id} style={{ minHeight: 72, padding: "10px 8px", textAlign: "center",
+              display: "flex", flexDirection: "column", justifyContent: "center",
+              background: on ? "rgba(255,46,136,.1)" : "transparent",
+              border: "1px solid " + (on ? "rgba(255,46,136,.5)" : "rgba(110,110,110,.2)") }}>
+              <div style={{ fontSize: 12, fontWeight: 800,
+                color: on ? "#F2F2F2" : "#6E6E6E" }}>{lt.label.replace(" Loss", "")}</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 18,
+                marginTop: 4, color: on ? "#FF2E88" : "#6E6E6E" }}>+{lt.pts}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: "#6E6E6E", marginTop: 8, lineHeight: 1.4 }}>
+        Set by the score, not picked: 0 or 1 games is a blowout, 5 is a tiebreak,
+        anything else is close.
+      </div>
+    </>
+  );
+}
+
+function PointsPreview({ derived, winPts = 3 }) {
+  if (!derived) return null;
+  const lp = LOSS_TYPES.find(l => l.id === derived.lossType)?.pts ?? 0;
+  return (
+    <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      <div style={{ flex: 1, padding: 12, background: "rgba(198,255,0,.07)",
+        border: "1px solid rgba(198,255,0,.3)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".2em", color: "#9A9A9A" }}>WINNER</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 24,
+          color: "#C6FF00", marginTop: 3 }}>+{winPts}</div>
+      </div>
+      <div style={{ flex: 1, padding: 12, border: "1px solid rgba(110,110,110,.25)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".2em", color: "#9A9A9A" }}>LOSER</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 24,
+          color: lp ? "#F2F2F2" : "#6E6E6E", marginTop: 3 }}>+{lp}</div>
+      </div>
+    </div>
+  );
+}
+
+function LockButton({ why, onLock }) {
+  return (
+    <button type="button" disabled={!!why} onClick={() => { if (!why) onLock(); }}
+      style={{ flex: 1, padding: "22px 16px", cursor: why ? "default" : "pointer",
+        fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
+        letterSpacing: ".2em", border: "none",
+        ...(why ? { background: "#1A1A1A", color: "#6E6E6E" }
+                : { background: "#C6FF00", color: "#050505",
+                    boxShadow: "0 0 30px rgba(198,255,0,.32)" }) }}>
+      {why || "LOCK RESULT ▶"}
+    </button>
+  );
+}
+"""
+
+
+# ── Knockout editor: same panel, same read-out, same lock button ──────────
+# It had its own pad, one row of 8-10 cells across a 430px phone (~40px each).
+# Two court-side controls that look different is how one of them gets fixed and
+# the other does not.
+KO_SCORE_OLD = '''        {!confirmed ? (
+          <div>
+            <label className="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-2 block">Score — tap each team's games{match.round === "final" ? " (up to 9)" : ""}</label>
+            <div className="space-y-2.5">
+              {[[t1, s1, setS1, "team1"], [t2, s2, setS2, "team2"]].map(([tid, sval, setS, side]) => (
+                <div key={side}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold truncate pr-2" style={{ color: derived?.winner === side ? "#C6FF00" : derived && derived.winner ? "#78716c" : "#e7e5e4" }}>{lbl(tid)}</span>
+                    <span className="font-mono text-2xl font-bold w-7 text-center shrink-0" style={{ color: derived?.winner === side ? "#C6FF00" : "#e7e5e4" }}>{sval ?? "—"}</span>
+                  </div>
+                  <div className="grid gap-1" style={{ gridTemplateColumns: `repeat(${maxScore + 1}, minmax(0, 1fr))` }}>
+                    {Array.from({ length: maxScore + 1 }, (_, n) => (
+                      <button key={n} type="button" onClick={() => { setS(n); setConfirmed(false); }}
+                        className="h-10 rounded-lg font-bold text-sm active:scale-90 transition-transform"
+                        style={sval === n
+                          ? { background: "#C6FF00", color: "#fff", border: "1px solid rgba(242,242,242,.14)", boxShadow: "0 2px 0 rgba(0,0,0,.4)" }
+                          : { background: "#292524", color: "#d6d3d1", border: "1px solid #2A2A2A" }}>{n}</button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 text-center text-xs">
+              {derived ? <span className="text-emerald-400">{lbl(derived.winner === "team1" ? t1 : t2)} wins · <span className="text-stone-500">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</span></span>
+                : s1 !== null && s1 === s2 ? <span className="text-cyan-300">Tied — adjust score</span>
+                : <span className="text-stone-600">Enter score above</span>}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-xl p-4 text-center space-y-1" style={{ background: "rgba(198,255,0,.08)", border: "1px solid rgba(198,255,0,.25)" }}>
+            <div className="font-mono text-3xl font-bold text-stone-100">{s1} — {s2}</div>
+            <div className="text-emerald-400 text-sm font-semibold">{lbl(derived.winner === "team1" ? t1 : t2)} wins</div>
+            <div className="text-stone-500 text-xs">{LOSS_TYPES.find(lt => lt.id === derived.lossType)?.label}</div>
+          </div>
+        )}
+      </>}'''
+KO_SCORE_NEW = '''        {(() => {
+          const ini = tid => { const t = teams.find(x => x.id === tid); if (!t) return "??";
+            const f = id => (state.players.find(p => p.id === id)?.name || "?")[0];
+            return (f(t.p1Id) || "?") + (f(t.p2Id) || "?"); };
+          return <>
+            <ScorePanel label={lbl(t1)} initials={ini(t1)} val={s1}
+              setVal={n => { setS1(n); setConfirmed(false); }}
+              won={derived?.winner === "team1"} lost={derived && derived.winner !== "team1"} max={maxScore} />
+            <ScorePanel label={lbl(t2)} initials={ini(t2)} val={s2}
+              setVal={n => { setS2(n); setConfirmed(false); }}
+              won={derived?.winner === "team2"} lost={derived && derived.winner !== "team2"} max={maxScore} />
+            <LossReadout derived={derived} />
+            {/* The knockout ladder pays by round, so the preview says which. */}
+            <PointsPreview derived={derived}
+              winPts={match.round === "final" ? 8 : match.round === "sf" ? 3 : 2} />
+          </>;
+        })()}
+      </>}'''
+
+KO_BTN_OLD = '''        {!confirmed
+          ? <Btn onClick={() => canConfirm && setConfirmed(true)} disabled={!canConfirm}>Confirm ▶</Btn>
+          : <Btn onClick={() => { onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() }); onClose(); }}>Save Result ✓</Btn>
+        }'''
+KO_BTN_NEW = '''        <LockButton
+          why={s1 === null || s2 === null ? "PICK BOTH SCORES"
+             : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+             : !canConfirm ? "PICK BOTH TEAMS" : null}
+          onLock={() => {
+            celebrate(lbl(derived.winner === "team1" ? t1 : t2) + " GO THROUGH");
+            onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() });
+            onClose();
+          }} />'''
+
+
+# ── Header: the handoff's lockup, and a sync pill anyone can tap ──────────
+HEADER_OLD = '''          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={secretTap} className="shrink-0" aria-label="Blackout Series" style={{lineHeight:0}}>
+              <img src={UP_LOGO_FULL} style={{height:64,width:"auto",display:"block",margin:"-8px 0",filter:"drop-shadow(0 0 10px rgba(198,255,0,.5)) drop-shadow(0 0 14px rgba(198,255,0,.4))"}} alt="Blackout Series" />
+            </button>
+          </div>'''
+HEADER_NEW = '''          <div className="flex items-center gap-3 min-w-0">
+            <button onClick={secretTap} className="shrink-0" aria-label="Urban Playground" style={{lineHeight:0}}>
+              <img src={UP_LOGO_FULL} style={{height:44,width:"auto",display:"block",margin:"-4px 0",filter:"drop-shadow(0 0 10px rgba(198,255,0,.4))"}} alt="Urban Playground" />
+            </button>
+            {/* The chrome carried no Blackout branding at all -- a player opened
+                the app and the only mark on screen was the club's. */}
+            <span style={{width:1,height:28,background:"rgba(255,255,255,.14)",flexShrink:0}} />
+            <span style={{width:30,height:30,flexShrink:0,position:"relative",background:"#C6FF00"}}>
+              <span style={{position:"absolute",left:0,right:0,top:14,height:1,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:18,height:2,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:22,height:3,background:"#050505"}} />
+              <span style={{position:"absolute",left:0,right:0,top:27,height:3,background:"#050505"}} />
+              <span style={{position:"absolute",right:4,top:4,width:4,height:4,background:"#FF2E88"}} />
+            </span>
+            <div style={{minWidth:0}}>
+              <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+                fontSize:20,lineHeight:1,whiteSpace:"nowrap"}}>BLACKOUT SERIES</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+                letterSpacing:".2em",color:"#6E6E6E",marginTop:3,whiteSpace:"nowrap"}}>
+                URBAN SOCIAL SERIES &middot; VOL.8</div>
+            </div>
+          </div>'''
+
+# The sync pill was gated behind canScore, so a player had no way to ask for
+# fresh data except pulling down -- and no way to see whether it was fresh.
+SYNCPILL_OLD = '''            {canScore && <SyncIndicator status={sync} errMsg={syncErr} />}'''
+SYNCPILL_NEW = '''            {canScore
+              ? <SyncIndicator status={sync} errMsg={syncErr} />
+              : <button onClick={refreshNow} aria-label="Refresh"
+                  style={{display:"flex",alignItems:"center",gap:6,padding:"5px 9px",cursor:"pointer",
+                    background:"transparent",border:"1px solid rgba(110,110,110,.3)"}}>
+                  <span style={{width:6,height:6,borderRadius:"50%",
+                    background: refreshing ? "#FF2E88" : "#C6FF00"}} />
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+                    letterSpacing:".18em",color:"#9A9A9A"}}>
+                    {refreshing ? "SYNCING" : "SYNCED"}</span>
+                </button>}'''
+
+# ── Sessions list: a finished row should open its recap ───────────────────
+SESSROW_OLD = '''               onClick={() => setOpenSessionId(s.id)}'''
+SESSROW_NEW = '''               onClick={() => s.completed ? setRecapSession(s) : setOpenSessionId(s.id)}'''
+
+SESSVIEW_OLD = '''function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab }) {'''
+SESSVIEW_NEW = '''function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab, meId }) {
+  // A finished night's row used to open the live session screen, which is the
+  // scorer's view of a night nobody is scoring any more. It opens the recap
+  // instead; the session screen is still one tap away from inside it.
+  const [recapSession, setRecapSession] = React.useState(null);'''
+
+SESSVIEW_TAIL_OLD = '''      {show && <CreateSessionModal'''
+SESSVIEW_TAIL_NEW = '''      <RecapSheet session={recapSession} state={state} leaderboard={leaderboard} meId={meId}
+        onClose={() => setRecapSession(null)}
+        onOpenSession={() => { const s = recapSession; setRecapSession(null); setOpenSessionId(s.id); }} />
+      {show && <CreateSessionModal'''
+
+SESSVIEW_PROP_OLD = '''{tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} />}'''
+SESSVIEW_PROP_NEW = '''{tab === "sessions" && <SessionsView state={state} update={update} setOpenSessionId={setOpenSessionId} isAdmin={isAdmin} leaderboard={leaderboard} setTab={setTab} meId={meId} />}'''
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 6 · PLAYER CARD EXTRAS, RICHER ROSTER, FOUR SPOTLIGHT AXES
+# ══════════════════════════════════════════════════════════════════════════
+EXTRAS = r"""
+
+// ══ VOL.8 · PLAYER CARD EXTRAS ════════════════════════════════════════════
+// The card showed a points breakdown and stopped there. The handoff asks for the
+// three things that make it worth opening someone else's: where their points
+// came from NIGHT BY NIGHT (each tapping through to that night's receipt),
+// their badges, and the head-to-head against you.
+function PlayerExtras({ player, state, leaderboard, meId }) {
+  const [receipt, setReceipt] = React.useState(null);
+  const players = state.players || [];
+  const sessions = state.sessions || [];
+  const nameOf = React.useCallback((s, teamId, pidDirect) => {
+    if (pidDirect) return (players.find(p => p.id === pidDirect) || {}).name || "?";
+    const t = (s.teams || []).find(x => x.id === teamId);
+    if (!t) return "?";
+    const n = id => ((players.find(p => p.id === id) || {}).name || "?").split(" ")[0];
+    return n(t.p1Id) + " & " + n(t.p2Id);
+  }, [players]);
+
+  const data = calcPlayerNights(player.id, sessions, nameOf);
+  const ranks = React.useMemo(() => rankByNight(players, sessions), [players, sessions]);
+  const best = Math.max(1, ...data.nights.map(n => n.nightTotal));
+
+  // Head to head: every decided match where the two were on opposite teams.
+  const h2h = React.useMemo(() => {
+    if (!meId || meId === player.id) return null;
+    let mine = 0, theirs = 0, last = null;
+    sessions.forEach((s, idx) => {
+      const a = getPlayerTeam(s, meId), b = getPlayerTeam(s, player.id);
+      if (!a || !b || a.id === b.id) return;
+      const all = (s.groupMatches || []).concat(s.bracket?.qf || [], s.bracket?.sf || [],
+                                                s.bracket?.final ? [s.bracket.final] : []);
+      all.forEach(m => {
+        if (!m || !m.winner) return;
+        const ids = [m.team1Id, m.team2Id];
+        if (!ids.includes(a.id) || !ids.includes(b.id)) return;
+        const iWon = teamWon(m, a.id);
+        if (iWon) mine++; else theirs++;
+        last = { idx, iWon, score: m.score, date: s.date };
+      });
+    });
+    return mine + theirs ? { mine, theirs, last } : null;
+  }, [sessions, meId, player.id]);
+
+  if (data.nights.length === 0 && !h2h) return null;
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      {data.nights.length > 0 && <>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".26em", color: "#9A9A9A" }}>WHERE THE POINTS CAME FROM</div>
+        <StackedBar seg={data.seg} total={data.total} />
+        <SegLegend seg={data.seg} />
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 6, marginTop: 16 }}>
+          {data.nights.slice(-5).map(n => (
+            <button key={n.id} onClick={() => setReceipt(n)}
+              style={{ padding: "10px 4px", cursor: "pointer", color: "inherit", textAlign: "center",
+                background: "rgba(14,14,14,.94)", border: "1px solid rgba(198,255,0,.25)" }}>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+                color: "#6E6E6E" }}>S{n.no}</div>
+              <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 17,
+                color: "#C6FF00", marginTop: 3 }}>+{n.nightTotal}</div>
+              <div style={{ height: 3, background: "rgba(110,110,110,.25)", marginTop: 6 }}>
+                <div style={{ height: "100%", background: "#C6FF00",
+                  width: Math.round(n.nightTotal / best * 100) + "%" }} />
+              </div>
+            </button>
+          ))}
+        </div>
+      </>}
+
+      {h2h && (
+        <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 20 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+            letterSpacing: ".24em", color: "#FF2E88" }}>HEAD TO HEAD &middot; YOU</div>
+          <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+            fontSize: 26, marginTop: 6 }}>
+            YOU {h2h.mine} &ndash; {h2h.theirs} {(player.name || "").split(" ")[0].toUpperCase()}
+          </div>
+          <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 4 }}>
+            {h2h.mine + h2h.theirs} meeting{h2h.mine + h2h.theirs === 1 ? "" : "s"}
+            {h2h.last && h2h.last.score
+              ? ` · last: ${h2h.last.iWon ? "you won" : "they won"} `
+                + `${h2h.last.score.t1}–${h2h.last.score.t2}`
+              : ""}
+          </div>
+        </div>
+      )}
+
+      <ReceiptSheet night={receipt} player={player}
+        rankAfter={receipt ? (ranks[receipt.idx] || {})[player.id] : null}
+        onClose={() => setReceipt(null)} />
+    </div>
+  );
+}
+"""
+
+# PlayerDetail: hang the extras off the end of its body, before the closing div.
+PLAYEREXTRA_OLD = '''function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, update, onClose }) {'''
+PLAYEREXTRA_NEW = '''function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, update, onClose, meId }) {'''
+
+PLAYERPROP_OLD = '''<PlayerDetail playerId={openPlayerId}'''
+PLAYERPROP_NEW = '''<PlayerDetail meId={meId} playerId={openPlayerId}'''
+
+PLAYERTAIL_OLD = '''      <Btn variant="secondary" className="w-full" onClick={() => {
+        const txt = generatePlayerCard(entry, state);
+        navigator.clipboard?.writeText(txt);
+        alert("Player card copied — paste it in WhatsApp.");
+      }}>Copy my player card</Btn>'''
+PLAYERTAIL_NEW = '''      <PlayerExtras player={entry.player} state={state} leaderboard={leaderboard} meId={meId} />
+      <Btn variant="secondary" className="w-full" onClick={() => {
+        const txt = generatePlayerCard(entry, state);
+        navigator.clipboard?.writeText(txt);
+        alert("Player card copied — paste it in WhatsApp.");
+      }}>Copy my player card</Btn>'''
+
+
+# ── Worth watching: four axes, de-duplicated ─────────────────────────────
+# Vol.7 showed two, and both could land on the same person, which wastes half
+# the row. The handoff asks for four chosen from outside the top three, each
+# player used once.
+SPOT_OLD = '''      {/* ── WORTH WATCHING ── */}
+      {(climber || bestRate) && <>
+        <div className="sg-kicker" style={{marginTop:20}}>Worth watching</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:10}}>'''
+SPOT_NEW = '''      {/* ── WORTH WATCHING (Vol.8: four axes, de-duplicated) ── */}
+      {spotlights.length > 0 && <>
+        <div className="sg-kicker" style={{marginTop:20}}>Worth watching</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:10}}>
+          {spotlights.map(sp => (
+            <div key={sp.key} onClick={() => setTab("leaderboard")} className="sg-card"
+                 style={{cursor:"pointer",padding:14,
+                   backgroundImage:`linear-gradient(180deg,${sp.colour},rgba(110,110,110,.05))`,
+                   backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,
+                   letterSpacing:".2em",color:sp.colour}}>{sp.label}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+                   fontVariationSettings:"'wdth' 118,'wght' 900",fontSize:34,lineHeight:1,
+                   color:sp.colour,marginTop:7}}>{sp.value}</div>
+              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
+                   color:"#F2F2F2",marginTop:8,whiteSpace:"nowrap",overflow:"hidden",
+                   textOverflow:"ellipsis"}}>{sp.name}</div>
+              <div style={{fontSize:12,lineHeight:1.4,color:"#CFCFCF",marginTop:5}}>{sp.note}</div>
+            </div>
+          ))}
+        </div>
+      </>}'''
+
+# Computed right after climber/bestRate so both can be reused rather than
+# recalculated. Anchored on the line that closes bestRate.
+SPOT_CALC_OLD = '''    return pool2.sort((a, b) => b.en.winRate - a.en.winRate || b.e.totalPts - a.e.totalPts)[0];
+  })();'''
+SPOT_CALC_NEW = '''    return pool2.sort((a, b) => b.en.winRate - a.en.winRate || b.e.totalPts - a.e.totalPts)[0];
+  })();
+
+  // Vol.8: four spotlight axes instead of two, each player used once. Two tiles
+  // that land on the same person waste half the row, which is what happened
+  // whenever the biggest climber also had the best win rate.
+  const spotlights = (() => {
+    const out = [], used = new Set(podium.map(e => e.player.id));
+    const push = (id, sp) => { if (id && !used.has(id)) { used.add(id); out.push(sp); } };
+    const nightsDone = sessions.filter(s => s.completed).length;
+
+    if (climber) push(climber.e.player.id, { key: "climb", colour: "#C6FF00",
+      label: "BIGGEST CLIMBER", value: "\u25b2" + climber.n, name: climber.e.player.name,
+      note: "places gained since last session" });
+
+    if (bestRate) push(bestRate.e.player.id, { key: "rate", colour: "#FF2E88",
+      label: "BEST WIN RATE", value: bestRate.en.winRate + "%", name: bestRate.e.player.name,
+      note: "from " + bestRate.en.decided + " matches" });
+
+    // Never missed a night -- only meaningful once there are nights to miss.
+    if (nightsDone >= 2) {
+      const iron = played.find(e => !used.has(e.player.id) && e.stats.sessionsPlayed >= nightsDone);
+      if (iron) push(iron.player.id, { key: "iron", colour: "#C6FF00",
+        label: "NEVER MISSED A NIGHT", value: nightsDone + "/" + nightsDone,
+        name: iron.player.name, note: "every night so far" });
+    }
+
+    const titled = played.filter(e => !used.has(e.player.id) && e.stats.finalsWon > 0)
+      .sort((a, b) => b.stats.finalsWon - a.stats.finalsWon)[0];
+    if (titled) push(titled.player.id, { key: "titles", colour: "#FF2E88",
+      label: "SESSION TITLES", value: String(titled.stats.finalsWon), name: titled.player.name,
+      note: titled.stats.finalsWon === 1 ? "one night won" : "nights won outright" });
+
+    return out.slice(0, 4);
+  })();'''
+
+
+
+# ── Motion polish ────────────────────────────────────────────────────────
+POLISH_CSS = """
+/* ── Leader sheen: a slow diagonal pass, mostly paused ── */
+.bo-sheen{position:relative;overflow:hidden}
+.bo-sheen::after{content:"";position:absolute;top:0;bottom:0;width:40%;
+  background:linear-gradient(100deg,transparent,rgba(198,255,0,.14),transparent);
+  transform:translateX(-160%);animation:bo-sheen 6s ease-in-out infinite}
+@keyframes bo-sheen{0%{transform:translateX(-160%)}28%{transform:translateX(320%)}
+  100%{transform:translateX(320%)}}
+
+/* ── Rows arrive from below, staggered ── */
+.bo-rowin{animation:bo-rowin 420ms cubic-bezier(.34,1.4,.64,1) both}
+@keyframes bo-rowin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .bo-sheen::after{animation:none;display:none}
+  .bo-rowin{animation:none}
+}
+"""
+
+COUNTUP = r"""
+
+// ══ VOL.8 · COUNT-UP ══════════════════════════════════════════════════════
+// Headline numbers ease to their value instead of snapping. Stepped rather than
+// time-based so it lands exactly on the target: max(1, ceil(remaining * .16))
+// per frame, which is the handoff's rule.
+function useCountUp(target) {
+  const [n, setN] = React.useState(0);
+  const raf = React.useRef();
+  React.useEffect(() => {
+    const t = Number(target) || 0;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setN(t); return;
+    }
+    let cur = 0;
+    const tick = () => {
+      const diff = t - cur;
+      if (Math.abs(diff) <= 1) { setN(t); return; }
+      cur += Math.sign(diff) * Math.max(1, Math.ceil(Math.abs(diff) * 0.16));
+      setN(cur);
+      raf.current = requestAnimationFrame(tick);
+    };
+    raf.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target]);
+  return n;
+}
+function CountUp({ to, prefix = "", suffix = "" }) {
+  const n = useCountUp(to);
+  return <>{prefix}{n}{suffix}</>;
+}
+"""
+
+# ME's headline number is the one people stare at.
+COUNT_ME_OLD = '''            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 62,
+                          lineHeight: 1, color: "#C6FF00" }}>{data.total}</div>'''
+COUNT_ME_NEW = '''            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 62,
+                          lineHeight: 1, color: "#C6FF00" }}><CountUp to={data.total} /></div>'''
