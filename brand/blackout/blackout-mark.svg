@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Blackout Series mark: a lime square going dark from the top down.
+       The bars thicken as they descend — the lights going out — and the
+       magenta square is the standby light still on in the corner. -->
+  <rect width="64" height="64" fill="#C6FF00"/>
+  <rect y="30" width="64" height="2" fill="#050505"/>
+  <rect y="38" width="64" height="4" fill="#050505"/>
+  <rect y="47" width="64" height="6" fill="#050505"/>
+  <rect y="57" width="64" height="7" fill="#050505"/>
+  <rect x="48" y="8" width="8" height="8" fill="#FF2E88"/>
+</svg>

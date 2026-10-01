@@ -90,7 +90,60 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
-### September Surge (Vol.7 — LIVE APP)
+### Blackout Series (Vol.8 — LIVE APP)
+- URL: https://blackout.urbanpadel.om — October 2026, nine nights
+- Local copy: `blackout-index.html`, **generated** by `build-blackout-app.py`
+  from `september-surge-index.html`. Do not hand-edit it: fix Vol.7 and re-run
+  the script, which is how a volume inherits the previous one's markup
+  (July Heat → August Attack → September Surge → Blackout). Every rename is
+  asserted, so a string that stops matching fails the build rather than shipping
+  a half-rebranded app.
+- Season numbers live in **`blackout-season.json`** — the app, the brand art and
+  the signup posts all read it, so none of them can advertise a figure the others
+  contradict. Nine nights, 2X from session 8, season 75/50/30, 14 OMR vouchers,
+  7 OMR entry, **no finals cut** (session 9 is open like any other night).
+- **Prize pool is derived, not typed: 14 × 2 × 9 + 155 = 407 OMR.** The handover
+  said 402, which does not add up from its own parts. If 402 is the real budget,
+  change a part in the JSON (8 paying nights, or a 70/50/30 split), not the total.
+- API: `/opt/blackout-api/api.js` — systemd: `blackout-api` — port **3009**
+- Tables: **`bo_*`**, created by mirroring Vol.7's schema
+  (`CREATE TABLE ... LIKE ss_* INCLUDING ALL`) and **owned by `urbanpadel_app`**
+  so the API's own migrations can ALTER them without a superuser.
+- Brand art: `brand/blackout/` — lime `#C6FF00` leads, magenta `#FF2E88` accents,
+  true black `#050505`, **radius 0 everywhere** except deliberate circles. The
+  lockup is served WebP-first (50KB vs 492KB as PNG).
+- Build + deploy:
+  ```bash
+  python3 build-blackout-app.py && bash ops/deploy-blackout.sh
+  ```
+- Stand it all up from scratch (idempotent): `ops/create-blackout.sh`
+- Carry-over (all-time only, series starts at zero):
+  ```bash
+  python3 ops/build-carryover.py surge blackout
+  scp ops/sync-surge-to-blackout.js urbanpadel:/opt/blackout-api/
+  ssh urbanpadel 'cd /opt/blackout-api && DRY=1 node sync-surge-to-blackout.js'
+  ssh urbanpadel 'cd /opt/blackout-api && node sync-surge-to-blackout.js'
+  ```
+  Already run: 60 players and 22 photos carried, Vol.8 series table empty.
+- **Not yet built from the handover:** the ME screen, per-night points receipts,
+  badges, the share-to-story cards, pull-to-refresh and skeleton loading, and the
+  5-tab bottom nav (it still has 3). The app shipped is Vol.7's screens in
+  Blackout's language, which is what gets the season running; those additions are
+  a separate build.
+- Also worth knowing: the RANK screen gates every tab, including ALL-TIME, behind
+  "first match played", so the carried all-time ladder is invisible until the
+  first Vol.8 result is entered.
+
+### September Surge (Vol.7 — ARCHIVED 1 Oct 2026)
+- **Champion: Hamed Amri, 189. Munther Rahbi 188** — one point, and it came from
+  the streak bonus cap, not from play on the night. See `archive/september-surge/`.
+- Frozen by `ops/archive-surge.sh`: `/state`, `/photos`, `/session-photos` and
+  `/history` are served from static JSON snapshots, every write route returns 403,
+  and `september-surge-api` is **stopped and disabled** — port 3008 is free.
+  surge.urbanpadel.om still renders the full app and the final table.
+- Reverse it by restoring `/etc/nginx/sites-available/surge.urbanpadel.om.bak-*`
+  and `systemctl enable --now september-surge-api`.
+- Details below describe the volume as it ran.
 - URL: https://surge.urbanpadel.om — the full tournament app, at the root
 - Local copy: `september-surge-index.html`, **generated** by
   `build-september-surge-app.py` from `august-attack-index.html`. Do not hand-edit

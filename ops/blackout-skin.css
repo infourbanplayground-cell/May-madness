@@ -1,0 +1,129 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   BLACKOUT SERIES · VOL.8 SKIN
+   ───────────────────────────────────────────────────────────────────────
+   Appended as the LAST style block, after every September Surge override
+   layer. Each volume's skin is an append-only layer on the one before, so
+   nothing above needs deleting.
+
+   It re-points tokens and enforces four rules the colour sweep cannot:
+   square corners, the scanline ground, the lime/magenta division of
+   labour, and the hard-edged glow. It does not touch layout, structure,
+   or scoring.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · TOKENS ────────────────────────────────────────────────────────
+   The sweep already rewrote every literal in the file. These re-point the
+   named tokens so anything added later inherits Blackout rather than a
+   Surge value that happens to still be spelled as a variable.
+   ────────────────────────────────────────────────────────────────────── */
+:root {
+  --ink: #0A0A0A;
+  --ink2: #050505;
+  --orange: #C6FF00;      /* historical name; it is the lead colour */
+  --orange-br: #C6FF00;
+  --red: #C6FF00;
+  --blue: #FF2E88;        /* historical name; it is the accent */
+  --blue-deep: #C4215F;
+  --blue-soft: #FF8FBE;
+  --gold: #FF2E88;
+  --cream: #F2F2F2;
+  --muted: #9A9A9A;
+  --muted2: #6E6E6E;
+  --line: rgba(110,110,110,.16);
+  --line-2: rgba(255,255,255,.07);
+  --surface: rgba(14,14,14,.94);
+  --surface-2: rgba(20,20,20,.96);
+  --hairline: rgba(110,110,110,.16);
+
+  /* Blackout is a square brand. Anything still reading a radius token gets
+     zero, so a component added later cannot reintroduce rounding. */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-lg: 0px;
+}
+
+/* ── 2 · SQUARE ────────────────────────────────────────────────────────
+   Radius 0 everywhere is the defining shape rule. The build zeroes React
+   inline styles (which beat a stylesheet); this covers the CSS rules and
+   Tailwind's rounded-* classes in one sweep.
+
+   The deliberate exceptions are circles, not rounded rectangles: status
+   dots, the live pulse ring, avatars and the progress ring. They are
+   matched by their 50%/9999px radius and left alone.
+   ────────────────────────────────────────────────────────────────────── */
+[class*="rounded"]:not([style*="50%"]) { border-radius: 0 !important; }
+.rounded-full, [style*="border-radius: 50%"], [style*="borderRadius: 50%"] {
+  border-radius: 50% !important;
+}
+button, input, select, textarea, .card, .tile, .panel, .pill, .chip, .sheet {
+  border-radius: 0 !important;
+}
+img.avatar, .avatar img, .dot, .ring { border-radius: 50% !important; }
+
+/* ── 3 · GROUND ───────────────────────────────────────────────────────
+   Surge sat on a deep-current gradient with a faint court motif. Blackout
+   sits on true black with two corner washes and scanlines — the lights
+   going down. The scanline pitch (1px line every 5px) is from the handoff;
+   coarser reads as stripes, finer disappears on a phone.
+   ────────────────────────────────────────────────────────────────────── */
+body {
+  background:
+    radial-gradient(circle at 100% 18%, rgba(255,46,136,.16), transparent 42%),
+    radial-gradient(circle at 0% 92%, rgba(198,255,0,.08), transparent 40%),
+    repeating-linear-gradient(0deg, rgba(198,255,0,.045) 0 1px, transparent 1px 5px),
+    #050505 !important;
+  background-attachment: fixed !important;
+}
+/* The court-line motif is a Surge/Attack idea and is retired here. */
+body::before, body::after { background-image: none !important; }
+
+/* ── 4 · GLOW ─────────────────────────────────────────────────────────
+   Surge's glow was wide and soft (40px + 90px). Blackout's is a single
+   tight halo — a hard light rather than an atmosphere.
+   ────────────────────────────────────────────────────────────────────── */
+.glow, .is-live, .leader, [data-glow] {
+  box-shadow: 0 0 30px rgba(198,255,0,.32) !important;
+}
+
+/* ── 5 · TYPE ─────────────────────────────────────────────────────────
+   Same family and axes as Vol.7 — Archivo, italic, 'wdth' 125 / 'wght' 900
+   — so the display face is unchanged. What differs is the kicker: Blackout
+   letterspaces harder and sets them in the muted grey, not the accent.
+   ────────────────────────────────────────────────────────────────────── */
+.kicker, .eyebrow, [class*="tracking-wide"], [class*="tracking-widest"] {
+  letter-spacing: .28em !important;
+  color: #9A9A9A !important;
+  font-weight: 800 !important;
+}
+/* Numbers that tick must not reflow as they change. */
+.tabular, [class*="font-mono"], .pts, .score { font-variant-numeric: tabular-nums; }
+
+/* ── 6 · DIVISION OF LABOUR ───────────────────────────────────────────
+   Lime is every positive and primary state: qualifying, winning, live, the
+   main action. Magenta is "you", knockout points, prizes and anything
+   urgent. The sweep mapped Surge's cyan and amber onto exactly those two
+   roles, so this layer only has to fix the places Surge used its accent
+   for something Blackout would not.
+   ────────────────────────────────────────────────────────────────────── */
+.you, [data-you], .is-you { color: #FF2E88 !important; border-color: rgba(255,46,136,.4) !important; }
+.qualify, .is-qualified { border-color: rgba(198,255,0,.5) !important; }
+
+/* Text on lime is always near-black — never white, which fails contrast
+   badly on a colour this bright. */
+[style*="background:#C6FF00"], [style*="background: #C6FF00"],
+[style*="backgroundColor:#C6FF00"], .bg-lime, .btn-primary {
+  color: #050505 !important;
+}
+
+/* ── 7 · REDUCED MOTION ───────────────────────────────────────────────
+   The handoff asks for this explicitly, and the scanline ground plus the
+   pulse ring are exactly the kind of thing that makes people ill.
+   ────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

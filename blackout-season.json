@@ -1,0 +1,60 @@
+{
+  "_comment": [
+    "Blackout Series — Vol.8 of the Urban Social Series. October 2026.",
+    "Single source of truth for the season's numbers: the app, the brand art and",
+    "the signup posts all derive from this file so none of them can advertise a",
+    "figure the others contradict.",
+    "",
+    "PRIZE POOL. The handover states 402 OMR alongside 9 nights, a 14 OMR voucher",
+    "per winning player, and season prizes of 75/50/30. Those parts do not add up",
+    "to 402: 14 x 2 players x 9 nights = 252, plus 155 of season prizes, is 407.",
+    "The app derives the pool from the parts rather than carrying a typed-in",
+    "total, so it advertises 407. If 402 is the real budget, change a part here",
+    "(8 paying nights, or a 70/50/30 season split) rather than the total.",
+    "",
+    "NO FINALS CUT. Session 9 is open like any other night; the season top three",
+    "on points take the season prizes. This is a change from Vol.7."
+  ],
+
+  "volume": "VOL.8",
+  "name": "BLACKOUT SERIES",
+  "nameTitle": "Blackout Series",
+  "tagline": "Lights Out.",
+  "taglineHtml": "LIGHTS <b>OUT.</b>",
+  "month": "October",
+  "monthUpper": "OCTOBER",
+  "host": "blackout.urbanpadel.om",
+
+  "sessions": 9,
+  "doubleFromSession": 8,
+  "seasonPrizes": [75, 50, 30],
+  "voucher": 14,
+  "entry": 7,
+  "finalsCut": false,
+
+  "schedule": "Mon & Wed, 5:30 PM, plus a Friday finals night",
+  "previousVolumes": ["June Fury", "July Heat", "August Attack", "September Surge"],
+  "previousVolume": "September Surge",
+  "previousHost": "surge.urbanpadel.om",
+
+  "palette": {
+    "bg": "#050505",
+    "surface1": "rgba(14,14,14,.94)",
+    "surface2": "rgba(20,20,20,.96)",
+    "lime": "#C6FF00",
+    "magenta": "#FF2E88",
+    "ink": "#F2F2F2",
+    "ink2": "#CFCFCF",
+    "muted": "#9A9A9A",
+    "muted2": "#6E6E6E",
+    "line": "rgba(110,110,110,.16)"
+  },
+
+  "server": {
+    "port": 3009,
+    "unit": "blackout-api",
+    "appDir": "/opt/blackout-api",
+    "webRoot": "/var/www/blackout.urbanpadel.om/public",
+    "tablePrefix": "bo_"
+  }
+}
