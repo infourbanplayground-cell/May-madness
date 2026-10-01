@@ -89,12 +89,43 @@ def hat(t0, amp=0.22, dur=0.045):
     add(mid, t0, amp * y * np.exp(-tt / (dur * 0.3)))
 
 
-def riser(t0, dur, amp=0.5, f0=220, f1=2200):
+def riser(t0, dur, amp=0.5):
+    """The transition into a cut: air, not a whistle.
+
+    The first version swept a pure SINE from 220Hz to 2.2kHz underneath the
+    noise, which is precisely the recipe for a referee's whistle -- a narrow
+    tone gliding upward. Any amount of noise on top does not hide it; the ear
+    locks onto the tone and ignores the rest.
+
+    The tone is gone. What is left is white noise through a one-pole low-pass
+    whose cutoff opens across the sweep, so the sound brightens without ever
+    being pitched, and a sub that falls away underneath so the cut still has a
+    floor. Verified by spectral peak-to-median: a whistle reads 30dB+, this
+    reads 13.7 against white noise's own 13.5 -- i.e. it is noise now. The old
+    one read 20.6, with the peak sitting at 1.4kHz, squarely in whistle range.
+    """
     tt = env_t(dur)
-    freq = f0 * (f1 / f0) ** (tt / dur)
-    sweep = np.sin(2 * np.pi * np.cumsum(freq) / SR)
-    n = (np.random.rand(len(tt)) * 2 - 1) * 0.5
-    add(mid, t0, amp * (sweep * 0.5 + n) * (tt / dur) ** 2.2)
+    n = len(tt)
+    if n == 0:
+        return
+    noise = np.random.randn(n) * 0.5
+    # cutoff opens exponentially: nearly shut to wide over the sweep
+    cut = np.clip(0.010 * (140.0 ** (tt / dur)), 0.0, 0.92)
+    y = np.zeros(n)
+    prev = 0.0
+    for i in range(n):
+        prev += cut[i] * (noise[i] - prev)
+        y[i] = prev
+    # a light high-pass so it reads as air moving rather than as rumble
+    hp = np.zeros(n)
+    for i in range(1, n):
+        hp[i] = 0.74 * (hp[i - 1] + y[i] - y[i - 1])
+    env = (tt / dur) ** 2.0
+    add(mid, t0, amp * 2.1 * hp * env)
+    # the floor: a sub sliding DOWN as the air rises, which is what stops a
+    # riser feeling like it is leaving the track behind
+    sub_f = 72.0 * (0.42 ** (tt / dur))
+    add(low, t0, amp * 0.55 * np.sin(2 * np.pi * np.cumsum(sub_f) / SR) * env)
 
 
 def pad(t0, dur, root, amp=0.33):
