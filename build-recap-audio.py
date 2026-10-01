@@ -103,8 +103,9 @@ def riser(t0, dur, amp=0.5):
     whose cutoff opens across the sweep, so the sound brightens without ever
     being pitched, and a sub that falls away underneath so the cut still has a
     floor. Verified by spectral peak-to-median: a whistle reads 30dB+, this
-    reads 13.7 against white noise's own 13.5 -- i.e. it is noise now. The old
-    one read 20.6, with the peak sitting at 1.4kHz, squarely in whistle range.
+    averages 13.8dB over eight seeds against pure white noise's own 11.5 -- near
+    enough noise. The old one averaged 20.8 with its peak sitting at 1.4kHz,
+    squarely in whistle range.
     """
     tt = env_t(dur)
     n = len(tt)
