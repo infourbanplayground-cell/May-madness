@@ -21,6 +21,8 @@ contradict.
 """
 import hashlib, json, os, re, sys
 
+import blackout_screens as SCREENS
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "september-surge-index.html")
 DST = os.path.join(HERE, "blackout-index.html")
@@ -250,6 +252,44 @@ def plain(s, table, report, label, required=True):
     return s
 
 
+def add_screens(s, report):
+    """Splice in the Vol.8 screens: per-event engine, ME, receipts, badges, roster.
+
+    These are the handoff's actual new features. Everything above this point is a
+    reskin of Vol.7; this is the part that answers "how did I get my points",
+    which is the question the volume was commissioned to answer.
+    """
+    # Engine goes directly after calcPlayerStats, which it calls to check itself.
+    i = s.index("function calcPlayerStats(")
+    d, j = 0, s.index("{", i)
+    for k in range(j, len(s)):
+        if s[k] == "{":
+            d += 1
+        elif s[k] == "}":
+            d -= 1
+            if d == 0:
+                j = k + 1
+                break
+    s = s[:j] + SCREENS.ENGINE + s[j:]
+    report(f"engine: +{len(SCREENS.ENGINE)} bytes after calcPlayerStats")
+
+    # Views go immediately before App, so every component they use is defined.
+    a = s.index("function App() {")
+    s = s[:a] + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
+    report(f"views: +{len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes before App "
+           f"(share cards + ME + roster)")
+
+    for name, old, new in (("icon", SCREENS.ICON_OLD, SCREENS.ICON_NEW),
+                           ("nav", SCREENS.NAV_OLD, SCREENS.NAV_NEW),
+                           ("nav grid", SCREENS.NAVGRID_OLD, SCREENS.NAVGRID_NEW),
+                           ("nav button", SCREENS.NAVBTN_OLD, SCREENS.NAVBTN_NEW),
+                           ("routes", SCREENS.ROUTE_OLD, SCREENS.ROUTE_NEW)):
+        assert old in s, f"{name}: anchor no longer matches"
+        s = s.replace(old, new, 1)
+    report("nav: 5 tabs (HOME / SESSIONS / RANK / ME / PLAYERS)")
+    return s
+
+
 def apply_skin(s, report):
     css = open(SKIN).read()
     block = ("\n<style>\n/* ══ BLACKOUT SERIES · VOL.8 SKIN — appended last ══ */\n"
@@ -288,6 +328,7 @@ def main():
     s = plain(s, CONTRAST, report, "contrast + copy")
     s = plain(s, SEASON, report, "season shape")
     s = square_inline(s, report)
+    s = add_screens(s, report)
     s = apply_skin(s, report)
 
     # A build id the page carries and version.txt must match: the update check
