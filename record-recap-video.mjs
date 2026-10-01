@@ -58,16 +58,16 @@ if (pre.imgs.some(ok => !ok)) { console.error(`${pre.imgs.filter(o => !o).length
 // Measure the inner span, not the block: the headline blocks are full-bleed
 // (left:0;right:0), so the block is 1080px wide at every instant and would
 // report "no widening" however well the entrance works.
-// The URL in the outro is the one line that must stay on one line, so it is
-// the one the shrink-to-fit pass wraps -- and the only element whose widening
-// can be measured. The headlines are deliberately multi-line and full-bleed, so
+// Sampled ACROSS the widen window, not after it: s10t animates from u=0.98 to
+// u=1.66, so three samples taken later all read the settled width and the check
+// reports "never widened" on a page that is working. The headlines are deliberately multi-line and full-bleed, so
 // their boxes are 1080px wide at every instant and say nothing.
 const widths = await pg.evaluate(() => {
-  window.__seek(35.0);                      // lets the fit pass build the span
-  const el = document.querySelector('#s9w .fitspan');
+  window.__seek(39.0);                      // lets the fit pass build the span
+  const el = document.querySelector('#s10t .fitspan');
   if (!el) return null;
   const at = t => { window.__seek(t); return el.getBoundingClientRect().width; };
-  return [at(34.60), at(34.85), at(35.60)];
+  return [at(38.70), at(38.95), at(39.55)];
 });
 if (!widths) { console.error('no .fitspan — the shrink-to-fit pass never ran'); process.exit(1); }
 if (!(widths[2] > widths[0] * 1.08)) {

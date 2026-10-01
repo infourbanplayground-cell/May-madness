@@ -22,15 +22,15 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad/video/recap.wav"
 
 SR = 44100
-DUR = 38.00
+DUR = 42.60
 N = int(SR * DUR)
 
 # Must match build-recap-video.py
-SCENES = [0.00, 3.60, 7.60, 13.20, 18.20, 21.60, 25.40, 29.20, 34.00]
-BEATS = [0.14, 1.05, 3.62, 7.62, 13.22, 18.22, 21.62, 25.42, 29.22, 30.40, 34.02, 35.20]
+SCENES = [0.00, 3.60, 7.60, 13.20, 18.20, 21.60, 25.40, 29.20, 34.00, 37.70]
+BEATS = [0.14, 1.05, 3.62, 7.62, 13.22, 18.22, 21.62, 25.42, 29.22, 30.40, 34.02, 35.20, 38.20]
 # Two big hits: the champion's photograph, and the one-point margin that closes
 # the season. Everything else is a cut.
-HERO = {29.22, 34.02}
+HERO = {29.22, 34.02, 38.20}
 BPM = 124.0
 SPB = 60.0 / BPM
 
@@ -184,7 +184,7 @@ for b in BEATS:
 
 # the last beat of the margin scene: let it ring out rather than stop dead
 tt = env_t(2.6)
-add(mid, 35.2, 0.3 * (np.sin(2 * np.pi * A3 * tt) * 0.5
+add(mid, 38.2, 0.3 * (np.sin(2 * np.pi * A3 * tt) * 0.5
                       + np.sin(2 * np.pi * E4 * tt) * 0.3) * np.exp(-tt / 0.85))
 
 # ── mix ───────────────────────────────────────────────────────────────────
@@ -199,6 +199,18 @@ for b in BEATS:
         duck[i0:i1] = np.minimum(duck[i0:i1], 1 - 0.22 * (1 - np.linspace(0, 1, i1 - i0)))
 
 mix = low * 1.0 + mid * duck * 1.0 + hit * 0.62
+
+# THE LIGHTS-OUT GAP. Half a second of near-silence between the end of Vol.7 and
+# the Blackout teaser, because the picture cuts to black there and a bed playing
+# through it turns the point of the cut into a glitch. Eased at both ends so it
+# reads as a held breath, not a dropout.
+g0, g1 = int(37.70 * SR), int(38.18 * SR)
+ramp = int(0.07 * SR)
+gate = np.ones(N)
+gate[g0:g1] = 0.06
+gate[g0 - ramp:g0] = np.linspace(1, 0.06, ramp)
+gate[g1:g1 + ramp] = np.linspace(0.06, 1, ramp)
+mix *= gate
 
 # gentle fades so the file neither clicks in nor cuts off
 fi, fo = int(SR * 0.05), int(SR * 0.55)

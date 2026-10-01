@@ -22,6 +22,14 @@ the video cannot disagree with surge.urbanpadel.om.
 | One night left | 2 points in it |
 | The podium | Hamed Amri 189, Munther Rahbi 188, Nooh Amri 171 |
 | The margin | **1 point** across eight nights |
+| Next | the lights go out on Vol.7 and come up on Blackout |
+
+## The handover
+
+The recap ends on half a second of black and near-silence — the audio drops 23dB
+and comes back — before the Blackout mark snaps in and the palette changes from
+Vol.7's cyan to Vol.8's lime. The gap IS the transition; a bed playing through it
+would turn the point of the cut into a glitch.
 
 Two more facts that did not make the cut but are true: eight different pairs won
 the eight nights (nobody repeated), and twelve different people won one.

@@ -34,6 +34,9 @@ W, H = 1080, 1920
 # are lit blue, which is why the recap stays in Surge's colours rather than
 # borrowing Vol.8's lime.
 CYAN, AMBER, CHALK, STEEL, INK, VOID = "#00E5FF", "#FF9E1B", "#F4F9FA", "#8A9BA8", "#0A0F14", "#050709"
+# Vol.8's two colours, used only by the teaser at the end. The handover from one
+# volume to the next is a colour change as much as anything else.
+LIME, MAGENTA = "#C6FF00", "#FF2E88"
 
 SCENES = {
     "s1": [0.00,  3.60],   # title
@@ -44,11 +47,15 @@ SCENES = {
     "s6": [21.60, 25.40],  # third
     "s7": [25.40, 29.20],  # second
     "s8": [29.20, 34.00],  # champion
-    "s9": [34.00, 38.00],  # the margin + outro
+    "s9": [34.00, 37.70],  # the margin
+    # The lights go out on Vol.7 and come up on Vol.8. The half second of black
+    # between the two is the point of the cut, so the teaser scene starts with
+    # nothing on screen and the mark snaps in after it.
+    "s10": [37.70, 42.60], # next volume
 }
-DUR = 38.00
-BEATS = [0.14, 1.05, 3.62, 7.62, 13.22, 18.22, 21.62, 25.42, 29.22, 30.40, 34.02, 35.20]
-HERO = {29.22, 34.02}
+DUR = 42.60
+BEATS = [0.14, 1.05, 3.62, 7.62, 13.22, 18.22, 21.62, 25.42, 29.22, 30.40, 34.02, 35.20, 38.20]
+HERO = {29.22, 34.02, 38.20}
 
 
 def b64(p):
@@ -103,6 +110,8 @@ def main():
                      f"{pod[2]['titles']} title", "photo": "p3"},
         ],
         "margin": st["margin"],
+        "next": {"host": "blackout.urbanpadel.om", "when": "MON & WED \u00b7 ALL OCTOBER",
+                 "nights": 9, "vol": "VOL.8"},
     })
 
     photos = {p: "data:image/jpeg;base64," + b64(os.path.join(PHOTOS, p + ".jpg"))
@@ -112,6 +121,7 @@ def main():
         faces=inline_fonts(), data=payload, photos=json.dumps(photos),
         logo=open(os.path.join(VID, "logo.txt")).read().strip(),
         W=W, H=H, cyan=CYAN, amber=AMBER, chalk=CHALK, steel=STEEL, ink=INK, void=VOID,
+        lime=LIME, magenta=MAGENTA, nexthost="BLACKOUT.URBANPADEL.OM",
     )
     with open(OUT, "w") as f:
         f.write(html)
@@ -209,6 +219,32 @@ IN ONE NIGHT.</div>
       <img src="{logo}" style="width:100%;display:block">
     </div>
     <div class="mono" style="position:absolute;left:0;right:0;top:1560px;text-align:center;font-size:25px;letter-spacing:.3em;color:{steel}">URBAN PLAYGROUND &middot; MUSCAT</div>
+  </div>
+
+  <!-- ── NEXT: the Vol.8 teaser. Its own ground, because this is where the
+       series changes colour. ── -->
+  <div class="scene" id="s10">
+    <div style="position:absolute;inset:0;background:{void}"></div>
+    <div style="position:absolute;inset:0;
+      background:radial-gradient(circle at 100% 16%, rgba(255,46,136,.18), transparent 44%),
+                 radial-gradient(circle at 0% 90%, rgba(198,255,0,.10), transparent 42%)"></div>
+    <div style="position:absolute;inset:-40px;
+      background:repeating-linear-gradient(0deg, rgba(198,255,0,.05) 0 2px, transparent 2px 10px)"
+      id="s10sc"></div>
+    <div class="kick" style="position:absolute;left:0;right:0;top:470px;text-align:center;font-size:28px;color:{lime}" id="s10k">NEXT</div>
+    <div style="position:absolute;left:50%;top:560px;width:132px;height:132px;margin-left:-66px" id="s10m">
+      <span style="position:absolute;inset:0;background:{lime}"></span>
+      <span style="position:absolute;left:0;right:0;top:62px;height:4px;background:{void}"></span>
+      <span style="position:absolute;left:0;right:0;top:78px;height:8px;background:{void}"></span>
+      <span style="position:absolute;left:0;right:0;top:97px;height:12px;background:{void}"></span>
+      <span style="position:absolute;left:0;right:0;top:118px;height:14px;background:{void}"></span>
+      <span style="position:absolute;right:16px;top:16px;width:17px;height:17px;background:{magenta}"></span>
+    </div>
+    <div class="disp fit" style="position:absolute;left:0;right:0;top:760px;text-align:center;font-size:132px" id="s10w">BLACKOUT</div>
+    <div class="disp fit" style="position:absolute;left:0;right:0;top:920px;text-align:center;font-size:104px;color:{lime}" id="s10t">LIGHTS OUT.</div>
+    <div style="position:absolute;left:50%;top:1100px;width:460px;height:5px;margin-left:-230px;background:{lime}" id="s10r"></div>
+    <div class="mono" style="position:absolute;left:0;right:0;top:1170px;text-align:center;font-size:27px;letter-spacing:.24em;color:{steel}" id="s10d"></div>
+    <div class="disp fit" style="position:absolute;left:0;right:0;top:1280px;text-align:center;font-size:58px;color:{lime}" id="s10u">{nexthost}</div>
   </div>
 
   <div class="vig"></div>
@@ -432,6 +468,23 @@ function seek(t){{
     set(document.getElementById('s9r'),1,`scaleX(${{outQuint(inv(u,1.26,1.70)).toFixed(3)}})`);
     set(document.getElementById('s9l'), inv(u,1.44,1.80),
         `scale(${{(0.92+0.08*outBack(inv(u,1.44,2.1))).toFixed(4)}})`);
+  }}
+
+  {{ const u=t-D.sc.s10[0];
+    // Half a second of nothing: the lights are out. Everything below starts
+    // after it, and the flash on the mark is the switch coming back on.
+    const sc=document.getElementById('s10sc');
+    sc.style.transform=`translateY(${{(t*3.2)%10}}px)`;
+    set(document.getElementById('s10k'), inv(u,0.46,0.72));
+    set(document.getElementById('s10m'), inv(u,0.50,0.74),
+        `scale(${{(0.7+0.3*outBack(inv(u,0.50,1.05))).toFixed(4)}})`);
+    widen(document.getElementById('s10w'),u,0.76,0.72,{{w0:70,blur:14}});
+    widen(document.getElementById('s10t'),u,0.98,0.68,{{w0:76,blur:9}});
+    set(document.getElementById('s10r'),1,`scaleX(${{outQuint(inv(u,1.42,1.86)).toFixed(3)}})`);
+    const dd=document.getElementById('s10d');
+    dd.textContent=`${{D.next.vol}} \u00b7 ${{D.next.nights}} NIGHTS \u00b7 ${{D.next.when}}`;
+    set(dd, inv(u,1.64,1.96));
+    widen(document.getElementById('s10u'),u,1.90,0.60,{{w0:80,blur:6}});
   }}
 }}
 window.__seek=seek; window.__dur=DUR; seek(0);
