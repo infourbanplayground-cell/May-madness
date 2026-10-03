@@ -211,12 +211,16 @@ body{{font-family:'Archivo',sans-serif;color:{ink};-webkit-font-smoothing:antial
 .row{{display:flex;align-items:baseline;justify-content:center;gap:18px}}
 /* Earner rows: rank, name, money. The money column is right-aligned on its own
    so three different name lengths cannot make three different money positions. */
-.ern{{display:flex;align-items:center;gap:26px;padding:18px 0;
+.ern{{display:flex;align-items:center;gap:22px;padding:18px 0;
   border-bottom:3px solid rgba(242,242,242,.10);will-change:transform,opacity}}
 .ern .pos{{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;
   color:{muted};width:48px}}
-.ern .who{{flex:1;font-style:italic;font-variation-settings:'wdth' 110,'wght' 900;
-  font-size:58px;white-space:nowrap;overflow:hidden;text-overflow:clip}}
+/* No overflow:hidden here. A clipped name looks like a design choice in a
+   still and like a bug in motion — the first cut lost the last letter of
+   MUNTHER RAHBI to the money column. The type is sized to the longest name
+   instead, and the recorder fails the render if anything is clipped. */
+.ern .who{{flex:1;min-width:0;font-style:italic;
+  font-variation-settings:'wdth' 104,'wght' 900;font-size:50px;white-space:nowrap}}
 .ern .amt{{font-style:italic;font-variation-settings:'wdth' 110,'wght' 900;
   font-size:62px;color:{lime}}}
 .ern .amt small{{font-family:'JetBrains Mono',monospace;font-style:normal;
@@ -289,7 +293,7 @@ FROM NIGHT {dbl}.</div>
       <span class="disp" style="font-size:72px;color:{lime}">OMR</span>
     </div>
     <div class="mono ctr" style="top:650px;font-size:26px;letter-spacing:.22em;color:{muted}" id="s5c">TOP THREE EARNERS</div>
-    <div id="s5g" style="position:absolute;left:120px;right:120px;top:716px">{earners}</div>
+    <div id="s5g" style="position:absolute;left:96px;right:96px;top:716px">{earners}</div>
     <div class="ctr" style="top:1130px;font-size:32px;color:{muted}" id="s5n">Night vouchers plus the season prize.</div>
   </div>
 

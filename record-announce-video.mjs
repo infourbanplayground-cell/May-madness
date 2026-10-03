@@ -118,6 +118,35 @@ if (over.length) {
   process.exit(1);
 }
 
+// Nothing may be clipped by its own container either. Frame-overflow and
+// container-clipping are different failures: the first cut of the earners scene
+// lost the last letter of a name to the money column beside it, which is well
+// inside the 1080px frame and invisible to the check above.
+const clipped = await pg.evaluate(() => {
+  const dur = window.__dur;
+  const scenes = [...document.querySelectorAll('.scene')];
+  const out = [], seen = new Set();
+  for (let i = 0; i < scenes.length; i++) {
+    window.__seek(((i + 0.85) / scenes.length) * dur);
+    for (const el of scenes) {
+      if (el.style.display === 'none') continue;
+      for (const n of el.querySelectorAll('*')) {
+        if (n.scrollWidth > n.clientWidth + 1 && n.clientWidth > 0) {
+          const key = n.id || n.className;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          out.push(`${key} "${n.textContent.trim().slice(0, 24)}": needs ${n.scrollWidth}px, has ${n.clientWidth}px`);
+        }
+      }
+    }
+  }
+  return out;
+});
+if (clipped.length) {
+  console.error('text clipped by its container:\n  ' + clipped.join('\n  '));
+  process.exit(1);
+}
+
 const N = Math.round(pre.dur * FPS);
 for (let f = 0; f < N; f++) {
   await pg.evaluate(t => window.__seek(t), f / FPS);
