@@ -43,6 +43,12 @@ for (const f of files) {
     const out = [];
     for (const el of document.querySelectorAll('body *')) {
       if (el.classList.contains('glow') || el.classList.contains('scan')) continue;
+      // Elements INSIDE an <svg> are skipped: getBoundingClientRect on a
+      // transformed or stroked SVG child reports a box that has little to do
+      // with where the ink is (a rotated circle reads 20% wider than its own
+      // diameter). The <svg> root itself is still checked, and it is the thing
+      // that is actually laid out on the page.
+      if (el.ownerSVGElement) continue;
       const r = el.getBoundingClientRect();
       if (!r.width || !r.height) continue;
       if (r.left < -0.5 || r.top < -0.5 || r.right > W + 0.5 || r.bottom > H + 0.5) {

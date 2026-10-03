@@ -196,6 +196,98 @@ def club_avatar():
 </body></html>"""
 
 
+def avatar_variant(style):
+    """Alternatives to the club avatar, same rules as the one above.
+
+    All of them are circle-safe, all of them carry the emblem at the same size
+    so the set can be judged on treatment rather than on scale, and none of them
+    names the volume — the palette does that, so next volume is a colour change
+    rather than a new logo.
+
+    On the lime grounds the emblem is driven to solid black with brightness(0)
+    rather than swapped for a black file, because no black file exists and a
+    second emblem asset is a second thing to keep in step. It takes the orange
+    ball with it, which at 48px is a feature: the mark reads as one silhouette.
+    """
+    w = 1024
+    ew = 462.0
+    eh = ew * UP_RATIO
+    ex, ey = (w - ew) / 2, (w - eh) / 2
+    emblem = (f'<div style="position:absolute;left:{ex:.0f}px;top:{ey:.0f}px;'
+              f'width:{ew:.0f}px;height:{eh:.0f}px" data-circle="1">'
+              f'<img src="data:image/png;base64,{UP_B64}" '
+              f'style="width:100%;display:block;%FILTER%"></div>')
+    ink = emblem.replace("%FILTER%", "filter:brightness(0)")
+    emblem = emblem.replace("%FILTER%", "")
+
+    if style == "solid":
+        # Lime ground, emblem punched out in black. The loudest of the set and
+        # the one that survives being 24px in a notification.
+        body = (f'<div style="position:absolute;inset:0;background:{LIME}"></div>'
+                f'<div style="position:absolute;left:50%;top:50%;width:916px;height:916px;'
+                f'margin:-458px 0 0 -458px;border:5px solid rgba(5,5,5,.30);'
+                f'border-radius:50%"></div>'
+                + ink +
+                f'<div style="position:absolute;left:770px;top:206px;width:46px;height:46px;'
+                f'background:{MAGENTA}"></div>')
+    elif style == "bars":
+        # The Blackout mark's own bars, behind the emblem. The circle crops them
+        # into chords, which is what makes it read as Blackout and not as a
+        # generic dark avatar.
+        bars = "".join(
+            f'<div style="position:absolute;left:0;right:0;top:{t}px;height:{h}px;'
+            f'background:{LIME};opacity:.92"></div>'
+            for t, h in ((812, 18), (862, 30), (926, 46), (992, 32)))
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + bars + emblem)
+    elif style == "arc":
+        # An open ring. The gap gives the mark a direction, which a closed ring
+        # cannot, and the magenta cap sits in the gap.
+        body = (f'<div style="position:absolute;inset:0;'
+                f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>'
+                # Drawn as a dashed SVG circle, not a rotated bordered div: a
+                # rotated 936px square has a 1324px diagonal, so its bounding
+                # box leaves the canvas and the overflow check fails it even
+                # though no ink is anywhere near the edge.
+                f'<svg viewBox="0 0 1024 1024" style="position:absolute;inset:0;'
+                f'width:1024px;height:1024px">'
+                f'<circle cx="512" cy="512" r="461" fill="none" stroke="{LIME}" '
+                f'stroke-width="14" stroke-dasharray="2171 724" '
+                f'transform="rotate(-118 512 512)"/></svg>'
+                + emblem +
+                f'<div style="position:absolute;left:836px;top:488px;width:48px;height:48px;'
+                f'background:{MAGENTA}"></div>')
+    elif style == "duo":
+        # Two rings, the club's colour outside and the volume's inside, so the
+        # avatar carries the season without carrying its name.
+        body = (f'<div style="position:absolute;inset:0;'
+                f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>'
+                f'<div style="position:absolute;left:50%;top:50%;width:964px;height:964px;'
+                f'margin:-482px 0 0 -482px;border:10px solid {MAGENTA};'
+                f'border-radius:50%;opacity:.85"></div>'
+                f'<div style="position:absolute;left:50%;top:50%;width:900px;height:900px;'
+                f'margin:-450px 0 0 -450px;border:16px solid {LIME};border-radius:50%"></div>'
+                + emblem)
+    elif style == "band":
+        # Half and half. The emblem sits on the dark side; the lime is weight
+        # rather than decoration, which is what carries at thumbnail size.
+        bw = 372.0
+        bh = bw * UP_RATIO
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                f'<div style="position:absolute;left:0;right:0;top:760px;bottom:0;'
+                f'background:{LIME}"></div>'
+                f'<div style="position:absolute;left:0;right:0;top:748px;height:8px;'
+                f'background:{MAGENTA}"></div>'
+                f'<div style="position:absolute;left:{(w-bw)/2:.0f}px;top:148px;'
+                f'width:{bw:.0f}px;height:{bh:.0f}px" data-circle="1">'
+                f'<img src="data:image/png;base64,{UP_B64}" '
+                f'style="width:100%;display:block"></div>')
+    else:
+        raise ValueError(style)
+
+    return head(w, w) + body + '</body></html>'
+
+
 def whatsapp():
     """The WhatsApp group photo.
 
@@ -265,6 +357,8 @@ def main():
         "blackout-icon": icon(),
         "blackout-whatsapp": whatsapp(),
         "blackout-club-avatar": club_avatar(),
+        **{f"blackout-avatar-{v}": avatar_variant(v)
+           for v in ("solid", "bars", "arc", "duo", "band")},
         "blackout-og": og().replace("__POOL__", str(pool)),
         "blackout-mark": mark_png(),
     }
