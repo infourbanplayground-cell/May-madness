@@ -123,7 +123,13 @@ body{{font-family:'Archivo',sans-serif;color:{ink};-webkit-font-smoothing:antial
 .scan{{position:absolute;inset:-40px;pointer-events:none;
   background:repeating-linear-gradient(0deg, rgba(198,255,0,.05) 0 2px, transparent 2px 10px)}}
 .rail{{position:absolute;left:0;right:0;height:10px;background:{lime};transform-origin:0 50%}}
-.scene{{position:absolute;inset:0;will-change:opacity,transform}}
+/* Every scene's content is laid out between roughly y=400 and y=1300, which
+   centres on 850 in a 1920 frame — top-heavy, with a dead bottom third. The
+   whole layer drops 100px rather than every `top` being re-typed one by one.
+   seek() only ever sets opacity and display on .scene, so a transform here is
+   safe. */
+.scene{{position:absolute;inset:0;transform:translateY(100px);
+  will-change:opacity,transform}}
 .disp{{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;line-height:.88;
   letter-spacing:-.5px;white-space:pre-line}}
 .kick{{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.3em;color:{lime}}}

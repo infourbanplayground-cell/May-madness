@@ -15,9 +15,14 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SP = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad"
 
 name = sys.argv[1] if len(sys.argv) > 1 else "announce"
-frames = os.path.join(SP, f"_{name[:4]}frames")
-if not os.path.isdir(frames):
-    frames = os.path.join(SP, f"_{name}frames")
+# The recorders abbreviate their frame directories differently (_annframes,
+# _featframes), so match on a prefix rather than guessing a fixed truncation —
+# a wrong guess here silently produces a sheet of missing tiles.
+cands = [d for d in os.listdir(SP)
+         if d.startswith("_") and d.endswith("frames") and name.startswith(d[1:-6])]
+if not cands:
+    sys.exit(f"no frame directory in {SP} for '{name}'")
+frames = os.path.join(SP, sorted(cands, key=len)[-1])
 
 spec = importlib.util.spec_from_file_location(
     "film", os.path.join(HERE, f"build-{name}-video.py"))
