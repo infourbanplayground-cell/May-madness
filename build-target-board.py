@@ -46,12 +46,12 @@ BALL_MAX = 67.7                  # mm, largest legal padel ball
 LIVERIES = {
     "house": dict(
         accent="#00E5FF", ink="#0A0F14", void="#050709", lift="#121B23",
-        chalk="#F4F9FA", muted="#5C6B78",
+        chalk="#F4F9FA", muted="#5C6B78", second="#FF3B7F",
         emblem=os.path.join("brand", "september-surge", "up-logo-cyan-2x.png"),
     ),
     "blackout": dict(
         accent="#C6FF00", ink="#050505", void="#000000", lift="#121212",
-        chalk="#F2F2F2", muted="#6E6E6E",
+        chalk="#F2F2F2", muted="#6E6E6E", second="#FF2E88",
         emblem=os.path.join("brand", "blackout", "up-logo-tight.png"),
     ),
 }
@@ -65,11 +65,18 @@ VOID         = L["void"]
 CYAN         = L["accent"]       # the accent, whatever this livery calls it
 CHALK        = L["chalk"]
 DEEP_STEEL   = L["muted"]
+MAGENTA      = L["second"]       # the aperture and the rule, and nothing else
 CUT          = "#FF00FF"         # the fabricator's cut colour, never printed
 
 _ew, _eh = __import__("PIL.Image", fromlist=["Image"]).open(
     os.path.join(HERE, L["emblem"])).size
 EMBLEM_RATIO = _eh / _ew
+
+# Balls per round. Two is a harder game than five in a way that is not obvious:
+# a single clean strike is now half your score, and ties are the normal outcome
+# rather than the exception, so the sudden-death rule carries real weight.
+BALLS = 2
+BALL_WORD = {1: "ONE", 2: "TWO", 3: "THREE", 4: "FOUR", 5: "FIVE"}[BALLS]
 
 HOLE_D = 120.0                   # 1.77x ball — 52mm of clearance
 CX, CY = 600.0, 1160.0           # 840mm off the floor with the board standing
@@ -80,7 +87,7 @@ CX, CY = 600.0, 1160.0           # 840mm off the floor with the board standing
 # Tints are pushed harder than they need to be on a screen: this is read from
 # the far baseline, ten-odd metres away, where low-contrast bands merge into
 # one grey disc and stop helping anyone aim.
-BANDS = [(430, 0.09), (350, 0.00), (280, 0.17), (210, 0.00), (140, 0.30)]
+BANDS = [(400, 0.09), (325, 0.00), (255, 0.17), (190, 0.00), (125, 0.30)]
 
 
 def b64(path):
@@ -132,13 +139,23 @@ def bullseye():
         x2, y2 = CX + dx * (outer + 68), CY + dy * (outer + 68)
         p.append(f'<line x1="{x1:.0f}" y1="{y1:.0f}" x2="{x2:.0f}" y2="{y2:.0f}" '
                  f'stroke="{CYAN}" stroke-opacity=".7" stroke-width="5"/>')
-    # The aperture: a void with a bright lip, which is what makes it legible
-    # from the far baseline.
+    # The aperture. It is the only thing on this board that scores, so it is the
+    # only thing in the SECOND colour: one magenta object among lime rings is
+    # unmissable at ten metres in a way that a brighter lime ring among lime
+    # rings is not. It used to wear the accent like everything else.
     r = HOLE_D / 2
+    p.append(f'<circle cx="{CX}" cy="{CY}" r="{r+28:.1f}" fill="{VOID}"/>')
     p.append(f'<circle cx="{CX}" cy="{CY}" r="{r}" fill="{VOID}" '
-             f'stroke="{CYAN}" stroke-width="9"/>')
-    p.append(f'<circle cx="{CX}" cy="{CY}" r="{r-11:.1f}" fill="none" '
-             f'stroke="{CYAN}" stroke-opacity=".35" stroke-width="2"/>')
+             f'stroke="{MAGENTA}" stroke-width="12"/>')
+    p.append(f'<circle cx="{CX}" cy="{CY}" r="{r+22:.1f}" fill="none" '
+             f'stroke="{MAGENTA}" stroke-opacity=".40" stroke-width="3"/>')
+    # Four spurs pointing in at it. The eye follows converging lines, and on a
+    # flat board this is the cheapest way to say "here" without a glow.
+    for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
+        a, b = r + 46, r + 92
+        p.append(f'<line x1="{CX+dx*a:.0f}" y1="{CY+dy*a:.0f}" '
+                 f'x2="{CX+dx*b:.0f}" y2="{CY+dy*b:.0f}" '
+                 f'stroke="{MAGENTA}" stroke-opacity=".75" stroke-width="6"/>')
     return "".join(p)
 
 
@@ -179,9 +196,18 @@ def board_svg(emblem_b64, cut_only=False):
     p.append(f'<rect width="{W}" height="{H}" fill="url(#g)"/>')
 
     p.append(f'<rect x="26" y="26" width="{W-52}" height="{H-52}" fill="none" '
-             f'stroke="{CHALK}" stroke-opacity=".14" stroke-width="3"/>')
-    p.append(f'<rect x="26" y="26" width="{W-52}" height="14" fill="{CYAN}"/>')
-    p.append(f'<rect x="26" y="{H-40}" width="{W-52}" height="8" fill="{CYAN}"/>')
+             f'stroke="{CHALK}" stroke-opacity=".10" stroke-width="3"/>')
+    p.append(f'<rect x="26" y="26" width="{W-52}" height="16" fill="{CYAN}"/>')
+    p.append(f'<rect x="26" y="{H-42}" width="{W-52}" height="10" fill="{CYAN}"/>')
+
+    # Corner brackets. The board is a 1.2 x 2m rectangle in a space made of
+    # rectangles — glass, fence posts, the court itself — and a hairline outline
+    # dissolves into all of them at distance. Brackets hold the frame, and they
+    # are the app's own corner language.
+    for x, y, sx, sy in ((26, 26, 1, 1), (W-26, 26, -1, 1),
+                         (26, H-26, 1, -1), (W-26, H-26, -1, -1)):
+        p.append(f'<path d="M {x:.0f} {y+sy*150:.0f} V {y:.0f} H {x+sx*150:.0f}" '
+                 f'fill="none" stroke="{CYAN}" stroke-width="10"/>')
 
     # ── header: the house mark, then the game ─────────────────────────────
     # The ratio is read off the file. It used to be hard-coded to the cyan
@@ -192,28 +218,50 @@ def board_svg(emblem_b64, cut_only=False):
     p.append(f'<image href="data:image/png;base64,{emblem_b64}" '
              f'x="{(W-ew)/2:.0f}" y="86" width="{ew:.0f}" height="{eh:.0f}" '
              f'preserveAspectRatio="xMidYMid meet"/>')
-    p.append(f'<text x="{W/2}" y="490" text-anchor="middle" font-family="Archivo" '
-             f'font-style="italic" font-size="176" '
-             f'font-variation-settings="\'wdth\' 125,\'wght\' 900" fill="{CHALK}" '
-             f'stroke="{CHALK}" stroke-width="7" paint-order="stroke fill">DEAD EYE</text>')
-    p.append(f'<text x="{W/2}" y="544" text-anchor="middle" '
+    # DEAD EYE, with a hard offset copy behind it in the second colour. A flat
+    # offset, never a blur: Chromium's PDF writer tiles large blurred shadows
+    # and the seams print as hard-edged rectangles.
+    for dx, dy, fill in ((10, 10, MAGENTA), (0, 0, CHALK)):
+        p.append(f'<text x="{W/2+dx}" y="{462+dy}" text-anchor="middle" '
+                 f'font-family="Archivo" font-style="italic" font-size="176" '
+                 f'font-variation-settings="\'wdth\' 125,\'wght\' 900" fill="{fill}" '
+                 f'stroke="{fill}" stroke-width="7" paint-order="stroke fill">DEAD EYE</text>')
+    p.append(f'<text x="{W/2}" y="518" text-anchor="middle" '
              f'font-family="JetBrains Mono, monospace" font-weight="700" font-size="30" '
              f'letter-spacing="14" fill="{CYAN}">TARGET CHALLENGE</text>')
-    p.append(f'<line x1="330" y1="592" x2="870" y2="592" stroke="{CYAN}" '
-             f'stroke-opacity=".45" stroke-width="3"/>')
+
+    # The ball count as objects, not as a word. Two squares say how many
+    # attempts you get before anyone has read a line of type — and the count is
+    # the thing on this board most likely to change.
+    bw, gap = 88.0, 26.0
+    row = BALLS * bw + (BALLS - 1) * gap
+    for i in range(BALLS):
+        bx = (W - row) / 2 + i * (bw + gap)
+        p.append(f'<rect x="{bx:.0f}" y="548" width="{bw:.0f}" height="{bw:.0f}" '
+                 f'fill="none" stroke="{CYAN}" stroke-width="5"/>')
+        p.append(f'<circle cx="{bx+bw/2:.0f}" cy="{548+bw/2:.0f}" r="21" fill="{CYAN}"/>')
+    p.append(f'<text x="{W/2}" y="664" text-anchor="middle" '
+             f'font-family="JetBrains Mono, monospace" font-weight="700" font-size="28" '
+             f'letter-spacing="12" fill="{CYAN}">{BALL_WORD} BALLS EACH</text>')
 
     # ── the bullseye ──────────────────────────────────────────────────────
     p.append(bullseye())
 
     # ── footer ────────────────────────────────────────────────────────────
-    p.append(f'<rect x="0" y="1706" width="{W}" height="{H-1706}" fill="{VOID}" fill-opacity=".5"/>')
-    p.append(f'<text x="{W/2}" y="1778" text-anchor="middle" '
-             f'font-family="JetBrains Mono, monospace" font-weight="700" font-size="28" '
-             f'letter-spacing="11" fill="{CYAN}">FIVE BALLS</text>')
-    p.append(f'<text x="{W/2}" y="1852" text-anchor="middle" font-family="Archivo" '
-             f'font-weight="800" font-size="48" fill="{CHALK}">'
-             f'Through the hole, or it doesn’t count.</text>')
-    p.append(f'<text x="{W/2}" y="1924" text-anchor="middle" '
+    p.append(f'<rect x="0" y="1700" width="{W}" height="{H-1700}" fill="{VOID}" fill-opacity=".6"/>')
+    p.append(f'<rect x="0" y="1700" width="{W}" height="4" fill="{CYAN}" fill-opacity=".5"/>')
+    # The rule, in display type rather than as a caption. It is the only thing
+    # anyone needs to be told, and it was set at 48px Archivo where the title
+    # above it was 176 — which is to say it read as a footnote to its own board.
+    p.append(f'<text x="{W/2}" y="1796" text-anchor="middle" font-family="Archivo" '
+             f'font-style="italic" font-size="64" '
+             f'font-variation-settings="\'wdth\' 118,\'wght\' 900" fill="{CHALK}">'
+             f'THROUGH THE HOLE,</text>')
+    p.append(f'<text x="{W/2}" y="1872" text-anchor="middle" font-family="Archivo" '
+             f'font-style="italic" font-size="64" '
+             f'font-variation-settings="\'wdth\' 118,\'wght\' 900" fill="{MAGENTA}">'
+             f'OR IT DOESN’T COUNT.</text>')
+    p.append(f'<text x="{W/2}" y="1950" text-anchor="middle" '
              f'font-family="JetBrains Mono, monospace" font-size="24" letter-spacing="10" '
              f'fill="{DEEP_STEEL}">URBAN PLAYGROUND · MUSCAT</text>')
 

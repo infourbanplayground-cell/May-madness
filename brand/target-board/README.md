@@ -56,7 +56,7 @@ Sized against the ball, not chosen because it looks right. A padel ball is
 | Clearance | 1.77x ball — 52mm of total spare |
 | Centre | 600, 1160 from the top-left |
 | Height off the floor | **840mm**, with the board standing on its base |
-| Bullseye outer ring | 860mm across |
+| Bullseye outer ring | 800mm across |
 
 120mm is a real challenge and still reachable: a clean strike goes through, a
 loose one hits the rings. If you want more people to score, 140mm takes it to
@@ -64,12 +64,20 @@ loose one hits the rings. If you want more people to score, 140mm takes it to
 
 ## Rules
 
-- **Five balls each.** Fed or served — pick one and hold everyone to it.
+- **Two balls each.** Fed or served — pick one and hold everyone to it.
 - **Through the hole, or it doesn't count.** A ball that hits a ring or the rim
   and comes back scores nothing. That is the whole reason the hole is cut rather
   than printed.
-- **Score is out of five.** 5/5 is a perfect round.
+- **Score is out of two.** 2/2 is a perfect round.
 - **Ties** go to sudden death, one ball each, until it breaks.
+
+**Two balls is a different game from five, and worth deciding on purpose.** One
+clean strike is now half your score rather than a fifth of it, so a single lucky
+hit wins rounds that five balls would have sorted out. Most rounds will be 0/2 or
+1/2 and ties stop being the exception — sudden death becomes the normal way a
+round ends, not a rare one, so have someone ready to run it. It is faster, which
+is the point if this is a queue between matches; `BALLS` in the builder sets both
+the board and the count printed on it.
 
 The printed rings are an aiming aid and the bullseye effect, not a score. If you
 would rather they counted — 25 for the inner band, 10 for the next, 5 for the
@@ -78,7 +86,7 @@ watching, which is exactly what the cut hole was chosen to avoid.
 
 Suggested formats:
 
-- **Side game** — 1 OMR for five balls, best round of the night takes the pot.
+- **Side game** — 1 OMR for two balls, best round of the night takes the pot.
 - **Session opener** — everyone shoots before the group stage; the round is a
   tiebreaker in the standings.
 - **Head to head** — two players, five balls each, straight shootout.
@@ -107,6 +115,25 @@ two bands sit close in tone.
 **The tints are pushed harder than they need to be on screen** (9%, 17%, 30%).
 This is read from the far baseline, ten-odd metres away, where low-contrast bands
 merge into one grey disc and stop helping anyone aim.
+
+**The aperture is the only magenta object on the board.** Everything else is the
+accent. It used to wear the accent too, which made the thing that actually scores
+one more lime ring among lime rings; a single object in the second colour is
+unmissable at ten metres. Four spurs point in at it, because the eye follows
+converging lines and that is the cheapest way to say "here" without a glow.
+
+**The ball count is drawn, not spelled.** Two squares above the rings say how
+many attempts you get before anyone has read a word, which matters for the one
+number on this board most likely to change.
+
+**Corner brackets, not a hairline frame.** The board is a 1.2 x 2m rectangle in a
+space made of rectangles — glass, fence posts, the court itself — and a thin
+outline dissolves into all of them at distance.
+
+**The title carries a hard offset in magenta, never a blur** — see the glow note
+below. The rule in the footer is set in display type for the same reason it is on
+the board at all: at 48px under a 176px title it read as a footnote to its own
+board.
 
 **No soft glows anywhere.** Chromium's vector PDF writer tiles large blurred
 shadows and the seams print as hard-edged rectangles — and at 2m across a court a
