@@ -59,6 +59,14 @@ def faces():
 MARK = open(os.path.join(BRAND, "blackout-mark.svg")).read()
 MARK_B64 = base64.b64encode(MARK.encode()).decode()
 
+# The club's own emblem. Its ratio is read off the file rather than assumed:
+# the emblems in this repo are different shapes, and a hard-coded one stretches
+# whichever it was not written for.
+UP_PATH = os.path.join(BRAND, "up-logo-tight.png")
+UP_B64 = b64(UP_PATH)
+_uw, _uh = __import__("PIL.Image", fromlist=["Image"]).open(UP_PATH).size
+UP_RATIO = _uh / _uw
+
 
 FIT_SCRIPT = r"""<script>
 // Shrink-to-fit for display type. An element carrying data-fit="<px>" is
@@ -152,6 +160,42 @@ def icon():
 </body></html>"""
 
 
+def club_avatar():
+    """The club's profile picture, in Blackout colours.
+
+    This is the URBAN PLAYGROUND emblem, not the BO mark: it goes on the club's
+    own accounts, which are not a volume's. The season shows in the palette —
+    lime ring, true black, the magenta tick — so October's accounts look like
+    October without the avatar claiming to be the tournament.
+
+    Every platform that matters crops a profile picture to a CIRCLE (Instagram,
+    WhatsApp, Facebook, X, YouTube), so the ring sits at r=468 of a 512 radius
+    rather than against the edge, where a platform's own border would eat it,
+    and the emblem carries data-circle for the renderer to check.
+
+    The emblem is white with the orange ball and stays that way. Recolouring it
+    lime would put lime on lime, and the orange is the club's, not a volume's.
+    """
+    w = 1024
+    ew = 462.0
+    eh = ew * UP_RATIO
+    return head(w, w) + f"""
+<div style="position:absolute;inset:0;
+     background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>
+<div class="glow"></div><div class="scan"></div>
+<div style="position:absolute;left:50%;top:50%;width:936px;height:936px;
+     margin:-468px 0 0 -468px;border:14px solid {LIME};border-radius:50%"></div>
+<div style="position:absolute;left:50%;top:50%;width:856px;height:856px;
+     margin:-428px 0 0 -428px;border:3px solid rgba(198,255,0,.22);border-radius:50%"></div>
+<div style="position:absolute;left:{(w-ew)/2:.0f}px;top:{(w-eh)/2:.0f}px;
+     width:{ew:.0f}px;height:{eh:.0f}px" data-circle="1">
+  <img src="data:image/png;base64,{UP_B64}" style="width:100%;display:block">
+</div>
+<div style="position:absolute;left:770px;top:206px;width:46px;height:46px;
+     background:{MAGENTA}"></div>
+</body></html>"""
+
+
 def whatsapp():
     """The WhatsApp group photo.
 
@@ -220,6 +264,7 @@ def main():
         "blackout-stack": stack(),
         "blackout-icon": icon(),
         "blackout-whatsapp": whatsapp(),
+        "blackout-club-avatar": club_avatar(),
         "blackout-og": og().replace("__POOL__", str(pool)),
         "blackout-mark": mark_png(),
     }
