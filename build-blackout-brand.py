@@ -182,7 +182,8 @@ def club_avatar():
     return head(w, w) + f"""
 <div style="position:absolute;inset:0;
      background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>
-<div class="glow"></div><div class="scan"></div>
+{PINK_DARK}
+<div class="scan"></div>
 <div style="position:absolute;left:50%;top:50%;width:936px;height:936px;
      margin:-468px 0 0 -468px;border:14px solid {LIME};border-radius:50%"></div>
 <div style="position:absolute;left:50%;top:50%;width:856px;height:856px;
@@ -194,6 +195,33 @@ def club_avatar():
 <div style="position:absolute;left:770px;top:206px;width:46px;height:46px;
      background:{MAGENTA}"></div>
 </body></html>"""
+
+
+# A touch of pink in the ground, on every avatar.
+#
+# Two layers, not one: a single radial reads as a smudge in one corner, while a
+# strong one opposite a faint one reads as light falling across the thing. The
+# magenta sits top-right and the lime answers it bottom-left, which is the same
+# arrangement the app and the posts use, so the accounts and the app look lit by
+# the same lamp.
+#
+# It goes UNDER everything a variant draws, so a ring or a court still sits on
+# top of it rather than being tinted by it.
+PINK_DARK = (
+    '<div style="position:absolute;inset:0;background:'
+    'radial-gradient(circle at 76% 12%, rgba(255,46,136,.26) 0%, '
+    'rgba(255,46,136,.07) 34%, transparent 56%),'
+    'radial-gradient(circle at 14% 92%, rgba(198,255,0,.11) 0%, transparent 48%)'
+    '"></div>')
+
+# On a lime ground the same idea has to be subtracted rather than added: pink at
+# 40% over lime is a muddy olive, so this is a low-alpha wash that warms the
+# corner instead of colouring it.
+PINK_LIME = (
+    '<div style="position:absolute;inset:0;background:'
+    'radial-gradient(circle at 82% 90%, rgba(255,46,136,.22) 0%, transparent 54%),'
+    'radial-gradient(circle at 18% 10%, rgba(255,255,255,.10) 0%, transparent 44%)'
+    '"></div>')
 
 
 def avatar_variant(style):
@@ -224,6 +252,7 @@ def avatar_variant(style):
         # Lime ground, emblem punched out in black. The loudest of the set and
         # the one that survives being 24px in a notification.
         body = (f'<div style="position:absolute;inset:0;background:{LIME}"></div>'
+                + PINK_LIME +
                 f'<div style="position:absolute;left:50%;top:50%;width:916px;height:916px;'
                 f'margin:-458px 0 0 -458px;border:5px solid rgba(5,5,5,.30);'
                 f'border-radius:50%"></div>'
@@ -239,12 +268,13 @@ def avatar_variant(style):
             f'background:{LIME};opacity:.92"></div>'
             for t, h in ((812, 18), (862, 30), (926, 46), (992, 32)))
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
-                + bars + emblem)
+                + PINK_DARK + bars + emblem)
     elif style == "arc":
         # An open ring. The gap gives the mark a direction, which a closed ring
         # cannot, and the magenta cap sits in the gap.
         body = (f'<div style="position:absolute;inset:0;'
                 f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>'
+                + PINK_DARK +
                 # Drawn as a dashed SVG circle, not a rotated bordered div: a
                 # rotated 936px square has a 1324px diagonal, so its bounding
                 # box leaves the canvas and the overflow check fails it even
@@ -262,6 +292,7 @@ def avatar_variant(style):
         # avatar carries the season without carrying its name.
         body = (f'<div style="position:absolute;inset:0;'
                 f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>'
+                + PINK_DARK +
                 f'<div style="position:absolute;left:50%;top:50%;width:964px;height:964px;'
                 f'margin:-482px 0 0 -482px;border:10px solid {MAGENTA};'
                 f'border-radius:50%;opacity:.85"></div>'
@@ -274,6 +305,7 @@ def avatar_variant(style):
         bw = 372.0
         bh = bw * UP_RATIO
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + PINK_DARK +
                 f'<div style="position:absolute;left:0;right:0;top:760px;bottom:0;'
                 f'background:{LIME}"></div>'
                 f'<div style="position:absolute;left:0;right:0;top:748px;height:8px;'
@@ -317,7 +349,8 @@ def avatar_variant2(style):
                 f'mask:{url} center/contain no-repeat" data-circle="1"></div>')
 
     dark = (f'<div style="position:absolute;inset:0;'
-            f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>')
+            f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>'
+            + PINK_DARK)
 
     if style == "mono":
         # The mark itself in the season's colour. The only one of the set where
@@ -329,6 +362,7 @@ def avatar_variant2(style):
         # glows in PRINT, where Chromium tiles them and the seams show; on
         # screen there is no such constraint.
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + PINK_DARK +
                 f'<div style="position:absolute;left:50%;top:50%;width:760px;height:760px;'
                 f'margin:-380px 0 0 -380px;border-radius:50%;'
                 f'background:radial-gradient(circle, rgba(198,255,0,.42) 0%, '
@@ -337,6 +371,7 @@ def avatar_variant2(style):
     elif style == "grid":
         # The app's own scanline language, turned into a field.
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + PINK_DARK +
                 f'<div style="position:absolute;inset:0;background:'
                 f'repeating-linear-gradient(0deg, rgba(198,255,0,.10) 0 2px, transparent 2px 64px),'
                 f'repeating-linear-gradient(90deg, rgba(198,255,0,.10) 0 2px, transparent 2px 64px)'
@@ -370,6 +405,7 @@ def avatar_variant2(style):
         # A hard diagonal. The only asymmetric one in either set, which is what
         # makes it findable in a list of round club logos.
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + PINK_DARK +
                 f'<div style="position:absolute;inset:0;background:{LIME};'
                 f'clip-path:polygon(0 100%, 100% 100%, 100% 64%)"></div>'
                 f'<div style="position:absolute;inset:0;background:{MAGENTA};'
@@ -379,6 +415,7 @@ def avatar_variant2(style):
         # Lime where the mark is, black where it is not: the colour sits behind
         # the artwork rather than around it, so the mark keeps its own weight.
         body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                + PINK_DARK +
                 # 840, not 700: a 700px disc cannot carry a 720px-tall mark,
                 # and the top of URBAN and the foot of PLAYGROUND fell off it
                 # into the black ground and simply vanished.
