@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """Blackout Series (Vol.8) brand art.
 
-Four files the app and the posts need, all built from the same lockup so they
+The files the app and the posts need, all built from the same lockup so they
 cannot drift apart:
 
   blackout-lockup.png   BLACK/OUT wordmark + mark, for the app header and splash
+  blackout-stack.png    the same lockup stacked, for the club's front door hero
   blackout-icon.png     512px app icon, lime ground
   blackout-og.png       1200x630 link preview
   blackout-mark.png     the mark alone, raster, for places SVG is awkward
+  blackout-whatsapp.png the group photo — laid out for a CIRCULAR crop
 
 The wordmark is Archivo italic at 'wdth' 125 / 'wght' 900 — the handoff's display
 style. It must be a VARIABLE instance: a static one silently ignores the width
@@ -150,6 +152,35 @@ def icon():
 </body></html>"""
 
 
+def whatsapp():
+    """The WhatsApp group photo.
+
+    NOT the app icon. WhatsApp crops a group photo to a CIRCLE, and the app
+    icon is laid out for a rounded square: its BO sits up in the top-left
+    corner, which a circle inscribed in that square slices straight through
+    (the B's corner is 526px from centre on a 512px radius). The accent square
+    loses its corner the same way.
+
+    So: the wordmark is centred and lives well inside the circle, carrying a
+    data-circle attribute the renderer checks against the inscribed circle. The
+    bars still bleed to the edges — they are meant to be cut, and the curve
+    reading across them is what makes the avatar recognisable at the 40px the
+    chat list actually draws it at.
+    """
+    w = 1024
+    return head(w, w, LIME) + f"""
+<div style="position:absolute;inset:0;background:{LIME}"></div>
+<div style="position:absolute;left:0;right:0;top:636px;height:20px;background:{BG}"></div>
+<div style="position:absolute;left:0;right:0;top:700px;height:34px;background:{BG}"></div>
+<div style="position:absolute;left:0;right:0;top:778px;height:52px;background:{BG}"></div>
+<div style="position:absolute;left:0;right:0;top:874px;height:76px;background:{BG}"></div>
+<div style="position:absolute;left:700px;top:168px;width:76px;height:76px;background:{MAGENTA}"></div>
+<div data-circle="1" class="d" data-fit="560"
+     style="position:absolute;left:50%;top:300px;transform:translateX(-50%);
+            display:inline-block;font-size:290px;color:{BG};white-space:nowrap">BO</div>
+</body></html>"""
+
+
 def og():
     w, h = 1200, 630
     return head(w, h) + f"""
@@ -188,6 +219,7 @@ def main():
         "blackout-lockup": lockup(),
         "blackout-stack": stack(),
         "blackout-icon": icon(),
+        "blackout-whatsapp": whatsapp(),
         "blackout-og": og().replace("__POOL__", str(pool)),
         "blackout-mark": mark_png(),
     }

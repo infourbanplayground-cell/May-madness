@@ -54,6 +54,29 @@ for (const f of files) {
     return out;
   });
 
+  // Anything carrying data-circle is going somewhere that crops to a circle —
+  // a WhatsApp group photo, an avatar. The inscribed circle cuts the corners of
+  // the square off entirely, so "it fits the canvas" is not the test.
+  const cropped = await pg.evaluate(() => {
+    const W = document.body.clientWidth, H = document.body.clientHeight;
+    const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2;
+    const out = [];
+    for (const el of document.querySelectorAll('[data-circle]')) {
+      const r = el.getBoundingClientRect();
+      let worst = 0;
+      for (const [x, y] of [[r.left, r.top], [r.right, r.top], [r.left, r.bottom], [r.right, r.bottom]]) {
+        worst = Math.max(worst, Math.hypot(x - cx, y - cy));
+      }
+      // 0.92R, not R: a corner that merely grazes the circle still looks clipped
+      // once the platform draws its own border over the edge.
+      if (worst > R * 0.92) {
+        out.push(`${el.className || el.tagName} reaches ${Math.round(worst)}px from centre `
+          + `(safe radius ${Math.round(R * 0.92)})`);
+      }
+    }
+    return out;
+  });
+
   const checks = await pg.evaluate(() => ({
     display: document.fonts.check('italic 900 40px Archivo'),
     // The mark is pure geometry and sets no type, so requiring the display face
@@ -88,6 +111,7 @@ for (const f of files) {
   }
   if (px.w !== size.w * DPR || px.h !== size.h * DPR) bad.push(`${px.w}x${px.h}, expected ${size.w * DPR}x${size.h * DPR}`);
   if (spill.length) bad.push('runs off the canvas: ' + spill.join(' ; '));
+  if (cropped.length) bad.push('would be cut by a circular crop: ' + cropped.join(' ; '));
   if (errs.length) bad.push(errs.join('; '));
   const fit = Object.entries(fitted).map(([k, v]) => `${k.split('#')[0]} ${v}px`).join(', ');
   console.log(`${path.basename(png)}  ${px.w}x${px.h}  ${(b.length / 1024).toFixed(0)}KB`
