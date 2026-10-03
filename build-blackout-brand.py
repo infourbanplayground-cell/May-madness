@@ -288,6 +288,111 @@ def avatar_variant(style):
     return head(w, w) + body + '</body></html>'
 
 
+def avatar_variant2(style):
+    """A second set, pushing past "emblem plus a frame device".
+
+    The first six were all the same idea wearing different jewellery: a mark in
+    the middle, something drawn around it. These change what is BEHIND the mark,
+    or the mark itself.
+
+    Recolouring uses a CSS mask over a flat fill rather than a filter chain. The
+    emblem is white artwork on transparency, so masking by its alpha gives the
+    exact brand hex; a filter stack can only ever arrive near it, and 'near the
+    brand lime' is not a colour this club has.
+    """
+    w = 1024
+    ew = 462.0
+    eh = ew * UP_RATIO
+    ex, ey = (w - ew) / 2, (w - eh) / 2
+    box = (f'position:absolute;left:{ex:.0f}px;top:{ey:.0f}px;'
+           f'width:{ew:.0f}px;height:{eh:.0f}px')
+    plain = (f'<div style="{box}" data-circle="1">'
+             f'<img src="data:image/png;base64,{UP_B64}" style="width:100%;display:block">'
+             f'</div>')
+
+    def masked(colour):
+        url = f"url(data:image/png;base64,{UP_B64})"
+        return (f'<div style="{box};background:{colour};'
+                f'-webkit-mask:{url} center/contain no-repeat;'
+                f'mask:{url} center/contain no-repeat" data-circle="1"></div>')
+
+    dark = (f'<div style="position:absolute;inset:0;'
+            f'background:radial-gradient(circle at 50% 42%, #12140C 0%, {BG} 62%)"></div>')
+
+    if style == "mono":
+        # The mark itself in the season's colour. The only one of the set where
+        # the logo changes rather than its surroundings — and the orange goes
+        # with it, since an alpha mask does not know the artwork had colours.
+        body = dark + masked(LIME)
+    elif style == "halo":
+        # Light behind the mark instead of a line around it. Blackout bans soft
+        # glows in PRINT, where Chromium tiles them and the seams show; on
+        # screen there is no such constraint.
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                f'<div style="position:absolute;left:50%;top:50%;width:760px;height:760px;'
+                f'margin:-380px 0 0 -380px;border-radius:50%;'
+                f'background:radial-gradient(circle, rgba(198,255,0,.42) 0%, '
+                f'rgba(198,255,0,.10) 48%, transparent 70%)"></div>'
+                + plain)
+    elif style == "grid":
+        # The app's own scanline language, turned into a field.
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                f'<div style="position:absolute;inset:0;background:'
+                f'repeating-linear-gradient(0deg, rgba(198,255,0,.10) 0 2px, transparent 2px 64px),'
+                f'repeating-linear-gradient(90deg, rgba(198,255,0,.10) 0 2px, transparent 2px 64px)'
+                f'"></div>'
+                f'<div style="position:absolute;left:50%;top:50%;width:936px;height:936px;'
+                f'margin:-468px 0 0 -468px;border:10px solid {LIME};border-radius:50%"></div>'
+                + plain)
+    elif style == "court":
+        # A padel court, from above, behind the mark. 20x10m at 2:1, with the
+        # net and the service lines where they actually are — a club's avatar
+        # may as well be about the game.
+        cw, chh = 880, 440
+        cx0, cy0 = (w - cw) / 2, (w - chh) / 2
+        svc = cw * 0.31          # service line, 3.0m from the back of a 10m half
+        body = (dark +
+                f'<svg viewBox="0 0 {w} {w}" style="position:absolute;inset:0;'
+                f'width:{w}px;height:{w}px" opacity=".8">'
+                f'<rect x="{cx0:.0f}" y="{cy0:.0f}" width="{cw}" height="{chh}" '
+                f'fill="none" stroke="{LIME}" stroke-width="5"/>'
+                f'<line x1="{w/2}" y1="{cy0:.0f}" x2="{w/2}" y2="{cy0+chh:.0f}" '
+                f'stroke="{MAGENTA}" stroke-width="5"/>'
+                f'<line x1="{cx0+svc:.0f}" y1="{cy0:.0f}" x2="{cx0+svc:.0f}" y2="{cy0+chh:.0f}" '
+                f'stroke="{LIME}" stroke-width="3"/>'
+                f'<line x1="{cx0+cw-svc:.0f}" y1="{cy0:.0f}" x2="{cx0+cw-svc:.0f}" '
+                f'y2="{cy0+chh:.0f}" stroke="{LIME}" stroke-width="3"/>'
+                f'<line x1="{cx0+svc:.0f}" y1="{w/2}" x2="{cx0+cw-svc:.0f}" y2="{w/2}" '
+                f'stroke="{LIME}" stroke-width="3"/>'
+                f'</svg>'
+                + plain)
+    elif style == "wedge":
+        # A hard diagonal. The only asymmetric one in either set, which is what
+        # makes it findable in a list of round club logos.
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                f'<div style="position:absolute;inset:0;background:{LIME};'
+                f'clip-path:polygon(0 100%, 100% 100%, 100% 64%)"></div>'
+                f'<div style="position:absolute;inset:0;background:{MAGENTA};'
+                f'clip-path:polygon(0 100%, 100% 62%, 100% 66%, 0 104%)"></div>'
+                + plain)
+    elif style == "disc":
+        # Lime where the mark is, black where it is not: the colour sits behind
+        # the artwork rather than around it, so the mark keeps its own weight.
+        body = (f'<div style="position:absolute;inset:0;background:{BG}"></div>'
+                # 840, not 700: a 700px disc cannot carry a 720px-tall mark,
+                # and the top of URBAN and the foot of PLAYGROUND fell off it
+                # into the black ground and simply vanished.
+                f'<div style="position:absolute;left:50%;top:50%;width:840px;height:840px;'
+                f'margin:-420px 0 0 -420px;border-radius:50%;background:{LIME}"></div>'
+                f'<div style="position:absolute;left:770px;top:206px;width:46px;height:46px;'
+                f'background:{MAGENTA}"></div>'
+                + masked(BG))
+    else:
+        raise ValueError(style)
+
+    return head(w, w) + body + '</body></html>'
+
+
 def whatsapp():
     """The WhatsApp group photo.
 
@@ -359,6 +464,8 @@ def main():
         "blackout-club-avatar": club_avatar(),
         **{f"blackout-avatar-{v}": avatar_variant(v)
            for v in ("solid", "bars", "arc", "duo", "band")},
+        **{f"blackout-avatar-{v}": avatar_variant2(v)
+           for v in ("mono", "halo", "grid", "court", "wedge", "disc")},
         "blackout-og": og().replace("__POOL__", str(pool)),
         "blackout-mark": mark_png(),
     }
