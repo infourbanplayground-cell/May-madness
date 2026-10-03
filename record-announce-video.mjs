@@ -63,11 +63,11 @@ if (pre.imgs.some(ok => !ok)) { console.error(`${pre.imgs.filter(o => !o).length
 // can be measured. The headlines are deliberately multi-line and full-bleed, so
 // their boxes are 1080px wide at every instant and say nothing.
 const widths = await pg.evaluate(() => {
-  window.__seek(25.60);                     // lets the fit pass build the span
-  const el = document.querySelector('#s7u .fitspan');
+  window.__seek(30.80);                     // lets the fit pass build the span
+  const el = document.querySelector('#s8u .fitspan');
   if (!el) return null;
   const at = t => { window.__seek(t); return el.getBoundingClientRect().width; };
-  return [at(25.34), at(25.52), at(26.20)];
+  return [at(30.54), at(30.72), at(31.40)];
 });
 if (!widths) { console.error('no .fitspan — the shrink-to-fit pass never ran'); process.exit(1); }
 if (!(widths[2] > widths[0] * 1.08)) {

@@ -24,13 +24,14 @@ OUT = ("/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae32896
        "/scratchpad/video/announce.wav")
 
 SR = 44100
-DUR = 28.20
+DUR = 33.40
 N = int(SR * DUR)
 
 # Must match build-announce-video.py
-SCENES = [0.00, 4.00, 8.20, 13.40, 18.20, 21.60, 24.40]
-BEATS = [0.14, 1.05, 4.02, 8.22, 13.42, 15.10, 18.22, 21.62, 24.42, 25.70]
-HERO = {13.42, 24.42}
+SCENES = [0.00, 4.00, 8.20, 13.40, 18.20, 23.40, 26.80, 29.60]
+BEATS = [0.14, 1.05, 4.02, 8.22, 13.42, 15.10, 18.22, 19.70, 23.42, 26.82,
+         29.62, 30.90]
+HERO = {13.42, 29.62}
 
 BPM = 126.0
 SPB = 60.0 / BPM
@@ -194,6 +195,7 @@ PLAN = [
     dict(root=F2, drive=0.4, bass=True,  kick=True,  snare=False, hats=2, arp=None,              bright=0.42),  # Vol.7 done
     dict(root=C2, drive=0.6, bass=True,  kick=True,  snare=True,  hats=4, arp=[A3, C4, E4, C4],  bright=0.52),  # schedule
     dict(root=A2, drive=0.8, bass=True,  kick=True,  snare=True,  hats=4, arp=[A3, C4, E4, A4],  bright=0.66),  # the money
+    dict(root=C2, drive=0.8, bass=True,  kick=True,  snare=True,  hats=4, arp=[A3, E4, C4, E4],  bright=0.70),  # what it paid
     dict(root=G2, drive=0.7, bass=True,  kick=True,  snare=True,  hats=4, arp=None,              bright=0.60),  # what changed
     dict(root=F2, drive=0.9, bass=True,  kick=True,  snare=True,  hats=4, arp=[C4, E4, A4, E4],  bright=0.72),  # entry
     dict(root=A2, drive=1.0, bass=True,  kick=True,  snare=True,  hats=4, arp=[A3, C4, E4, A4, G4, E4], bright=0.88),  # sign up
@@ -209,7 +211,7 @@ for i, (a, b) in enumerate(bounds):
     pad(a, (b - a) + XF, p["root"], 0.30 + 0.06 * p["drive"], p["bright"])
 
 # Two drops: the pool reveal and the cut to the link.
-DROPS = [(SCENES[3] - SPB * 0.5, SCENES[3]), (SCENES[6] - SPB * 0.5, SCENES[6])]
+DROPS = [(SCENES[3] - SPB * 0.5, SCENES[3]), (SCENES[7] - SPB * 0.5, SCENES[7])]
 
 
 def muted(t):
@@ -241,7 +243,7 @@ for i, (a, b) in enumerate(bounds):
         arp(a, b - a, p["arp"], 0.15 + 0.08 * p["drive"], SPB / 2)
 
 for i, s in enumerate(SCENES[1:], start=1):
-    big = s in (SCENES[3], SCENES[6])
+    big = s in (SCENES[3], SCENES[7])
     riser(s - 1.15, 1.15, 0.70 if big else 0.46)
     if PLAN[i - 1]["kick"]:
         fill(s - 0.32)

@@ -19,6 +19,7 @@ moving value a pure function of t behind window.__seek(t).
   node record-announce-video.mjs
 """
 import base64, datetime, json, os, re
+from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SP = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad"
@@ -30,10 +31,11 @@ LIME, MAGENTA, INK, MUTED, BG = "#C6FF00", "#FF2E88", "#F2F2F2", "#9A9A9A", "#05
 
 # Scene table — shared verbatim with build-announce-audio.py, so the hits land
 # on the cuts rather than near them.
-SCENES = [0.00, 4.00, 8.20, 13.40, 18.20, 21.60, 24.40]
-DUR = 28.20
-BEATS = [0.14, 1.05, 4.02, 8.22, 13.42, 15.10, 18.22, 21.62, 24.42, 25.70]
-HERO = [13.42, 24.42]
+SCENES = [0.00, 4.00, 8.20, 13.40, 18.20, 23.40, 26.80, 29.60]
+DUR = 33.40
+BEATS = [0.14, 1.05, 4.02, 8.22, 13.42, 15.10, 18.22, 19.70, 23.42, 26.82,
+         29.62, 30.90]
+HERO = [13.42, 29.62]
 
 
 def b64(p):
@@ -58,6 +60,54 @@ def inline_fonts():
 
 DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
 
+# Vol.7's own terms, read off the volume that paid them, not off Vol.8's.
+SURGE_VOUCHER = 14
+SURGE_SEASON = [75, 50, 30]
+
+
+def surge_earnings():
+    """What Vol.7 actually paid, per player, from the archived state.
+
+    Not a stored figure — the app never kept one. A night's voucher goes to both
+    players on the team that wins the final, so this walks every session's
+    bracket and adds the season prizes on top.
+
+    The whole thing is checked against the pool Vol.7 advertised: if what this
+    computes does not come to 379 OMR, either a night was missed or the terms
+    are wrong, and a film is not the place to find that out.
+    """
+    here = os.path.join(HERE, "archive", "september-surge")
+    state = json.load(open(os.path.join(here, "final-state.json")))["state"]
+    std = json.load(open(os.path.join(here, "final-standings.json")))
+    names = {p["id"]: p["name"] for p in state["players"]}
+
+    wins = defaultdict(int)
+    for ses in state["sessions"]:
+        fin = (ses.get("bracket") or {}).get("final")
+        if isinstance(fin, list):
+            fin = fin[0] if fin else None
+        assert fin and fin.get("winner"), f"{ses['name']} has no decided final"
+        tid = fin["team1Id"] if fin["winner"] == "team1" else fin["team2Id"]
+        team = next(t for t in ses["teams"] if t["id"] == tid)
+        for pid in (team["p1Id"], team["p2Id"]):
+            wins[pid] += 1
+
+    earned = {pid: n * SURGE_VOUCHER for pid, n in wins.items()}
+    season = {}
+    for i, p in enumerate(std["podium"][:3]):
+        earned[p["id"]] = earned.get(p["id"], 0) + SURGE_SEASON[i]
+        season[p["id"]] = SURGE_SEASON[i]
+
+    pool = SURGE_VOUCHER * 2 * len(state["sessions"]) + sum(SURGE_SEASON)
+    assert sum(earned.values()) == pool, \
+        f"earnings come to {sum(earned.values())}, not the {pool} Vol.7 advertised"
+
+    rows = sorted(earned.items(), key=lambda kv: (-kv[1], names.get(kv[0], "")))
+    return pool, [dict(name=names[pid], total=t, nights=wins.get(pid, 0),
+                       vouchers=wins.get(pid, 0) * SURGE_VOUCHER,
+                       season=season.get(pid, 0))
+                  for pid, t in rows[:3]]
+
 
 def main():
     cfg = json.load(open(os.path.join(HERE, "blackout-season.json")))
@@ -78,9 +128,16 @@ def main():
         f'<span class="cn">{d.day}</span></div>'
         for i, d in enumerate(nights))
 
+    paid, top = surge_earnings()
+    earners = "".join(
+        f'<div class="ern" id="e{i}"><span class="pos">{i+1}</span>'
+        f'<span class="who">{e["name"].upper()}</span>'
+        f'<span class="amt">{e["total"]}<small>OMR</small></span></div>'
+        for i, e in enumerate(top))
+
     payload = json.dumps({
         "scenes": SCENES, "dur": DUR, "beats": BEATS, "hero": HERO,
-        "n": len(nights), "pool": pool,
+        "n": len(nights), "pool": pool, "paid": paid, "earners": len(top),
     })
 
     mark = open(os.path.join(HERE, "brand", "blackout", "blackout-mark.svg")).read()
@@ -88,7 +145,7 @@ def main():
         faces=inline_fonts(), data=payload, W=W, H=H,
         mark=base64.b64encode(mark.encode()).decode(),
         lime=LIME, magenta=MAGENTA, ink=INK, muted=MUTED, bg=BG,
-        chips=chips,
+        chips=chips, earners=earners,
         host=cfg["host"].upper(),
         month=cfg["monthUpper"],
         prev=std["volume"],
@@ -108,6 +165,11 @@ def main():
     print(f"  pool      {pool} OMR  ({cfg['voucher']} x 2 x {cfg['sessions']} + {sum(cfg['seasonPrizes'])})")
     print(f"  nights    {len(nights)}, {nights[0]} .. {nights[-1]}  (finals {finals})")
     print(f"  handover  {std['volume']} — {champ['name']} {champ['pts']}, by {margin}")
+    print(f"  paid out  {paid} OMR across Vol.7, reconciled to the advertised pool")
+    for i, e in enumerate(top):
+        print(f"    {i+1}. {e['name']:<18} {e['total']:>3} OMR "
+              f"({e['nights']} night{'s' if e['nights'] != 1 else ''} x {SURGE_VOUCHER}"
+              + (f" + {e['season']} season" if e["season"] else "") + ")")
     print("\nnow:  python3 build-announce-audio.py && node record-announce-video.mjs")
 
 
@@ -147,6 +209,18 @@ body{{font-family:'Archivo',sans-serif;color:{ink};-webkit-font-smoothing:antial
 .chip.fin .cn{{color:{lime}}}
 .chip.fin .cd{{color:{lime}}}
 .row{{display:flex;align-items:baseline;justify-content:center;gap:18px}}
+/* Earner rows: rank, name, money. The money column is right-aligned on its own
+   so three different name lengths cannot make three different money positions. */
+.ern{{display:flex;align-items:center;gap:26px;padding:18px 0;
+  border-bottom:3px solid rgba(242,242,242,.10);will-change:transform,opacity}}
+.ern .pos{{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;
+  color:{muted};width:48px}}
+.ern .who{{flex:1;font-style:italic;font-variation-settings:'wdth' 110,'wght' 900;
+  font-size:58px;white-space:nowrap;overflow:hidden;text-overflow:clip}}
+.ern .amt{{font-style:italic;font-variation-settings:'wdth' 110,'wght' 900;
+  font-size:62px;color:{lime}}}
+.ern .amt small{{font-family:'JetBrains Mono',monospace;font-style:normal;
+  font-weight:700;font-size:24px;letter-spacing:.16em;color:{muted};margin-left:10px}}
 .flash{{position:absolute;inset:0;pointer-events:none;background:{lime};
   mix-blend-mode:screen;opacity:0}}
 </style></head><body>
@@ -207,31 +281,43 @@ body{{font-family:'Archivo',sans-serif;color:{ink};-webkit-font-smoothing:antial
 FROM NIGHT {dbl}.</div>
   </div>
 
-  <!-- 5 · what changed -->
+  <!-- 5 · what that was worth to the people who won it -->
   <div class="scene" id="s5">
-    <div class="kick ctr" style="top:560px;font-size:24px" id="s5k">NEW THIS VOLUME</div>
-    <div class="disp ctr" style="top:620px;font-size:122px" id="s5t">NO FINALS
-CUT.</div>
-    <div class="ctr" style="top:900px;font-size:40px;color:{muted}" id="s5n">Night {sessions} is open to everyone.</div>
-    <div style="position:absolute;left:50%;top:1010px;width:360px;height:5px;margin-left:-180px;background:{magenta}" id="s5r"></div>
-    <div class="ctr" style="top:1080px;font-size:40px" id="s5s">Season top three on points take it.</div>
+    <div class="kick ctr" style="top:380px;font-size:24px" id="s5k">LAST SEASON, PAID OUT</div>
+    <div class="ctr" id="s5b" style="top:430px">
+      <span class="disp" style="font-size:168px;color:{lime}" id="s5v">0</span>
+      <span class="disp" style="font-size:72px;color:{lime}">OMR</span>
+    </div>
+    <div class="mono ctr" style="top:650px;font-size:26px;letter-spacing:.22em;color:{muted}" id="s5c">TOP THREE EARNERS</div>
+    <div id="s5g" style="position:absolute;left:120px;right:120px;top:716px">{earners}</div>
+    <div class="ctr" style="top:1130px;font-size:32px;color:{muted}" id="s5n">Night vouchers plus the season prize.</div>
   </div>
 
-  <!-- 6 · entry -->
+  <!-- 6 · what changed -->
   <div class="scene" id="s6">
-    <div class="kick ctr" style="top:700px;font-size:24px" id="s6k">TO PLAY</div>
-    <div class="disp ctr" style="top:756px;font-size:200px;color:{lime}" id="s6t">{entry} OMR</div>
-    <div class="mono ctr" style="top:1000px;font-size:32px;letter-spacing:.24em;color:{muted}" id="s6s">A NIGHT</div>
+    <div class="kick ctr" style="top:560px;font-size:24px" id="s6k">NEW THIS VOLUME</div>
+    <div class="disp ctr" style="top:620px;font-size:122px" id="s6t">NO FINALS
+CUT.</div>
+    <div class="ctr" style="top:900px;font-size:40px;color:{muted}" id="s6n">Night {sessions} is open to everyone.</div>
+    <div style="position:absolute;left:50%;top:1010px;width:360px;height:5px;margin-left:-180px;background:{magenta}" id="s6r"></div>
+    <div class="ctr" style="top:1080px;font-size:40px" id="s6s">Season top three on points take it.</div>
   </div>
 
-  <!-- 7 · where -->
+  <!-- 7 · entry -->
   <div class="scene" id="s7">
-    <div class="disp ctr" style="top:520px;font-size:120px" id="s7t">SIGN UP
+    <div class="kick ctr" style="top:700px;font-size:24px" id="s7k">TO PLAY</div>
+    <div class="disp ctr" style="top:756px;font-size:200px;color:{lime}" id="s7t">{entry} OMR</div>
+    <div class="mono ctr" style="top:1000px;font-size:32px;letter-spacing:.24em;color:{muted}" id="s7s">A NIGHT</div>
+  </div>
+
+  <!-- 8 · where -->
+  <div class="scene" id="s8">
+    <div class="disp ctr" style="top:520px;font-size:120px" id="s8t">SIGN UP
 NOW.</div>
-    <div style="position:absolute;left:50%;top:800px;width:520px;height:5px;margin-left:-260px;background:{lime}" id="s7r"></div>
-    <div class="disp ctr fit" style="top:866px;font-size:62px;color:{lime}" id="s7u">{host}</div>
-    <div class="mono ctr" style="top:1010px;font-size:28px;letter-spacing:.22em;color:{muted}" id="s7d">FIRST NIGHT &middot; {first} &middot; 5:30 PM</div>
-    <div style="position:absolute;left:50%;top:1150px;width:130px;height:130px;margin-left:-65px" id="s7m">
+    <div style="position:absolute;left:50%;top:800px;width:520px;height:5px;margin-left:-260px;background:{lime}" id="s8r"></div>
+    <div class="disp ctr fit" style="top:866px;font-size:62px;color:{lime}" id="s8u">{host}</div>
+    <div class="mono ctr" style="top:1010px;font-size:28px;letter-spacing:.22em;color:{muted}" id="s8d">FIRST NIGHT &middot; {first} &middot; 5:30 PM</div>
+    <div style="position:absolute;left:50%;top:1150px;width:130px;height:130px;margin-left:-65px" id="s8m">
       <img src="data:image/svg+xml;base64,{mark}" style="width:100%;display:block">
     </div>
     <div class="mono ctr" style="top:1360px;font-size:24px;letter-spacing:.3em;color:#6E6E6E">URBAN PLAYGROUND &middot; MUSCAT</div>
@@ -377,29 +463,45 @@ function seek(t){{
     widen(g('s4d'), u, 2.16, 0.66, {{w0:76,blur:8}});
   }}
 
-  {{ // 5 · what changed
+  {{ // 5 · what that was worth
     const u=t-S[4];
     rise(g('s5k'), u, 0.08, 0.40, 10);
-    widen(g('s5t'), u, 0.18, 0.70, {{w0:70,blur:10}});
-    rise(g('s5n'), u, 0.86, 0.46, 14);
-    set(g('s5r'), 1, `scaleX(${{outQuint(inv(u,1.10,1.50)).toFixed(3)}})`);
-    rise(g('s5s'), u, 1.38, 0.46, 14);
+    // the payout counts up, then the three people it went to land in order
+    const p=outExpo(inv(u,0.20,1.15));
+    set(g('s5b'), inv(u,0.20,0.40), `scale(${{(0.95+0.05*p).toFixed(4)}})`);
+    g('s5v').textContent=Math.round(D.paid*p);
+    set(g('s5c'), inv(u,1.12,1.34));
+    for(let i=0;i<D.earners;i++){{
+      const a=1.34+i*0.30, q=outBack(inv(u,a,a+0.46));
+      set(g('e'+i), inv(u,a,a+0.18),
+          `translateX(${{(-34*(1-q)).toFixed(1)}}px)`);
+    }}
+    rise(g('s5n'), u, 2.46, 0.46, 12);
   }}
 
-  {{ // 6 · entry
+  {{ // 6 · what changed
     const u=t-S[5];
-    rise(g('s6k'), u, 0.06, 0.36, 10);
-    widen(g('s6t'), u, 0.16, 0.70, {{w0:68,blur:11}});
-    set(g('s6s'), inv(u,0.86,1.10));
+    rise(g('s6k'), u, 0.08, 0.40, 10);
+    widen(g('s6t'), u, 0.18, 0.70, {{w0:70,blur:10}});
+    rise(g('s6n'), u, 0.86, 0.46, 14);
+    set(g('s6r'), 1, `scaleX(${{outQuint(inv(u,1.10,1.50)).toFixed(3)}})`);
+    rise(g('s6s'), u, 1.38, 0.46, 14);
   }}
 
-  {{ // 7 · where
+  {{ // 7 · entry
     const u=t-S[6];
-    widen(g('s7t'), u, 0.16, 0.76);
-    set(g('s7r'), 1, `scaleX(${{outQuint(inv(u,0.80,1.25)).toFixed(3)}})`);
-    widen(g('s7u'), u, 0.94, 0.62, {{w0:80,blur:6}});
-    set(g('s7d'), inv(u,1.30,1.60));
-    set(g('s7m'), inv(u,1.52,1.86), `scale(${{(0.9+0.1*outBack(inv(u,1.52,2.2))).toFixed(4)}})`);
+    rise(g('s7k'), u, 0.06, 0.36, 10);
+    widen(g('s7t'), u, 0.16, 0.70, {{w0:68,blur:11}});
+    set(g('s7s'), inv(u,0.86,1.10));
+  }}
+
+  {{ // 8 · where
+    const u=t-S[7];
+    widen(g('s8t'), u, 0.16, 0.76);
+    set(g('s8r'), 1, `scaleX(${{outQuint(inv(u,0.80,1.25)).toFixed(3)}})`);
+    widen(g('s8u'), u, 0.94, 0.62, {{w0:80,blur:6}});
+    set(g('s8d'), inv(u,1.30,1.60));
+    set(g('s8m'), inv(u,1.52,1.86), `scale(${{(0.9+0.1*outBack(inv(u,1.52,2.2))).toFixed(4)}})`);
   }}
 }}
 window.__seek=seek; window.__dur=DUR; seek(0);
