@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A0C12">
+<title>Urban Playground · Padel in Muscat</title>
+<meta name="description" content="Urban Playground: padel in Muscat, Oman. Social Series, court bookings and the club shop.">
+<meta property="og:title" content="Urban Playground">
+<meta property="og:description" content="Padel in Muscat. Social Series · Court bookings · Club shop.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://urbanpadel.om/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Archivo:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ──────────────────────────────────────────────────────────────
+     URBAN PLAYGROUND: house hub.
+
+     This page is the CLUB's front door, not a series page, so it
+     wears the house mark: Urban Orange #F56530 (sampled from
+     up-logo-new.png, not guessed) on court black.
+
+     The live series accent appears in exactly one place, inside the
+     NOW PLAYING panel, which carries that volume's own wordmark. It
+     is fenced inside that one plate and never leaks into page chrome,
+     so the house mark stays the house mark whatever is running.
+
+     Vol.8 is Blackout Series, so that accent is now Blackout Lime.
+     Vol.7 ran Surge Cyan and Vol.6 ran Attack Red; the red sat close
+     enough to house orange to read as a mistake if the two ever mixed,
+     and lime has the same virtue cyan had - far enough from orange that
+     the fence is easy to hold.
+
+     TO TAKE A SERVICE LIVE: on its card, delete the `soon` class
+     and add the href. Nothing else changes, the card is already
+     an <a>, it just has no href while it's held back.
+     ────────────────────────────────────────────────────────────── */
+  :root {
+    --court:   #0A0C12;   /* page base */
+    --blackout:#06070B;   /* gradient floor */
+    --plate:   rgba(16,20,32,.90);
+    --orange:  #F56530;   /* house accent */
+    --orange-d:#C74A1E;
+    --live:    #C6FF00;   /* the running volume's accent, Blackout Lime */
+    /* NOTE for the next volume: --live covers everything except three rgba()
+       glows that need the colour as components, not as a token. Search for
+       rgba(198,255,0 and move those too, or the panel glows in the OLD
+       volume's colour around the new one's lockup. */
+    --ice:     #3DE1FF;
+    --chalk:   #F4F6FA;
+    --steel:   #8B95A7;
+    --green:   #27E08A;
+    --hair:    rgba(244,246,250,.10);
+    --e-out:   cubic-bezier(.23,1,.32,1);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { -webkit-text-size-adjust:100%; }
+  body {
+    min-height:100vh;
+    font-family:'Archivo', system-ui, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    color:var(--chalk);
+    background:var(--court);
+  }
+  .bg {
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(ellipse 90% 50% at 50% -4%, rgba(245,101,48,.20), transparent 62%),
+      radial-gradient(ellipse 70% 40% at 8% 34%, rgba(245,101,48,.07), transparent 60%),
+      radial-gradient(ellipse 70% 45% at 94% 80%, rgba(245,101,48,.09), transparent 62%),
+      linear-gradient(180deg,#08090D 0%, var(--court) 50%, var(--blackout) 100%);
+  }
+  /* court grid */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:
+      linear-gradient(rgba(245,101,48,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,101,48,.05) 1px, transparent 1px);
+    background-size:54px 54px;
+    -webkit-mask-image:radial-gradient(120% 80% at 50% 26%, #000, transparent 84%);
+            mask-image:radial-gradient(120% 80% at 50% 26%, #000, transparent 84%);
+  }
+
+  .wrap {
+    position:relative; z-index:1;
+    max-width:820px; margin:0 auto;
+    /* Bottom padding clears the fixed WhatsApp button (56px + 16px offset)
+       so it never sits on top of the footer. */
+    padding:20px 16px calc(108px + env(safe-area-inset-bottom,0px));
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    border:1px solid var(--hair); background:rgba(16,20,32,.72);
+    padding:12px 16px; margin-bottom:34px;
+  }
+  .topbar .est {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.22em; white-space:nowrap;
+    color:var(--orange); border:1px solid var(--orange); padding:5px 9px;
+  }
+  .topbar .who {
+    font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:clamp(14px,3.4vw,18px); letter-spacing:.32em; color:var(--chalk);
+  }
+  .topbar .om {
+    font-family:'JetBrains Mono',monospace; font-weight:500; font-size:12px;
+    letter-spacing:.18em; color:var(--steel);
+  }
+
+  /* ── HERO ── */
+  .hero { text-align:center; margin-bottom:40px; }
+  /* The mark carries the name on its own, it already reads URBAN
+     PLAYGROUND, so there is no wordmark beside it to compete with. Sized by
+     width, not height: the source is 940x788 and width is what has to fit the
+     column. */
+  .hero img.up {
+    width:clamp(230px,64vw,400px); height:auto; display:block; margin:0 auto;
+    filter:drop-shadow(0 0 34px rgba(245,101,48,.42));
+  }
+  .hero .sub {
+    display:inline-block; margin-top:24px;
+    font-family:'JetBrains Mono',monospace; font-weight:500;
+    font-size:13px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--steel);
+    border-top:1px solid var(--hair); border-bottom:1px solid var(--hair);
+    padding:9px 6px;
+  }
+
+  /* ── SECTION RULE ── */
+  .sec { display:flex; align-items:center; gap:14px; margin:0 0 18px; }
+  .sec span {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px;
+    letter-spacing:.3em; color:var(--orange); white-space:nowrap;
+  }
+  .sec .line { flex:1; height:1px; background:var(--hair); }
+  .sec.q span { color:var(--steel); }
+
+  /* Corner-tick plate, the house card treatment. Drawn with background
+     gradients so it never collides with a pseudo-element. No radius, ever. */
+  .tick {
+    position:relative; background:var(--plate);
+    background-image:
+      linear-gradient(var(--tickc),var(--tickc)), linear-gradient(var(--tickc),var(--tickc)),
+      linear-gradient(var(--tickc),var(--tickc)), linear-gradient(var(--tickc),var(--tickc));
+    background-size:22px 2px, 2px 22px, 22px 2px, 2px 22px;
+    background-position:0 0, 0 0, 100% 100%, 100% 100%;
+    background-repeat:no-repeat;
+    --tickc:var(--orange);
+  }
+
+  /* ── LIVE SERIES PANEL (the one place the series accent lives) ── */
+  .live {
+    display:block; text-decoration:none; color:inherit; overflow:hidden;
+    padding:26px 18px 24px; text-align:center; margin-bottom:38px;
+    --tickc:var(--live);
+    box-shadow:0 18px 46px rgba(0,0,0,.55);
+    transition:transform .16s var(--e-out), box-shadow .16s var(--e-out);
+  }
+  .live .glow {
+    position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 60% 55% at 50% 34%, rgba(198,255,0,.14), transparent 70%);
+  }
+  .live .head {
+    position:relative; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; flex-wrap:wrap; margin-bottom:14px;
+  }
+  .kick {
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12px;
+    letter-spacing:.26em; color:var(--live);
+  }
+  .kick i { width:4px; height:14px; background:var(--live); box-shadow:0 0 10px var(--live); display:block; }
+  .stamp {
+    flex:none; font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:11px; letter-spacing:.2em;
+    color:var(--green); border:1px solid rgba(39,224,138,.45);
+    background:rgba(6,7,11,.7); padding:6px 10px;
+  }
+  .stamp::before {
+    content:''; display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--green); box-shadow:0 0 9px var(--green); margin-right:7px; vertical-align:1px;
+  }
+  /* <picture> is inline by default, which would collapse the img's
+     percentage width against a shrink-to-fit box. Making the wrapper a
+     block keeps the lockup sized against the panel, as it was when this
+     was a bare <img>. */
+  .live .lockup-wrap { position:relative; display:block; }
+  .live img.lockup {
+    width:94%; max-width:430px; display:block; margin:0 auto;
+    filter:drop-shadow(0 10px 34px rgba(198,255,0,.34));
+  }
+  .live .tagline {
+    position:relative; font-family:'Teko',sans-serif; font-weight:600;
+    font-size:clamp(21px,4.9vw,28px); letter-spacing:.1em; margin-top:12px;
+  }
+  .live .tagline b { color:var(--live); font-weight:400; }
+  .cta {
+    position:relative; display:inline-block; margin-top:20px;
+    font-family:'Teko',sans-serif; font-weight:600; font-size:26px; letter-spacing:.12em;
+    color:var(--court); background:var(--live);
+    padding:13px 30px 11px;
+    box-shadow:0 0 26px rgba(198,255,0,.40);
+  }
+
+  /* ── SERVICE CARDS ── */
+  .svcs { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:38px; }
+  .svc {
+    display:flex; flex-direction:column; align-items:flex-start;
+    padding:26px 22px 22px; text-decoration:none; color:inherit;
+    box-shadow:0 14px 36px rgba(0,0,0,.45);
+    transition:transform .16s var(--e-out), box-shadow .16s var(--e-out);
+  }
+  .svc .ico { width:46px; height:46px; margin-bottom:18px; }
+  .svc .ico svg { width:100%; height:100%; display:block; color:var(--orange); }
+  .svc h2 {
+    font-family:'Teko',sans-serif; font-weight:600;
+    font-size:clamp(34px,7vw,45px); letter-spacing:.03em; line-height:.98;
+    text-transform:uppercase;
+  }
+  .svc p {
+    margin-top:10px; font-size:15px; line-height:1.5; color:var(--steel);
+    font-weight:400;
+  }
+  .svc .go {
+    margin-top:18px; font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:12px; letter-spacing:.2em; color:var(--orange);
+  }
+
+  /* Held back. The card is still an <a>, it just carries no href, so it is
+     not clickable and not focusable, and no one lands in a half-built shop.
+     Removing `soon` and adding href is the whole launch. */
+  .svc.soon { --tickc:var(--steel); cursor:default; }
+  .svc.soon .ico svg { color:var(--steel); }
+  .svc.soon h2 { color:var(--steel); }
+  .svc.soon .badge {
+    margin-top:18px; display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace; font-weight:700;
+    font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--court); background:var(--steel);
+    padding:7px 11px 6px;
+  }
+  .svc.soon .badge::before {
+    content:''; width:7px; height:7px; background:var(--court); display:block;
+  }
+
+  /* ── ARCHIVE ── */
+  .archive { padding:24px 16px 16px; --tickc:var(--steel); margin-bottom:34px; }
+  .arch-row {
+    display:flex; align-items:center; gap:14px;
+    border:1px solid var(--hair); background:rgba(6,7,11,.5);
+    padding:14px 15px; margin-bottom:10px;
+    text-decoration:none; color:inherit;
+    transition:background .14s, border-color .14s, transform .14s var(--e-out);
+  }
+  .arch-row:last-child { margin-bottom:0; }
+  .arch-vol {
+    flex:0 0 auto; width:50px; height:50px; display:grid; place-items:center;
+    font-family:'Teko',sans-serif; font-weight:600; font-size:25px; letter-spacing:.02em;
+    color:var(--chalk); border:1px solid var(--hair); background:rgba(16,20,32,.9);
+  }
+  .arch-name {
+    flex:1; min-width:0;
+    font-family:'Teko',sans-serif; font-weight:600; font-size:28px;
+    letter-spacing:.03em; line-height:1.02;
+  }
+  .arch-name small {
+    display:block; font-family:'Archivo',sans-serif; font-weight:600;
+    font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--steel); margin-top:5px;
+  }
+  .arch-name em { font-style:normal; color:var(--orange); }
+  .arch-cta {
+    font-family:'JetBrains Mono',monospace; font-weight:700; font-size:11px;
+    letter-spacing:.18em; color:var(--steel); white-space:nowrap;
+  }
+
+  /* ── FOOTER ── */
+  .foot {
+    border-top:1px solid rgba(245,101,48,.40);
+    padding:22px 4px 0;
+    display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .foot-l { font-family:'Teko',sans-serif; font-weight:600; font-size:30px; letter-spacing:.06em; }
+  .foot-r {
+    font-family:'JetBrains Mono',monospace; font-weight:500; font-size:11px;
+    letter-spacing:.12em; color:var(--steel); text-align:right; line-height:2;
+  }
+  /* Padded to a real tap target, as bare inline text this was 15px tall. */
+  .foot-r a {
+    display:inline-block; padding:11px 2px;
+    color:var(--steel); text-decoration:none;
+    border-bottom:1px solid rgba(139,149,167,.4);
+  }
+  @media (hover:hover) { .foot-r a:hover { color:var(--orange); border-bottom-color:var(--orange); } }
+
+  /* ── WHATSAPP ──
+     Kept in WhatsApp's own green (#25D366) rather than house orange. It is a
+     third-party mark and people scan for that exact green bubble; recolouring
+     it costs more in recognition than it gains in palette purity. It does not
+     collide with --green (#27E08A, the LIVE chip), that one is a small
+     outlined pill, this is a filled block, and they never sit together.
+
+     A direct child of <body>, deliberately: any ancestor with a computed
+     transform becomes the containing block for its fixed descendants, and the
+     cards on this page all animate transform on hover. */
+  .wa {
+    position:fixed; z-index:50;
+    right:16px; bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    width:56px; height:56px;
+    display:grid; place-items:center;
+    background:#25D366; color:#0A0C12; text-decoration:none;
+    box-shadow:0 12px 34px rgba(0,0,0,.55), 0 0 26px rgba(37,211,102,.30);
+    transition:transform .16s var(--e-out), box-shadow .16s var(--e-out),
+               opacity .18s var(--e-out), visibility 0s linear 0s;
+  }
+  /* Tucked away while the ENTER button passes through the same horizontal
+     band (the script at the end of the page sets this). A fixed button over a
+     scrolling page cannot be kept apart by layout alone: on a 320-390px phone
+     the two share the bottom of the first view. */
+  .wa.tuck {
+    opacity:0; visibility:hidden; pointer-events:none;
+    transform:translateY(12px);
+    transition:transform .16s var(--e-out), opacity .16s var(--e-out), visibility 0s linear .16s;
+  }
+  /* No optical nudge. Measuring the rendered ink showed the glyph already
+     sits dead centre in its viewBox, a translate() correction here only
+     moved it off by the amount it corrected. */
+  .wa svg { width:32px; height:32px; fill:currentColor; display:block; }
+  @media (hover:hover) {
+    .wa:hover { transform:translateY(-2px); box-shadow:0 18px 44px rgba(0,0,0,.6), 0 0 34px rgba(37,211,102,.45); }
+  }
+  .wa:active { transform:translateY(1px) scale(.97); }
+
+  /* ── RESPONSIVE: 430px is the real device ── */
+  @media (max-width:640px) {
+    .svcs { grid-template-columns:1fr; }
+  }
+  @media (max-width:520px) {
+    .topbar { flex-wrap:wrap; justify-content:center; text-align:center; row-gap:10px; }
+    .topbar .who { order:0; flex:1 0 100%; letter-spacing:.24em; }
+    .topbar .est { order:1; }
+    .topbar .om  { order:2; }
+    .arch-row { flex-wrap:wrap; }
+    .arch-name { flex:1 1 60%; font-size:19px; }
+    .arch-cta { flex:1 0 100%; text-align:right; padding-top:4px; }
+    .foot { justify-content:center; text-align:center; }
+    .foot-r { text-align:center; }
+  }
+
+  /* Hover is gated, on a touch device an ungated :hover leaves cards stuck
+     in the lifted state after a tap. */
+  @media (hover:hover) {
+    .live:hover { transform:translateY(-3px); box-shadow:0 26px 60px rgba(0,0,0,.65), 0 0 0 1px rgba(198,255,0,.32); }
+    .svc:not(.soon):hover { transform:translateY(-3px); box-shadow:0 22px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(245,101,48,.35); }
+    .arch-row:hover { background:rgba(6,7,11,.85); border-color:rgba(245,101,48,.3); transform:translateX(3px); }
+    .arch-row:hover .arch-cta { color:var(--orange); }
+  }
+  /* Everything pressable gets an :active. */
+  .live:active { transform:translateY(1px) scale(.995); }
+  .svc:not(.soon):active { transform:translateY(1px) scale(.995); }
+  .arch-row:active { transform:scale(.99); }
+
+  /* Keep opacity, drop movement, a panel that appears with no transition
+     at all reads as a bug, so this is not "no animation". */
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { transition-duration:.01ms !important; animation-duration:.01ms !important; }
+    .live:hover, .svc:hover, .arch-row:hover,
+    .live:active, .svc:active, .arch-row:active { transform:none; }
+  }
+  :focus-visible { outline:2px solid var(--orange); outline-offset:3px; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="est">EST. 2026</span>
+    <span class="who">URBAN PLAYGROUND</span>
+    <span class="om">MUSCAT · OMAN</span>
+  </div>
+
+  <div class="hero">
+    <img class="up" src="/assets/up-logo-new.png" alt="Urban Playground">
+    <div class="sub">Padel · Social Series · Muscat</div>
+  </div>
+
+  <!-- ── NOW PLAYING ─────────────────────────────────────────── -->
+  <div class="sec"><span>NOW PLAYING</span><div class="line"></div></div>
+
+  <a href="https://blackout.urbanpadel.om" class="live tick">
+    <div class="glow"></div>
+    <div class="head">
+      <span class="kick"><i></i>VOL. 8 · OCTOBER 2026</span>
+      <span class="stamp">LIVE</span>
+    </div>
+    <!-- WebP first: the lockup is the heaviest paint on this page and the
+         PNG is ten times the size. The PNG stays as the fallback rather
+         than being dropped, because a broken image here is the front
+         door's hero. -->
+    <picture class="lockup-wrap">
+      <source type="image/webp" srcset="/assets/blackout-stack.webp">
+      <img class="lockup" src="/assets/blackout-stack.png" alt="Blackout Series">
+    </picture>
+    <div class="tagline">LIGHTS <b>OUT.</b></div>
+    <span class="cta">ENTER →</span>
+  </a>
+
+  <!-- ── THE CLUB ────────────────────────────────────────────── -->
+  <div class="sec"><span>THE CLUB</span><div class="line"></div></div>
+
+  <div class="svcs">
+
+    <!-- TO LAUNCH: remove `soon`, add href="https://bookings.urbanpadel.om" -->
+    <a class="svc soon tick" aria-disabled="true">
+      <span class="ico">
+        <!-- A calendar with one slot taken, not a court from above. Every
+             court glyph tried here (service lines, net, ball) collapsed into
+             a window pane or a drawer at 46px, an interior horizontal rule
+             reads as furniture. The card is about picking a TIME, and the
+             court identity is already carried by the page grid and the mark. -->
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6"
+             stroke-linecap="square" aria-hidden="true">
+          <rect x="6" y="11" width="36" height="31"/>
+          <line x1="6" y1="20" x2="42" y2="20"/>
+          <line x1="16" y1="6" x2="16" y2="15"/>
+          <line x1="32" y1="6" x2="32" y2="15"/>
+          <rect x="13" y="27" width="10" height="8" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <h2>Book a Court</h2>
+      <p>Pick your slot, pick your court, pay at the club. Padel and
+         pickleball, 4 PM to midnight.</p>
+      <span class="badge">Coming soon</span>
+    </a>
+
+    <!-- TO LAUNCH: remove `soon`, add href="https://shop.urbanpadel.om" -->
+    <a class="svc soon tick" aria-disabled="true">
+      <span class="ico">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+          <path d="M10 16 h28 l3 25 H7 z"/>
+          <path d="M18 16 v-3.5 a6 6 0 0 1 12 0 V16"/>
+        </svg>
+      </span>
+      <h2>The Shop</h2>
+      <p>Rackets, balls, grips and club kit: the gear we play with, ready
+         to collect at the courts.</p>
+      <span class="badge">Coming soon</span>
+    </a>
+
+  </div>
+
+  <!-- ── ARCHIVE ─────────────────────────────────────────────── -->
+  <div class="sec q"><span>THE ARCHIVE</span><div class="line"></div></div>
+
+  <div class="archive tick">
+    <a class="arch-row" href="https://surge.urbanpadel.om">
+      <span class="arch-vol">V.7</span>
+      <span class="arch-name">SEPTEMBER SURGE<small>September 2026 · 8 sessions · Champion <em>Hamed Amri</em></small></span>
+      <span class="arch-cta">FINAL TABLE →</span>
+    </a>
+    <a class="arch-row" href="https://attack.urbanpadel.om">
+      <span class="arch-vol">V.6</span>
+      <span class="arch-name">AUGUST ATTACK<small>August 2026 · 9 sessions · Champion <em>Muntaser Hasni</em></small></span>
+      <span class="arch-cta">FINAL TABLE →</span>
+    </a>
+    <a class="arch-row" href="https://heat.urbanpadel.om">
+      <span class="arch-vol">V.5</span>
+      <span class="arch-name">JULY HEAT<small>July 2026 · 9 sessions · Champion <em>Muntaser Hasni</em></small></span>
+      <span class="arch-cta">FINAL TABLE →</span>
+    </a>
+    <a class="arch-row" href="https://june.urbanpadel.om">
+      <span class="arch-vol">V.4</span>
+      <span class="arch-name">JUNE FURY<small>June 2026 · Knockout brackets · Archived</small></span>
+      <span class="arch-cta">RESULTS →</span>
+    </a>
+  </div>
+
+  <div class="foot">
+    <span class="foot-l">URBANPADEL.OM</span>
+    <span class="foot-r">
+      <a href="mailto:info@urbanpadel.om">info@urbanpadel.om</a><br>
+      Muscat, Oman · 2026
+    </span>
+  </div>
+
+</div>
+
+<!-- api.whatsapp.com/send takes the number in full international form with no
+     +, spaces or dashes: 968 (Oman) + 99534433. (BHD rule: never wa.me.) -->
+<a class="wa" href="https://api.whatsapp.com/send?phone=96899534433"
+   target="_blank" rel="noopener"
+   aria-label="Chat with Urban Playground on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+
+<script>
+/* Keep the WhatsApp button and the ENTER button apart. When ENTER's box,
+   plus a 16px margin, shares any vertical space with the WhatsApp button,
+   the WhatsApp button tucks away; it comes back as soon as ENTER scrolls on. */
+(function () {
+  var wa = document.querySelector('.wa'), cta = document.querySelector('.cta');
+  if (!wa || !cta) return;
+  var pending = false;
+  function check() {
+    pending = false;
+    var c = cta.getBoundingClientRect();
+    var h = wa.offsetHeight, bottomGap = parseFloat(getComputedStyle(wa).bottom) || 16;
+    var waTop = window.innerHeight - bottomGap - h, waBottom = waTop + h;
+    var clash = c.bottom + 16 > waTop && c.top - 16 < waBottom;
+    wa.classList.toggle('tuck', clash);
+  }
+  function queue() { if (!pending) { pending = true; requestAnimationFrame(check); } }
+  addEventListener('scroll', queue, { passive: true });
+  addEventListener('resize', queue);
+  addEventListener('load', queue);
+  check();
+})();
+</script>
+
+</body>
+</html>

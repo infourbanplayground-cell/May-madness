@@ -26,7 +26,27 @@ sleep 4 && grep Connected /tmp/chisel.log
 | IP | 76.13.221.95 (Hostinger KVM1, Ubuntu 24.04, KL) |
 | SSH user | root |
 | Web root | `/var/www/urbanpadel.om/public` |
-| Main site | https://urbanpadel.om (Coming Soon placeholder) |
+| Main site | https://urbanpadel.om (the club's front door — see below) |
+
+## The Front Door (urbanpadel.om)
+
+- Source: **`landing/index.html`** — deploy with `bash ops/deploy-landing.sh`.
+  It lived only on the server until Oct 2026, so the one page every visitor sees
+  first had no history; edit the repo copy, never the file on the VPS.
+- Shape: NOW PLAYING (the running volume, as a hero panel) → THE CLUB (book /
+  shop, both Coming Soon) → THE ARCHIVE (every finished volume, newest first).
+- **Rolling a volume over** means three edits: point the NOW PLAYING block at the
+  new app, add the finished one to the top of THE ARCHIVE with its champion, and
+  move the `--live` token to the new volume's accent. `--live` covers everything
+  except a few `rgba()` glows that need the colour as components — search for the
+  old accent's `rgba(` triple and move those too, or the panel glows stay the
+  previous volume's colour around the new one's lockup.
+- The hero wants the **stacked** lockup (`brand/<vol>/*-stack.*`), not the
+  horizontal one: at `max-width:430px` a 3.7:1 lockup stands 117px high and reads
+  as an afterthought in the one place it is the hero. Stacked it stands 242.
+- The deploy script verifies the live art is **byte-identical** to the local
+  file, not merely 200: Cloudflare will happily serve a cached copy of the old
+  art, which looks exactly like a successful deploy.
 
 ## Owner's Apps
 
@@ -111,7 +131,17 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   so the API's own migrations can ALTER them without a superuser.
 - Brand art: `brand/blackout/` — lime `#C6FF00` leads, magenta `#FF2E88` accents,
   true black `#050505`, **radius 0 everywhere** except deliberate circles. The
-  lockup is served WebP-first (50KB vs 492KB as PNG).
+  lockup is served WebP-first (45KB vs 481KB as PNG). Rebuild all of it with
+  `python3 build-blackout-brand.py && node render-blackout-brand.mjs && python3 ops/make-brand-webp.py`
+  — the WebP step is not optional, a stale WebP beside a fixed PNG ships the old
+  art to every browser made in the last decade.
+- Display type in the brand art is **shrink-to-fit** (`data-fit="<px>"`, applied
+  by the renderer *after* `document.fonts.ready`, since the fallback face
+  measures narrower than Archivo at `wdth` 125). The renderer also fails any page
+  whose content runs off its own canvas — the stacked lockup first shipped with
+  the B and the T of BLACKOUT sliced off by the edge of the bitmap, and every
+  assertion passed, because they were all about the font and none about where the
+  ink landed.
 - Build + deploy:
   ```bash
   python3 build-blackout-app.py && bash ops/deploy-blackout.sh

@@ -58,6 +58,33 @@ MARK = open(os.path.join(BRAND, "blackout-mark.svg")).read()
 MARK_B64 = base64.b64encode(MARK.encode()).decode()
 
 
+FIT_SCRIPT = r"""<script>
+// Shrink-to-fit for display type. An element carrying data-fit="<px>" is
+// stepped down until it is no wider than that, so a wordmark can never run off
+// its own canvas -- which is exactly how the stacked lockup first shipped with
+// the B and the T sliced off.
+//
+// The renderer calls this AFTER document.fonts.ready rather than letting it run
+// on parse: measured in the fallback face the numbers are meaningless, and the
+// display face is both italic and at 'wdth' 125, so it is far wider than
+// anything the browser would substitute.
+window.__fit = function () {
+  var out = {};
+  document.querySelectorAll('[data-fit]').forEach(function (el, i) {
+    var max = parseFloat(el.dataset.fit);
+    var fs = parseFloat(getComputedStyle(el).fontSize);
+    var guard = 0;
+    while (el.getBoundingClientRect().width > max && fs > 8 && guard++ < 500) {
+      fs -= 1;
+      el.style.fontSize = fs + 'px';
+    }
+    out[el.className + '#' + i] = Math.round(fs);
+  });
+  return out;
+};
+</script>"""
+
+
 def head(w, h, bg=BG):
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {faces()}
@@ -72,7 +99,7 @@ html,body{{width:{w}px;height:{h}px;background:{bg};overflow:hidden;
 .d{{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;line-height:.84;
   letter-spacing:-.5px}}
 .k{{font-weight:800;text-transform:uppercase;letter-spacing:.28em;color:{MUTED}}}
-</style></head><body><div class="glow"></div><div class="scan"></div>"""
+</style>{FIT_SCRIPT}</head><body><div class="glow"></div><div class="scan"></div>"""
 
 
 def lockup():
@@ -83,8 +110,28 @@ def lockup():
   <img src="data:image/svg+xml;base64,{MARK_B64}" style="width:188px;height:188px;display:block">
   <div style="width:2px;height:206px;background:rgba(255,255,255,.14)"></div>
   <div>
-    <div class="d" style="font-size:152px;color:{INK}">BLACK<span style="color:{LIME}">OUT</span></div>
-    <div class="k" style="font-size:25px;margin-top:20px">SERIES &middot; URBAN SOCIAL SERIES &middot; VOL.8</div>
+    <div class="d" data-fit="1100" style="display:inline-block;font-size:152px;color:{INK}">BLACK<span style="color:{LIME}">OUT</span></div>
+    <div class="k" data-fit="1100" style="display:inline-block;font-size:25px;margin-top:20px">SERIES &middot; URBAN SOCIAL SERIES &middot; VOL.8</div>
+  </div>
+</div></body></html>"""
+
+
+def stack():
+    """Stacked lockup for the club's front door.
+
+    The horizontal lockup is 3.7:1. The landing page sizes the running volume's
+    mark at max-width 430px inside a tall panel, where Surge's 2.1:1 lockup
+    stood 202px high; the wide one would stand 117 and read as an afterthought
+    in the one place it is the hero. Same parts, stacked.
+    """
+    w, h = 1100, 620
+    return head(w, h) + f"""
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;gap:34px">
+  <img src="data:image/svg+xml;base64,{MARK_B64}" style="width:150px;height:150px;display:block">
+  <div style="text-align:center">
+    <div class="d" data-fit="980" style="display:inline-block;font-size:168px;color:{INK}">BLACK<span style="color:{LIME}">OUT</span></div>
+    <div class="k" data-fit="980" style="display:inline-block;font-size:26px;margin-top:22px">SERIES &middot; URBAN SOCIAL SERIES &middot; VOL.8</div>
   </div>
 </div></body></html>"""
 
@@ -139,6 +186,7 @@ def main():
     pool = cfg["voucher"] * 2 * cfg["sessions"] + sum(cfg["seasonPrizes"])
     pages = {
         "blackout-lockup": lockup(),
+        "blackout-stack": stack(),
         "blackout-icon": icon(),
         "blackout-og": og().replace("__POOL__", str(pool)),
         "blackout-mark": mark_png(),
