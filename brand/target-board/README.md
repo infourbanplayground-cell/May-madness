@@ -5,9 +5,29 @@ bullseye. The ball has to pass through to score, so nothing is judged by eye and
 nothing gets argued about.
 
 **House branding, not a volume's.** The Urban Playground emblem, dark ground,
-cyan. No September Surge lockup and no Vol.7 wordmark — the board is a fixture
-that outlives any one season, and anything season-specific would date it the
-moment the volume turns over.
+one accent. No volume lockup and no wordmark — the board is a fixture that
+outlives any one season, and anything season-specific would date it the moment
+the volume turns over.
+
+**The accent is the one exception, and it is a named livery.** The first board
+was cyan, which was September Surge's colour; the moment Vol.7 was archived the
+fixture was wearing a retired volume's livery. So the palette is selectable and
+nothing else changes with it:
+
+```bash
+python3 build-target-board.py                 # blackout — lime, the default
+LIVERY=house python3 build-target-board.py    # the original cyan
+node render-target-board.mjs
+```
+
+Each livery carries the club's own emblem in its own finish — white with the
+orange ball for blackout, the cyan mark for house. The aspect ratio is read off
+the file rather than assumed: the two are different shapes (324x505 and
+768x1130), and the hard-coded ratio silently stretched whichever one it was not
+written for.
+
+The **cut file is livery-independent** — it is geometry, and one hole is one
+hole whatever colour the rings are.
 
 ## Files
 
@@ -19,6 +39,10 @@ moment the volume turns over.
 | `deadeye-cutfile.png` | preview of the cut geometry |
 
 Rebuild: `python3 build-target-board.py && node render-target-board.mjs`
+(prefix `LIVERY=house` for cyan). The fonts are inlined from the repo-side
+bundle; the original build read them from `/tmp`, which does not survive a new
+container, and a print file you cannot rebuild is a print file you cannot
+correct.
 
 ## The hole
 

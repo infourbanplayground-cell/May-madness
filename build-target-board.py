@@ -4,10 +4,16 @@
 One hole, dead centre, inside a printed bullseye. The ball has to pass through
 to score, so nothing is judged by eye and nobody argues.
 
-House branding, not a volume's: the Urban Playground emblem, dark ground, cyan.
-No September Surge lockup, no Vol.7 wordmark, and none of Vol.7's surge trace —
-the board is a fixture that outlives any one season, and anything season-specific
-would date it the moment the volume turns over.
+House branding, not a volume's: the Urban Playground emblem, dark ground, one
+accent. No volume lockup and no wordmark — the board is a fixture that outlives
+any one season, and anything season-specific would date it the moment the volume
+turns over.
+
+The ACCENT is the exception, and it is deliberate. The first board was cyan,
+which was September Surge's colour, and the moment Vol.7 was archived the fixture
+was wearing a retired volume's livery. So the palette is a named livery now
+(LIVERY=blackout, the default, or LIVERY=house for the original cyan): the rings
+pick up whatever is on court, and nothing else about the board changes.
 
 Three outputs, because a fabricator needs three different things:
 
@@ -23,22 +29,47 @@ against the largest legal ball.
   python3 build-target-board.py
   node render-target-board.mjs
 """
-import base64, os
+import base64, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-FONT_BUNDLE = "/tmp/certs/fonts/bundle.css"
-BRAND = os.path.join(HERE, "brand", "september-surge")   # where the UP mark lives
+SP = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad"
+FONTS = os.path.join(SP, "video", "fonts")
+FONT_BUNDLE = "/tmp/certs/fonts/bundle.css"      # the original location, if it survives
 OUT = os.path.join(HERE, "brand", "target-board")
 
 W, H = 1200.0, 2000.0            # mm
 BALL_MAX = 67.7                  # mm, largest legal padel ball
 
-INK          = "#0A0F14"
-VOID         = "#050709"
-CYAN         = "#00E5FF"
-CHALK        = "#F4F9FA"
-DEEP_STEEL   = "#5C6B78"
+# Liveries. Only the accent, the grounds and which emblem file is used change —
+# the geometry, the type and the wording are identical, because the board is the
+# same fixture whichever volume is running.
+LIVERIES = {
+    "house": dict(
+        accent="#00E5FF", ink="#0A0F14", void="#050709", lift="#121B23",
+        chalk="#F4F9FA", muted="#5C6B78",
+        emblem=os.path.join("brand", "september-surge", "up-logo-cyan-2x.png"),
+    ),
+    "blackout": dict(
+        accent="#C6FF00", ink="#050505", void="#000000", lift="#121212",
+        chalk="#F2F2F2", muted="#6E6E6E",
+        emblem=os.path.join("brand", "blackout", "up-logo-tight.png"),
+    ),
+}
+LIVERY = os.environ.get("LIVERY", "blackout")
+if LIVERY not in LIVERIES:
+    sys.exit(f"unknown livery {LIVERY!r} — one of {', '.join(LIVERIES)}")
+L = LIVERIES[LIVERY]
+
+INK          = L["ink"]
+VOID         = L["void"]
+CYAN         = L["accent"]       # the accent, whatever this livery calls it
+CHALK        = L["chalk"]
+DEEP_STEEL   = L["muted"]
 CUT          = "#FF00FF"         # the fabricator's cut colour, never printed
+
+_ew, _eh = __import__("PIL.Image", fromlist=["Image"]).open(
+    os.path.join(HERE, L["emblem"])).size
+EMBLEM_RATIO = _eh / _ew
 
 HOLE_D = 120.0                   # 1.77x ball — 52mm of clearance
 CX, CY = 600.0, 1160.0           # 840mm off the floor with the board standing
@@ -55,6 +86,31 @@ BANDS = [(430, 0.09), (350, 0.00), (280, 0.17), (210, 0.00), (140, 0.30)]
 def b64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
+
+
+def faces():
+    """The font faces, inlined.
+
+    The original build read a bundle from /tmp, which does not survive a new
+    container — a print file that cannot be rebuilt is a print file you cannot
+    correct. Falls back to the repo-side fonts the rest of the art uses.
+    """
+    if os.path.exists(FONT_BUNDLE):
+        css = open(FONT_BUNDLE).read()
+        if "url(data:" in css:
+            return css
+    css = open(os.path.join(FONTS, "fonts.css")).read()
+    seen = {}
+
+    def sub(m):
+        n = m.group(1)
+        if n not in seen:
+            seen[n] = b64(os.path.join(FONTS, n))
+        return "url(data:font/woff2;base64,%s) format('woff2')" % seen[n]
+
+    css = re.sub(r"url\(([0-9a-f]+\.woff2)\)\s*format\('woff2'\)", sub, css)
+    assert ".woff2)" not in css, "a font file was left as an external reference"
+    return css
 
 
 def bullseye():
@@ -118,7 +174,7 @@ def board_svg(emblem_b64, cut_only=False):
 
     # ── artwork ───────────────────────────────────────────────────────────
     p.append(f'<defs><radialGradient id="g" cx="50%" cy="57%" r="64%">'
-             f'<stop offset="0%" stop-color="#121B23"/>'
+             f'<stop offset="0%" stop-color="{L["lift"]}"/>'
              f'<stop offset="100%" stop-color="{INK}"/></radialGradient></defs>')
     p.append(f'<rect width="{W}" height="{H}" fill="url(#g)"/>')
 
@@ -128,8 +184,11 @@ def board_svg(emblem_b64, cut_only=False):
     p.append(f'<rect x="26" y="{H-40}" width="{W-52}" height="8" fill="{CYAN}"/>')
 
     # ── header: the house mark, then the game ─────────────────────────────
+    # The ratio is read off the file. It used to be hard-coded to the cyan
+    # emblem's 768x1130, which silently stretches any other emblem — the house
+    # one is 324x505, a different shape.
     ew = 130.0
-    eh = ew * 1130 / 768
+    eh = ew * EMBLEM_RATIO
     p.append(f'<image href="data:image/png;base64,{emblem_b64}" '
              f'x="{(W-ew)/2:.0f}" y="86" width="{ew:.0f}" height="{eh:.0f}" '
              f'preserveAspectRatio="xMidYMid meet"/>')
@@ -163,10 +222,9 @@ def board_svg(emblem_b64, cut_only=False):
 
 
 def build_html(emblem_b64, cut_only):
-    faces = open(FONT_BUNDLE).read()
     bg = "#FFFFFF" if cut_only else INK
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
-{faces}
+{faces()}
 @page {{ size: {W}mm {H}mm; margin: 0; }}
 *{{margin:0;padding:0;}}
 html,body{{width:{W}mm;height:{H}mm;background:{bg};overflow:hidden;
@@ -179,12 +237,12 @@ svg{{display:block;}}
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    emblem = b64(os.path.join(BRAND, "up-logo-cyan-2x.png"))
+    emblem = b64(os.path.join(HERE, L["emblem"]))
     for cut_only, name in ((False, "deadeye-board"), (True, "deadeye-cutfile")):
         with open(os.path.join(OUT, name + ".html"), "w") as f:
             f.write(build_html(emblem, cut_only))
         print(f"built {name}.html")
-    print(f"\nboard {W:.0f} x {H:.0f}mm, 1 hole")
+    print(f"\nboard {W:.0f} x {H:.0f}mm, 1 hole   livery {LIVERY} ({L['accent']})")
     print(f"  ø{HOLE_D:.0f}mm at ({CX:.0f},{CY:.0f})  {H-CY:.0f}mm off the floor  "
           f"{HOLE_D/BALL_MAX:.2f}x ball  ({HOLE_D-BALL_MAX:.1f}mm clearance)")
     print(f"  bullseye outer ø{BANDS[0][0]*2:.0f}mm")
