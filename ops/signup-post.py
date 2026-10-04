@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """The WhatsApp sign-up sheet for a Blackout night.
 
+WhatsApp gives you *bold*, _italic_ and emoji, and that is the whole of it —
+there is no colour. So the volume's palette is carried by the only three
+coloured squares that match it (🟩 lime, 💗 magenta, 🟪 UV) and nothing else;
+a post wearing six unrelated emoji reads as spam rather than as a series.
+
 The app generates this itself once a session exists (generateReminderText), but
 the first night's sheet has to go out BEFORE anyone has created the session —
 and so does every night's, if the organiser wants it posted early. This writes
@@ -38,40 +43,61 @@ def main():
     left = len(nights) - n
     date_str = d.strftime("%a %-d %b")
 
+    # ── the season strip ─────────────────────────────────────────────────
+    # WhatsApp has no colour. Emoji are the only palette there is, and the
+    # volume's three happen to exist as squares: 🟩 lime, 💗 magenta, 🟪 UV.
+    # Using those three and nothing else keeps the post in the series' colours
+    # instead of the usual confetti of unrelated emoji.
+    #
+    # The strip is the season's lights coming on, which is the one device that
+    # could only belong to a volume called Blackout: a night that has been
+    # played is lit, a night still to come is dark, and the double-points
+    # nights are magenta from the start because everyone should see them
+    # coming. On night 1 it reads 🟩⬛⬛⬛⬛⬛⬛💗💗.
+    strip = ""
+    for i in range(1, len(nights) + 1):
+        if i >= cfg["doubleFromSession"]:
+            strip += "💗"
+        elif i <= n:
+            strip += "🟩"
+        else:
+            strip += "⬛"
+
+    RULE = "━━━━━━━━━━━━━━"
+
     L = []
-    L.append(f"🔥 *{cfg['name']} · Session {n}* 🔥")
+    L.append(f"⬛🟩 *{cfg['nameTitle'].upper()} · NIGHT {n}* 🟩⬛")
     L.append(f"_Urban Social Series · {cfg['volume']}_")
     L.append("")
+    L.append(strip)
+    L.append(f"_night {n} of {len(nights)}  ·  💗 = double points_")
+    L.append("")
+    L.append(RULE)
     if dbl:
-        L.append("*⚡ DOUBLE POINTS ⚡ DOUBLE POINTS ⚡ DOUBLE POINTS*")
+        L.append("💗 *DOUBLE POINTS TONIGHT* 💗")
+        L.append("_every point counts twice_")
         L.append("")
     L.append("📍 Urban Playground")
-    L.append(f"🗓️ {date_str} · 5:30 PM")
+    L.append(f"🗓️ {date_str}  ·  5:30 PM")
     L.append(f"💸 {cfg['entry']} OMR")
-    L.append("")
-    L.append(f"🏆 Win = {cfg['voucher']} OMR voucher per player")
-    if dbl:
-        L.append("🔥🔥 *EVERY POINT COUNTS TWICE — leaderboard about to FLIP* 🔥🔥")
+    L.append(f"🏆 {cfg['voucher']} OMR voucher — each winner")
     if n == 1:
-        # Night one has no standings to tease and no sessions behind it, so it
-        # gets the thing that is actually true of it: everyone starts level.
-        L.append(f"📊 {len(nights)} nights · season starts at zero tonight")
-        L.append(f"🥇 Season top 3: {' / '.join(str(p) for p in cfg['seasonPrizes'])} OMR")
+        L.append(f"🥇 Season top 3 — {' / '.join(str(p) for p in cfg['seasonPrizes'])} OMR")
     elif left > 0:
-        L.append(f"📊 {left} session{'s' if left != 1 else ''} left · "
-                 f"this is where champions are made")
+        L.append(f"📊 {left} night{'s' if left != 1 else ''} left after tonight")
+    L.append(RULE)
     L.append("")
-    L.append(f"🎾 Full table & your own rank: https://{cfg['host']}")
+    L.append(f"🎾 Table & your rank: https://{cfg['host']}")
     L.append("")
-    L.append("Drop name + partner below 👇")
+    L.append("*Drop name + partner* 👇")
     L.append("")
     L += [f"{i}-" for i in range(1, MAX_TEAMS + 1)]
     L.append("")
-    L.append("⏳ Waitlist")
+    L.append("🟪 *WAITLIST*")
     L += [f"{i}-" for i in range(1, WL_SIZE + 1)]
     L.append("")
     L.append(f"⚠️ *{MAX_TEAMS} teams max* · first come, first served")
-    L.append("💥 *Lights out.* 👑")
+    L.append("💥 *LIGHTS OUT.*")
 
     out = "\n".join(L)
     print(out)
