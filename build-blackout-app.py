@@ -313,7 +313,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.SHARE + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -330,6 +330,9 @@ def add_screens(s, report):
                            ("countdown", SCREENS.DASH_ANCHOR_OLD, SCREENS.DASH_ANCHOR_NEW),
                            ("recap+prizes", SCREENS.DASH_TAIL_OLD, SCREENS.DASH_TAIL_NEW),
                            ("mvp open", SCREENS.MVP_OLD, SCREENS.MVP_NEW),
+                           ("line-up state", SCREENS.LU_STATE_OLD, SCREENS.LU_STATE_NEW),
+                           ("line-up chip", SCREENS.LU_ACT_OLD, SCREENS.LU_ACT_NEW),
+                           ("line-up sheet", SCREENS.LU_MOUNT_OLD, SCREENS.LU_MOUNT_NEW),
                            ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
                            ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
                            ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),

@@ -2214,3 +2214,328 @@ COUNT_ME_OLD = '''            <div style={{ fontFamily: "'JetBrains Mono',monosp
                           lineHeight: 1, color: "#C6FF00" }}>{data.total}</div>'''
 COUNT_ME_NEW = '''            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 62,
                           lineHeight: 1, color: "#C6FF00" }}><CountUp to={data.total} /></div>'''
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 10 · LINE-UP STORY CARDS — the semi-finals and the final
+# ══════════════════════════════════════════════════════════════════════════
+#
+# The design handover shipped these as a separate file, `Semi-Final Story`, and
+# nothing in the app ever used it: 1080x1920, a photo slot with a colour grade
+# over it, SEMI / FINAL in display type, the two teams on plates and the pool
+# across the foot. This is that template, driven by the bracket.
+#
+# It is a LINE-UP card, not a result card — it goes out when the draw is known
+# and the match has not been played, which is the moment people actually want to
+# post. The four existing share cards are all after the fact.
+#
+# Three things worth knowing:
+#
+# The photo is OPTIONAL and the card is designed to work without one. Session
+# photos live on Cloudinary, so drawing one into the canvas is a cross-origin
+# draw; if the CDN does not send CORS headers the canvas is tainted and
+# toDataURL throws. That is caught and the card is repainted without the photo
+# rather than failing.
+#
+# Canvas cannot set `font-variation-settings`, so the display type here is at
+# Archivo's default width, not 'wdth' 125 — the same compromise the other share
+# cards make.
+#
+# The pool is derived from the same constants the app uses everywhere else. The
+# handover's own artwork says 402 OMR, which does not add up from its parts;
+# nothing here types a total.
+
+LINEUP = r"""
+const LU_W = 1080, LU_H = 1920;
+
+function luImg(src) {
+  return new Promise(res => {
+    if (!src) return res(null);
+    const im = new Image();
+    im.crossOrigin = "anonymous";
+    im.onload = () => res(im);
+    im.onerror = () => res(null);
+    im.src = src;
+  });
+}
+
+// Cover-fit, the way CSS background-size:cover does it: fill the box, crop the
+// overflow, never distort faces.
+function luCover(g, im, x, y, w, h) {
+  const r = Math.max(w / im.width, h / im.height);
+  const dw = im.width * r, dh = im.height * r;
+  g.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+}
+
+function luPaint(g, kind, d, im) {
+  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);
+
+  // ── the photo, and the grade that makes any photo look like this volume ──
+  if (im) {
+    const top = 420, hh = 1140;
+    g.save();
+    g.beginPath(); g.rect(0, top, LU_W, hh); g.clip();
+    luCover(g, im, 0, top, LU_W, hh);
+    // desaturate, then push the brand's two colours in from the two edges
+    g.globalCompositeOperation = "saturation";
+    g.fillStyle = "#1a1a1a"; g.globalAlpha = 0.85;
+    g.fillRect(0, top, LU_W, hh);
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "screen";
+    let lr = g.createLinearGradient(0, 0, LU_W, 0);
+    lr.addColorStop(0, "rgba(255,46,136,.55)");
+    lr.addColorStop(0.38, "rgba(255,46,136,0)");
+    lr.addColorStop(0.62, "rgba(198,255,0,0)");
+    lr.addColorStop(1, "rgba(198,255,0,.45)");
+    g.fillStyle = lr; g.fillRect(0, top, LU_W, hh);
+    g.restore();
+    // fade the photo into the ground at both ends, so it has no visible edge
+    let vg = g.createLinearGradient(0, top, 0, top + hh);
+    vg.addColorStop(0, "#050505");
+    vg.addColorStop(0.18, "rgba(5,5,5,0)");
+    vg.addColorStop(0.62, "rgba(5,5,5,0)");
+    vg.addColorStop(1, "#050505");
+    g.fillStyle = vg; g.fillRect(0, top, LU_W, hh);
+  } else {
+    // No photo: the corner washes the rest of the brand uses, so the card is
+    // never a flat black rectangle.
+    let rg = g.createRadialGradient(LU_W, LU_H * 0.16, 0, LU_W, LU_H * 0.16, LU_W);
+    rg.addColorStop(0, "rgba(255,46,136,.22)"); rg.addColorStop(1, "rgba(255,46,136,0)");
+    g.fillStyle = rg; g.fillRect(0, 0, LU_W, LU_H);
+    rg = g.createRadialGradient(0, LU_H * 0.9, 0, 0, LU_H * 0.9, LU_W);
+    rg.addColorStop(0, "rgba(198,255,0,.12)"); rg.addColorStop(1, "rgba(198,255,0,0)");
+    g.fillStyle = rg; g.fillRect(0, 0, LU_W, LU_H);
+  }
+
+  // scanlines over everything
+  g.fillStyle = "rgba(198,255,0,.055)";
+  for (let y = 0; y < LU_H; y += 10) g.fillRect(0, y, LU_W, 2);
+  g.fillStyle = "#C6FF00"; g.fillRect(0, 0, LU_W, 10);
+
+  const L = 80, R = LU_W - 80, W = R - L;
+
+  // ── header ──
+  g.fillStyle = "#C6FF00"; g.fillRect(L, 146, 16, 16);
+  stMono(g, "BLACKOUT SERIES · VOL.8", L + 40, 161, 26, "#C6FF00", 6);
+
+  const big = kind === "final" ? ["THE", "FINAL"] : ["SEMI", "FINAL"];
+  stDisp(g, big[0], L, 350, 164, "#F2F2F2", W);
+  stDisp(g, big[1], L, 500, 164, "#C6FF00", W);
+
+  // ── the two plates, sitting on the floor of the card ──
+  const plate = (y, name, chip, colour) => {
+    g.fillStyle = "rgba(15,15,15,.92)";
+    g.fillRect(L, y, W, 150);
+    g.strokeStyle = colour; g.lineWidth = 3;
+    g.strokeRect(L + 1.5, y + 1.5, W - 3, 147);
+    const room = W - 72 - (chip ? 140 : 0);
+    const size = stFit(g, name, room, 56, 900);
+    g.font = `italic 900 ${size}px Archivo, sans-serif`;
+    g.fillStyle = "#F2F2F2";
+    g.fillText(name, L + 36, y + 95);
+    if (chip) {
+      g.font = '700 26px "JetBrains Mono", monospace';
+      g.fillStyle = colour;
+      g.fillText(chip, R - 36 - g.measureText(chip).width, y + 92);
+    }
+  };
+
+  const baseY = 1270;
+  plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
+  g.font = '900 30px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
+  {
+    const t = "V S";
+    g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + 222);
+  }
+  plate(baseY + 260, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
+
+  // ── footer ──
+  stMono(g, d.foot || "", L, LU_H - 150, 28, "#8A8A8A", 6);
+  g.font = '800 28px Archivo, sans-serif'; g.fillStyle = "#C6FF00";
+  {
+    const t = `${d.pool} OMR`;
+    g.fillText(t, R - g.measureText(t).width, LU_H - 150);
+  }
+}
+
+// Returns a data URL. The photo may taint the canvas, which only shows up at
+// toDataURL, so the fallback is a clean repaint without it rather than an error.
+async function drawLineup(kind, d, photo) {
+  const im = await luImg(photo);
+  const mk = (img) => {
+    const c = document.createElement("canvas");
+    c.width = LU_W; c.height = LU_H;
+    luPaint(c.getContext("2d"), kind, d, img);
+    return c;
+  };
+  try {
+    return mk(im).toDataURL("image/png");
+  } catch (e) {
+    return mk(null).toDataURL("image/png");
+  }
+}
+
+// Every line-up this session can show: each semi with both teams known, then
+// the final. Built from the bracket, so it cannot disagree with the draw.
+function buildLineups(session, state, pool) {
+  const teams = session.teams || [];
+  const nm = id => {
+    const t = teams.find(x => x.id === id);
+    if (!t) return "";
+    // First names, as the handover's own template shows them: two full names
+    // on one plate shrink to the point where neither is readable in a story.
+    const f = pid => (((state.players || []).find(p => p.id === pid) || {}).name || "?")
+                       .split(" ")[0];
+    return `${f(t.p1Id)} & ${f(t.p2Id)}`;
+  };
+  const grp = id => {
+    const t = teams.find(x => x.id === id);
+    return t && t.group ? "GRP " + t.group : "";
+  };
+  // The session's own name is what everyone calls it; fall back to its position
+  // only when the name carries no number.
+  const named = (session.name || "").match(/\d+/);
+  const no = named ? Number(named[0])
+                   : (state.sessions || []).findIndex(s => s.id === session.id) + 1;
+  const foot = `NIGHT ${String(no).padStart(2, "0")}`;
+  const out = [];
+  const b = session.bracket || {};
+  (b.sf || []).forEach((m, i) => {
+    if (!m || !m.team1Id || !m.team2Id) return;
+    out.push({
+      key: "sf" + i, kind: "semi", label: `SEMI ${i + 1}`,
+      a: nm(m.team1Id), b: nm(m.team2Id), aChip: grp(m.team1Id), bChip: grp(m.team2Id),
+      foot, pool,
+      caption: `Semi-final ${i + 1} tonight — ${nm(m.team1Id)} vs ${nm(m.team2Id)}. `
+             + `Night ${no} of the Blackout Series. blackout.urbanpadel.om`,
+    });
+  });
+  const f = b.final;
+  if (f && f.team1Id && f.team2Id) {
+    out.push({
+      key: "final", kind: "final", label: "FINAL",
+      a: nm(f.team1Id), b: nm(f.team2Id), aChip: grp(f.team1Id), bChip: grp(f.team2Id),
+      foot, pool,
+      caption: `The final — ${nm(f.team1Id)} vs ${nm(f.team2Id)}. `
+             + `Night ${no} of the Blackout Series. blackout.urbanpadel.om`,
+    });
+  }
+  return out;
+}
+
+function LineupSheet({ open, items, photos, onClose }) {
+  const [i, setI] = React.useState(0);
+  const [ph, setPh] = React.useState(-1);          // -1 = no photo
+  const [url, setUrl] = React.useState("");
+  const [flash, setFlash] = React.useState("");
+  React.useEffect(() => { if (open) { setI(0); setPh(-1); } }, [open]);
+  const item = items[i];
+  React.useEffect(() => {
+    if (!open || !item) return;
+    let alive = true;
+    setUrl("");
+    // The display face has to be in before the canvas measures anything, or the
+    // card is laid out against a fallback and the names overrun their plates.
+    document.fonts.ready
+      .then(() => drawLineup(item.kind, item, ph >= 0 ? photos[ph] : null))
+      .then(u => { if (alive) setUrl(u); });
+    return () => { alive = false; };
+  }, [open, i, ph, items, photos]);
+  if (!open || !item) return null;
+
+  const save = async () => {
+    try {
+      const blob = await (await fetch(url)).blob();
+      const f = new File([blob], `blackout-${item.key}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) {
+        await navigator.share({ files: [f], title: "Blackout Series" });
+        return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a");
+    a.href = url; a.download = `blackout-${item.key}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setFlash("SAVED"); setTimeout(() => setFlash(""), 1600);
+  };
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(item.caption || ""); setFlash("CAPTION COPIED"); }
+    catch (e) { setFlash("COULDN'T COPY"); }
+    setTimeout(() => setFlash(""), 1600);
+  };
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 90,
+      background: "rgba(5,5,5,.9)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0A0A0A", width: "100%",
+        maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
+        <div style={{ display: "grid",
+                      gridTemplateColumns: `repeat(${Math.min(items.length, 4)},1fr)`, gap: 6 }}>
+          {items.map((it, k) => (
+            <button key={it.key} onClick={() => setI(k)} style={{ padding: "10px 4px", cursor: "pointer",
+              background: i === k ? "#C6FF00" : "transparent",
+              color: i === k ? "#050505" : "#9A9A9A",
+              border: "1px solid " + (i === k ? "#C6FF00" : "rgba(110,110,110,.3)"),
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+              letterSpacing: ".12em" }}>{it.label}</button>
+          ))}
+        </div>
+
+        {photos.length > 0 && (
+          <button onClick={() => setPh(p => (p + 2 > photos.length ? -1 : p + 1))}
+            style={{ width: "100%", marginTop: 8, padding: "10px", cursor: "pointer",
+              background: "transparent", color: ph >= 0 ? "#C6FF00" : "#9A9A9A",
+              border: "1px solid " + (ph >= 0 ? "rgba(198,255,0,.45)" : "rgba(110,110,110,.3)"),
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+              letterSpacing: ".12em" }}>
+            {ph >= 0 ? `PHOTO ${ph + 1} / ${photos.length} — TAP TO CHANGE` : "ADD A PHOTO FROM TONIGHT"}
+          </button>
+        )}
+
+        <div style={{ display: "flex", justifyContent: "center", margin: "16px 0" }}>
+          {url
+            ? <img src={url} alt="" style={{ width: 270, height: 480, display: "block",
+                                             border: "1px solid rgba(110,110,110,.3)" }} />
+            : <div style={{ width: 270, height: 480, background: "#111" }} />}
+        </div>
+        <div style={{ fontSize: 11, color: "#6E6E6E", textAlign: "center", marginBottom: 12 }}>
+          Preview is the actual 1080&times;1920 file, shown small.
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <button onClick={save} style={{ padding: "16px", background: "#C6FF00", color: "#050505",
+            border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
+            fontWeight: 700, fontSize: 11, letterSpacing: ".14em" }}>SHARE / SAVE</button>
+          <button onClick={copy} style={{ padding: "16px", background: "transparent", color: "#C6FF00",
+            border: "1px solid rgba(198,255,0,.45)", cursor: "pointer",
+            fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+            letterSpacing: ".14em" }}>COPY CAPTION</button>
+        </div>
+        {flash && <div style={{ textAlign: "center", color: "#C6FF00", marginTop: 10,
+          fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: ".14em" }}>{flash}</div>}
+        <button onClick={onClose} style={{ width: "100%", marginTop: 10, padding: "12px",
+          background: "transparent", color: "#6E6E6E", border: "none", cursor: "pointer",
+          fontFamily: "'JetBrains Mono',monospace", fontSize: 11, letterSpacing: ".14em" }}>CLOSE</button>
+      </div>
+    </div>
+  );
+}
+"""
+
+# The chip that opens it, in the session's action row. It appears the moment a
+# line-up exists — which is the point: the card is for the gap between the draw
+# and the match, not for afterwards.
+LU_ACT_OLD = """              { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },"""
+LU_ACT_NEW = """              { key:"lineup", label:"Line-up", Ic:CIc.share, go:() => setShowLineup(true),
+                show:lineups.length > 0, warm:true },
+              { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },"""
+
+LU_STATE_OLD = """  const [showShare, setShowShare] = useState(false);"""
+LU_STATE_NEW = """  const [showShare, setShowShare] = useState(false);
+  const [showLineup, setShowLineup] = useState(false);
+  // Derived, not stored: the draw is the source of truth for who is playing.
+  const lineups = buildLineups(session, state,
+    14 * 2 * SESSIONS_TOTAL + SEASON_PRIZES.reduce((a, b) => a + b, 0));"""
+
+LU_MOUNT_OLD = """      {showEdit && <Modal open={true} onClose={() => setShowEdit(false)} title="SESSION OPTIONS">"""
+LU_MOUNT_NEW = """      <LineupSheet open={showLineup} items={lineups} photos={sessionPhotos}
+                   onClose={() => setShowLineup(false)} />
+      {showEdit && <Modal open={true} onClose={() => setShowEdit(false)} title="SESSION OPTIONS">"""
