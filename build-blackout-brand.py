@@ -161,22 +161,22 @@ def icon():
 
 
 def club_avatar():
-    """The club's profile picture: the emblem in lime, inside a magenta ring.
+    """The club's profile picture: the emblem in lime, no ring.
 
     Chosen by the owner from twelve. It is the mono treatment — the mark itself
-    in the season's colour rather than a device drawn around a white mark — with
-    the ring added, so lime leads and magenta frames. That is the reverse of
-    every other avatar in this file, and it is why this one does not look like a
-    dark circle with a logo in it.
+    in the season's colour rather than a device drawn around a white mark —
+    which is why it does not read as a dark circle with a logo dropped in it.
+    The ring was tried in three weights and dropped; the weights are still built
+    as mono-ring10/16/24 if it is ever wanted back.
 
     This is the URBAN PLAYGROUND emblem, not the BO mark: it goes on the club's
     own accounts, which are not a volume's. The season shows in the palette, so
     the next volume is a colour change rather than a new logo.
 
-    The ring sits at r=468 of a 512 radius, inside where a platform draws its own
-    border, because every account that matters crops to a circle.
+    Every account that matters crops to a circle, so the mark is checked against
+    the inscribed circle rather than against the square it is drawn in.
     """
-    return avatar_variant2("mono-ring16")
+    return avatar_variant2("mono")
 
 
 # A touch of pink in the ground, on every avatar.
