@@ -19,11 +19,16 @@ OUT = os.path.join(BRAND, "posts")
 LIGHT = os.environ.get("LIGHT") == "1"
 if LIGHT:
     BG, LIME, MAGENTA, INK, MUTED = "#FFFFFF", "#6E8F00", "#C4005E", "#0A0A0A", "#6E6E6E"
-    RULE, WLRULE = "rgba(10,10,10,.38)", "rgba(196,0,94,.5)"
+    RULE, WLRULE = "rgba(10,10,10,.38)", "rgba(72,20,150,.55)"
 else:
     BG, LIME, MAGENTA, INK, MUTED = "#050505", "#C6FF00", "#FF2E88", "#F2F2F2", "#9A9A9A"
-    RULE, WLRULE = "rgba(242,242,242,.30)", "rgba(255,46,136,.55)"
+    RULE, WLRULE = "rgba(242,242,242,.30)", "rgba(123,43,255,.60)"
 MAX_TEAMS, WL_SIZE = 16, 5
+
+# The extended palette. UV takes the waitlist and the night strip, which is what
+# frees magenta to mean ONE thing on this sheet — the double-points night. A
+# colour that marks two different things marks neither.
+UV_DARK, UV_LIGHT = "#7B2BFF", "#4814A0"
 
 
 def b64(p):
@@ -59,6 +64,15 @@ def main():
     # block black and swallows the bars that make it the mark. It goes on
     # unfiltered; lime on white is a strong enough block to read.
     mark_style = ''
+    UV = UV_LIGHT if LIGHT else UV_DARK
+
+    # The season at a glance: nine cells, tonight's lit, the double-points
+    # nights in magenta. Someone signing up can see where in the season they
+    # are without being told.
+    strip = "".join(
+        f'<span class="nd{" on" if i == n else ""}'
+        f'{" dbl" if i >= cfg["doubleFromSession"] else ""}">{i}</span>'
+        for i in range(1, len(nights) + 1))
     mark = base64.b64encode(
         open(os.path.join(BRAND, "blackout-mark.svg")).read().encode()).decode()
 
@@ -83,8 +97,16 @@ html,body{{width:210mm;height:297mm;background:{BG};color:{INK};
 .top img{{width:16mm;display:block}}
 .d{{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;line-height:.9}}
 .k{{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.22em}}
-.meta{{display:flex;gap:8mm;margin:4mm 0 3.5mm}}
+.meta{{display:flex;gap:6mm;margin:3.5mm 0 3mm;white-space:nowrap}}
 .meta div span{{display:block}}
+.strip{{display:flex;gap:1.6mm;margin:0 0 4mm}}
+.nd{{flex:1;height:6mm;border:.3mm solid rgba(242,242,242,.18);color:{MUTED};
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:2.8mm;
+  display:flex;align-items:center;justify-content:center}}
+.nd.done{{background:rgba(198,255,0,.13);border-color:rgba(198,255,0,.42);color:{LIME}}}
+.nd.dbl{{border-color:{MAGENTA};color:{MAGENTA}}}
+.nd.on{{background:{LIME};border-color:{LIME};color:{BG}}}
+.nd.on.dbl{{background:{MAGENTA};border-color:{MAGENTA};color:{BG}}}
 .hdr{{display:flex;gap:4mm;margin-bottom:2mm}}
 .hdr span:first-child{{width:12mm}}
 .hdr span{{flex:1}}
@@ -92,7 +114,7 @@ html,body{{width:210mm;height:297mm;background:{BG};color:{INK};
 .num{{width:12mm;font-family:'JetBrains Mono',monospace;font-weight:700;
   font-size:4.4mm;color:{MUTED};padding-bottom:1mm}}
 .line{{flex:1;border-bottom:.4mm solid {RULE};height:6.4mm}}
-.row.wl .num{{color:{MAGENTA}}}
+.row.wl .num{{color:{UV}}}
 .row.wl .line{{border-bottom-color:{WLRULE}}}
 .wlhdr{{margin:4mm 0 2.2mm;display:flex;align-items:center;gap:3mm}}
 .foot{{position:absolute;left:13mm;right:13mm;bottom:10mm;display:flex;
@@ -107,30 +129,32 @@ html,body{{width:210mm;height:297mm;background:{BG};color:{INK};
   </div>
   <div style="margin-left:auto;text-align:right">
     <div class="d" style="font-size:9.4mm;color:{LIME};white-space:nowrap">SESSION {n}</div>
-    <div class="k" style="font-size:3.4mm;color:{MUTED};margin-top:1.5mm">
+    <div class="k" style="font-size:3.1mm;color:{MUTED};margin-top:1.5mm;white-space:nowrap">
       {d.strftime('%a %-d %B').upper()} &middot; 5:30 PM</div>
   </div>
 </div>
 
 <div class="meta">
   <div><span class="k" style="font-size:2.6mm;color:{MUTED}">ENTRY</span>
-       <span class="d" style="font-size:7mm;margin-top:1mm">{cfg['entry']} OMR</span></div>
+       <span class="d" style="font-size:6.2mm;margin-top:1mm">{cfg['entry']} OMR</span></div>
   <div><span class="k" style="font-size:2.6mm;color:{MUTED}">EACH WINNER</span>
-       <span class="d" style="font-size:7mm;color:{LIME};margin-top:1mm">{cfg['voucher']} OMR</span></div>
+       <span class="d" style="font-size:6.2mm;color:{LIME};margin-top:1mm">{cfg['voucher']} OMR</span></div>
   <div><span class="k" style="font-size:2.6mm;color:{MUTED}">TEAMS</span>
-       <span class="d" style="font-size:7mm;margin-top:1mm">{MAX_TEAMS} MAX</span></div>
+       <span class="d" style="font-size:6.2mm;margin-top:1mm">{MAX_TEAMS} MAX</span></div>
   {'<div><span class="k" style="font-size:2.6mm;color:' + MAGENTA + '">TONIGHT</span>'
-   '<span class="d" style="font-size:7mm;color:' + MAGENTA + ';margin-top:1mm">DOUBLE POINTS</span></div>'
+   '<span class="d" style="font-size:6.2mm;color:' + MAGENTA + ';margin-top:1mm">DOUBLE POINTS</span></div>'
    if dbl else ''}
 </div>
+
+<div class="strip">{strip}</div>
 
 <div class="hdr k" style="font-size:2.8mm;color:{MUTED}">
   <span>#</span><span>PLAYER</span><span>PARTNER</span></div>
 {rows}
 
 <div class="wlhdr">
-  <span class="k" style="font-size:3mm;color:{MAGENTA}">WAITLIST</span>
-  <span style="flex:1;height:.3mm;background:rgba(255,46,136,.3)"></span>
+  <span class="k" style="font-size:3mm;color:{UV}">WAITLIST</span>
+  <span style="flex:1;height:.3mm;background:{WLRULE}"></span>
 </div>
 {wl}
 

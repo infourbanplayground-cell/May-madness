@@ -141,78 +141,46 @@
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@page { size: A4; margin: 0; }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:210mm;height:297mm;background:#050505;color:#F2F2F2;
-  font-family:'Archivo',sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.pad{padding:10mm 13mm}
-.top{display:flex;align-items:center;gap:6mm;border-bottom:1.2mm solid #C6FF00;
-  padding-bottom:4mm}
-.top img{width:16mm;display:block}
+html,body{width:1500px;height:1180px;background:#050505;color:#F2F2F2;
+  font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+.wash{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 88% 8%, rgba(123,43,255,.22), transparent 46%),
+             radial-gradient(circle at 6% 94%, rgba(198,255,0,.10), transparent 44%)}
+.pad{position:relative;padding:54px 60px}
 .d{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;line-height:.9}
-.k{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.22em}
-.meta{display:flex;gap:6mm;margin:3.5mm 0 3mm;white-space:nowrap}
-.meta div span{display:block}
-.strip{display:flex;gap:1.6mm;margin:0 0 4mm}
-.nd{flex:1;height:6mm;border:.3mm solid rgba(242,242,242,.18);color:#9A9A9A;
-  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:2.8mm;
-  display:flex;align-items:center;justify-content:center}
-.nd.done{background:rgba(198,255,0,.13);border-color:rgba(198,255,0,.42);color:#C6FF00}
-.nd.dbl{border-color:#FF2E88;color:#FF2E88}
-.nd.on{background:#C6FF00;border-color:#C6FF00;color:#050505}
-.nd.on.dbl{background:#FF2E88;border-color:#FF2E88;color:#050505}
-.hdr{display:flex;gap:4mm;margin-bottom:2mm}
-.hdr span:first-child{width:12mm}
-.hdr span{flex:1}
-.row{display:flex;gap:4mm;align-items:flex-end;margin-bottom:2.6mm}
-.num{width:12mm;font-family:'JetBrains Mono',monospace;font-weight:700;
-  font-size:4.4mm;color:#9A9A9A;padding-bottom:1mm}
-.line{flex:1;border-bottom:.4mm solid rgba(242,242,242,.30);height:6.4mm}
-.row.wl .num{color:#7B2BFF}
-.row.wl .line{border-bottom-color:rgba(123,43,255,.60)}
-.wlhdr{margin:4mm 0 2.2mm;display:flex;align-items:center;gap:3mm}
-.foot{position:absolute;left:13mm;right:13mm;bottom:10mm;display:flex;
-  justify-content:space-between;align-items:flex-end}
-</style></head><body><div class="pad">
+.k{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.26em}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:34px}
+.card{border:3px solid rgba(242,242,242,.10);padding:18px}
+.chip{height:104px}
+.nm{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:17px;
+  letter-spacing:.18em;margin-top:16px}
+.hx{font-family:'JetBrains Mono',monospace;font-size:15px;color:#9A9A9A;margin-top:5px}
+.use{font-size:17px;color:#CFCFCF;margin-top:11px;min-height:48px}
+.ratio{font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.06em;
+  color:#E9FF86;margin-top:8px}
+.ratio.warn{color:#FF2E88}
+.ratio.bad{color:#9A9A9A}
+.rule{height:3px;background:rgba(242,242,242,.10);margin:34px 0 26px}
+.nights{display:flex;gap:14px;margin-top:18px}
+.night{width:96px;height:78px;border:3px solid;display:flex;align-items:center;
+  justify-content:center;font-style:italic;
+  font-variation-settings:'wdth' 118,'wght' 900;font-size:30px}
+</style></head><body><div class="wash"></div><div class="pad">
 
-<div class="top">
-  <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij4KICA8IS0tIEJsYWNrb3V0IFNlcmllcyBtYXJrOiBhIGxpbWUgc3F1YXJlIGdvaW5nIGRhcmsgZnJvbSB0aGUgdG9wIGRvd24uCiAgICAgICBUaGUgYmFycyB0aGlja2VuIGFzIHRoZXkgZGVzY2VuZCDigJQgdGhlIGxpZ2h0cyBnb2luZyBvdXQg4oCUIGFuZCB0aGUKICAgICAgIG1hZ2VudGEgc3F1YXJlIGlzIHRoZSBzdGFuZGJ5IGxpZ2h0IHN0aWxsIG9uIGluIHRoZSBjb3JuZXIuIC0tPgogIDxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgZmlsbD0iI0M2RkYwMCIvPgogIDxyZWN0IHk9IjMwIiB3aWR0aD0iNjQiIGhlaWdodD0iMiIgZmlsbD0iIzA1MDUwNSIvPgogIDxyZWN0IHk9IjM4IiB3aWR0aD0iNjQiIGhlaWdodD0iNCIgZmlsbD0iIzA1MDUwNSIvPgogIDxyZWN0IHk9IjQ3IiB3aWR0aD0iNjQiIGhlaWdodD0iNiIgZmlsbD0iIzA1MDUwNSIvPgogIDxyZWN0IHk9IjU3IiB3aWR0aD0iNjQiIGhlaWdodD0iNyIgZmlsbD0iIzA1MDUwNSIvPgogIDxyZWN0IHg9IjQ4IiB5PSI4IiB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjRkYyRTg4Ii8+Cjwvc3ZnPgo=" style="">
-  <div>
-    <div class="k" style="font-size:3mm;color:#C6FF00">URBAN SOCIAL SERIES &middot; VOL.8</div>
-    <div class="d" style="font-size:13mm;margin-top:1.5mm">BLACKOUT SERIES</div>
-  </div>
-  <div style="margin-left:auto;text-align:right">
-    <div class="d" style="font-size:9.4mm;color:#C6FF00;white-space:nowrap">SESSION 1</div>
-    <div class="k" style="font-size:3.1mm;color:#9A9A9A;margin-top:1.5mm;white-space:nowrap">
-      MON 5 OCTOBER &middot; 5:30 PM</div>
-  </div>
-</div>
+<div class="k" style="font-size:17px;color:#7B2BFF">URBAN SOCIAL SERIES &middot; VOL.8</div>
+<div class="d" style="font-size:66px;margin-top:12px">THE BLACKOUT PALETTE</div>
+<div style="font-size:21px;color:#CFCFCF;margin-top:14px;max-width:1000px">
+  Lights out plus UV is the room this volume is named after &mdash; and neon
+  yellow-green and neon pink are what highlighter pigments do under one.
+  Violet is the lamp, not a third neon picked for contrast.</div>
 
-<div class="meta">
-  <div><span class="k" style="font-size:2.6mm;color:#9A9A9A">ENTRY</span>
-       <span class="d" style="font-size:6.2mm;margin-top:1mm">7 OMR</span></div>
-  <div><span class="k" style="font-size:2.6mm;color:#9A9A9A">EACH WINNER</span>
-       <span class="d" style="font-size:6.2mm;color:#C6FF00;margin-top:1mm">14 OMR</span></div>
-  <div><span class="k" style="font-size:2.6mm;color:#9A9A9A">TEAMS</span>
-       <span class="d" style="font-size:6.2mm;margin-top:1mm">16 MAX</span></div>
-  
-</div>
+<div class="grid"><div class="card"><div class="chip" style="background:#C6FF00"></div><div class="nm">LIME</div><div class="hx">#C6FF00</div><div class="use">Primary · live · a night in progress</div><div class="ratio">17.2:1 on black &middot; type ok</div></div><div class="card"><div class="chip" style="background:#E9FF86"></div><div class="nm">LIME PALE</div><div class="hx">#E9FF86</div><div class="use">Highlights · type on lime fills</div><div class="ratio">18.5:1 on black &middot; type ok</div></div><div class="card"><div class="chip" style="background:#8CB800"></div><div class="nm">LIME DEEP</div><div class="hx">#8CB800</div><div class="use">Fills and tints under type</div><div class="ratio">8.7:1 on black &middot; type ok</div></div><div class="card"><div class="chip" style="background:#FF2E88"></div><div class="nm">MAGENTA</div><div class="hx">#FF2E88</div><div class="use">The rare one · double points · the aperture</div><div class="ratio">5.8:1 on black &middot; type ok</div></div><div class="card"><div class="chip" style="background:#7B2BFF"></div><div class="nm">UV</div><div class="hx">#7B2BFF</div><div class="use">Structure · waitlist · the night grid</div><div class="ratio warn">3.5:1 on black &middot; large type only</div></div><div class="card"><div class="chip" style="background:#2E0B73"></div><div class="nm">UV DEEP</div><div class="hx">#2E0B73</div><div class="use">Plates behind UV · never type</div><div class="ratio bad">1.4:1 on black &middot; fills only</div></div><div class="card"><div class="chip" style="background:#F2F2F2"></div><div class="nm">INK</div><div class="hx">#F2F2F2</div><div class="use">Primary text</div><div class="ratio">18.2:1 on black &middot; type ok</div></div><div class="card"><div class="chip" style="background:#9A9A9A"></div><div class="nm">MUTED</div><div class="hx">#9A9A9A</div><div class="use">Done · archived · inactive</div><div class="ratio">7.2:1 on black &middot; type ok</div></div></div>
 
-<div class="strip"><span class="nd on">1</span><span class="nd">2</span><span class="nd">3</span><span class="nd">4</span><span class="nd">5</span><span class="nd">6</span><span class="nd">7</span><span class="nd dbl">8</span><span class="nd dbl">9</span></div>
-
-<div class="hdr k" style="font-size:2.8mm;color:#9A9A9A">
-  <span>#</span><span>PLAYER</span><span>PARTNER</span></div>
-<div class="row"><span class="num">1</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">2</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">3</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">4</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">5</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">6</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">7</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">8</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">9</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">10</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">11</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">12</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">13</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">14</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">15</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">16</span><span class="line"></span><span class="line"></span></div>
-
-<div class="wlhdr">
-  <span class="k" style="font-size:3mm;color:#7B2BFF">WAITLIST</span>
-  <span style="flex:1;height:.3mm;background:rgba(123,43,255,.60)"></span>
-</div>
-<div class="row wl"><span class="num">W1</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W2</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W3</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W4</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W5</span><span class="line"></span><span class="line"></span></div>
-
-<div class="foot">
-  <div class="k" style="font-size:2.8mm;color:#9A9A9A">
-    FIRST COME, FIRST SERVED &middot; BLACKOUT.URBANPADEL.OM</div>
-  <div class="d" style="font-size:5mm;color:#C6FF00">LIGHTS OUT.</div>
-</div>
+<div class="rule"></div>
+<div class="k" style="font-size:15px;color:#9A9A9A">THE NIGHT RAMP &mdash; COLOUR EARNED BY THE SCHEDULE</div>
+<div class="nights"><div class="night" style="background:rgba(198,255,0,0.050);border-color:rgba(198,255,0,0.25);color:#C6FF00"><span>N1</span></div><div class="night" style="background:rgba(198,255,0,0.072);border-color:rgba(198,255,0,0.33);color:#C6FF00"><span>N2</span></div><div class="night" style="background:rgba(198,255,0,0.093);border-color:rgba(198,255,0,0.42);color:#C6FF00"><span>N3</span></div><div class="night" style="background:rgba(198,255,0,0.115);border-color:rgba(198,255,0,0.50);color:#C6FF00"><span>N4</span></div><div class="night" style="background:rgba(198,255,0,0.137);border-color:rgba(198,255,0,0.58);color:#E9FF86"><span>N5</span></div><div class="night" style="background:rgba(198,255,0,0.158);border-color:rgba(198,255,0,0.67);color:#E9FF86"><span>N6</span></div><div class="night" style="background:rgba(198,255,0,0.180);border-color:rgba(198,255,0,0.75);color:#E9FF86"><span>N7</span></div><div class="night" style="background:rgba(255,46,136,.16);border-color:#FF2E88;color:#FF2E88"><span>N8</span></div><div class="night" style="background:rgba(255,46,136,.16);border-color:#FF2E88;color:#FF2E88"><span>N9</span></div></div>
+<div style="font-size:18px;color:#9A9A9A;margin-top:16px">
+  Lime deepens across the season; nights 8 and 9 take magenta, because
+  they are the double-points nights. Nothing here is decorative.</div>
 </div></body></html>

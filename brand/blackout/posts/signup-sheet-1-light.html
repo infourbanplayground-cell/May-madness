@@ -151,8 +151,16 @@ html,body{width:210mm;height:297mm;background:#FFFFFF;color:#0A0A0A;
 .top img{width:16mm;display:block}
 .d{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;line-height:.9}
 .k{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.22em}
-.meta{display:flex;gap:8mm;margin:4mm 0 3.5mm}
+.meta{display:flex;gap:6mm;margin:3.5mm 0 3mm;white-space:nowrap}
 .meta div span{display:block}
+.strip{display:flex;gap:1.6mm;margin:0 0 4mm}
+.nd{flex:1;height:6mm;border:.3mm solid rgba(242,242,242,.18);color:#6E6E6E;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:2.8mm;
+  display:flex;align-items:center;justify-content:center}
+.nd.done{background:rgba(198,255,0,.13);border-color:rgba(198,255,0,.42);color:#6E8F00}
+.nd.dbl{border-color:#C4005E;color:#C4005E}
+.nd.on{background:#6E8F00;border-color:#6E8F00;color:#FFFFFF}
+.nd.on.dbl{background:#C4005E;border-color:#C4005E;color:#FFFFFF}
 .hdr{display:flex;gap:4mm;margin-bottom:2mm}
 .hdr span:first-child{width:12mm}
 .hdr span{flex:1}
@@ -160,8 +168,8 @@ html,body{width:210mm;height:297mm;background:#FFFFFF;color:#0A0A0A;
 .num{width:12mm;font-family:'JetBrains Mono',monospace;font-weight:700;
   font-size:4.4mm;color:#6E6E6E;padding-bottom:1mm}
 .line{flex:1;border-bottom:.4mm solid rgba(10,10,10,.38);height:6.4mm}
-.row.wl .num{color:#C4005E}
-.row.wl .line{border-bottom-color:rgba(196,0,94,.5)}
+.row.wl .num{color:#4814A0}
+.row.wl .line{border-bottom-color:rgba(72,20,150,.55)}
 .wlhdr{margin:4mm 0 2.2mm;display:flex;align-items:center;gap:3mm}
 .foot{position:absolute;left:13mm;right:13mm;bottom:10mm;display:flex;
   justify-content:space-between;align-items:flex-end}
@@ -175,28 +183,30 @@ html,body{width:210mm;height:297mm;background:#FFFFFF;color:#0A0A0A;
   </div>
   <div style="margin-left:auto;text-align:right">
     <div class="d" style="font-size:9.4mm;color:#6E8F00;white-space:nowrap">SESSION 1</div>
-    <div class="k" style="font-size:3.4mm;color:#6E6E6E;margin-top:1.5mm">
+    <div class="k" style="font-size:3.1mm;color:#6E6E6E;margin-top:1.5mm;white-space:nowrap">
       MON 5 OCTOBER &middot; 5:30 PM</div>
   </div>
 </div>
 
 <div class="meta">
   <div><span class="k" style="font-size:2.6mm;color:#6E6E6E">ENTRY</span>
-       <span class="d" style="font-size:7mm;margin-top:1mm">7 OMR</span></div>
+       <span class="d" style="font-size:6.2mm;margin-top:1mm">7 OMR</span></div>
   <div><span class="k" style="font-size:2.6mm;color:#6E6E6E">EACH WINNER</span>
-       <span class="d" style="font-size:7mm;color:#6E8F00;margin-top:1mm">14 OMR</span></div>
+       <span class="d" style="font-size:6.2mm;color:#6E8F00;margin-top:1mm">14 OMR</span></div>
   <div><span class="k" style="font-size:2.6mm;color:#6E6E6E">TEAMS</span>
-       <span class="d" style="font-size:7mm;margin-top:1mm">16 MAX</span></div>
+       <span class="d" style="font-size:6.2mm;margin-top:1mm">16 MAX</span></div>
   
 </div>
+
+<div class="strip"><span class="nd on">1</span><span class="nd">2</span><span class="nd">3</span><span class="nd">4</span><span class="nd">5</span><span class="nd">6</span><span class="nd">7</span><span class="nd dbl">8</span><span class="nd dbl">9</span></div>
 
 <div class="hdr k" style="font-size:2.8mm;color:#6E6E6E">
   <span>#</span><span>PLAYER</span><span>PARTNER</span></div>
 <div class="row"><span class="num">1</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">2</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">3</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">4</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">5</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">6</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">7</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">8</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">9</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">10</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">11</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">12</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">13</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">14</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">15</span><span class="line"></span><span class="line"></span></div><div class="row"><span class="num">16</span><span class="line"></span><span class="line"></span></div>
 
 <div class="wlhdr">
-  <span class="k" style="font-size:3mm;color:#C4005E">WAITLIST</span>
-  <span style="flex:1;height:.3mm;background:rgba(255,46,136,.3)"></span>
+  <span class="k" style="font-size:3mm;color:#4814A0">WAITLIST</span>
+  <span style="flex:1;height:.3mm;background:rgba(72,20,150,.55)"></span>
 </div>
 <div class="row wl"><span class="num">W1</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W2</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W3</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W4</span><span class="line"></span><span class="line"></span></div><div class="row wl"><span class="num">W5</span><span class="line"></span><span class="line"></span></div>
 

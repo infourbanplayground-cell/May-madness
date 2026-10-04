@@ -50,8 +50,44 @@
     "ink2": "#CFCFCF",
     "muted": "#9A9A9A",
     "muted2": "#6E6E6E",
-    "line": "rgba(110,110,110,.16)"
+    "line": "rgba(110,110,110,.16)",
+
+    "limePale": "#E9FF86",
+    "limeDeep": "#8CB800",
+    "uv": "#7B2BFF",
+    "uvDeep": "#2E0B73",
+    "surfaceUV": "rgba(12,7,26,.96)"
   },
+
+  "_paletteNotes": [
+    "EXTENSION, not a repaint. lime and magenta keep every job they already",
+    "have; the five below are additions for jobs nothing was covering.",
+    "",
+    "THE IDEA: Blackout is a blacklight. Lights out plus UV is exactly the room",
+    "this volume is named after, and the two colours it already had — neon",
+    "yellow-green and neon pink — are what highlighter pigments do under one.",
+    "Violet is the lamp they are lit by, so it belongs to the series in a way a",
+    "third neon picked for contrast would not.",
+    "",
+    "uv (#7B2BFF) is a STRUCTURE colour: fills, plates, chips, the waitlist,",
+    "anything secondary. It is NOT a text colour on black — 3.1:1 against",
+    "#050505 fails at body size. Set type in ink, limePale or magenta.",
+    "",
+    "limePale / limeDeep give the single lime a ladder. The target board and",
+    "the app currently fake one with opacity, which is why bands merge at",
+    "distance: 9% lime on black and 17% lime on black are nearly the same",
+    "grey-green. Real steps hold apart.",
+    "",
+    "ROLES. The gap this fills is semantic, not decorative — Vol.6 had a",
+    "separate colour for live/success and this volume had none:",
+    "  lime      primary, live, a night in progress",
+    "  limePale  highlights, type on lime fills",
+    "  limeDeep  fills and tints under type",
+    "  magenta   the rare one: double points, the aperture, the one thing",
+    "            that scores. Dilute it and it stops meaning anything.",
+    "  uv        structure, waitlist, secondary chips, the night grid",
+    "  muted     done, archived, inactive"
+  ],
 
   "server": {
     "port": 3009,
