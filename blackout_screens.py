@@ -1563,6 +1563,14 @@ SCORESHEET = r"""function MatchEditorModal({ session, state, group, match, onClo
   const initS2 = match?.score?.t2 ?? (match?.winner ? (match.winner === "team2" ? 6 : 3) : null);
   const [s1, setS1] = useState(initS1);
   const [s2, setS2] = useState(initS2);
+  // Declared, because the lock button both reads it and sets it. Without this
+  // the screen rendered perfectly until the moment a score was complete: the
+  // button's `disabled={!!why || saving}` short-circuits while `why` is truthy
+  // ("PICK BOTH SCORES"), so `saving` was never evaluated — and the instant
+  // both scores were picked, `why` went null, JS finally read `saving`, threw
+  // ReferenceError, and React tore the whole tree down. It only ever broke on a
+  // valid score, which is the one case nobody tests.
+  const [saving, setSaving] = useState(false);
 
   const first = id => (state.players.find(p => p.id === id)?.name || "?").split(" ")[0];
   const lbl = t => t ? `${first(t.p1Id)} & ${first(t.p2Id)}` : "?";
