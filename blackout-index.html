@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "0d25fada93c1";
+  var V = "263681f12a05";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -3634,7 +3634,9 @@ function luPaint(g, kind, d, im, logo) {
   g.fillStyle = "#C6FF00"; g.fillRect(L, 146, 16, 16);
   stMono(g, "BLACKOUT SERIES · VOL.8", L + 40, 161, 26, "#C6FF00", 6);
 
-  const big = kind === "final" ? ["THE", "FINAL"] : ["SEMI", "FINAL"];
+  const big = kind === "champs" ? ["NIGHT", "CHAMPIONS"]
+            : kind === "final"  ? ["THE", "FINAL"]
+            : ["SEMI", "FINAL"];
   stDisp(g, big[0], L, 350, 164, "#F2F2F2", W);
   stDisp(g, big[1], L, 500, 164, "#C6FF00", W);
 
@@ -3643,17 +3645,24 @@ function luPaint(g, kind, d, im, logo) {
   // two doubles pairs read as a block of type rather than as a line-up. 44 on a
   // 116px plate leaves air around them and gives the photograph the room back.
   const PH = 116;
-  const plate = (y, name, chip, colour) => {
+  const plate = (y, name, chip, colour, score, dim) => {
     g.fillStyle = "rgba(15,15,15,.92)";
     g.fillRect(L, y, W, PH);
     g.strokeStyle = colour; g.lineWidth = 3;
     g.strokeRect(L + 1.5, y + 1.5, W - 3, PH - 3);
-    const room = W - 64 - (chip ? 130 : 0);
+    const tail = score ? 110 : (chip ? 130 : 0);
+    const room = W - 64 - tail;
     const size = stFit(g, name, room, 44, 900);
     g.font = `italic 900 ${size}px Archivo, sans-serif`;
-    g.fillStyle = "#F2F2F2";
+    g.fillStyle = dim ? "#9A9A9A" : "#F2F2F2";
     g.fillText(name, L + 32, y + PH / 2 + size * 0.34);
-    if (chip) {
+    if (score) {
+      // The score sits where the group chip would: one slot, never both, so a
+      // result card and a line-up card have the same silhouette.
+      g.font = `italic 900 52px Archivo, sans-serif`;
+      g.fillStyle = dim ? "#6E6E6E" : colour;
+      g.fillText(score, R - 32 - g.measureText(score).width, y + PH / 2 + 18);
+    } else if (chip) {
       g.font = '700 22px "JetBrains Mono", monospace';
       g.fillStyle = colour;
       g.fillText(chip, R - 32 - g.measureText(chip).width, y + PH / 2 + 8);
@@ -3661,13 +3670,23 @@ function luPaint(g, kind, d, im, logo) {
   };
 
   const baseY = 1230;
-  plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
-  g.font = '900 26px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
-  {
-    const t = "V S";
-    g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44);
+  if (kind === "champs") {
+    plate(baseY, (d.a || "").toUpperCase(), "", "#C6FF00", d.aScore);
+    g.font = '700 22px "JetBrains Mono", monospace'; g.fillStyle = "#6E6E6E";
+    {
+      const t = "BEAT";
+      g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44);
+    }
+    plate(baseY + PH + 72, (d.b || "").toUpperCase(), "", "#6E6E6E", d.bScore, true);
+  } else {
+    plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
+    g.font = '900 26px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
+    {
+      const t = "V S";
+      g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44);
+    }
+    plate(baseY + PH + 72, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
   }
-  plate(baseY + PH + 72, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
 
   // ── footer ──
   // The pool used to sit here. It is the season's number, not this match's, and
@@ -3759,6 +3778,22 @@ function buildLineups(session, state, pool) {
       caption: `The final — ${nm(f.team1Id)} vs ${nm(f.team2Id)}. `
              + `Night ${no} of the Blackout Series. blackout.urbanpadel.om`,
     });
+    // The result card, once there is a result. Winner first and the loser
+    // greyed: a champions card that gives both teams the same weight is a
+    // fixture list with a trophy on it.
+    if (f.winner) {
+      const winId = f.winner === "team1" ? f.team1Id : f.team2Id;
+      const lostId = f.winner === "team1" ? f.team2Id : f.team1Id;
+      const hi = f.score ? Math.max(f.score.t1, f.score.t2) : "";
+      const lo = f.score ? Math.min(f.score.t1, f.score.t2) : "";
+      out.push({
+        key: "champs", kind: "champs", label: "CHAMPS",
+        a: nm(winId), b: nm(lostId), aScore: String(hi), bScore: String(lo),
+        foot, pool,
+        caption: `${nm(winId)} take night ${no}${f.score ? ` — ${hi}-${lo}` : ""}. `
+               + `14 OMR voucher each. blackout.urbanpadel.om`,
+      });
+    }
   }
   return out;
 }
