@@ -330,7 +330,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -360,6 +360,17 @@ def add_screens(s, report):
                            ("line-up state", SCREENS.LU_STATE_OLD, SCREENS.LU_STATE_NEW),
                            ("line-up chip", SCREENS.LU_ACT_OLD, SCREENS.LU_ACT_NEW),
                            ("line-up sheet", SCREENS.LU_MOUNT_OLD, SCREENS.LU_MOUNT_NEW),
+                           # After the line-up splices, not before: all three of
+                           # these anchor on text the line-up splices introduce.
+                           ("posts state", SCREENS.GC_STATE_OLD, SCREENS.GC_STATE_NEW),
+                           ("posts chip", SCREENS.GC_ACT_OLD, SCREENS.GC_ACT_NEW),
+                           ("posts sheet", SCREENS.GC_MOUNT_OLD, SCREENS.GC_MOUNT_NEW),
+                           # Social / progression. The home anchor is text the
+                           # countdown splice introduces, so this follows it.
+                           ("home rival + recap", SCREENS.SOC_HOME_OLD, SCREENS.SOC_HOME_NEW),
+                           ("rank pin", SCREENS.SOC_RANK_OLD, SCREENS.SOC_RANK_NEW),
+                           ("head to head", SCREENS.SOC_H2H_OLD, SCREENS.SOC_H2H_NEW),
+                           ("me form + partners", SCREENS.SOC_ME_OLD, SCREENS.SOC_ME_NEW),
                            ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
                            ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
                            ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),

@@ -416,7 +416,7 @@ function ReceiptSheet({ night, player, rankAfter, onClose }) {
   );
 }
 
-function MeView({ state, leaderboard, meId, onOpenPicker, setTab }) {
+function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerId }) {
   const [receipt, setReceipt] = React.useState(null);
   const [share, setShare] = React.useState(null);
   const players = state.players || [];
@@ -760,7 +760,7 @@ NAV_NEW = """  // Vol.8 runs the handoff's five tabs. ME is the new one and is t
 ROUTE_OLD = """        {tab === "players" && isAdmin && <PlayersView state={state} update={update} setOpenPlayerId={setOpenPlayerId} isAdmin={isAdmin} />}"""
 
 ROUTE_NEW = """        {tab === "players" && isAdmin && <PlayersView state={state} update={update} setOpenPlayerId={setOpenPlayerId} isAdmin={isAdmin} />}
-        {tab === "me" && <MeView state={state} leaderboard={leaderboard} meId={meId} onOpenPicker={() => setShowMe(true)} setTab={setTab} />}
+        {tab === "me" && <MeView state={state} leaderboard={leaderboard} meId={meId} onOpenPicker={() => setShowMe(true)} setTab={setTab} setOpenPlayerId={setOpenPlayerId} />}
         {tab === "roster" && <RosterView state={state} leaderboard={leaderboard} setOpenPlayerId={setOpenPlayerId} meId={meId} />}"""
 
 # The icon set has `users` (a group) but no single-person glyph, and ME needs one.
@@ -3546,3 +3546,1008 @@ KO_PHOTOS_EMPTY_NEW = """  if (bracketEmpty) {
     return <div className="space-y-3">
       <QualifyControl />
       <KoPhotoStrip session={session} updateSession={updateSession} canUpload={canUploadPhotos} />"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 14 · THE GROUP STAGE, AS SOMETHING YOU CAN POST
+# ══════════════════════════════════════════════════════════════════════════
+#
+# A night already generates the two cards everyone expects — the champions and
+# the leaderboard — and both arrive at the very end, after most people have
+# gone home. Everything in between, which is most of the evening, produced
+# nothing to post at all.
+#
+# The group stage is the part of the night with the most people in it: every
+# team plays in it, where the knockout only holds eight. So these are the cards
+# that let the night be posted WHILE it is a night:
+#
+#   THE DRAW     the moment the groups are made, before a ball is hit.
+#                Nobody has lost yet, so everyone shares it.
+#   THE TABLES   after the group stage. Who is through, who is out, in one
+#                picture — the cliffhanger before the knockout.
+#   THE BRACKET  the eight that survived, drawn as a tree.
+#
+# All three are 1080x1920 and are drawn by the same painter as the line-up
+# cards, so a night's posts look like one set rather than three.
+GROUPCARDS = r"""
+
+// ── one group's block: letter tile, name, rows ────────────────────────────
+//
+// Row height adapts to the number of teams rather than the card scrolling or
+// clipping: a 4-team group gets tall rows, a 6-team group gets short ones, and
+// both fill the same band. The alternative — a fixed row height — silently
+// drops the bottom team of a big group off the card, which is exactly the team
+// most likely to be checking.
+function gcGroup(g, d, x, y, w, h) {
+  const HEAD = 62;
+  const rows = d.rows || [];
+  const n = Math.max(1, rows.length);
+  const gap = 8;
+  const rh = Math.max(52, Math.min(96, (h - HEAD - gap * n) / n));
+
+  // letter tile
+  g.fillStyle = "#C6FF00";
+  g.fillRect(x, y, HEAD - 10, HEAD - 10);
+  g.font = "italic 900 34px Archivo, sans-serif";
+  g.fillStyle = "#050505";
+  {
+    const t = d.letter;
+    g.fillText(t, x + (HEAD - 10 - g.measureText(t).width) / 2, y + HEAD - 10 - 16);
+  }
+  g.font = '700 23px "JetBrains Mono", monospace';
+  g.fillStyle = "#9A9A9A";
+  {
+    let cx = x + HEAD + 4;
+    for (const ch of (d.title || "")) { g.fillText(ch, cx, y + 36); cx += g.measureText(ch).width + 4; }
+  }
+  if (d.note) {
+    g.font = '700 19px "JetBrains Mono", monospace';
+    g.fillStyle = "#6E6E6E";
+    g.fillText(d.note, x + w - g.measureText(d.note).width, y + 36);
+  }
+
+  let ry = y + HEAD;
+  rows.forEach((r, i) => {
+    // `through` is what colours the row. It is not "position <= 2": in a
+    // three-group night the two best third-placed teams go through too, so a
+    // third row can be lime and a second row cannot be assumed safe. The caller
+    // passes the bracket's own answer.
+    const live = r.through === true;
+    const out = r.through === false;
+    g.fillStyle = live ? "rgba(198,255,0,.09)" : "rgba(15,15,15,.9)";
+    g.fillRect(x, ry, w, rh);
+    g.strokeStyle = live ? "#C6FF00" : "rgba(110,110,110,.3)";
+    g.lineWidth = live ? 3 : 2;
+    g.strokeRect(x + 1.5, ry + 1.5, w - 3, rh - 3);
+
+    // Position, but only on a card that HAS positions. On the draw nothing has
+    // been played, so a column of 1-2-3-4 beside the names is read as a ranking
+    // the organiser has made — and the order there is just the order the teams
+    // were entered.
+    if (d.ordered) {
+      g.font = '700 ' + Math.round(rh * 0.34) + 'px "JetBrains Mono", monospace';
+      g.fillStyle = live ? "#C6FF00" : out ? "#6E6E6E" : "#9A9A9A";
+      g.fillText(String(i + 1), x + 22, ry + rh / 2 + rh * 0.12);
+    }
+
+    // name — shrink to fit the room that is actually left after the tail
+    const tail = r.tail ? 190 : 0;
+    const nx = x + (d.ordered ? 68 : 26);
+    const room = w - (nx - x) - 26 - tail;
+    const size = stFit(g, r.name, room, Math.round(rh * 0.42), 900);
+    g.font = `italic 900 ${size}px Archivo, sans-serif`;
+    g.fillStyle = out ? "#8A8A8A" : "#F2F2F2";
+    g.fillText(r.name, nx, ry + rh / 2 + size * 0.34);
+
+    if (r.tail) {
+      g.font = '700 ' + Math.round(rh * 0.3) + 'px "JetBrains Mono", monospace';
+      g.fillStyle = live ? "#C6FF00" : out ? "#6E6E6E" : "#9A9A9A";
+      g.fillText(r.tail, x + w - 26 - g.measureText(r.tail).width, ry + rh / 2 + rh * 0.11);
+    }
+    ry += rh + gap;
+  });
+  return ry;
+}
+
+// ── the painter ───────────────────────────────────────────────────────────
+function gcPaint(g, kind, d, logo) {
+  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);
+
+  // the volume's two washes, same corners as every other card in the set
+  let rg = g.createRadialGradient(LU_W, LU_H * 0.1, 0, LU_W, LU_H * 0.1, LU_W);
+  rg.addColorStop(0, "rgba(123,43,255,.26)"); rg.addColorStop(1, "rgba(123,43,255,0)");
+  g.fillStyle = rg; g.fillRect(0, 0, LU_W, LU_H);
+  rg = g.createRadialGradient(0, LU_H * 0.95, 0, 0, LU_H * 0.95, LU_W);
+  rg.addColorStop(0, "rgba(198,255,0,.10)"); rg.addColorStop(1, "rgba(198,255,0,0)");
+  g.fillStyle = rg; g.fillRect(0, 0, LU_W, LU_H);
+  g.fillStyle = "rgba(198,255,0,.04)";
+  for (let y = 0; y < LU_H; y += 10) g.fillRect(0, y, LU_W, 2);
+  g.fillStyle = "#C6FF00"; g.fillRect(0, 0, LU_W, 10);
+
+  const L = 76, R = LU_W - 76, W = R - L;
+  g.textBaseline = "alphabetic";
+
+  // ── header ──
+  const ms = 64, my = 104;
+  g.fillStyle = "#C6FF00"; g.fillRect(L, my, ms, ms);
+  g.fillStyle = "#050505";
+  [[0.47, 0.03], [0.59, 0.06], [0.73, 0.09], [0.89, 0.11]].forEach(([t, h]) =>
+    g.fillRect(L, my + ms * t, ms, ms * h));
+  g.fillStyle = "#FF2E88"; g.fillRect(L + ms * 0.75, my + ms * 0.12, ms * 0.13, ms * 0.13);
+  stMono(g, "BLACKOUT SERIES · VOL.8", L + ms + 22, my + ms * 0.64, 20, "#9A9A9A", 3);
+
+  stMono(g, (d.eyebrow || "").toUpperCase(), L, 258, 24, "#FF2E88", 5);
+  const big = kind === "draw"    ? ["THE", "DRAW"]
+            : kind === "tables"  ? ["GROUP", "TABLES"]
+            :                      ["THE", "BRACKET"];
+  stDisp(g, big[0], L, 360, 120, "#F2F2F2", W);
+  stDisp(g, big[1], L, 472, 120, "#C6FF00", W);
+
+  // A key, on the one card that needs one. Lime means "through" here and it
+  // means nothing on the draw card, so stating it only where it carries meaning
+  // keeps it from becoming decoration people stop reading.
+  let TOP = 540;
+  if (d.key) {
+    g.fillStyle = "#C6FF00"; g.fillRect(L, 512, 20, 20);
+    g.font = '700 20px "JetBrains Mono", monospace';
+    g.fillStyle = "#9A9A9A";
+    {
+      let kx = L + 32;
+      for (const ch of d.key) { g.fillText(ch, kx, 529); kx += g.measureText(ch).width + 3; }
+    }
+    TOP = 572;
+  }
+
+  // ── body ──
+  const BOT = LU_H - 360;
+  if (kind === "bracket") {
+    gcBracket(g, d, L, TOP, W, BOT - TOP);
+  } else {
+    const groups = d.groups || [];
+    const n = Math.max(1, groups.length);
+    const gap = 30;
+    const bh = (BOT - TOP - gap * (n - 1)) / n;
+    groups.forEach((gr, i) => gcGroup(g, gr, L, TOP + i * (bh + gap), W, bh));
+  }
+
+  // ── footer ──
+  if (logo) {
+    const lh = 150, lw = lh * (logo.width / logo.height);
+    const off = document.createElement("canvas");
+    off.width = Math.ceil(lw); off.height = lh;
+    const o = off.getContext("2d");
+    o.drawImage(logo, 0, 0, lw, lh);
+    o.globalCompositeOperation = "source-in";
+    o.fillStyle = "#C6FF00";
+    o.fillRect(0, 0, lw, lh);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 290);
+  }
+  g.font = '700 24px "JetBrains Mono", monospace';
+  g.fillStyle = "#8A8A8A";
+  {
+    const t = d.foot || "";
+    let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
+  }
+}
+
+// ── the knockout, round by round ──────────────────────────────────────────
+//
+// Not a tree. A bracket tree wants landscape: at 1080 wide, three columns leave
+// about 300px a slot, and "ALMUNTASER & MUATASIM" does not fit in 300px at any
+// size you would want to read on a phone — the first version of this card had
+// names running through their own scores and out past the border.
+//
+// Stacked rounds give every tie the full width of the card, which is the one
+// thing a doubles name actually needs, and they read top to bottom the way a
+// story card is already read. The cost is the connecting lines, which were
+// carrying no information a reader of eight names could not infer.
+function gcBracket(g, d, x, y, w, h) {
+  const cols = (d.cols || []).filter(c => c.ties && c.ties.length);
+  if (!cols.length) return;
+
+  // Fill the band: all the ties across all the rounds share the height, so a
+  // night that only reached the semis is not drawn as a third of a card.
+  const ties = cols.reduce((n, c) => n + c.ties.length, 0);
+  // RGAP separates one TIE from the next; the 4px inside a tie binds its two
+  // rows together. At 10 the two gaps were close enough that a round of four
+  // ties read as one list of eight names.
+  const LBL = 34, SGAP = 26, RGAP = 26;
+  const avail = h - cols.length * (LBL + SGAP) - (ties - cols.length) * RGAP;
+  const th = Math.max(72, Math.min(132, avail / ties));
+
+  let cy = y;
+  cols.forEach(col => {
+    g.font = '700 19px "JetBrains Mono", monospace';
+    g.fillStyle = "#9A9A9A";
+    {
+      let tx = x;
+      for (const ch of col.label) { g.fillText(ch, tx, cy + 18); tx += g.measureText(ch).width + 3; }
+    }
+    cy += LBL;
+    col.ties.forEach(t => {
+      const rh = (th - 4) / 2;
+      [[t.a, t.aWon, t.aScore], [t.b, t.bWon, t.bScore]].forEach(([nm, won, sc], k) => {
+        const ry = cy + k * (rh + 4);
+        g.fillStyle = won ? "rgba(198,255,0,.10)" : "rgba(15,15,15,.9)";
+        g.fillRect(x, ry, w, rh);
+        g.strokeStyle = won ? "#C6FF00" : "rgba(110,110,110,.3)";
+        g.lineWidth = won ? 3 : 2;
+        g.strokeRect(x + 1.5, ry + 1.5, w - 3, rh - 3);
+        const size = stFit(g, nm || "TBD", w - 48 - 70, Math.round(rh * 0.5), 900);
+        g.font = `italic 900 ${size}px Archivo, sans-serif`;
+        g.fillStyle = nm ? (won ? "#F2F2F2" : "#8A8A8A") : "#5A5A5A";
+        g.fillText(nm || "TBD", x + 24, ry + rh / 2 + size * 0.34);
+        if (sc) {
+          g.font = `700 ${Math.round(rh * 0.42)}px "JetBrains Mono", monospace`;
+          g.fillStyle = won ? "#C6FF00" : "#6E6E6E";
+          g.fillText(sc, x + w - 24 - g.measureText(sc).width, ry + rh / 2 + rh * 0.15);
+        }
+      });
+      cy += th + RGAP;
+    });
+    cy += SGAP - RGAP;
+  });
+}
+
+async function drawGroupCard(kind, d) {
+  const logo = await luImg("assets/up-logo-tight.png");
+  const c = document.createElement("canvas");
+  c.width = LU_W; c.height = LU_H;
+  gcPaint(c.getContext("2d"), kind, d, logo);
+  return c.toDataURL("image/png");
+}
+"""
+
+GROUPCARDS_BUILD = r"""
+
+// Everything the three cards need, read off the session the same way the
+// screens read it. Nothing here re-derives a standing or a qualifier: the group
+// table comes from calcGroupStandings and who goes through comes from
+// qualifyingTeamIds, which is the function the bracket itself seeds from. A
+// card that promised a spot the bracket then did not honour would be worse than
+// no card at all.
+function buildGroupCards(session, state, idx) {
+  const teams = session.teams || [];
+  const players = state.players || [];
+  const first = id => (((players.find(p => p.id === id) || {}).name) || "?").split(" ")[0];
+  const nm = id => {
+    const t = teams.find(x => x.id === id);
+    return t ? first(t.p1Id) + " & " + first(t.p2Id) : "";
+  };
+  const groups = getSessionGroups(session).filter(gr => teams.some(t => t.group === gr));
+  const played = (session.groupMatches || []).filter(m => m.winner).length;
+  const total = (session.groupMatches || []).length;
+  const groupsDone = total > 0 && played === total;
+  const no = idx + 1;
+  const date = fmtNightDate(session.date);
+  const foot = "BLACKOUT.URBANPADEL.OM";
+
+  // ── THE DRAW ── seeds, not results. Posted before anyone has lost.
+  const draw = {
+    eyebrow: `SESSION ${no} · ${date}`,
+    foot,
+    groups: groups.map(gr => {
+      const inG = teams.filter(t => t.group === gr);
+      return {
+        letter: gr, title: "GROUP " + gr, ordered: false,
+        note: inG.length + " TEAMS",
+        rows: inG.map(t => ({
+          name: nm(t.id).toUpperCase(),
+          tail: t.seed ? "SEED " + t.seed : "",
+          through: null,
+        })),
+      };
+    }),
+    caption: `Session ${no} draw. ${teams.length} teams, ${groups.length} groups. `
+           + `Table and live scores: blackout.urbanpadel.om`,
+  };
+
+  // ── THE TABLES ── where it stands, and who that puts through.
+  const through = qualifyingTeamIds(session);
+  const tables = {
+    eyebrow: groupsDone ? `SESSION ${no} · GROUPS COMPLETE`
+                        : `SESSION ${no} · ${played}/${total} PLAYED`,
+    foot,
+    key: groupsDone ? "THROUGH TO THE KNOCKOUT" : "CURRENTLY QUALIFYING",
+    groups: groups.map(gr => {
+      const rows = calcGroupStandings(session, gr);
+      return {
+        letter: gr, title: "GROUP " + gr, ordered: true,
+        note: groupsDone ? "" : "LIVE",
+        rows: rows.map(r => ({
+          name: nm(r.team.id).toUpperCase(),
+          // Wins and game difference, which is the order the table is actually
+          // sorted in. Showing points here instead would print a number that
+          // does not explain the order above it.
+          tail: `${r.wins}W  ${r.gd >= 0 ? "+" : ""}${r.gd}`,
+          through: r.played > 0 ? through.has(r.team.id) : null,
+        })),
+      };
+    }),
+    caption: groupsDone
+      ? `Groups are done. ${through.size} teams through to the knockout. blackout.urbanpadel.om`
+      : `Group stage, session ${no} — ${played} of ${total} played. blackout.urbanpadel.om`,
+  };
+
+  // ── THE BRACKET ── only the rounds this night actually has.
+  const b = session.bracket || {};
+  const tie = m => {
+    if (!m) return null;
+    const w = m.winner;
+    return {
+      a: nm(m.team1Id).toUpperCase(), b: nm(m.team2Id).toUpperCase(),
+      aWon: w === "team1", bWon: w === "team2",
+      aScore: m.score ? String(m.score.t1) : "", bScore: m.score ? String(m.score.t2) : "",
+    };
+  };
+  const cols = [
+    { label: "QUARTER-FINALS", ties: (b.qf || []).map(tie).filter(Boolean) },
+    { label: "SEMI-FINALS", ties: (b.sf || []).map(tie).filter(Boolean) },
+    { label: "FINAL", ties: [tie(b.final)].filter(Boolean) },
+  ];
+  const bracket = {
+    eyebrow: `SESSION ${no} · ${date}`, foot, cols,
+    caption: `Session ${no} knockout. blackout.urbanpadel.om`,
+  };
+
+  // Only offer a card that has something on it. An empty bracket tab that
+  // paints three empty columns is a tab people press once.
+  const out = [];
+  if (teams.length) out.push({ key: "draw", label: "THE DRAW", d: draw });
+  if (played > 0) out.push({ key: "tables", label: "TABLES", d: tables });
+  if (cols.some(c => c.ties.length)) out.push({ key: "bracket", label: "BRACKET", d: bracket });
+  return out;
+}
+
+// The sheet. Deliberately the same shape as LineupSheet — tabs across the top,
+// the real bitmap as the preview, share and copy-caption underneath — so the
+// two are one control that happens to open on different cards.
+function GroupCardSheet({ open, items, onClose }) {
+  const [k, setK] = React.useState(0);
+  const [url, setUrl] = React.useState("");
+  const [flash, setFlash] = React.useState("");
+  React.useEffect(() => { if (open) setK(0); }, [open]);
+  React.useEffect(() => {
+    if (!open || !items.length) return;
+    let alive = true;
+    const it = items[Math.min(k, items.length - 1)];
+    document.fonts.ready
+      .then(() => drawGroupCard(it.key, it.d))
+      .then(u => { if (alive) setUrl(u); });
+    return () => { alive = false; };
+  }, [open, k, items]);
+  if (!open) return null;
+  if (!items.length) return null;
+  const it = items[Math.min(k, items.length - 1)];
+
+  const save = async () => {
+    try {
+      const blob = await (await fetch(url)).blob();
+      const f = new File([blob], `blackout-${it.key}.png`, { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) {
+        await navigator.share({ files: [f], title: "Blackout Series" });
+        return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a");
+    a.href = url; a.download = `blackout-${it.key}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setFlash("SAVED"); setTimeout(() => setFlash(""), 1600);
+  };
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(it.d.caption || ""); setFlash("CAPTION COPIED"); }
+    catch (e) { setFlash("COULDN'T COPY"); }
+    setTimeout(() => setFlash(""), 1600);
+  };
+  const btn = { fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+                letterSpacing: ".2em", cursor: "pointer", padding: 16 };
+
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 95,
+      background: "rgba(5,5,5,.92)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0A0A0A", width: "100%",
+        maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${items.length},1fr)`, gap: 6 }}>
+          {items.map((x, i) => (
+            <button key={x.key} onClick={() => setK(i)} style={{ padding: "11px 4px", cursor: "pointer",
+              background: i === k ? "#C6FF00" : "transparent",
+              color: i === k ? "#050505" : "#9A9A9A",
+              border: "1px solid " + (i === k ? "#C6FF00" : "rgba(110,110,110,.3)"),
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+              letterSpacing: ".12em" }}>{x.label}</button>
+          ))}
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", margin: "16px 0" }}>
+          {url
+            ? <img src={url} alt="" style={{ width: 270, height: 480, display: "block",
+                                             border: "1px solid rgba(110,110,110,.3)" }} />
+            : <div style={{ width: 270, height: 480, background: "#111" }} />}
+        </div>
+        <div style={{ fontSize: 11, color: "#6E6E6E", textAlign: "center", marginBottom: 12 }}>
+          Preview is the actual 1080&times;1920 file, shown small.
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <button onClick={save} style={{ ...btn, background: "#C6FF00", color: "#050505",
+            border: "none" }}>SHARE / SAVE</button>
+          <button onClick={copy} style={{ ...btn, background: "transparent", color: "#FF2E88",
+            border: "1px solid rgba(255,46,136,.5)" }}>COPY CAPTION</button>
+        </div>
+        {flash && <div style={{ textAlign: "center", marginTop: 12, color: "#C6FF00",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".2em" }}>{flash}</div>}
+        <button onClick={onClose} style={{ width: "100%", marginTop: 14, padding: 12,
+          background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
+      </div>
+    </div>
+  );
+}
+"""
+
+# Mounted next to the line-up sheet on the session screen, because that is where
+# the organiser already is when the groups are drawn and when they finish.
+GC_ACT_OLD = """              { key:"lineup", label:"Line-up", Ic:CIc.share, go:() => setShowLineup(true),"""
+GC_ACT_NEW = """              { key:"groups", label:"Posts", Ic:CIc.flame, go:() => setShowGroupCards(true),
+                show: (session.teams || []).length > 0 },
+              { key:"lineup", label:"Line-up", Ic:CIc.share, go:() => setShowLineup(true),"""
+
+GC_STATE_OLD = """  const [showLineup, setShowLineup] = useState(false);"""
+GC_STATE_NEW = """  const [showLineup, setShowLineup] = useState(false);
+  const [showGroupCards, setShowGroupCards] = useState(false);
+  const groupCards = useMemo(
+    () => buildGroupCards(session, state, (state.sessions || []).findIndex(s => s.id === session.id)),
+    [session, state]);"""
+
+GC_MOUNT_OLD = """      <LineupSheet open={showLineup} items={lineups} photos={sessionPhotos}"""
+GC_MOUNT_NEW = """      <GroupCardSheet open={showGroupCards} items={groupCards}
+                      onClose={() => setShowGroupCards(false)} />
+      <LineupSheet open={showLineup} items={lineups} photos={sessionPhotos}"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 15 · SOCIAL, RIVALRIES, PROGRESSION  (handover 1A–1D, 2A)
+# ══════════════════════════════════════════════════════════════════════════
+#
+# The handover's second section. All of it is about the same thing: a league
+# table tells you where you are, and none of it tells you who you are racing.
+# A player on 38 points reads that as a number; "two behind Munther, who you
+# have beaten twice" is the thing that gets them to turn up on Wednesday.
+#
+# Everything here is derived from matches already played. Nothing invents a
+# metric — the rival is the nearest player on the table, the chemistry is the
+# record of two people who have actually partnered, and the predictor is the
+# gap measured in that player's own average night rather than a model.
+SOCIAL = r"""
+
+// ── who you are actually racing ───────────────────────────────────────────
+//
+// The nearest player ABOVE you, because that is the one you can do something
+// about. At #1 it flips to the nearest below, which is the same relationship
+// read from the other end. `passed` is the sharper case the handover's alert is
+// written for: someone who was behind you before the last night and is not any
+// more.
+function rivalOf(meId, leaderboard, state) {
+  if (!meId) return null;
+  const i = leaderboard.findIndex(e => e.player.id === meId);
+  if (i < 0) return null;
+  const me = leaderboard[i];
+  const up = i > 0 ? leaderboard[i - 1] : null;
+  const down = leaderboard[i + 1] || null;
+  const other = up || down;
+  if (!other) return null;
+
+  // Did they go past me on the last completed night? Compare the table as it
+  // was before that night with the table now, rather than storing a flag that
+  // can go stale the moment a score is corrected.
+  const sessions = state.sessions || [];
+  let passed = false;
+  if (sessions.length >= 1 && up) {
+    const before = sessions.slice(0, -1);
+    const mineBefore = calcPlayerStats(meId, before).totalPts;
+    const theirsBefore = calcPlayerStats(up.player.id, before).totalPts;
+    passed = theirsBefore < mineBefore && up.totalPts > me.totalPts;
+  }
+  return {
+    player: other.player,
+    ahead: !!up,
+    gap: Math.abs((other.totalPts || 0) - (me.totalPts || 0)),
+    myPts: me.totalPts || 0,
+    myRank: i + 1,
+    passed,
+  };
+}
+
+// What a night is worth to THIS player — their own median, not the field's.
+// Used by the predictor so the bar reads "one of your nights" rather than "one
+// of somebody's nights".
+function typicalNight(meId, sessions) {
+  const got = [];
+  sessions.forEach((s, i) => {
+    if (!getPlayerTeam(s, meId)) return;
+    const upto = calcPlayerStats(meId, sessions.slice(0, i + 1)).totalPts;
+    const prev = i ? calcPlayerStats(meId, sessions.slice(0, i)).totalPts : 0;
+    got.push(upto - prev);
+  });
+  if (!got.length) return 0;
+  got.sort((a, b) => a - b);
+  return got[Math.floor(got.length / 2)];
+}
+
+// ── head to head, with the meetings kept ──────────────────────────────────
+function h2hDetail(aId, bId, sessions) {
+  let mine = 0, theirs = 0;
+  const meetings = [];
+  sessions.forEach((s, idx) => {
+    const a = getPlayerTeam(s, aId), b = getPlayerTeam(s, bId);
+    if (!a || !b || a.id === b.id) return;
+    const all = (s.groupMatches || []).concat(s.bracket?.qf || [], s.bracket?.sf || [],
+                                              s.bracket?.final ? [s.bracket.final] : []);
+    all.forEach(m => {
+      if (!m || !m.winner) return;
+      const ids = [m.team1Id, m.team2Id];
+      if (!ids.includes(a.id) || !ids.includes(b.id)) return;
+      const iWon = teamWon(m, a.id);
+      if (iWon) mine++; else theirs++;
+      const t1 = m.team1Id === a.id;
+      meetings.push({ idx, iWon,
+        score: m.score ? `${t1 ? m.score.t1 : m.score.t2}–${t1 ? m.score.t2 : m.score.t1}` : "" });
+    });
+  });
+  return mine + theirs ? { mine, theirs, meetings } : null;
+}
+
+// ── chemistry: the record of two people who played TOGETHER ───────────────
+function chemistry(aId, bId, sessions) {
+  let w = 0, l = 0, nights = 0;
+  sessions.forEach(s => {
+    const t = getPlayerTeam(s, aId);
+    if (!t || (t.p1Id !== bId && t.p2Id !== bId)) return;
+    nights++;
+    const all = (s.groupMatches || []).concat(s.bracket?.qf || [], s.bracket?.sf || [],
+                                              s.bracket?.final ? [s.bracket.final] : []);
+    all.forEach(m => {
+      if (!m || !m.winner) return;
+      if (m.team1Id !== t.id && m.team2Id !== t.id) return;
+      if (teamWon(m, t.id)) w++; else l++;
+    });
+  });
+  if (!nights) return null;
+  return { nights, w, l, games: w + l, pct: w + l ? Math.round(w / (w + l) * 100) : 0 };
+}
+
+// Every partner this player has had, best record first. The floor of 2 games is
+// there because a single 6-0 would otherwise crown a 100% partner someone has
+// played one match with.
+function partnerTable(meId, sessions, players) {
+  const ids = new Set();
+  sessions.forEach(s => {
+    const t = getPlayerTeam(s, meId);
+    if (t) ids.add(t.p1Id === meId ? t.p2Id : t.p1Id);
+  });
+  return [...ids].map(id => {
+    const c = chemistry(meId, id, sessions);
+    const p = players.find(x => x.id === id);
+    return c && p ? { id, name: p.name, ...c } : null;
+  }).filter(x => x && x.games >= 2)
+    .sort((a, b) => b.pct - a.pct || b.games - a.games);
+}
+
+// ── 1A · the rival alert, on Home ─────────────────────────────────────────
+function RivalAlert({ state, leaderboard, meId, setTab }) {
+  const r = React.useMemo(() => rivalOf(meId, leaderboard, state), [meId, leaderboard, state]);
+  if (!r) return null;
+  const sessions = state.sessions || [];
+  const h = React.useMemo(() => h2hDetail(meId, r.player.id, sessions), [meId, r.player.id, sessions]);
+  const first = (r.player.name || "").split(" ")[0].toUpperCase();
+
+  const line = r.passed ? `${first} PASSED YOU LAST NIGHT`
+             : r.ahead  ? `${first} IS ${r.gap} POINT${r.gap === 1 ? "" : "S"} AHEAD`
+             :            `${first} IS ${r.gap} POINT${r.gap === 1 ? "" : "S"} BEHIND`;
+  const sub = h
+    ? `You have met ${h.mine + h.theirs} time${h.mine + h.theirs === 1 ? "" : "s"} — `
+      + `${h.mine}–${h.theirs} to ${h.mine >= h.theirs ? "you" : "them"}.`
+    : `You have not played each other yet.`;
+
+  return (
+    <button onClick={() => setTab("leaderboard")}
+      style={{ display: "block", width: "100%", textAlign: "left", cursor: "pointer", color: "inherit",
+        marginTop: 14, padding: "14px 16px", border: "1px solid rgba(255,46,136,.4)",
+        background: "linear-gradient(90deg,#FF2E88 0 3px,rgba(20,20,20,.96) 3px)" }}>
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+        letterSpacing: ".3em", color: "#FF2E88" }}>{r.passed ? "RIVAL" : "THE CHASE"}</div>
+      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+        fontSize: 22, lineHeight: 1.04, marginTop: 7 }}>{line}</div>
+      <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 6 }}>{sub}</div>
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 10,
+        letterSpacing: ".2em", color: "#C6FF00", marginTop: 10 }}>SEE RANK &#9654;</div>
+    </button>
+  );
+}
+
+// ── 2A · the recap-ready card, on Home ────────────────────────────────────
+//
+// Shows the morning after, until the player dismisses it. "Dismissed" is kept
+// per session id in localStorage, so closing last night's card does not also
+// close next week's.
+function RecapReadyCard({ state, leaderboard, meId, onOpen }) {
+  const sessions = state.sessions || [];
+  const done = sessions.filter(s => s.completed);
+  const last = done.length ? done[done.length - 1] : null;
+  const key = last ? "bo-recap-seen-" + last.id : "";
+  const [hidden, setHidden] = React.useState(() => {
+    try { return key ? localStorage.getItem(key) === "1" : false; } catch (e) { return false; }
+  });
+  React.useEffect(() => {
+    try { setHidden(key ? localStorage.getItem(key) === "1" : false); } catch (e) { setHidden(false); }
+  }, [key]);
+
+  const d = React.useMemo(() => {
+    if (!last || !meId) return null;
+    const idx = sessions.findIndex(s => s.id === last.id);
+    if (idx < 0 || !getPlayerTeam(last, meId)) return null;
+    const after = calcPlayerStats(meId, sessions.slice(0, idx + 1)).totalPts;
+    const before = idx ? calcPlayerStats(meId, sessions.slice(0, idx)).totalPts : 0;
+    const t = getPlayerTeam(last, meId);
+    const all = (last.groupMatches || []).concat(last.bracket?.qf || [], last.bracket?.sf || [],
+                                                 last.bracket?.final ? [last.bracket.final] : []);
+    let w = 0, l = 0;
+    all.forEach(m => {
+      if (!m || !m.winner) return;
+      if (m.team1Id !== t.id && m.team2Id !== t.id) return;
+      if (teamWon(m, t.id)) w++; else l++;
+    });
+    // moveInto returns MAPS of playerId -> rank, not this player's rank. Read
+    // off the top level they are objects: `rank` renders as [object Object] and
+    // `prev - rank` is NaN, which is exactly what the first build of this card
+    // put on screen — "▼NaN" where the movement should be.
+    const mv = moveInto(state, idx);
+    const rankNow = (mv.rank || {})[meId] || null;
+    const rankPrev = (mv.prev || {})[meId] || null;
+    return { no: idx + 1, date: fmtNightDate(last.date), gained: after - before, w, l,
+             rank: rankNow, delta: rankPrev && rankNow ? rankPrev - rankNow : 0, session: last };
+  }, [last, meId, sessions, state]);
+
+  if (!d || hidden) return null;
+  const climbed = d.delta > 0, dropped = d.delta < 0;
+  const col = climbed ? "#C6FF00" : dropped ? "#FF2E88" : "#F2F2F2";
+  const stat = (v, label, c) => (
+    <div style={{ flex: 1 }}>
+      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+        fontSize: 34, lineHeight: 1, color: c }}>{v}</div>
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
+        letterSpacing: ".2em", color: "#9A9A9A", marginTop: 5 }}>{label}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ marginTop: 14, padding: "16px 14px", background: "rgba(20,20,20,.96)",
+      border: "1px solid rgba(198,255,0,.4)" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+          letterSpacing: ".3em", color: "#C6FF00" }}>YOUR RECAP</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#9A9A9A" }}>
+            {(d.date || "").toUpperCase()} &middot; {d.w + d.l} GAME{d.w + d.l === 1 ? "" : "S"}
+          </span>
+          <button onClick={() => { try { localStorage.setItem(key, "1"); } catch (e) {} setHidden(true); }}
+            aria-label="Dismiss" style={{ cursor: "pointer", background: "none", border: "none",
+              color: "#6E6E6E", fontSize: 14, lineHeight: 1, padding: 0 }}>&times;</button>
+        </div>
+      </div>
+      <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+        {stat("+" + d.gained, "POINTS", "#C6FF00")}
+        {stat(`${d.w}–${d.l}`, "RECORD", "#F2F2F2")}
+        {stat(d.delta === 0 ? "—" : (climbed ? "▲" : "▼") + Math.abs(d.delta),
+              "NOW #" + (d.rank || "-"), col)}
+      </div>
+      <button onClick={() => onOpen(d.session)} style={{ marginTop: 14, cursor: "pointer",
+        background: "none", border: "none", padding: 0, fontFamily: "'Archivo',sans-serif",
+        fontWeight: 900, fontSize: 10, letterSpacing: ".2em", color: "#C6FF00" }}>
+        OPEN RECAP &#9654;
+      </button>
+    </div>
+  );
+}
+
+// ── 1B · your row, pinned to the top of RANK, with the predictor ──────────
+function RankPin({ state, leaderboard, meId, setOpenPlayerId }) {
+  const r = React.useMemo(() => rivalOf(meId, leaderboard, state), [meId, leaderboard, state]);
+  const typical = React.useMemo(() => typicalNight(meId, state.sessions || []), [meId, state.sessions]);
+  if (!r) return null;
+  const me = leaderboard.find(e => e.player.id === meId);
+  if (!me) return null;
+
+  // The bar is the gap measured in nights of this player's own form. Eight
+  // segments because a gap worth more than two typical nights is not a gap the
+  // bar should pretend to render precisely.
+  const SEG = 8;
+  const lit = typical > 0 ? Math.max(0, Math.min(SEG, SEG - Math.round(r.gap / typical * (SEG / 2)))) : 0;
+  const verb = r.ahead ? "TO CATCH" : "TO HOLD";
+
+  return (
+    <div style={{ marginTop: 12, border: "1px solid rgba(198,255,0,.45)", background: "rgba(20,20,20,.96)" }}>
+      <div onClick={() => setOpenPlayerId && setOpenPlayerId(meId)}
+        style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 11, padding: "13px 14px" }}>
+        <div style={{ flex: "0 0 auto", width: 38, height: 38, display: "grid", placeItems: "center",
+          border: "1px solid rgba(198,255,0,.5)", background: "rgba(198,255,0,.12)",
+          fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+          fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: 17, color: "#C6FF00" }}>{r.myRank}</div>
+        <Avatar player={me.player} size={34} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            fontVariationSettings: "'wdth' 112,'wght' 900", fontSize: 17, whiteSpace: "nowrap",
+            overflow: "hidden", textOverflow: "ellipsis" }}>{me.player.name}</div>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 9,
+            letterSpacing: ".18em", color: "#9A9A9A", marginTop: 3 }}>YOU</div>
+        </div>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+          fontSize: 26, color: "#C6FF00" }}>{r.myPts}</div>
+      </div>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px",
+        borderTop: "1px solid rgba(110,110,110,.2)", background: "rgba(255,46,136,.06)" }}>
+        <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 8,
+          letterSpacing: ".24em", color: "#FF2E88" }}>RIVAL</span>
+        <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 800, whiteSpace: "nowrap",
+          overflow: "hidden", textOverflow: "ellipsis" }}>{r.player.name}</span>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 13,
+          color: "#FF2E88" }}>{r.ahead ? "−" : "+"}{r.gap} PTS</span>
+      </div>
+
+      <div style={{ padding: "11px 14px", borderTop: "1px solid rgba(110,110,110,.2)" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 8,
+            letterSpacing: ".24em", color: "#9A9A9A" }}>PREDICTOR &middot; {verb}</span>
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#6E6E6E" }}>
+            {typical > 0 ? `YOUR NIGHT ≈ ${typical} PTS` : "NO FORM YET"}
+          </span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${SEG},1fr)`, gap: 3, marginTop: 8 }}>
+          {Array.from({ length: SEG }).map((_, i) => (
+            <div key={i} style={{ height: 6,
+              background: i < lit ? "#C6FF00" : "rgba(110,110,110,.25)" }} />
+          ))}
+        </div>
+        {/* "0.1 of your nights" is arithmetic, not language. Below one night the
+            useful thing to say is that it is within a single night's reach;
+            above it, how many nights. */}
+        <div style={{ fontSize: 11, color: "#9A9A9A", marginTop: 7 }}>
+          {typical > 0
+            ? (r.gap === 0
+                ? "Dead level. One game decides it."
+                : r.gap <= typical
+                  ? `${r.gap} point${r.gap === 1 ? "" : "s"} — inside one night.`
+                  : `${r.gap} points — about ${Math.round(r.gap / typical)} of your nights.`)
+            : "Play a night and this fills in."}
+        </div>
+      </div>
+    </div>
+  );
+}
+"""
+
+SOCIAL2 = r"""
+
+// ── 1C · head to head, as the handover draws it ───────────────────────────
+//
+// Replaces the one-line version: the score big enough to be the point of the
+// card, a bar that shows the ratio at a glance, and the last three meetings as
+// squares so "4-2" has some texture — three straight losses and a 4-2 are very
+// different 4-2s.
+function H2HCard({ meId, player, sessions }) {
+  const h = React.useMemo(() => h2hDetail(meId, player.id, sessions), [meId, player.id, sessions]);
+  if (!h) return null;
+  const tot = h.mine + h.theirs;
+  const pct = Math.round(h.mine / tot * 100);
+  const last3 = h.meetings.slice(-3).reverse();
+  return (
+    <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 20 }}>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".24em", color: "#FF2E88" }}>HEAD TO HEAD</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+          fontSize: 56, lineHeight: .9, color: h.mine >= h.theirs ? "#C6FF00" : "#F2F2F2" }}>
+          {h.mine} &ndash; {h.theirs}
+        </div>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 9,
+          letterSpacing: ".18em", color: "#9A9A9A" }}>
+          YOU &middot; {(player.name || "").split(" ")[0].toUpperCase()}
+        </div>
+      </div>
+      <div style={{ display: "flex", height: 6, marginTop: 12, background: "rgba(110,110,110,.25)" }}>
+        <div style={{ width: pct + "%", background: "#C6FF00" }} />
+        <div style={{ flex: 1, background: "#FF2E88" }} />
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 12 }}>
+        <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
+          letterSpacing: ".2em", color: "#9A9A9A" }}>LAST {last3.length}</span>
+        {last3.map((m, i) => (
+          <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span style={{ width: 8, height: 8, background: m.iWon ? "#C6FF00" : "#FF2E88" }} />
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11,
+              color: "#9A9A9A" }}>{m.score}</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── 1C · chemistry ────────────────────────────────────────────────────────
+function ChemistryCard({ meId, player, sessions, players }) {
+  const c = React.useMemo(() => chemistry(meId, player.id, sessions), [meId, player.id, sessions]);
+  const table = React.useMemo(() => partnerTable(meId, sessions, players), [meId, sessions, players]);
+  if (!c) return null;
+  const place = table.findIndex(t => t.id === player.id);
+  return (
+    <div style={{ border: "1px solid rgba(198,255,0,.35)", padding: 14, marginTop: 12 }}>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".24em", color: "#C6FF00" }}>CHEMISTRY &middot; AS PARTNERS</div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginTop: 9 }}>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+          fontSize: 44, lineHeight: .9, color: "#C6FF00" }}>{c.pct}%</div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "#9A9A9A" }}>
+          {c.w}&ndash;{c.l} &middot; {c.games} game{c.games === 1 ? "" : "s"} &middot;{" "}
+          {c.nights} night{c.nights === 1 ? "" : "s"}
+        </div>
+      </div>
+      {place >= 0 && (
+        <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 8 }}>
+          {/* "Your 1st best partner" is not a thing anyone says. */}
+          {place === 0
+            ? "Your best partner this season."
+            : `Your ${rank_ordinal(place + 1).toLowerCase()} best partner this season.`}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── 1D · the rank line, session by session ────────────────────────────────
+//
+// Drawn with the y-axis inverted, because rank 1 belongs at the top and a
+// chart where "going up" means "getting worse" is a chart people misread once
+// and never trust again.
+function RankPath({ meId, state }) {
+  const sessions = state.sessions || [];
+  const players = state.players || [];
+  const ranks = React.useMemo(() => rankByNight(players, sessions), [players, sessions]);
+  const pts = [];
+  ranks.forEach((pos, i) => { if (pos[meId]) pts.push({ i, r: pos[meId] }); });
+  if (pts.length < 2) return null;
+
+  const W = 300, H = 76, PAD = 10, GUT = 26;   // GUT: room for the rank ticks
+  const lo = Math.min(...pts.map(p => p.r)), hi = Math.max(...pts.map(p => p.r));
+  const span = Math.max(1, hi - lo);
+  const x = k => GUT + (W - GUT - PAD) * (pts.length === 1 ? 0.5 : k / (pts.length - 1));
+  const y = r => PAD + (H - PAD * 2) * ((r - lo) / span);   // inverted: best rank on top
+  const d = pts.map((p, k) => `${k ? "L" : "M"}${x(k).toFixed(1)},${y(p.r).toFixed(1)}`).join(" ");
+  const peakK = pts.findIndex(p => p.r === lo);
+  const lastK = pts.length - 1;
+  const dropped = pts.length > 1 && pts[lastK].r > pts[lastK - 1].r;
+
+  return (
+    <div style={{ border: "1px solid rgba(110,110,110,.3)", padding: 14, marginTop: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".24em", color: "#9A9A9A" }}>RANK, NIGHT BY NIGHT</span>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#6E6E6E" }}>
+          BEST #{lo}
+        </span>
+      </div>
+      {/* Two ticks, so the direction of the line is not something you have to
+          infer. Without them a rising line reads as "points going up" and the
+          axis is the opposite way round from that. */}
+      <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: H, marginTop: 8, display: "block" }}>
+        <text x="0" y={PAD + 3} fill="#6E6E6E" fontSize="9"
+              fontFamily="'JetBrains Mono',monospace">#{lo}</text>
+        {hi !== lo && <text x="0" y={H - PAD + 3} fill="#6E6E6E" fontSize="9"
+              fontFamily="'JetBrains Mono',monospace">#{hi}</text>}
+        <path d={d} fill="none" stroke="#C6FF00" strokeWidth="2" />
+        {pts.map((p, k) => (
+          <circle key={k} cx={x(k)} cy={y(p.r)} r={k === peakK || k === lastK ? 4 : 2.5}
+            fill={k === lastK && dropped ? "#FF2E88" : k === peakK ? "#C6FF00" : "#050505"}
+            stroke={k === lastK && dropped ? "#FF2E88" : "#C6FF00"} strokeWidth="2" />
+        ))}
+      </svg>
+      <div style={{ display: "flex", justifyContent: "space-between",
+        fontFamily: "'JetBrains Mono',monospace", fontSize: 9, color: "#6E6E6E", marginTop: 2 }}>
+        <span>S{pts[0].i + 1}</span><span>NOW #{pts[lastK].r}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── 1D · top partners ─────────────────────────────────────────────────────
+function TopPartners({ meId, state, setOpenPlayerId }) {
+  const table = React.useMemo(
+    () => partnerTable(meId, state.sessions || [], state.players || []),
+    [meId, state.sessions, state.players]);
+  if (!table.length) return null;
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".24em", color: "#9A9A9A" }}>TOP PARTNERS</div>
+      <div style={{ marginTop: 9 }}>
+        {table.slice(0, 3).map(t => (
+          <button key={t.id} onClick={() => setOpenPlayerId && setOpenPlayerId(t.id)}
+            style={{ display: "block", width: "100%", textAlign: "left", cursor: "pointer",
+              color: "inherit", background: "rgba(14,14,14,.94)", border: "none",
+              borderTop: "1px solid rgba(110,110,110,.16)", padding: "10px 0" }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <span style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 14,
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{t.name}</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11,
+                color: "#9A9A9A" }}>{t.w}&ndash;{t.l}</span>
+              <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+                fontSize: 17, color: "#C6FF00" }}>{t.pct}%</span>
+            </div>
+            <div style={{ height: 4, background: "rgba(110,110,110,.25)", marginTop: 6 }}>
+              <div style={{ height: "100%", width: t.pct + "%", background: "#C6FF00" }} />
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+"""
+
+# ── splices ───────────────────────────────────────────────────────────────
+
+# Home. The rival alert and the recap card sit directly under the hero, above
+# the countdown: both are about the night that just happened, and the countdown
+# is about the next one.
+SOC_HOME_OLD = """      {/* ── FINALS COUNTDOWN (Vol.8) ── */}"""
+SOC_HOME_NEW = """      {/* ── LAST NIGHT, AND WHO YOU ARE RACING (Vol.8) ── */}
+      {meId && <RecapReadyCard state={state} leaderboard={leaderboard} meId={meId}
+                               onOpen={(s) => setRecap(s)} />}
+      {meId && <RivalAlert state={state} leaderboard={leaderboard} meId={meId} setTab={setTab} />}
+
+      {/* ── FINALS COUNTDOWN (Vol.8) ── */}"""
+
+# Rank. Pinned above the leader, because the whole point is not having to find
+# yourself in a list of 314.
+SOC_RANK_OLD = """        {/* ── LEADER ── */}"""
+SOC_RANK_NEW = """        {/* ── YOU, PINNED (Vol.8) ── */}
+        {meId && !lifetime && <RankPin state={state} leaderboard={leaderboard} meId={meId}
+                                       setOpenPlayerId={setOpenPlayerId} />}
+
+        {/* ── LEADER ── */}"""
+
+# Player card: the richer head-to-head replaces the one-line version, and
+# chemistry goes under it.
+SOC_H2H_OLD = """      {h2h && (
+        <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 20 }}>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+            letterSpacing: ".24em", color: "#FF2E88" }}>HEAD TO HEAD &middot; YOU</div>
+          <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+            fontSize: 26, marginTop: 6 }}>
+            YOU {h2h.mine} &ndash; {h2h.theirs} {(player.name || "").split(" ")[0].toUpperCase()}
+          </div>
+          <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 4 }}>
+            {h2h.mine + h2h.theirs} meeting{h2h.mine + h2h.theirs === 1 ? "" : "s"}
+            {h2h.last && h2h.last.score
+              ? ` · last: ${h2h.last.iWon ? "you won" : "they won"} `
+                + `${h2h.last.score.t1}–${h2h.last.score.t2}`
+              : ""}
+          </div>
+        </div>
+      )}"""
+SOC_H2H_NEW = """      {meId && meId !== player.id &&
+        <H2HCard meId={meId} player={player} sessions={sessions} />}
+      {meId && meId !== player.id &&
+        <ChemistryCard meId={meId} player={player} sessions={sessions} players={players} />}"""
+
+# ME: the rank line and the partner table, under the points receipt.
+# The handover's 1D order is form, then achievements, then partners. Mounted
+# above BADGES rather than at the end of the screen: spliced onto the tail they
+# landed under SHARE TO STORY, which reads as an afterthought to the share row
+# rather than as part of the player's season.
+SOC_ME_OLD = """      {/* badges */}"""
+SOC_ME_NEW = """      <RankPath meId={meId} state={state} />
+      <TopPartners meId={meId} state={state} setOpenPlayerId={setOpenPlayerId} />
+
+      {/* badges */}"""
