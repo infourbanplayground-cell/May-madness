@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "ffcef404ee4d";
+  var V = "70681d16d830";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -3077,6 +3077,7 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
         maxHeight: "90vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
           letterSpacing: ".26em", color: "#9A9A9A" }}>
+          <BoMark size={13} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 7 }} />
           SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " · 2X NIGHT" : ""}
         </div>
         <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
@@ -3124,6 +3125,139 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
       </div>
+    </div>
+  );
+}
+
+function BoMark({ size = 16, style }) {
+  const s = size;
+  return (
+    <svg width={s} height={s} viewBox="0 0 100 100" aria-hidden="true"
+         style={{ display: "block", flex: "0 0 auto", ...(style || {}) }}>
+      <rect x="0" y="0" width="100" height="46" fill="#C6FF00" />
+      <rect x="75" y="12" width="13" height="13" fill="#FF2E88" />
+      <rect x="0" y="55" width="100" height="7" fill="#C6FF00" />
+      <rect x="0" y="69" width="100" height="9" fill="#C6FF00" />
+      <rect x="0" y="85" width="100" height="11" fill="#C6FF00" />
+    </svg>
+  );
+}
+
+// An eyebrow with the mark in front of it. Every screen head uses this, so the
+// mark sits in the same place on all of them instead of five near-misses.
+function ScreenEyebrow({ children, color = "#C6FF00" }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <BoMark size={14} />
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 10,
+                    letterSpacing: ".34em", textTransform: "uppercase", color }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// The table as it stood after night `upto` (0-based, inclusive). Returns a map
+// of playerId -> rank, plus the ordered rows.
+function rankAt(state, upto) {
+  const sessions = (state.sessions || []).slice(0, upto + 1);
+  const rows = (state.players || []).map(p => {
+    const s = calcPlayerStats(p.id, sessions);
+    // sessionsPlayed lives on s.stats, not on s — reading it off the top level
+    // silently returns undefined and ranks nobody who has yet to score.
+    return { id: p.id, name: p.name, pts: s.totalPts, played: (s.stats || {}).sessionsPlayed || 0 };
+  }).filter(r => r.played > 0 || r.pts > 0)
+    .sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+  const rank = {};
+  rows.forEach((r, i) => { rank[r.id] = i + 1; });
+  return { rows, rank };
+}
+
+// Movement into the latest completed night: ▲n, ▼n or —.
+function moveInto(state, idx) {
+  if (idx <= 0) return { rank: rankAt(state, idx).rank, prev: {} };
+  return { rank: rankAt(state, idx).rank, prev: rankAt(state, idx - 1).rank };
+}
+
+function Delta({ now, before }) {
+  if (!before || !now || before === now) {
+    return <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11,
+                          color: "#6E6E6E" }}>—</span>;
+  }
+  const up = before > now;
+  return (
+    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                   color: up ? "#C6FF00" : "#FF2E88" }}>
+      {up ? "▲" : "▼"}{Math.abs(before - now)}
+    </span>
+  );
+}
+
+// The standings, on the SESSIONS screen. The owner asked to see the ranking
+// without leaving for the RANK tab — this is the top five plus your own row
+// when you are outside it, which is the only part of the table anyone checks
+// between nights.
+function SessionsTable({ state, meId, onOpen }) {
+  const played = (state.sessions || []).reduce(
+    (n, s, i) => (s.completed || (s.bracket && s.bracket.final && s.bracket.final.winner) ? i : n), -1);
+  const { rows } = rankAt(state, Math.max(played, (state.sessions || []).length - 1));
+  if (!rows.length) {
+    return (
+      <div style={{ border: "1px solid rgba(110,110,110,.3)", background: "rgba(14,14,14,.94)",
+                    padding: 16, textAlign: "center", color: "#6E6E6E", fontSize: 12 }}>
+        The table opens after the first night is played.
+      </div>
+    );
+  }
+  const { rank, prev } = moveInto(state, played);
+  const top = rows.slice(0, 5);
+  const mine = rows.findIndex(r => r.id === meId);
+  const extra = mine >= 5 ? rows[mine] : null;
+
+  const Row = ({ r, i }) => {
+    const you = r.id === meId;
+    return (
+      <div onClick={() => onOpen && onOpen(r.id)}
+           style={{ display: "grid", gridTemplateColumns: "22px 1fr 44px 42px", alignItems: "center",
+                    gap: 8, padding: "9px 0", cursor: onOpen ? "pointer" : "default",
+                    borderTop: i === 0 ? "none" : "1px solid rgba(110,110,110,.16)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12,
+                      color: i === 0 ? "#C6FF00" : "#6E6E6E" }}>{rank[r.id] || i + 1}</div>
+        <div style={{ fontSize: 14, fontWeight: 800,
+                      color: you ? "#FF2E88" : "#F2F2F2", overflow: "hidden",
+                      textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {r.name}{you ? " · you" : ""}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <Delta now={rank[r.id]} before={prev[r.id]} />
+        </div>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                      fontSize: 17, textAlign: "right",
+                      color: you ? "#FF2E88" : "#F2F2F2" }}>{r.pts}</div>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ border: "1px solid rgba(198,255,0,.35)", background: "rgba(20,20,20,.96)",
+                  padding: "12px 14px 6px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+                    marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                      letterSpacing: ".3em", color: "#C6FF00" }}>
+          {played >= 0 ? `TABLE AFTER S${played + 1}` : "THE TABLE"}
+        </div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#9A9A9A" }}>
+          {rows.length} RANKED
+        </div>
+      </div>
+      {top.map((r, i) => <Row key={r.id} r={r} i={i} />)}
+      {extra && (
+        <>
+          <div style={{ borderTop: "1px solid rgba(110,110,110,.16)", margin: "2px 0" }} />
+          <Row r={extra} i={1} />
+        </>
+      )}
     </div>
   );
 }
@@ -3840,9 +3974,12 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab }) {
 
   return (
     <div>
-      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
-                    letterSpacing: ".28em", color: "#9A9A9A" }}>
-        YOUR SEASON &middot; {(me?.name || "").toUpperCase()}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <BoMark size={14} />
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+                      letterSpacing: ".28em", color: "#9A9A9A" }}>
+          YOUR SEASON &middot; {(me?.name || "").toUpperCase()}
+        </div>
       </div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
                     fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS</div>
@@ -4004,7 +4141,9 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   return (
     <div>
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
-                    letterSpacing: ".28em", color: "#9A9A9A" }}>
+                    letterSpacing: ".28em", color: "#9A9A9A",
+                    display: "flex", alignItems: "center", gap: 8 }}>
+        <BoMark size={14} />
         THE ROSTER &middot; {leaderboard.length} PLAYERS
         {!started && <span style={{ color: "#6E6E6E" }}> &middot; BY ALL-TIME</span>}
       </div>
@@ -5141,8 +5280,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
     <div className="space-y-4" style={{animation:"sgSlide 200ms var(--ease-out) both"}}>
       <div className="flex items-end justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:18}}>
         <div>
-          <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".34em",
-               textTransform:"uppercase",color:"#C6FF00"}}>{state.sessions.length || SESSIONS_TOTAL} nights · Vol.8</div>
+          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} nights &middot; Vol.8</ScreenEyebrow>
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                fontSize:44,lineHeight:.9,color:"#F2F2F2",marginTop:6}}>SESSIONS</div>
         </div>
@@ -5152,6 +5290,11 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
           <button className="jh-chipbtn" onClick={() => setShowFormat(true)}><CIc.flame size={12} /> FORMAT</button>
           {isAdmin && <button className="jh-chipbtn red" onClick={() => setShow(true)}>+ NEW</button>}
         </div>
+      </div>
+
+      <div style={{marginTop:14}}>
+        <SessionsTable state={state} meId={meId}
+                       onOpen={() => setTab && setTab("leaderboard")} />
       </div>
 
       <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:12}}>
@@ -7483,8 +7626,9 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:150,lineHeight:1,
              color:"rgba(198,255,0,.06)",pointerEvents:"none"}}>08</div>
         <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,
-             letterSpacing:".34em",textTransform:"uppercase",color:"#C6FF00"}}>
-          Series standings · {active.length} players</div>
+             letterSpacing:".34em",textTransform:"uppercase",color:"#C6FF00",
+             display:"flex",alignItems:"center",gap:8}}>
+          <BoMark size={14} />Series standings · {active.length} players</div>
         <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:50,lineHeight:.88,color:"#F2F2F2",marginTop:8}}>RANKINGS</div>
         <div style={{position:"relative",height:3,marginTop:12,background:"linear-gradient(90deg,#C6FF00,rgba(198,255,0,0))"}} />

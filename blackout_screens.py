@@ -2539,3 +2539,210 @@ LU_MOUNT_OLD = """      {showEdit && <Modal open={true} onClose={() => setShowEd
 LU_MOUNT_NEW = """      <LineupSheet open={showLineup} items={lineups} photos={sessionPhotos}
                    onClose={() => setShowLineup(false)} />
       {showEdit && <Modal open={true} onClose={() => setShowEdit(false)} title="SESSION OPTIONS">"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 11 · UI/UX REQUEST — the logo on screens, and the table on SESSIONS
+# ══════════════════════════════════════════════════════════════════════════
+#
+# Two things the owner asked for directly, plus the shared pieces the social /
+# recap package needs.
+#
+# The mark is drawn as inline SVG rather than loaded from assets/: it appears on
+# five screens, and five <img> requests for the same 16px square is five chances
+# for a screen to render with a hole in its header. It is the same geometry the
+# share cards draw on canvas.
+#
+# rankAt() is the one new piece of engine. It ranks the field as it stood after
+# any given night, which is what every movement arrow in this package is: the
+# difference between rankAt(n) and rankAt(n-1). Computed, never stored — a
+# stored delta is a delta that goes stale the moment a score is corrected.
+
+UIUX = r"""
+function BoMark({ size = 16, style }) {
+  const s = size;
+  return (
+    <svg width={s} height={s} viewBox="0 0 100 100" aria-hidden="true"
+         style={{ display: "block", flex: "0 0 auto", ...(style || {}) }}>
+      <rect x="0" y="0" width="100" height="46" fill="#C6FF00" />
+      <rect x="75" y="12" width="13" height="13" fill="#FF2E88" />
+      <rect x="0" y="55" width="100" height="7" fill="#C6FF00" />
+      <rect x="0" y="69" width="100" height="9" fill="#C6FF00" />
+      <rect x="0" y="85" width="100" height="11" fill="#C6FF00" />
+    </svg>
+  );
+}
+
+// An eyebrow with the mark in front of it. Every screen head uses this, so the
+// mark sits in the same place on all of them instead of five near-misses.
+function ScreenEyebrow({ children, color = "#C6FF00" }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <BoMark size={14} />
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 10,
+                    letterSpacing: ".34em", textTransform: "uppercase", color }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// The table as it stood after night `upto` (0-based, inclusive). Returns a map
+// of playerId -> rank, plus the ordered rows.
+function rankAt(state, upto) {
+  const sessions = (state.sessions || []).slice(0, upto + 1);
+  const rows = (state.players || []).map(p => {
+    const s = calcPlayerStats(p.id, sessions);
+    // sessionsPlayed lives on s.stats, not on s — reading it off the top level
+    // silently returns undefined and ranks nobody who has yet to score.
+    return { id: p.id, name: p.name, pts: s.totalPts, played: (s.stats || {}).sessionsPlayed || 0 };
+  }).filter(r => r.played > 0 || r.pts > 0)
+    .sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+  const rank = {};
+  rows.forEach((r, i) => { rank[r.id] = i + 1; });
+  return { rows, rank };
+}
+
+// Movement into the latest completed night: ▲n, ▼n or —.
+function moveInto(state, idx) {
+  if (idx <= 0) return { rank: rankAt(state, idx).rank, prev: {} };
+  return { rank: rankAt(state, idx).rank, prev: rankAt(state, idx - 1).rank };
+}
+
+function Delta({ now, before }) {
+  if (!before || !now || before === now) {
+    return <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11,
+                          color: "#6E6E6E" }}>—</span>;
+  }
+  const up = before > now;
+  return (
+    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                   color: up ? "#C6FF00" : "#FF2E88" }}>
+      {up ? "▲" : "▼"}{Math.abs(before - now)}
+    </span>
+  );
+}
+
+// The standings, on the SESSIONS screen. The owner asked to see the ranking
+// without leaving for the RANK tab — this is the top five plus your own row
+// when you are outside it, which is the only part of the table anyone checks
+// between nights.
+function SessionsTable({ state, meId, onOpen }) {
+  const played = (state.sessions || []).reduce(
+    (n, s, i) => (s.completed || (s.bracket && s.bracket.final && s.bracket.final.winner) ? i : n), -1);
+  const { rows } = rankAt(state, Math.max(played, (state.sessions || []).length - 1));
+  if (!rows.length) {
+    return (
+      <div style={{ border: "1px solid rgba(110,110,110,.3)", background: "rgba(14,14,14,.94)",
+                    padding: 16, textAlign: "center", color: "#6E6E6E", fontSize: 12 }}>
+        The table opens after the first night is played.
+      </div>
+    );
+  }
+  const { rank, prev } = moveInto(state, played);
+  const top = rows.slice(0, 5);
+  const mine = rows.findIndex(r => r.id === meId);
+  const extra = mine >= 5 ? rows[mine] : null;
+
+  const Row = ({ r, i }) => {
+    const you = r.id === meId;
+    return (
+      <div onClick={() => onOpen && onOpen(r.id)}
+           style={{ display: "grid", gridTemplateColumns: "22px 1fr 44px 42px", alignItems: "center",
+                    gap: 8, padding: "9px 0", cursor: onOpen ? "pointer" : "default",
+                    borderTop: i === 0 ? "none" : "1px solid rgba(110,110,110,.16)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12,
+                      color: i === 0 ? "#C6FF00" : "#6E6E6E" }}>{rank[r.id] || i + 1}</div>
+        <div style={{ fontSize: 14, fontWeight: 800,
+                      color: you ? "#FF2E88" : "#F2F2F2", overflow: "hidden",
+                      textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {r.name}{you ? " · you" : ""}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <Delta now={rank[r.id]} before={prev[r.id]} />
+        </div>
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                      fontSize: 17, textAlign: "right",
+                      color: you ? "#FF2E88" : "#F2F2F2" }}>{r.pts}</div>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ border: "1px solid rgba(198,255,0,.35)", background: "rgba(20,20,20,.96)",
+                  padding: "12px 14px 6px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
+                    marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                      letterSpacing: ".3em", color: "#C6FF00" }}>
+          {played >= 0 ? `TABLE AFTER S${played + 1}` : "THE TABLE"}
+        </div>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#9A9A9A" }}>
+          {rows.length} RANKED
+        </div>
+      </div>
+      {top.map((r, i) => <Row key={r.id} r={r} i={i} />)}
+      {extra && (
+        <>
+          <div style={{ borderTop: "1px solid rgba(110,110,110,.16)", margin: "2px 0" }} />
+          <Row r={extra} i={1} />
+        </>
+      )}
+    </div>
+  );
+}
+"""
+
+# The mark, on every screen head. Each of these is the eyebrow line above a
+# screen's 44px headline; swapping the plain div for ScreenEyebrow puts the mark
+# in front of it without touching the headline underneath.
+LOGO_SESSIONS_OLD = """          <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".34em",
+               textTransform:"uppercase",color:"#C6FF00"}}>{state.sessions.length || SESSIONS_TOTAL} nights · Vol.8</div>"""
+LOGO_SESSIONS_NEW = """          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} nights &middot; Vol.8</ScreenEyebrow>"""
+
+# The standings card, between the SESSIONS head and the list of nights.
+TABLE_ON_SESSIONS_OLD = """      <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:12}}>
+        {state.sessions.length === 0 ? ("""
+TABLE_ON_SESSIONS_NEW = """      <div style={{marginTop:14}}>
+        <SessionsTable state={state} meId={meId}
+                       onOpen={() => setTab && setTab("leaderboard")} />
+      </div>
+
+      <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:12}}>
+        {state.sessions.length === 0 ? ("""
+
+# The mark on the other four screen heads. Each is an eyebrow above a big
+# headline; the mark goes in front of the eyebrow so it sits in the same
+# position on every screen rather than five near-misses.
+LOGO_ME_OLD = """      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+                    letterSpacing: ".28em", color: "#9A9A9A" }}>
+        YOUR SEASON &middot; {(me?.name || "").toUpperCase()}
+      </div>"""
+LOGO_ME_NEW = """      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <BoMark size={14} />
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+                      letterSpacing: ".28em", color: "#9A9A9A" }}>
+          YOUR SEASON &middot; {(me?.name || "").toUpperCase()}
+        </div>
+      </div>"""
+
+LOGO_PLAYERS_OLD = """      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+                    letterSpacing: ".28em", color: "#9A9A9A" }}>
+        THE ROSTER &middot; {leaderboard.length} PLAYERS"""
+LOGO_PLAYERS_NEW = """      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+                    letterSpacing: ".28em", color: "#9A9A9A",
+                    display: "flex", alignItems: "center", gap: 8 }}>
+        <BoMark size={14} />
+        THE ROSTER &middot; {leaderboard.length} PLAYERS"""
+
+LOGO_RANK_OLD = """        <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,
+             letterSpacing:".34em",textTransform:"uppercase",color:"#C6FF00"}}>
+          Series standings · {active.length} players</div>"""
+LOGO_RANK_NEW = """        <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,
+             letterSpacing:".34em",textTransform:"uppercase",color:"#C6FF00",
+             display:"flex",alignItems:"center",gap:8}}>
+          <BoMark size={14} />Series standings · {active.length} players</div>"""
+
+LOGO_RECAP_OLD = """          SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " · 2X NIGHT" : ""}"""
+LOGO_RECAP_NEW = """          <BoMark size={13} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 7 }} />
+          SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " · 2X NIGHT" : ""}"""

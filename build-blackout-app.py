@@ -313,7 +313,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -330,6 +330,12 @@ def add_screens(s, report):
                            ("countdown", SCREENS.DASH_ANCHOR_OLD, SCREENS.DASH_ANCHOR_NEW),
                            ("recap+prizes", SCREENS.DASH_TAIL_OLD, SCREENS.DASH_TAIL_NEW),
                            ("mvp open", SCREENS.MVP_OLD, SCREENS.MVP_NEW),
+                           ("sessions eyebrow", SCREENS.LOGO_SESSIONS_OLD, SCREENS.LOGO_SESSIONS_NEW),
+                           ("me eyebrow", SCREENS.LOGO_ME_OLD, SCREENS.LOGO_ME_NEW),
+                           ("players eyebrow", SCREENS.LOGO_PLAYERS_OLD, SCREENS.LOGO_PLAYERS_NEW),
+                           ("rank eyebrow", SCREENS.LOGO_RANK_OLD, SCREENS.LOGO_RANK_NEW),
+                           ("recap eyebrow", SCREENS.LOGO_RECAP_OLD, SCREENS.LOGO_RECAP_NEW),
+                           ("sessions table", SCREENS.TABLE_ON_SESSIONS_OLD, SCREENS.TABLE_ON_SESSIONS_NEW),
                            ("line-up state", SCREENS.LU_STATE_OLD, SCREENS.LU_STATE_NEW),
                            ("line-up chip", SCREENS.LU_ACT_OLD, SCREENS.LU_ACT_NEW),
                            ("line-up sheet", SCREENS.LU_MOUNT_OLD, SCREENS.LU_MOUNT_NEW),
