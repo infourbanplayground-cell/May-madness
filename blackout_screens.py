@@ -2335,31 +2335,35 @@ function luPaint(g, kind, d, im, logo) {
   stDisp(g, big[1], L, 500, 164, "#C6FF00", W);
 
   // ── the two plates, sitting on the floor of the card ──
+  // The names were set at 56px on a 150px plate and filled it wall to wall, so
+  // two doubles pairs read as a block of type rather than as a line-up. 44 on a
+  // 116px plate leaves air around them and gives the photograph the room back.
+  const PH = 116;
   const plate = (y, name, chip, colour) => {
     g.fillStyle = "rgba(15,15,15,.92)";
-    g.fillRect(L, y, W, 150);
+    g.fillRect(L, y, W, PH);
     g.strokeStyle = colour; g.lineWidth = 3;
-    g.strokeRect(L + 1.5, y + 1.5, W - 3, 147);
-    const room = W - 72 - (chip ? 140 : 0);
-    const size = stFit(g, name, room, 56, 900);
+    g.strokeRect(L + 1.5, y + 1.5, W - 3, PH - 3);
+    const room = W - 64 - (chip ? 130 : 0);
+    const size = stFit(g, name, room, 44, 900);
     g.font = `italic 900 ${size}px Archivo, sans-serif`;
     g.fillStyle = "#F2F2F2";
-    g.fillText(name, L + 36, y + 95);
+    g.fillText(name, L + 32, y + PH / 2 + size * 0.34);
     if (chip) {
-      g.font = '700 26px "JetBrains Mono", monospace';
+      g.font = '700 22px "JetBrains Mono", monospace';
       g.fillStyle = colour;
-      g.fillText(chip, R - 36 - g.measureText(chip).width, y + 92);
+      g.fillText(chip, R - 32 - g.measureText(chip).width, y + PH / 2 + 8);
     }
   };
 
-  const baseY = 1160;
+  const baseY = 1230;
   plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
-  g.font = '900 30px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
+  g.font = '900 26px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
   {
     const t = "V S";
-    g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + 222);
+    g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44);
   }
-  plate(baseY + 260, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
+  plate(baseY + PH + 72, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
 
   // ── footer ──
   // The pool used to sit here. It is the season's number, not this match's, and
