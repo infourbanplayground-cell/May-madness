@@ -137,6 +137,17 @@ TEXT = [
      "\U0001F3C6 *September Surge final standings:*\nsurge.urbanpadel.om ▶ Leaderboard"),
     # The advertised pool is derived, never typed, so the meta tags move with it.
     (f"{PREV_POOL} OMR", f"{POOL} OMR"),
+    # The photo watermark and the download filename, which are Vol.SIX's and had
+    # survived two rebrands. Nothing matched them because every rename table
+    # since has swept the OUTGOING volume's name, and these carried the one
+    # before that: Vol.7's table renamed "attack" strings to "surge" only where
+    # it happened to name them, and this one renames "surge" strings. So every
+    # photo shared out of Surge, and out of Blackout until now, was stamped
+    # ATTACK.URBANPADEL.OM — sending anyone who read it to Vol.6's app.
+    #
+    # The lesson is in the build, not here: see the stray-host check below.
+    ("ATTACK.URBANPADEL.OM", CFG["host"].upper()),
+    ("august-attack-", "blackout-"),
 ]
 
 # ── Things the colour sweep gets right and the brand still gets wrong. ───────
@@ -451,6 +462,32 @@ def main():
     # that is a rename that stopped matching.
     allowed = {"September Surge": 4, "surge.urbanpadel.om": 1}
     bad = {k: v for k, v in leftovers.items() if v > allowed.get(k, 0)}
+
+    # Any OTHER volume's host, in any casing. The named checks above only ever
+    # catch the volume this build inherits from, which is how Vol.6's host rode
+    # through two rebrands stamped on every shared photo: Vol.7's table swept
+    # "attack" where it named it, Vol.8's sweeps "surge", and nobody was looking
+    # for the one before last. This looks for the shape instead of the name, so
+    # it fails on a host from any volume, including ones not yet written.
+    #
+    # Comments are skipped. The first run of this check failed on
+    # HEAT.URBANPADEL.OM and the match turned out to be a code comment left by
+    # whoever fixed this same bug one volume earlier — which is worth keeping,
+    # not renaming. Only text that reaches a user counts.
+    hosts = {}
+    for m in re.finditer(r"\b([a-z]+)\.urbanpadel\.om\b", s, re.I):
+        h = m.group(0).lower()
+        if h == CFG["host"]:
+            continue
+        line_start = s.rfind("\n", 0, m.start()) + 1
+        before = s[line_start:m.start()]
+        if "//" in before or before.lstrip().startswith(("*", "#")):
+            continue
+        hosts[h] = hosts.get(h, 0) + 1
+    stray = {h: n for h, n in hosts.items()
+             if n > {CFG["previousHost"]: 1}.get(h, 0)}
+    if stray:
+        bad.update(stray)
     print()
     print(f"built {os.path.basename(DST)}  {len(s)/1024:.0f}KB  build {bid}")
     print(f"  pool {POOL} OMR  ·  {CFG['sessions']} nights  ·  2X from {CFG['doubleFromSession']}"

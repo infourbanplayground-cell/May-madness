@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "9cfd85562e18";
+  var V = "8331a389e4a1";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1392,7 +1392,7 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
   ctx.textAlign = "right";
   ctx.fillStyle = ice;
   ctx.font = `700 ${19 * s}px 'JetBrains Mono', monospace`;
-  ctx.fillText("ATTACK.URBANPADEL.OM", w - pad - 20 * s, by + barH / 2);
+  ctx.fillText("BLACKOUT.URBANPADEL.OM", w - pad - 20 * s, by + barH / 2);
 }
 
 // Uploads a resized photo to the server for Cloudinary enhancement (brightness/
@@ -1491,14 +1491,14 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
 async function sharePhoto(dataUrl, idx) {
   try {
     const blob = await (await fetch(dataUrl)).blob();
-    const f = new File([blob], `august-attack-${idx + 1}.jpg`, { type: blob.type || "image/jpeg" });
+    const f = new File([blob], `blackout-${idx + 1}.jpg`, { type: blob.type || "image/jpeg" });
     if (navigator.canShare && navigator.canShare({ files: [f] })) {
       await navigator.share({ files: [f], title: "Blackout Series" });
       return;
     }
   } catch (e) { if (e && e.name === "AbortError") return; }
   const a = document.createElement("a");
-  a.href = dataUrl; a.download = `august-attack-${idx + 1}.jpg`;
+  a.href = dataUrl; a.download = `blackout-${idx + 1}.jpg`;
   document.body.appendChild(a); a.click(); a.remove();
 }
 function generatePlayerCard(entry, state) {
