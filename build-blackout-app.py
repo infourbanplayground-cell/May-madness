@@ -313,7 +313,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.RECAP2 + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -365,6 +365,9 @@ def add_screens(s, report):
 
     report("nav: 5 tabs (HOME / SESSIONS / RANK / ME / PLAYERS)")
     s = replace_fn(s, "MatchEditorModal", SCREENS.SCORESHEET, report, "score sheet")
+    # The recap sheet gains the MY NIGHT / EVERYONE toggle the social handoff
+    # asks for; EVERYONE is what Vol.8 already showed, extended.
+    s = replace_fn(s, "RecapSheet", SCREENS.RECAP_SHEET, report, "recap sheet")
     return s
 
 

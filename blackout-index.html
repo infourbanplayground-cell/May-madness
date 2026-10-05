@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "70681d16d830";
+  var V = "a72265e7b5c2";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -3023,18 +3023,26 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 }
 
 // ══ VOL.8 · NIGHT RECAP ═══════════════════════════════════════════════════
+
 function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession }) {
   if (!session) return null;
+  const [tab, setTab] = React.useState(() => {
+    try { return localStorage.getItem("bo_recap_tab") || "mine"; } catch (e) { return "mine"; }
+  });
+  const [story, setStory] = React.useState(null);
+  React.useEffect(() => {
+    try { localStorage.setItem("bo_recap_tab", tab); } catch (e) {}
+  }, [tab]);
+
   const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
   const teamName = tid => {
     const t = (session.teams || []).find(x => x.id === tid);
-    return t ? nameOf(t.p1Id) + " & " + nameOf(t.p2Id) : "—";
+    return t ? nameOf(t.p1Id) + " & " + nameOf(t.p2Id) : "-";
   };
-  const f = session.bracket?.final;
+  const f = session.bracket && session.bracket.final;
   const champTid = f && f.winner ? (f.winner === "team1" ? f.team1Id : f.team2Id) : null;
   const idx = (state.sessions || []).findIndex(s => s.id === session.id);
 
-  // Top scorer on the night, from the same per-event engine the receipts use.
   const nightOf = pid => {
     const r = calcPlayerNights(pid, (state.sessions || []).slice(0, idx + 1), () => "");
     const n = r.nights.find(x => x.idx === idx);
@@ -3044,31 +3052,49 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
   const scored = inIt.map(p => ({ p, pts: nightOf(p.id) })).sort((a, b) => b.pts - a.pts);
   const topScorer = scored[0];
 
-  // Biggest win of the night, by margin.
-  const all = (session.groupMatches || []).concat(session.bracket?.qf || [],
-    session.bracket?.sf || [], f ? [f] : []).filter(m => m && m.winner && m.score);
+  const all = (session.groupMatches || []).concat((session.bracket || {}).qf || [],
+    (session.bracket || {}).sf || [], f ? [f] : []).filter(m => m && m.winner && m.score);
   const biggest = all.map(m => {
     const w = m.winner === "team1" ? m.team1Id : m.team2Id;
-    const a = Math.abs(m.score.t1 - m.score.t2);
-    return { m, w, margin: a };
+    return { m, w, margin: Math.abs(m.score.t1 - m.score.t2) };
   }).sort((x, y) => y.margin - x.margin)[0];
 
   const votes = session.mvpVotes || {};
   const mvpId = Object.keys(votes).sort((a, b) => (votes[b] || 0) - (votes[a] || 0))[0];
 
-  const Row = ({ k, v, sub, c }) => (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0",
-      borderBottom: "1px solid rgba(110,110,110,.16)" }}>
-      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
-        letterSpacing: ".2em", color: "#9A9A9A", width: 104 }}>{k}</span>
-      <span style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontWeight: 800, fontSize: 14, display: "block" }}>{v}</span>
-        {sub && <span style={{ fontSize: 12, color: "#9A9A9A" }}>{sub}</span>}
-      </span>
-      {c && <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
-        fontSize: 16, color: "#C6FF00" }}>{c}</span>}
-    </div>
-  );
+  // My story: the handoff's three stat rows, filled from the night.
+  const mineStory = d => {
+    const wins = d.games.filter(g => g.won).length;
+    const best = d.games.filter(g => g.won)
+      .sort((a, b) => parseInt(b.score) - parseInt(a.score))[0];
+    const far = d.games.some(g => g.stage === "FINAL") ? "REACHED THE FINAL"
+              : d.games.some(g => g.stage === "SEMI-FINAL") ? "REACHED SEMI-FINAL"
+              : d.games.some(g => g.stage === "QUARTER-FINAL") ? "REACHED THE QUARTERS"
+              : "GROUP STAGE";
+    setStory({
+      no: idx + 1, who: (nameOf(meId) || "").split(" ")[0],
+      record: wins + "-" + (d.games.length - wins),
+      rows: [
+        { k: "POINTS", v: "+" + (d.ptsNow - d.ptsWas), lime: true },
+        { k: "HOW FAR", v: far },
+        best ? { k: "BEST WIN", v: best.score + " VS " + best.opponents[0].toUpperCase() } : null,
+      ].filter(Boolean),
+      foot: "SESSION " + (idx + 1) + " \u00b7 " + fmtNightDate(session.date).toUpperCase(),
+      rankLine: d.rankNow ? "#" + d.rankNow + " OF " + d.total : "",
+    });
+  };
+
+  const groupStory = sum => setStory({
+    no: idx + 1, who: sum.final ? sum.final.winners.toUpperCase() : "THE NIGHT",
+    record: sum.final ? sum.final.score : "",
+    rows: [
+      { k: "PLAYERS", v: String(sum.playerCount) },
+      { k: "GAMES", v: String(sum.gameCount) },
+      sum.closest ? { k: "CLOSEST", v: sum.closest.score, lime: true } : null,
+    ].filter(Boolean),
+    foot: "SESSION " + (idx + 1) + " \u00b7 " + fmtNightDate(session.date).toUpperCase(),
+    rankLine: sum.tiebreaks + (sum.tiebreaks === 1 ? " TIEBREAK" : " TIEBREAKS"),
+  });
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
@@ -3078,56 +3104,36 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
           letterSpacing: ".26em", color: "#9A9A9A" }}>
           <BoMark size={13} style={{ display: "inline-block", verticalAlign: "-2px", marginRight: 7 }} />
-          SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " · 2X NIGHT" : ""}
+          SESSION {idx + 1} &middot; {fmtNightDate(session.date)}{session.doublePoints ? " \u00b7 2X NIGHT" : ""}
         </div>
         <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
           fontSize: 44, lineHeight: .9, marginTop: 6 }}>SESSION {idx + 1}<br />RECAP</div>
 
-        {champTid && (
-          <div style={{ border: "2px solid #C6FF00", background: "rgba(198,255,0,.06)",
-            padding: 16, marginTop: 18, boxShadow: "0 0 30px rgba(198,255,0,.18)" }}>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
-              letterSpacing: ".26em", color: "#C6FF00" }}>CHAMPIONS</div>
-            <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
-              fontSize: 26, marginTop: 6 }}>{teamName(champTid)}</div>
-            {f.score && <div style={{ fontSize: 12, color: "#9A9A9A", marginTop: 4 }}>
-              Final {f.score.t1}&ndash;{f.score.t2} &middot; {inIt.length} players
-            </div>}
-          </div>
-        )}
+        <RecapToggle tab={tab} setTab={setTab} />
 
-        <div style={{ marginTop: 16 }}>
-          {mvpId && <Row k="MVP" v={nameOf(mvpId)} sub="player vote" c={votes[mvpId]} />}
-          {topScorer && topScorer.pts > 0 &&
-            <Row k="TOP SCORER" v={topScorer.p.name} sub="points on the night" c={"+" + topScorer.pts} />}
-          {biggest && <Row k="BIGGEST WIN" v={teamName(biggest.w)}
-            sub={biggest.m.score.t1 + "–" + biggest.m.score.t2} />}
-        </div>
-
-        {meId && getPlayerTeam(session, meId) && (
-          <div style={{ border: "1px solid rgba(255,46,136,.4)", padding: 14, marginTop: 16 }}>
-            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
-              letterSpacing: ".24em", color: "#FF2E88" }}>YOUR NIGHT</div>
-            <div style={{ fontSize: 14, fontWeight: 800, marginTop: 5 }}>
-              +{nightOf(meId)} points &middot; open ME for the receipt
-            </div>
-          </div>
-        )}
+        {tab === "mine"
+          ? <RecapMine session={session} state={state} meId={meId} idx={idx} onShare={mineStory} />
+          : <RecapEveryone session={session} state={state} meId={meId} idx={idx}
+              nameOf={nameOf} teamName={teamName} champTid={champTid} f={f}
+              mvpId={mvpId} votes={votes} topScorer={topScorer} biggest={biggest}
+              inIt={inIt} onShare={groupStory} />}
 
         {onOpenSession && (
           <button onClick={onOpenSession} style={{ width: "100%", marginTop: 16, padding: "14px",
             background: "transparent", border: "1px solid rgba(198,255,0,.4)", color: "#C6FF00",
             fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
-            letterSpacing: ".24em", cursor: "pointer" }}>OPEN THE NIGHT &#9654;</button>
+            letterSpacing: ".24em", cursor: "pointer" }}>FULL RESULTS &#9654;</button>
         )}
         <button onClick={onClose} style={{ width: "100%", marginTop: 10, padding: "14px",
           background: "transparent", border: "1px solid rgba(110,110,110,.4)", color: "#9A9A9A",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".24em", cursor: "pointer" }}>CLOSE</button>
       </div>
+      <RecapStorySheet open={story} onClose={() => setStory(null)} />
     </div>
   );
 }
+
 
 function BoMark({ size = 16, style }) {
   const s = size;
@@ -3261,6 +3267,441 @@ function SessionsTable({ state, meId, onOpen }) {
     </div>
   );
 }
+
+// Every game one player played on a night, in the order they played them.
+function recapGames(session, state, pid) {
+  const team = getPlayerTeam(session, pid);
+  if (!team) return [];
+  const nameOf = id => ((state.players || []).find(p => p.id === id) || {}).name || "?";
+  const first = id => nameOf(id).split(" ")[0];
+  const partner = team.p1Id === pid ? team.p2Id : team.p1Id;
+  const teamOf = tid => (session.teams || []).find(t => t.id === tid);
+  const opp = tid => {
+    const t = teamOf(tid);
+    return t ? [first(t.p1Id), first(t.p2Id)] : ["?", "?"];
+  };
+
+  const rows = [];
+  const push = (m, stage) => {
+    if (!m || !m.winner || (m.team1Id !== team.id && m.team2Id !== team.id)) return;
+    const mine = m.team1Id === team.id;
+    const otherId = mine ? m.team2Id : m.team1Id;
+    const won = teamWon(m, team.id);
+    const a = mine ? m.score.t1 : m.score.t2;
+    const b = mine ? m.score.t2 : m.score.t1;
+    rows.push({
+      stage, won, score: `${a}–${b}`,
+      partner: first(partner), opponents: opp(otherId),
+      tiebreak: m.lossType === "tiebreak" || Math.abs(a - b) === 1,
+    });
+  };
+
+  let g = 0;
+  (session.groupMatches || []).forEach(m => {
+    if (m.team1Id === team.id || m.team2Id === team.id) { g += 1; push(m, `GROUP · G${g}`); }
+  });
+  ((session.bracket || {}).qf || []).forEach(m => push(m, "QUARTER-FINAL"));
+  ((session.bracket || {}).sf || []).forEach(m => push(m, "SEMI-FINAL"));
+  const f = (session.bracket || {}).final;
+  if (f) push(f, "FINAL");
+  const tp = (session.bracket || {}).thirdsPlayoff || (session.bracket || {}).thirdPlace;
+  if (tp) push(tp, "3RD PLACE");
+  return rows;
+}
+
+// The headline, generated from what actually happened. Ordered by what is worth
+// saying: winning the thing, then beating the leader, then a tiebreak, then a
+// count of wins.
+function recapHeadline(games, opts) {
+  const w = games.filter(g => g.won).length;
+  const l = games.length - w;
+  if (!games.length) return ["NO GAMES", "ON THE NIGHT"];
+  if (opts && opts.champion) return [`${w}–${l} AND`, "THE TITLE."];
+  if (opts && opts.beatLeader) return ["YOU BEAT", "THE LEADER."];
+  if (games.some(g => g.won && g.tiebreak)) return [`${w} WINS.`, "ONE TIEBREAK."];
+  if (w && !l) return ["UNBEATEN", "ON THE NIGHT."];
+  if (!w) return ["TOUGH ONE.", `${l} LOSSES.`];
+  return [`${w} WINS.`, `${l} ${l === 1 ? "LOSS" : "LOSSES"}.`];
+}
+
+// The whole group's night, the same for everyone.
+function sessionSummary(session, state, idx) {
+  const nameOf = id => ((state.players || []).find(p => p.id === id) || {}).name || "?";
+  const teamName = tid => {
+    const t = (session.teams || []).find(x => x.id === tid);
+    return t ? nameOf(t.p1Id).split(" ")[0] + " & " + nameOf(t.p2Id).split(" ")[0] : "—";
+  };
+  const f = (session.bracket || {}).final;
+  const all = (session.groupMatches || []).concat((session.bracket || {}).qf || [],
+    (session.bracket || {}).sf || [], f ? [f] : []).filter(m => m && m.winner && m.score);
+  const players = (state.players || []).filter(p => getPlayerTeam(session, p.id));
+
+  const { rank } = rankAt(state, idx);
+  const prev = idx > 0 ? rankAt(state, idx - 1).rank : {};
+  let climb = null;
+  players.forEach(p => {
+    const before = prev[p.id], now = rank[p.id];
+    if (!before || !now) return;
+    const up = before - now;
+    if (up > 0 && (!climb || up > climb.up)) climb = { name: p.name, up };
+  });
+
+  const tiebreaks = all.filter(m => Math.abs(m.score.t1 - m.score.t2) === 1).length;
+  const closest = all.map(m => ({ m, d: Math.abs(m.score.t1 - m.score.t2) }))
+                     .sort((a, b) => a.d - b.d)[0];
+
+  return {
+    playerCount: players.length,
+    gameCount: all.length,
+    final: f && f.winner ? {
+      winners: teamName(f.winner === "team1" ? f.team1Id : f.team2Id),
+      runnersUp: teamName(f.winner === "team1" ? f.team2Id : f.team1Id),
+      score: f.score ? `${Math.max(f.score.t1, f.score.t2)}–${Math.min(f.score.t1, f.score.t2)}` : "",
+    } : null,
+    climb, tiebreaks,
+    closest: closest ? { score: `${closest.m.score.t1}–${closest.m.score.t2}` } : null,
+  };
+}
+
+// ── the two tabs ──────────────────────────────────────────────────────────
+function RecapToggle({ tab, setTab }) {
+  const B = ({ id, label }) => (
+    <button onClick={() => setTab(id)} style={{ padding: "11px 4px", cursor: "pointer",
+      background: tab === id ? "#C6FF00" : "transparent",
+      color: tab === id ? "#050505" : "#9A9A9A", border: "none",
+      fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 10,
+      letterSpacing: ".24em", textTransform: "uppercase" }}>{label}</button>
+  );
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr",
+                  border: "1px solid rgba(110,110,110,.4)", marginTop: 14 }}>
+      <B id="mine" label="My night" /><B id="everyone" label="Everyone" />
+    </div>
+  );
+}
+
+function RecapMine({ session, state, meId, idx, onShare }) {
+  if (!meId) {
+    return <div style={{ padding: "28px 0", textAlign: "center", color: "#6E6E6E", fontSize: 13 }}>
+      Pick who you are on the ME tab and your night appears here.
+    </div>;
+  }
+  const games = recapGames(session, state, meId);
+  if (!games.length) {
+    return <div style={{ padding: "28px 0", textAlign: "center", color: "#6E6E6E", fontSize: 13 }}>
+      You did not play this night.
+    </div>;
+  }
+  const after = rankAt(state, idx), before = idx > 0 ? rankAt(state, idx - 1) : { rank: {} };
+  const rankNow = after.rank[meId], rankWas = before.rank[meId];
+  const ptsNow = calcPlayerStats(meId, (state.sessions || []).slice(0, idx + 1)).totalPts;
+  const ptsWas = idx > 0 ? calcPlayerStats(meId, (state.sessions || []).slice(0, idx)).totalPts : 0;
+  const f = (session.bracket || {}).final;
+  const myTeam = getPlayerTeam(session, meId);
+  const champion = !!(f && f.winner && myTeam &&
+    (f.winner === "team1" ? f.team1Id : f.team2Id) === myTeam.id);
+  const head = recapHeadline(games, { champion });
+  const down = rankWas && rankNow && rankNow > rankWas;
+  // calcBadges(pid, sessions, players, nightsData, ranks) — passing `state`
+  // where `sessions` belongs crashes the screen, since state has no .filter.
+  const upto = (state.sessions || []).slice(0, idx + 1);
+  const nameOf = id => ((state.players || []).find(p => p.id === id) || {}).name || "?";
+  const nights = calcPlayerNights(meId, upto, nameOf);
+  const badges = calcBadges(meId, upto, state.players || [], nights,
+                            rankByNight(state.players || [], upto));
+  const fresh = (badges || []).filter(b => b.got).slice(-1)[0];
+
+  return (
+    <div>
+      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+                    fontSize: 44, lineHeight: .88, marginTop: 14 }}>
+        {head[0]}<br /><span style={{ color: "#C6FF00" }}>{head[1]}</span>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", marginTop: 16,
+                    border: "1px solid rgba(198,255,0,.35)" }}>
+        <div style={{ padding: 14, borderRight: "1px solid rgba(110,110,110,.3)" }}>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
+                        letterSpacing: ".2em", color: "#9A9A9A" }}>RANK</div>
+          <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 7 }}>
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 22,
+                           color: "#6E6E6E" }}>{rankWas ? "#" + rankWas : "-"}</span>
+            <span style={{ color: "#6E6E6E" }}>&#9654;</span>
+            <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                           fontSize: 34, color: down ? "#FF2E88" : "#C6FF00" }}>
+              {rankNow ? "#" + rankNow : "-"}</span>
+          </div>
+        </div>
+        <div style={{ padding: 14, textAlign: "right" }}>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
+                        letterSpacing: ".2em", color: "#9A9A9A" }}>POINTS</div>
+          <div style={{ marginTop: 6, fontStyle: "italic",
+                        fontVariationSettings: "'wdth' 112,'wght' 900", fontSize: 34,
+                        color: "#C6FF00" }}>{ptsWas} &#9654; {ptsNow}</div>
+        </div>
+      </div>
+
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                    letterSpacing: ".3em", color: "#9A9A9A", margin: "18px 0 2px" }}>GAMES</div>
+      {games.map((g, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 0",
+                              borderTop: "1px solid rgba(110,110,110,.16)" }}>
+          <span style={{ width: 8, height: 8, flex: "0 0 auto",
+                         background: g.won ? "#C6FF00" : "#FF2E88" }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontSize: 14, fontWeight: 800, display: "block", overflow: "hidden",
+                           textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              w/ {g.partner} vs {g.opponents.join(" & ")}
+            </span>
+            <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 9,
+                           letterSpacing: ".16em", color: "#9A9A9A" }}>
+              {g.stage}{g.tiebreak ? " · TIEBREAK" : ""}
+            </span>
+          </span>
+          <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                         fontSize: 18 }}>{g.score}</span>
+        </div>
+      ))}
+
+      {fresh && (
+        <div style={{ background: "rgba(255,46,136,.08)", border: "1px solid rgba(255,46,136,.4)",
+                      padding: 12, marginTop: 16 }}>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                        letterSpacing: ".24em", color: "#FF2E88" }}>UNLOCKED &middot; {fresh.name}</div>
+          <div style={{ fontSize: 12, color: "#CFCFCF", marginTop: 4 }}>{fresh.desc}</div>
+        </div>
+      )}
+
+      {onShare && (
+        <button onClick={() => onShare({ head, games, ptsNow, ptsWas, rankNow,
+                                         total: (state.players || []).length })}
+          style={{ width: "100%", marginTop: 16, padding: 14, background: "#C6FF00",
+                   color: "#050505", border: "none", cursor: "pointer",
+                   fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+                   letterSpacing: ".2em" }}>SHARE STORY</button>
+      )}
+    </div>
+  );
+}
+
+// The group's night. Keeps what Vol.8 already showed — champions, MVP, top
+// scorer, biggest win — and adds the three things the handoff asks for: the
+// final as a card, the table as it stands after this night, and the night in
+// numbers.
+function RecapEveryone({ session, state, meId, idx, nameOf, teamName, champTid, f,
+                         mvpId, votes, topScorer, biggest, inIt, onShare }) {
+  const sum = sessionSummary(session, state, idx);
+  const { rows, rank } = rankAt(state, idx);
+  const prev = idx > 0 ? rankAt(state, idx - 1).rank : {};
+  const top = rows.slice(0, 5);
+  const mineIdx = rows.findIndex(r => r.id === meId);
+  const extra = mineIdx >= 5 ? rows[mineIdx] : null;
+
+  const Row = ({ k, v, sub, c }) => (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "13px 0",
+      borderBottom: "1px solid rgba(110,110,110,.16)" }}>
+      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".2em", color: "#9A9A9A", width: 104 }}>{k}</span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ fontWeight: 800, fontSize: 14, display: "block" }}>{v}</span>
+        {sub && <span style={{ fontSize: 12, color: "#9A9A9A" }}>{sub}</span>}
+      </span>
+      {c && <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+        fontSize: 16, color: "#C6FF00" }}>{c}</span>}
+    </div>
+  );
+
+  const TRow = ({ r, i }) => {
+    const you = r.id === meId;
+    return (
+      <div style={{ display: "grid", gridTemplateColumns: "22px 1fr 44px 40px", alignItems: "center",
+                    gap: 8, padding: "8px 0",
+                    borderTop: i === 0 ? "none" : "1px solid rgba(110,110,110,.16)" }}>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12,
+                       color: i === 0 ? "#C6FF00" : "#6E6E6E" }}>{rank[r.id] || i + 1}</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: you ? "#FF2E88" : "#F2F2F2",
+                       overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {r.name}{you ? " · you" : ""}</span>
+        <span style={{ textAlign: "center" }}><Delta now={rank[r.id]} before={prev[r.id]} /></span>
+        <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                       fontSize: 17, textAlign: "right",
+                       color: you ? "#FF2E88" : "#F2F2F2" }}>{r.pts}</span>
+      </div>
+    );
+  };
+
+  const Tile = ({ k, v, c }) => (
+    <div style={{ background: "rgba(14,14,14,.94)", padding: 10, flex: 1, minWidth: 0 }}>
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
+                    letterSpacing: ".2em", color: "#9A9A9A" }}>{k}</div>
+      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                    fontSize: 20, marginTop: 5, color: c || "#F2F2F2", overflow: "hidden",
+                    textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v}</div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, letterSpacing: ".2em",
+                    color: "#9A9A9A", marginTop: 14 }}>
+        {sum.playerCount} PLAYERS &middot; {sum.gameCount} GAMES
+      </div>
+      {sum.final && (
+        <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+                      fontSize: 40, lineHeight: .9, marginTop: 8 }}>
+          {sum.final.winners.toUpperCase()}<br /><span style={{ color: "#C6FF00" }}>TAKE IT</span>
+        </div>
+      )}
+
+      {champTid && (
+        <div style={{ border: "1px solid rgba(198,255,0,.35)", padding: 14, marginTop: 14 }}>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                        letterSpacing: ".3em", color: "#C6FF00" }}>FINAL</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                        marginTop: 8 }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: "#C6FF00" }}>{teamName(champTid)}</span>
+            <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                           fontSize: 24, color: "#C6FF00" }}>
+              {f && f.score ? Math.max(f.score.t1, f.score.t2) : ""}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                        marginTop: 4 }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: "#9A9A9A" }}>
+              {teamName(f.winner === "team1" ? f.team2Id : f.team1Id)}</span>
+            <span style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+                           fontSize: 24, color: "#9A9A9A" }}>
+              {f && f.score ? Math.min(f.score.t1, f.score.t2) : ""}</span>
+          </div>
+        </div>
+      )}
+
+      <div style={{ marginTop: 16 }}>
+        {mvpId && <Row k="MVP" v={nameOf(mvpId)} sub="player vote" c={votes[mvpId]} />}
+        {topScorer && topScorer.pts > 0 &&
+          <Row k="TOP SCORER" v={topScorer.p.name} sub="points on the night" c={"+" + topScorer.pts} />}
+        {biggest && <Row k="BIGGEST WIN" v={teamName(biggest.w)}
+          sub={biggest.m.score.t1 + "-" + biggest.m.score.t2} />}
+      </div>
+
+      {top.length > 0 && (
+        <>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                        letterSpacing: ".3em", color: "#9A9A9A", margin: "18px 0 2px" }}>
+            TABLE AFTER S{idx + 1}</div>
+          {top.map((r, i) => <TRow key={r.id} r={r} i={i} />)}
+          {extra && <>
+            <div style={{ borderTop: "1px solid rgba(110,110,110,.16)", margin: "2px 0" }} />
+            <TRow r={extra} i={1} />
+          </>}
+        </>
+      )}
+
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                    letterSpacing: ".3em", color: "#9A9A9A", margin: "18px 0 8px" }}>
+        NIGHT IN NUMBERS</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <Tile k="BIGGEST CLIMB" v={sum.climb ? sum.climb.name.split(" ")[0] : "—"} c="#C6FF00" />
+        <Tile k="TIEBREAKS" v={String(sum.tiebreaks)} />
+        <Tile k="CLOSEST" v={sum.closest ? sum.closest.score : "—"} c="#FF2E88" />
+      </div>
+
+      {onShare && (
+        <button onClick={() => onShare(sum)} style={{ width: "100%", marginTop: 16, padding: 14,
+          background: "#C6FF00", color: "#050505", border: "none", cursor: "pointer",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".2em" }}>SHARE NIGHT RECAP</button>
+      )}
+    </div>
+  );
+}
+
+// The 9:16 recap story. Same canvas approach as every other share card here, so
+// what you preview is the file you post.
+function drawRecapStory(d) {
+  const c = document.createElement("canvas");
+  c.width = 1080; c.height = 1920;
+  const g = c.getContext("2d");
+  g.fillStyle = "#050505"; g.fillRect(0, 0, 1080, 1920);
+  let rg = g.createRadialGradient(1080, 300, 0, 1080, 300, 1000);
+  rg.addColorStop(0, "rgba(255,46,136,.22)"); rg.addColorStop(1, "rgba(255,46,136,0)");
+  g.fillStyle = rg; g.fillRect(0, 0, 1080, 1920);
+  rg = g.createRadialGradient(0, 1700, 0, 0, 1700, 1000);
+  rg.addColorStop(0, "rgba(198,255,0,.12)"); rg.addColorStop(1, "rgba(198,255,0,0)");
+  g.fillStyle = rg; g.fillRect(0, 0, 1080, 1920);
+  g.fillStyle = "rgba(198,255,0,.05)";
+  for (let y = 0; y < 1920; y += 10) g.fillRect(0, y, 1080, 2);
+  g.fillStyle = "#C6FF00"; g.fillRect(0, 0, 1080, 10);
+
+  const L = 86, R = 1080 - 86, W = R - L;
+  stMono(g, `BLACKOUT SERIES · VOL.8 · S${d.no}`, L, 190, 24, "#C6FF00", 5);
+  stDisp(g, (d.who || "").toUpperCase(), L, 400, 112, "#F2F2F2", W);
+  stDisp(g, d.record, L, 530, 112, "#C6FF00", W);
+  stDisp(g, "ON THE", L, 650, 112, "#F2F2F2", W);
+  stDisp(g, "NIGHT", L, 770, 112, "#F2F2F2", W);
+
+  let y = 1020;
+  (d.rows || []).slice(0, 3).forEach(r => {
+    g.fillStyle = "rgba(110,110,110,.3)"; g.fillRect(L, y - 56, W, 2);
+    stMono(g, r.k, L, y - 18, 22, "#9A9A9A", 4);
+    stDisp(g, r.v, L, y + 36, 56, r.lime ? "#C6FF00" : "#F2F2F2", W);
+    y += 180;
+  });
+
+  stMono(g, d.foot || "", L, 1920 - 150, 26, "#FF2E88", 5);
+  g.font = '700 26px "JetBrains Mono", monospace'; g.fillStyle = "#9A9A9A";
+  const t = d.rankLine || "";
+  g.fillText(t, R - g.measureText(t).width, 1920 - 150);
+  return c.toDataURL("image/png");
+}
+
+function RecapStorySheet({ open, onClose }) {
+  const [url, setUrl] = React.useState("");
+  const [flash, setFlash] = React.useState("");
+  React.useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    document.fonts.ready.then(() => { if (alive) setUrl(drawRecapStory(open)); });
+    return () => { alive = false; };
+  }, [open]);
+  if (!open) return null;
+  const save = async () => {
+    try {
+      const blob = await (await fetch(url)).blob();
+      const f = new File([blob], "blackout-recap.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [f] })) {
+        await navigator.share({ files: [f], title: "Blackout Series" }); return;
+      }
+    } catch (e) { if (e && e.name === "AbortError") return; }
+    const a = document.createElement("a");
+    a.href = url; a.download = "blackout-recap.png";
+    document.body.appendChild(a); a.click(); a.remove();
+    setFlash("SAVED"); setTimeout(() => setFlash(""), 1600);
+  };
+  return (
+    <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 95,
+      background: "rgba(5,5,5,.92)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#0A0A0A", width: "100%",
+        maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #C6FF00", padding: 16 }}>
+        <div style={{ display: "flex", justifyContent: "center", margin: "6px 0 14px" }}>
+          {url ? <img src={url} alt="" style={{ width: 260, height: 462, display: "block",
+                        border: "1px solid rgba(110,110,110,.3)" }} />
+               : <div style={{ width: 260, height: 462, background: "#111" }} />}
+        </div>
+        <button onClick={save} style={{ width: "100%", padding: 16, background: "#C6FF00",
+          color: "#050505", border: "none", cursor: "pointer",
+          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".2em" }}>SHARE / SAVE</button>
+        {flash && <div style={{ textAlign: "center", color: "#C6FF00", marginTop: 10,
+          fontFamily: "'JetBrains Mono',monospace", fontSize: 11 }}>{flash}</div>}
+        <button onClick={onClose} style={{ width: "100%", marginTop: 10, padding: 12,
+          background: "transparent", color: "#6E6E6E", border: "none", cursor: "pointer",
+          fontFamily: "'JetBrains Mono',monospace", fontSize: 11,
+          letterSpacing: ".14em" }}>CLOSE</button>
+      </div>
+    </div>
+  );
+}
+
 
 
 // ══ VOL.8 · SHARE TO STORY ════════════════════════════════════════════════
