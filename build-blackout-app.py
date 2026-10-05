@@ -290,6 +290,12 @@ def replace_fn(s, name, new_src, report, label):
     return s[:i] + new_src + s[j:]
 
 
+# Ship a reviewed subset. SKIP=recap leaves the session-recap package out of the
+# build entirely, which is how a court-side fix goes out mid-session without
+# carrying screens that have only ever been tested against synthetic data.
+SKIP = {x.strip() for x in os.environ.get("SKIP", "").split(",") if x.strip()}
+
+
 def add_screens(s, report):
     """Splice in the Vol.8 screens: per-event engine, ME, receipts, badges, roster.
 
@@ -313,7 +319,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.RECAP2 + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -336,6 +342,10 @@ def add_screens(s, report):
                            ("rank eyebrow", SCREENS.LOGO_RANK_OLD, SCREENS.LOGO_RANK_NEW),
                            ("recap eyebrow", SCREENS.LOGO_RECAP_OLD, SCREENS.LOGO_RECAP_NEW),
                            ("sessions table", SCREENS.TABLE_ON_SESSIONS_OLD, SCREENS.TABLE_ON_SESSIONS_NEW),
+                           ("ko photos sig", SCREENS.KO_PHOTOS_SIG_OLD, SCREENS.KO_PHOTOS_SIG_NEW),
+                           ("ko photos call", SCREENS.KO_PHOTOS_CALL_OLD, SCREENS.KO_PHOTOS_CALL_NEW),
+                           ("ko photos strip", SCREENS.KO_PHOTOS_OLD, SCREENS.KO_PHOTOS_NEW),
+                           ("ko photos empty", SCREENS.KO_PHOTOS_EMPTY_OLD, SCREENS.KO_PHOTOS_EMPTY_NEW),
                            ("line-up state", SCREENS.LU_STATE_OLD, SCREENS.LU_STATE_NEW),
                            ("line-up chip", SCREENS.LU_ACT_OLD, SCREENS.LU_ACT_NEW),
                            ("line-up sheet", SCREENS.LU_MOUNT_OLD, SCREENS.LU_MOUNT_NEW),
@@ -367,7 +377,10 @@ def add_screens(s, report):
     s = replace_fn(s, "MatchEditorModal", SCREENS.SCORESHEET, report, "score sheet")
     # The recap sheet gains the MY NIGHT / EVERYONE toggle the social handoff
     # asks for; EVERYONE is what Vol.8 already showed, extended.
-    s = replace_fn(s, "RecapSheet", SCREENS.RECAP_SHEET, report, "recap sheet")
+    if "recap" not in SKIP:
+        s = replace_fn(s, "RecapSheet", SCREENS.RECAP_SHEET, report, "recap sheet")
+    else:
+        report("recap sheet: SKIPPED (SKIP=recap)")
     return s
 
 

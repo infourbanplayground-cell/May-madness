@@ -3332,3 +3332,116 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
   );
 }
 """
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 13 · PHOTOS IN THE KNOCKOUT
+# ══════════════════════════════════════════════════════════════════════════
+#
+# The owner asked for this from the court: the line-up card wants a photo, and
+# the only place to add one was the PHOTOS chip two taps away, which nobody
+# finds while a semi-final is about to start.
+#
+# It writes to the same `session.photos` the Photos tab and the photo wall use —
+# one list of a night's pictures, not a second parallel one. Upload goes through
+# the same watermark + Cloudinary path, so a picture added here appears on the
+# wall and in the line-up card's photo cycle like any other.
+
+KO_PHOTOS = r"""
+function KoPhotoStrip({ session, updateSession, canUpload }) {
+  const [busy, setBusy] = React.useState(false);
+  const photos = session.photos || [];
+
+  const add = async (files) => {
+    if (!files.length) return;
+    if (!getToken()) { alert("Sign in first — photos can't be saved without it."); return; }
+    setBusy(true);
+    try {
+      const settled = await Promise.allSettled(
+        files.map(async f => uploadFramedPhotoToCloud(await watermarkPhotoToBase64(f)))
+      );
+      const urls = settled.filter(r => r.status === "fulfilled" && r.value).map(r => r.value);
+      if (urls.length) {
+        const next = [...(session.photos || []), ...urls];
+        updateSession(s => ({ ...s, photos: next }));
+        await uploadSessionPhotosToServer(session.id, next);
+      }
+      const failed = files.length - urls.length;
+      if (failed > 0) alert(`${failed} photo${failed > 1 ? "s" : ""} couldn't be added.`);
+    } catch (e) {
+      alert("Couldn't add photos: " + (e && e.message ? e.message : e));
+    } finally { setBusy(false); }
+  };
+
+  if (!canUpload && photos.length === 0) return null;
+
+  return (
+    <div style={{ border: "1px solid rgba(110,110,110,.3)", background: "rgba(14,14,14,.94)",
+                  padding: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
+                      letterSpacing: ".3em", color: "#9A9A9A" }}>
+          KNOCKOUT PHOTOS{photos.length ? ` \u00b7 ${photos.length}` : ""}
+        </div>
+        {canUpload && (
+          <label style={{ cursor: busy ? "default" : "pointer", padding: "7px 12px",
+                          border: "1px solid rgba(198,255,0,.45)", color: "#C6FF00",
+                          fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+                          fontSize: 10, letterSpacing: ".14em",
+                          opacity: busy ? .5 : 1 }}>
+            {busy ? "UPLOADING\u2026" : "+ ADD PHOTO"}
+            <input type="file" accept="image/*" multiple style={{ display: "none" }}
+                   disabled={busy}
+                   onChange={e => { const f = Array.from(e.target.files || []);
+                                    e.target.value = ""; add(f); }} />
+          </label>
+        )}
+      </div>
+      {photos.length > 0 && (
+        <div style={{ display: "flex", gap: 6, marginTop: 10, overflowX: "auto" }}>
+          {photos.slice(-8).map((src, i) => (
+            <img key={i} src={src} alt="" onClick={() => sharePhoto && sharePhoto(src, i)}
+                 style={{ width: 64, height: 64, objectFit: "cover", flex: "0 0 auto",
+                          cursor: "pointer", border: "1px solid rgba(110,110,110,.3)" }} />
+          ))}
+        </div>
+      )}
+      <div style={{ fontSize: 11, color: "#6E6E6E", marginTop: 8 }}>
+        Added here, they show on the photo wall and can go on the line-up card.
+      </div>
+    </div>
+  );
+}
+"""
+
+# In the KO tab, directly under the qualification control — the first thing on
+# the screen the scorer is already looking at.
+KO_PHOTOS_OLD = """  return (
+    <div className="space-y-4">
+      <QualifyControl />
+      {(() => {
+        // Transparency panel: every qualified team with its OVERALL seed (1..8),"""
+KO_PHOTOS_NEW = """  return (
+    <div className="space-y-4">
+      <QualifyControl />
+      <KoPhotoStrip session={session} updateSession={updateSession} canUpload={canUploadPhotos} />
+      {(() => {
+        // Transparency panel: every qualified team with its OVERALL seed (1..8),"""
+
+KO_PHOTOS_SIG_OLD = """function BracketTab({ session, state, updateSession, isAdmin, canScore }) {"""
+KO_PHOTOS_SIG_NEW = """function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploadPhotos }) {"""
+
+KO_PHOTOS_CALL_OLD = """        {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} />}"""
+KO_PHOTOS_CALL_NEW = """        {tab === "bracket" && <BracketTab session={session} state={state} updateSession={updateSession} isAdmin={isAdmin} canScore={canScore} canUploadPhotos={canUploadPhotos} />}"""
+
+
+# The same strip on the "no bracket yet" screen. Without this the control exists
+# only once the knockout has been seeded, which is the half of the night it is
+# least needed — the group stage is where the photographs are taken.
+KO_PHOTOS_EMPTY_OLD = """  if (bracketEmpty) {
+    return <div className="space-y-3">
+      <QualifyControl />"""
+KO_PHOTOS_EMPTY_NEW = """  if (bracketEmpty) {
+    return <div className="space-y-3">
+      <QualifyControl />
+      <KoPhotoStrip session={session} updateSession={updateSession} canUpload={canUploadPhotos} />"""
