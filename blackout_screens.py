@@ -1119,13 +1119,17 @@ function FinalsCountdown({ state, leaderboard, meId, setTab }) {
   }, []);
 
   const sessions = state.sessions || [];
-  // Before the organiser has created the nine nights there is no session to
-  // read a date from, and the countdown is most wanted exactly then -- during
-  // signup. So it falls back to the scheduled finals date from the season
-  // config, and only prefers a session once one exists at that slot.
-  const finals = sessions.length >= SESSIONS_TOTAL ? sessions[SESSIONS_TOTAL - 1]
-               : sessions.length ? sessions[sessions.length - 1]
-               : { date: FINALS_DATE };
+  // The finals is the night ON the scheduled finals date — nothing else.
+  //
+  // This used to fall back to "the last session created" whenever fewer than
+  // nine existed, which was meant to cover signup but did the opposite: with
+  // Session 1 created, the FINALS countdown counted down to Session 1. On the
+  // evening of night one it read two hours, which is true of tonight and
+  // nonsense about the finals.
+  //
+  // Matching on the date also survives the sessions being created out of
+  // order, or a tenth being added, both of which break an index.
+  const finals = sessions.find(s => s.date === FINALS_DATE) || { date: FINALS_DATE };
   if (!finals || !finals.date) return null;
   // Parsed field by field: the server runs UTC+4, and new Date("2026-10-30")
   // is parsed as UTC, which puts the night a day early for everyone here.
