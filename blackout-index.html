@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "5007af74912f";
+  var V = "4dafa2a90218";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -3583,7 +3583,7 @@ function luCover(g, im, x, y, w, h) {
   g.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
 }
 
-function luPaint(g, kind, d, im) {
+function luPaint(g, kind, d, im, logo) {
   g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);
 
   // ── the photo, and the grade that makes any photo look like this volume ──
@@ -3656,7 +3656,7 @@ function luPaint(g, kind, d, im) {
     }
   };
 
-  const baseY = 1270;
+  const baseY = 1160;
   plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
   g.font = '900 30px Archivo, sans-serif'; g.fillStyle = "#FF2E88";
   {
@@ -3666,22 +3666,42 @@ function luPaint(g, kind, d, im) {
   plate(baseY + 260, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
 
   // ── footer ──
-  stMono(g, d.foot || "", L, LU_H - 150, 28, "#8A8A8A", 6);
-  g.font = '800 28px Archivo, sans-serif'; g.fillStyle = "#C6FF00";
+  // The pool used to sit here. It is the season's number, not this match's, and
+  // on a card about two teams about to play it read as the prize for winning
+  // the night, which it is not.
+  if (logo) {
+    const lh = 186, lw = lh * (logo.width / logo.height);
+    // Tinted to the volume's lime rather than drawn as-is: the file is white
+    // with an orange ball, and orange is the one colour on this card that
+    // belongs to neither team.
+    const off = document.createElement("canvas");
+    off.width = Math.ceil(lw); off.height = lh;
+    const o = off.getContext("2d");
+    o.drawImage(logo, 0, 0, lw, lh);
+    o.globalCompositeOperation = "source-in";
+    o.fillStyle = "#C6FF00";
+    o.fillRect(0, 0, lw, lh);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 330);
+  }
+  g.font = '700 26px "JetBrains Mono", monospace';
+  g.fillStyle = "#8A8A8A";
   {
-    const t = `${d.pool} OMR`;
-    g.fillText(t, R - g.measureText(t).width, LU_H - 150);
+    const t = d.foot || "";
+    let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
   }
 }
 
 // Returns a data URL. The photo may taint the canvas, which only shows up at
 // toDataURL, so the fallback is a clean repaint without it rather than an error.
 async function drawLineup(kind, d, photo) {
-  const im = await luImg(photo);
+  // Both loads are same-origin or CORS-enabled and either may fail; the card is
+  // designed to survive losing either one.
+  const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-tight.png")]);
   const mk = (img) => {
     const c = document.createElement("canvas");
     c.width = LU_W; c.height = LU_H;
-    luPaint(c.getContext("2d"), kind, d, img);
+    luPaint(c.getContext("2d"), kind, d, img, logo);
     return c;
   };
   try {
