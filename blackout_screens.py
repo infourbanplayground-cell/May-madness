@@ -2502,6 +2502,11 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
   const [busy, setBusy] = React.useState(false);
   const [adj, setAdj] = React.useState({ ...LU_ADJ0 });
   const [dragging, setDragging] = React.useState(false);
+  // Cut-out mode. `cutFail` is separate from `cut` on purpose: a photo whose
+  // background will not come off has to turn the toggle OFF and say so, not sit
+  // there switched on showing the ordinary card and looking broken.
+  const [cut, setCut] = React.useState(false);
+  const [cutFail, setCutFail] = React.useState(false);
   const drag = React.useRef(null);
   React.useEffect(() => { if (open) { setI(0); setPh(-1); } }, [open]);
   // A new photo starts square. Carrying one photo's crop onto the next is how
@@ -2518,13 +2523,24 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
     // too slow on a phone, and luPaint is written in card coordinates so a
     // scaled context needs no other change.
     const scale = dragging ? 0.5 : 1;
+    const photo = ph >= 0 ? photos[ph] : null;
     // The display face has to be in before the canvas measures anything, or the
     // card is laid out against a fallback and the names overrun their plates.
     document.fonts.ready
-      .then(() => drawLineupAt(item.kind, item, ph >= 0 ? photos[ph] : null, adj, scale))
+      .then(async () => {
+        if (cut && photo) {
+          const u = await drawCutCardAt(item.kind, { ...item, seed: item.key + (session ? session.id : "") },
+                                        photo, adj, scale);
+          if (u) { if (alive) setCutFail(false); return u; }
+          // The background would not come off — say so and drop back rather
+          // than leaving the toggle lit over an ordinary card.
+          if (alive) { setCutFail(true); setCut(false); }
+        }
+        return drawLineupAt(item.kind, item, photo, adj, scale);
+      })
       .then(u => { if (alive) setUrl(u); });
     return () => { alive = false; };
-  }, [open, i, ph, items, photos, adj, dragging]);
+  }, [open, i, ph, items, photos, adj, dragging, cut, session]);
   if (!open || !item) return null;
   const hasPhoto = ph >= 0 && !!photos[ph];
 
@@ -2552,7 +2568,12 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
     // Redraw at full size before sharing. `url` may still be the half-scale
     // JPEG the drag used, and shipping that would quietly post a 540x960
     // card — the one bug this whole preview-is-the-file idea exists to avoid.
-    const full = await drawLineupAt(item.kind, item, ph >= 0 ? photos[ph] : null, adj, 1);
+    const photo = ph >= 0 ? photos[ph] : null;
+    const full = (cut && photo
+        ? await drawCutCardAt(item.kind, { ...item, seed: item.key + (session ? session.id : "") },
+                              photo, adj, 1)
+        : null)
+      || await drawLineupAt(item.kind, item, photo, adj, 1);
     try {
       const blob = await (await fetch(full)).blob();
       const f = new File([blob], `blackout-${item.key}.png`, { type: "image/png" });
@@ -2629,6 +2650,23 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
           )}
         </div>
 
+        {hasPhoto && (
+          <button onClick={() => { setCutFail(false); setCut(v => !v); }}
+            style={{ width: "100%", marginTop: 6, padding: "11px", cursor: "pointer",
+              background: cut ? "#C6FF00" : "transparent",
+              color: cut ? "#050505" : "#C6FF00",
+              border: "1px solid " + (cut ? "#C6FF00" : "rgba(198,255,0,.45)"),
+              fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+              letterSpacing: ".14em" }}>
+            {cut ? "CUT OUT \u00B7 ON" : "CUT THE BACKGROUND OUT"}
+          </button>
+        )}
+        {cutFail && (
+          <div style={{ marginTop: 6, fontSize: 11, color: "#FF2E88", textAlign: "center" }}>
+            Couldn't cut this one out &mdash; using the photo as it is.
+          </div>
+        )}
+
         <div style={{ display: "flex", justifyContent: "center", margin: "16px 0" }}>
           {url
             ? <img src={url} alt="" draggable={false}
@@ -2646,7 +2684,7 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
             ? "Drag the card to move the photo. The preview is the file."
             : "Preview is the actual 1080\u00D71920 file, shown small."}
         </div>
-        {hasPhoto && <LuPhotoControls adj={adj} setAdj={setAdj} />}
+        {hasPhoto && <LuPhotoControls adj={adj} setAdj={setAdj} hideWash={cut} />}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
           <button onClick={save} style={{ padding: "16px", background: "#C6FF00", color: "#050505",
             border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
@@ -4760,7 +4798,7 @@ async function drawLineupAt(kind, d, photo, adj, scale) {
 // The controls. Drag anywhere on the card to move the photo; the rest is
 // sliders, because a slider is the one control that works with a thumb on a
 // phone held in one hand at the side of a court.
-function LuPhotoControls({ adj, setAdj, disabled }) {
+function LuPhotoControls({ adj, setAdj, disabled, hideWash }) {
   const row = (label, key, min, max, step, fmt) => (
     <div style={{ marginTop: 10, opacity: disabled ? .4 : 1 }}>
       <div style={{ display: "flex", justifyContent: "space-between",
@@ -4778,7 +4816,9 @@ function LuPhotoControls({ adj, setAdj, disabled }) {
       {row("ZOOM", "zoom", 1, 2.6, 0.02, v => v.toFixed(2) + "×")}
       {LU_CAN_FILTER && row("BRIGHTNESS", "bright", 0.5, 1.7, 0.02,
         v => (v > 1 ? "+" : "") + Math.round((v - 1) * 100) + "%")}
-      {row("COLOUR WASH", "grade", 0, 1, 0.02, v => Math.round(v * 100) + "%")}
+      {/* In cut-out mode the photograph is gone, so there is nothing for the
+          wash to sit on and the slider would do nothing at all. */}
+      {!hideWash && row("COLOUR WASH", "grade", 0, 1, 0.02, v => Math.round(v * 100) + "%")}
       <button onClick={() => setAdj({ ...LU_ADJ0 })} disabled={disabled}
         style={{ width: "100%", marginTop: 10, padding: 10, cursor: "pointer",
           background: "transparent", border: "1px solid rgba(110,110,110,.4)",
@@ -4895,3 +4935,258 @@ LUEDIT_DRAW_NEW = """async function drawLineup(kind, d, photo, adj) {
     luPaint(c.getContext("2d"), kind, d, img, logo, adj);
     return c;
   };"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 18 · THE CUT-OUT CARD  (option H5)
+# ══════════════════════════════════════════════════════════════════════════
+#
+# The photo stops being a backdrop and becomes the subject: the players are cut
+# out of it and stood on the volume's own ground, with the display type passing
+# BEHIND them. That last part is the whole reason to cut out at all — type
+# behind a subject is what separates a poster from a layout, and no amount of
+# grading a rectangle gets there.
+#
+# WHERE THE CUTTING HAPPENS. Cloudinary, as a URL transform. The alternative was
+# running a matting model on the VPS, and the VPS has one vCPU — birefnet takes
+# tens of seconds a frame there, which means a queue, a worker and a thing to
+# maintain. Cloudinary's `e_background_removal` is already enabled on the
+# account, is cached at their CDN, and tested against birefnet-general on a real
+# team photo it is equivalent: both keep the net post and the two balls and
+# neither leaves the court showing between anyone's legs. It is a paid add-on
+# with a monthly quota, which is the one thing to watch.
+#
+# WHY EVERYTHING ELSE IS DRAWN. The streaks, the lamps, the beams of grain —
+# none of it is a filter over the photograph. It is all painted on the ground
+# underneath, and the players composite over it untouched. That is what makes
+# the card survive a bad photo: a dark, noisy phone shot still lands on a
+# designed background, because none of the design depended on the photograph.
+CUTCARD = r"""
+
+// Cloudinary hosts the session photos, so the cut-out is a URL away. Anything
+// not on Cloudinary (a data: URL, a local file during a test) has no cut-out
+// and the caller falls back to the normal card.
+function luCutoutUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  if (!/res\.cloudinary\.com\/.+\/image\/upload\//.test(url)) return null;
+  // Insert the transform right after /upload/, and ask for png — the whole
+  // point is the alpha channel, and jpeg has none.
+  return url.replace(/\/image\/upload\//, "/image/upload/e_background_removal/")
+            .replace(/\.(jpg|jpeg|webp)(\?.*)?$/i, ".png");
+}
+
+// Where the ink actually is. A cut-out arrives with large transparent margins
+// — whatever the original frame was — so fitting it by its own width and
+// height stands the players somewhere arbitrary. This finds the real bounds.
+function luInkBox(im) {
+  const S = 220;                       // scanning at full size is pointless
+  const c = document.createElement("canvas");
+  const r = Math.min(S / im.width, S / im.height);
+  c.width = Math.max(1, Math.round(im.width * r));
+  c.height = Math.max(1, Math.round(im.height * r));
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(im, 0, 0, c.width, c.height);
+  let d;
+  try { d = g.getImageData(0, 0, c.width, c.height).data; }
+  catch (e) { return { x: 0, y: 0, w: im.width, h: im.height }; }
+  let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
+  for (let y = 0; y < c.height; y++) {
+    for (let x = 0; x < c.width; x++) {
+      if (d[(y * c.width + x) * 4 + 3] > 24) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x;
+        if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+    }
+  }
+  if (x1 < 0) return { x: 0, y: 0, w: im.width, h: im.height };
+  const sx = im.width / c.width, sy = im.height / c.height;
+  return { x: x0 * sx, y: y0 * sy, w: (x1 - x0 + 1) * sx, h: (y1 - y0 + 1) * sy };
+}
+
+// A tiny seeded PRNG. The streaks are generated rather than loaded from a
+// file, so every card is its own and none of it costs an image request or a
+// generation credit — and seeding from the session means a given night always
+// comes out the same, which matters when a card is re-made after a correction.
+function luRng(seed) {
+  let s = 0;
+  for (const ch of String(seed || "blackout")) s = (s * 31 + ch.charCodeAt(0)) | 0;
+  s = (s ^ 0x9e3779b9) >>> 0;
+  return () => {
+    s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0;
+    return s / 4294967296;
+  };
+}
+
+function luStreaks(g, seed) {
+  const rnd = luRng(seed);
+  g.globalCompositeOperation = "screen";
+  for (let i = 0; i < 46; i++) {
+    const y = rnd() * LU_H;
+    const h = 2 + rnd() * 7;
+    const w = (0.18 + rnd() * 0.75) * LU_W;
+    const x = rnd() < 0.62 ? LU_W - w - rnd() * 90 : rnd() * 120;
+    const a = 0.08 + rnd() * 0.42;
+    const lg = g.createLinearGradient(x, 0, x + w, 0);
+    const fromRight = x + w > LU_W * 0.7;
+    lg.addColorStop(0, fromRight ? "rgba(198,255,0,0)" : "rgba(198,255,0," + a + ")");
+    lg.addColorStop(1, fromRight ? "rgba(198,255,0," + a + ")" : "rgba(198,255,0,0)");
+    g.fillStyle = lg;
+    g.fillRect(x, y, w, h);
+  }
+  // The magenta bleed up the left edge — the only place magenta is allowed to
+  // be a field rather than an accent. Radial, not a rectangle with a sideways
+  // gradient: that version faded out horizontally but stopped dead top and
+  // bottom, and the two hard horizontal seams were the first thing you saw.
+  g.globalCompositeOperation = "screen";
+  const mg = g.createRadialGradient(-LU_W * 0.10, LU_H * 0.52, 0,
+                                    -LU_W * 0.10, LU_H * 0.52, LU_W * 0.80);
+  mg.addColorStop(0, "rgba(255,46,136,.42)");
+  mg.addColorStop(0.45, "rgba(255,46,136,.16)");
+  mg.addColorStop(1, "rgba(255,46,136,0)");
+  g.fillStyle = mg; g.fillRect(0, 0, LU_W, LU_H);
+  g.globalCompositeOperation = "source-over";
+}
+"""
+
+CUTCARD2 = r"""
+
+// The H5 painter. Draw order is the design: ground, streaks, lamps, header,
+// display type, PEOPLE, then the plates — the names are the one thing on this
+// card that may never be covered by anything.
+function luPaintCut(g, kind, d, cut, logo, adj) {
+  adj = adj || LU_ADJ0;
+  const L = 80, R = LU_W - 80, W = R - L;
+  g.textBaseline = "alphabetic";
+
+  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);
+  luStreaks(g, d.seed || d.key || "blackout");
+
+  // the two lamps
+  const lamp = (cx, cy, rad, rgb, a) => {
+    const r2 = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    r2.addColorStop(0, `rgba(${rgb},${a})`);
+    r2.addColorStop(0.2, `rgba(${rgb},${a * 0.5})`);
+    r2.addColorStop(0.55, `rgba(${rgb},${a * 0.14})`);
+    r2.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = r2; g.fillRect(0, 0, LU_W, LU_H);
+  };
+  g.globalCompositeOperation = "screen";
+  lamp(40, 760, 620, "255,46,136", 0.62);
+  lamp(1050, 600, 600, "198,255,0", 0.56);
+  g.globalCompositeOperation = "source-over";
+
+  // header
+  g.fillStyle = "#C6FF00"; g.fillRect(0, 0, LU_W, 10);
+  g.fillStyle = "#C6FF00"; g.fillRect(L, 146, 16, 16);
+  stMono(g, "BLACKOUT SERIES · VOL.8", L + 40, 161, 26, "#C6FF00", 6);
+
+  const big = kind === "champs" ? ["NIGHT", "CHAMPIONS"]
+            : kind === "final"  ? ["THE", "FINAL"]
+            : ["SEMI", "FINAL"];
+
+  // The ghost word, bleeding past both edges. It is allowed off the canvas —
+  // that is the point of it — so it is NOT fitted to the card's width.
+  {
+    const t = big[1];
+    const sz = stFit(g, t, LU_W * 1.30, 300, 900);
+    g.font = `italic 900 ${sz}px Archivo, sans-serif`;
+    g.fillStyle = "rgba(198,255,0,.55)";
+    g.fillText(t, (LU_W - g.measureText(t).width) / 2, 620);
+  }
+  stDisp(g, big[0], L, 350, 150, "#F2F2F2", W);
+
+  // ── the players ──
+  // Stood on a floor just above the plates and fitted inside the card on BOTH
+  // axes: fitting on height alone ran a row of four past each edge and sliced
+  // the outside two.
+  if (cut) {
+    const FEET = 1215, HEAD_MIN = 470;
+    const b = luInkBox(cut);
+    const z = Math.max(1, adj.zoom || 1);
+    const r = Math.min(LU_W * 0.94 / b.w, (FEET - HEAD_MIN) / b.h) * z;
+    const dw = b.w * r, dh = b.h * r;
+    const x = (LU_W - dw) / 2 + (adj.x || 0);
+    const y = FEET - dh + (adj.y || 0);
+    g.save();
+    if (LU_CAN_FILTER && adj.bright && adj.bright !== 1) g.filter = `brightness(${adj.bright})`;
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+    g.drawImage(cut, b.x, b.y, b.w, b.h, x, y, dw, dh);
+    g.restore();
+  }
+
+  // ── plates ──
+  const PH = 116;
+  const plate = (y, name, chip, colour, score, dim) => {
+    g.fillStyle = "rgba(12,12,12,.9)";
+    g.fillRect(L, y, W, PH);
+    g.strokeStyle = colour; g.lineWidth = 3;
+    g.strokeRect(L + 1.5, y + 1.5, W - 3, PH - 3);
+    const tail = score ? 110 : (chip ? 130 : 0);
+    const size = stFit(g, name, W - 64 - tail, 44, 900);
+    g.font = `italic 900 ${size}px Archivo, sans-serif`;
+    g.fillStyle = dim ? "#9A9A9A" : "#F2F2F2";
+    g.fillText(name, L + 32, y + PH / 2 + size * 0.34);
+    if (score) {
+      g.font = "italic 900 52px Archivo, sans-serif";
+      g.fillStyle = dim ? "#6E6E6E" : colour;
+      g.fillText(score, R - 32 - g.measureText(score).width, y + PH / 2 + 18);
+    } else if (chip) {
+      g.font = '700 22px "JetBrains Mono", monospace';
+      g.fillStyle = colour;
+      g.fillText(chip, R - 32 - g.measureText(chip).width, y + PH / 2 + 8);
+    }
+  };
+  const baseY = 1230;
+  if (kind === "champs") {
+    plate(baseY, (d.a || "").toUpperCase(), "", "#C6FF00", d.aScore);
+    g.font = '700 22px "JetBrains Mono", monospace'; g.fillStyle = "#6E6E6E";
+    { const t = "BEAT"; g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44); }
+    plate(baseY + PH + 72, (d.b || "").toUpperCase(), "", "#6E6E6E", d.bScore, true);
+  } else {
+    plate(baseY, (d.a || "TBD").toUpperCase(), d.aChip || "", "#C6FF00");
+    g.font = "900 26px Archivo, sans-serif"; g.fillStyle = "#FF2E88";
+    { const t = "V S"; g.fillText(t, (LU_W - g.measureText(t).width) / 2, baseY + PH + 44); }
+    plate(baseY + PH + 72, (d.b || "TBD").toUpperCase(), d.bChip || "", "#FF2E88");
+  }
+
+  // ── footer ──
+  if (logo) {
+    const lh = 186, lw = lh * (logo.width / logo.height);
+    const off = document.createElement("canvas");
+    off.width = Math.ceil(lw); off.height = lh;
+    const o = off.getContext("2d");
+    o.drawImage(logo, 0, 0, lw, lh);
+    o.globalCompositeOperation = "source-in";
+    o.fillStyle = "#C6FF00"; o.fillRect(0, 0, lw, lh);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 330);
+  }
+  g.font = '700 26px "JetBrains Mono", monospace';
+  g.fillStyle = "#8A8A8A";
+  {
+    const t = d.foot || "";
+    let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
+  }
+
+  // scanlines and grain, over everything including the type — the grain is
+  // what stops a flat black ground banding on a phone screen.
+  g.fillStyle = "rgba(0,0,0,.05)";
+  for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);
+}
+
+// Renders the cut-out card at `scale`. Returns null when there is no cut-out to
+// be had, so the caller can fall back rather than paint an empty poster.
+async function drawCutCardAt(kind, d, photo, adj, scale) {
+  const cutUrl = luCutoutUrl(photo);
+  if (!cutUrl) return null;
+  const [cut, logo] = await Promise.all([luImg(cutUrl), luImg("assets/up-logo-tight.png")]);
+  if (!cut) return null;
+  const c = document.createElement("canvas");
+  c.width = Math.round(LU_W * scale); c.height = Math.round(LU_H * scale);
+  const g = c.getContext("2d");
+  g.scale(scale, scale);
+  luPaintCut(g, kind, d, cut, logo, adj);
+  try { return c.toDataURL(scale < 1 ? "image/jpeg" : "image/png", 0.86); }
+  catch (e) { return null; }
+}
+"""
