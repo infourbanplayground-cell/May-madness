@@ -2500,24 +2500,61 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
   const [url, setUrl] = React.useState("");
   const [flash, setFlash] = React.useState("");
   const [busy, setBusy] = React.useState(false);
+  const [adj, setAdj] = React.useState({ ...LU_ADJ0 });
+  const [dragging, setDragging] = React.useState(false);
+  const drag = React.useRef(null);
   React.useEffect(() => { if (open) { setI(0); setPh(-1); } }, [open]);
+  // A new photo starts square. Carrying one photo's crop onto the next is how
+  // you end up posting a card framed for a picture it is no longer showing.
+  React.useEffect(() => { setAdj({ ...LU_ADJ0 }); }, [ph, i]);
   const item = items[i];
   React.useEffect(() => {
     if (!open || !item) return;
     let alive = true;
-    setUrl("");
+    // Only blank the preview when there is nothing to show yet. Blanking on
+    // every adjustment makes the card flash black under the finger.
+    setUrl(u => u || "");
+    // Half size while a finger is down: a full 1080x1920 repaint per frame is
+    // too slow on a phone, and luPaint is written in card coordinates so a
+    // scaled context needs no other change.
+    const scale = dragging ? 0.5 : 1;
     // The display face has to be in before the canvas measures anything, or the
     // card is laid out against a fallback and the names overrun their plates.
     document.fonts.ready
-      .then(() => drawLineup(item.kind, item, ph >= 0 ? photos[ph] : null))
+      .then(() => drawLineupAt(item.kind, item, ph >= 0 ? photos[ph] : null, adj, scale))
       .then(u => { if (alive) setUrl(u); });
     return () => { alive = false; };
-  }, [open, i, ph, items, photos]);
+  }, [open, i, ph, items, photos, adj, dragging]);
   if (!open || !item) return null;
+  const hasPhoto = ph >= 0 && !!photos[ph];
+
+  // Drag the preview to move the photo. The preview is 270 wide for a 1080
+  // card, so one preview pixel is four card pixels — pan in card coordinates
+  // and the clamp in luCoverAdj does the rest.
+  const P2C = LU_W / 270;
+  const onDown = e => {
+    if (!hasPhoto) return;
+    drag.current = { px: e.clientX, py: e.clientY, x: adj.x, y: adj.y };
+    setDragging(true);
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (err) {}
+  };
+  const onMove = e => {
+    if (!drag.current) return;
+    e.preventDefault();
+    const d = drag.current;
+    setAdj(a => ({ ...a,
+      x: d.x + (e.clientX - d.px) * P2C,
+      y: d.y + (e.clientY - d.py) * P2C }));
+  };
+  const onUp = () => { if (drag.current) { drag.current = null; setDragging(false); } };
 
   const save = async () => {
+    // Redraw at full size before sharing. `url` may still be the half-scale
+    // JPEG the drag used, and shipping that would quietly post a 540x960
+    // card — the one bug this whole preview-is-the-file idea exists to avoid.
+    const full = await drawLineupAt(item.kind, item, ph >= 0 ? photos[ph] : null, adj, 1);
     try {
-      const blob = await (await fetch(url)).blob();
+      const blob = await (await fetch(full)).blob();
       const f = new File([blob], `blackout-${item.key}.png`, { type: "image/png" });
       if (navigator.canShare && navigator.canShare({ files: [f] })) {
         await navigator.share({ files: [f], title: "Blackout Series" });
@@ -2525,7 +2562,7 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
       }
     } catch (e) { if (e && e.name === "AbortError") return; }
     const a = document.createElement("a");
-    a.href = url; a.download = `blackout-${item.key}.png`;
+    a.href = full; a.download = `blackout-${item.key}.png`;
     document.body.appendChild(a); a.click(); a.remove();
     setFlash("SAVED"); setTimeout(() => setFlash(""), 1600);
   };
@@ -2594,14 +2631,23 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
 
         <div style={{ display: "flex", justifyContent: "center", margin: "16px 0" }}>
           {url
-            ? <img src={url} alt="" style={{ width: 270, height: 480, display: "block",
-                                             border: "1px solid rgba(110,110,110,.3)" }} />
+            ? <img src={url} alt="" draggable={false}
+                onPointerDown={onDown} onPointerMove={onMove}
+                onPointerUp={onUp} onPointerCancel={onUp}
+                style={{ width: 270, height: 480, display: "block",
+                         border: "1px solid " + (dragging ? "#C6FF00" : "rgba(110,110,110,.3)"),
+                         cursor: hasPhoto ? (dragging ? "grabbing" : "grab") : "default",
+                         touchAction: hasPhoto ? "none" : "auto",
+                         userSelect: "none", WebkitUserSelect: "none" }} />
             : <div style={{ width: 270, height: 480, background: "#111" }} />}
         </div>
-        <div style={{ fontSize: 11, color: "#6E6E6E", textAlign: "center", marginBottom: 12 }}>
-          Preview is the actual 1080&times;1920 file, shown small.
+        <div style={{ fontSize: 11, color: "#6E6E6E", textAlign: "center", marginBottom: 2 }}>
+          {hasPhoto
+            ? "Drag the card to move the photo. The preview is the file."
+            : "Preview is the actual 1080\u00D71920 file, shown small."}
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        {hasPhoto && <LuPhotoControls adj={adj} setAdj={setAdj} />}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
           <button onClick={save} style={{ padding: "16px", background: "#C6FF00", color: "#050505",
             border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 11, letterSpacing: ".14em" }}>SHARE / SAVE</button>
@@ -4651,3 +4697,201 @@ QUALITY_COVER_OLD = """function luCover(g, im, x, y, w, h) {
 QUALITY_COVER_NEW = """function luCover(g, im, x, y, w, h) {
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
   const r = Math.max(w / im.width, h / im.height);"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 17 · EDITING THE LINE-UP PHOTO ON THE CARD
+# ══════════════════════════════════════════════════════════════════════════
+#
+# The photo was cover-fitted dead centre and that was that. On a 1080x1140
+# window a group shot taken in portrait loses its top and bottom, which on a
+# team photo is heads and feet — and the only remedy was to go and take a
+# different photo.
+#
+# So: drag the preview to move the photo, pinch or slide to zoom, and two
+# sliders for how bright it is and how hard the volume's colour wash sits on
+# it. The preview IS the file, so what is dragged into place is what posts.
+#
+# Dragging redraws a 1080x1920 card every frame, which is too slow on a phone.
+# luPaint works entirely in card coordinates, so the fix is one line: render to
+# a smaller canvas with ctx.scale() while the finger is down, and once at full
+# size when it lifts. Nothing in the painter has to know.
+LUEDIT = r"""
+
+const LU_ADJ0 = { x: 0, y: 0, zoom: 1, bright: 1, grade: 1 };
+
+// Canvas filter is how brightness is applied; Safari only got it in 17. Where
+// it is missing the slider is hidden rather than left there doing nothing.
+const LU_CAN_FILTER = (() => {
+  try { return typeof document.createElement("canvas").getContext("2d").filter === "string"; }
+  catch (e) { return false; }
+})();
+
+// Cover-fit with a pan and a zoom, clamped so no amount of dragging can pull a
+// gap in at an edge.
+function luCoverAdj(g, im, x, y, w, h, adj) {
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+  const z = Math.max(1, (adj && adj.zoom) || 1);
+  const r = Math.max(w / im.width, h / im.height) * z;
+  const dw = im.width * r, dh = im.height * r;
+  const mx = Math.max(0, (dw - w) / 2), my = Math.max(0, (dh - h) / 2);
+  const ox = Math.max(-mx, Math.min(mx, (adj && adj.x) || 0));
+  const oy = Math.max(-my, Math.min(my, (adj && adj.y) || 0));
+  g.drawImage(im, x + (w - dw) / 2 + ox, y + (h - dh) / 2 + oy, dw, dh);
+  return { mx, my };
+}
+
+// Draws the card at `scale`. luPaint is written entirely in 1080x1920 card
+// coordinates, so a scaled context is all a cheap preview needs.
+async function drawLineupAt(kind, d, photo, adj, scale) {
+  const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-tight.png")]);
+  const mk = (img) => {
+    const c = document.createElement("canvas");
+    c.width = Math.round(LU_W * scale); c.height = Math.round(LU_H * scale);
+    const g = c.getContext("2d");
+    g.scale(scale, scale);
+    luPaint(g, kind, d, img, logo, adj);
+    return c;
+  };
+  try { return mk(im).toDataURL(scale < 1 ? "image/jpeg" : "image/png", 0.86); }
+  catch (e) { return mk(null).toDataURL("image/png"); }
+}
+
+// The controls. Drag anywhere on the card to move the photo; the rest is
+// sliders, because a slider is the one control that works with a thumb on a
+// phone held in one hand at the side of a court.
+function LuPhotoControls({ adj, setAdj, disabled }) {
+  const row = (label, key, min, max, step, fmt) => (
+    <div style={{ marginTop: 10, opacity: disabled ? .4 : 1 }}>
+      <div style={{ display: "flex", justifyContent: "space-between",
+        fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+        letterSpacing: ".2em", color: "#9A9A9A" }}>
+        <span>{label}</span><span style={{ color: "#C6FF00" }}>{fmt(adj[key])}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={adj[key]} disabled={disabled}
+        onChange={e => setAdj(a => ({ ...a, [key]: parseFloat(e.target.value) }))}
+        style={{ width: "100%", marginTop: 5, accentColor: "#C6FF00" }} />
+    </div>
+  );
+  return (
+    <div style={{ marginTop: 6 }}>
+      {row("ZOOM", "zoom", 1, 2.6, 0.02, v => v.toFixed(2) + "×")}
+      {LU_CAN_FILTER && row("BRIGHTNESS", "bright", 0.5, 1.7, 0.02,
+        v => (v > 1 ? "+" : "") + Math.round((v - 1) * 100) + "%")}
+      {row("COLOUR WASH", "grade", 0, 1, 0.02, v => Math.round(v * 100) + "%")}
+      <button onClick={() => setAdj({ ...LU_ADJ0 })} disabled={disabled}
+        style={{ width: "100%", marginTop: 10, padding: 10, cursor: "pointer",
+          background: "transparent", border: "1px solid rgba(110,110,110,.4)",
+          color: "#9A9A9A", fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+          fontSize: 10, letterSpacing: ".2em" }}>RESET PHOTO</button>
+    </div>
+  );
+}
+"""
+
+# ── the painter takes an adjustment ───────────────────────────────────────
+LUEDIT_SIG_OLD = """function luPaint(g, kind, d, im, logo) {"""
+LUEDIT_SIG_NEW = """function luPaint(g, kind, d, im, logo, adj) {
+  adj = adj || LU_ADJ0;"""
+
+LUEDIT_PHOTO_OLD = """    const top = 420, hh = 1140;
+    g.save();
+    g.beginPath(); g.rect(0, top, LU_W, hh); g.clip();
+    luCover(g, im, 0, top, LU_W, hh);
+    // desaturate, then push the brand's two colours in from the two edges
+    g.globalCompositeOperation = "saturation";
+    g.fillStyle = "#1a1a1a"; g.globalAlpha = 0.85;
+    g.fillRect(0, top, LU_W, hh);
+    g.globalAlpha = 1;
+    g.globalCompositeOperation = "screen";
+    let lr = g.createLinearGradient(0, 0, LU_W, 0);
+    lr.addColorStop(0, "rgba(255,46,136,.55)");
+    lr.addColorStop(0.38, "rgba(255,46,136,0)");
+    lr.addColorStop(0.62, "rgba(198,255,0,0)");
+    lr.addColorStop(1, "rgba(198,255,0,.45)");
+    g.fillStyle = lr; g.fillRect(0, top, LU_W, hh);
+    g.restore();"""
+LUEDIT_PHOTO_NEW = """    const top = 420, hh = 1140;
+    const gr = Math.max(0, Math.min(1, adj.grade == null ? 1 : adj.grade));
+    const br = adj.bright || 1;
+    g.save();
+    g.beginPath(); g.rect(0, top, LU_W, hh); g.clip();
+
+    // ── 1. the photograph, pushed back ──────────────────────────────────
+    // The old treatment desaturated and then laid a flat left-to-right wash
+    // over the whole window, which tinted the players as much as the room.
+    // This darkens and cools the frame first so the photo becomes a ground,
+    // and puts the colour in as LIGHT in the next step instead.
+    if (LU_CAN_FILTER) {
+      g.filter = `brightness(${(br * (1 - 0.34 * gr)).toFixed(3)}) `
+               + `contrast(${(1 + 0.26 * gr).toFixed(3)}) `
+               + `saturate(${(1 - 0.62 * gr).toFixed(3)})`;
+      luCoverAdj(g, im, 0, top, LU_W, hh, adj);
+      g.filter = "none";
+    } else {
+      luCoverAdj(g, im, 0, top, LU_W, hh, adj);
+      g.globalCompositeOperation = "saturation";
+      g.fillStyle = "#1a1a1a"; g.globalAlpha = 0.85 * gr;
+      g.fillRect(0, top, LU_W, hh);
+      g.globalCompositeOperation = "source-over";
+      g.fillStyle = "#050505"; g.globalAlpha = 0.22 * gr;
+      g.fillRect(0, top, LU_W, hh);
+      g.globalAlpha = 1;
+    }
+
+    // ── 2. the floodlights ──────────────────────────────────────────────
+    // Two lamps BEHIND the players rather than a wash across them: magenta
+    // low and left, lime higher and right, both soft and both centred near
+    // the shoulder line of a group shot, which is where a real backlight
+    // would sit. `screen` is what makes them read as light falling on the
+    // room instead of paint laid on the picture.
+    g.globalCompositeOperation = "screen";
+    // A lamp needs a hot core and a fast falloff. The first version used a
+    // gentle ramp over most of the card and read as coloured haze laid on the
+    // whole picture rather than as two lights in the room behind it.
+    const lamp = (cx, cy, rad, rgb, a) => {
+      const rg2 = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
+      rg2.addColorStop(0,    `rgba(${rgb},${(a * gr).toFixed(3)})`);
+      rg2.addColorStop(0.18, `rgba(${rgb},${(a * gr * 0.55).toFixed(3)})`);
+      rg2.addColorStop(0.50, `rgba(${rgb},${(a * gr * 0.16).toFixed(3)})`);
+      rg2.addColorStop(1,    `rgba(${rgb},0)`);
+      g.fillStyle = rg2; g.fillRect(0, top, LU_W, hh);
+    };
+    // Shoulder height, just outside the frame on each side: that is where a
+    // backlight would stand, and it is what puts a rim on people rather than
+    // a tint on everything.
+    lamp(LU_W * 0.04, top + hh * 0.34, LU_W * 0.50, "255,46,136", 0.72);
+    lamp(LU_W * 0.98, top + hh * 0.26, LU_W * 0.48, "198,255,0",  0.62);
+    g.globalCompositeOperation = "source-over";
+
+    // ── 3. the floor ────────────────────────────────────────────────────
+    // Darken the bottom of the window so the lamps do not light the ground
+    // the plates stand on. Without it the lime glow runs under the names.
+    const fg = g.createLinearGradient(0, top + hh * 0.52, 0, top + hh);
+    fg.addColorStop(0, "rgba(5,5,5,0)");
+    fg.addColorStop(1, `rgba(5,5,5,${(0.55 * gr).toFixed(3)})`);
+    g.fillStyle = fg; g.fillRect(0, top, LU_W, hh);
+    g.restore();"""
+
+# drawLineup keeps its name and gains the adjustment, so every existing caller
+# that does not care about editing is unchanged.
+LUEDIT_DRAW_OLD = """async function drawLineup(kind, d, photo) {
+  // Both loads are same-origin or CORS-enabled and either may fail; the card is
+  // designed to survive losing either one.
+  const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-tight.png")]);
+  const mk = (img) => {
+    const c = document.createElement("canvas");
+    c.width = LU_W; c.height = LU_H;
+    luPaint(c.getContext("2d"), kind, d, img, logo);
+    return c;
+  };"""
+LUEDIT_DRAW_NEW = """async function drawLineup(kind, d, photo, adj) {
+  // Both loads are same-origin or CORS-enabled and either may fail; the card is
+  // designed to survive losing either one.
+  const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-tight.png")]);
+  const mk = (img) => {
+    const c = document.createElement("canvas");
+    c.width = LU_W; c.height = LU_H;
+    luPaint(c.getContext("2d"), kind, d, img, logo, adj);
+    return c;
+  };"""

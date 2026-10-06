@@ -330,7 +330,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.LUEDIT + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -380,6 +380,11 @@ def add_screens(s, report):
                            ("photo: frame width", SCREENS.QUALITY_FRAME_W_OLD, SCREENS.QUALITY_FRAME_W_NEW),
                            ("photo: frame output", SCREENS.QUALITY_FRAME_OUT_OLD, SCREENS.QUALITY_FRAME_OUT_NEW),
                            ("photo: card cover", SCREENS.QUALITY_COVER_OLD, SCREENS.QUALITY_COVER_NEW),
+                           # On-the-fly line-up photo editing. These anchor on
+                           # LINEUP's own text, so they follow its concat.
+                           ("lu edit: painter", SCREENS.LUEDIT_SIG_OLD, SCREENS.LUEDIT_SIG_NEW),
+                           ("lu edit: photo block", SCREENS.LUEDIT_PHOTO_OLD, SCREENS.LUEDIT_PHOTO_NEW),
+                           ("lu edit: drawLineup", SCREENS.LUEDIT_DRAW_OLD, SCREENS.LUEDIT_DRAW_NEW),
                            ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
                            ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
                            ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),
