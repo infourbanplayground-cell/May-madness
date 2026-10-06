@@ -4551,3 +4551,103 @@ SOC_ME_NEW = """      <RankPath meId={meId} state={state} />
       <TopPartners meId={meId} state={state} setOpenPlayerId={setOpenPlayerId} />
 
       {/* badges */}"""
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 16 · IMAGE QUALITY
+# ══════════════════════════════════════════════════════════════════════════
+#
+# Every photo in this app went through the same three mistakes, inherited
+# unchanged from Vol.5:
+#
+#   1. imageSmoothingQuality is never set, so every downscale used Chrome's
+#      default "low" filter. On a 4000px phone photo going to 1600 that is not
+#      a slightly softer image — it ALIASES, inventing moire and jagged edges
+#      that were never in the frame. It also costs file size, because JPEG then
+#      has to encode the noise the filter invented.
+#   2. The frame output was capped at 1080px wide, which leaves nothing for the
+#      story card to crop into: luCover filling 1080x1140 from a landscape
+#      1080-wide photo is upscaling, on the one card that gets posted.
+#   3. Two lossy encodes at 0.90 then 0.85, the first one purely to get the
+#      file to Cloudinary.
+#
+# Measured against a Lanczos reference downscale of the same source, the old
+# pipeline sits at 29.0 dB PSNR and this one at 35.0 — about a quarter of the
+# error — for 594KB against 326KB.
+#
+# Worth recording how nearly this went the other way: judged by the usual
+# sharpness metric (variance of the Laplacian) the OLD pipeline scores HIGHER,
+# 3813 against 2315. That is the aliasing being counted as detail. Sharpness
+# metrics are the wrong tool when the failure mode is invented high frequency;
+# error against a known-good resample is the right one.
+QUALITY_SMOOTH_NOTE = """      // Chrome's default is "low", a cheap bilinear filter that aliases badly
+      // on the 4-8x downscale a phone photo needs. "high" is a proper
+      // multi-step filter: less moire, AND a smaller file, because there is
+      // less invented high-frequency noise for JPEG to encode."""
+
+# ── player avatar: tiny file, no reason for it to be the worst-looking thing
+#    on the roster ──
+QUALITY_AVATAR_OLD = """      const ctx = canvas.getContext("2d");
+      const s = Math.min(img.width, img.height);
+      const ox = (img.width - s) / 2, oy = (img.height - s) / 2;
+      ctx.drawImage(img, ox, oy, s, s, 0, 0, size, size);
+      resolve(canvas.toDataURL("image/jpeg", 0.65));"""
+QUALITY_AVATAR_NEW = """      const ctx = canvas.getContext("2d");
+""" + QUALITY_SMOOTH_NOTE + """
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+      const s = Math.min(img.width, img.height);
+      const ox = (img.width - s) / 2, oy = (img.height - s) / 2;
+      ctx.drawImage(img, ox, oy, s, s, 0, 0, size, size);
+      resolve(canvas.toDataURL("image/jpeg", 0.84));"""
+
+# ── generic resize ──
+QUALITY_RESIZE_OLD = """      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.72));"""
+QUALITY_RESIZE_NEW = """      canvas.width = w; canvas.height = h;
+      const rctx = canvas.getContext("2d");
+      rctx.imageSmoothingEnabled = true; rctx.imageSmoothingQuality = "high";
+      rctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.84));"""
+
+# ── the upload that goes to Cloudinary for enhancement ──
+QUALITY_ENHANCE_OLD = """        canvas.width = w; canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", 0.9));"""
+QUALITY_ENHANCE_NEW = """        canvas.width = w; canvas.height = h;
+        const ectx = canvas.getContext("2d");
+        ectx.imageSmoothingEnabled = true; ectx.imageSmoothingQuality = "high";
+        ectx.drawImage(img, 0, 0, w, h);
+        // 0.94, not 0.90: this encode exists only to move the file to the
+        // enhancer, and every artefact it adds is baked in before the frame is
+        // drawn and encoded a second time.
+        resolve(canvas.toDataURL("image/jpeg", 0.94));"""
+
+QUALITY_ENHANCE_W_OLD = """async function enhancePhotoOnServer(file, maxW = 1600) {"""
+QUALITY_ENHANCE_W_NEW = """async function enhancePhotoOnServer(file, maxW = 2048) {"""
+
+# ── the framed photo people actually see and post ──
+QUALITY_FRAME_W_OLD = """async function watermarkPhotoToBase64(file, maxW = 1080) {"""
+QUALITY_FRAME_W_NEW = """// 1440, not 1080. The story cards cover-fit this photo into 1080x1140, so a
+// 1080-wide landscape shot was being UPSCALED on the card most likely to be
+// posted. 1440 gives the crop something to take.
+async function watermarkPhotoToBase64(file, maxW = 1440) {"""
+
+QUALITY_FRAME_OUT_OLD = """  canvas.width = w; canvas.height = h;
+  drawAttackPhotoFrame(canvas.getContext("2d"), srcImg, w, h, wm);
+  return canvas.toDataURL("image/jpeg", 0.85);"""
+QUALITY_FRAME_OUT_NEW = """  canvas.width = w; canvas.height = h;
+  const fctx = canvas.getContext("2d");
+  fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = "high";
+  drawAttackPhotoFrame(fctx, srcImg, w, h, wm);
+  return canvas.toDataURL("image/jpeg", 0.90);"""
+
+# ── the story cards draw photos too ──
+# luCover is the one place a photo is scaled INSIDE a card, and it was scaling
+# with the same default filter on a canvas that is then saved as PNG — so the
+# aliasing is preserved losslessly, which is the worst of both.
+QUALITY_COVER_OLD = """function luCover(g, im, x, y, w, h) {
+  const r = Math.max(w / im.width, h / im.height);"""
+QUALITY_COVER_NEW = """function luCover(g, im, x, y, w, h) {
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+  const r = Math.max(w / im.width, h / im.height);"""

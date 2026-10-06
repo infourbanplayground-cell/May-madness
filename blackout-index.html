@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "bc00cb822ed4";
+  var V = "e4caeb1381cf";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1278,10 +1278,15 @@ function resizeToBase64(file, size = 200) {
       const canvas = document.createElement("canvas");
       canvas.width = size; canvas.height = size;
       const ctx = canvas.getContext("2d");
+      // Chrome's default is "low", a cheap bilinear filter that aliases badly
+      // on the 4-8x downscale a phone photo needs. "high" is a proper
+      // multi-step filter: less moire, AND a smaller file, because there is
+      // less invented high-frequency noise for JPEG to encode.
+      ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
       const s = Math.min(img.width, img.height);
       const ox = (img.width - s) / 2, oy = (img.height - s) / 2;
       ctx.drawImage(img, ox, oy, s, s, 0, 0, size, size);
-      resolve(canvas.toDataURL("image/jpeg", 0.65));
+      resolve(canvas.toDataURL("image/jpeg", 0.84));
     };
     img.onerror = reject;
     img.src = url;
@@ -1297,8 +1302,10 @@ function resizePhotoToBase64(file, maxW = 900) {
       const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
       const canvas = document.createElement("canvas");
       canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      resolve(canvas.toDataURL("image/jpeg", 0.72));
+      const rctx = canvas.getContext("2d");
+      rctx.imageSmoothingEnabled = true; rctx.imageSmoothingQuality = "high";
+      rctx.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.84));
     };
     img.onerror = reject;
     img.src = url;
@@ -1407,7 +1414,7 @@ function fileToDataURL(file) {
   });
 }
 
-async function enhancePhotoOnServer(file, maxW = 1600) {
+async function enhancePhotoOnServer(file, maxW = 2048) {
   let dataUrl = null, forceJpg = false;
   // Try to decode + downscale locally first (keeps the upload small).
   try {
@@ -1420,8 +1427,13 @@ async function enhancePhotoOnServer(file, maxW = 1600) {
         const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
         const canvas = document.createElement("canvas");
         canvas.width = w; canvas.height = h;
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
+        const ectx = canvas.getContext("2d");
+        ectx.imageSmoothingEnabled = true; ectx.imageSmoothingQuality = "high";
+        ectx.drawImage(img, 0, 0, w, h);
+        // 0.94, not 0.90: this encode exists only to move the file to the
+        // enhancer, and every artefact it adds is baked in before the frame is
+        // drawn and encoded a second time.
+        resolve(canvas.toDataURL("image/jpeg", 0.94));
       };
       img.onerror = reject;
       img.src = url;
@@ -1456,7 +1468,10 @@ function loadImageEl(src, useCors = false) {
   });
 }
 
-async function watermarkPhotoToBase64(file, maxW = 1080) {
+// 1440, not 1080. The story cards cover-fit this photo into 1080x1140, so a
+// 1080-wide landscape shot was being UPSCALED on the card most likely to be
+// posted. 1440 gives the crop something to take.
+async function watermarkPhotoToBase64(file, maxW = 1440) {
   const wm = await loadJHWatermark();
   try { await document.fonts.load("italic 27px Archivo"); } catch (e) {}
 
@@ -1483,8 +1498,10 @@ async function watermarkPhotoToBase64(file, maxW = 1080) {
   const w = Math.round(srcImg.width * scale), h = Math.round(srcImg.height * scale);
   const canvas = document.createElement("canvas");
   canvas.width = w; canvas.height = h;
-  drawAttackPhotoFrame(canvas.getContext("2d"), srcImg, w, h, wm);
-  return canvas.toDataURL("image/jpeg", 0.85);
+  const fctx = canvas.getContext("2d");
+  fctx.imageSmoothingEnabled = true; fctx.imageSmoothingQuality = "high";
+  drawAttackPhotoFrame(fctx, srcImg, w, h, wm);
+  return canvas.toDataURL("image/jpeg", 0.90);
 }
 
 // ── Share a photo via the native share sheet (Instagram etc.) ──
@@ -3575,6 +3592,7 @@ function luImg(src) {
 // Cover-fit, the way CSS background-size:cover does it: fill the box, crop the
 // overflow, never distort faces.
 function luCover(g, im, x, y, w, h) {
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
   const r = Math.max(w / im.width, h / im.height);
   const dw = im.width * r, dh = im.height * r;
   g.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);

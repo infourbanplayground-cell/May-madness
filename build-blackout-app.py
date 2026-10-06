@@ -371,6 +371,15 @@ def add_screens(s, report):
                            ("rank pin", SCREENS.SOC_RANK_OLD, SCREENS.SOC_RANK_NEW),
                            ("head to head", SCREENS.SOC_H2H_OLD, SCREENS.SOC_H2H_NEW),
                            ("me form + partners", SCREENS.SOC_ME_OLD, SCREENS.SOC_ME_NEW),
+                           # Image quality. Inherited from Vol.5 and wrong in
+                           # every volume since; see the note in blackout_screens.
+                           ("photo: avatar", SCREENS.QUALITY_AVATAR_OLD, SCREENS.QUALITY_AVATAR_NEW),
+                           ("photo: resize", SCREENS.QUALITY_RESIZE_OLD, SCREENS.QUALITY_RESIZE_NEW),
+                           ("photo: enhance", SCREENS.QUALITY_ENHANCE_OLD, SCREENS.QUALITY_ENHANCE_NEW),
+                           ("photo: enhance width", SCREENS.QUALITY_ENHANCE_W_OLD, SCREENS.QUALITY_ENHANCE_W_NEW),
+                           ("photo: frame width", SCREENS.QUALITY_FRAME_W_OLD, SCREENS.QUALITY_FRAME_W_NEW),
+                           ("photo: frame output", SCREENS.QUALITY_FRAME_OUT_OLD, SCREENS.QUALITY_FRAME_OUT_NEW),
+                           ("photo: card cover", SCREENS.QUALITY_COVER_OLD, SCREENS.QUALITY_COVER_NEW),
                            ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
                            ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
                            ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),
