@@ -330,7 +330,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.LUEDIT + SCREENS.CUTCARD + SCREENS.CUTCARD2 + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.LUEDIT + SCREENS.CUTCARD + SCREENS.CUTCARD2 + SCREENS.AVATARS + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -385,6 +385,10 @@ def add_screens(s, report):
                            ("lu edit: painter", SCREENS.LUEDIT_SIG_OLD, SCREENS.LUEDIT_SIG_NEW),
                            ("lu edit: photo block", SCREENS.LUEDIT_PHOTO_OLD, SCREENS.LUEDIT_PHOTO_NEW),
                            ("lu edit: drawLineup", SCREENS.LUEDIT_DRAW_OLD, SCREENS.LUEDIT_DRAW_NEW),
+                           # Profile photos: branded cut-out avatars.
+                           ("avatar: editor upload", SCREENS.AV_EDIT_OLD, SCREENS.AV_EDIT_NEW),
+                           ("avatar: card upload", SCREENS.AV_CARD_OLD, SCREENS.AV_CARD_NEW),
+                           ("avatar: crop bias", SCREENS.AV_POS_OLD, SCREENS.AV_POS_NEW),
                            ("ko score", SCREENS.KO_SCORE_OLD, SCREENS.KO_SCORE_NEW),
                            ("ko lock", SCREENS.KO_BTN_OLD, SCREENS.KO_BTN_NEW),
                            ("header", SCREENS.HEADER_OLD, SCREENS.HEADER_NEW),

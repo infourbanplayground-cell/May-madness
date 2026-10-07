@@ -3692,16 +3692,21 @@ function gcGroup(g, d, x, y, w, h) {
 
   let ry = y + HEAD;
   rows.forEach((r, i) => {
-    // `through` is what colours the row. It is not "position <= 2": in a
-    // three-group night the two best third-placed teams go through too, so a
-    // third row can be lime and a second row cannot be assumed safe. The caller
-    // passes the bracket's own answer.
-    const live = r.through === true;
-    const out = r.through === false;
-    g.fillStyle = live ? "rgba(198,255,0,.09)" : "rgba(15,15,15,.9)";
+    // Three states, not two. A third-placed team in a three-group night has
+    // NOT been knocked out when this card goes up: either it is one of the best
+    // thirds or it is in the thirds playoff, and in playoff mode that match has
+    // not been played yet. Dimming it pre-judged a result — and did it using
+    // the phantom-bye numbers, which is how a team with a worse real record
+    // came out ahead of one with a better one.
+    const live = r.through === true;       // through, decided
+    const alive = r.through === "alive";   // still in it, not yet decided
+    const out = r.through === false;       // done
+    g.fillStyle = live ? "rgba(198,255,0,.09)"
+                : alive ? "rgba(255,46,136,.07)"
+                : "rgba(15,15,15,.9)";
     g.fillRect(x, ry, w, rh);
-    g.strokeStyle = live ? "#C6FF00" : "rgba(110,110,110,.3)";
-    g.lineWidth = live ? 3 : 2;
+    g.strokeStyle = live ? "#C6FF00" : alive ? "#FF2E88" : "rgba(110,110,110,.3)";
+    g.lineWidth = live || alive ? 3 : 2;
     g.strokeRect(x + 1.5, ry + 1.5, w - 3, rh - 3);
 
     // Position, but only on a card that HAS positions. On the draw nothing has
@@ -3710,7 +3715,7 @@ function gcGroup(g, d, x, y, w, h) {
     // were entered.
     if (d.ordered) {
       g.font = '700 ' + Math.round(rh * 0.34) + 'px "JetBrains Mono", monospace';
-      g.fillStyle = live ? "#C6FF00" : out ? "#6E6E6E" : "#9A9A9A";
+      g.fillStyle = live ? "#C6FF00" : alive ? "#FF2E88" : out ? "#6E6E6E" : "#9A9A9A";
       g.fillText(String(i + 1), x + 22, ry + rh / 2 + rh * 0.12);
     }
 
@@ -3725,7 +3730,7 @@ function gcGroup(g, d, x, y, w, h) {
 
     if (r.tail) {
       g.font = '700 ' + Math.round(rh * 0.3) + 'px "JetBrains Mono", monospace';
-      g.fillStyle = live ? "#C6FF00" : out ? "#6E6E6E" : "#9A9A9A";
+      g.fillStyle = live ? "#C6FF00" : alive ? "#FF2E88" : out ? "#6E6E6E" : "#9A9A9A";
       g.fillText(r.tail, x + w - 26 - g.measureText(r.tail).width, ry + rh / 2 + rh * 0.11);
     }
     ry += rh + gap;
@@ -3771,14 +3776,16 @@ function gcPaint(g, kind, d, logo) {
   // means nothing on the draw card, so stating it only where it carries meaning
   // keeps it from becoming decoration people stop reading.
   let TOP = 540;
-  if (d.key) {
-    g.fillStyle = "#C6FF00"; g.fillRect(L, 512, 20, 20);
-    g.font = '700 20px "JetBrains Mono", monospace';
-    g.fillStyle = "#9A9A9A";
-    {
-      let kx = L + 32;
-      for (const ch of d.key) { g.fillText(ch, kx, 529); kx += g.measureText(ch).width + 3; }
-    }
+  if (d.keys && d.keys.length) {
+    let kx = L;
+    d.keys.forEach(([col, label]) => {
+      g.fillStyle = col; g.fillRect(kx, 512, 20, 20);
+      kx += 30;
+      g.font = '700 19px "JetBrains Mono", monospace';
+      g.fillStyle = "#9A9A9A";
+      for (const ch of label) { g.fillText(ch, kx, 529); kx += g.measureText(ch).width + 3; }
+      kx += 34;
+    });
     TOP = 572;
   }
 
@@ -3929,28 +3936,46 @@ function buildGroupCards(session, state, idx) {
 
   // ── THE TABLES ── where it stands, and who that puts through.
   const through = qualifyingTeamIds(session);
+  // The top `qualifyCount` of a group are through on their own merit and
+  // nothing later can take it away. Everyone below them in a three-group night
+  // is NOT automatically out: the thirds are either the best thirds or they are
+  // in the playoff, and either way the card goes up before that is settled. So
+  // a third place is drawn as "still in it", never as eliminated.
+  const qCount = getQualifyCount(session);
+  const thirdsLive = groups.length === 3 || session.thirdPlaceMode === "all4r16";
   const tables = {
     eyebrow: groupsDone ? `SESSION ${no} · GROUPS COMPLETE`
                         : `SESSION ${no} · ${played}/${total} PLAYED`,
     foot,
-    key: groupsDone ? "THROUGH TO THE KNOCKOUT" : "CURRENTLY QUALIFYING",
+    keys: thirdsLive
+      ? [["#C6FF00", "THROUGH"],
+         ["#FF2E88", session.thirdPlaceMode === "playoff" ? "IN THE PLAYOFF" : "STILL IN IT"]]
+      : [["#C6FF00", groupsDone ? "THROUGH TO THE KNOCKOUT" : "CURRENTLY QUALIFYING"]],
     groups: groups.map(gr => {
       const rows = calcGroupStandings(session, gr);
       return {
         letter: gr, title: "GROUP " + gr, ordered: true,
         note: groupsDone ? "" : "LIVE",
-        rows: rows.map(r => ({
+        rows: rows.map((r, i) => ({
           name: nm(r.team.id).toUpperCase(),
           // Wins and game difference, which is the order the table is actually
           // sorted in. Showing points here instead would print a number that
           // does not explain the order above it.
           tail: `${r.wins}W  ${r.gd >= 0 ? "+" : ""}${r.gd}`,
-          through: r.played > 0 ? through.has(r.team.id) : null,
+          through: r.played === 0 ? null
+                 : i < qCount ? true
+                 : (thirdsLive && i === qCount) ? "alive"
+                 : through.has(r.team.id) ? true
+                 : false,
         })),
       };
     }),
     caption: groupsDone
-      ? `Groups are done. ${through.size} teams through to the knockout. blackout.urbanpadel.om`
+      ? (thirdsLive
+          ? `Groups are done. Top two in each group are through, and the thirds `
+            + `are still in it. blackout.urbanpadel.om`
+          : `Groups are done. ${through.size} teams through to the knockout. `
+            + `blackout.urbanpadel.om`)
       : `Group stage, session ${no} — ${played} of ${total} played. blackout.urbanpadel.om`,
   };
 
@@ -5190,3 +5215,178 @@ async function drawCutCardAt(kind, d, photo, adj, scale) {
   catch (e) { return null; }
 }
 """
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# 19 · PROFILE PHOTOS
+# ══════════════════════════════════════════════════════════════════════════
+#
+# What was wrong was not the quality. Every profile photo was a 200x200 JPEG and
+# the largest an avatar is ever drawn is 40 CSS pixels, so there were always
+# enough pixels. The problem was the CROP: resizeToBase64 takes a dead-centre
+# square out of whatever is uploaded, and half of what people upload is a
+# full-body or wide court shot. The centre of those is a torso, a fence, or a
+# person standing fifteen metres away. At 40px that is an unidentifiable smudge,
+# and `objectPosition: center 28%` on the <img> was the app trying to paper over
+# it by guessing where faces usually are.
+#
+# The second problem was where they live. Session photos go to Cloudinary;
+# profile photos were inlined as base64 in the state — 1.23 MB for 40 people,
+# which projects to 9.6 MB on every single load at 314. That is also WHY they
+# were capped at 200px.
+#
+# So a profile photo now: goes to Cloudinary, comes back with its background
+# removed, and is composited onto the volume's own ground. The roster stops
+# being 314 mismatched phone crops with 314 different fences behind them and
+# becomes one set. The state carries a URL instead of a picture.
+#
+# Every step degrades rather than fails. No background removal -> a face-aware
+# crop, which is still far better than a centre crop. No Cloudinary at all ->
+# the old base64 path, unchanged.
+AVATARS = r"""
+
+const AV_SIZE = 512;
+
+// Face-aware crop. c_thumb with g_face finds the face and crops to it; c_fill
+// with g_auto does not — it was tested and simply letterboxes the frame.
+// Background removed, then cropped to the face. The order matters: removal
+// first means the face detector is looking at a subject on nothing, and the
+// crop lands on the person rather than on whatever the camera also caught.
+function avCutFaceUrl(url, size = AV_SIZE) {
+  if (!url || !/res\.cloudinary\.com\/.+\/image\/upload\//.test(url)) return null;
+  return url.replace(/\/image\/upload\//,
+      `/image/upload/e_background_removal/c_thumb,g_face,w_${size},h_${size}/`)
+    .replace(/\.(jpg|jpeg|webp)(\?.*)?$/i, ".png");
+}
+
+function avFaceUrl(url, size = AV_SIZE) {
+  if (!url || !/res\.cloudinary\.com\/.+\/image\/upload\//.test(url)) return null;
+  return url.replace(/\/image\/upload\//,
+    `/image/upload/c_thumb,g_face,w_${size},h_${size}/e_improve/`);
+}
+
+// The volume's ground for a cut-out portrait: near-black with the two lamps
+// behind the head, the same light the line-up cards use, scaled to a square.
+function avGround(g, S) {
+  g.fillStyle = "#050505"; g.fillRect(0, 0, S, S);
+  const lamp = (cx, cy, rad, rgb, a) => {
+    const r2 = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    r2.addColorStop(0, `rgba(${rgb},${a})`);
+    r2.addColorStop(0.35, `rgba(${rgb},${a * 0.42})`);
+    r2.addColorStop(1, `rgba(${rgb},0)`);
+    g.fillStyle = r2; g.fillRect(0, 0, S, S);
+  };
+  g.globalCompositeOperation = "screen";
+  lamp(S * 0.26, S * 0.46, S * 0.62, "255,46,136", 0.52);
+  lamp(S * 0.78, S * 0.28, S * 0.58, "198,255,0", 0.56);
+  g.globalCompositeOperation = "source-over";
+}
+
+// Composite a cut-out onto that ground, standing on the bottom edge.
+function avComposite(cut, S = AV_SIZE) {
+  const c = document.createElement("canvas");
+  c.width = S; c.height = S;
+  const g = c.getContext("2d");
+  avGround(g, S);
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+  const square = Math.abs(cut.width - cut.height) / Math.max(cut.width, cut.height) < 0.05;
+  if (square) {
+    // Cloudinary already framed this on the face and returned a square, so it
+    // goes on at 1:1 and the ground shows through the transparency. Re-fitting
+    // it to its own ink box, which the first version did, re-centres a crop
+    // that was already correct and leaves a band of empty ground above the
+    // head.
+    g.drawImage(cut, 0, 0, S, S);
+  } else {
+    // An un-cropped cut-out: fit on BOTH axes. Height alone pushes a wide
+    // subject past the sides, which crops the very thing being cut out.
+    const b = luInkBox(cut);
+    const r = Math.min(S * 0.86 / b.w, S * 0.94 / b.h);
+    const dw = b.w * r, dh = b.h * r;
+    g.drawImage(cut, b.x, b.y, b.w, b.h, (S - dw) / 2, S - dh, dw, dh);
+  }
+  return c.toDataURL("image/jpeg", 0.92);
+}
+
+// The whole pipeline, with a fallback at every step.
+//
+// Returns a URL to store in photoUrl, or null to mean "use the old path".
+async function buildBrandAvatar(file) {
+  let cloudUrl = null;
+  try {
+    // A generous source: the cut-out and the face crop both want more than the
+    // 200px the avatar used to be stored at.
+    const src = await resizePhotoToBase64(file, 1400);
+    cloudUrl = await uploadFramedPhotoToCloud(src);
+  } catch (e) { return null; }
+  if (!cloudUrl || !cloudUrl.startsWith("http")) return null;
+
+  // 1. background removed AND framed on the face, in one transform, then
+  //    composited on the volume's ground.
+  //
+  //    Chaining the two is the whole trick. Cutting out alone does not fix
+  //    framing — a full-body shot comes back as a tiny figure on a nice
+  //    gradient — and cropping alone leaves 314 different fences behind 314
+  //    people. Cloudinary applies them in sequence, so one URL gets both.
+  const cutUrl = avCutFaceUrl(cloudUrl);
+  if (cutUrl) {
+    const cut = await luImg(cutUrl);
+    if (cut) {
+      try {
+        const out = await uploadFramedPhotoToCloud(avComposite(cut));
+        if (out && out.startsWith("http")) return out;
+      } catch (e) { /* fall through */ }
+    }
+  }
+  // 2. no cut-out to be had — a face-aware crop still beats a centre crop
+  const face = avFaceUrl(cloudUrl);
+  if (face) {
+    const ok = await luImg(face);
+    if (ok) return face;
+  }
+  // 3. the plain upload, which at least is a URL rather than 30KB of base64
+  return cloudUrl;
+}
+"""
+
+# ── the two upload paths ──────────────────────────────────────────────────
+#
+# Both are patched the same way: try the branded avatar, and only fall back to
+# the 200px base64 if every step of it failed.
+AV_EDIT_OLD = """            setPhotoUploading(true);
+            try { const b64 = await resizeToBase64(f); setPhotoUrl(b64); } catch {}
+            setPhotoUploading(false);"""
+AV_EDIT_NEW = """            setPhotoUploading(true);
+            try {
+              const branded = await buildBrandAvatar(f);
+              setPhotoUrl(branded || await resizeToBase64(f));
+            } catch { try { setPhotoUrl(await resizeToBase64(f)); } catch {} }
+            setPhotoUploading(false);"""
+
+AV_CARD_OLD = """    try {
+      const b64 = await resizeToBase64(f);
+      update(s => ({ ...s, players: s.players.map(p => p.id === playerId ? { ...p, photoUrl: b64 } : p) }));
+      await uploadPhotoToServer(playerId, b64);
+    } catch {}"""
+AV_CARD_NEW = """    try {
+      // A branded avatar is a URL, so it lives in the state like any other
+      // field. uploadPhotoToServer is only for base64, which is why it is not
+      // called on that branch — calling it would store nothing and clear the
+      // separate photo record the fallback path depends on.
+      const branded = await buildBrandAvatar(f);
+      if (branded) {
+        update(s => ({ ...s, players: s.players.map(p => p.id === playerId ? { ...p, photoUrl: branded } : p) }));
+      } else {
+        const b64 = await resizeToBase64(f);
+        update(s => ({ ...s, players: s.players.map(p => p.id === playerId ? { ...p, photoUrl: b64 } : p) }));
+        await uploadPhotoToServer(playerId, b64);
+      }
+    } catch {}"""
+
+# A branded or face-cropped avatar is already composed as a square, so nudging
+# it up by 28% crops the top off the head. The nudge was only ever a guess at
+# where a face sits in a dead-centre crop, so it stays for those and goes for
+# everything else.
+AV_POS_OLD = """      style={{ ...commonStyle, objectPosition: "center 28%" }} />;  // bias crop toward faces (upper third)"""
+AV_POS_NEW = """      style={{ ...commonStyle,
+                objectPosition: player.photoUrl.startsWith("data:") ? "center 28%" : "center" }} />;"""
