@@ -2432,17 +2432,37 @@ async function drawLineup(kind, d, photo) {
 
 // Every line-up this session can show: each semi with both teams known, then
 // the final. Built from the bracket, so it cannot disagree with the draw.
+// What a team is called ON A POST. First names by default, because two full
+// names on one plate shrink until neither is readable in a story — but the
+// organiser can override it per session, which is the only way to fix the
+// things a derived name cannot know: that two players share a first name, that
+// someone goes by something else, or that a name was typed wrong at signup.
+//
+// The override lives on the session, never on the player: renaming a card must
+// not touch the leaderboard, the receipts or anyone's history.
+function teamCardLabel(session, state, teamId) {
+  const t = (session.teams || []).find(x => x.id === teamId);
+  if (!t) return "";
+  const over = (session.cardNames || {})[teamId];
+  if (over && over.trim()) return over.trim();
+  const f = pid => (((state.players || []).find(p => p.id === pid) || {}).name || "?")
+                     .split(" ")[0];
+  return `${f(t.p1Id)} & ${f(t.p2Id)}`;
+}
+
+// The derived name on its own, for showing as the placeholder and for telling
+// whether an override is actually doing anything.
+function teamDefaultLabel(session, state, teamId) {
+  const t = (session.teams || []).find(x => x.id === teamId);
+  if (!t) return "";
+  const f = pid => (((state.players || []).find(p => p.id === pid) || {}).name || "?")
+                     .split(" ")[0];
+  return `${f(t.p1Id)} & ${f(t.p2Id)}`;
+}
+
 function buildLineups(session, state, pool) {
   const teams = session.teams || [];
-  const nm = id => {
-    const t = teams.find(x => x.id === id);
-    if (!t) return "";
-    // First names, as the handover's own template shows them: two full names
-    // on one plate shrink to the point where neither is readable in a story.
-    const f = pid => (((state.players || []).find(p => p.id === pid) || {}).name || "?")
-                       .split(" ")[0];
-    return `${f(t.p1Id)} & ${f(t.p2Id)}`;
-  };
+  const nm = id => teamCardLabel(session, state, id);
   const grp = id => {
     const t = teams.find(x => x.id === id);
     return t && t.group ? "GRP " + t.group : "";
@@ -2459,7 +2479,8 @@ function buildLineups(session, state, pool) {
     if (!m || !m.team1Id || !m.team2Id) return;
     out.push({
       key: "sf" + i, kind: "semi", label: `SEMI ${i + 1}`,
-      a: nm(m.team1Id), b: nm(m.team2Id), aChip: grp(m.team1Id), bChip: grp(m.team2Id),
+      a: nm(m.team1Id), b: nm(m.team2Id), aId: m.team1Id, bId: m.team2Id,
+      aChip: grp(m.team1Id), bChip: grp(m.team2Id),
       foot, pool,
       caption: `Semi-final ${i + 1} tonight — ${nm(m.team1Id)} vs ${nm(m.team2Id)}. `
              + `Night ${no} of the Blackout Series. blackout.urbanpadel.om`,
@@ -2469,7 +2490,8 @@ function buildLineups(session, state, pool) {
   if (f && f.team1Id && f.team2Id) {
     out.push({
       key: "final", kind: "final", label: "FINAL",
-      a: nm(f.team1Id), b: nm(f.team2Id), aChip: grp(f.team1Id), bChip: grp(f.team2Id),
+      a: nm(f.team1Id), b: nm(f.team2Id), aId: f.team1Id, bId: f.team2Id,
+      aChip: grp(f.team1Id), bChip: grp(f.team2Id),
       foot, pool,
       caption: `The final — ${nm(f.team1Id)} vs ${nm(f.team2Id)}. `
              + `Night ${no} of the Blackout Series. blackout.urbanpadel.om`,
@@ -2484,7 +2506,8 @@ function buildLineups(session, state, pool) {
       const lo = f.score ? Math.min(f.score.t1, f.score.t2) : "";
       out.push({
         key: "champs", kind: "champs", label: "CHAMPS",
-        a: nm(winId), b: nm(lostId), aScore: String(hi), bScore: String(lo),
+        a: nm(winId), b: nm(lostId), aId: winId, bId: lostId,
+        aScore: String(hi), bScore: String(lo),
         foot, pool,
         caption: `${nm(winId)} take night ${no}${f.score ? ` — ${hi}-${lo}` : ""}. `
                + `14 OMR voucher each. blackout.urbanpadel.om`,
@@ -2494,7 +2517,72 @@ function buildLineups(session, state, pool) {
   return out;
 }
 
-function LineupSheet({ open, items, photos, onClose, session, updateSession, canUpload }) {
+// Editing what the two plates say. Scoped to the session and keyed by team, so
+// a fix made on the semi card is already right on the final and the champions
+// card — the alternative, editing per card, means typing the same correction
+// three times on the one night it matters.
+function LineupNames({ item, session, state, updateSession }) {
+  const [open, setOpen] = React.useState(false);
+  const rows = [["aId", "TOP"], ["bId", "BOTTOM"]].filter(([k]) => item[k]);
+  const over = session && session.cardNames ? session.cardNames : {};
+  const dirty = rows.some(([k]) => (over[item[k]] || "").trim());
+
+  const set = (teamId, value) => updateSession(s => {
+    const next = { ...(s.cardNames || {}) };
+    // An empty box means "go back to the derived name", so the key is removed
+    // rather than stored as "" — a stored empty string would render a blank
+    // plate on every card for the rest of the night.
+    if (value.trim()) next[teamId] = value; else delete next[teamId];
+    return { ...s, cardNames: next };
+  });
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} style={{ width: "100%", marginTop: 8, padding: 11,
+        background: "transparent", color: dirty ? "#C6FF00" : "#9A9A9A", cursor: "pointer",
+        border: "1px solid " + (dirty ? "rgba(198,255,0,.45)" : "rgba(110,110,110,.4)"),
+        fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+        letterSpacing: ".14em" }}>
+        {dirty ? "NAMES \u00B7 EDITED" : "EDIT THE NAMES"}
+      </button>
+    );
+  }
+  return (
+    <div style={{ marginTop: 8, padding: 12, border: "1px solid rgba(198,255,0,.3)",
+                  background: "rgba(14,14,14,.94)" }}>
+      {rows.map(([k, label]) => {
+        const teamId = item[k];
+        const def = teamDefaultLabel(session, state || { players: [] }, teamId);
+        return (
+          <div key={k} style={{ marginBottom: 10 }}>
+            <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+              letterSpacing: ".2em", color: "#9A9A9A", marginBottom: 5 }}>{label}</div>
+            <input value={over[teamId] || ""} placeholder={def}
+              onChange={e => set(teamId, e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", background: "#050505",
+                color: "#F2F2F2", border: "1px solid rgba(110,110,110,.5)", borderRadius: 0,
+                fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 15 }} />
+          </div>
+        );
+      })}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+        <button onClick={() => rows.forEach(([k]) => set(item[k], ""))}
+          style={{ padding: 10, background: "transparent", color: "#9A9A9A", cursor: "pointer",
+            border: "1px solid rgba(110,110,110,.4)", fontFamily: "'JetBrains Mono',monospace",
+            fontWeight: 700, fontSize: 10, letterSpacing: ".14em" }}>RESET</button>
+        <button onClick={() => setOpen(false)}
+          style={{ padding: 10, background: "#C6FF00", color: "#050505", cursor: "pointer",
+            border: "none", fontFamily: "'JetBrains Mono',monospace",
+            fontWeight: 700, fontSize: 10, letterSpacing: ".14em" }}>DONE</button>
+      </div>
+      <div style={{ fontSize: 11, color: "#6E6E6E", marginTop: 9 }}>
+        Only changes the posts. Nothing here touches points or the table.
+      </div>
+    </div>
+  );
+}
+
+function LineupSheet({ open, items, photos, onClose, session, updateSession, canUpload, state }) {
   const [i, setI] = React.useState(0);
   const [ph, setPh] = React.useState(-1);          // -1 = no photo
   const [url, setUrl] = React.useState("");
@@ -2685,6 +2773,10 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
             : "Preview is the actual 1080\u00D71920 file, shown small."}
         </div>
         {hasPhoto && <LuPhotoControls adj={adj} setAdj={setAdj} hideWash={cut} />}
+        {canUpload && (item.aId || item.bId) && (
+          <LineupNames item={item} session={session} state={state} updateSession={updateSession} />
+        )}
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
           <button onClick={save} style={{ padding: "16px", background: "#C6FF00", color: "#050505",
             border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
@@ -2722,7 +2814,7 @@ LU_STATE_NEW = """  const [showShare, setShowShare] = useState(false);
 
 LU_MOUNT_OLD = """      {showEdit && <Modal open={true} onClose={() => setShowEdit(false)} title="SESSION OPTIONS">"""
 LU_MOUNT_NEW = """      <LineupSheet open={showLineup} items={lineups} photos={sessionPhotos}
-                   session={session} updateSession={updateSession}
+                   session={session} updateSession={updateSession} state={state}
                    canUpload={canUploadPhotos}
                    onClose={() => setShowLineup(false)} />
       {showEdit && <Modal open={true} onClose={() => setShowEdit(false)} title="SESSION OPTIONS">"""
@@ -3901,11 +3993,10 @@ GROUPCARDS_BUILD = r"""
 function buildGroupCards(session, state, idx) {
   const teams = session.teams || [];
   const players = state.players || [];
-  const first = id => (((players.find(p => p.id === id) || {}).name) || "?").split(" ")[0];
-  const nm = id => {
-    const t = teams.find(x => x.id === id);
-    return t ? first(t.p1Id) + " & " + first(t.p2Id) : "";
-  };
+  // The same resolver the line-up cards use, so a team renamed on one post is
+  // renamed on all of them. A draw card and a champions card that disagree
+  // about what a pair is called is worse than either name being wrong.
+  const nm = id => teamCardLabel(session, state, id);
   const groups = getSessionGroups(session).filter(gr => teams.some(t => t.group === gr));
   const played = (session.groupMatches || []).filter(m => m.winner).length;
   const total = (session.groupMatches || []).length;
