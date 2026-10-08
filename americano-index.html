@@ -1536,12 +1536,10 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
             const upC = Math.max(1, Math.min(
               Number(cfg.upcourts) || UP.COURTS, Math.floor(selCount / 4), UP.COURTS));
             const upR = selCount - 4 * upC;
-            const rounds = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+            const sc = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+            const rounds = sc + (cfg.upshuffle ? 1 : 0);
             const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
             const mins = nightMinutes(rounds, tgt);
-            // Only the SCORING rounds have to divide evenly — the shuffle is
-            // off the rest rota precisely so it cannot skew them.
-            const sc = Math.max(1, rounds - (cfg.upshuffle ? 1 : 0));
             const fair = selCount >= 8 ? upFairRounds(selCount, upC, 40) : [];
             const evenRests = upR === 0 || (fair || []).includes(sc);
             const restsEach = (sc * upR) / selCount;
@@ -1555,12 +1553,11 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                       {" "}{selCount} checked in.</Fragment>
                   : <Fragment>
                       <b style={{ color: "var(--cream)" }}>
-                        {plural(selCount, "player")} on {plural(upC, "court")}, {plural(rounds, "round")}.
+                        {plural(selCount, "player")} on {plural(upC, "court")},{" "}
+                        {plural(sc, "scoring round")}{cfg.upshuffle ? ` after the shuffle — ${rounds} matches each` : ""}.
                       </b>{" "}
-                      {cfg.upshuffle && <Fragment>Round 1 is the shuffle, then {plural(sc, "scoring round")}.{" "}</Fragment>}
                       {upR === 0
-                        ? <Fragment>Nobody sits out — everyone plays all {rounds} — and the last round
-                            is worth double.</Fragment>
+                        ? <Fragment>Nobody sits out and the last round is worth double.</Fragment>
                         : evenRests
                           ? <Fragment>
                               {plural(upR, "player")} {upR === 1 ? "rests" : "rest"} each round, on a rota drawn
@@ -1579,7 +1576,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                         ? "Where everyone starts is decided on court, by the shuffle — nobody is placed by a draw."
                         : "The opening ladder is seeded by form, not drawn — a random draw hands a Court 1 starter 7x the chance of a Court 4 starter."}{" "}
                       <b style={{ color: mins > 180 ? "var(--warn)" : "var(--cream)" }}>
-                        {rounds} rounds of first to {tgt} runs about {asClock(mins)}
+                        {rounds} {cfg.upshuffle ? "matches" : "rounds"} of first to {tgt} runs about {asClock(mins)}
                       </b>
                       {mins > 180
                         ? " — over three hours. Drop the target or the round count."
@@ -1603,7 +1600,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                 took the whole screen down with "no points defined for court 5". */}
             <div className="grid3">
               {(cfg.format === "uprising"
-                 ? [["Courts", "upcourts"], ["Play to", "uppoints"], ["Rounds", "uprounds"]]
+                 ? [["Courts", "upcourts"], ["Play to", "uppoints"], ["Scoring rounds", "uprounds"]]
                  : [["Points", "points"], ["Rounds", "rounds"], ["Courts", "courts"]]
                ).map(([lab, key]) => (
                 <label className="stack" key={key}>
@@ -1628,8 +1625,8 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                   <b>Round 1 is the shuffle</b>
                   <i>
                     {cfg.upshuffle
-                      ? "A real match that sets your starting court and scores nothing. Leaves " +
-                        Math.max(1, (Number(cfg.uprounds) || UP.ROUNDS) - 1) + " scoring rounds."
+                      ? "A real match that sets your starting court and scores nothing — played on top of the " +
+                        (Number(cfg.uprounds) || UP.ROUNDS) + " scoring rounds, not instead of one."
                       : "Off — round 1 scores, and the opening courts are seeded from form, or drawn if nobody has any."}
                   </i>
                 </span>
@@ -2167,7 +2164,7 @@ function App() {
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
   const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
-                                   upcourts: 4, uppoints: UP.TARGET, uprounds: UP.ROUNDS,
+                                   upcourts: 4, uppoints: 13, uprounds: 15,
                                    upshuffle: true, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [receipt, setReceipt] = useState(null);
@@ -2257,7 +2254,11 @@ function App() {
       // 0.73 with true skill against 0.62, and gives a median of 11 different
       // partners against 8. It only costs time, which is what the finish
       // estimate on the setup screen is for.
-      const upRounds = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+      // cfg.uprounds is the number of SCORING rounds. The shuffle sits on top
+      // of it rather than inside it, because "15 rounds" means fifteen rounds
+      // that count — asked for 15 and given 14 is the wrong kind of surprise.
+      const upScoring = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+      const upRounds = upScoring + (cfg.upshuffle ? 1 : 0);
       const ladder0 = upSeedLadder(ids, upForm, upCourtCount);
       const seedT = {
         id: uid("t"), format: "uprising", playerIds: ids, ladder0, rounds: [],

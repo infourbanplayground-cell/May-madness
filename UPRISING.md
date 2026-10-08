@@ -230,6 +230,28 @@ people away at the door.
 
 ---
 
+## The night, as it is set up today
+
+The app opens on these, so the organiser types nothing:
+
+| | |
+|---|---|
+| Players | 16, four courts |
+| Round 1 | **the shuffle** — sets the courts, scores nothing |
+| Scoring rounds | **15** |
+| Match | **first to 13** |
+| Matches each | **16** |
+| Finish | about **2h53** from the first serve |
+| Last round | **double** |
+
+`Scoring rounds` means rounds that count. The shuffle sits on top of it, not
+inside it — ask for 15 and you get 15 that score, plus the shuffle, 16 matches.
+
+Measured on a full night played through the app: everybody plays all 15 scoring
+rounds, 960 points are awarded in total (14 normal rounds at 60 plus 120 for the
+doubled final), the table spreads about 25 to 80, and players meet 10 to 13
+different partners out of a possible 15.
+
 ## The night
 
 | | |
