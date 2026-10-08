@@ -190,6 +190,65 @@ it is a question of which bucket the night writes to, not new machinery.
 
 ---
 
+## The prize, and whether anyone else can win it
+
+One voucher for one winner does not survive contact with a mixed field. Simulated
+over 200 seasons of twelve monthly nights, with a pool of 24 regulars of whom 16
+turn up each time:
+
+| Prize rule | Nights won by a top-3 player |
+|---|---|
+| **Scratch** — most points | **70%** (78% if the ladder is seeded by form) |
+| **Handicap** — most above your own average | **21%** |
+| **The Rise** — biggest climb from your starting court | 37% random ladder, **6%** seeded |
+
+The top 3 of 24 are 12.5% of the room, so that is the number a genuinely open
+prize should sit near.
+
+**Scratch alone means three people take three quarters of the vouchers.** That is
+the problem, confirmed. But removing it is worse: a prize nobody good can win is
+a prize the good players stop turning up for, and they are the ones who make the
+top court worth climbing to.
+
+### So: two vouchers, same budget
+
+| | |
+|---|---|
+| **CHAMPION** | Most points. Won on merit, by whoever was best on the night. |
+| **THE CLIMB** | Most points above **your own running average**. Open to anyone. |
+
+At 21% the handicap prize still rewards playing well — it is not a raffle — but
+it is winnable by anyone in the room on a good night. And it self-corrects: win
+it by overperforming and your average rises, so next month the bar is higher.
+Nobody can farm it.
+
+The series already pays 14 OMR to each of two winning players per night. Two
+vouchers here is the same spend, and the same shape: one for the best, one for
+the best against themselves.
+
+**A first-timer's baseline is the field average**, which is deliberately
+generous. A newcomer can win THE CLIMB on their first night. For a format whose
+whole job is converting people who have never played, that is a feature.
+
+### What not to award
+
+**Do not make "biggest climb up the ladder" a prize if the opening ladder is
+seeded by form.** At 6% it is not an open prize, it is an inverted one — a strong
+player starts on Court 1 and mathematically cannot win it. Keep the climb as a
+story and a share card, not as money.
+
+### The one thing to watch
+
+A handicap built from your own history can be gamed by losing on purpose one
+month to lower the bar for the next. Three things make it not worth doing: the
+voucher is small, the average is computed from recorded results rather than
+anything self-declared, and tanking a night in front of fifteen people who can
+see which court you are on carries its own cost. If it ever does happen, the fix
+is to compute the baseline from a player's **best four of their last six nights**
+rather than a plain average, which makes a deliberate bad night worthless.
+
+---
+
 ## Open decisions
 
 1. **Does a night count toward all-time points?** I would say yes — it is how
