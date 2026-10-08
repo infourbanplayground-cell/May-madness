@@ -104,6 +104,35 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - **Admin DC odds editing**: admin panel has two rows in odds form — row 1: 1/X/2, row 2: 1X/X2 (optional)
 - **My Picks auto-expand**: in Fixtures tab, switching to "My Picks" filter auto-shows finished matches
 
+### Americano + UPRISING
+- URL: https://americano.urbanpadel.om — local copy: `americano-index.html`
+  (it had **no copy in the repo until Oct 2026** and lived only on the server,
+  the same way the landing page did; the repo is the source now)
+- API: `/opt/americano-api/api.js` — systemd: `americano-api` — port 3007
+- Tables: `americano_state`, `americano_photos`. The API stores the whole state
+  as one JSON blob and never validates its shape, which is why UPRISING needed
+  **no new API, no new port and no new tables** — it is another entry in
+  `state.tournaments`.
+- The API serves players live out of August Attack's DB and deletes
+  `state.players` on save, so the roster is shared and never forked.
+- Two formats in one app, chosen at setup:
+  - **AMERICANO** — the circle method, so everyone partners everyone exactly
+    once. Courts can be capped; sit-outs rotate; if the schedule cannot give
+    everyone the same number of matches the table switches to points per match.
+  - **UPRISING** — a court ladder. 4 courts, 9 rounds, nobody sits out, winners
+    up and losers down, points worth more higher up, last round double. The
+    reasoning and the simulations behind every number are in `UPRISING.md`.
+- **The UPRISING rules live in `uprising-engine.js` and nowhere else.**
+  `build-americano-app.py` inlines that file into the page between two markers
+  and refuses to build if the engine declares a name the app already has — the
+  engine's helper was once called `pairKey`, which the app also defines, and a
+  duplicate declaration is a SyntaxError that blanks the **entire** page rather
+  than breaking one screen.
+- Deploy: `node --test uprising-engine.test.js && python3 build-americano-app.py && bash ops/deploy-americano.sh`
+- June Fury (Vol.1) used to share this directory. It now has its own at
+  `/var/www/june.urbanpadel.om/public`, still on port 3001, so the landing
+  page's archive link survives.
+
 ### Booking App (Court reservations)
 - URL: https://bookings.urbanpadel.om
 - Source: `/home/user/May-madness/booking-app/`
