@@ -53,6 +53,11 @@ the court they are standing on. That is the whole design.
 
 ### How partners are chosen
 
+The **opening ladder is seeded by form** — a player's average from previous
+UPRISINGs, their all-time points on a first appearance, newcomers in the middle.
+Not drawn at random: see "where you start" below, where a random draw is shown to
+be worth a five-fold swing in who wins.
+
 On each court the four players are ranked by their running total, and paired
 **1 + 4 against 2 + 3**. Closest possible match, every round.
 
@@ -124,7 +129,7 @@ one.
 
 | | |
 |---|---|
-| Rounds | 9 |
+| Rounds | 9, **the last one worth double** |
 | Match | first to 16 points |
 | Per round | ~11 min play + ~2 min change |
 | Total | ~2 hours |
@@ -187,6 +192,58 @@ from that. Nothing is stored twice.
 UPRISING results should feed the **all-time** table and stay out of the series
 table. The app already draws that line (`prevSeriesPts` vs the live series), so
 it is a question of which bucket the night writes to, not new machinery.
+
+---
+
+## Can someone come back and still win?
+
+Measured over 3,000 simulated nights.
+
+| | |
+|---|---|
+| Nights where the **last round changed the winner** | **20%** |
+| Winner was outside the top 3 at halfway (round 5) | 13%, from as low as **8th** |
+| Winner was outside the top 3 a third of the way in (round 3) | 28%, from as low as **11th** |
+| Biggest points deficit overturned in the final round | **6** — one Court 1 win against a Court 3 win |
+| Won from the **bottom court at halfway** | **0 of 3,000** |
+
+So: yes, and often. One night in five comes down to the final round, and a
+player sitting eighth at halfway can still take it. What cannot happen is a
+comeback from the bottom court after round 5 — by then you need to already be
+climbing. That is the right shape for a two-hour format: live to the end, but
+not a lottery.
+
+### Make the last round double
+
+Weighting the ninth round at 2× takes "the last round decided it" from **20% of
+nights to 31%** — one in three. It costs nothing, it is one line in the engine,
+and it is worth announcing out loud before the round starts. Everyone on every
+court still has something to play for at 19:30, which is the hour a social
+normally dies.
+
+### The thing that actually needs fixing: where you start
+
+Starting court is worth more than it should be if it is drawn at random:
+
+| Started on | Share of wins |
+|---|---|
+| Court 1 | **40%** |
+| Court 2 | 31% |
+| Court 3 | 20% |
+| Court 4 | **8%** |
+
+Even money would be 25% each. A random draw therefore hands one player a
+**five times** better chance than another before a ball is hit — and that is
+luck deciding who takes a voucher.
+
+**So seed the opening ladder by form**, not at random: previous UPRISING average,
+or all-time points for a first appearance, with newcomers placed in the middle.
+Then Court 1 at 40% is not luck, it is the reigning form player starting where
+they earned, and the ladder is doing its job from round one instead of spending
+three rounds sorting itself out.
+
+That makes the CHAMPION prize *more* merit-based, which is the point of it. The
+openness lives in the second prize, below — not in randomising the start.
 
 ---
 
