@@ -855,8 +855,14 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                 </label>
               ))}
             </div>
-            <div className="note">{hint}</div>
-            {unevenWarning && (
+            {/* Both of these are about the classic rotation, and both read off
+                cfg.courts / cfg.rounds — the two fields UPRISING hides and
+                ignores. Left ungated they told an UPRISING organiser that
+                "8 players rest each round" and that 7 rounds would be unfair,
+                neither of which is true of a format where nobody sits out and
+                the round count is fixed at nine. */}
+            {cfg.format !== "uprising" && <div className="note">{hint}</div>}
+            {cfg.format !== "uprising" && unevenWarning && (
               <div className="note" style={{ color: "var(--gold)" }}>{unevenWarning}</div>
             )}
           </div>
@@ -899,7 +905,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
 
 // ── live board ──────────────────────────────────────────────────
 function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, editing, setEditing,
-                 onCommit, onFinish, onOpenCourts, onOpenJoin }) {
+                 onCommit, onFinish, onOpenCourts, onOpenJoin, onAbandon }) {
   const isUp = t.format === "uprising";
   const ri = Math.min(roundIdx, t.rounds.length - 1);
   const round = t.rounds[ri];
@@ -1051,6 +1057,15 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
       </div>
 
       {canFinish && <button className="btn" onClick={onFinish}>Finish session 🏆</button>}
+
+      {/* A session with unscored matches can never be finished, so without this
+          an abandoned night stays `active` forever and the app opens into it
+          instead of Setup — there is no other way back. An August session with
+          seven unscored rounds was still on the board in October. */}
+      {canEdit && !canFinish && (
+        <button className="btn ghost" style={{ borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+          onClick={onAbandon}>Abandon session</button>
+      )}
     </div>
   );
 }
@@ -1276,7 +1291,9 @@ function App() {
   const upForm = useMemo(() => {
     const got = {};
     (tournaments || []).forEach(t => {
-      if (t.format !== "uprising" || t.status === "active") return;
+      // Only a FINISHED night is form. An abandoned one is a few scores and a
+      // walk-off, and an active one is tonight.
+      if (t.format !== "uprising" || t.status !== "completed") return;
       upStandings(t, byId).forEach(r => {
         if (r.played > 0) (got[r.id] = got[r.id] || []).push(r.total);
       });
@@ -1346,6 +1363,15 @@ function App() {
     saveT({ ...active, status: "completed", completedAt: Date.now() });
     setPodiumId(active.id); setSel({}); setModal("podium");
   }
+  // Abandoned, NOT deleted: the night stays in the state so the scores anyone
+  // did enter are not thrown away, but it stops being `active` so Setup comes
+  // back. History shows only `completed`, so it does not appear there, and it
+  // does not feed UPRISING form either.
+  function abandonSession() {
+    if (!active) return;
+    saveT({ ...active, status: "abandoned", abandonedAt: Date.now() });
+    setSel({}); setRoundIdx(0); setModal(null); setView("board");
+  }
   function submitLogin() {
     fetch("/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin }) })
       .then(r => r.json()).then(r => {
@@ -1399,7 +1425,8 @@ function App() {
               drafts={drafts} setDrafts={setDrafts} editing={editing} setEditing={setEditing}
               onCommit={commitScore} onFinish={finishSession}
               onOpenCourts={() => { setCourtsPick(active.courtCount); setModal("courts"); }}
-              onOpenJoin={() => setModal("join")} />
+              onOpenJoin={() => setModal("join")}
+              onAbandon={() => setModal("abandon")} />
           : <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />)}
 
         {view === "standings" && <Standings t={shownT} byId={byId}
@@ -1453,6 +1480,25 @@ function App() {
             </div>
             <button className="btn" style={{ width: "100%", marginTop: 18 }} disabled={pick === active.courtCount}
               onClick={() => { saveT(rebuildTail(active, pick, null)); setModal(null); }}>Apply</button>
+          </Sheet>
+        );
+      })()}
+
+      {modal === "abandon" && active && (() => {
+        const total = active.rounds.reduce((n, r) => n + r.courts.length, 0);
+        const scored = active.rounds.reduce(
+          (n, r) => n + r.courts.filter(m => m.score1 != null).length, 0);
+        return (
+          <Sheet title="Abandon this session?" onClose={() => setModal(null)}>
+            <div className="note">
+              <b>{active.name}</b> — {scored} of {total} matches scored.
+              It will be closed without a podium and will not appear in the archive,
+              and you will be able to start a new session. This cannot be undone from here.
+            </div>
+            <button className="btn" style={{ width: "100%", marginTop: 18, borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+              onClick={abandonSession}>Abandon it</button>
+            <button className="btn ghost" style={{ width: "100%", marginTop: 10 }}
+              onClick={() => setModal(null)}>Keep playing</button>
           </Sheet>
         );
       })()}
