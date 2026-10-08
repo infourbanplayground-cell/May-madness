@@ -107,21 +107,64 @@ night. That is the correct amount of luck for a social.
 
 ### If the field isn't 16
 
-**16 is a hard cap**, with a waitlist, like the series. Below that:
+**Four to a court is padel, not a rule we chose. The FIELD does not have to be
+a multiple of four.** It just means somebody sits out every round, and the whole
+question is whether that can be made fair. Measured, it can:
 
-| Players | Courts | Note |
+| Players | Courts | Rest each round | Rounds | Everyone plays | Finish |
+|---|---|---|---|---|---|
+| 8 | 2 | nobody | 7 | 7 | ~1h45 |
+| **9** | 2 | 1 | **9** | 8 | ~2h |
+| **10** | 2 | 2 | **10** (or 5) | 8 (or 4) | ~2h15 |
+| **11** | 2 | 3 | **11** | 8 | ~2h30 |
+| 12 | 3 | nobody | 9 | 9 | ~2h |
+| 16 | 4 | nobody | 9 | 9 | ~2h |
+| **20** | 4 | 4 | **10** | 8 | ~2h25 |
+| 24 | 4 | 8 | 5 or 10 | 3 or 6 | ~1h20 / 2h25 |
+
+With P players and R resting each round, N rounds deal N×R rests, so they share
+out exactly when **P divides N×R**. That is where each round count above comes
+from. The app works it out and picks it for you.
+
+**Four courts is the ceiling**, because the points table has exactly four rungs.
+20 players would otherwise ask for a fifth court that has no points defined for
+it. The club has four anyway — the ladder is as tall as the venue.
+
+Rest goes on **a rota drawn at the start of the night and walked in order**, so
+when your turn comes it has nothing to do with how you are playing. The first
+attempt broke rest ties by ladder position, which quietly handed the early
+rounds off to the weak players and the double final off to the strong ones.
+
+#### The double final is off whenever anybody sits out
+
+Measured over 20,000 nights of 9 players: with the 2× final on, whoever draws
+the final-round rest takes **3.6%** of the wins against the **11.1%** that would
+be their fair share. They cannot win the night, for a reason they had no say in.
+With a flat final it is 13.6% — slightly generous, which is the right direction
+for a social. So the multiplier is a property of the field, not of the format:
+**16 or 12 players, the last round doubles. 9, 10, 11 or 20, it does not.**
+
+#### If you run a different number of rounds
+
+You can. The rests then come out uneven — some play one more match than others —
+and the table **must** switch to points per round played. This is not a nicety.
+Over 20,000 nights of 11 players across 9 rounds:
+
+| Ranked on | Players who rested twice | Players who rested three times |
 |---|---|---|
-| 16 | 4 | the format as designed |
-| 12 | 3 | identical, one rung shorter |
-| 8 | 2 | a 90-minute version, 7 rounds |
+| **Raw points** | 55% of the field took **94% of the wins** | 45% took 6% |
+| **Points per round played** | 55% took 58% | 45% took 42% |
 
-Anything that is not a multiple of four drops to the next one down and the extras
-take the waitlist. A rotating sit-out was considered and rejected: it makes the
-scoring unfair (fewer rounds, fewer points) and it makes one person per round
-the unlucky one, which is precisely the feeling this format exists to remove.
+One extra match decided the night. The app detects uneven rests and switches the
+table automatically, and says on screen that it has.
 
-If more than 16 want in, run two sessions in an evening rather than stretching
-one.
+A rotating sit-out was once rejected here on the grounds that it "makes the
+scoring unfair and makes one person per round the unlucky one". The first half
+was right and is fixed by the two rules above. The second half was wrong: at 9
+players you sit out **one round in nine**, and the alternative was turning
+people away at the door.
+
+---
 
 ---
 

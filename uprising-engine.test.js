@@ -6,14 +6,21 @@ const {
   UP, upSeedLadder, upPairCourt, upRoundPoints, upRoundDone, upCourtsAfter,
   upCurrentCourts, upBuildRound, upTotals, upStandings, upPrizes, upClimbPath,
   upValidate, upPairKey,
+  upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota,
+  upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
 } = E;
 
 const ids = n => Array.from({ length: n }, (_, i) => `p${String(i).padStart(2, "0")}`);
 
-function newNight(n = 16, form = {}) {
+function newNight(n = 16, form = {}, rounds = 0) {
   const players = ids(n).map(id => ({ id, name: id.toUpperCase() }));
-  return { id: "n1", players, playerIds: players.map(p => p.id),
-           ladder0: upSeedLadder(players.map(p => p.id), form), rounds: [] };
+  const pids = players.map(p => p.id);
+  const courtCount = Math.min(Math.floor(n / 4), UP.COURTS);
+  const fair = upFairRounds(n, courtCount);
+  return { id: "n1", players, playerIds: pids, courtCount,
+           numRounds: rounds || (fair === null ? UP.ROUNDS : (fair[0] || UP.ROUNDS)),
+           restRota: upMakeRestRota(pids, 7),
+           ladder0: upSeedLadder(pids, form, courtCount), rounds: [] };
 }
 
 // Plays one round: `pick` decides the winner for a given match.
@@ -166,7 +173,7 @@ test("nine rounds stay four to a court, every round, every time", () => {
 test("a tenth round is refused", () => {
   const night = newNight(16);
   for (let r = 0; r < UP.ROUNDS; r++) playRound(night);
-  assert.throws(() => upBuildRound(night), /nine rounds/);
+  assert.throws(() => upBuildRound(night), /already 9 rounds long/);
 });
 
 test("the next round is refused until this one is finished", () => {
@@ -276,10 +283,160 @@ test("validate catches a drawn match", () => {
   assert.ok(upValidate(night).some(x => /drawn/.test(x)));
 });
 
-test("validate catches a field that is not a multiple of four", () => {
+test("validate catches a field whose rounds do not rest anybody", () => {
+  // A seventeenth player means one person must sit out every round. The rounds
+  // already built rest nobody, so they no longer describe this field.
   const night = newNight(16);
+  for (let r = 0; r < 3; r++) playRound(night);
   night.players.push({ id: "pX", name: "X" }); night.playerIds.push("pX");
-  assert.ok(upValidate(night).some(x => /multiple of 4/.test(x)));
+  const bad = upValidate(night);
+  assert.ok(bad.some(x => /0 resting, expected 1/.test(x)), bad.join("; "));
+});
+
+// ── fields that are not a multiple of four ─────────────────────────────────
+
+test("four to a court is padel; the FIELD need not be a multiple of four", () => {
+  for (const n of [9, 10, 11]) {
+    const night = newNight(n);
+    assert.equal(upCourts(night), 2, `${n} players should play on 2 courts`);
+    assert.equal(upRestCount(night), n - 8);
+    const r = upBuildRound(night);
+    assert.equal(r.courts.length, 2);
+    r.courts.forEach(m => assert.equal(new Set([...m.team1, ...m.team2]).size, 4));
+    assert.equal(r.sitOuts.length, n - 8, `${n}: wrong number resting`);
+    const onCourt = r.courts.flatMap(m => [...m.team1, ...m.team2]);
+    assert.equal(new Set([...onCourt, ...r.sitOuts]).size, n, `${n}: somebody is missing`);
+    r.sitOuts.forEach(p => assert.ok(!onCourt.includes(p), `${n}: ${p} rests and plays`));
+  }
+});
+
+test("the round count that makes rests come out even", () => {
+  assert.deepEqual(upFairRounds(9, 2), [9]);
+  assert.deepEqual(upFairRounds(10, 2), [5, 10]);
+  assert.deepEqual(upFairRounds(11, 2), [11]);
+  assert.equal(upFairRounds(16, 4), null, "nobody rests, so any round count is fair");
+  assert.equal(upFairRounds(12, 3), null);
+  // 20 on the club's four courts: 4 rest each round, even only at multiples of 5
+  assert.deepEqual(upFairRounds(20, 4), [5, 10]);
+  assert.deepEqual(upFairRounds(20, 4, 15), [5, 10, 15]);
+});
+
+test("the ladder is never taller than the points table", () => {
+  // 20 players would ask for five courts, and the points table has four rungs.
+  // Before this cap the first round threw "no points defined for court 5" and
+  // took the whole screen down.
+  for (const n of [20, 24, 31]) {
+    const night = newNight(n);
+    assert.ok(upCourts(night) <= UP.COURTS, `${n} players asked for ${upCourts(night)} courts`);
+    const r = upBuildRound(night);
+    r.courts.forEach(m => assert.ok(UP.WIN[m.court] != null, `court ${m.court} has no points`));
+  }
+});
+
+test("20 players on four courts: four rest, ten rounds, everybody plays eight", () => {
+  const night = newNight(20, {}, 10);
+  assert.equal(upCourts(night), 4);
+  assert.equal(upRestCount(night), 4);
+  assert.equal(upDoubleFinal(night), false);
+  for (let r = 0; r < 10; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  assert.deepEqual(upValidate(night), []);
+  const rows = upStandings(night);
+  assert.deepEqual([...new Set(rows.map(r => r.played))], [8]);
+  const rests = {}; night.playerIds.forEach(i => rests[i] = 0);
+  night.rounds.forEach(r => r.sitOuts.forEach(p => rests[p]++));
+  assert.deepEqual([...new Set(Object.values(rests))], [2]);
+  assert.equal(upUneven(night), false);
+});
+
+test("at the fair round count everybody rests exactly the same number of times", () => {
+  for (const [n, rounds, each] of [[9, 9, 1], [10, 10, 2], [11, 11, 3], [10, 5, 1]]) {
+    const night = newNight(n, {}, rounds);
+    for (let r = 0; r < rounds; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+    const rests = {};
+    night.playerIds.forEach(id => { rests[id] = 0; });
+    night.rounds.forEach(r => r.sitOuts.forEach(p => rests[p]++));
+    const v = Object.values(rests);
+    assert.deepEqual([...new Set(v)], [each],
+      `${n} players over ${rounds} rounds: rests were ${JSON.stringify(rests)}`);
+    assert.deepEqual(upValidate(night), [], `${n}/${rounds} failed validation`);
+    const rows = upStandings(night);
+    assert.deepEqual([...new Set(rows.map(r => r.played))], [rounds - each]);
+    assert.equal(upUneven(night), false, "equal rests must not be flagged uneven");
+  }
+});
+
+test("the double final is off whenever anyone has to sit out", () => {
+  // Measured over 20,000 nights: with the 2x final on and one player resting
+  // each round, whoever draws the final-round rest takes 3.6% of the wins
+  // against an 11.1% fair share. They cannot win, for a reason they did not
+  // choose. So the multiplier belongs to the field, not to the format.
+  assert.equal(upDoubleFinal(newNight(16)), true);
+  assert.equal(upDoubleFinal(newNight(12)), true);
+  [9, 10, 11].forEach(n => assert.equal(upDoubleFinal(newNight(n)), false, `${n}`));
+
+  const even = newNight(16);
+  for (let r = 0; r < UP.ROUNDS; r++) playRound(even, () => true);
+  const odd = newNight(9, {}, 9);
+  for (let r = 0; r < 9; r++) playRound(odd, () => true);
+  // the 16-player night's last round pays double, the 9-player night's does not
+  const lastOf = night => {
+    const before = upTotals({ ...night, rounds: night.rounds.slice(0, -1) });
+    const after = upTotals(night);
+    const p = night.rounds[night.rounds.length - 1].courts[0].team1[0];
+    return after[p] - before[p];
+  };
+  assert.equal(lastOf(even), 2 * UP.WIN[1], "16 players: the final should pay double");
+  assert.equal(lastOf(odd), UP.WIN[1], "9 players: the final should pay flat");
+});
+
+test("uneven rests push the table onto points per round played", () => {
+  // 11 players over 9 rounds cannot rest evenly (27 rests / 11 players). On raw
+  // points the players who rested twice took 94% of 20,000 simulated nights
+  // over the ones who rested three times — one extra round decided it.
+  const night = newNight(11, {}, 9);
+  for (let r = 0; r < 9; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  assert.equal(upUneven(night), true);
+  const rows = upStandings(night);
+  assert.ok(rows.every(r => r.byAvg === true), "every row should say the table is per-round");
+  const played = [...new Set(rows.map(r => r.played))].sort();
+  assert.equal(played.length, 2, "some play 6 and some 7");
+  for (let i = 1; i < rows.length; i++)
+    assert.ok(rows[i - 1].avg >= rows[i].avg - 1e-9, "rows must be ordered by average");
+  rows.forEach(r => assert.ok(Math.abs(r.avg - r.total / r.played) < 1e-9));
+});
+
+test("a nine-player night survives every round and the invariant holds", () => {
+  const night = newNight(9, {}, 9);
+  for (let r = 0; r < 9; r++) playRound(night, (m, n) => n.rounds.length % 2 === 0);
+  assert.equal(night.rounds.length, 9);
+  assert.deepEqual(upValidate(night), []);
+  assert.throws(() => upBuildRound(night), /already 9 rounds long/);
+  const rows = upStandings(night);
+  assert.equal(rows.length, 9);
+  assert.deepEqual([...new Set(rows.map(r => r.played))], [8], "everyone plays eight of nine");
+});
+
+test("the rest rota ignores how anyone is playing", () => {
+  // The first version of this broke rest ties by ladder position, which handed
+  // the early rounds off to the weak players and the double final off to the
+  // strong ones — it measured the tie-break, not the format.
+  const a = newNight(10, {}, 10);
+  const b = newNight(10, {}, 10);
+  for (let r = 0; r < 10; r++) playRound(a, () => true);        // team1 always wins
+  for (let r = 0; r < 10; r++) playRound(b, () => false);       // team2 always wins
+  assert.deepEqual(a.rounds.map(r => [...r.sitOuts].sort()),
+                   b.rounds.map(r => [...r.sitOuts].sort()),
+                   "who rests must not depend on who is winning");
+});
+
+test("a player added mid-night still takes a turn resting", () => {
+  const night = newNight(12);
+  night.players.push({ id: "pZZ", name: "ZZ" }); night.playerIds.push("pZZ");
+  night.ladder0.pZZ = 3;
+  assert.equal(upRestCount(night), 1);
+  const seen = new Set();
+  for (let r = 1; r <= 13; r++) upRestingFor(night, r).forEach(p => seen.add(p));
+  assert.ok(seen.has("pZZ"), "the late arrival was never given a rest turn");
 });
 
 test("validate catches a duplicated player", () => {

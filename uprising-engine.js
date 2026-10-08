@@ -27,6 +27,89 @@ const UP = {
 
 function upPairKey(a, b) { return [a, b].sort().join("|"); }
 
+// UP.COURTS and UP.ROUNDS describe the 16-player night the format was designed
+// around. A real social is whoever turns up, so every rule below reads the
+// night's own numbers and falls back to those constants.
+// Capped at UP.COURTS, and that cap is not arbitrary: the points table has
+// exactly four rungs (8/6/4/2 over 4/3/2/1), so a fifth court has no points
+// defined for it. 20 players would otherwise ask for 5 courts and the night
+// would throw on the first round. The club has four courts anyway — the ladder
+// is as tall as the venue.
+function upCourts(night) {
+  const most = Math.min(Math.floor(upPlayerIds(night).length / 4), UP.COURTS);
+  const want = night.courtCount || most;
+  return Math.max(1, Math.min(want, most));
+}
+function upRoundsTotal(night) { return night.numRounds || UP.ROUNDS; }
+
+// How many people sit out each round. Four to a court is padel, not a choice —
+// but the FIELD does not have to be a multiple of four, it just means somebody
+// rests every round.
+function upRestCount(night) {
+  return Math.max(0, upPlayerIds(night).length - 4 * upCourts(night));
+}
+
+// Round counts at which every player rests exactly the same number of times.
+// With P players and R resting each round, N rounds deal N*R rests, so the
+// rests divide evenly exactly when P divides N*R. 9 players want 9 rounds,
+// 10 want 5 or 10, 11 want 11.
+function upFairRounds(playerCount, courts = 0, maxRounds = 14) {
+  const C = Math.max(1, Math.min(courts || Math.floor(playerCount / 4),
+                                 Math.floor(playerCount / 4), UP.COURTS));
+  const R = playerCount - 4 * C;
+  if (C < 1) return [];
+  if (R === 0) return null;                 // null means "any round count is fair"
+  const out = [];
+  for (let n = 2; n <= maxRounds; n++) if ((n * R) % playerCount === 0) out.push(n);
+  return out;
+}
+
+// The last round is worth double — but ONLY when nobody ever sits out.
+// Measured over 20,000 nights: with the 2x final on and one player resting
+// each round, whoever draws the final-round rest takes 3.6% of the wins
+// against the 11.1% that would be their share if it cost nothing. They
+// effectively cannot win the night, for a reason they had no say in. With a
+// flat final it is 13.6% — slightly generous, which is the right direction for
+// a social. So the multiplier is a property of the field, not of the format.
+function upDoubleFinal(night) { return upRestCount(night) === 0; }
+
+// ── who sits out ───────────────────────────────────────────────────────────
+//
+// A fixed rota, drawn once at the start of the night and walked in order, so
+// that when your turn comes it has nothing to do with how you are playing. The
+// first attempt at this broke rest ties by ladder position, which quietly gave
+// the weak players the early rounds off and the strong players the double final
+// off — it measured the tie-break rather than the format.
+function upMakeRestRota(playerIds, seed = 1) {
+  const ids = [...playerIds];
+  let s = (seed >>> 0) || 1;
+  const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+  for (let i = ids.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd() * (i + 1));
+    [ids[i], ids[j]] = [ids[j], ids[i]];
+  }
+  return ids;
+}
+
+function upRestRota(night) {
+  const ids = upPlayerIds(night);
+  const rota = (night.restRota || []).filter(id => ids.includes(id));
+  // Anyone added after the rota was drawn goes on the end rather than being
+  // silently exempt from ever resting.
+  return [...rota, ...ids.filter(id => !rota.includes(id))];
+}
+
+// Who sits out round `roundNum` (1-based). Deterministic: the same night always
+// produces the same rota, so a reload cannot reshuffle who is resting.
+function upRestingFor(night, roundNum) {
+  const R = upRestCount(night);
+  if (R <= 0) return [];
+  const rota = upRestRota(night);
+  const out = [];
+  for (let i = 0; i < R; i++) out.push(rota[((roundNum - 1) * R + i) % rota.length]);
+  return [...new Set(out)];
+}
+
 function upCourtSizes(courts) {
   const n = {};
   Object.values(courts).forEach(c => { n[c] = (n[c] || 0) + 1; });
@@ -44,15 +127,19 @@ function upCourtSizes(courts) {
 // `form` is a map of playerId -> number (higher is better). A player with no
 // history gets the median, so newcomers start in the middle rather than being
 // punished or rewarded for being unknown.
-function upSeedLadder(playerIds, form = {}) {
+function upSeedLadder(playerIds, form = {}, courtCount = 0) {
   const known = playerIds.filter(p => typeof form[p] === "number").map(p => form[p]).sort((a, b) => a - b);
   const median = known.length ? known[Math.floor(known.length / 2)] : 0;
   const keyOf = p => (typeof form[p] === "number" ? form[p] : median);
   // Ties broken by id so the ladder is deterministic — the same input must
   // always give the same draw, or a reload reshuffles the night.
   const order = [...playerIds].sort((a, b) => (keyOf(b) - keyOf(a)) || String(a).localeCompare(String(b)));
+  // Clamped to the courts that actually exist: with 9 players on 2 courts the
+  // ninth person is not standing on a Court 3 that nobody is playing on, they
+  // are the bottom of Court 2 and the first to sit out.
+  const C = courtCount || Math.floor(playerIds.length / 4) || 1;
   const out = {};
-  order.forEach((p, i) => { out[p] = 1 + Math.floor(i / 4); });
+  order.forEach((p, i) => { out[p] = Math.min(C, 1 + Math.floor(i / 4)); });
   return out;
 }
 
@@ -102,7 +189,7 @@ function upRoundDone(round) {
 // winners stay on Court 1; Court 4 losers stay on Court 4. This balances
 // exactly — each court sends two away and receives two — which `upValidate`
 // checks on every round rather than trusting.
-function upCourtsAfter(round, before) {
+function upCourtsAfter(round, before, courtCount = UP.COURTS) {
   const next = { ...before };
   (round.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
@@ -110,7 +197,7 @@ function upCourtsAfter(round, before) {
     const up = aWon ? m.team1 : m.team2;
     const down = aWon ? m.team2 : m.team1;
     up.forEach(p => { next[p] = Math.max(1, m.court - 1); });
-    down.forEach(p => { next[p] = Math.min(UP.COURTS, m.court + 1); });
+    down.forEach(p => { next[p] = Math.min(courtCount, m.court + 1); });
   });
   return next;
 }
@@ -119,7 +206,8 @@ function upCourtsAfter(round, before) {
 // that has been fully played.
 function upCurrentCourts(night) {
   let courts = { ...(night.ladder0 || {}) };
-  (night.rounds || []).forEach(r => { if (upRoundDone(r)) courts = upCourtsAfter(r, courts); });
+  const C = upCourts(night);
+  (night.rounds || []).forEach(r => { if (upRoundDone(r)) courts = upCourtsAfter(r, courts, C); });
   return courts;
 }
 
@@ -133,21 +221,43 @@ function upSeenPairs(night) {
   return seen;
 }
 
+// The ladder as an ORDER, not just a court number. With nobody resting the two
+// are the same thing. With somebody resting they are not: if a Court 1 player
+// sits out, Court 1 has three, and the round has to be seated from the ranking
+// rather than from the court map. Court first, then running total, then id so
+// that the same night always deals the same seats.
+function upLadderOrder(night) {
+  const courts = upCurrentCourts(night);
+  const totals = upTotals(night);
+  const C = upCourts(night);
+  return upPlayerIds(night).slice().sort((a, b) =>
+    ((courts[a] || C) - (courts[b] || C))
+    || ((totals[b] || 0) - (totals[a] || 0))
+    || String(a).localeCompare(String(b)));
+}
+
 // ── building the next round ────────────────────────────────────────────────
 
 function upBuildRound(night) {
   const rounds = night.rounds || [];
   const last = rounds[rounds.length - 1];
   if (last && !upRoundDone(last)) throw new Error("the previous round is not finished");
-  if (rounds.length >= UP.ROUNDS) throw new Error("the night is already nine rounds long");
+  const N = upRoundsTotal(night);
+  if (rounds.length >= N) throw new Error(`the night is already ${N} rounds long`);
 
-  const courts = upCurrentCourts(night);
+  const C = upCourts(night);
   const totals = upTotals(night);
   const seen = upSeenPairs(night);
-  const out = { roundNum: rounds.length + 1, sitOuts: [], courts: [] };
-  for (let c = 1; c <= UP.COURTS; c++) {
-    const on = Object.keys(courts).filter(p => courts[p] === c);
-    if (on.length !== 4) throw new Error(`court ${c} has ${on.length} players, not 4`);
+  const roundNum = rounds.length + 1;
+
+  const sitOuts = upRestingFor(night, roundNum);
+  const playing = upLadderOrder(night).filter(p => !sitOuts.includes(p));
+  if (playing.length !== 4 * C)
+    throw new Error(`${playing.length} players to seat on ${C} courts, not ${4 * C}`);
+
+  const out = { roundNum, sitOuts, courts: [] };
+  for (let c = 1; c <= C; c++) {
+    const on = playing.slice((c - 1) * 4, c * 4);
     const [A, B] = upPairCourt(on, totals, seen);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
     out.courts.push({ court: c, team1: A, team2: B, score1: null, score2: null });
@@ -163,15 +273,31 @@ function upPlayerIds(night) {
 
 function upTotals(night) {
   const total = {};
+  const N = upRoundsTotal(night), dbl = upDoubleFinal(night);
   upPlayerIds(night).forEach(id => { total[id] = 0; });
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
-    const isFinal = r.roundNum === UP.ROUNDS;
+    const isFinal = dbl && r.roundNum === N;
     const aWon = m.score1 > m.score2;
     m.team1.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, aWon, isFinal); });
     m.team2.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, !aWon, isFinal); });
   }));
   return total;
+}
+
+// Do the rests come out even? They do when the round count was chosen for the
+// field (upFairRounds), and they do not when the night runs to a different
+// number because everyone has to be gone by eight.
+function upUneven(night) {
+  const played = {};
+  upPlayerIds(night).forEach(id => { played[id] = 0; });
+  (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+    if (!upMatchDone(m)) return;
+    [...m.team1, ...m.team2].forEach(p => { played[p] = (played[p] || 0) + 1; });
+  }));
+  const counts = Object.values(played);
+  if (!counts.length) return false;
+  return Math.max(...counts) - Math.min(...counts) > 0;
 }
 
 // The full table. `baseline` is a player's own running average from previous
@@ -220,6 +346,13 @@ function upStandings(night, byId = {}, baselines = {}) {
       wins: wins[id] || 0,
       diff: (match[id] || 0) - (against[id] || 0),
       played: played[id] || 0,
+      // Points per round actually played. When the rests are uneven this is
+      // what the table ranks on, and it is not a nicety: measured over 20,000
+      // nights of 11 players over 9 rounds, ranking on raw points gave the
+      // players who rested twice 94% of the wins over the ones who rested
+      // three times. One extra round decided the night. On points per round
+      // that is 58/42 against a 55/45 split of the field.
+      avg: played[id] ? (total[id] || 0) / played[id] : 0,
       court: courts[id] || start[id] || UP.COURTS,
       startCourt: start[id] || UP.COURTS,
       partners: [...partners[id]],
@@ -228,8 +361,13 @@ function upStandings(night, byId = {}, baselines = {}) {
       vsBaseline: (total[id] || 0) - base,
     };
   });
-  // CHAMPION: most points, match points break the tie.
-  rows.sort((x, y) => (y.total - x.total) || (y.matchPts - x.matchPts)
+  // CHAMPION: most points, match points break the tie — unless some players
+  // got more rounds than others, in which case per-round is the only honest
+  // order. `byAvg` is reported on every row so the screen can say which it is.
+  const uneven = upUneven(night);
+  rows.forEach(r => { r.byAvg = uneven; });
+  rows.sort((x, y) => (uneven ? (y.avg - x.avg) : 0) || (y.total - x.total)
+                      || (y.matchPts - x.matchPts)
                       || String(x.name).localeCompare(String(y.name)));
   rows.forEach((r, i) => { r.rank = i + 1; });
   return rows;
@@ -269,20 +407,33 @@ function upClimbPath(night, playerId) {
 function upValidate(night) {
   const bad = [];
   const ids = upPlayerIds(night);
+  const C = upCourts(night), R = upRestCount(night);
   if (new Set(ids).size !== ids.length) bad.push("a player appears twice");
-  if (ids.length && ids.length % 4 !== 0) bad.push(`${ids.length} players is not a multiple of 4`);
+  // The FIELD no longer has to be a multiple of four — only the seating does.
+  // What has to hold is that the people on court are 4C and the rest are
+  // resting, and that the resting turns come round evenly.
+  if (ids.length < 8) bad.push(`${ids.length} players is fewer than two courts`);
+  if (ids.length - 4 * C !== R) bad.push("rest count does not match the field");
+  if (C > UP.COURTS) bad.push(`${C} courts, but points are only defined for ${UP.COURTS}`);
 
-  const sizes0 = upCourtSizes(night.ladder0 || {});
-  Object.entries(sizes0).forEach(([c, n]) => {
-    if (n !== 4) bad.push(`opening ladder: court ${c} has ${n}`);
-  });
+  const rests = {};
+  ids.forEach(id => { rests[id] = 0; });
 
   let courts = { ...(night.ladder0 || {}) };
   (night.rounds || []).forEach(r => {
+    const sit = r.sitOuts || [];
+    if (sit.length !== R) bad.push(`round ${r.roundNum}: ${sit.length} resting, expected ${R}`);
+    sit.forEach(p => {
+      if (!ids.includes(p)) bad.push(`round ${r.roundNum}: ${p} is resting but is not in the field`);
+      rests[p] = (rests[p] || 0) + 1;
+    });
+    if ((r.courts || []).length !== C)
+      bad.push(`round ${r.roundNum}: ${(r.courts || []).length} courts, expected ${C}`);
     const onCourt = {};
     (r.courts || []).forEach(m => {
       [...(m.team1 || []), ...(m.team2 || [])].forEach(p => {
         if (onCourt[p]) bad.push(`round ${r.roundNum}: ${p} is on two courts`);
+        if (sit.includes(p)) bad.push(`round ${r.roundNum}: ${p} is resting and playing`);
         onCourt[p] = m.court;
       });
       if (new Set([...(m.team1 || []), ...(m.team2 || [])]).size !== 4)
@@ -295,12 +446,24 @@ function upValidate(night) {
         bad.push(`round ${r.roundNum} court ${m.court}: drawn match`);
     });
     if (upRoundDone(r)) {
-      courts = upCourtsAfter(r, courts);
-      Object.entries(upCourtSizes(courts)).forEach(([c, n]) => {
-        if (n !== 4) bad.push(`after round ${r.no}: court ${c} has ${n}`);
-      });
+      courts = upCourtsAfter(r, courts, C);
+      // Court sizes only have to be exactly four when nobody rests. With
+      // resters a court legitimately holds three or five BETWEEN rounds,
+      // because the next round is seated from the ladder order, not from the
+      // court map — what matters is that the seating is four to a court, which
+      // is checked above.
+      if (R === 0) {
+        Object.entries(upCourtSizes(courts)).forEach(([c, n]) => {
+          if (n !== 4) bad.push(`after round ${r.roundNum}: court ${c} has ${n}`);
+        });
+      }
     }
   });
+
+  // Rests must come out within one of each other across the rounds played.
+  const counts = Object.values(rests);
+  if (R > 0 && counts.length && Math.max(...counts) - Math.min(...counts) > 1)
+    bad.push(`rests are uneven: ${Math.min(...counts)}–${Math.max(...counts)} across the night`);
   return bad;
 }
 
@@ -309,5 +472,7 @@ if (typeof module !== "undefined" && module.exports) {
     UP, upPlayerIds, upSeedLadder, upPairCourt, upRoundPoints, upMatchDone, upRoundDone,
     upCourtsAfter, upCurrentCourts, upSeenPairs, upBuildRound, upTotals,
     upStandings, upPrizes, upClimbPath, upValidate, upPairKey,
+    upCourts, upRoundsTotal, upRestCount, upFairRounds, upDoubleFinal,
+    upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
   };
 }
