@@ -413,6 +413,9 @@
   .wbtn:active{transform:scale(.97);}
   .wbtn.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.12);color:var(--volt);box-shadow:var(--glow);}
   .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px;}
+  /* Past a target of 16 the pad needs a fifth column or it runs off the card. */
+  .pad.tight{grid-template-columns:repeat(5,1fr);gap:6px;}
+  .pad.tight .pbtn{font-size:15px;padding:11px 0;}
   .pbtn{
     border:1px solid var(--line);border-radius:0;background:var(--tint);color:var(--cream);
     font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;
@@ -457,6 +460,13 @@ const uid = p => p + "_" + Math.random().toString(36).slice(2, 10);
 const initials = n => (n || "?").split(" ").filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
 const restPhrase = n => (n === 1 ? "1 player rests" : n + " players rest");
 const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+
+// Roughly how long a night runs, so the target score can be chosen against the
+// clock rather than against a guess. A first-to-16 round measures at about
+// eleven minutes of play plus two to change ends and re-pair, which is ~0.68
+// min a point; the rest scales from there.
+const nightMinutes = (rounds, target) => Math.round(rounds * (0.68 * target + 2));
+const asClock = mins => Math.floor(mins / 60) + "h" + String(mins % 60).padStart(2, "0");
 
 // ── Americano scheduling: circle method ─────────────────────────
 // Over (n-1) rounds (n even; padded with a bye slot if odd) every pair of
@@ -1380,6 +1390,19 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                               that out evenly, so the table will rank on points per round played.</Fragment>}
                       {" "}The opening ladder is seeded by form, not drawn — a random draw is worth a
                       five-fold swing in who wins.
+                      {(() => {
+                        const rounds = upR === 0 ? UP.ROUNDS : (pick || UP.ROUNDS);
+                        const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
+                        const mins = nightMinutes(rounds, tgt);
+                        return (
+                          <Fragment>
+                            {" "}<b style={{ color: mins > 180 ? "var(--warn)" : "var(--cream)" }}>
+                              {rounds} rounds of first to {tgt} runs about {asClock(mins)}
+                            </b>
+                            {mins > 180 ? " — over three hours. Drop the target or the round count." : " from the first serve."}
+                          </Fragment>
+                        );
+                      })()}
                     </Fragment>}
               </div>
             );
@@ -1394,7 +1417,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                 took the whole screen down with "no points defined for court 5". */}
             <div className="grid3">
               {(cfg.format === "uprising"
-                 ? [["Courts", "upcourts"]]
+                 ? [["Courts", "upcourts"], ["Play to", "uppoints"]]
                  : [["Points", "points"], ["Rounds", "rounds"], ["Courts", "courts"]]
                ).map(([lab, key]) => (
                 <label className="stack" key={key}>
@@ -1633,7 +1656,7 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
                       <div className="label">
                         And {(upd.w === 1 ? m.team2 : m.team1).map(id => nameOf(id).split(" ")[0]).join(" + ")} got
                       </div>
-                      <div className="pad">
+                      <div className={"pad" + (pts > 16 ? " tight" : "")}>
                         {Array.from({ length: pts }, (_, v) => v).map(v => (
                           <button key={v} className={"pbtn" + (upd.l === v ? " on" : "")}
                             onClick={() => setUp({ l: v })}>{v}</button>
@@ -1864,7 +1887,8 @@ function App() {
   const [pin, setPin] = useState("");
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
-  const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2, upcourts: 4, format: "americano" });
+  const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
+                                   upcourts: 4, uppoints: UP.TARGET, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [drafts, setDrafts] = useState({});
   const [editing, setEditing] = useState({});
@@ -1956,7 +1980,13 @@ function App() {
       nt = {
         ...seedT,
         name: cfg.name.trim() || "Uprising " + new Date().toLocaleDateString(),
-        createdAt: Date.now(), pointsPerMatch: UP.TARGET,
+        // The target is the organiser's: first to 16 is the default because it
+        // lands an UPRISING round at about eleven minutes, but a shorter night
+        // wants 11 and a longer one 21. Nothing in the ladder depends on it —
+        // the court you are on decides the points, the scoreline only breaks
+        // ties — so it is free to move.
+        createdAt: Date.now(),
+        pointsPerMatch: Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET)),
         baselines: Object.fromEntries(ids.filter(i => upForm[i] != null).map(i => [i, upForm[i]])),
         rounds: [upBuildRound(seedT)], status: "active",
       };

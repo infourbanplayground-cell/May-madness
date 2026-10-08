@@ -42,8 +42,13 @@ on each court, playing 2 v 2.
 
 ### Each round
 
-1. The four players on a court play one match to **16 points**, straight points,
-   no games or sets. About 11 minutes.
+1. The four players on a court play one match, **first to 16 points**, straight
+   points, no games or sets. About 11 minutes. The target is set at check-in and
+   can be anything — 11 for a short night, 21 for a long one. Nothing in the
+   ladder depends on it: the court you are standing on decides the points you
+   earn, and the scoreline only breaks ties. A round takes roughly
+   `0.68 x target + 2` minutes including the change, which is the number the
+   setup screen uses to tell you when the night will finish.
 2. **The winning pair moves up a court. The losing pair moves down.** Court 1
    winners stay on Court 1; Court 4 losers stay on Court 4.
 3. Everyone re-pairs on their new court for the next round.
@@ -173,7 +178,7 @@ people away at the door.
 | | |
 |---|---|
 | Rounds | 9, **the last one worth double** |
-| Match | first to 16 points |
+| Match | first to 16 points — **the organiser sets the target**, any number from 4 to 99 |
 | Per round | ~11 min play + ~2 min change |
 | Total | ~2 hours |
 | Start | 17:30 → finish ~19:40 |
