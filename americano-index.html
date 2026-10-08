@@ -15,133 +15,261 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-<meta name="theme-color" content="#0a0807" />
+<meta name="theme-color" content="#06060A" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Americano" />
 <title>🎾 AMERICANO · Urban Playground</title>
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23fbbf24'/%3E%3Cstop offset='50%25' style='stop-color:%23f97316'/%3E%3Cstop offset='100%25' style='stop-color:%23dc2626'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 10 C 35 25 30 40 35 55 C 38 65 30 70 28 75 C 35 70 45 75 50 90 C 55 75 65 70 72 75 C 70 70 62 65 65 55 C 70 40 65 25 50 10 Z' fill='url(%23g)'/%3E%3C/svg%3E" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2306060A'/%3E%3Cg fill='none' stroke='%2300F5C8' stroke-width='11' stroke-linecap='square' stroke-linejoin='miter'%3E%3Cpath d='M22 66 L50 38 L78 66'/%3E%3C/g%3E%3Crect x='22' y='78' width='56' height='8' fill='%239D6BFF'/%3E%3C/svg%3E" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700;1,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
 
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
 
 <style>
+  /* ═══════════════════════════════════════════════════════════
+     AMERICANO + UPRISING · Blackout's design language, re-voiced.
+
+     Blackout runs lime #C6FF00 over magenta #FF2E88 on true black.
+     This runs VOLT #00F5C8 over ULTRAVIOLET #9D6BFF.
+
+     Why volt leads and not the violet: Blackout's mechanics depend
+     on the lead accent being BRIGHTER than the body text, because
+     it has to carry 10px letterspaced kickers, big mono numbers and
+     solid fills with black type sitting on them. Measured on
+     #06060A: lime is 17.1:1, and the brightest violet still usable
+     as a colour is 7.6:1 — while a violet FILL takes neither black
+     (4.8:1) nor white (3.8:1) text above the 4.5 floor. A violet
+     lead would therefore break every solid accent surface in the
+     app. Volt is 14.4:1 and ultraviolet is 5.8:1, which is almost
+     exactly Blackout's own pairing (17.1 / 5.8) in a different hue.
+
+     Ratio target is Blackout's: roughly 3:1 lead to accent. If a
+     screen reads violet-first, it is wrong.
+
+     TOKEN NAMES ARE DELIBERATELY NOT RENAMED. --orange holds volt,
+     --gold holds ultraviolet, --red holds volt. The JSX references
+     these inline in well over a hundred places and renaming them is
+     exactly how skins in this repo have broken before (see DESIGN.md
+     §1: "class names lie — read the computed value, not the name").
+     New rules use --volt / --uv, which are honest.
+
+     Every tint is built from an _rgb component token rather than a
+     written-out rgba() triple. The landing page's --live rollover
+     taught this: a themed colour that also appears as loose rgba()
+     components leaves glows the previous colour when the token moves.
+     ═══════════════════════════════════════════════════════════ */
   :root {
-    --ink:#0A0807; --ink2:#140C08;
-    --orange:#FF5E1E; --orange-br:#FF8A3D; --red:#FF2A24; --ember:#8A1E08;
-    --blue:#33A1FF; --blue-soft:#7FC4FF; --gold:#FFC24B;
-    --cream:#FFF4EC; --muted:#C7A192; --muted2:#8C7167;
-    --line:rgba(255,236,224,.12); --line2:rgba(255,236,224,.09);
-    --tint:rgba(255,236,224,.03);
+    --volt-rgb: 0,245,200;
+    --uv-rgb: 157,107,255;
+    --cream-rgb: 242,240,247;
+
+    --volt:#00F5C8;
+    --uv:#9D6BFF;
+    --ink:#06060A; --ink2:#030305; --plate:#0C0C12;
+
+    /* legacy names, remapped — read the value, not the name */
+    --orange:var(--volt); --orange-br:var(--volt); --red:var(--volt);
+    --blue:var(--uv); --blue-soft:#C4A6FF; --blue-deep:#6E3FD4;
+    --gold:var(--uv);                 /* there is no gold in this system */
+    --ember:#06302A;
+    --cream:#F2F0F7; --muted:#9A95A8;
+    /* #6E6880 measured 3.8:1 on the page — fine for a decorative kicker, and
+       DESIGN.md §2b says exactly that about Surge's Deep Steel. But .label is
+       not decoration here: it carries "1 played · 1 won", "+5", "2 matches ·
+       32 pts" and every court number. Data at 3.8:1 in a dark room on a phone
+       is not readable, so this is the lowest value that clears 4.5:1 against
+       both the page (#06060A) and the card plate (#0C0C12). */
+    --muted2:#8A84A2;
+    --line:rgba(var(--cream-rgb),.12);
+    --line2:rgba(var(--cream-rgb),.075);
+    --tint:rgba(var(--cream-rgb),.03);
+
+    --panel:rgba(12,12,18,.82);
+    --neon:rgba(var(--volt-rgb),.55);
+    --glow:0 0 30px rgba(var(--volt-rgb),.30);
+    --glow-uv:0 0 30px rgba(var(--uv-rgb),.30);
+    --tick:rgba(var(--cream-rgb),.20);
+
+    /* The only warm colour in the system, and the only third colour.
+       Destructive and urgency ONLY — never navigation, never a state.
+       Ultraviolet cannot do this job because it already means Court 1,
+       winner and double points, so an Abandon button in it would look
+       like a reward. */
+    --warn-rgb: 255,77,109;
+    --warn:#FF4D6D;
+
+    /* Motion, from DESIGN.md §4. Nothing over 320ms — this is a
+       scoreboard, not a title sequence. */
+    --ease-out:cubic-bezier(.23,1,.32,1);
+    --ease-drawer:cubic-bezier(.32,.72,0,1);
+
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
+
+  /* Blackout's display face: Archivo at wdth 125 / wght 900, italic.
+     NOT Anton — Anton is the Vol.5–6 face and is no longer loaded.
+     The width axis only exists if the font link asks for it, which is
+     why the <link> above requests `wdth` explicitly; without it the
+     browser silently serves a static instance and every heading
+     renders narrow. */
+  .display, .sect, .field.big, .plinth .pname, .brand .name {
+    font-family:'Archivo',system-ui,sans-serif;
+    font-style:italic; font-variation-settings:'wdth' 125,'wght' 900;
+    font-weight:900; text-transform:uppercase;
+  }
+  /* Numbers are mono everywhere. A score that shifts width as it
+     counts up reads as a glitch. */
+  .score, .field.num, .mono, nav.bottom button, .rchip, .label,
+  .plinth .ppts, .ava {
+    font-family:'JetBrains Mono',ui-monospace,monospace;
+  }
+
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{background:var(--ink);}
   body{
     color:var(--cream);font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
-    min-height:100vh;
+    min-height:100vh;overscroll-behavior-y:none;
   }
   input,select,button,textarea{font-family:inherit;}
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
   ::-webkit-scrollbar{width:6px;height:6px;}
-  ::-webkit-scrollbar-thumb{background:var(--ember);border-radius:9px;}
-  @keyframes riseIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  ::-webkit-scrollbar-track{background:#0E0E12;}
+  ::-webkit-scrollbar-thumb{background:#262233;border-radius:0;}
+  @keyframes riseIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 
   /* ── page frame ─────────────────────────────── */
+  /* Two washes and a floor, as Blackout: accent high-left, lead
+     high-right, lead again at the foot. */
   .bg{
     position:fixed;inset:0;z-index:0;pointer-events:none;
     background:
-      radial-gradient(120% 80% at 82% 8%,rgba(255,94,30,.20),transparent 55%),
-      radial-gradient(130% 90% at 18% 108%,rgba(138,30,8,.45),transparent 60%),
-      radial-gradient(80% 60% at 100% 104%,rgba(30,99,214,.15),transparent 55%),
-      linear-gradient(180deg,#0a0a0e 0%,#0A0807 46%,#050405 100%);
+      radial-gradient(ellipse 90% 55% at 12% 6%,rgba(var(--uv-rgb),.13),transparent),
+      radial-gradient(ellipse 80% 55% at 88% 10%,rgba(var(--volt-rgb),.13),transparent),
+      radial-gradient(ellipse 60% 50% at 50% 96%,rgba(var(--volt-rgb),.07),transparent),
+      linear-gradient(180deg,#030305 0%,#06060A 58%,#04040A 100%);
+  }
+  /* 46px tactical grid — Blackout's page texture. */
+  .bg::before{
+    content:"";position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(var(--volt-rgb),.045) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(var(--volt-rgb),.045) 1px,transparent 1px);
+    background-size:46px 46px;
+  }
+  .bg::after{
+    content:"";position:absolute;inset:0;opacity:.28;
+    mix-blend-mode:overlay;background-image:var(--grain);
   }
   .wrap{position:relative;z-index:2;}
-  main{max-width:1160px;margin:0 auto;padding:26px 18px 110px;}
-  .screen{display:flex;flex-direction:column;gap:26px;animation:riseIn .35s ease;}
+  main{max-width:1160px;margin:0 auto;padding:26px 18px 112px;}
+  .screen{display:flex;flex-direction:column;gap:26px;animation:riseIn .19s var(--ease-out);}
 
   header.top{
-    position:sticky;top:0;z-index:40;background:rgba(10,8,7,.86);backdrop-filter:blur(14px);
+    position:sticky;top:0;z-index:40;background:rgba(6,6,10,.88);backdrop-filter:blur(14px);
     border-bottom:1px solid var(--line);padding:11px 18px;
     display:flex;align-items:center;justify-content:space-between;gap:14px;
   }
   .brand{display:flex;align-items:center;gap:13px;min-width:0;}
+  /* The mark is a square plate with an outlined volt glyph, not a
+     rounded gradient pill. Radius 0 is the rule. */
   .brand .mark{
-    width:36px;height:36px;flex:0 0 auto;border-radius:10px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(150deg,var(--orange-br),var(--red));color:#1A0603;font-size:19px;
+    width:34px;height:34px;flex:0 0 auto;border-radius:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(var(--volt-rgb),.12);border:1px solid var(--neon);box-shadow:var(--glow);
+    color:var(--volt);font-size:17px;line-height:0;
   }
-  .brand .name{font-family:'Anton',sans-serif;font-size:19px;letter-spacing:.05em;text-transform:uppercase;line-height:1;}
+  .brand .name{font-size:19px;letter-spacing:.04em;line-height:1;}
   .brand .sub{
-    font-size:10px;font-weight:800;letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);
-    margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw;
+    font-family:'JetBrains Mono',ui-monospace,monospace;
+    font-size:9.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);
+    margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw;
   }
 
   /* ── type ───────────────────────────────────── */
+  /* Kicker: Blackout's bar-then-word, in the accent. */
   .eyebrow{
-    display:inline-flex;align-items:center;gap:12px;font-size:12px;font-weight:800;
-    letter-spacing:.34em;text-transform:uppercase;color:var(--blue);
+    display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:800;
+    letter-spacing:.34em;text-transform:uppercase;color:var(--uv);
   }
-  .eyebrow i{width:30px;height:2px;background:var(--blue);box-shadow:0 0 14px rgba(51,161,255,.6);display:block;}
+  .eyebrow i{width:28px;height:2px;background:var(--uv);box-shadow:0 0 14px rgba(var(--uv-rgb),.6);display:block;}
   .display{
-    font-family:'Anton',sans-serif;font-size:clamp(44px,8.4vw,70px);line-height:.86;
-    text-transform:uppercase;margin-top:14px;
+    font-size:clamp(42px,8.2vw,66px);line-height:.88;letter-spacing:.01em;
+    margin-top:14px;text-shadow:0 0 22px rgba(var(--volt-rgb),.18);
   }
-  .display em{font-style:italic;color:var(--orange);}
+  .display em{font-style:italic;color:var(--volt);text-shadow:0 0 26px rgba(var(--volt-rgb),.45);}
   .lede{font-size:16px;font-weight:500;line-height:1.5;color:var(--muted);margin-top:16px;max-width:560px;}
   .lede b{color:var(--cream);font-weight:800;}
   .hair{border-top:1px solid var(--line);padding-top:22px;}
-  .label{font-size:10px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;color:var(--muted2);}
+  .label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);}
   .note{font-size:13.5px;line-height:1.55;color:var(--muted2);max-width:640px;}
-  .sect{font-family:'Anton',sans-serif;font-size:26px;text-transform:uppercase;}
+  .sect{font-size:24px;letter-spacing:.01em;}
 
   /* ── controls ───────────────────────────────── */
+  /* Blackout buttons are outlined neon plates, not gradients. */
   .btn{
-    border:0;border-radius:13px;padding:14px 22px;font-size:11.5px;font-weight:900;
+    border:1px solid var(--neon);border-radius:0;padding:14px 22px;font-size:11.5px;font-weight:900;
     letter-spacing:.18em;text-transform:uppercase;cursor:pointer;
-    background:linear-gradient(178deg,var(--orange-br),var(--red));color:#1A0603;
+    background:rgba(var(--volt-rgb),.12);color:var(--volt);box-shadow:var(--glow);
+    transition:transform .16s var(--ease-out),background .16s ease,border-color .16s ease,color .16s ease;
   }
-  .btn:disabled{opacity:.4;cursor:default;}
-  .btn.pill{border-radius:999px;padding:9px 18px;font-size:11px;letter-spacing:.16em;box-shadow:0 12px 30px rgba(255,80,20,.34);}
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.35;cursor:default;box-shadow:none;}
+  .btn:disabled:active{transform:none;}
+  .btn.pill{border-radius:0;padding:9px 18px;font-size:11px;letter-spacing:.16em;}
   .btn.ghost{
     background:transparent;border:1px solid var(--line);color:var(--muted);
-    border-radius:999px;padding:7px 14px;font-size:10px;font-weight:800;letter-spacing:.22em;box-shadow:none;
+    border-radius:0;padding:8px 14px;font-size:10px;font-weight:700;letter-spacing:.22em;box-shadow:none;
   }
-  .btn.ghost:hover{border-color:var(--orange);color:var(--orange-br);}
-  .btn.small{border-radius:11px;padding:9px 13px;font-size:10px;letter-spacing:.18em;background:transparent;border:1px solid var(--line);color:var(--muted);}
-  .btn.small:hover{border-color:var(--orange);color:var(--orange-br);}
-  .btn.gold{background:transparent;border:1px solid rgba(255,194,75,.4);color:var(--gold);border-radius:999px;padding:8px 16px;font-size:10px;letter-spacing:.2em;box-shadow:none;}
+  .btn.small{
+    border-radius:0;padding:9px 13px;font-size:10px;letter-spacing:.18em;
+    background:transparent;border:1px solid var(--line);color:var(--muted);box-shadow:none;
+  }
+  .btn.gold{
+    background:rgba(var(--uv-rgb),.12);border:1px solid rgba(var(--uv-rgb),.55);color:var(--uv);
+    border-radius:0;padding:8px 16px;font-size:10px;letter-spacing:.2em;box-shadow:var(--glow-uv);
+  }
+  @media(hover:hover){
+    .btn.ghost:hover,.btn.small:hover{border-color:var(--neon);color:var(--volt);}
+  }
 
   .field{
-    width:100%;background:transparent;border:0;border-bottom:1px solid rgba(255,236,224,.16);
+    width:100%;background:transparent;border:0;border-bottom:1px solid rgba(var(--cream-rgb),.16);
     padding:10px 2px;color:var(--cream);font-size:16px;outline:none;
   }
-  .field:focus{border-bottom-color:var(--orange);}
-  .field.big{font-family:'Anton',sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:.02em;}
-  .field.num{font-family:'Anton',sans-serif;font-size:34px;color:var(--orange-br);padding:6px 2px;}
+  .field::placeholder{color:var(--muted2);}
+  .field:focus{border-bottom-color:var(--volt);box-shadow:0 1px 0 0 rgba(var(--volt-rgb),.35);}
+  .field.big{font-size:24px;letter-spacing:.01em;}
+  .field.num{font-size:32px;font-weight:700;color:var(--volt);padding:6px 2px;}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
   .stack{display:flex;flex-direction:column;gap:8px;}
 
+  /* ── roster chips ───────────────────────────── */
   .chip{
-    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;cursor:pointer;
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:0;cursor:pointer;
     border:1px solid var(--line);background:var(--tint);color:var(--cream);text-align:left;
     font-size:14px;font-weight:600;min-width:0;
+    transition:transform .16s var(--ease-out),border-color .16s ease,background .16s ease;
   }
-  .chip.on{border-color:var(--orange);background:rgba(255,94,30,.12);}
+  .chip:active{transform:scale(.97);}
+  .chip.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);box-shadow:var(--glow);}
   .chipgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px;}
 
+  /* The one deliberate circle in the system. */
   .ava{
     width:34px;height:34px;flex:0 0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-family:'Anton',sans-serif;font-size:12px;background:rgba(255,94,30,.18);color:var(--orange-br);overflow:hidden;
+    font-size:11px;font-weight:700;background:rgba(var(--volt-rgb),.12);border:1px solid rgba(var(--volt-rgb),.28);
+    color:var(--volt);overflow:hidden;
   }
-  .ava.on{background:linear-gradient(150deg,var(--orange-br),var(--red));color:#1A0603;}
+  .ava.on{background:var(--volt);border-color:var(--volt);color:#03140F;box-shadow:var(--glow);}
   .ava img{width:100%;height:100%;object-fit:cover;}
-  .ava.lg{width:44px;height:44px;font-size:15px;}
+  .ava.lg{width:44px;height:44px;font-size:14px;}
 
   .row{display:flex;align-items:center;gap:13px;border-bottom:1px solid var(--line2);padding:11px 2px;}
   .truncate{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;}
@@ -150,78 +278,165 @@
   .rchips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;}
   .rchip{
     flex:0 0 auto;border:1px solid var(--line);background:var(--tint);color:var(--muted2);
-    border-radius:999px;padding:7px 14px;font-size:11px;font-weight:800;letter-spacing:.12em;cursor:pointer;
+    border-radius:0;padding:7px 13px;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer;
+    transition:transform .16s var(--ease-out),border-color .16s ease,color .16s ease;
   }
-  .rchip.done{border-color:rgba(51,161,255,.3);background:rgba(51,161,255,.08);color:var(--blue-soft);}
-  .rchip.on{border-color:var(--orange);background:rgba(255,94,30,.15);color:var(--orange-br);}
+  .rchip:active{transform:scale(.95);}
+  .rchip.done{border-color:rgba(var(--uv-rgb),.4);background:rgba(var(--uv-rgb),.09);color:var(--blue-soft);}
+  .rchip.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.12);color:var(--volt);box-shadow:var(--glow);}
 
   /* ── court card ─────────────────────────────── */
-  .court{border:1px solid var(--line);border-radius:18px;padding:16px;background:rgba(20,12,8,.5);}
-  .court.live{border-color:rgba(255,94,30,.30);}
-  .court.final{border-color:rgba(51,161,255,.22);}
+  /* Blackout/August surface: a flat dark plate marked by two
+     L-shaped corner ticks drawn as background gradients, so they
+     can never collide with a pseudo-element. The tick colour, not a
+     border colour, carries the state. */
+  .court{
+    border:1px solid var(--line);border-radius:0;padding:16px;background-color:var(--panel);
+    background-image:
+      linear-gradient(var(--tick),var(--tick)),linear-gradient(var(--tick),var(--tick)),
+      linear-gradient(var(--tick),var(--tick)),linear-gradient(var(--tick),var(--tick));
+    background-size:16px 2px,2px 16px,16px 2px,2px 16px;
+    background-position:0 0,0 0,100% 100%,100% 100%;
+    background-repeat:no-repeat;
+  }
+  .court.live{--tick:var(--volt);border-color:rgba(var(--volt-rgb),.28);box-shadow:var(--glow);}
+  .court.final{--tick:var(--uv);border-color:rgba(var(--uv-rgb),.24);}
   .courtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
-  .score{font-family:'Anton',sans-serif;font-size:40px;line-height:1;}
+  .score{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em;}
   .teamside{display:flex;flex-direction:column;gap:7px;min-width:0;}
 
+  /* ── ladder (UPRISING) ──────────────────────── */
+  .rung{
+    display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);
+    background:var(--tint);
+  }
+  .rung .cn{
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;
+    letter-spacing:.14em;width:62px;flex:0 0 auto;color:var(--muted);
+  }
+  .rung .who{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rung.top{border-color:var(--neon);background:rgba(var(--volt-rgb),.09);box-shadow:var(--glow);}
+  .rung.top .cn{color:var(--volt);}
+
   input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;}
-  input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:transparent;}
+  input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:0;background:transparent;}
   input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;
-    background:var(--orange);border:3px solid var(--ink);
-    box-shadow:0 0 0 1px rgba(255,138,61,.6),0 8px 22px rgba(255,94,30,.45);cursor:grab;
+    -webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:0;
+    background:var(--volt);border:3px solid var(--ink);
+    box-shadow:0 0 0 1px rgba(var(--volt-rgb),.6),0 0 18px rgba(var(--volt-rgb),.5);cursor:grab;
   }
   input[type=range]::-moz-range-thumb{
-    width:22px;height:22px;border-radius:50%;background:var(--orange);border:3px solid var(--ink);cursor:grab;
+    width:22px;height:22px;border-radius:0;background:var(--volt);border:3px solid var(--ink);cursor:grab;
   }
-  .track{height:8px;border-radius:99px;background:rgba(255,236,224,.10);position:relative;margin:10px 0 2px;}
-  .track > i{position:absolute;inset:0 auto 0 0;border-radius:99px;background:linear-gradient(90deg,var(--orange-br),var(--red));display:block;}
+  .track{height:8px;border-radius:0;background:rgba(var(--cream-rgb),.10);position:relative;margin:10px 0 2px;}
+  .track > i{position:absolute;inset:0 auto 0 0;border-radius:0;background:var(--volt);display:block;
+    box-shadow:0 0 16px rgba(var(--volt-rgb),.45);}
 
   /* ── bottom nav ─────────────────────────────── */
+  /* Opaque plate, no backdrop-filter: DESIGN.md §6 — with the blur
+     gone any alpha lets the hero type ghost through, and the bar
+     drifts while Safari's toolbar collapses without translateZ. */
   nav.bottom{
     position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;
-    background:rgba(10,8,7,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);
-    padding-bottom:env(safe-area-inset-bottom);
+    background:#06060A;border-top:1px solid var(--line);
+    padding-bottom:env(safe-area-inset-bottom,0px);transform:translateZ(0);
   }
   nav.bottom button{
     flex:1;background:transparent;border:0;cursor:pointer;padding:13px 4px 14px;
-    font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--muted2);
-    position:relative;
+    font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted2);
+    position:relative;transition:color .16s ease;
   }
-  nav.bottom button.on{color:var(--cream);}
+  nav.bottom button.on{color:var(--volt);}
   nav.bottom button.on::before{
     content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
-    width:34px;height:2px;background:var(--orange);box-shadow:0 0 14px rgba(255,94,30,.7);
+    width:30px;height:2px;background:var(--volt);box-shadow:0 0 14px rgba(var(--volt-rgb),.8);
   }
 
   /* ── modal ──────────────────────────────────── */
-  .scrim{position:fixed;inset:0;z-index:60;background:rgba(4,3,3,.72);backdrop-filter:blur(6px);
-    display:flex;align-items:flex-end;justify-content:center;padding:0;}
+  /* The scrim is on the container's ::before, never on the container
+     itself — fading the container drags the panel's opacity down and
+     you see the page through the sheet mid-rise (DESIGN.md §6). */
+  .scrim{
+    position:fixed;inset:0;z-index:60;display:flex;align-items:flex-end;justify-content:center;padding:0;
+  }
+  .scrim::before{
+    content:"";position:absolute;inset:0;background:rgba(2,2,4,.76);backdrop-filter:blur(6px);
+    animation:fadeIn .18s ease;
+  }
   .sheet{
-    width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:#120A07;
-    border:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom));
-    animation:riseIn .25s ease;
+    position:relative;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;background:var(--plate);
+    border:1px solid var(--line);border-top:2px solid var(--neon);border-radius:0;
+    padding:20px 18px calc(22px + env(safe-area-inset-bottom));
+    animation:riseIn .3s var(--ease-drawer);
   }
   @media(min-width:640px){
     .scrim{align-items:center;padding:20px;}
-    .sheet{border-radius:22px;}
   }
   .sheethead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
 
   /* ── podium ─────────────────────────────────── */
+  /* No gold/silver/bronze: the medal ladder is lead / light steel /
+     steel, as in August and Blackout. */
   .podium{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:6px 0 18px;}
   .plinth{
-    flex:1;max-width:150px;border:1px solid var(--line);background:var(--tint);border-radius:16px 16px 0 0;
+    flex:1;max-width:150px;border:1px solid var(--line);background:var(--tint);border-radius:0;
     display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;padding:14px 8px 12px;text-align:center;
   }
-  .plinth.first{border-color:rgba(255,194,75,.45);background:rgba(255,194,75,.10);}
+  .plinth.first{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);box-shadow:var(--glow);}
+  .plinth.first .ppts{color:var(--volt);}
+  .plinth.second{border-color:rgba(var(--cream-rgb),.28);}
+  .plinth.second .ppts{color:#C9C6D4;}
+  .plinth.third .ppts{color:var(--muted);}
+
   @media(max-width:520px){
     .grid3{gap:14px;}
-    .field.num{font-size:28px;}
+    .field.num{font-size:26px;}
     .courtgrid{grid-template-columns:1fr;}
     /* give player names the room the big score would otherwise take */
-    .court .score{font-size:30px;}
+    .court .score{font-size:29px;}
     .court{padding:14px 12px;}
     .teamside span{font-size:13px;}
+  }
+
+  /* Keep the fade, drop the travel. A panel that appears with no
+     transition at all reads as a bug, not as respect. */
+
+  /* ── UPRISING score entry ───────────────────── */
+  /* Blackout's court-side pattern: big targets, no typing, and the
+     state of the entry readable at arm's length in the dark. */
+  .wbtn{
+    flex:1;min-width:0;border:1px solid var(--line);border-radius:0;background:var(--tint);
+    color:var(--muted);padding:13px 10px;font-size:12.5px;font-weight:800;cursor:pointer;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    transition:transform .16s var(--ease-out),border-color .16s ease,color .16s ease,background .16s ease;
+  }
+  .wbtn:active{transform:scale(.97);}
+  .wbtn.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.12);color:var(--volt);box-shadow:var(--glow);}
+  .pad{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px;}
+  .pbtn{
+    border:1px solid var(--line);border-radius:0;background:var(--tint);color:var(--cream);
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;
+    padding:13px 0;cursor:pointer;
+    transition:transform .16s var(--ease-out),border-color .16s ease,color .16s ease,background .16s ease;
+  }
+  .pbtn:active{transform:scale(.94);}
+  .pbtn.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.14);color:var(--volt);box-shadow:var(--glow);}
+
+  /* ── roster search ──────────────────────────── */
+  .srch{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--tint);padding:0 12px;}
+  .srch input{flex:1;min-width:0;background:transparent;border:0;outline:none;color:var(--cream);
+    font-size:15px;padding:12px 0;}
+  .srch input::placeholder{color:var(--muted2);}
+  .srch .ico{color:var(--muted2);font-size:14px;}
+
+  @media(max-width:520px){
+    .pad{grid-template-columns:repeat(4,1fr);}
+    .pbtn{font-size:16px;padding:12px 0;}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    .screen,.sheet{animation:fadeIn .18s ease;}
+    .btn:active,.chip:active,.rchip:active{transform:none;}
   }
 </style>
 </head>
@@ -777,7 +992,21 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
   const needed = selCount >= 4 ? maxCourtsFor(selCount) : 0;
   const useCourts = Math.max(1, Math.min(Number(cfg.courts) || 1, needed || 1));
   const benched = selCount >= 4 ? Math.max(0, selCount - useCourts * 4) : 0;
-  const roster = useMemo(() => people.slice().sort((a, b) => a.name.localeCompare(b.name)), [people]);
+  // 286 people are synced from August Attack and the whole list used to render
+  // alphabetically with no way to search it. Checking in sixteen meant hunting
+  // down a 286-row grid, twice, while people waited on court. Two changes fix
+  // it: a filter, and everyone already checked in pinned to the top so the
+  // scorer can see who they have without scrolling back up.
+  const [q, setQ] = useState("");
+  const roster = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return people.slice()
+      .filter(p => !needle || p.name.toLowerCase().includes(needle))
+      .sort((a, b) => {
+        const sa = sel[a.id] ? 0 : 1, sb = sel[b.id] ? 0 : 1;
+        return sa !== sb ? sa - sb : a.name.localeCompare(b.name);
+      });
+  }, [people, q, sel]);
 
   const hint = selCount < 4
     ? "Check in at least 4 players to start."
@@ -827,10 +1056,14 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
             {[["americano", "AMERICANO"], ["uprising", "UPRISING"]].map(([k, lab]) => (
               <button key={k} type="button" onClick={() => setCfg(c => ({ ...c, format: k }))}
                 style={{ flex: 1, padding: "14px 8px", cursor: "pointer", borderRadius: 0,
-                  background: cfg.format === k ? "var(--orange)" : "transparent",
-                  color: cfg.format === k ? "var(--cream)" : "var(--muted)",
-                  border: "1px solid " + (cfg.format === k ? "var(--orange)" : "var(--line)"),
-                  fontWeight: 800, letterSpacing: ".14em", fontSize: 12 }}>{lab}</button>
+                  background: cfg.format === k ? "var(--volt)" : "transparent",
+                  /* Cream on a volt fill measures 1.2:1 — the selected format
+                     was very nearly invisible. Volt is a BRIGHT accent, so
+                     anything sitting on it has to be near-black (14.4:1). */
+                  color: cfg.format === k ? "var(--ink)" : "var(--muted)",
+                  boxShadow: cfg.format === k ? "var(--glow)" : "none",
+                  border: "1px solid " + (cfg.format === k ? "var(--volt)" : "var(--line)"),
+                  fontWeight: 900, letterSpacing: ".14em", fontSize: 12 }}>{lab}</button>
             ))}
           </div>
           {cfg.format === "uprising" && (
@@ -872,7 +1105,20 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
               <span className="sect">Check In</span>
               <span className="label">{selCount} checked in</span>
             </div>
-            <div className="note" style={{ marginBottom: 12 }}>Tap everyone who showed up.</div>
+            <div className="srch" style={{ marginBottom: 12 }}>
+              <span className="ico">⌕</span>
+              <input value={q} onChange={e => setQ(e.target.value)}
+                placeholder={`Search ${people.length} players…`} />
+              {q && <button className="btn ghost" style={{ padding: "5px 10px" }} onClick={() => setQ("")}>Clear</button>}
+            </div>
+            <div className="note" style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", gap: 10 }}>
+              <span>Tap everyone who showed up. Checked-in players stay at the top.</span>
+              {selCount > 0 && (
+                <button className="btn ghost" style={{ flex: "0 0 auto", padding: "5px 10px" }}
+                  onClick={() => setSel({})}>Clear all</button>
+              )}
+            </div>
+            {roster.length === 0 && <div className="note">No player matches “{q}”.</div>}
             <div className="chipgrid">
               {roster.map(p => (
                 <button key={p.id} className={"chip" + (sel[p.id] ? " on" : "")}
@@ -929,24 +1175,16 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
         <div className="display">Round <em>{round.roundNum}</em></div>
         <div className="note" style={{ marginTop: 12 }}>
           of {isUp ? UP.ROUNDS : t.rounds.length} · {scored}/{round.courts.length} courts scored
-          {isUp && round.roundNum === UP.ROUNDS && <b style={{ color: "var(--gold)" }}> · DOUBLE POINTS</b>}
+          {isUp && round.roundNum === UP.ROUNDS && <b style={{ color: "var(--warn)" }}> · DOUBLE POINTS</b>}
         </div>
         {isUp && (
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
             {[1, 2, 3, 4].slice(0, t.courtCount || 4).map(c => {
               const on = Object.keys(ladder).filter(p => ladder[p] === c);
               return (
-                <div key={c} style={{ display: "flex", alignItems: "center", gap: 10,
-                  padding: "9px 12px", border: "1px solid " + (c === 1 ? "var(--gold)" : "var(--line)"),
-                  background: c === 1 ? "rgba(255,194,75,.08)" : "transparent" }}>
-                  <span style={{ fontWeight: 900, fontSize: 13, width: 54, letterSpacing: ".1em",
-                    color: c === 1 ? "var(--gold)" : "var(--muted)" }}>
-                    {c === 1 ? "COURT 1" : "COURT " + c}
-                  </span>
-                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, overflow: "hidden",
-                    textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {on.map(nameOf).join(" · ")}
-                  </span>
+                <div key={c} className={"rung" + (c === 1 ? " top" : "")}>
+                  <span className="cn">COURT {c}</span>
+                  <span className="who">{on.map(nameOf).join("  ·  ")}</span>
                 </div>
               );
             })}
@@ -967,7 +1205,13 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
         })}
       </div>
 
-      {canEdit && (
+      {/* Change courts and Late arrival both rebuild the remaining rounds with
+          rebuildTail(), which calls generateSchedule() — the CLASSIC Americano
+          circle method. On an UPRISING night that would overwrite the ladder
+          with an Americano schedule and silently end the format mid-session.
+          UPRISING's court count is not a setting either: it is players ÷ 4. So
+          the controls are Americano's, and UPRISING states the fact instead. */}
+      {canEdit && !isUp && (
         <div className="hair" style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <div className="label">Courts in use</div>
@@ -976,6 +1220,16 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
           <div style={{ display: "flex", gap: 8 }}>
             <button className="btn small" onClick={onOpenCourts}>Change courts</button>
             <button className="btn small" onClick={onOpenJoin}>Late arrival</button>
+          </div>
+        </div>
+      )}
+      {canEdit && isUp && (
+        <div className="hair">
+          <div className="label">Courts in use</div>
+          <div className="sect" style={{ marginTop: 6 }}>{plural(t.courtCount, "court")}</div>
+          <div className="note" style={{ marginTop: 10 }}>
+            Fixed for the night — {t.playerIds.length} players, four to a court. A late arrival
+            would leave someone sitting out, which UPRISING does not do.
           </div>
         </div>
       )}
@@ -993,10 +1247,28 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
           const done = m.score1 != null && m.score2 != null;
           const isEditing = !!editing[key];
           const show = canEdit && (!done || isEditing);
+          // Classic Americano shares a fixed pot of points between the two
+          // pairs, so one slider says everything: 20 here is 12 there.
           const slide = drafts[key] != null ? drafts[key] : (done ? Number(m.score1) : Math.round(pts / 2));
-          const s1 = done && !isEditing ? m.score1 : show ? slide : "–";
-          const s2 = done && !isEditing ? m.score2 : show ? pts - slide : "–";
           const presets = [pts, Math.round(pts * 0.75), Math.round(pts * 0.625), Math.round(pts / 2)];
+
+          // UPRISING does NOT work that way: a match is first to 16, so the
+          // winner has 16 and the loser has 0-15 and the two do not sum to
+          // anything fixed. Driven by the zero-sum slider, a real 16-11 could
+          // not be entered at all, and the slider's own midpoint preset gave
+          // 8-8 — which upMatchDone rejects as unfinished, so the round never
+          // completed, the next round was never built, and the night stalled
+          // with nothing on screen to say why. So UPRISING gets its own entry:
+          // tap the side that won, then tap what the other side got.
+          const upd = drafts["up-" + key] || (done
+            ? { w: m.score1 > m.score2 ? 1 : 2, l: Math.min(Number(m.score1), Number(m.score2)) }
+            : { w: 0, l: null });
+          const upReady = upd.w > 0 && upd.l != null;
+          const upS = side => upd.w === 0 ? "–" : upd.w === side ? pts : (upd.l == null ? "?" : upd.l);
+          const setUp = patch => setDrafts(d => ({ ...d, ["up-" + key]: { ...upd, ...patch } }));
+
+          const s1 = done && !isEditing ? m.score1 : !show ? "–" : isUp ? upS(1) : slide;
+          const s2 = done && !isEditing ? m.score2 : !show ? "–" : isUp ? upS(2) : pts - slide;
           return (
             <div key={key} className={"court" + (done && !isEditing ? " final" : show ? " live" : "")}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -1028,7 +1300,40 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
                 </div>
               </div>
 
-              {show && (
+              {show && isUp && (
+                <div style={{ marginTop: 14 }}>
+                  <div className="label">Who won the court</div>
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    {[1, 2].map(side => (
+                      <button key={side} className={"wbtn" + (upd.w === side ? " on" : "")}
+                        onClick={() => setUp({ w: side })}>
+                        {(side === 1 ? m.team1 : m.team2).map(id => nameOf(id).split(" ")[0]).join(" + ")}
+                      </button>
+                    ))}
+                  </div>
+                  {upd.w > 0 && (
+                    <div style={{ marginTop: 14 }}>
+                      <div className="label">
+                        And {(upd.w === 1 ? m.team2 : m.team1).map(id => nameOf(id).split(" ")[0]).join(" + ")} got
+                      </div>
+                      <div className="pad">
+                        {Array.from({ length: pts }, (_, v) => v).map(v => (
+                          <button key={v} className={"pbtn" + (upd.l === v ? " on" : "")}
+                            onClick={() => setUp({ l: v })}>{v}</button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <button className="btn" style={{ width: "100%", marginTop: 16 }} disabled={!upReady}
+                    onClick={() => onCommit(ri, mi, upS(1), upS(2), key)}>
+                    {!upd.w ? "Pick the winning pair"
+                      : upd.l == null ? "Pick their score"
+                      : (done ? "Update" : "Confirm") + ` ${upS(1)}–${upS(2)}`}
+                  </button>
+                </div>
+              )}
+
+              {show && !isUp && (
                 <div style={{ marginTop: 14 }}>
                   <div className="track"><i style={{ width: Math.round((slide / pts) * 100) + "%" }} /></div>
                   <input type="range" min="0" max={pts} value={slide}
@@ -1063,7 +1368,7 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
           instead of Setup — there is no other way back. An August session with
           seven unscored rounds was still on the board in October. */}
       {canEdit && !canFinish && (
-        <button className="btn ghost" style={{ borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+        <button className="btn ghost" style={{ borderColor: "rgba(var(--warn-rgb),.45)", color: "var(--warn)" }}
           onClick={onAbandon}>Abandon session</button>
       )}
     </div>
@@ -1099,15 +1404,16 @@ function Standings({ t, byId, onPodium }) {
       )}
       <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
         {table.map((s, i) => (
-          <div className="row" key={s.id} style={i === 0 ? { background: "rgba(255,194,75,.07)", borderRadius: 12 } : null}>
-            <span className="score" style={{ fontSize: 22, width: 34, textAlign: "center", color: i === 0 ? "var(--gold)" : "var(--muted2)" }}>{i + 1}</span>
+          <div className="row" key={s.id} style={i === 0 ? { background: "rgba(var(--volt-rgb),.07)", borderLeft: "2px solid var(--volt)", paddingLeft: 10 } : null}>
+            <span className="score" style={{ fontSize: 22, width: 34, textAlign: "center", color: i === 0 ? "var(--volt)" : "var(--muted2)" }}>{i + 1}</span>
             <Ava p={s} on={i === 0} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="truncate" style={{ display: "block", fontWeight: 800 }}>{s.name}</span>
               <span className="label" style={{ letterSpacing: ".12em" }}>{s.played} played · {s.wins} won</span>
             </span>
             <span style={{ textAlign: "right" }}>
-              <span className="score" style={{ fontSize: 26, color: "var(--orange-br)", display: "block" }}>
+              <span className="score" style={{ fontSize: 26, display: "block",
+                color: i === 0 ? "var(--volt)" : "var(--cream)" }}>
                 {byAvg ? (s.played ? s.avg.toFixed(1) : "–") : s.points}
               </span>
               <span className="label" style={{ letterSpacing: ".12em" }}>
@@ -1184,7 +1490,7 @@ function Admin({ guests, newName, setNewName, onAdd, onRename, onDelete }) {
             <Ava p={p} />
             <input className="field" style={{ borderBottom: 0, fontWeight: 700 }} value={p.name}
               onChange={e => onRename(p.id, e.target.value)} />
-            <button className="btn small" style={{ borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+            <button className="btn small" style={{ borderColor: "rgba(var(--warn-rgb),.45)", color: "var(--warn)" }}
               onClick={() => onDelete(p.id)}>Del</button>
           </div>
         ))}
@@ -1402,15 +1708,30 @@ function App() {
     { id: "history", label: "History" }
   ];
   if (role === "admin") navDefs.push({ id: "admin", label: "Admin" });
-  const headerSub = active ? active.name : (canEdit ? "Ready to set up" : "Guest view");
+  // The header used to say AMERICANO on an UPRISING night, with the format
+  // demoted to the subtitle. The wordmark is the thing people photograph.
+  const headerName = active && active.format === "uprising" ? "Uprising"
+                   : active ? "Americano"
+                   : cfg.format === "uprising" ? "Uprising" : "Americano";
+  const headerSub = active
+    ? active.name.replace(new RegExp("^" + headerName + "\\s+", "i"), "")
+    : (canEdit ? "Ready to set up" : "Guest view");
 
   return (
     <Fragment>
       <header className="top">
         <div className="brand">
-          <span className="mark">🎾</span>
+          {/* A drawn mark, not an emoji: the emoji renders in whatever face
+              the OS supplies and carries its own colours, which is the one
+              thing a palette cannot override. This is the climb. */}
+          <span className="mark" aria-hidden="true">
+            <svg viewBox="0 0 100 100" width="18" height="18">
+              <path d="M18 64 L50 32 L82 64" fill="none" stroke="currentColor"
+                strokeWidth="13" strokeLinecap="square" />
+            </svg>
+          </span>
           <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-            <span className="name">Americano</span>
+            <span className="name">{headerName}</span>
             <span className="sub">{headerSub}</span>
           </span>
         </div>
@@ -1495,7 +1816,7 @@ function App() {
               It will be closed without a podium and will not appear in the archive,
               and you will be able to start a new session. This cannot be undone from here.
             </div>
-            <button className="btn" style={{ width: "100%", marginTop: 18, borderColor: "rgba(255,42,36,.32)", color: "var(--orange-br)" }}
+            <button className="btn" style={{ width: "100%", marginTop: 18, borderColor: "rgba(var(--warn-rgb),.45)", color: "var(--warn)", background: "rgba(var(--warn-rgb),.10)", boxShadow: "0 0 30px rgba(var(--warn-rgb),.25)" }}
               onClick={abandonSession}>Abandon it</button>
             <button className="btn ghost" style={{ width: "100%", marginTop: 10 }}
               onClick={() => setModal(null)}>Keep playing</button>
@@ -1578,10 +1899,10 @@ function App() {
           <Sheet title="Podium 👑" onClose={() => setModal(null)}>
             <div className="podium">
               {order.filter(i => table[i]).map((i, slot) => (
-                <div key={i} className={"plinth" + (i === 0 ? " first" : "")} style={{ height: heights[slot] }}>
+                <div key={i} className={"plinth" + (i === 0 ? " first" : i === 1 ? " second" : " third")} style={{ height: heights[slot] }}>
                   <Ava p={table[i]} on={i === 0} lg />
-                  <span className="truncate" style={{ fontWeight: 800, fontSize: 13, maxWidth: "100%" }}>{table[i].name}</span>
-                  <span className="score" style={{ fontSize: 24, color: i === 0 ? "var(--gold)" : "var(--orange-br)" }}>
+                  <span className="truncate pname" style={{ fontSize: 13, maxWidth: "100%" }}>{table[i].name}</span>
+                  <span className="score ppts" style={{ fontSize: 24 }}>
                     {table[i].byAvg ? table[i].avg.toFixed(1) : table[i].points}
                   </span>
                   <span className="label">{i === 0 ? "1st" : i === 1 ? "2nd" : "3rd"}</span>

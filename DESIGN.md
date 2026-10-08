@@ -164,6 +164,74 @@ The red→cyan and cyan→amber sweeps produce the wrong answer in three places:
 
 ---
 
+## 2c. Americano + UPRISING tokens (`americano-index.html`)
+
+Not a volume — a standing app with two formats — but it runs **Blackout's design
+language in a different voice**. Blackout is lime over magenta on true black;
+this is **VOLT over ULTRAVIOLET**.
+
+| Token | Hex | Use |
+|---|---|---|
+| Void | `#06060A` | Page base |
+| Plate | `#0C0C12` | Sheets, card plate (`--panel` is this at 82%) |
+| **Volt** | `#00F5C8` | The lead. Active states, kickers, Court 1, the leader |
+| Ultraviolet | `#9D6BFF` | Second voice. Final/scored states, podium button, archive |
+| Chalk | `#F2F0F7` | Primary text |
+| Steel | `#9A95A8` | Secondary prose |
+| Deep Steel | `#8A84A2` | Labels, data chips, inactive nav |
+| Warn | `#FF4D6D` | **Destructive and urgency only** — Abandon, DOUBLE POINTS |
+
+**Why volt leads and the violet does not.** Blackout's mechanics depend on the
+lead accent being *brighter than the body text*, because it carries 10px
+letterspaced kickers, big mono numbers and solid fills with black type on them.
+Measured on `#06060A`: lime 17.1:1, volt 14.4:1, magenta 5.8:1, ultraviolet
+5.8:1 — but the brightest usable violet is only 7.6:1, and a violet **fill**
+takes neither black (4.8:1) nor white (3.8:1) above the 4.5 floor. A violet lead
+would break every solid accent surface in the app. Volt/ultraviolet reproduces
+Blackout's own 17.1/5.8 split in a different hue.
+
+Ratio target is Blackout's: roughly **3:1 lead to accent**. If a screen reads
+violet-first, it is wrong. The leader's points are volt; everyone else's are
+chalk — sixteen glowing volt numbers is not an accent, it is a background.
+
+### Traps this skin already fell into
+
+- **Deep Steel was `#6E6880` (3.8:1).** DESIGN.md §2b blesses that range for
+  decorative letterspaced kickers, and it is wrong here: `.label` carries
+  "1 played · 1 won", "+5" and every court number. Data at 3.8:1 on a phone in a
+  dark room is not readable. `#8A84A2` is the lowest value clearing 4.5:1
+  against both the page and the card plate.
+- **The format toggle was cream on a volt fill — 1.2:1.** It looked fine in a
+  screenshot and was very nearly invisible. Anything sitting *on* volt must be
+  near-black. There is a Playwright contrast audit in the scratchpad that walks
+  every text node per screen; run it rather than trusting your eyes on a dark
+  theme.
+- **Token names are deliberately NOT renamed.** `--orange` holds volt, `--gold`
+  holds ultraviolet, `--red` holds volt. The JSX references them inline in well
+  over a hundred places. New rules use `--volt` / `--uv`, which are honest.
+- Every tint is built from an `_rgb` component token (`--volt-rgb`,
+  `--uv-rgb`, `--cream-rgb`), never a written-out `rgba()` triple — the same
+  failure the landing page's `--live` rollover produces.
+
+### What differs from Blackout beyond colour
+
+| | Blackout | This |
+|---|---|---|
+| Display face | Archivo `wdth` 125 `wght` 900 italic | same |
+| Numbers | JetBrains Mono | same, and the scores too |
+| Card marker | 4 corner ticks, `16×2px` | same; tick colour is the state |
+| Page texture | 46px tactical grid + grain | same |
+| Mark | BLACKOUT lockup | a drawn volt chevron — the climb |
+| Nav | — | opaque plate, no `backdrop-filter` (DESIGN.md §6) |
+
+**Anton is not loaded here.** The font link requests Archivo **with the `wdth`
+axis** (`ital,wdth,wght@0,62..125,400..900;1,...`). Without that axis in the
+URL, Google serves a static instance, `font-variation-settings:'wdth' 125` does
+nothing, and every heading silently renders narrow. Check for
+`font-stretch: 62% 125%` in the served CSS.
+
+---
+
 ## 3. Brand assets
 
 Served from `/assets/` on every host (`/var/www/<host>/public/assets/`).
