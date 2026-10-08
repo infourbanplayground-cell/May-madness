@@ -177,7 +177,7 @@ people away at the door.
 
 | | |
 |---|---|
-| Rounds | 9, **the last one worth double** |
+| Rounds | **the organiser's**, 2 to 40. 9 is the default because it fits two hours, not because anything counts to nine. The last round is worth double |
 | Match | first to 16 points — **the organiser sets the target**, any number from 4 to 99 |
 | Per round | ~11 min play + ~2 min change |
 | Total | ~2 hours |
@@ -188,6 +188,31 @@ For comparison, a Blackout night gives a player three group matches. This is
 three times the padel in less time, with a different partner each time.
 
 ---
+
+### How long, and how many rounds
+
+Nine was a **time budget**, not a rule — nothing in the ladder or the points
+table counts to nine. A longer night is a measurably better competition, run on
+the real engine over 3,000 nights of 16 players:
+
+| Rounds | Distinct partners (min/median/max) | Winner is a true top-3 player | Table vs true skill | Finish, first to 16 |
+|---|---|---|---|---|
+| 7 | 4 / 7 / 7 | 56% | 0.56 | 1h30 |
+| **9** | 5 / 8 / 9 | 61% | 0.62 | **1h56** |
+| 11 | 5 / 9 / 11 | 64% | 0.67 | 2h22 |
+| 12 | 5 / 9 / 12 | 67% | 0.69 | 2h35 |
+| **15** | **6 / 11 / 14** | **69%** | **0.73** | 3h13 |
+| 19 | 6 / 12 / 15 | 73% | 0.76 | 4h05 |
+
+A round takes about `0.68 x target + 2` minutes including the change, so the
+target is the lever that makes a long night fit: **15 rounds at first to 13 is
+2h43**, where 15 at first to 16 is 3h13.
+
+Two things flatten off. **Partners**: a court of four has only three ways to
+split, so past about round 11 you start meeting the same partner again — 15
+rounds gives a median of 11 different partners, not 15. **Fairness**: each extra
+round is worth less than the one before, and the 9 → 12 step buys more than the
+12 → 15 step.
 
 ## What gets posted
 
