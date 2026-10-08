@@ -7,7 +7,7 @@ const {
   upCurrentCourts, upBuildRound, upTotals, upStandings, upPrizes, upClimbPath,
   upValidate, upPairKey,
   upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
-  upScoringRound, upScoringRounds,
+  upScoringRound, upScoringRounds, upPlanRounds, upNightMinutes, upRoundMinutes,
   upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
 } = E;
 
@@ -674,4 +674,50 @@ test("20 on four courts, with the shuffle, still splits evenly", () => {
   assert.deepEqual([...new Set(rows.map(r => r.played))], [8]);
   assert.equal(upUneven(night), false);
   assert.deepEqual(upValidate(night), []);
+});
+
+// ── fitting the night into the evening ─────────────────────────────────────
+
+test("the plan never overruns the budget it was given", () => {
+  for (const budget of [110, 120, 150, 165, 180]) {
+    for (let target = 7; target <= 24; target++) {
+      for (const players of [8, 12, 16, 20, 24]) {
+        const scoring = upPlanRounds(budget, target, { players, shuffle: true });
+        const mins = upNightMinutes(scoring + 1, target);
+        assert.ok(mins <= budget + 1,
+          `${players}p, first to ${target}, ${budget}min → ${scoring} rounds = ${mins}min`);
+      }
+    }
+  }
+});
+
+test("a longer evening buys more rounds, and a longer match costs them", () => {
+  assert.ok(upPlanRounds(180, 13, { players: 16 }) > upPlanRounds(150, 13, { players: 16 }));
+  assert.ok(upPlanRounds(150, 9, { players: 16 }) > upPlanRounds(150, 16, { players: 16 }));
+});
+
+test("the plan prefers a round count that shares the rests evenly", () => {
+  // 20 players rest 4 a round; even only at multiples of 5. Whatever fits, the
+  // plan should come back with one of those rather than the raw maximum.
+  for (const budget of [120, 150, 180]) {
+    const scoring = upPlanRounds(budget, 13, { players: 20, courts: 4 });
+    assert.ok(upFairRounds(20, 4, 30).includes(scoring),
+      `20 players in ${budget}min gave ${scoring} scoring rounds, which is not even`);
+  }
+  // 16 players never rest, so no snapping is needed or wanted
+  const s16 = upPlanRounds(150, 13, { players: 16, courts: 4 });
+  assert.equal(s16, Math.floor(150 / upRoundMinutes(13)) - 1);
+});
+
+test("a night planned for 2h30 actually comes out even and valid", () => {
+  for (const players of [16, 20]) {
+    const target = 11;
+    const scoring = upPlanRounds(150, target, { players, courts: 4 });
+    const night = newNight(players, {}, scoring + 1);
+    night.shuffle = true;
+    for (let r = 0; r < scoring + 1; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+    assert.deepEqual(upValidate(night), [], `${players} players`);
+    assert.equal(upUneven(night), false, `${players} players: rests came out uneven`);
+    assert.ok(upNightMinutes(scoring + 1, target) <= 150);
+  }
 });

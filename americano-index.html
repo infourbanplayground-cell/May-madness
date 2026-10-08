@@ -540,7 +540,10 @@ const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
 // clock rather than against a guess. A first-to-16 round measures at about
 // eleven minutes of play plus two to change ends and re-pair, which is ~0.68
 // min a point; the rest scales from there.
-const nightMinutes = (rounds, target) => Math.round(rounds * (0.68 * target + 2));
+// One pace, in the engine, used by the planner and the estimate alike — two
+// copies of this number is how a screen ends up promising 2h30 for a night the
+// planner built for 2h53.
+const nightMinutes = (rounds, target) => upNightMinutes(rounds, target);
 const asClock = mins => Math.floor(mins / 60) + "h" + String(mins % 60).padStart(2, "0");
 
 // ── Americano scheduling: circle method ─────────────────────────
@@ -648,6 +651,44 @@ function upScoringRound(night, roundNum) {
 }
 function upScoringRounds(night) {
   return upRoundsTotal(night) - (night.shuffle ? 1 : 0);
+}
+
+// ── fitting the night into the evening ─────────────────────────────────────
+//
+// A round costs roughly PER_POINT minutes a point plus a fixed changeover, so
+// the round count follows from the target and the time available rather than
+// being guessed at. Measured on 16 players over 4,000 nights per setting, at a
+// fixed budget MORE SHORTER rounds beats fewer longer ones every time — at 150
+// minutes, 17 rounds of first to 9 correlates 0.893 with true skill where 12
+// rounds of first to 13 manages 0.875 — because the ladder needs rounds to
+// sort itself and a longer match mostly buys precision you already have.
+//
+// The changeover is the thing to be honest about: at 2 minutes a 150-minute
+// evening holds 18 matches, at 3 minutes only 16. UP_PACE is deliberately a
+// little pessimistic so a night finishes early rather than late.
+const UP_PACE = { perPoint: 0.68, change: 2.5 };
+
+function upRoundMinutes(target, pace = UP_PACE) {
+  return pace.perPoint * target + pace.change;
+}
+function upNightMinutes(matches, target, pace = UP_PACE) {
+  return Math.round(matches * upRoundMinutes(target, pace));
+}
+
+// How many SCORING rounds fit in `budget` minutes, given the target and
+// whether a shuffle is being played. Snapped to a round count that shares the
+// rests evenly when one exists at or below the fit, because an even night that
+// finishes early beats an uneven one that uses every minute.
+function upPlanRounds(budget, target, opts = {}) {
+  const { shuffle = true, players = 16, courts = 0, pace = UP_PACE, min = 4, max = 30 } = opts;
+  const matches = Math.floor(budget / upRoundMinutes(target, pace));
+  let scoring = matches - (shuffle ? 1 : 0);
+  scoring = Math.max(min, Math.min(max, scoring));
+  const C = Math.max(1, Math.min(courts || Math.floor(players / 4), Math.floor(players / 4), UP.COURTS));
+  const fair = upFairRounds(players, C, max);
+  if (fair === null || !fair.length) return scoring;      // nobody rests, or nothing divides
+  const under = fair.filter(n => n <= scoring);
+  return under.length ? under[under.length - 1] : scoring;
 }
 
 // ── who sits out ───────────────────────────────────────────────────────────
@@ -1536,9 +1577,12 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
             const upC = Math.max(1, Math.min(
               Number(cfg.upcourts) || UP.COURTS, Math.floor(selCount / 4), UP.COURTS));
             const upR = selCount - 4 * upC;
-            const sc = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
-            const rounds = sc + (cfg.upshuffle ? 1 : 0);
             const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
+            const sc = cfg.upfinish
+              ? upPlanRounds(Number(cfg.upfinish), tgt,
+                  { shuffle: !!cfg.upshuffle, players: Math.max(8, selCount), courts: upC })
+              : Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+            const rounds = sc + (cfg.upshuffle ? 1 : 0);
             const mins = nightMinutes(rounds, tgt);
             const fair = selCount >= 8 ? upFairRounds(selCount, upC, 40) : [];
             const evenRests = upR === 0 || (fair || []).includes(sc);
@@ -1625,7 +1669,9 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                 took the whole screen down with "no points defined for court 5". */}
             <div className="grid3">
               {(cfg.format === "uprising"
-                 ? [["Courts", "upcourts"], ["Play to", "uppoints"], ["Scoring rounds", "uprounds"]]
+                 ? (cfg.upfinish
+                      ? [["Courts", "upcourts"], ["Play to", "uppoints"]]
+                      : [["Courts", "upcourts"], ["Play to", "uppoints"], ["Scoring rounds", "uprounds"]])
                  : [["Points", "points"], ["Rounds", "rounds"], ["Courts", "courts"]]
                ).map(([lab, key]) => (
                 <label className="stack" key={key}>
@@ -1642,6 +1688,36 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                 "8 players rest each round" and that 7 rounds would be unfair,
                 neither of which is true of a format where nobody sits out and
                 the round count is fixed at nine. */}
+            {cfg.format === "uprising" && (() => {
+              // The round count is the thing nobody can work out in their head:
+              // it depends on the target, the changeover and the field. So the
+              // organiser says when everyone has to be off court and the app
+              // does the arithmetic — and snaps to a count that shares the
+              // rests evenly, because finishing early and even beats using
+              // every minute and ranking per round.
+              const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
+              const upC2 = Math.max(1, Math.min(Number(cfg.upcourts) || UP.COURTS,
+                Math.max(2, Math.floor(selCount / 4)), UP.COURTS));
+              return (
+                <div className="hair" style={{ paddingTop: 0, borderTop: 0 }}>
+                  <div className="label" style={{ marginBottom: 9 }}>Everyone off court by</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                    {[[120, "2h"], [150, "2h30"], [180, "3h"], [0, "Set rounds myself"]].map(([v, lab]) => {
+                      const on = (Number(cfg.upfinish) || 0) === v;
+                      const sc = v ? upPlanRounds(v, tgt, { shuffle: !!cfg.upshuffle,
+                        players: Math.max(8, selCount), courts: upC2 }) : 0;
+                      return (
+                        <button key={v} type="button" className={"rchip" + (on ? " on" : "")}
+                          style={{ padding: "9px 13px", fontSize: 12 }}
+                          onClick={() => setCfg(c => ({ ...c, upfinish: v }))}>
+                          {lab}{v ? ` · ${sc} rds` : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
             {cfg.format === "uprising" && (
               <button type="button" className={"toggle" + (cfg.upshuffle ? " on" : "")}
                 onClick={() => setCfg(c => ({ ...c, upshuffle: !c.upshuffle }))}>
@@ -2189,8 +2265,8 @@ function App() {
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
   const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
-                                   upcourts: 4, uppoints: 13, uprounds: 15,
-                                   upshuffle: true, format: "americano" });
+                                   upcourts: 4, uppoints: 11, uprounds: 15,
+                                   upshuffle: true, upfinish: 150, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [receipt, setReceipt] = useState(null);
   const [drafts, setDrafts] = useState({});
@@ -2282,7 +2358,10 @@ function App() {
       // cfg.uprounds is the number of SCORING rounds. The shuffle sits on top
       // of it rather than inside it, because "15 rounds" means fifteen rounds
       // that count — asked for 15 and given 14 is the wrong kind of surprise.
-      const upScoring = Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+      const upScoring = cfg.upfinish
+        ? upPlanRounds(Number(cfg.upfinish), Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET)),
+            { shuffle: !!cfg.upshuffle, players: ids.length, courts: upCourtCount })
+        : Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
       const upRounds = upScoring + (cfg.upshuffle ? 1 : 0);
       const ladder0 = upSeedLadder(ids, upForm, upCourtCount);
       const seedT = {

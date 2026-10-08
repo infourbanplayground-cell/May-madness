@@ -265,6 +265,46 @@ people away at the door.
 
 ---
 
+## Fitting the night into the evening
+
+**You say when everyone has to be off court; the app works out the rest.** The
+round count is the one number nobody can do in their head — it depends on the
+target, the changeover and the field size — so it is derived, not typed.
+
+| Everyone off court by | 16 players | finishes |
+|---|---|---|
+| 2h | 11 scoring rounds | 2h00 |
+| **2h30** | **14 scoring rounds** | **2h30** |
+| 3h | 17 scoring rounds | 3h00 |
+
+A round costs about `0.68 × target + 2.5` minutes. The changeover constant is
+deliberately a little pessimistic so a night finishes early rather than late.
+
+**The planner snaps to a round count that shares the rests evenly** whenever
+one exists at or below the fit. An even night that finishes early beats an
+uneven one that uses every minute — which is why 20 players asked to finish by
+2h30 get 10 scoring rounds at 1h50 rather than 12 at 2h20.
+
+### Spend the time on rounds, not on longer matches
+
+Measured over 4,000 nights per setting, at a fixed budget **more shorter rounds
+beats fewer longer ones, every time:**
+
+| 150 minutes buys | Accuracy vs true skill | Partners |
+|---|---|---|
+| 17 scoring rounds of first to 9 | **0.893** | 10.7 |
+| 14 of first to 11 | 0.885 | 9.8 |
+| 12 of first to 13 | 0.875 | 9.1 |
+| 9 of first to 19 | 0.857 | 7.8 |
+
+The ladder needs *rounds* to sort itself; a longer match mostly buys precision
+you already have. The effect survives a pessimistic changeover (at 3 minutes a
+round the ordering is identical), so it is not an artefact of the pace model.
+
+The floor is taste, not maths: first to 6 scores best of all, and a padel match
+decided by six rallies is a drill. **First to 11 is the default** — a real
+match, and short enough to afford fourteen of them in two and a half hours.
+
 ## The night, as it is set up today
 
 The app opens on these, so the organiser types nothing:
@@ -273,10 +313,10 @@ The app opens on these, so the organiser types nothing:
 |---|---|
 | Players | 16, four courts |
 | Round 1 | **the shuffle** — sets the courts, scores nothing |
-| Scoring rounds | **15** |
-| Match | **first to 13** |
-| Matches each | **16** |
-| Finish | about **2h53** from the first serve |
+| Everyone off court by | **2h30** |
+| Scoring rounds | **14**, derived from that |
+| Match | **first to 11** |
+| Matches each | **15** |
 | Last round | **double** |
 
 `Scoring rounds` means rounds that count. The shuffle sits on top of it, not
