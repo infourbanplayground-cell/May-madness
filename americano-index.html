@@ -1543,9 +1543,24 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
             const fair = selCount >= 8 ? upFairRounds(selCount, upC, 40) : [];
             const evenRests = upR === 0 || (fair || []).includes(sc);
             const restsEach = (sc * upR) / selCount;
-            const nearest = (fair || []).slice().sort((a, b) =>
-              Math.abs(a - sc) - Math.abs(b - sc) || a - b)[0];
-            const nearestTotal = nearest ? nearest + (cfg.upshuffle ? 1 : 0) : null;
+            // Suggest the LONGEST even round count that still finishes inside
+            // three hours, not merely the closest number. Closest-by-distance
+            // told a 9-player night to run 18 scoring rounds — even, and 3h26
+            // — when 9 rounds is just as even and finishes at 2h10.
+            const shuf = cfg.upshuffle ? 1 : 0;
+            // Only offer a round count that could actually be played. Some
+            // field sizes have exactly one even answer and it is 25 or 31
+            // scoring rounds — five to six hours. Printing it as the fix is
+            // worse than saying plainly that there is no fix.
+            const fits = (fair || []).filter(n => nightMinutes(n + shuf, tgt) <= 180);
+            const nearest = fits.length ? fits[fits.length - 1] : null;
+            const nearestTotal = nearest ? nearest + shuf : null;
+            const nearestMins = nearest ? nightMinutes(nearestTotal, tgt) : 0;
+
+            // Four courts seat sixteen. Past that the extra people are not
+            // playing a format, they are queuing for one — at 24 a third of
+            // the room is off court every round, at 32 it is half.
+            const idle = selCount ? Math.round(100 * upR / selCount) : 0;
             return (
               <div className="hair" style={{ fontSize: 14, color: "var(--muted)", marginBottom: 18 }}>
                 {selCount < 8
@@ -1570,7 +1585,12 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                               <b style={{ color: "var(--warn)" }}>{plural(upR, "player")} {upR === 1 ? "rests" : "rest"} each
                               round, and {plural(sc, "scoring round")} does not share that out evenly</b> — some will
                               play one more match than others, so the table will rank on <b>points per round played</b>.
-                              {nearestTotal ? <Fragment>{" "}{nearestTotal} rounds in total would be exactly even.</Fragment> : null}
+                              {nearestTotal
+                                ? <Fragment>{" "}<b style={{ color: "var(--cream)" }}>{nearest} scoring rounds</b>{" "}
+                                    would be exactly even ({nearestTotal} matches, {asClock(nearestMins)}).</Fragment>
+                                : <Fragment>{" "}No round count that fits an evening shares {selCount} players
+                                    out evenly, so this field always ranks per round — which is fair, just less
+                                    tidy. Drop to {4 * upC} or go up to {4 * upC + upC} and it comes out exact.</Fragment>}
                             </Fragment>}
                       {" "}{cfg.upshuffle
                         ? "Where everyone starts is decided on court, by the shuffle — nobody is placed by a draw."
@@ -1581,6 +1601,11 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                       {mins > 180
                         ? " — over three hours. Drop the target or the round count."
                         : " from the first serve."}
+                      {idle >= 30
+                        ? <Fragment>{" "}<b style={{ color: "var(--warn)" }}>{idle}% of the room is off court
+                            every round.</b> Four courts seat sixteen; past about {4 * upC + Math.round(4 * upC * 0.3)} players
+                            they are queuing rather than playing, and two shorter sessions beat one long one.</Fragment>
+                        : null}
                       {rounds >= 12 && upR === 0
                         ? <Fragment>{" "}A longer night is a better competition — at 16 players, 15 rounds puts
                             the strongest player on top 69% of the time against 61% at nine — but a court of four

@@ -206,6 +206,41 @@ With a flat final it is 13.6% — slightly generous, which is the right directio
 for a social. So the multiplier is a property of the field, not of the format:
 **16 or 12 players, the last round doubles. 9, 10, 11 or 20, it does not.**
 
+#### Where it stops working
+
+Every field from 8 to 40 was played through the engine at the defaults. **None
+of them crash and none fail the validator** — but there are three different
+ways a size stops being a good night.
+
+**1. Under 8 — refused.** One court is not a ladder. Four to seven people
+should run classic Americano, which the same app does.
+
+**2. Sizes that cannot divide evenly in an evening.** 25, 27, 29, 31, 33, 35,
+37, 39 — each has exactly one even round count and it is 25 to 39 scoring
+rounds, five hours or more. These always rank on points per round. That is
+fair, just less tidy, and the setup screen says so rather than offering a
+number nobody can play.
+
+**3. Too many people standing still.** Four courts seat sixteen, so everyone
+past that is in a queue:
+
+| Players | Off court every round | Matches each over 15 rounds |
+|---|---|---|
+| 16 | **nobody** | 15 |
+| 20 | 20% | 12 |
+| 24 | 33% | 10 |
+| 28 | 43% | 8 |
+| 32 | **50%** | 7 |
+| 40 | 60% | 6 |
+
+Past about **21** the format is a queue with a scoreboard. The setup screen
+warns from 30% and suggests two shorter sessions instead. **24 is the practical
+ceiling** — it is still even, and ten matches each is a real night.
+
+**The sizes that come out exactly even at the default 15 scoring rounds:**
+**8, 10, 12, 15, 16, 20, 24, 30, 40.** Of those, 8, 12 and 16 are perfect —
+nobody rests at all.
+
 #### If you run a different number of rounds
 
 You can. The rests then come out uneven — some play one more match than others —
