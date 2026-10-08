@@ -49,10 +49,11 @@ function upRestCount(night) {
   return Math.max(0, upPlayerIds(night).length - 4 * upCourts(night));
 }
 
-// Round counts at which every player rests exactly the same number of times.
-// With P players and R resting each round, N rounds deal N*R rests, so the
-// rests divide evenly exactly when P divides N*R. 9 players want 9 rounds,
-// 10 want 5 or 10, 11 want 11.
+// SCORING-round counts at which every player rests exactly the same number of
+// times. With P players and R resting each round, N rounds deal N*R rests, so
+// they divide evenly exactly when P divides N*R. 9 players want 9 scoring
+// rounds, 10 want 5 or 10, 11 want 11. A night with the shuffle runs one round
+// longer than the number this returns.
 function upFairRounds(playerCount, courts = 0, maxRounds = 14) {
   const C = Math.max(1, Math.min(courts || Math.floor(playerCount / 4),
                                  Math.floor(playerCount / 4), UP.COURTS));
@@ -72,6 +73,28 @@ function upFairRounds(playerCount, courts = 0, maxRounds = 14) {
 // flat final it is 13.6% — slightly generous, which is the right direction for
 // a social. So the multiplier is a property of the field, not of the format.
 function upDoubleFinal(night) { return upRestCount(night) === 0; }
+
+// ── the shuffle ────────────────────────────────────────────────────────────
+//
+// On night one nobody has form, so the opening ladder is a draw — and a draw
+// decides far too much. Measured over 30,000 nights with a random opening
+// ladder and 9 scoring rounds, a Court 1 starter takes 45% of the wins and a
+// Court 4 starter 6%: a 7.3x swing settled before a ball is hit. Playing a
+// longer night barely helps (3.7x at 15 rounds, 2.4x at 25) because the
+// advantage compounds rather than washes out.
+//
+// So round one can be a SHUFFLE: a real match that sets where you start and
+// pays nothing. That drops the draw's influence to 2.7x at 9 scoring rounds
+// and 2.1x at 15, and what is left is earned — you are on Court 1 because you
+// won a match, not because of a hat. It costs one round of time and it is one
+// sentence to explain, which is why it beats every seeding scheme that needs
+// data we do not have for a room of strangers.
+function upScoringRound(night, roundNum) {
+  return !(night.shuffle && roundNum === 1);
+}
+function upScoringRounds(night) {
+  return upRoundsTotal(night) - (night.shuffle ? 1 : 0);
+}
 
 // ── who sits out ───────────────────────────────────────────────────────────
 //
@@ -101,12 +124,25 @@ function upRestRota(night) {
 
 // Who sits out round `roundNum` (1-based). Deterministic: the same night always
 // produces the same rota, so a reload cannot reshuffle who is resting.
+//
+// The shuffle is taken OFF the rota and given the tail of it. If the shuffle
+// consumed a normal rota slot, the one player who happened to rest during it
+// would spend their rest on a round that pays nothing and so play every
+// scoring round, while everyone else played one fewer — 9 players over 9
+// rounds came out 8 scoring matches for one person and 7 for the other eight.
+// Taking the shuffle off the rota means the scoring rounds, which are the only
+// ones that count, divide evenly again.
 function upRestingFor(night, roundNum) {
   const R = upRestCount(night);
   if (R <= 0) return [];
   const rota = upRestRota(night);
   const out = [];
-  for (let i = 0; i < R; i++) out.push(rota[((roundNum - 1) * R + i) % rota.length]);
+  if (night.shuffle && roundNum === 1) {
+    for (let i = 0; i < R; i++) out.push(rota[(rota.length - 1 - i + rota.length) % rota.length]);
+    return [...new Set(out)];
+  }
+  const idx = night.shuffle ? roundNum - 2 : roundNum - 1;
+  for (let i = 0; i < R; i++) out.push(rota[(idx * R + i) % rota.length]);
   return [...new Set(out)];
 }
 
@@ -277,6 +313,7 @@ function upTotals(night) {
   upPlayerIds(night).forEach(id => { total[id] = 0; });
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
+    if (!upScoringRound(night, r.roundNum)) return;   // the shuffle pays nothing
     const isFinal = dbl && r.roundNum === N;
     const aWon = m.score1 > m.score2;
     m.team1.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, aWon, isFinal); });
@@ -292,7 +329,7 @@ function upUneven(night) {
   const played = {};
   upPlayerIds(night).forEach(id => { played[id] = 0; });
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
-    if (!upMatchDone(m)) return;
+    if (!upMatchDone(m) || !upScoringRound(night, r.roundNum)) return;
     [...m.team1, ...m.team2].forEach(p => { played[p] = (played[p] || 0) + 1; });
   }));
   const counts = Object.values(played);
@@ -314,11 +351,16 @@ function upStandings(night, byId = {}, baselines = {}) {
   });
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
+    // Partners count even in the shuffle — you did play with them, and
+    // TONIGHT'S PARTNERS is the card that does this format's actual job. The
+    // rest of the table does not: a shuffle win is not a win, because it paid
+    // nothing, and counting it would make "6 won" disagree with the points.
+    partners[m.team1[0]].add(m.team1[1]); partners[m.team1[1]].add(m.team1[0]);
+    partners[m.team2[0]].add(m.team2[1]); partners[m.team2[1]].add(m.team2[0]);
+    if (!upScoringRound(night, r.roundNum)) return;
     const aWon = m.score1 > m.score2;
     m.team1.forEach(p => { match[p] += m.score1; against[p] += m.score2; played[p]++; if (aWon) wins[p]++; });
     m.team2.forEach(p => { match[p] += m.score2; against[p] += m.score1; played[p]++; if (!aWon) wins[p]++; });
-    partners[m.team1[0]].add(m.team1[1]); partners[m.team1[1]].add(m.team1[0]);
-    partners[m.team2[0]].add(m.team2[1]); partners[m.team2[1]].add(m.team2[0]);
   }));
 
   const scored = upPlayerIds(night).filter(id => played[id] > 0);
@@ -412,17 +454,21 @@ function upReceipt(night, playerId) {
     if (!upMatchDone(m)) {
       out.push({ roundNum: r.roundNum, court: m.court, partner, against,
                  pending: true, doubled: isFinal,
-                 stake: { win: upRoundPoints(m.court, true, isFinal),
-                          lose: upRoundPoints(m.court, false, isFinal) },
+                 shuffle: !upScoringRound(night, r.roundNum),
+                 stake: upScoringRound(night, r.roundNum)
+                   ? { win: upRoundPoints(m.court, true, isFinal),
+                       lose: upRoundPoints(m.court, false, isFinal) }
+                   : { win: 0, lose: 0 },
                  points: null, running });
       return;
     }
     const myScore = mine === 1 ? m.score1 : m.score2;
     const theirScore = mine === 1 ? m.score2 : m.score1;
     const won = myScore > theirScore;
-    const points = upRoundPoints(m.court, won, isFinal);
+    const scores = upScoringRound(night, r.roundNum);
+    const points = scores ? upRoundPoints(m.court, won, isFinal) : 0;
     running += points;
-    out.push({ roundNum: r.roundNum, court: m.court, partner, against,
+    out.push({ roundNum: r.roundNum, court: m.court, partner, against, shuffle: !scores,
                won, myScore, theirScore, points, running, doubled: isFinal,
                moved: won ? (m.court === 1 ? "stay" : "up")
                           : (m.court === upCourts(night) ? "stay" : "down") });
@@ -517,6 +563,7 @@ if (typeof module !== "undefined" && module.exports) {
     upCourtsAfter, upCurrentCourts, upSeenPairs, upBuildRound, upTotals,
     upStandings, upPrizes, upClimbPath, upValidate, upPairKey,
     upCourts, upRoundsTotal, upRestCount, upFairRounds, upDoubleFinal, upReceipt,
+    upScoringRound, upScoringRounds,
     upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
   };
 }

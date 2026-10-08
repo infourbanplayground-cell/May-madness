@@ -7,6 +7,7 @@ const {
   upCurrentCourts, upBuildRound, upTotals, upStandings, upPrizes, upClimbPath,
   upValidate, upPairKey,
   upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
+  upScoringRound, upScoringRounds,
   upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
 } = E;
 
@@ -552,4 +553,125 @@ test("a round spent resting is on the receipt, not missing from it", () => {
     const rest = rec.find(x => x.resting);
     assert.equal(rest.points, 0);
   });
+});
+
+// ── the shuffle round ──────────────────────────────────────────────────────
+
+function shuffleNight(n = 16, rounds = 10) {
+  const night = newNight(n, {}, rounds);
+  night.shuffle = true;
+  return night;
+}
+
+test("the shuffle round pays nothing to anybody", () => {
+  const night = shuffleNight(16, 10);
+  playRound(night, () => true);
+  const after = upTotals(night);
+  assert.deepEqual([...new Set(Object.values(after))], [0],
+    "round one is the shuffle — it must not award a single point");
+  // and the very next round does pay
+  playRound(night, () => true);
+  assert.ok(Math.max(...Object.values(upTotals(night))) > 0, "round two should score");
+});
+
+test("the shuffle sets the ladder — that is its whole job", () => {
+  const night = shuffleNight(16, 10);
+  const before = { ...night.ladder0 };
+  const r = playRound(night, () => true);           // team1 wins everywhere
+  const after = upCurrentCourts(night);
+  const moved = Object.keys(after).filter(id => after[id] !== before[id]);
+  assert.ok(moved.length > 0, "nobody moved, so the shuffle decided nothing");
+  // winners on court 2 should now be on court 1
+  const c2 = r.courts.find(x => x.court === 2);
+  c2.team1.forEach(p => assert.equal(after[p], 1));
+});
+
+test("a shuffle win is not a win, and does not count as a match played", () => {
+  const night = shuffleNight(16, 10);
+  for (let r = 0; r < 10; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  upStandings(night).forEach(row => {
+    assert.equal(row.played, 9, `${row.name} played ${row.played}, expected 9 scoring rounds`);
+    assert.ok(row.wins <= 9);
+  });
+  assert.equal(upScoringRounds(night), 9);
+});
+
+test("but the shuffle still counts as a partner — that is the funnel's job", () => {
+  const night = shuffleNight(16, 10);
+  const r = playRound(night, () => true);
+  const m = r.courts[0];
+  const rows = upStandings(night);
+  const row = rows.find(x => x.id === m.team1[0]);
+  assert.ok(row.partners.includes(m.team1[1]),
+    "you played with them; TONIGHT'S PARTNERS must say so even though it paid nothing");
+});
+
+test("the receipt marks the shuffle rather than hiding it", () => {
+  const night = shuffleNight(16, 10);
+  for (let r = 0; r < 10; r++) playRound(night, () => true);
+  const rows = upStandings(night);
+  rows.forEach(row => {
+    const rec = upReceipt(night, row.id);
+    assert.equal(rec.length, 10, "all ten rounds appear");
+    assert.equal(rec[0].shuffle, true, "round one is flagged as the shuffle");
+    assert.equal(rec[0].points, 0);
+    assert.equal(rec[0].running, 0);
+    assert.ok(rec[0].myScore != null, "the scoreline is still shown");
+    assert.equal(rec[rec.length - 1].running, row.total, `${row.name}: receipt must match the table`);
+  });
+});
+
+test("an unplayed shuffle round advertises no stake", () => {
+  const night = shuffleNight(16, 10);
+  night.rounds.push(upBuildRound(night));
+  const m = night.rounds[0].courts[0];
+  const rec = upReceipt(night, m.team1[0]);
+  assert.equal(rec[0].pending, true);
+  assert.equal(rec[0].shuffle, true);
+  assert.deepEqual(rec[0].stake, { win: 0, lose: 0 });
+});
+
+test("the double still lands on the last round, not the last scoring round + 1", () => {
+  const night = shuffleNight(16, 10);
+  for (let r = 0; r < 10; r++) playRound(night, () => true);
+  const rec = upReceipt(night, night.rounds[9].courts[0].team1[0]);
+  assert.equal(rec[9].doubled, true);
+  assert.equal(rec[8].doubled, false);
+});
+
+test("a night without the shuffle is untouched by any of this", () => {
+  const night = newNight(16);
+  for (let r = 0; r < UP.ROUNDS; r++) playRound(night, () => true);
+  assert.equal(upScoringRounds(night), UP.ROUNDS);
+  assert.equal(upScoringRound(night, 1), true);
+  upStandings(night).forEach(row => assert.equal(row.played, UP.ROUNDS));
+  upReceipt(night, night.playerIds[0]).forEach(r => assert.ok(!r.shuffle));
+});
+
+test("the shuffle does not eat somebody's rest", () => {
+  // 9 players, 1 resting each round. With the shuffle ON, the night is the
+  // shuffle plus 9 scoring rounds, and the SCORING rounds are what has to come
+  // out even. Before the shuffle was taken off the rota, one player rested
+  // during it and therefore played all 9 scoring rounds while everyone else
+  // played 8.
+  const night = newNight(9, {}, 10);
+  night.shuffle = true;
+  for (let r = 0; r < 10; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  assert.equal(upScoringRounds(night), 9);
+  const rows = upStandings(night);
+  assert.deepEqual([...new Set(rows.map(r => r.played))], [8],
+    "every player should get the same number of SCORING matches");
+  assert.equal(upUneven(night), false);
+  assert.deepEqual(upValidate(night), []);
+});
+
+test("20 on four courts, with the shuffle, still splits evenly", () => {
+  const night = newNight(20, {}, 11);     // shuffle + 10 scoring
+  night.shuffle = true;
+  for (let r = 0; r < 11; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  assert.equal(upScoringRounds(night), 10);
+  const rows = upStandings(night);
+  assert.deepEqual([...new Set(rows.map(r => r.played))], [8]);
+  assert.equal(upUneven(night), false);
+  assert.deepEqual(upValidate(night), []);
 });

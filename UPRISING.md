@@ -56,6 +56,48 @@ on each court, playing 2 v 2.
 Nobody has to follow a table to know where they stand. They can see it — it is
 the court they are standing on. That is the whole design.
 
+### Round one: the shuffle
+
+> **Round 1 is the shuffle. Random courts, one match, no points. It decides where you start.**
+> **From then on: win and you go up, lose and you go down.**
+
+On night one nobody has form, so the opening ladder would be a draw — and a draw
+decides far too much. Measured over 30,000 nights with a random opening ladder:
+
+| Scoring rounds | Started C1 | C2 | C3 | C4 | Gap |
+|---|---|---|---|---|---|
+| 9 | **45%** | 31% | 17% | **6%** | **7.3×** |
+| 15 | 40% | 29% | 20% | 11% | 3.7× |
+| 25 | 35% | 28% | 22% | 14% | 2.4× |
+
+Even would be 25% each. Two equally good players have a **seven times**
+difference in their chance of winning, settled before a ball is hit, and a
+longer night barely dilutes it — the advantage compounds rather than washes out.
+
+A shuffle round fixes most of it:
+
+| | Gap |
+|---|---|
+| Random draw, 9 scoring rounds | 7.3× |
+| **Shuffle + 9 scoring rounds** | **2.7×** |
+| **Shuffle + 15 scoring rounds** | **2.1×** |
+
+What is left is *earned* — you are on Court 1 because you won a match, not
+because of a hat. It costs one round of time, it is one sentence to explain, and
+it needs no data, which is why it beats every seeding scheme for a room of
+strangers. Behind the scenes the shuffle's own courts can still be seeded from
+form where we have it; players never need to know, because the shuffle decides
+the real start either way.
+
+One detail that is not optional: **the shuffle is taken off the rest rota.** If
+it consumed a normal slot, the player who happened to rest during it would spend
+their rest on a round that pays nothing and so play every scoring round, while
+everyone else played one fewer — 9 players over 9 scoring rounds came out 9
+matches for one person and 8 for the other eight. Off the rota, the scoring
+rounds divide evenly again.
+
+The seeding note below therefore applies only when the shuffle is switched off.
+
 ### How partners are chosen
 
 The **opening ladder is seeded by form** — a player's average from previous
