@@ -303,7 +303,7 @@
   .court.final{--tick:var(--uv);border-color:rgba(var(--uv-rgb),.24);}
   .courtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
   .score{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em;}
-  .teamside{display:flex;flex-direction:column;gap:7px;min-width:0;}
+  .teamside{display:flex;flex-direction:column;gap:7px;min-width:0;overflow:hidden;}
 
   /* ── ladder (UPRISING) ──────────────────────── */
   .rung{
@@ -424,6 +424,65 @@
   }
   .pbtn:active{transform:scale(.94);}
   .pbtn.on{border-color:var(--neon);background:rgba(var(--volt-rgb),.14);color:var(--volt);box-shadow:var(--glow);}
+
+  /* ── what a round is worth ──────────────────── */
+  /* Mono, because these are numbers a player compares across courts at a
+     glance, and proportional digits make 8 and 4 different widths. */
+  .rung .worth{
+    flex:0 0 auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12px;
+    letter-spacing:.02em;color:var(--muted2);
+  }
+  .rung .worth b{color:var(--cream);font-weight:700;}
+  .rung.top .worth b{color:var(--volt);}
+  .rung .worth i{font-style:normal;}
+
+  .stake{
+    flex:1;min-width:0;text-align:center;white-space:nowrap;
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:9.5px;font-weight:700;
+    letter-spacing:.1em;color:var(--muted2);
+  }
+  .stake b{color:var(--cream);font-size:12px;}
+  .stake .sep{margin:0 5px;opacity:.5;}
+  .stake .dbl{
+    margin-left:7px;padding:1px 5px;color:var(--warn);
+    border:1px solid rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.10);
+  }
+
+  .award{
+    display:flex;flex-direction:column;gap:1px;margin-top:4px;
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;
+    color:var(--muted);
+  }
+  .award.win{color:var(--volt);}
+  .award i{font-style:normal;font-family:'Archivo',sans-serif;font-size:9.5px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);}
+
+  /* ── the receipt ────────────────────────────── */
+  .rcpt{display:flex;flex-direction:column;}
+  .rcpt .r{
+    display:flex;align-items:center;gap:11px;padding:10px 2px;
+    border-bottom:1px solid var(--line2);
+  }
+  .rcpt .rn{
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;
+    color:var(--muted2);width:26px;flex:0 0 auto;
+  }
+  .rcpt .ct{
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10px;font-weight:700;
+    letter-spacing:.08em;padding:3px 7px;border:1px solid var(--line);color:var(--muted);
+    flex:0 0 auto;
+  }
+  .rcpt .r.won .ct{border-color:var(--neon);color:var(--volt);background:rgba(var(--volt-rgb),.10);}
+  .rcpt .mid{flex:1;min-width:0;}
+  .rcpt .sc{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;font-weight:700;}
+  .rcpt .with{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);
+    display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rcpt .got{
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:17px;font-weight:700;
+    text-align:right;flex:0 0 auto;color:var(--muted);
+  }
+  .rcpt .r.won .got{color:var(--volt);}
+  .rcpt .got small{display:block;font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:.06em;}
 
   /* ── roster search ──────────────────────────── */
   .srch{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--tint);padding:0 12px;}
@@ -863,6 +922,50 @@ function upPrizes(night, byId = {}, baselines = {}) {
   const climb = [...eligible].sort((a, b) => (b.vsBaseline - a.vsBaseline)
                                              || (b.total - a.total))[0];
   return { champion, climb };
+}
+
+// Round by round, what one player did and what it paid. The scoring is only
+// worth anything to a player if they can see it accruing — "Court 1 is worth
+// double Court 3" means nothing until you have watched it happen to you — so
+// this walks the same rounds the table walks and records every award as it is
+// made, rather than re-deriving a total some other way. The running figure at
+// the end therefore cannot disagree with upStandings: same loop, same call to
+// upRoundPoints.
+function upReceipt(night, playerId) {
+  const dbl = upDoubleFinal(night), N = upRoundsTotal(night);
+  const out = [];
+  let running = 0;
+  (night.rounds || []).forEach(r => {
+    const isFinal = dbl && r.roundNum === N;
+    const m = (r.courts || []).find(x =>
+      (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
+    if (!m) {
+      out.push({ roundNum: r.roundNum, resting: true, points: 0, running,
+                 doubled: isFinal });
+      return;
+    }
+    const mine = (m.team1 || []).includes(playerId) ? 1 : 2;
+    const partner = (mine === 1 ? m.team1 : m.team2).find(p => p !== playerId);
+    const against = mine === 1 ? m.team2 : m.team1;
+    if (!upMatchDone(m)) {
+      out.push({ roundNum: r.roundNum, court: m.court, partner, against,
+                 pending: true, doubled: isFinal,
+                 stake: { win: upRoundPoints(m.court, true, isFinal),
+                          lose: upRoundPoints(m.court, false, isFinal) },
+                 points: null, running });
+      return;
+    }
+    const myScore = mine === 1 ? m.score1 : m.score2;
+    const theirScore = mine === 1 ? m.score2 : m.score1;
+    const won = myScore > theirScore;
+    const points = upRoundPoints(m.court, won, isFinal);
+    running += points;
+    out.push({ roundNum: r.roundNum, court: m.court, partner, against,
+               won, myScore, theirScore, points, running, doubled: isFinal,
+               moved: won ? (m.court === 1 ? "stay" : "up")
+                          : (m.court === upCourts(night) ? "stay" : "down") });
+  });
+  return out;
 }
 
 // Each player's court after every round — the line that makes the share card.
@@ -1519,6 +1622,11 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
     && t.rounds.every(r => r.courts.every(m => m.score1 != null && m.score2 != null))
     && (!isUp || t.rounds.length === upRoundsTotal(t));
   const nameOf = id => (byId[id] && byId[id].name) || "?";
+  // Whether the round ON SCREEN pays double, which is not the same question as
+  // whether the night has a double final — scroll back to round 3 and the
+  // stakes shown must be round 3's.
+  const dblRound = isUp && upDoubleFinal(t) && round.roundNum === upRoundsTotal(t);
+  const dblNow = dblRound;
 
   return (
     <div className="screen">
@@ -1532,12 +1640,25 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
         </div>
         {isUp && (
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div className="label" style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+              <span>The ladder{dblNow ? " · double points" : ""}</span><span>Win / lose</span>
+            </div>
+            {/* Doubled on the final round, so the rungs show the real stake
+                for the round being looked at, not the standard one. */}
             {Array.from({ length: upCourts(t) }, (_, i) => i + 1).map(c => {
               const on = Object.keys(ladder).filter(p => ladder[p] === c);
               return (
                 <div key={c} className={"rung" + (c === 1 ? " top" : "")}>
                   <span className="cn">COURT {c}</span>
                   <span className="who">{on.map(nameOf).join("  ·  ")}</span>
+                  {/* What this rung pays. "Court 1 is worth double Court 3"
+                      means nothing as a sentence in a sign-up post; it means
+                      something when it is written on the court you are
+                      standing on, before you play. */}
+                  <span className="worth">
+                    <b>{upRoundPoints(c, true, dblNow)}</b>
+                    <i>/{upRoundPoints(c, false, dblNow)}</i>
+                  </span>
                 </div>
               );
             })}
@@ -1626,20 +1747,39 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
           const s2 = done && !isEditing ? m.score2 : !show ? "–" : isUp ? upS(2) : pts - slide;
           return (
             <div key={key} className={"court" + (done && !isEditing ? " final" : show ? " live" : "")}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12, gap: 8 }}>
                 <span className="label">Court {m.court}</span>
+                {/* The stake, on the card, before anyone serves. A player who
+                    can see that this court pays 8 and the one below pays 4 is
+                    playing the ladder; one who cannot is just playing padel. */}
+                {isUp && (
+                  <span className="stake">
+                    WIN <b>{upRoundPoints(m.court, true, dblRound)}</b>
+                    <span className="sep">·</span>
+                    LOSE <b>{upRoundPoints(m.court, false, dblRound)}</b>
+                    {dblRound && <span className="dbl">2×</span>}
+                  </span>
+                )}
                 <span className="label" style={{ color: done ? "var(--blue-soft)" : show ? "var(--orange-br)" : "var(--muted2)" }}>
                   {done ? "Final" : show ? "Scoring" : "Awaiting"}
                 </span>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 10, alignItems: "center" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)", gap: 10, alignItems: "center" }}>
                 <div className="teamside">
                   {m.team1.map(id => (
                     <span key={id} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                       <Ava p={byId[id]} /><span className="truncate" style={{ fontWeight: 700, fontSize: 14 }}>{nameOf(id)}</span>
                     </span>
                   ))}
+                  {isUp && done && !isEditing && (
+                    <span className={"award" + (m.score1 > m.score2 ? " win" : "")}>
+                      +{upRoundPoints(m.court, m.score1 > m.score2, dblRound)}
+                      <i>{m.score1 > m.score2
+                        ? (m.court === 1 ? "hold Court 1" : "up to Court " + (m.court - 1))
+                        : (m.court === upCourts(t) ? "stay on Court " + m.court : "down to Court " + (m.court + 1))}</i>
+                    </span>
+                  )}
                 </div>
                 <div style={{ textAlign: "center" }}>
                   <div className="score" style={{ color: "var(--cream)" }}>
@@ -1647,11 +1787,26 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
                   </div>
                 </div>
                 <div className="teamside" style={{ alignItems: "flex-end" }}>
+                  {/* NOT row-reverse. Reversing the row puts the overflow on
+                      the left, so a long name was clipped mid-word and ran
+                      straight through the score instead of ellipsing —
+                      "Abdurahman Riyami" printed over the 0 of 16–0. Normal
+                      direction with the avatar last keeps the ellipsis where
+                      the browser can draw it. */}
                   {m.team2.map(id => (
-                    <span key={id} style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flexDirection: "row-reverse" }}>
-                      <Ava p={byId[id]} /><span className="truncate" style={{ fontWeight: 700, fontSize: 14 }}>{nameOf(id)}</span>
+                    <span key={id} style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 8, minWidth: 0, width: "100%" }}>
+                      <span className="truncate" style={{ fontWeight: 700, fontSize: 14, textAlign: "right" }}>{nameOf(id)}</span>
+                      <Ava p={byId[id]} />
                     </span>
                   ))}
+                  {isUp && done && !isEditing && (
+                    <span className={"award" + (m.score2 > m.score1 ? " win" : "")} style={{ textAlign: "right" }}>
+                      +{upRoundPoints(m.court, m.score2 > m.score1, dblRound)}
+                      <i>{m.score2 > m.score1
+                        ? (m.court === 1 ? "hold Court 1" : "up to Court " + (m.court - 1))
+                        : (m.court === upCourts(t) ? "stay on Court " + m.court : "down to Court " + (m.court + 1))}</i>
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -1731,7 +1886,8 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
 }
 
 // ── standings ───────────────────────────────────────────────────
-function Standings({ t, byId, onPodium }) {
+function Standings({ t, byId, onPodium, onReceipt }) {
+  const isUp = !!t && t.format === "uprising";
   if (!t) return (
     <div className="screen">
       <div><Eyebrow>Standings</Eyebrow><div className="display">No <em>session</em></div>
@@ -1759,12 +1915,18 @@ function Standings({ t, byId, onPodium }) {
       )}
       <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
         {table.map((s, i) => (
-          <div className="row" key={s.id} style={i === 0 ? { background: "rgba(var(--volt-rgb),.07)", borderLeft: "2px solid var(--volt)", paddingLeft: 10 } : null}>
+          <div className="row" key={s.id}
+            onClick={isUp && onReceipt ? () => onReceipt(s.id) : undefined}
+            style={Object.assign({},
+              i === 0 ? { background: "rgba(var(--volt-rgb),.07)", borderLeft: "2px solid var(--volt)", paddingLeft: 10 } : null,
+              isUp && onReceipt ? { cursor: "pointer" } : null)}>
             <span className="score" style={{ fontSize: 22, width: 34, textAlign: "center", color: i === 0 ? "var(--volt)" : "var(--muted2)" }}>{i + 1}</span>
             <Ava p={s} on={i === 0} />
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="truncate" style={{ display: "block", fontWeight: 800 }}>{s.name}</span>
-              <span className="label" style={{ letterSpacing: ".12em" }}>{s.played} played · {s.wins} won</span>
+              <span className="label" style={{ letterSpacing: ".12em" }}>
+                {s.played} played · {s.wins} won{isUp && onReceipt ? " · tap for rounds" : ""}
+              </span>
             </span>
             <span style={{ textAlign: "right" }}>
               <span className="score" style={{ fontSize: 26, display: "block",
@@ -1906,6 +2068,7 @@ function App() {
                                    upcourts: 4, uppoints: UP.TARGET, uprounds: UP.ROUNDS,
                                    format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
+  const [receipt, setReceipt] = useState(null);
   const [drafts, setDrafts] = useState({});
   const [editing, setEditing] = useState({});
   const [courtsPick, setCourtsPick] = useState(null);
@@ -2131,6 +2294,7 @@ function App() {
           : <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />)}
 
         {view === "standings" && <Standings t={shownT} byId={byId}
+          onReceipt={id => { setReceipt({ id, tid: shownT.id }); setModal("receipt"); }}
           onPodium={() => { setPodiumId(shownT ? shownT.id : null); setModal("podium"); }} />}
 
         {view === "players" && <Players people={people} tournaments={tournaments} query={query} setQuery={setQuery}
@@ -2267,6 +2431,72 @@ function App() {
                     <span className="label" style={{ letterSpacing: ".12em" }}>{p.record}</span>
                   </div>
                 ))}
+            </div>
+          </Sheet>
+        );
+      })()}
+
+      {/* Round by round, for one player. The ladder only teaches you to play
+          it if you can see what each round paid you — a total at the end is a
+          result, not feedback. */}
+      {modal === "receipt" && receipt && (() => {
+        const rt = tournaments.find(x => x.id === receipt.tid);
+        if (!rt) return null;
+        const rows = upReceipt(rt, receipt.id);
+        const me = byId[receipt.id] || {};
+        const nm = id => (byId[id] || {}).name || "?";
+        const total = rows.reduce((n, r) => n + (r.points || 0), 0);
+        const stand = calcStandings(rt, byId);
+        const pos = stand.findIndex(x => x.id === receipt.id) + 1;
+        return (
+          <Sheet title={me.name || "Player"} onClose={() => setModal(null)}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+              <span className="label">{pos ? `${pos} of ${stand.length}` : ""}</span>
+              <span>
+                <span className="score" style={{ fontSize: 30, color: "var(--volt)" }}>{total}</span>
+                <span className="label" style={{ marginLeft: 8 }}>points</span>
+              </span>
+            </div>
+            <div className="rcpt">
+              {rows.map(r => (
+                <div className={"r" + (r.won ? " won" : "")} key={r.roundNum}>
+                  <span className="rn">R{r.roundNum}</span>
+                  {r.resting
+                    ? <Fragment>
+                        <span className="ct">REST</span>
+                        <span className="mid"><span className="with">sat this round out</span></span>
+                        <span className="got">0</span>
+                      </Fragment>
+                    : r.pending
+                      ? <Fragment>
+                          <span className="ct">C{r.court}</span>
+                          <span className="mid">
+                            <span className="sc" style={{ color: "var(--muted2)" }}>not played</span>
+                            <span className="with">with {nm(r.partner)}</span>
+                          </span>
+                          <span className="got" style={{ fontSize: 13 }}>
+                            {r.stake.win}<small>or {r.stake.lose}</small>
+                          </span>
+                        </Fragment>
+                      : <Fragment>
+                          <span className="ct">C{r.court}</span>
+                          <span className="mid">
+                            <span className="sc">{r.myScore}–{r.theirScore}
+                              {r.doubled && <span style={{ color: "var(--warn)", fontSize: 10, marginLeft: 7 }}>2×</span>}
+                            </span>
+                            <span className="with">
+                              with {nm(r.partner)} · {r.moved === "up" ? "▲ up" : r.moved === "down" ? "▼ down" : "– held"}
+                            </span>
+                          </span>
+                          <span className="got">+{r.points}<small>{r.running}</small></span>
+                        </Fragment>}
+                </div>
+              ))}
+            </div>
+            <div className="note" style={{ marginTop: 14 }}>
+              Court 1 pays {UP.WIN[1]} for a win and {UP.LOSE[1]} for a loss; Court {upCourts(rt)} pays{" "}
+              {UP.WIN[upCourts(rt)]} and {UP.LOSE[upCourts(rt)]}. Losing on Court 1 is worth the same as
+              winning on Court 3 — where you got to counts as much as what you did there.
             </div>
           </Sheet>
         );

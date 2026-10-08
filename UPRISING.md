@@ -83,6 +83,21 @@ better rule.
 
 ### Scoring — the court is the multiplier
 
+**Players can see all of it, round by round.** The price of every rung is
+printed on the ladder (`8/4`, `6/3`, `4/2`, `2/1`), every court card carries its
+own stake before anyone serves (`WIN 8 · LOSE 4`), and the moment a result is
+locked both pairs see what they earned and where they are going (`+8 HOLD COURT
+1`, `+4 DOWN TO COURT 2`). Tapping any name in the table opens that player's
+round-by-round receipt: court, scoreline, partner, which way they moved, what it
+paid and the running total. A table that only shows a number at the end is a
+result; this is feedback, and it is what lets someone play the ladder rather
+than just play padel.
+
+The receipt walks the same rounds the table walks and records each award as it
+is made, so the two cannot disagree — there is a test that checks every player's
+receipt ends on exactly their table total.
+
+
 Raw points cannot be the score. A player on Court 4 beating weaker opponents
 scores more points than a player on Court 1 losing to the best in the room, so
 ranking on raw points would reward staying at the bottom — the exact opposite of

@@ -386,6 +386,50 @@ function upPrizes(night, byId = {}, baselines = {}) {
   return { champion, climb };
 }
 
+// Round by round, what one player did and what it paid. The scoring is only
+// worth anything to a player if they can see it accruing — "Court 1 is worth
+// double Court 3" means nothing until you have watched it happen to you — so
+// this walks the same rounds the table walks and records every award as it is
+// made, rather than re-deriving a total some other way. The running figure at
+// the end therefore cannot disagree with upStandings: same loop, same call to
+// upRoundPoints.
+function upReceipt(night, playerId) {
+  const dbl = upDoubleFinal(night), N = upRoundsTotal(night);
+  const out = [];
+  let running = 0;
+  (night.rounds || []).forEach(r => {
+    const isFinal = dbl && r.roundNum === N;
+    const m = (r.courts || []).find(x =>
+      (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
+    if (!m) {
+      out.push({ roundNum: r.roundNum, resting: true, points: 0, running,
+                 doubled: isFinal });
+      return;
+    }
+    const mine = (m.team1 || []).includes(playerId) ? 1 : 2;
+    const partner = (mine === 1 ? m.team1 : m.team2).find(p => p !== playerId);
+    const against = mine === 1 ? m.team2 : m.team1;
+    if (!upMatchDone(m)) {
+      out.push({ roundNum: r.roundNum, court: m.court, partner, against,
+                 pending: true, doubled: isFinal,
+                 stake: { win: upRoundPoints(m.court, true, isFinal),
+                          lose: upRoundPoints(m.court, false, isFinal) },
+                 points: null, running });
+      return;
+    }
+    const myScore = mine === 1 ? m.score1 : m.score2;
+    const theirScore = mine === 1 ? m.score2 : m.score1;
+    const won = myScore > theirScore;
+    const points = upRoundPoints(m.court, won, isFinal);
+    running += points;
+    out.push({ roundNum: r.roundNum, court: m.court, partner, against,
+               won, myScore, theirScore, points, running, doubled: isFinal,
+               moved: won ? (m.court === 1 ? "stay" : "up")
+                          : (m.court === upCourts(night) ? "stay" : "down") });
+  });
+  return out;
+}
+
 // Each player's court after every round — the line that makes the share card.
 function upClimbPath(night, playerId) {
   const path = [night.ladder0 ? night.ladder0[playerId] : UP.COURTS];
@@ -472,7 +516,7 @@ if (typeof module !== "undefined" && module.exports) {
     UP, upPlayerIds, upSeedLadder, upPairCourt, upRoundPoints, upMatchDone, upRoundDone,
     upCourtsAfter, upCurrentCourts, upSeenPairs, upBuildRound, upTotals,
     upStandings, upPrizes, upClimbPath, upValidate, upPairKey,
-    upCourts, upRoundsTotal, upRestCount, upFairRounds, upDoubleFinal,
+    upCourts, upRoundsTotal, upRestCount, upFairRounds, upDoubleFinal, upReceipt,
     upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
   };
 }

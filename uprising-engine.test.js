@@ -6,7 +6,7 @@ const {
   UP, upSeedLadder, upPairCourt, upRoundPoints, upRoundDone, upCourtsAfter,
   upCurrentCourts, upBuildRound, upTotals, upStandings, upPrizes, upClimbPath,
   upValidate, upPairKey,
-  upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota,
+  upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
   upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
 } = E;
 
@@ -477,4 +477,79 @@ test("the table counts real wins and a real game difference", () => {
   // and the differences cancel, because one pair's gain is the other's loss
   assert.equal(rows.reduce((s, r) => s + r.diff, 0), 0);
   assert.ok(rows[0].wins > 0, "the leader must have won something");
+});
+
+// ── the per-round receipt ──────────────────────────────────────────────────
+
+test("the receipt totals exactly what the table says", () => {
+  // The scoring is only worth anything to a player if they can watch it
+  // accrue, and a breakdown that disagrees with the table is worse than none.
+  const night = newNight(16);
+  for (let r = 0; r < UP.ROUNDS; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+  const rows = upStandings(night);
+  rows.forEach(row => {
+    const rec = upReceipt(night, row.id);
+    assert.equal(rec.length, UP.ROUNDS, `${row.name}: ${rec.length} rounds on the receipt`);
+    assert.equal(rec[rec.length - 1].running, row.total,
+      `${row.name}: receipt ends on ${rec[rec.length - 1].running}, table says ${row.total}`);
+    assert.equal(rec.reduce((t, x) => t + (x.points || 0), 0), row.total);
+  });
+});
+
+test("the receipt says what each round paid, and why", () => {
+  const night = newNight(16);
+  playRound(night, () => true);
+  const m = night.rounds[0].courts.find(x => x.court === 2);
+  const rec = upReceipt(night, m.team1[0]);
+  assert.equal(rec[0].court, 2);
+  assert.equal(rec[0].won, true);
+  assert.equal(rec[0].points, UP.WIN[2], "a win on Court 2 is six");
+  assert.equal(rec[0].moved, "up");
+  assert.equal(rec[0].partner, m.team1[1]);
+  const loser = upReceipt(night, m.team2[0]);
+  assert.equal(loser[0].points, UP.LOSE[2]);
+  assert.equal(loser[0].moved, "down");
+  // Court 1 winners and bottom-court losers have nowhere to go
+  const top = upReceipt(night, night.rounds[0].courts.find(x => x.court === 1).team1[0]);
+  assert.equal(top[0].moved, "stay");
+  const bot = upReceipt(night, night.rounds[0].courts.find(x => x.court === 4).team2[0]);
+  assert.equal(bot[0].moved, "stay");
+});
+
+test("an unplayed round shows what is at stake, not a score", () => {
+  const night = newNight(16);
+  night.rounds.push(upBuildRound(night));
+  const m = night.rounds[0].courts.find(x => x.court === 3);
+  const rec = upReceipt(night, m.team1[0]);
+  assert.equal(rec[0].pending, true);
+  assert.equal(rec[0].points, null);
+  assert.deepEqual(rec[0].stake, { win: UP.WIN[3], lose: UP.LOSE[3] });
+});
+
+test("the final round's stake and award are both doubled, when it is doubled", () => {
+  const night = newNight(16);
+  for (let r = 0; r < UP.ROUNDS; r++) playRound(night, () => true);
+  const last = night.rounds[UP.ROUNDS - 1].courts.find(x => x.court === 1);
+  const rec = upReceipt(night, last.team1[0]);
+  const fin = rec[UP.ROUNDS - 1];
+  assert.equal(fin.doubled, true);
+  assert.equal(fin.points, UP.WIN[1] * UP.FINAL_MULT);
+
+  // 9 players: somebody sits out every round, so the final is NOT doubled
+  const odd = newNight(9, {}, 9);
+  for (let r = 0; r < 9; r++) playRound(odd, () => true);
+  const oRec = upReceipt(odd, odd.playerIds[0]);
+  assert.ok(oRec.every(x => x.doubled === false));
+});
+
+test("a round spent resting is on the receipt, not missing from it", () => {
+  const night = newNight(9, {}, 9);
+  for (let r = 0; r < 9; r++) playRound(night, () => true);
+  night.playerIds.forEach(id => {
+    const rec = upReceipt(night, id);
+    assert.equal(rec.length, 9, "every round should appear, played or not");
+    assert.equal(rec.filter(x => x.resting).length, 1, `${id} should rest exactly once`);
+    const rest = rec.find(x => x.resting);
+    assert.equal(rest.points, 0);
+  });
 });
