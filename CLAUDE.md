@@ -153,6 +153,21 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   edge of the bitmap while every assertion passed, because they were all about
   the font and none about where the ink landed. Its numbers are hand-written, so
   re-check them against the RULES screen when the defaults move.
+- **The announcement lives in `uprising-social.json`** — date, time, entry,
+  prizes, cap. The FORMAT numbers are deliberately NOT in it: `ops/uprising-facts.mjs`
+  reads courts, rounds, target, running time and the points table out of the
+  shipped engine, so a post cannot advertise a figure the app contradicts (the
+  same discipline as `blackout-season.json`). Build with
+  `python3 build-uprising-announce.py && node ops/render-uprising-announce.mjs` —
+  three 1080x1350 carousel cards, a 1080x1920 story, and `CAPTIONS.txt` with the
+  WhatsApp and Instagram copy generated from the same facts. The renderer fails
+  on any element that runs off its canvas; pass `PW_CHROMIUM` in a container
+  where Playwright has no headless shell.
+- **First UPRISING: Saturday 17 Oct 2026, 17:30–20:00, 7 OMR, 16 places.**
+  Champion 15 OMR; THE CLIMB takes a free entry to the next one rather than
+  cash — it costs 7 OMR of foregone entry instead of 15 in vouchers and brings
+  the winner back, which is what a monthly format needs. Change the date in the
+  JSON and every card and caption re-renders.
 - June Fury (Vol.1) used to share this directory. It now has its own at
   `/var/www/june.urbanpadel.om/public`, still on port 3001, so the landing
   page's archive link survives.

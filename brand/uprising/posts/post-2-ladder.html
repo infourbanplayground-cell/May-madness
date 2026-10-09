@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="http://127.0.0.1:8901/lib/fonts.css" rel="stylesheet" />
+<style>html,body{width:1080px;height:1350px;}
+  :root{
+    --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
+    --volt:#00F5C8; --uv:#9D6BFF; --cream:#F2F0F7; --muted:#9A95A8;
+    --muted2:#8A84A2; --warn:#FF4D6D; --line:rgba(var(--cream-rgb),.12);
+    --neon:rgba(var(--volt-rgb),.55);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{position:relative;overflow:hidden;background:#06060A;color:var(--cream);
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wash{position:absolute;inset:0;background:
+      radial-gradient(ellipse 90% 55% at 12% 4%,rgba(var(--uv-rgb),.17),transparent),
+      radial-gradient(ellipse 80% 55% at 92% 8%,rgba(var(--volt-rgb),.15),transparent),
+      radial-gradient(ellipse 70% 50% at 50% 100%,rgba(var(--volt-rgb),.10),transparent),
+      linear-gradient(180deg,#030305,#06060A 58%,#04040A);}
+  .grid{position:absolute;inset:0;background-image:
+      linear-gradient(rgba(var(--volt-rgb),.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(var(--volt-rgb),.05) 1px,transparent 1px);
+    background-size:60px 60px;}
+  .grain{position:absolute;inset:0;opacity:.26;mix-blend-mode:overlay;background-image:var(--grain);}
+  .pad{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+  .disp{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;letter-spacing:.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .top{display:flex;align-items:center;gap:16px;}
+  .mark{width:46px;height:46px;border:1px solid var(--neon);background:rgba(var(--volt-rgb),.12);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(var(--volt-rgb),.30);}
+  .top .nm{font-size:30px;}
+  .top .sub{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.3em;color:var(--uv);}
+  .lede{color:var(--muted);line-height:1.45;}
+  .lede b{color:var(--cream);font-weight:800;}
+  .host{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.2em;color:var(--volt);}
+  .host small{display:block;color:var(--muted2);letter-spacing:.2em;margin-top:6px;}
+  .foot{padding-top:30px;border-top:1px solid var(--line);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:26px;}
+  .fact b{display:block;font-family:'Archivo';font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;text-transform:uppercase;white-space:nowrap;}
+  .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted2);margin-top:5px;}
+.pad{padding:60px 64px 54px;}
+  .lhead{display:flex;justify-content:space-between;font-size:12px;font-weight:800;
+    letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;}
+  .rung{display:flex;align-items:center;gap:20px;border:1px solid var(--line);
+    padding:21px 22px;margin-bottom:9px;background:rgba(var(--cream-rgb),.025);}
+  .rung.top{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
+    box-shadow:0 0 34px rgba(var(--volt-rgb),.22);}
+  .rung .cn{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    letter-spacing:.14em;width:168px;color:var(--muted);}
+  .rung.top .cn{color:var(--volt);}
+  .rung .note{flex:1;font-size:17px;color:var(--muted2);}
+  .rung .pts{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+    width:112px;text-align:right;}
+  .rung .pts b{color:var(--cream);} .rung.top .pts b{color:var(--volt);}
+  .rung .pts i{font-style:normal;color:var(--muted2);}
+  .mid{display:flex;justify-content:space-between;padding:0 24px;margin:-3px 0 5px;}
+  .mid span{font-size:15px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;}
+  .up{color:var(--volt);} .dn{color:var(--uv);}
+
+  h2{font-size:84px;line-height:.88;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.42);}
+  .lede{font-size:22px;margin-top:22px;max-width:900px;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .step{border:1px solid var(--line);padding:21px 19px 23px;background:rgba(var(--cream-rgb),.025);}
+  .step .n{font-size:13px;font-weight:700;color:var(--volt);letter-spacing:.14em;}
+  .step b{display:block;font-size:20px;font-weight:800;color:var(--cream);margin-top:9px;}
+  .step i{display:block;font-style:normal;font-size:15px;line-height:1.4;color:var(--muted2);margin-top:7px;}
+  .fact b{font-size:38px;} .fact i{font-size:11px;}
+  .host{font-size:14px;text-align:right;}
+</style>
+</head><body>
+<div class="wash"></div><div class="grid"></div><div class="grain"></div>
+<div class="pad">
+  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="nm disp">UPRISING</span>
+      <span class="sub">How it works</span></div>
+  <div>
+    <h2 class="disp">Win and you<br>go <em>up a court</em></h2>
+    <p class="lede">Lose and you go down. Points are worth more the higher you climb — so
+       farming wins at the bottom gets you nowhere. <b>Losing on Court 1 is worth a win on
+       Court 3.</b></p>
+  </div>
+  <div><div class="lhead"><span>The ladder</span><span>Win / lose</span></div><div class="rung top"><span class="cn">COURT 1</span><span class="note">The top. Winners stay.</span>
+          <span class="pts"><b>8</b><i> / 4</i></span></div><div class="mid"><span class="up">&#9650; Winners move up</span><span class="dn">Losers move down &#9660;</span></div><div class="rung"><span class="cn">COURT 2</span><span class="note">Win here and you are on Court 1 next round.</span>
+          <span class="pts"><b>6</b><i> / 3</i></span></div><div class="rung"><span class="cn">COURT 3</span><span class="note">A win here is worth a loss on Court 1.</span>
+          <span class="pts"><b>4</b><i> / 2</i></span></div><div class="rung"><span class="cn">COURT 4</span><span class="note">The bottom. Only one way to go.</span>
+          <span class="pts"><b>2</b><i> / 1</i></span></div></div>
+  <div class="steps">
+    <div class="step"><span class="n mono">01</span><b>The shuffle</b>
+      <i>Round one scores nothing. It decides where you start, so your court is won, not drawn.</i></div>
+    <div class="step"><span class="n mono">02</span><b>New partners</b>
+      <i>Re-paired on arrival, closest match possible. Ten different partners in a night.</i></div>
+    <div class="step"><span class="n mono">03</span><b>Last round doubles</b>
+      <i>Highest total wins. One night in three is decided in the final round.</i></div>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">4</b><i>Courts</i></span>
+      <span class="fact"><b class="disp">14</b><i>Scoring rounds</i></span>
+      <span class="fact"><b class="disp">11</b><i>Point match</i></span>
+      <span class="fact"><b class="disp">2h30</b><i>Start to finish</i></span>
+    </div>
+    <span class="host">AMERICANO.URBANPADEL.OM</span>
+  </div>
+</div>
+</body></html>

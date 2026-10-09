@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="http://127.0.0.1:8901/lib/fonts.css" rel="stylesheet" />
+<style>html,body{width:1080px;height:1350px;}
+  :root{
+    --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
+    --volt:#00F5C8; --uv:#9D6BFF; --cream:#F2F0F7; --muted:#9A95A8;
+    --muted2:#8A84A2; --warn:#FF4D6D; --line:rgba(var(--cream-rgb),.12);
+    --neon:rgba(var(--volt-rgb),.55);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{position:relative;overflow:hidden;background:#06060A;color:var(--cream);
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wash{position:absolute;inset:0;background:
+      radial-gradient(ellipse 90% 55% at 12% 4%,rgba(var(--uv-rgb),.17),transparent),
+      radial-gradient(ellipse 80% 55% at 92% 8%,rgba(var(--volt-rgb),.15),transparent),
+      radial-gradient(ellipse 70% 50% at 50% 100%,rgba(var(--volt-rgb),.10),transparent),
+      linear-gradient(180deg,#030305,#06060A 58%,#04040A);}
+  .grid{position:absolute;inset:0;background-image:
+      linear-gradient(rgba(var(--volt-rgb),.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(var(--volt-rgb),.05) 1px,transparent 1px);
+    background-size:60px 60px;}
+  .grain{position:absolute;inset:0;opacity:.26;mix-blend-mode:overlay;background-image:var(--grain);}
+  .pad{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+  .disp{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;letter-spacing:.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .top{display:flex;align-items:center;gap:16px;}
+  .mark{width:46px;height:46px;border:1px solid var(--neon);background:rgba(var(--volt-rgb),.12);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(var(--volt-rgb),.30);}
+  .top .nm{font-size:30px;}
+  .top .sub{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.3em;color:var(--uv);}
+  .lede{color:var(--muted);line-height:1.45;}
+  .lede b{color:var(--cream);font-weight:800;}
+  .host{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.2em;color:var(--volt);}
+  .host small{display:block;color:var(--muted2);letter-spacing:.2em;margin-top:6px;}
+  .foot{padding-top:30px;border-top:1px solid var(--line);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:26px;}
+  .fact b{display:block;font-family:'Archivo';font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;text-transform:uppercase;white-space:nowrap;}
+  .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted2);margin-top:5px;}
+.pad{padding:60px 64px 54px;}
+  .kick{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
+  h1{font-size:112px;line-height:.86;margin-top:26px;}
+  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
+  .lede{font-size:26px;margin-top:30px;max-width:900px;}
+  .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:30px 0;}
+  .day{font-size:100px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
+  .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
+    letter-spacing:.14em;color:var(--cream);margin-top:14px;}
+  .fact b{font-size:46px;} .fact i{font-size:12px;}
+  .host{font-size:15px;text-align:right;white-space:nowrap;} .host small{font-size:12px;}
+</style>
+</head><body>
+<div class="wash"></div><div class="grid"></div><div class="grain"></div>
+<div class="pad">
+  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="nm disp">UPRISING</span>
+      <span class="sub">Urban Playground</span></div>
+  <div>
+    <div class="kick mono">New · One Saturday a month</div>
+    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <p class="lede">A new padel social. <b>Come on your own</b> — you play with a different
+       partner almost every round, and the court you are standing on is your position.</p>
+  </div>
+  <div class="when">
+    <div class="day disp">17 OCT</div>
+    <div class="dl">SATURDAY &nbsp;·&nbsp; 17:30 &#8211; 20:00 &nbsp;·&nbsp; DOORS 17:15</div>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">16</b><i>Places only</i></span>
+      <span class="fact"><b class="disp">15</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp">7 OMR</b><i>To play</i></span>
+    </div>
+    <span class="host">AMERICANO.URBANPADEL.OM<small>COME ALONE. LEAVE WITH TEN.</small></span>
+  </div>
+</div>
+</body></html>

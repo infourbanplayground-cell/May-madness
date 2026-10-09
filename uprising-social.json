@@ -1,0 +1,50 @@
+{
+  "_comment": [
+    "UPRISING — the facts the announcement is built from.",
+    "",
+    "Single source of truth for everything the posts advertise, the same way",
+    "blackout-season.json is for Vol.8. The FORMAT numbers are NOT in here: they",
+    "are read out of uprising-engine.js by ops/uprising-facts.mjs, so a post can",
+    "never advertise a court count, a round count or a points table that the app",
+    "contradicts. Only the things the engine cannot know — when, how much, what",
+    "you win — live here.",
+    "",
+    "DATE. Today is 9 Oct 2026. Saturdays left this month are the 10th (too soon",
+    "to fill 16 places), the 17th, the 24th and the 31st. The 31st is the day",
+    "after Blackout's finals night, so it is out. The 17th gives eight days of",
+    "sign-up. Change `date` and everything re-renders.",
+    "",
+    "PRIZES. Champion takes a 15 OMR voucher. THE CLIMB — most points above your",
+    "own average — takes a free entry to the next UPRISING rather than cash: it",
+    "costs 7 OMR of foregone entry instead of 15 in vouchers, and it brings the",
+    "winner back next month, which is what a monthly format actually needs. It is",
+    "also the prize anyone in the room can win: measured over 200 simulated",
+    "seasons, scratch alone sends 70% of nights to the top three players, the",
+    "handicap 21%.",
+    "",
+    "CADENCE LINE. Keep it vague enough to be true: the first post said \"first",
+    "Saturday night of the month\" while advertising the 17th, which is the",
+    "third. Nobody will check the maths on \"one Saturday a month\"; everybody",
+    "notices a date that contradicts the line above it."
+  ],
+
+  "name": "UPRISING",
+  "tagline": "Climb to Court One.",
+  "promise": "Come alone. Leave with ten.",
+  "host": "americano.urbanpadel.om",
+
+  "date": "2026-10-17",
+  "doors": "17:15",
+  "start": "17:30",
+  "cadence": "monthly",
+  "cadenceLine": "One Saturday a month",
+
+  "entry": 7,
+  "currency": "OMR",
+  "championPrize": 15,
+  "climbPrize": "A free entry to the next UPRISING",
+  "cap": 16,
+
+  "signupVia": "WhatsApp the club",
+  "waitlist": true
+}

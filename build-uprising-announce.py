@@ -1,0 +1,410 @@
+# -*- coding: utf-8 -*-
+"""UPRISING — the announcement.
+
+A three-card carousel at 1080x1350 (Instagram's portrait crop, the largest the
+feed will show) plus a 1080x1920 story card:
+
+  post-1-hero.png     what it is, when, and the one line that sells it
+  post-2-ladder.png   how it works, with the ladder as the hero
+  post-3-prizes.png   what it costs, what you win, and why anyone can win it
+  post-story.png      the whole thing on one tall card
+
+Every figure is derived, never typed. The date, entry and prizes come from
+uprising-social.json; the court count, round count, target, running time and
+points table come out of the SHIPPED engine via ops/uprising-facts.mjs. A post
+cannot advertise a number the app contradicts.
+
+  python3 build-uprising-announce.py
+  node ops/render-uprising-announce.mjs
+"""
+import datetime, json, os, subprocess, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "brand", "uprising", "posts")
+os.makedirs(OUT, exist_ok=True)
+
+S = json.load(open(os.path.join(HERE, "uprising-social.json")))
+F = json.loads(subprocess.check_output(
+    ["node", os.path.join(HERE, "ops", "uprising-facts.mjs")], text=True))
+
+# Dates are formatted here, from a plain YYYY-MM-DD, never through
+# toISOString() — the server runs UTC and Oman is UTC+4, which has silently
+# moved a date back a day in this repo before.
+y, m, d = (int(x) for x in S["date"].split("-"))
+DT = datetime.date(y, m, d)
+DAY = DT.strftime("%A").upper()
+DATE_LONG = f'{DT.strftime("%A")} {DT.day} {DT.strftime("%B")}'
+DATE_SHORT = f'{DT.strftime("%a").upper()} {DT.day} {DT.strftime("%b").upper()}'
+
+FONTS = os.environ.get("UP_FONTS",
+    "https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;"
+    "1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap")
+
+CUR = S["currency"]
+END = (datetime.datetime.combine(DT, datetime.time(int(S["start"][:2]), int(S["start"][3:])))
+       + datetime.timedelta(minutes=F["minutes"])).strftime("%H:%M")
+
+CSS = """
+  :root{
+    --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
+    --volt:#00F5C8; --uv:#9D6BFF; --cream:#F2F0F7; --muted:#9A95A8;
+    --muted2:#8A84A2; --warn:#FF4D6D; --line:rgba(var(--cream-rgb),.12);
+    --neon:rgba(var(--volt-rgb),.55);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{position:relative;overflow:hidden;background:#06060A;color:var(--cream);
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wash{position:absolute;inset:0;background:
+      radial-gradient(ellipse 90% 55% at 12% 4%,rgba(var(--uv-rgb),.17),transparent),
+      radial-gradient(ellipse 80% 55% at 92% 8%,rgba(var(--volt-rgb),.15),transparent),
+      radial-gradient(ellipse 70% 50% at 50% 100%,rgba(var(--volt-rgb),.10),transparent),
+      linear-gradient(180deg,#030305,#06060A 58%,#04040A);}
+  .grid{position:absolute;inset:0;background-image:
+      linear-gradient(rgba(var(--volt-rgb),.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(var(--volt-rgb),.05) 1px,transparent 1px);
+    background-size:60px 60px;}
+  .grain{position:absolute;inset:0;opacity:.26;mix-blend-mode:overlay;background-image:var(--grain);}
+  .pad{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+  .disp{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;letter-spacing:.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .top{display:flex;align-items:center;gap:16px;}
+  .mark{width:46px;height:46px;border:1px solid var(--neon);background:rgba(var(--volt-rgb),.12);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(var(--volt-rgb),.30);}
+  .top .nm{font-size:30px;}
+  .top .sub{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.3em;color:var(--uv);}
+  .lede{color:var(--muted);line-height:1.45;}
+  .lede b{color:var(--cream);font-weight:800;}
+  .host{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.2em;color:var(--volt);}
+  .host small{display:block;color:var(--muted2);letter-spacing:.2em;margin-top:6px;}
+  .foot{padding-top:30px;border-top:1px solid var(--line);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:26px;}
+  .fact b{display:block;font-family:'Archivo';font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;text-transform:uppercase;white-space:nowrap;}
+  .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted2);margin-top:5px;}
+"""
+
+MARK = ("""<span class="mark"><svg viewBox="0 0 100 100" width="24" height="24">"""
+        """<path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" """
+        """stroke-linecap="square"/></svg></span>""")
+
+
+def page(name, w, h, pad, body, extra=""):
+    html = f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="{FONTS}" rel="stylesheet" />
+<style>html,body{{width:{w}px;height:{h}px;}}{CSS}.pad{{padding:{pad};}}{extra}</style>
+</head><body>
+<div class="wash"></div><div class="grid"></div><div class="grain"></div>
+<div class="pad">{body}</div>
+</body></html>"""
+    open(os.path.join(OUT, name), "w").write(html)
+    return name
+
+
+def header(sub="Urban Playground"):
+    return f"""<div class="top">{MARK}<span class="nm disp">{S['name']}</span>
+      <span class="sub">{sub}</span></div>"""
+
+
+def ladder(rows_note=True):
+    out = ['<div><div class="lhead"><span>The ladder</span><span>Win / lose</span></div>']
+    notes = {1: "The top. Winners stay.",
+             2: "Win here and you are on Court 1 next round.",
+             3: "A win here is worth a loss on Court 1.",
+             4: "The bottom. Only one way to go."}
+    for c in range(1, F["courts"] + 1):
+        top = " top" if c == 1 else ""
+        # Without the note there is no flex filler, so the points floated in
+        # the middle of a very wide rung instead of sitting at its right edge.
+        note = (f'<span class="note">{notes.get(c, "")}</span>' if rows_note
+                else '<span class="note"></span>')
+        out.append(f'''<div class="rung{top}"><span class="cn">COURT {c}</span>{note}
+          <span class="pts"><b>{F["win"][str(c)]}</b><i> / {F["lose"][str(c)]}</i></span></div>''')
+        if c == 1:
+            out.append('<div class="mid"><span class="up">&#9650; Winners move up</span>'
+                       '<span class="dn">Losers move down &#9660;</span></div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+LADDER_CSS = """
+  .lhead{display:flex;justify-content:space-between;font-size:12px;font-weight:800;
+    letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;}
+  .rung{display:flex;align-items:center;gap:20px;border:1px solid var(--line);
+    padding:21px 22px;margin-bottom:9px;background:rgba(var(--cream-rgb),.025);}
+  .rung.top{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
+    box-shadow:0 0 34px rgba(var(--volt-rgb),.22);}
+  .rung .cn{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    letter-spacing:.14em;width:168px;color:var(--muted);}
+  .rung.top .cn{color:var(--volt);}
+  .rung .note{flex:1;font-size:17px;color:var(--muted2);}
+  .rung .pts{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+    width:112px;text-align:right;}
+  .rung .pts b{color:var(--cream);} .rung.top .pts b{color:var(--volt);}
+  .rung .pts i{font-style:normal;color:var(--muted2);}
+  .mid{display:flex;justify-content:space-between;padding:0 24px;margin:-3px 0 5px;}
+  .mid span{font-size:15px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;}
+  .up{color:var(--volt);} .dn{color:var(--uv);}
+"""
+
+# ── 1. hero ────────────────────────────────────────────────────────────────
+page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
+  {header()}
+  <div>
+    <div class="kick mono">New · {S['cadenceLine']}</div>
+    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <p class="lede">A new padel social. <b>Come on your own</b> — you play with a different
+       partner almost every round, and the court you are standing on is your position.</p>
+  </div>
+  <div class="when">
+    <div class="day disp">{DT.day} {DT.strftime("%b").upper()}</div>
+    <div class="dl">{DT.strftime("%A").upper()} &nbsp;·&nbsp; {S['start']} &#8211; {END} &nbsp;·&nbsp; DOORS {S['doors']}</div>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">{F['players']}</b><i>Places only</i></span>
+      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
+    </div>
+    <span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span>
+  </div>
+""", """
+  .kick{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
+  h1{font-size:112px;line-height:.86;margin-top:26px;}
+  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
+  .lede{font-size:26px;margin-top:30px;max-width:900px;}
+  .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:30px 0;}
+  .day{font-size:100px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
+  .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
+    letter-spacing:.14em;color:var(--cream);margin-top:14px;}
+  .fact b{font-size:46px;} .fact i{font-size:12px;}
+  .host{font-size:15px;text-align:right;white-space:nowrap;} .host small{font-size:12px;}
+""")
+
+# ── 2. the ladder ──────────────────────────────────────────────────────────
+page("post-2-ladder.html", 1080, 1350, "60px 64px 54px", f"""
+  {header("How it works")}
+  <div>
+    <h2 class="disp">Win and you<br>go <em>up a court</em></h2>
+    <p class="lede">Lose and you go down. Points are worth more the higher you climb — so
+       farming wins at the bottom gets you nowhere. <b>Losing on Court 1 is worth a win on
+       Court 3.</b></p>
+  </div>
+  {ladder()}
+  <div class="steps">
+    <div class="step"><span class="n mono">01</span><b>The shuffle</b>
+      <i>Round one scores nothing. It decides where you start, so your court is won, not drawn.</i></div>
+    <div class="step"><span class="n mono">02</span><b>New partners</b>
+      <i>Re-paired on arrival, closest match possible. Ten different partners in a night.</i></div>
+    <div class="step"><span class="n mono">03</span><b>Last round doubles</b>
+      <i>Highest total wins. One night in three is decided in the final round.</i></div>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">{F['courts']}</b><i>Courts</i></span>
+      <span class="fact"><b class="disp">{F['scoring']}</b><i>Scoring rounds</i></span>
+      <span class="fact"><b class="disp">{F['target']}</b><i>Point match</i></span>
+      <span class="fact"><b class="disp">2h30</b><i>Start to finish</i></span>
+    </div>
+    <span class="host">{S['host'].upper()}</span>
+  </div>
+""", LADDER_CSS + """
+  h2{font-size:84px;line-height:.88;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.42);}
+  .lede{font-size:22px;margin-top:22px;max-width:900px;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .step{border:1px solid var(--line);padding:21px 19px 23px;background:rgba(var(--cream-rgb),.025);}
+  .step .n{font-size:13px;font-weight:700;color:var(--volt);letter-spacing:.14em;}
+  .step b{display:block;font-size:20px;font-weight:800;color:var(--cream);margin-top:9px;}
+  .step i{display:block;font-style:normal;font-size:15px;line-height:1.4;color:var(--muted2);margin-top:7px;}
+  .fact b{font-size:38px;} .fact i{font-size:11px;}
+  .host{font-size:14px;text-align:right;}
+""")
+
+# ── 3. what you win ────────────────────────────────────────────────────────
+page("post-3-prizes.html", 1080, 1350, "60px 64px 54px", f"""
+  {header("What you win")}
+  <div>
+    <h2 class="disp">Two ways<br>to <em>take it</em></h2>
+    <p class="lede">One prize for the best player on the night. One for the best against
+       <b>themselves</b> — so a first-timer can win on their first night.</p>
+  </div>
+  <div>
+    <div class="prize win">
+      <div class="pl"><span class="t disp">Champion</span>
+        <span class="d">Most points after {F['scoring']} scoring rounds.</span></div>
+      <span class="v disp">{S['championPrize']} {CUR}</span>
+    </div>
+    <div class="prize climb">
+      <div class="pl"><span class="t disp">The Climb</span>
+        <span class="d">Most points above your own average. Open to anyone in the room.</span></div>
+      <span class="v disp small">{S['climbPrize']}</span>
+    </div>
+    <p class="note">Measured over 200 simulated seasons: a single scratch prize sends
+       <b>70%</b> of nights to the same three players. The handicap prize is
+       <b>21%</b> — and it self-corrects, because winning it raises your own bar.</p>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
+      <span class="fact"><b class="disp">{S['cap']}</b><i>Places only</i></span>
+      <span class="fact"><b class="disp">{DT.day} {DT.strftime("%b").upper()}</b><i>{DT.strftime("%a").upper()} · {S["start"]}</i></span>
+    </div>
+    <span class="host">{S['signupVia'].upper()}<small>{S['host'].upper()}</small></span>
+  </div>
+""", """
+  h2{font-size:84px;line-height:.88;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.42);}
+  .lede{font-size:23px;margin-top:22px;max-width:880px;}
+  .prize{display:flex;align-items:center;gap:30px;border:1px solid var(--line);
+    padding:34px 32px;margin-bottom:14px;background:rgba(var(--cream-rgb),.025);}
+  .prize.win{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
+    box-shadow:0 0 36px rgba(var(--volt-rgb),.22);}
+  .prize.climb{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
+  .pl{flex:1;}
+  .prize .t{display:block;font-size:38px;}
+  .prize.win .t{color:var(--volt);} .prize.climb .t{color:var(--uv);}
+  .prize .d{display:block;font-size:17px;color:var(--muted2);margin-top:8px;line-height:1.4;}
+  .prize .v{font-size:52px;white-space:nowrap;text-align:right;}
+  .prize .v.small{font-size:24px;max-width:300px;white-space:normal;line-height:1.2;color:var(--uv);}
+  .note{font-size:17px;line-height:1.5;color:var(--muted2);margin-top:22px;}
+  .note b{color:var(--cream);}
+  .fact b{font-size:38px;} .fact i{font-size:11px;}
+  .host{font-size:14px;text-align:right;white-space:nowrap;} .host small{font-size:12px;}
+""")
+
+# ── 4. story ───────────────────────────────────────────────────────────────
+page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
+  {header()}
+  <div>
+    <div class="kick mono">New · {S['cadenceLine']}</div>
+    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <p class="lede">Come on your own. A different partner almost every round, and the court
+       you are standing on is your position.</p>
+  </div>
+  {ladder(rows_note=False)}
+  <div class="when">
+    <div class="day disp">{DATE_SHORT}</div>
+    <div class="dl">{S['start']} &#8211; {END} &nbsp;·&nbsp; {S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places</div>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:46px">
+      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp">{S['championPrize']} {CUR}</b><i>Champion</i></span>
+      <span class="fact"><b class="disp">Free</b><i>Next month, for the climb</i></span>
+    </div>
+  </div>
+  <div class="hostline"><span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span></div>
+""", LADDER_CSS + """
+  .kick{font-size:14px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
+  h1{font-size:132px;line-height:.85;margin-top:28px;}
+  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
+  .lede{font-size:27px;margin-top:30px;}
+  .rung .cn{width:190px;font-size:21px;}
+  .rung{padding:26px 24px;}
+  .rung .pts{font-size:30px;}
+  .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:34px 0;}
+  .day{font-size:96px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
+  .dl{font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700;
+    letter-spacing:.1em;color:var(--cream);margin-top:16px;}
+  .foot{border-top:0;padding-top:0;}
+  .fact b{font-size:46px;} .fact i{font-size:12px;}
+  .hostline{text-align:center;}
+  .host{font-size:16px;} .host small{font-size:13px;}
+""")
+
+# ── the copy ───────────────────────────────────────────────────────────────
+# Written here rather than kept in a doc, so the sentence that quotes "15
+# matches" is regenerated from the same facts as the card that prints it.
+CAP = os.path.join(OUT, "CAPTIONS.txt")
+HR = "=" * 68
+open(CAP, "w").write(f"""UPRISING — announcement copy
+Generated by build-uprising-announce.py. Every number here is the same one the
+cards and the app carry; re-run the builder after changing uprising-social.json
+rather than editing this by hand.
+
+{HR}
+WHATSAPP — the group post (paste with post-1-hero.png)
+{HR}
+
+*{S['name']}* — a new padel social. {DATE_LONG}.
+
+Come on your own. No partner needed.
+
+{F['courts']} courts, one ladder. Win and you move up a court, lose and you move
+down — the court you're standing on is your position. You play with a
+different partner almost every round.
+
+• {F['matches']} matches each — not three
+• {F['target']} points a match, {S['start']}–{END}
+• {S['entry']} {CUR} · {S['cap']} places, then a waitlist
+• Champion takes {S['championPrize']} {CUR}
+• THE CLIMB — most points above your own average — plays the next one free
+
+Round one is the shuffle: it decides which court you start on and scores
+nothing, so nobody is placed by a draw.
+
+Reply to claim a place. Monthly from here.
+{S['host']}
+
+{HR}
+INSTAGRAM — carousel caption (4 cards, hero first)
+{HR}
+
+{S['promise']}
+
+{S['name']} is a new monthly padel social, and the first one is {DATE_LONG}.
+
+Four courts stacked into one ladder. Win your match and you climb a court.
+Lose and you drop one. Points are worth more the higher you get — so there's
+nothing to gain from sitting at the bottom beating people you should beat.
+
+{F['matches']} matches in {F['minutes'] // 60}h{F['minutes'] % 60:02d}. A different partner almost every round. You do
+not need to bring anyone.
+
+{S['entry']} {CUR} · {S['cap']} places · {S['start']} start
+Champion {S['championPrize']} {CUR}. Biggest climb above your own average plays next month free.
+
+Link in bio to the live ladder.
+
+#urbanplayground #padeloman #padelmuscat #uprising
+
+{HR}
+STORY — text over post-story.png
+{HR}
+
+NEW · {DATE_LONG}
+Come alone. {S['cap']} places.
+Link sticker → {S['host']}
+
+{HR}
+THE ONE-LINER, if you only get a sentence
+{HR}
+
+"Four courts, one ladder — win and you climb, lose and you drop.
+ {F['matches']} matches, no partner needed, {S['entry']} {CUR}."
+
+{HR}
+WHAT NOT TO PROMISE
+{HR}
+
+· Not "a different partner every round" — a court of four has only three ways
+  to split, so past about round 11 people start repeating. Measured: 10 to 13
+  different partners out of {F['scoring'] + 1}. "Almost every round" and "ten different
+  partners" are both true; "every round" is not.
+· Not "the best player wins". Measured, the winner is one of the three
+  strongest players about 69% of the time. That is the right amount of luck
+  for a social, and it is why THE CLIMB exists — but do not sell it as a
+  ranking tournament.
+· Not a finals night, a season table or a league. This is one night, monthly.
+""")
+
+print(f"UPRISING announcement — {DATE_LONG}, {S['start']}–{END}")
+print(f"  {F['players']} players · {F['courts']} courts · {F['matches']} matches "
+      f"({F['scoring']} scoring + the shuffle) · first to {F['target']} · {F['minutes']} min")
+print(f"  {S['entry']} {CUR} in · champion {S['championPrize']} {CUR} · climb: {S['climbPrize'].lower()}")
+print(f"  wrote 4 pages + CAPTIONS.txt to {OUT}")
