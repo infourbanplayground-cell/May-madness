@@ -195,6 +195,13 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   `data-fit` and is shrunk after `document.fonts.ready` (the fallback face
   measures narrower than Archivo at `wdth` 125, so sizing before that sizes
   against the wrong letters).
+- **The first night advertises ONE prize**: `"secondPrize": false` in the JSON.
+  The prize cards carry a single CHAMPION block and a LAST ROUND DOUBLES note
+  in place of the runner-up, and no caption mentions a second prize — a prize
+  that is advertised and then not handed out is worse than never offering one.
+  `upPrizes()` still computes a second one (the stress harness asserts on it)
+  and nothing reads it. Set `secondPrize` true to put THE CLIMB back and every
+  card and caption re-renders with the second block.
 - **THE CLIMB is per scoring round, and cannot be awarded on night one.**
   Baselines are points per round — nights are sized to the clock, so comparing
   a 14-round total with a 10-round total made 14 of 16 players look worse and
@@ -206,9 +213,8 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   which is the champion only 7% of the time. Flip `firstNight` in
   `uprising-social.json` to false after the first night.
 - **First UPRISING: Saturday 10 Oct 2026, 7 OMR, 16 places.**
-  Champion 15 OMR; the second prize takes a free entry to the next one rather
-  than cash — it costs 7 OMR of foregone entry instead of 15 in vouchers and
-  brings the winner back, which is what a monthly format needs. Change the date
+  Champion takes a 15 OMR **voucher** and that is the only prize advertised.
+  Change the date
   in the JSON and every card and caption re-renders, including the date block,
   which reads TOMORROW or TONIGHT while that is true and the date otherwise.
   **The posts carry no clock times and no durations** — the start is fixed when

@@ -30,7 +30,7 @@ bottom. Highest total at the end takes the night. 👑
 • First to 11, straight rallies
 • 7 OMR · up to 16 places, then a waitlist
 • 👑 Champion takes a *15 OMR voucher*
-• ⚡ STRONGEST FINISH — biggest second half of the night — plays the next one FREE
+• 🔥 Last round is worth DOUBLE
 
 Round one is the shuffle: it decides which court you start on and scores
 nothing, so nobody is placed by a draw. You earn where you stand.
@@ -49,6 +49,7 @@ one. Up to 15 matches, a new partner almost every round, come on your
 own. First to 11 — straight rallies, no games, no sets.
 
 7 OMR · up to 16 places · champion takes a 15 OMR voucher
+Last round counts double, so it is not over until it is over.
 
 👍 to claim a place → americano.urbanpadel.om
 
@@ -61,7 +62,7 @@ WHATSAPP 3 — the reminder, a few hours before
 ⏳ *UPRISING is today* — a few places left.
 
 Come alone, we sort the pairs. Win a match, climb a court; lose one, drop
-a court. 7 OMR, up to 15 matches, 15 OMR voucher to the champion.
+a court. 7 OMR, up to 15 matches, a 15 OMR voucher to the champion.
 
 Last call — 👍 and you are in.
 
@@ -102,7 +103,7 @@ Up to 15 matches. A different partner almost every round. You do not need
 to bring anyone.
 
 7 OMR · up to 16 places
-Champion takes a 15 OMR voucher. Strongest finisher plays next month free.
+Champion takes a 15 OMR voucher. Last round counts double.
 
 Link in bio to the live ladder.
 
@@ -127,7 +128,7 @@ card, not just the last.
   story-3-match.png    THE QUESTION EVERYONE ASKS — first to 11
                        Sticker: "Ask me anything" so the replies come to you
 
-  story-4-prizes.png   THE STAKES — 15 OMR voucher, and a free entry next month
+  story-4-prizes.png   THE STAKES — 15 OMR voucher to the champion
                        Sticker: countdown to Sat 10 Oct
 
   story-5-claim.png    THE ASK — reply and you are in
@@ -153,8 +154,10 @@ WHAT NOT TO PROMISE
   partners" are both true; "every round" is not.
 · Not "the best player wins". Measured, the winner is one of the three
   strongest players about 69% of the time. That is the right amount of luck
-  for a social, and it is why THE CLIMB exists — but do not sell it as a
-  ranking tournament.
+  for a social — but do not sell it as a ranking tournament.
+· Not a second prize, a runner-up prize or a free entry. There is ONE prize
+  this night and the cards say so. If one is added later, set secondPrize in
+  uprising-social.json and re-render rather than promising it in a message.
 · Not a finals night, a season table or a league. This is one night, monthly.
 · Not "15 OMR" on its own — it is a voucher, and every line above
   says so. Somebody turning up expecting cash and being handed a voucher was

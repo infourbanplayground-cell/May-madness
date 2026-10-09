@@ -73,6 +73,10 @@ PAYS = ", ".join(
 # On night one THE CLIMB cannot be awarded — see uprising-social.json. The post
 # must advertise the prize that will actually be handed out.
 FIRST = bool(S.get("firstNight"))
+# One prize, or two. With SECOND off, the prize cards carry a single CHAMPION
+# block and no caption mentions a runner-up — a second prize that is advertised
+# and then not handed out is worse than never having offered it.
+SECOND = bool(S.get("secondPrize"))
 SECOND_NAME = "Strongest finish" if FIRST else "The Climb"
 SECOND_RULE = ("Most points in the second half of the night minus the first. "
                "Nothing to do with how you started.") if FIRST else \
@@ -347,9 +351,8 @@ page("post-3-ladder.html", 1080, 1350, "60px 64px 54px", f"""
 page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
   {header("What you win")}
   <div>
-    <h2 class="disp">Two ways<br>to <em>take it</em></h2>
-    <p class="lede">One prize for the best player on the night. One for the best against
-       <b>themselves</b> — so a first-timer can win on their first night.</p>
+    <h2 class="disp">{"Two ways<br>to <em>take it</em>" if SECOND else "One night.<br>One <em>winner</em>."}</h2>
+    <p class="lede">{"One prize for the best player on the night. One for the best against <b>themselves</b> — so a first-timer can win on their first night." if SECOND else "No groups, no knockout, no final. <b>Every point you win all night goes on one table</b>, and the name at the top of it takes the voucher."}</p>
   </div>
   <div>
     <div class="prize win">
@@ -357,12 +360,12 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
         <span class="d">Most points once the last round is played.</span></div>
       <span class="v disp">{CHAMP}<em>{KIND}</em></span>
     </div>
-    <div class="prize climb">
+    {f'''<div class="prize climb">
       <div class="pl"><span class="t disp">{SECOND_NAME}</span>
         <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
-    </div>
-    <p class="note">{"One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar."}</p>
+    </div>''' if SECOND else ""}
+    <p class="note">{("One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar.") if SECOND else f"There is no score to reach and no last-match shoot-out. A win on Court 1 is worth {F['win']['1']} and a win on Court {F['courts']} is worth {F['win'][str(F['courts'])]}, so the table rewards <b>climbing and staying up there</b> — and the last round counts double, which is why one night in three is still open when it starts."}</p>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px;align-items:flex-end">
@@ -515,9 +518,8 @@ story("story-3-match.html", f"""
 story("story-4-prizes.html", f"""
   {header("What you win")}
   <div>
-    <h2 class="disp">Two ways<br>to <em>take it</em></h2>
-    <p class="lede">One for the best player on the night. One for the best against
-       <b>themselves</b> — so a first-timer can win on their first night.</p>
+    <h2 class="disp">{"Two ways<br>to <em>take it</em>" if SECOND else "One night.<br>One <em>winner</em>."}</h2>
+    <p class="lede">{"One for the best player on the night. One for the best against <b>themselves</b> — so a first-timer can win on their first night." if SECOND else "No groups, no knockout, no final. <b>Every point you win all night goes on one table</b> — and the name at the top takes it."}</p>
   </div>
   <div>
     <div class="prize win">
@@ -525,11 +527,15 @@ story("story-4-prizes.html", f"""
         <span class="d">Most points once the last round is played.</span></div>
       <span class="v disp">{CHAMP}<em>{KIND}</em></span>
     </div>
-    <div class="prize climb">
+    {f'''<div class="prize climb">
       <div class="pl"><span class="t disp">{SECOND_NAME}</span>
         <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
-    </div>
+    </div>''' if SECOND else f'''<div class="prize note">
+      <div class="pl"><span class="t disp">Last round doubles</span>
+        <span class="d">Worth twice the points, so the night is not over
+        until it is. One in three is decided there.</span></div>
+    </div>'''}
   </div>
   <div class="hostline"><span class="host">{S['entry']} {CUR} TO PLAY &nbsp;·&nbsp; {DATE_SHORT}</span></div>
 """, """
@@ -538,9 +544,11 @@ story("story-4-prizes.html", f"""
   .prize.win{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
     box-shadow:0 0 36px rgba(var(--volt-rgb),.22);}
   .prize.climb{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
+  .prize.note{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
   .pl{flex:1;}
   .prize .t{display:block;font-size:42px;}
-  .prize.win .t{color:var(--volt);} .prize.climb .t{color:var(--uv);}
+  .prize.win .t{color:var(--volt);}
+  .prize.climb .t, .prize.note .t{color:var(--uv);}
   .prize .d{display:block;font-size:19px;color:var(--muted2);margin-top:10px;line-height:1.4;}
   .prize .v{font-size:56px;white-space:nowrap;text-align:right;}
   .prize .v em{display:block;font-family:'Archivo',sans-serif;font-style:normal;
@@ -615,8 +623,9 @@ bottom. Highest total at the end takes the night. 👑
 • Up to {F['matches']} matches each — not three
 • First to {F['target']}, straight rallies
 • {S['entry']} {CUR} · up to {S['cap']} places, then a waitlist
-• 👑 Champion takes a *{CHAMP_FULL}*
-• ⚡ {"STRONGEST FINISH — biggest second half of the night — plays the next one FREE" if FIRST else "THE CLIMB — most points above your own average — plays the next one FREE"}
+• 👑 Champion takes a *{CHAMP_FULL}*{f'''
+• ⚡ {"STRONGEST FINISH — biggest second half of the night — plays the next one FREE" if FIRST else "THE CLIMB — most points above your own average — plays the next one FREE"}''' if SECOND else ""}
+• 🔥 Last round is worth DOUBLE
 
 Round one is the shuffle: it decides which court you start on and scores
 nothing, so nobody is placed by a draw. You earn where you stand.
@@ -635,6 +644,7 @@ one. Up to {F['matches']} matches, a new partner almost every round, come on you
 own. First to {F['target']} — straight rallies, no games, no sets.
 
 {S['entry']} {CUR} · up to {S['cap']} places · champion takes a {CHAMP_FULL}
+Last round counts double, so it is not over until it is over.
 
 👍 to claim a place → {S['host']}
 
@@ -647,7 +657,7 @@ WHATSAPP 3 — the reminder, a few hours before
 ⏳ *{S['name']} is today* — a few places left.
 
 Come alone, we sort the pairs. Win a match, climb a court; lose one, drop
-a court. {S['entry']} {CUR}, up to {F['matches']} matches, {CHAMP_FULL} to the champion.
+a court. {S['entry']} {CUR}, up to {F['matches']} matches, a {CHAMP_FULL} to the champion.
 
 Last call — 👍 and you are in.
 
@@ -688,7 +698,7 @@ Up to {F['matches']} matches. A different partner almost every round. You do not
 to bring anyone.
 
 {S['entry']} {CUR} · up to {S['cap']} places
-Champion takes a {CHAMP_FULL}. {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.
+Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.' if SECOND else " Last round counts double."}
 
 Link in bio to the live ladder.
 
@@ -713,7 +723,7 @@ card, not just the last.
   story-3-match.png    THE QUESTION EVERYONE ASKS — first to {F['target']}
                        Sticker: "Ask me anything" so the replies come to you
 
-  story-4-prizes.png   THE STAKES — {CHAMP_FULL}, and a free entry next month
+  story-4-prizes.png   THE STAKES — {CHAMP_FULL} to the champion
                        Sticker: countdown to {DATE_SHORT.title()}
 
   story-5-claim.png    THE ASK — reply and you are in
@@ -739,8 +749,10 @@ WHAT NOT TO PROMISE
   partners" are both true; "every round" is not.
 · Not "the best player wins". Measured, the winner is one of the three
   strongest players about 69% of the time. That is the right amount of luck
-  for a social, and it is why THE CLIMB exists — but do not sell it as a
-  ranking tournament.
+  for a social — but do not sell it as a ranking tournament.{"" if SECOND else '''
+· Not a second prize, a runner-up prize or a free entry. There is ONE prize
+  this night and the cards say so. If one is added later, set secondPrize in
+  uprising-social.json and re-render rather than promising it in a message.'''}
 · Not a finals night, a season table or a league. This is one night, monthly.
 · Not "{S['championPrize']} {CUR}" on its own — it is a {KIND or "prize"}, and every line above
   says so. Somebody turning up expecting cash and being handed a {KIND or "prize"} was
@@ -755,5 +767,6 @@ print(f"UPRISING announcement — {DATE_LONG}, {S['start']}–{END}")
 print(f"  {F['players']} players · {F['courts']} courts · {F['matches']} matches "
       f"({F['scoring']} scoring + the shuffle) · first to {F['target']} · {F['minutes']} min")
 print(f"  {S['entry']} {CUR} in · champion {CHAMP_FULL} · "
-      f"{SECOND_NAME.lower()}: {S['climbPrize'].lower()}")
+      + (f"{SECOND_NAME.lower()}: {S['climbPrize'].lower()}" if SECOND
+         else "no second prize advertised"))
 print(f"  wrote {N_PAGES} pages + CAPTIONS.txt to {OUT}")
