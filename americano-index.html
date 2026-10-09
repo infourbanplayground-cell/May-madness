@@ -473,6 +473,37 @@
   .toggle b{display:block;font-size:13.5px;font-weight:800;color:var(--cream);letter-spacing:.01em;}
   .toggle i{display:block;font-style:normal;font-size:12.5px;line-height:1.45;color:var(--muted2);margin-top:3px;}
 
+  /* ── rules ──────────────────────────────────── */
+  .rule{display:flex;gap:14px;align-items:flex-start;}
+  .rule .rn{
+    flex:0 0 auto;width:30px;height:30px;border:1px solid var(--neon);color:var(--volt);
+    background:rgba(var(--volt-rgb),.10);display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',ui-monospace,monospace;font-size:13px;font-weight:700;
+  }
+  .rule b{display:block;font-size:15px;font-weight:800;color:var(--cream);letter-spacing:.01em;}
+  .rule p{font-size:14px;line-height:1.55;color:var(--muted2);margin-top:5px;}
+  .rule p b{display:inline;font-size:inherit;}
+
+  .ptab{border:1px solid var(--line);}
+  .ptab .ph,.ptab .pr{display:grid;grid-template-columns:1fr auto auto;gap:14px;padding:10px 13px;align-items:center;}
+  .ptab .ph{
+    border-bottom:1px solid var(--line);font-size:10px;font-weight:700;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted2);
+  }
+  .ptab .ph span:not(:first-child),.ptab .pr span:not(:first-child){width:34px;text-align:center;}
+  .ptab .pr{border-bottom:1px solid var(--line2);font-size:14px;font-weight:700;}
+  .ptab .pr:last-child{border-bottom:0;}
+  .ptab .pr span:not(:first-child){font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--muted);}
+  .ptab .pr b{color:var(--cream);font-weight:700;}
+  .ptab .pr.top{background:rgba(var(--volt-rgb),.08);}
+  .ptab .pr.top b{color:var(--volt);}
+
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(142px,1fr));gap:10px;margin-top:12px;}
+  .fact{border:1px solid var(--line);background:var(--tint);padding:12px 13px;}
+  .fact b{display:block;font-family:'Archivo',sans-serif;font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;font-size:19px;color:var(--cream);text-transform:uppercase;}
+  .fact i{display:block;font-style:normal;font-size:11px;line-height:1.4;color:var(--muted2);margin-top:4px;}
+
   /* ── the receipt ────────────────────────────── */
   .rcpt{display:flex;flex-direction:column;}
   .rcpt .r{
@@ -534,7 +565,9 @@ const LS = {
 const uid = p => p + "_" + Math.random().toString(36).slice(2, 10);
 const initials = n => (n || "?").split(" ").filter(Boolean).map(w => w[0]).slice(0, 2).join("").toUpperCase();
 const restPhrase = n => (n === 1 ? "1 player rests" : n + " players rest");
-const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+// "15 matchs" shipped to a rules screen once. Words ending in a sibilant take
+// -es; everything this app pluralises (court, player, round, time) takes -s.
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : /(ch|sh|s|x|z)$/.test(w) ? "es" : "s");
 
 // Roughly how long a night runs, so the target score can be chosen against the
 // clock rather than against a guess. A first-to-16 round measures at about
@@ -2228,6 +2261,133 @@ function Admin({ guests, newName, setNewName, onAdd, onRename, onDelete }) {
   );
 }
 
+// ── rules ───────────────────────────────────────────────────────
+// Every number on this screen is read from the engine, never typed. A rules
+// page that can disagree with the scoring is worse than no rules page: players
+// trust it, and the first time it is wrong they stop trusting the table too.
+function Rules({ t, cfg }) {
+  const live = t && t.format === "uprising" ? t : null;
+  const players = live ? live.playerIds.length : 16;
+  const C = live ? upCourts(live) : Math.min(UP.COURTS, Math.max(2, Number(cfg.upcourts) || UP.COURTS));
+  const target = live ? (live.pointsPerMatch || UP.TARGET) : (Number(cfg.uppoints) || UP.TARGET);
+  const shuffle = live ? !!live.shuffle : !!cfg.upshuffle;
+  const scoring = live ? upScoringRounds(live)
+    : (cfg.upfinish ? upPlanRounds(Number(cfg.upfinish), target, { shuffle, players, courts: C })
+                    : (Number(cfg.uprounds) || UP.ROUNDS));
+  const matches = scoring + (shuffle ? 1 : 0);
+  const resting = Math.max(0, players - 4 * C);
+  const dbl = resting === 0;
+  const mins = nightMinutes(matches, target);
+
+  const Rule = ({ n, head, children }) => (
+    <div className="rule">
+      <span className="rn">{n}</span>
+      <div>
+        <b>{head}</b>
+        <p>{children}</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="screen">
+      <div>
+        <Eyebrow>How it works</Eyebrow>
+        <div className="display">Climb to <em>Court One</em></div>
+        <p className="lede">
+          Come alone. You play with a different partner almost every round, and the court you
+          are standing on is your position — there is no table to follow.
+        </p>
+      </div>
+
+      <div className="hair" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {shuffle && (
+          <Rule n="1" head="Round one is the shuffle">
+            Courts are drawn, you play one match, and it scores <b>nothing</b>. All it decides is
+            which court you start on — so where you begin is won, not drawn.
+          </Rule>
+        )}
+        <Rule n={shuffle ? "2" : "1"} head="Win and you go up. Lose and you go down.">
+          The winning pair moves up a court together, the losing pair moves down. Court 1 winners
+          stay on Court 1; Court {C} losers stay on Court {C}.
+        </Rule>
+        <Rule n={shuffle ? "3" : "2"} head="New partners every round">
+          On your new court the four of you are ranked by points so far and paired{" "}
+          <b>1 + 4 against 2 + 3</b> — the closest match the four of you can make. If that would
+          repeat a partnership from tonight, the next-closest split is used instead.
+        </Rule>
+        <Rule n={shuffle ? "4" : "3"} head={`Every match is first to ${target}`}>
+          Straight points, no games or sets. The winner finishes on {target}; the other pair keeps
+          whatever they scored.
+        </Rule>
+        {resting > 0 && (
+          <Rule n={shuffle ? "5" : "4"} head={`${plural(resting, "player")} ${resting === 1 ? "rests" : "rest"} each round`}>
+            {4 * C} play at once on {plural(C, "court")}, so {resting} sit out. Rest runs on a rota
+            drawn before the first serve, in order, so your turn has nothing to do with how you are
+            playing — and everyone rests the same number of times.
+          </Rule>
+        )}
+      </div>
+
+      <div className="hair">
+        <div className="sect">The points</div>
+        <p className="note" style={{ margin: "10px 0 14px" }}>
+          Points are worth more the higher you climb — otherwise the smart move would be to stay at
+          the bottom and beat weaker opponents, which is the opposite of the idea.
+        </p>
+        <div className="ptab">
+          <div className="ph"><span>Court</span><span>Win</span><span>Lose</span></div>
+          {Array.from({ length: C }, (_, i) => i + 1).map(c => (
+            <div className={"pr" + (c === 1 ? " top" : "")} key={c}>
+              <span>Court {c}</span>
+              <span><b>{UP.WIN[c]}</b></span>
+              <span>{UP.LOSE[c]}</span>
+            </div>
+          ))}
+        </div>
+        <p className="note" style={{ marginTop: 14 }}>
+          Read the diagonal: <b style={{ color: "var(--cream)" }}>losing on Court 1 is worth the same
+          as winning on Court 3</b>. Where you got to counts as much as what you did when you got there.
+        </p>
+        {dbl && (
+          <p className="note" style={{ marginTop: 10, color: "var(--warn)" }}>
+            <b>The last round is worth double.</b> One night in three is decided in it.
+          </p>
+        )}
+        {!dbl && (
+          <p className="note" style={{ marginTop: 10 }}>
+            The last round is <b>not</b> doubled tonight — somebody has to sit it out, and they could
+            not otherwise win.
+          </p>
+        )}
+      </div>
+
+      <div className="hair">
+        <div className="sect">Tonight</div>
+        <div className="facts">
+          {[[plural(players, "player"), "checked in"],
+            [plural(C, "court"), `${4 * C} on court at once`],
+            [plural(matches, "match"), shuffle ? `the shuffle + ${scoring} that score` : "all of them score"],
+            [`First to ${target}`, "straight points"],
+            [asClock(mins), "from the first serve"]].map(([a, b2]) => (
+            <div className="fact" key={a}><b>{a}</b><i>{b2}</i></div>
+          ))}
+        </div>
+      </div>
+
+      <div className="hair">
+        <div className="sect">Winning it</div>
+        <p className="note" style={{ marginTop: 10 }}>
+          Highest total after the last round takes it. There is no score to reach — you accumulate.
+          {resting > 0 && " If the rounds cannot give everyone the same number of matches, the table ranks on points per round played, so nobody wins on extra court time."}
+          {" "}Level at the top is broken by <b style={{ color: "var(--cream)" }}>total match points scored</b>,
+          then head to head.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ── history ─────────────────────────────────────────────────────
 function History({ tournaments, byId, onOpen }) {
   const done = tournaments.filter(x => x.status === "completed").sort((a, b) => b.createdAt - a.createdAt);
@@ -2473,7 +2633,8 @@ function App() {
     { id: "board", label: active ? "Board" : "Setup" },
     { id: "standings", label: "Standings" },
     { id: "players", label: "Players" },
-    { id: "history", label: "History" }
+    { id: "history", label: "History" },
+    { id: "rules", label: "Rules" }
   ];
   if (role === "admin") navDefs.push({ id: "admin", label: "Admin" });
   // The header used to say AMERICANO on an UPRISING night, with the format
@@ -2524,6 +2685,8 @@ function App() {
 
         {view === "players" && <Players people={people} tournaments={tournaments} query={query} setQuery={setQuery}
           onOpenStats={id => { setStatsId(id); setModal("stats"); }} />}
+
+        {view === "rules" && <Rules t={active} cfg={cfg} />}
 
         {view === "history" && <History tournaments={tournaments} byId={byId}
           onOpen={id => { setHistoryId(id); setView("standings"); }} />}

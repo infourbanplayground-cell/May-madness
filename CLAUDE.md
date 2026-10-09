@@ -140,6 +140,19 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   typo three rounds back, which the unit tests never covered. The unit tests
   check cases somebody thought of; this checks the ones nobody did — it is what
   caught upClimbPath clamping to four courts on a two-court night.
+- **RULES is a screen in the app**, not a document — a fifth nav tab. Every
+  number on it is read from the engine (`UP.WIN`, `upCourts`, `upScoringRounds`,
+  `upPlanRounds`), never typed, and it describes the ACTIVE night when there is
+  one and the current setup when there is not. A rules page that can disagree
+  with the scoring is worse than none: players trust it, and the first time it
+  is wrong they stop trusting the table too.
+- The shareable format graphic is `brand/uprising/format-card.html`, rendered by
+  `node ops/render-uprising-card.mjs` to a 1080x1350 PNG. The renderer **fails if
+  any element runs off the canvas** and if the display face is not Archivo at
+  `wdth` 125 — the Blackout lockup once shipped with letters sliced off by the
+  edge of the bitmap while every assertion passed, because they were all about
+  the font and none about where the ink landed. Its numbers are hand-written, so
+  re-check them against the RULES screen when the defaults move.
 - June Fury (Vol.1) used to share this directory. It now has its own at
   `/var/www/june.urbanpadel.om/public`, still on port 3001, so the landing
   page's archive link survives.
