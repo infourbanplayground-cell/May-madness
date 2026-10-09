@@ -10,7 +10,7 @@ const {
   UP, upSeedLadder, upMakeRestRota, upBuildRound, upStandings, upReceipt,
   upValidate, upCourts, upRestCount, upUneven, upScoringRounds, upScoringRound,
   upDoubleFinal, upRoundPoints, upFairRounds, upPlanRounds, upTotals,
-  upCurrentCourts, upClimbPath, upPrizes, upPairKey, upFinisher,
+  upCurrentCourts, upClimbPath, upPrizes, upPairKey, upFinisher, upShuffleRounds,
 } = E;
 
 let rngState = 1;
@@ -29,7 +29,7 @@ function buildNight(cfg) {
   const ids = Array.from({ length: players }, (_, i) => 'p' + String(i).padStart(2, '0'));
   return {
     id: 'n', playerIds: ids, courtCount: courts,
-    numRounds: scoring + (shuffle ? 1 : 0), shuffle,
+    numRounds: scoring + upShuffleRounds({ shuffle }), shuffle,
     pointsPerMatch: target,
     restRota: upMakeRestRota(ids, ri(1, 1e9)),
     ladder0: upSeedLadder(ids, {}, Math.min(courts, Math.floor(players / 4))),
@@ -110,7 +110,8 @@ function audit(night, cfg, tag) {
     check(rec[rec.length - 1].running === row.total, `${row.id}: receipt ends ${rec[rec.length-1].running}, table says ${row.total}`, ctx);
     check(rec.reduce((n, x) => n + (x.points || 0), 0) === row.total, `${row.id}: receipt rows do not sum to the total`, ctx);
     const shuf = rec.filter(x => x.shuffle);
-    check(shuf.length === (cfg.shuffle ? 1 : 0), `${row.id}: ${shuf.length} shuffle rows`, ctx);
+    check(shuf.length === upShuffleRounds({ shuffle: cfg.shuffle }),
+      `${row.id}: ${shuf.length} shuffle rows, expected ${upShuffleRounds({ shuffle: cfg.shuffle })}`, ctx);
     shuf.forEach(x => check(x.points === 0, `${row.id}: the shuffle paid ${x.points}`, ctx));
     check(rec.every(x => x.points === null || x.points >= 0), `${row.id}: negative points on the receipt`, ctx);
     check(rec.filter(x => x.resting).length === rests[row.id], `${row.id}: receipt shows ${rec.filter(x=>x.resting).length} rests, rota gave ${rests[row.id]}`, ctx);
@@ -181,7 +182,9 @@ for (let n = 0; n < NIGHTS; n++) {
   const maxC = Math.min(Math.floor(players / 4), UP.COURTS);
   const courts = ri(1, maxC);
   const target = pick([6, 8, 9, 11, 13, 16, 21, 24]);
-  const shuffle = rnd() < 0.7;
+  // 0, 1 or 2 opening shuffle rounds. Two is allowed now, so the harness
+  // has to build them or the option ships untested.
+  const shuffle = rnd() < 0.3 ? false : (rnd() < 0.3 ? 2 : true);
   const usePlanner = rnd() < 0.5;
   const scoring = usePlanner
     ? upPlanRounds(pick([120, 150, 180]), target, { shuffle, players, courts })

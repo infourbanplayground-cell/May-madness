@@ -104,11 +104,22 @@ function upDoubleFinal(night) {
 // won a match, not because of a hat. It costs one round of time and it is one
 // sentence to explain, which is why it beats every seeding scheme that needs
 // data we do not have for a room of strangers.
+// How many opening rounds are shuffle. `shuffle` was a boolean and still may
+// be one — true means 1 — but a number is allowed now, because one shuffle
+// round is one data point per player and a single blowout or thrashing can
+// put somebody on the wrong court for the night. Two rounds average that out.
+// Capped at 2: a third costs a scoring round and buys very little.
+function upShuffleRounds(night) {
+  const v = night.shuffle;
+  if (v === true) return 1;
+  if (!v) return 0;
+  return Math.max(0, Math.min(2, Math.floor(Number(v) || 0)));
+}
 function upScoringRound(night, roundNum) {
-  return !(night.shuffle && roundNum === 1);
+  return roundNum > upShuffleRounds(night);
 }
 function upScoringRounds(night) {
-  return upRoundsTotal(night) - (night.shuffle ? 1 : 0);
+  return upRoundsTotal(night) - upShuffleRounds(night);
 }
 
 // ── fitting the night into the evening ─────────────────────────────────────
@@ -140,7 +151,9 @@ function upNightMinutes(matches, target, pace = UP_PACE) {
 function upPlanRounds(budget, target, opts = {}) {
   const { shuffle = true, players = 16, courts = 0, pace = UP_PACE, min = 4, max = 30 } = opts;
   const matches = Math.floor(budget / upRoundMinutes(target, pace));
-  let scoring = matches - (shuffle ? 1 : 0);
+  // The shuffle may be two rounds now, and they come out of the clock like
+  // any other — planning for one would overrun the finish time by a round.
+  let scoring = matches - upShuffleRounds({ shuffle });
   scoring = Math.max(min, Math.min(max, scoring));
   const C = Math.max(1, Math.min(courts || Math.floor(players / 4), Math.floor(players / 4), UP.COURTS));
   const fair = upFairRounds(players, C, max);
@@ -190,11 +203,16 @@ function upRestingFor(night, roundNum) {
   if (R <= 0) return [];
   const rota = upRestRota(night);
   const out = [];
-  if (night.shuffle && roundNum === 1) {
-    for (let i = 0; i < R; i++) out.push(rota[(rota.length - 1 - i + rota.length) % rota.length]);
+  const S = upShuffleRounds(night);
+  if (roundNum <= S) {
+    // The shuffle rounds come off the TAIL of the rota, walking backwards, so
+    // they do not consume a scoring round's rest slot — and with two of them
+    // the second takes the slice before the first, so nobody sits out both.
+    const base = rota.length - 1 - (roundNum - 1) * R;
+    for (let i = 0; i < R; i++) out.push(rota[((base - i) % rota.length + rota.length) % rota.length]);
     return [...new Set(out)];
   }
-  const idx = night.shuffle ? roundNum - 2 : roundNum - 1;
+  const idx = roundNum - 1 - S;
   for (let i = 0; i < R; i++) out.push(rota[(idx * R + i) % rota.length]);
   return [...new Set(out)];
 }
@@ -326,10 +344,17 @@ function upCourtsAfter(round, before, courtCount = UP.COURTS) {
 // Anyone who RESTED the shuffle has no margin and goes to the middle of the
 // ranking — no information either way, the same treatment upSeedLadder gives a
 // player with no form.
-function upShuffleLadder(night) {
+function upShuffleLadder(night, upto) {
   const ids = upPlayerIds(night);
-  const r = (night.rounds || [])[0];
-  if (!r || !upRoundDone(r)) return { ...(night.ladder0 || {}) };
+  const rs = night.rounds || [];
+  const S = upShuffleRounds(night);
+  // How many shuffle rounds to count. Defaults to all of them that are done;
+  // round 2 of a two-round shuffle is itself seated from round 1's ladder, so
+  // it asks for upto = 1.
+  const n = Math.min(upto === undefined ? S : upto, S, rs.length);
+  const done = rs.slice(0, n).filter(upRoundDone);
+  if (!done.length) return { ...(night.ladder0 || {}) };
+  const r = done[done.length - 1];
   // The courts the SHUFFLE was played on, not the ones the night is set to
   // now. This ladder is a record of a round that happened; gaining a court at
   // round 7 must not re-deal it. Anyone left above the current count is
@@ -337,13 +362,16 @@ function upShuffleLadder(night) {
   // from the ladder order by upBuildRound anyway.
   const C = upRoundCourts(r) || upCourts(night);
 
+  // Margins SUM across the shuffle rounds. One round is one data point, and a
+  // single 11-1 thrashing can put a good player on the bottom court for the
+  // night; two rounds average it out before anything is at stake.
   const margin = {};
-  (r.courts || []).forEach(m => {
+  done.forEach(rr => (rr.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
     const d = m.score1 - m.score2;
-    (m.team1 || []).forEach(p => { margin[p] = d; });
-    (m.team2 || []).forEach(p => { margin[p] = -d; });
-  });
+    (m.team1 || []).forEach(p => { margin[p] = (margin[p] || 0) + d; });
+    (m.team2 || []).forEach(p => { margin[p] = (margin[p] || 0) - d; });
+  }));
   // TIES ARE BROKEN BY THE REST ROTA, NOT BY ID.
   //
   // upSeedLadder also breaks its ties by id, so on night one — when nobody has
@@ -376,21 +404,27 @@ function upShuffleLadder(night) {
 }
 
 // True once the shuffle has been played and has therefore become the ladder.
+// True once at least the FIRST shuffle round is done — from that point the
+// ladder comes from margins rather than from the draw.
 function upShuffled(night) {
+  const S = upShuffleRounds(night);
   const r = (night.rounds || [])[0];
-  return !!(night.shuffle && r && upRoundDone(r));
+  return !!(S && r && upRoundDone(r));
 }
 
 function upCurrentCourts(night) {
   const C = upCourts(night);
   const rs = night.rounds || [];
+  const S = upShuffleRounds(night);
   const shuffled = upShuffled(night);
+  // The ladder after the shuffle is the margin ranking over every shuffle
+  // round that has been played — not the draw, and not the draw nudged.
   let courts = shuffled ? upShuffleLadder(night) : { ...(night.ladder0 || {}) };
   rs.forEach((r, i) => {
     if (!upRoundDone(r)) return;
-    // The shuffle produced the ladder above; it does not also move people
+    // A shuffle round PRODUCED the ladder above; it does not also move people
     // within it, or its winners would climb twice for one match.
-    if (shuffled && i === 0) return;
+    if (i < S) return;
     // Each round is resolved against the number of courts IT was played on.
     // A round that happened on three courts kept its bottom-court losers where
     // they were; gaining a fourth court later must not reach back and drop
@@ -713,10 +747,11 @@ function upClimbPath(night, playerId) {
   // good shuffle that first step is the biggest move of the night, and hiding
   // it would make the climb look like it started from nowhere.
   const path = [Math.min(courts[playerId] || C, C)];
+  const S = upShuffleRounds(night);
   rs.forEach((r, i) => {
     if (!upRoundDone(r)) return;
-    courts = (shuffled && i === 0) ? upShuffleLadder(night)
-                                   : upCourtsAfter(r, courts, upRoundCourts(r) || C);
+    courts = (i < S) ? upShuffleLadder(night, i + 1)
+                     : upCourtsAfter(r, courts, upRoundCourts(r) || C);
     path.push(Math.min(courts[playerId] || C, C));
   });
   return path;
@@ -778,8 +813,8 @@ function upValidate(night) {
         bad.push(`round ${r.roundNum} court ${m.court}: drawn match`);
     });
     if (upRoundDone(r)) {
-      courts = (upShuffled(night) && i === 0) ? upShuffleLadder(night)
-                                              : upCourtsAfter(r, courts, Cr);
+      courts = (i < upShuffleRounds(night)) ? upShuffleLadder(night, i + 1)
+                                            : upCourtsAfter(r, courts, Cr);
       // Court sizes only have to be exactly four when nobody rests. With
       // resters a court legitimately holds three or five BETWEEN rounds,
       // because the next round is seated from the ladder order, not from the
@@ -816,6 +851,6 @@ if (typeof module !== "undefined" && module.exports) {
     upScoringRound, upScoringRounds,
     UP_PACE, upRoundMinutes, upNightMinutes, upPlanRounds,
     upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
-    upRoundCourts, upCourtsAt, upShuffleLadder, upShuffled,
+    upRoundCourts, upCourtsAt, upShuffleLadder, upShuffled, upShuffleRounds,
   };
 }

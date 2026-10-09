@@ -262,6 +262,28 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - Both the RULES screen and the home page say the margin decides it, because
     it changes how people play that match — a 11-2 shuffle win from the bottom
     of the draw opens on Court 1.
+- **The shuffle can be 0, 1 or 2 rounds.** `night.shuffle` is a COUNT, read by
+  `upShuffleRounds` — `true` still means 1, so nights created before this keep
+  working. Chosen on the setup screen; margins SUM across the shuffle rounds,
+  and round 2 is itself seated from round 1's margin ladder.
+  - One shuffle round is one data point per player, and a single 11-1
+    thrashing can put a good player on the bottom court for the night. Measured
+    at 16 players on 4 courts over 3,000 nights, the opening ladder separates
+    the strongest quarter from the weakest by **0.60 courts after one shuffle
+    and 0.83 after two**; the best player then takes the night 24.4% of the
+    time against 23.6%, with the same clock, because the second shuffle costs a
+    scoring round.
+  - The shuffle rounds come off the TAIL of the rest rota, walking backwards,
+    so they never consume a scoring round's rest slot and nobody sits out both.
+  - `upPlanRounds` subtracts the real count; planning for one would overrun the
+    finish time by a round.
+- **Margin is for the shuffle and nothing else.** Scoring stays flat 8/6/4/2 and
+  ignores the score; pairing within a court still ranks on running court-points.
+  Measured over 104,000 courts, ranking the pairing on point difference instead
+  cuts the mean skill gap between the two pairs from 0.3328 to 0.3269 — 1.8%,
+  against 0.1550 for perfect knowledge and 0.5982 for the worst split. The
+  bottleneck is which court you are on, not how the four of you are divided, so
+  it is not worth a rule players would have to be told about.
 - **Courts can change MID-NIGHT**, which they could not before — a court frees
   up or is taken away at 7pm and the alternative used to be abandoning the
   session. `Change courts` is live on an UPRISING board and does NOT call
