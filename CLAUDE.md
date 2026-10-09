@@ -166,6 +166,16 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   renderer sizes anything named `story-*` at 1920 and everything else at 1350,
   and fails on any element that runs off its canvas; pass `PW_CHROMIUM` in a
   container where Playwright has no headless shell.
+- **The sign-up list is `ops/uprising-signup.py`** — the WhatsApp numbered sheet
+  people reply into, the sibling of `ops/signup-post.py` for Blackout. Two
+  differences that matter: it counts 16 **people**, not teams (Blackout asks for
+  "name + partner", and assuming you need to find one first is the single most
+  likely reason somebody does not reply), and the cap is `min(cap, engine
+  players)` rather than a typed 16, so it cannot take names for places that do
+  not exist. `--full` prepends the format block for a group that has not seen
+  the cards; the two write different files so a run of one does not take the
+  other away. Palette is 🟩/🟪 and nothing else — WhatsApp has no colour, and a
+  post wearing six unrelated emoji reads as spam rather than as a series.
 - Each story card repeats the name and the date, because a story is watched one
   frame at a time and most people see one of the five. The deep top/bottom
   padding is not whitespace for its own sake — Instagram draws its own chrome
