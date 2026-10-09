@@ -14,7 +14,10 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const src = join(root, 'brand/uprising/format-card.html');
 const out = join(root, 'brand/uprising/format-card.png');
 
-const b = await chromium.launch();
+// This container pins Chromium at a fixed path and ships no headless-shell,
+// so the default launch fails with "run npx playwright install".
+const exe = process.env.PW_CHROMIUM || undefined;
+const b = await chromium.launch(exe ? { executablePath: exe } : {});
 const p = await b.newPage({ viewport: { width: 1080, height: 1350 }, deviceScaleFactor: 2 });
 const errs = [];
 p.on('pageerror', e => errs.push(e.message));
@@ -38,7 +41,23 @@ const fit = await p.evaluate(() => {
       over.push(`TEXT CLIPPED: "${e.textContent.trim().slice(0, 22)}" needs ${e.scrollWidth}px in ${e.clientWidth}px`);
   });
   const h1 = getComputedStyle(document.querySelector('h1'));
-  return { h: document.body.scrollHeight, over: [...new Set(over)],
+  // fontFamily reports what was ASKED for, so this passes while the card is
+  // drawn in Times; document.fonts.check answers true with nothing loaded at
+  // all. Measuring the same string against a face we know is not it is the
+  // only test that notices. See ops/render-uprising-announce.mjs.
+  const probe = (ff) => {
+    const s = document.createElement('span');
+    s.textContent = 'UPRISING 11-7 Court';
+    s.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font:900 100px ${ff};`;
+    document.body.appendChild(s);
+    const w = s.getBoundingClientRect().width;
+    s.remove();
+    return w;
+  };
+  const missing = ['Archivo', 'JetBrains Mono'].filter(f =>
+    Math.abs(probe(`"${f}", monospace`) - probe('monospace')) < 1 &&
+    Math.abs(probe(`"${f}", serif`) - probe('serif')) < 1);
+  return { h: document.body.scrollHeight, over: [...new Set(over)], missing,
            face: h1.fontFamily.split(',')[0], vars: h1.fontVariationSettings };
 });
 
@@ -47,6 +66,9 @@ console.log(`content      : 1080x${fit.h} on a 1080x1350 canvas`);
 console.log(`overflow     : ${fit.over.length ? fit.over.join('\n               ') : 'nothing runs off the canvas'}`);
 if (fit.face !== 'Archivo' || !/125/.test(fit.vars))
   errs.push('the display face is not Archivo at wdth 125 — the font link is wrong or did not load');
+if (fit.missing.length)
+  errs.push(`FONT NOT LOADED: ${fit.missing.join(', ')} — the card rendered in a fallback `
+    + `face. The stylesheet is brand/fonts/fonts.css; re-make it with ops/vendor-fonts.py`);
 await p.screenshot({ path: out });
 console.log(`wrote        : ${out}`);
 console.log(`errors       : ${errs.length ? errs.join('; ') : 'none'}`);

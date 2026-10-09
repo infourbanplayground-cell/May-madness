@@ -42,6 +42,7 @@
   "entry": 7,
   "currency": "OMR",
   "championPrize": 15,
+  "championPrizeKind": "voucher",
   "climbPrize": "A free entry to the next UPRISING",
 
   "firstNight": true,

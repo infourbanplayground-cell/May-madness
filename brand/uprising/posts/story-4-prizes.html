@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="http://127.0.0.1:8901/lib/fonts.css" rel="stylesheet" />
+<link href="../../fonts/fonts.css" rel="stylesheet" />
 <style>html,body{width:1080px;height:1920px;}
   :root{
     --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
@@ -45,7 +44,7 @@
   .fact b u{display:block;text-decoration:none;font-family:'Archivo',sans-serif;
     font-style:normal;font-variation-settings:normal;font-weight:800;
     font-size:.32em;letter-spacing:.2em;color:var(--muted2);margin-bottom:2px;}
-.pad{padding:120px 64px 110px;}
+.pad{padding:180px 64px 210px;}
   .lhead{display:flex;justify-content:space-between;font-size:12px;font-weight:800;
     letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;}
   .rung{display:flex;align-items:center;gap:20px;border:1px solid var(--line);
@@ -65,52 +64,68 @@
   .up{color:var(--volt);} .dn{color:var(--uv);}
 
   .top{justify-content:space-between;}
-  .top .sub{margin-left:0;}
+  .top .sub{margin-left:0;font-size:13px;}
+  .top .nm{font-size:34px;}
   .kick{font-size:14px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
-  h1.wordmark{white-space:nowrap;font-size:176px;line-height:.84;margin-top:26px;color:var(--volt);
+  h1.wordmark{white-space:nowrap;font-size:176px;line-height:.84;color:var(--volt);
     text-shadow:0 0 70px rgba(var(--volt-rgb),.45);letter-spacing:-.005em;}
-  .strap{font-size:44px;line-height:1;margin-top:16px;color:var(--cream);}
-  .lede{font-size:24px;margin-top:24px;}
-  .rung .cn{width:190px;font-size:21px;}
-  .rung{padding:26px 24px;}
-  .rung .pts{font-size:30px;}
+  /* 84, not 96: at 96 the longest line a story headline carries ("CLIMB A
+     COURT") takes a third line, and a two-line headline with an orphan under
+     it reads as a mistake. Checked by counting rendered lines, not by eye. */
+  h2{font-size:84px;line-height:.9;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 48px rgba(var(--volt-rgb),.45);}
+  .strap{font-size:46px;line-height:1;margin-top:18px;color:var(--cream);}
+  .lede{font-size:26px;margin-top:26px;}
   .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:34px 0;}
-  .day{font-size:96px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
-  .dl{font-family:'JetBrains Mono',monospace;font-size:23px;font-weight:700;
+  .day{font-size:104px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
+  .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
     letter-spacing:.1em;color:var(--cream);margin-top:16px;}
-  .foot{border-top:0;padding-top:0;}
-  .fact b{font-size:46px;} .fact i{font-size:12px;}
+  .rung{padding:28px 26px;} .rung .cn{width:200px;font-size:22px;} .rung .pts{font-size:32px;}
+  .rung .note{font-size:19px;}
+  .lhead{font-size:13px;}
+  .mid span{font-size:16px;}
   .hostline{text-align:center;}
-  .host{font-size:16px;} .host small{font-size:13px;}
+  .host{font-size:17px;} .host small{font-size:13px;margin-top:8px;}
+  .swipe{text-align:center;font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    letter-spacing:.2em;color:var(--volt);}
+
+  .prize{display:flex;align-items:center;gap:30px;border:1px solid var(--line);
+    padding:38px 34px;margin-bottom:16px;background:rgba(var(--cream-rgb),.025);}
+  .prize.win{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
+    box-shadow:0 0 36px rgba(var(--volt-rgb),.22);}
+  .prize.climb{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
+  .pl{flex:1;}
+  .prize .t{display:block;font-size:42px;}
+  .prize.win .t{color:var(--volt);} .prize.climb .t{color:var(--uv);}
+  .prize .d{display:block;font-size:19px;color:var(--muted2);margin-top:10px;line-height:1.4;}
+  .prize .v{font-size:56px;white-space:nowrap;text-align:right;}
+  .prize .v em{display:block;font-family:'Archivo',sans-serif;font-style:normal;
+    font-variation-settings:normal;font-weight:800;font-size:16px;letter-spacing:.24em;
+    color:var(--muted2);margin-top:8px;}
+  .prize .v.small{font-size:26px;max-width:320px;white-space:normal;line-height:1.25;color:var(--uv);}
 </style>
 </head><body>
 <div class="wash"></div><div class="grid"></div><div class="grain"></div>
 <div class="pad">
-  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="sub">Urban Playground</span></div>
+  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="nm disp">UPRISING</span>
+      <span class="sub">What you win</span></div>
   <div>
-    <div class="kick mono">New · One Saturday a month</div>
-    <h1 class="disp wordmark" data-fit>UPRISING</h1>
-    <div class="strap disp">Climb to Court One.</div>
-    <p class="lede">Come on your own. A different partner almost every round, and the court
-       you are standing on is your position. Every match is <b>first to 11</b> —
-       straight rallies, no games, no sets.</p>
+    <h2 class="disp">Two ways<br>to <em>take it</em></h2>
+    <p class="lede">One for the best player on the night. One for the best against
+       <b>themselves</b> — so a first-timer can win on their first night.</p>
   </div>
-  <div><div class="lhead"><span>The ladder</span><span>Win / lose</span></div><div class="rung top"><span class="cn">COURT 1</span><span class="note"></span>
-          <span class="pts"><b>8</b><i> / 4</i></span></div><div class="mid"><span class="up">&#9650; Winners move up</span><span class="dn">Losers move down &#9660;</span></div><div class="rung"><span class="cn">COURT 2</span><span class="note"></span>
-          <span class="pts"><b>6</b><i> / 3</i></span></div><div class="rung"><span class="cn">COURT 3</span><span class="note"></span>
-          <span class="pts"><b>4</b><i> / 2</i></span></div><div class="rung"><span class="cn">COURT 4</span><span class="note"></span>
-          <span class="pts"><b>2</b><i> / 1</i></span></div></div>
-  <div class="when">
-    <div class="day disp">TOMORROW</div>
-    <div class="dl">SAT 10 OCT &nbsp;·&nbsp; 7 OMR &nbsp;·&nbsp; up to 16 places</div>
-  </div>
-  <div class="foot">
-    <div style="display:flex;gap:46px;align-items:flex-end">
-      <span class="fact"><b class="disp"><u>Up to</u>15</b><i>Matches each</i></span>
-      <span class="fact"><b class="disp">15 OMR</b><i>Champion</i></span>
-      <span class="fact"><b class="disp">Free</b><i>Next month, for the finish</i></span>
+  <div>
+    <div class="prize win">
+      <div class="pl"><span class="t disp">Champion</span>
+        <span class="d">Most points once the last round is played.</span></div>
+      <span class="v disp">15 OMR<em>voucher</em></span>
+    </div>
+    <div class="prize climb">
+      <div class="pl"><span class="t disp">Strongest finish</span>
+        <span class="d">Most points in the second half of the night minus the first. Nothing to do with how you started.</span></div>
+      <span class="v disp small">A free entry to the next UPRISING</span>
     </div>
   </div>
-  <div class="hostline"><span class="host">AMERICANO.URBANPADEL.OM<small>COME ALONE. LEAVE WITH TEN.</small></span></div>
+  <div class="hostline"><span class="host">7 OMR TO PLAY &nbsp;·&nbsp; SAT 10 OCT</span></div>
 </div>
 </body></html>

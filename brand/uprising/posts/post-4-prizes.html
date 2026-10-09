@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="http://127.0.0.1:8901/lib/fonts.css" rel="stylesheet" />
+<link href="../../fonts/fonts.css" rel="stylesheet" />
 <style>html,body{width:1080px;height:1350px;}
   :root{
     --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
@@ -59,6 +58,9 @@
   .prize.win .t{color:var(--volt);} .prize.climb .t{color:var(--uv);}
   .prize .d{display:block;font-size:17px;color:var(--muted2);margin-top:8px;line-height:1.4;}
   .prize .v{font-size:52px;white-space:nowrap;text-align:right;}
+  .prize .v em{display:block;font-family:'Archivo',sans-serif;font-style:normal;
+    font-variation-settings:normal;font-weight:800;font-size:15px;letter-spacing:.24em;
+    color:var(--muted2);margin-top:6px;}
   .prize .v.small{font-size:24px;max-width:300px;white-space:normal;line-height:1.2;color:var(--uv);}
   .note{font-size:17px;line-height:1.5;color:var(--muted2);margin-top:22px;}
   .note b{color:var(--cream);}
@@ -79,7 +81,7 @@
     <div class="prize win">
       <div class="pl"><span class="t disp">Champion</span>
         <span class="d">Most points once the last round is played.</span></div>
-      <span class="v disp">15 OMR</span>
+      <span class="v disp">15 OMR<em>voucher</em></span>
     </div>
     <div class="prize climb">
       <div class="pl"><span class="t disp">Strongest finish</span>

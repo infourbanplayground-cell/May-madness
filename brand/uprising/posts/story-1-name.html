@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8" />
 <link href="../../fonts/fonts.css" rel="stylesheet" />
-<style>html,body{width:1080px;height:1350px;}
+<style>html,body{width:1080px;height:1920px;}
   :root{
     --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
     --volt:#00F5C8; --uv:#9D6BFF; --cream:#F2F0F7; --muted:#9A95A8;
@@ -44,22 +44,53 @@
   .fact b u{display:block;text-decoration:none;font-family:'Archivo',sans-serif;
     font-style:normal;font-variation-settings:normal;font-weight:800;
     font-size:.32em;letter-spacing:.2em;color:var(--muted2);margin-bottom:2px;}
-.pad{padding:60px 64px 54px;}
+.pad{padding:180px 64px 210px;}
+  .lhead{display:flex;justify-content:space-between;font-size:12px;font-weight:800;
+    letter-spacing:.26em;text-transform:uppercase;color:var(--muted2);margin-bottom:12px;}
+  .rung{display:flex;align-items:center;gap:20px;border:1px solid var(--line);
+    padding:21px 22px;margin-bottom:9px;background:rgba(var(--cream-rgb),.025);}
+  .rung.top{border-color:var(--neon);background:rgba(var(--volt-rgb),.10);
+    box-shadow:0 0 34px rgba(var(--volt-rgb),.22);}
+  .rung .cn{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    letter-spacing:.14em;width:168px;color:var(--muted);}
+  .rung.top .cn{color:var(--volt);}
+  .rung .note{flex:1;font-size:17px;color:var(--muted2);}
+  .rung .pts{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;
+    width:112px;text-align:right;}
+  .rung .pts b{color:var(--cream);} .rung.top .pts b{color:var(--volt);}
+  .rung .pts i{font-style:normal;color:var(--muted2);}
+  .mid{display:flex;justify-content:space-between;padding:0 24px;margin:-3px 0 5px;}
+  .mid span{font-size:15px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;}
+  .up{color:var(--volt);} .dn{color:var(--uv);}
+
   .top{justify-content:space-between;}
-  .top .sub{margin-left:0;}
-  .kick{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
-  /* The name is the hero. It is set to fill the width rather than to a fixed
-     size, so a longer name would shrink instead of running off the card. */
-  h1.wordmark{white-space:nowrap;font-size:184px;line-height:.84;margin-top:24px;color:var(--volt);
+  .top .sub{margin-left:0;font-size:13px;}
+  .top .nm{font-size:34px;}
+  .kick{font-size:14px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
+  h1.wordmark{white-space:nowrap;font-size:176px;line-height:.84;color:var(--volt);
     text-shadow:0 0 70px rgba(var(--volt-rgb),.45);letter-spacing:-.005em;}
+  /* 84, not 96: at 96 the longest line a story headline carries ("CLIMB A
+     COURT") takes a third line, and a two-line headline with an orphan under
+     it reads as a mistake. Checked by counting rendered lines, not by eye. */
+  h2{font-size:84px;line-height:.9;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 48px rgba(var(--volt-rgb),.45);}
   .strap{font-size:46px;line-height:1;margin-top:18px;color:var(--cream);}
-  .lede{font-size:24px;margin-top:26px;max-width:900px;}
-  .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:30px 0;}
-  .day{font-size:100px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
+  .lede{font-size:26px;margin-top:26px;}
+  .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:34px 0;}
+  .day{font-size:104px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
   .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
-    letter-spacing:.14em;color:var(--cream);margin-top:14px;}
-  .fact b{font-size:46px;} .fact i{font-size:12px;}
-  .host{font-size:15px;text-align:right;white-space:nowrap;} .host small{font-size:12px;}
+    letter-spacing:.1em;color:var(--cream);margin-top:16px;}
+  .rung{padding:28px 26px;} .rung .cn{width:200px;font-size:22px;} .rung .pts{font-size:32px;}
+  .rung .note{font-size:19px;}
+  .lhead{font-size:13px;}
+  .mid span{font-size:16px;}
+  .hostline{text-align:center;}
+  .host{font-size:17px;} .host small{font-size:13px;margin-top:8px;}
+  .swipe{text-align:center;font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:700;
+    letter-spacing:.2em;color:var(--volt);}
+
+  .strap{font-size:52px;}
+  .lede{font-size:28px;max-width:900px;}
 </style>
 </head><body>
 <div class="wash"></div><div class="grid"></div><div class="grain"></div>
@@ -67,22 +98,15 @@
   <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="sub">Urban Playground</span></div>
   <div>
     <div class="kick mono">New · One Saturday a month</div>
-    <h1 class="disp wordmark" data-fit>UPRISING</h1>
-    <div class="strap disp">Climb to Court One.</div>
-    <p class="lede">A new padel social. <b>Come on your own</b> — you play with a different
-       partner almost every round, and the court you are standing on is your position.</p>
+    <h1 class="disp wordmark" data-fit style="margin-top:26px">UPRISING</h1>
+    <div class="strap">Climb to Court One.</div>
+    <p class="lede">A new padel social. <b>Come on your own</b> — four courts, one ladder,
+       and a different partner almost every round.</p>
   </div>
   <div class="when">
     <div class="day disp">TOMORROW</div>
     <div class="dl">SAT 10 OCT &nbsp;·&nbsp; NO PARTNER NEEDED</div>
   </div>
-  <div class="foot">
-    <div style="display:flex;gap:40px;align-items:flex-end">
-      <span class="fact"><b class="disp"><u>Up to</u>16</b><i>Places</i></span>
-      <span class="fact"><b class="disp"><u>Up to</u>15</b><i>Matches each</i></span>
-      <span class="fact"><b class="disp">7 OMR</b><i>To play</i></span>
-    </div>
-    <span class="host">AMERICANO.URBANPADEL.OM<small>COME ALONE. LEAVE WITH TEN.</small></span>
-  </div>
+  <div class="hostline"><span class="host">AMERICANO.URBANPADEL.OM<small>COME ALONE. LEAVE WITH TEN.</small></span></div>
 </div>
 </body></html>

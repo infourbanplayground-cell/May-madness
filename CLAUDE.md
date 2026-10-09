@@ -159,10 +159,34 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   shipped engine, so a post cannot advertise a figure the app contradicts (the
   same discipline as `blackout-season.json`). Build with
   `python3 build-uprising-announce.py && node ops/render-uprising-announce.mjs` —
-  three 1080x1350 carousel cards, a 1080x1920 story, and `CAPTIONS.txt` with the
-  WhatsApp and Instagram copy generated from the same facts. The renderer fails
-  on any element that runs off its canvas; pass `PW_CHROMIUM` in a container
-  where Playwright has no headless shell.
+  **four 1080x1350 feed cards, five 1080x1920 stories** (`story-1-name`,
+  `-2-ladder`, `-3-match`, `-4-prizes`, `-5-claim`) and `CAPTIONS.txt`, which
+  carries four WhatsApp posts (announcement, short, day-of reminder, "what even
+  is it?"), the Instagram carousel caption and a sticker plan per story. The
+  renderer sizes anything named `story-*` at 1920 and everything else at 1350,
+  and fails on any element that runs off its canvas; pass `PW_CHROMIUM` in a
+  container where Playwright has no headless shell.
+- Each story card repeats the name and the date, because a story is watched one
+  frame at a time and most people see one of the five. The deep top/bottom
+  padding is not whitespace for its own sake — Instagram draws its own chrome
+  over roughly the top 170px and the reply bar over the bottom 200px.
+- **The champion's prize is a voucher and every line says so.** `championPrizeKind`
+  in the JSON prints under the figure on the cards and inside the sentence in the
+  copy. "Champion takes 15 OMR" reads as cash, and somebody arriving expecting
+  notes was misled by our own poster.
+- **The brand faces are vendored in `brand/fonts/`** (`ops/vendor-fonts.py`,
+  Archivo + JetBrains Mono, Latin subsets, ~446KB). Chromium in this container
+  does **not** trust the agent proxy's CA, so a `<link>` to fonts.googleapis.com
+  fails with `ERR_CERT_AUTHORITY_INVALID` — and a webfont that fails to load is
+  not an error, it is a silent fallback. The whole five-card story series once
+  rendered in **Times** with every assertion green.
+- Both renderers now prove the face was really **drawn**, not merely asked for.
+  `getComputedStyle().fontFamily` reports the family in the stylesheet whether or
+  not it loaded, and `document.fonts.check()` answers *true* with zero faces
+  loaded — so the only honest test is to measure a probe string in the face and
+  in one it cannot be (`monospace`, `serif`) and fail if the widths match.
+  Proved by deleting the stylesheet link: `FONT NOT LOADED: Archivo,
+  JetBrains Mono`, exit 1.
 - **Both renderers check the INK, not just the box.** An element can sit inside
   the canvas while the text in it runs out the side — `scrollWidth > clientWidth`
   is the test. UPRISING at 184px lost its G off the right edge of the hero and
