@@ -2372,6 +2372,7 @@ const UP_NEXT = {
   dateLabel: "Sat 10 Oct",
   entry: "7 OMR",
   cap: 16,
+  courts: 3,
   champion: "15 OMR voucher",
   signupVia: "WhatsApp the club",
   cadence: "One Saturday a month"
@@ -2685,7 +2686,7 @@ function App() {
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
   const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
-                                   upcourts: 3, uppoints: 11, uprounds: 15,
+                                   upcourts: UP_NEXT.courts || UP.COURTS, uppoints: 11, uprounds: 15,
                                    upshuffle: true, upfinish: 150, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [receipt, setReceipt] = useState(null);

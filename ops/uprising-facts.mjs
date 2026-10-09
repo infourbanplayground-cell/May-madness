@@ -16,7 +16,13 @@ const S = require(join(root, 'uprising-social.json'));
 const target = 11, budget = 150, shuffle = true;
 const players = S.cap || 16;
 // The court count is the club's, not the format's — see _courts in the JSON.
-const courts = Math.max(2, Math.min(S.courts || E.UP.COURTS, Math.floor(players / 4), E.UP.COURTS));
+// The override is for ONE night and expires on its own: it counts only while
+// its date is still the date being advertised. Roll the date forward and the
+// norm comes back without anyone having to remember to undo this.
+const ov = S.courtsOverride || {};
+const wanted = (ov.date && ov.date === S.date && ov.courts) || S.courts || E.UP.COURTS;
+const courts = Math.max(2, Math.min(wanted, Math.floor(players / 4), E.UP.COURTS));
+const overridden = courts !== (S.courts || E.UP.COURTS);
 const scoring = E.upPlanRounds(budget, target, { shuffle, players, courts });
 const rounds = scoring + (shuffle ? 1 : 0);
 const resting = players - courts * 4;
@@ -26,7 +32,7 @@ const resting = players - courts * 4;
 const matchesEach = (scoring * 4 * courts) / players;
 
 console.log(JSON.stringify({
-  players, courts, target, shuffle, scoring, rounds,
+  players, courts, overridden, target, shuffle, scoring, rounds,
   matches: matchesEach,
   even: Number.isInteger(matchesEach),
   onCourt: courts * 4,

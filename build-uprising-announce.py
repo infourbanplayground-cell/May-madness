@@ -693,6 +693,9 @@ NEXT = ("const UP_NEXT = {\n"
         f'  dateLabel: "{DATE_SHORT.title()}",\n'
         f'  entry: "{S["entry"]} {CUR}",\n'
         f'  cap: {S["cap"]},\n'
+        # The app's setup default reads this, so a one-night court override
+        # reverts in the app the same moment it reverts in the posters.
+        f'  courts: {F["courts"]},\n'
         f'  champion: "{CHAMP_FULL}",\n'
         f'  signupVia: "{S["signupVia"]}",\n'
         f'  cadence: "{S["cadenceLine"]}"\n'
