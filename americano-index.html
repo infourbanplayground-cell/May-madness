@@ -595,7 +595,10 @@ function upPairKey(a, b) { return [a, b].sort().join("|"); }
 function upCourts(night) {
   const most = Math.min(Math.floor(upPlayerIds(night).length / 4), UP.COURTS);
   const want = night.courtCount || most;
-  return Math.max(1, Math.min(want, most));
+  // Two is the floor wherever the field allows it: a one-court "ladder" has
+  // nowhere to climb to, and with 8 players minimum there is always a second
+  // court to fill.
+  return Math.max(Math.min(2, most), Math.min(want, most));
 }
 function upRoundsTotal(night) { return night.numRounds || UP.ROUNDS; }
 
@@ -1040,7 +1043,7 @@ function upReceipt(night, playerId) {
       (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
     if (!m) {
       out.push({ roundNum: r.roundNum, resting: true, points: 0, running,
-                 doubled: isFinal });
+                 shuffle: !upScoringRound(night, r.roundNum), doubled: isFinal });
       return;
     }
     const mine = (m.team1 || []).includes(playerId) ? 1 : 2;
@@ -1073,11 +1076,17 @@ function upReceipt(night, playerId) {
 
 // Each player's court after every round — the line that makes the share card.
 function upClimbPath(night, playerId) {
-  const path = [night.ladder0 ? night.ladder0[playerId] : UP.COURTS];
+  // upCourtsAfter defaults its clamp to UP.COURTS. Called without the night's
+  // own court count, a loser on the bottom court of a TWO-court night was sent
+  // to Court 3 — a court nobody was standing on — and the climb line that is
+  // the whole point of the share card drew a rung that did not exist. Every
+  // other caller already passes this; this one was missed.
+  const C = upCourts(night);
+  const path = [night.ladder0 ? night.ladder0[playerId] : C];
   let courts = { ...(night.ladder0 || {}) };
   (night.rounds || []).forEach(r => {
     if (!upRoundDone(r)) return;
-    courts = upCourtsAfter(r, courts);
+    courts = upCourtsAfter(r, courts, C);
     path.push(courts[playerId]);
   });
   return path;
@@ -1574,8 +1583,11 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
             // budget, not a rule — nothing in the ladder or the points table
             // counts to nine. This block tells them what their own number
             // actually produces rather than quietly substituting one.
-            const upC = Math.max(1, Math.min(
-              Number(cfg.upcourts) || UP.COURTS, Math.floor(selCount / 4), UP.COURTS));
+            // Two is the floor: one court is not a ladder — there is nowhere to
+            // climb to — and eight players is already the minimum, so two
+            // courts can always be filled.
+            const upC = Math.max(2, Math.min(
+              Number(cfg.upcourts) || UP.COURTS, Math.max(2, Math.floor(selCount / 4)), UP.COURTS));
             const upR = selCount - 4 * upC;
             const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
             const sc = cfg.upfinish
@@ -1676,7 +1688,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                ).map(([lab, key]) => (
                 <label className="stack" key={key}>
                   <span className="label">{lab}</span>
-                  <input className="field num" type="number" min="1" max={key === "courts" ? 4 : undefined}
+                  <input className="field num" type="number" min={key === "upcourts" ? 2 : 1} max={key === "courts" || key === "upcourts" ? 4 : undefined}
                     value={cfg[key]}
                     onChange={e => setCfg(c => ({ ...c, [key]: e.target.value }))} />
                 </label>
@@ -1696,7 +1708,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
               // rests evenly, because finishing early and even beats using
               // every minute and ranking per round.
               const tgt = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
-              const upC2 = Math.max(1, Math.min(Number(cfg.upcourts) || UP.COURTS,
+              const upC2 = Math.max(2, Math.min(Number(cfg.upcourts) || UP.COURTS,
                 Math.max(2, Math.floor(selCount / 4)), UP.COURTS));
               return (
                 <div className="hair" style={{ paddingTop: 0, borderTop: 0 }}>
@@ -2346,8 +2358,8 @@ function App() {
       // four — it just means somebody rests every round, on a rota drawn now
       // and walked in order so that when your turn comes it has nothing to do
       // with how you are playing.
-      const upCourtCount = Math.max(1, Math.min(
-        Number(cfg.upcourts) || UP.COURTS, Math.floor(ids.length / 4), UP.COURTS));
+      const upCourtCount = Math.max(2, Math.min(
+        Number(cfg.upcourts) || UP.COURTS, Math.max(2, Math.floor(ids.length / 4)), UP.COURTS));
       // Nine rounds was a two-hour time budget, never a rule of the format —
       // nothing in the ladder or the points table counts to nine. Longer is a
       // measurably better competition: at 16 players, 15 rounds puts the real

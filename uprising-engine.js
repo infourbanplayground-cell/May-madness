@@ -38,7 +38,10 @@ function upPairKey(a, b) { return [a, b].sort().join("|"); }
 function upCourts(night) {
   const most = Math.min(Math.floor(upPlayerIds(night).length / 4), UP.COURTS);
   const want = night.courtCount || most;
-  return Math.max(1, Math.min(want, most));
+  // Two is the floor wherever the field allows it: a one-court "ladder" has
+  // nowhere to climb to, and with 8 players minimum there is always a second
+  // court to fill.
+  return Math.max(Math.min(2, most), Math.min(want, most));
 }
 function upRoundsTotal(night) { return night.numRounds || UP.ROUNDS; }
 
@@ -483,7 +486,7 @@ function upReceipt(night, playerId) {
       (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
     if (!m) {
       out.push({ roundNum: r.roundNum, resting: true, points: 0, running,
-                 doubled: isFinal });
+                 shuffle: !upScoringRound(night, r.roundNum), doubled: isFinal });
       return;
     }
     const mine = (m.team1 || []).includes(playerId) ? 1 : 2;
@@ -516,11 +519,17 @@ function upReceipt(night, playerId) {
 
 // Each player's court after every round — the line that makes the share card.
 function upClimbPath(night, playerId) {
-  const path = [night.ladder0 ? night.ladder0[playerId] : UP.COURTS];
+  // upCourtsAfter defaults its clamp to UP.COURTS. Called without the night's
+  // own court count, a loser on the bottom court of a TWO-court night was sent
+  // to Court 3 — a court nobody was standing on — and the climb line that is
+  // the whole point of the share card drew a rung that did not exist. Every
+  // other caller already passes this; this one was missed.
+  const C = upCourts(night);
+  const path = [night.ladder0 ? night.ladder0[playerId] : C];
   let courts = { ...(night.ladder0 || {}) };
   (night.rounds || []).forEach(r => {
     if (!upRoundDone(r)) return;
-    courts = upCourtsAfter(r, courts);
+    courts = upCourtsAfter(r, courts, C);
     path.push(courts[playerId]);
   });
   return path;

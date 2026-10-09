@@ -721,3 +721,34 @@ test("a night planned for 2h30 actually comes out even and valid", () => {
     assert.ok(upNightMinutes(scoring + 1, target) <= 150);
   }
 });
+
+test("the climb path never visits a court nobody is playing on", () => {
+  // upCourtsAfter clamps to UP.COURTS unless told otherwise, so on a two-court
+  // night the loser of the bottom court was recorded as moving to Court 3.
+  for (const [players, courts] of [[8, 2], [9, 2], [11, 2], [12, 3], [13, 3], [16, 4]]) {
+    const night = newNight(players, {}, 8);
+    night.courtCount = courts;
+    night.ladder0 = upSeedLadder(night.playerIds, {}, courts);
+    for (let r = 0; r < 8; r++) playRound(night, m => m.team1[0] < m.team2[0]);
+    night.playerIds.forEach(id => {
+      upClimbPath(night, id).forEach(c => {
+        assert.ok(c >= 1 && c <= courts,
+          `${players}p on ${courts} courts: ${id} visits court ${c}`);
+      });
+    });
+  }
+});
+
+test("resting through the shuffle is marked as the shuffle, not as a normal rest", () => {
+  const night = newNight(11, {}, 12);     // 3 rest each round
+  night.shuffle = true;
+  for (let r = 0; r < 12; r++) playRound(night, () => true);
+  const sat = night.rounds[0].sitOuts;
+  assert.equal(sat.length, 3);
+  sat.forEach(id => {
+    const row = upReceipt(night, id)[0];
+    assert.equal(row.resting, true);
+    assert.equal(row.shuffle, true, "a rest during the shuffle is still the shuffle");
+    assert.equal(row.points, 0);
+  });
+});

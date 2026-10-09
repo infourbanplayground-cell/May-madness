@@ -129,6 +129,17 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   duplicate declaration is a SyntaxError that blanks the **entire** page rather
   than breaking one screen.
 - Deploy: `node --test uprising-engine.test.js && python3 build-americano-app.py && bash ops/deploy-americano.sh`
+- **`ops/uprising-stress.js` is the one that finds real bugs.** `node ops/uprising-stress.js 25000`
+  builds that many randomised nights against the shipped engine — random field
+  8–32, courts, target, shuffle on/off, planner-chosen or hand-set round counts —
+  and asserts every invariant: four to a court, nobody in two places, rests
+  balanced within one, each player's receipt reconstructing their table total,
+  points conserved against what the courts owe, the double final applying iff
+  nobody rests, the table sorted by the mode it claims, and the climb path never
+  visiting a court that does not exist. It also replays a scorer correcting a
+  typo three rounds back, which the unit tests never covered. The unit tests
+  check cases somebody thought of; this checks the ones nobody did — it is what
+  caught upClimbPath clamping to four courts on a two-court night.
 - June Fury (Vol.1) used to share this directory. It now has its own at
   `/var/www/june.urbanpadel.om/public`, still on port 3001, so the landing
   page's archive link survives.
