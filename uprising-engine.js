@@ -75,7 +75,19 @@ function upFairRounds(playerCount, courts = 0, maxRounds = 14) {
 // effectively cannot win the night, for a reason they had no say in. With a
 // flat final it is 13.6% — slightly generous, which is the right direction for
 // a social. So the multiplier is a property of the field, not of the format.
-function upDoubleFinal(night) { return upRestCount(night) === 0; }
+// The last round is worth double only when NOBODY sits it out — somebody who
+// is resting the decider could not win it.
+//
+// Once the final round has been played this reads what actually happened on
+// it, not what the night is set to now. Otherwise taking a court away after
+// the last round was played would retroactively un-double it and move every
+// total on the table, which is the one moment of the night when the numbers
+// have to stop moving.
+function upDoubleFinal(night) {
+  const last = (night.rounds || [])[upRoundsTotal(night) - 1];
+  if (last) return (last.sitOuts || []).length === 0;
+  return upRestCount(night) === 0;
+}
 
 // ── the shuffle ────────────────────────────────────────────────────────────
 //
@@ -266,6 +278,21 @@ function upRoundDone(round) {
 // winners stay on Court 1; Court 4 losers stay on Court 4. This balances
 // exactly — each court sends two away and receives two — which `upValidate`
 // checks on every round rather than trusting.
+// How many courts a round was ACTUALLY played on. A round carries its own
+// courts array, so this is a fact about history and not about the night's
+// current setting — which is the whole point once the count can change
+// mid-night. A court lost at round 6 must not rewrite rounds 1 to 5.
+function upRoundCourts(round) {
+  return (round && round.courts ? round.courts.length : 0);
+}
+
+// The court count in effect for a given round: the round's own if it has been
+// built, otherwise whatever the night is set to now.
+function upCourtsAt(night, roundNum) {
+  const r = (night.rounds || [])[roundNum - 1];
+  return upRoundCourts(r) || upCourts(night);
+}
+
 function upCourtsAfter(round, before, courtCount = UP.COURTS) {
   const next = { ...before };
   (round.courts || []).forEach(m => {
@@ -284,7 +311,20 @@ function upCourtsAfter(round, before, courtCount = UP.COURTS) {
 function upCurrentCourts(night) {
   let courts = { ...(night.ladder0 || {}) };
   const C = upCourts(night);
-  (night.rounds || []).forEach(r => { if (upRoundDone(r)) courts = upCourtsAfter(r, courts, C); });
+  const rs = night.rounds || [];
+  rs.forEach(r => {
+    if (!upRoundDone(r)) return;
+    // Each round is resolved against the number of courts IT was played on.
+    // A round that happened on three courts kept its bottom-court losers where
+    // they were; gaining a fourth court later must not reach back and drop
+    // them into it. History does not move.
+    courts = upCourtsAfter(r, courts, upRoundCourts(r) || C);
+  });
+  // Lose a court and anybody standing on the one that went — including whoever
+  // was resting when it went, who no round moved — comes down to the new
+  // bottom. Without this they sit on a court nobody is playing on and the next
+  // round seats them below players who are genuinely last.
+  Object.keys(courts).forEach(p => { courts[p] = Math.min(courts[p] || 1, C); });
   return courts;
 }
 
@@ -574,12 +614,15 @@ function upClimbPath(night, playerId) {
   // the whole point of the share card drew a rung that did not exist. Every
   // other caller already passes this; this one was missed.
   const C = upCourts(night);
-  const path = [night.ladder0 ? night.ladder0[playerId] : C];
+  // And each round is resolved against the courts IT was played on, so a path
+  // drawn after a mid-night court change traces the rungs the player actually
+  // stood on rather than redrawing the night at today's height.
+  const path = [Math.min(night.ladder0 ? night.ladder0[playerId] : C, C)];
   let courts = { ...(night.ladder0 || {}) };
   (night.rounds || []).forEach(r => {
     if (!upRoundDone(r)) return;
-    courts = upCourtsAfter(r, courts, C);
-    path.push(courts[playerId]);
+    courts = upCourtsAfter(r, courts, upRoundCourts(r) || C);
+    path.push(Math.min(courts[playerId] || C, Math.max(C, upRoundCourts(r) || C)));
   });
   return path;
 }
@@ -606,15 +649,23 @@ function upValidate(night) {
   ids.forEach(id => { rests[id] = 0; });
 
   let courts = { ...(night.ladder0 || {}) };
-  (night.rounds || []).forEach(r => {
+  const rs = night.rounds || [];
+  // The court count can change mid-night — a court frees up, or one is taken
+  // away. Each round is therefore judged against ITS OWN shape, not the
+  // night's current one; judging round 2 by a count set at round 7 fails every
+  // round that came before the change for no reason.
+  const changed = rs.some(r => upRoundCourts(r) && upRoundCourts(r) !== upRoundCourts(rs[0]));
+  rs.forEach((r, i) => {
+    const Cr = upRoundCourts(r) || C;
+    const Rr = Math.max(0, ids.length - 4 * Cr);
     const sit = r.sitOuts || [];
-    if (sit.length !== R) bad.push(`round ${r.roundNum}: ${sit.length} resting, expected ${R}`);
+    if (sit.length !== Rr) bad.push(`round ${r.roundNum}: ${sit.length} resting, expected ${Rr}`);
     sit.forEach(p => {
       if (!ids.includes(p)) bad.push(`round ${r.roundNum}: ${p} is resting but is not in the field`);
       rests[p] = (rests[p] || 0) + 1;
     });
-    if ((r.courts || []).length !== C)
-      bad.push(`round ${r.roundNum}: ${(r.courts || []).length} courts, expected ${C}`);
+    if (Cr > UP.COURTS || Cr < 1)
+      bad.push(`round ${r.roundNum}: ${Cr} courts, but points are defined for 1-${UP.COURTS}`);
     const onCourt = {};
     (r.courts || []).forEach(m => {
       [...(m.team1 || []), ...(m.team2 || [])].forEach(p => {
@@ -632,13 +683,13 @@ function upValidate(night) {
         bad.push(`round ${r.roundNum} court ${m.court}: drawn match`);
     });
     if (upRoundDone(r)) {
-      courts = upCourtsAfter(r, courts, C);
+      courts = upCourtsAfter(r, courts, Cr);
       // Court sizes only have to be exactly four when nobody rests. With
       // resters a court legitimately holds three or five BETWEEN rounds,
       // because the next round is seated from the ladder order, not from the
       // court map — what matters is that the seating is four to a court, which
       // is checked above.
-      if (R === 0) {
+      if (Rr === 0) {
         Object.entries(upCourtSizes(courts)).forEach(([c, n]) => {
           if (n !== 4) bad.push(`after round ${r.roundNum}: court ${c} has ${n}`);
         });
@@ -646,9 +697,16 @@ function upValidate(night) {
     }
   });
 
-  // Rests must come out within one of each other across the rounds played.
+  // Rests must come out within one of each other across the rounds played —
+  // but only while the night kept the same number of courts. Gain a court at
+  // round 7 and the rota it was walking stops part-way; the people who had
+  // already taken their turn have one more rest than the people who had not,
+  // and no amount of care afterwards can undo a round that is already played.
+  // That is not corruption, it is the night that actually happened, and the
+  // table handles it: upUneven() goes true and the standings rank on points
+  // per round played, so nobody wins on extra court time.
   const counts = Object.values(rests);
-  if (R > 0 && counts.length && Math.max(...counts) - Math.min(...counts) > 1)
+  if (!changed && R > 0 && counts.length && Math.max(...counts) - Math.min(...counts) > 1)
     bad.push(`rests are uneven: ${Math.min(...counts)}–${Math.max(...counts)} across the night`);
   return bad;
 }
@@ -662,5 +720,6 @@ if (typeof module !== "undefined" && module.exports) {
     upScoringRound, upScoringRounds,
     UP_PACE, upRoundMinutes, upNightMinutes, upPlanRounds,
     upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
+    upRoundCourts, upCourtsAt,
   };
 }

@@ -234,6 +234,40 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   `data-fit` and is shrunk after `document.fonts.ready` (the fallback face
   measures narrower than Archivo at `wdth` 125, so sizing before that sizes
   against the wrong letters).
+- **Courts can change MID-NIGHT**, which they could not before — a court frees
+  up or is taken away at 7pm and the alternative used to be abandoning the
+  session. `Change courts` is live on an UPRISING board and does NOT call
+  `rebuildTail` (that is the classic Americano circle method and would overwrite
+  the ladder); it sets `courtCount` and the next round is dealt on it.
+  - **Every round carries its own court count** — `upRoundCourts(r)` is
+    `r.courts.length`, a fact about history. `upCurrentCourts`, `upValidate`
+    and `upClimbPath` all resolve each round against the count IT was played
+    on, so gaining a court at round 7 cannot reach back and drop somebody into
+    a Court 4 that did not exist in round 2. The final court map is then
+    clamped to the current count, which is what brings down anyone left
+    standing on a court that has gone — including whoever was resting when it
+    went, since no round moves them.
+  - The app deals the next round the instant the last score is locked, so by
+    the time the organiser opens the sheet the round on the board is already
+    drawn on the OLD count. If it has **no scores in it** it is re-dealt; a
+    round with so much as one score is history and is left alone. Without this
+    the change lands a round later than it was made — the round the court
+    actually became free.
+  - `upDoubleFinal` reads the LAST ROUND'S OWN sitOuts once it has been played,
+    not the night's current setting, so taking a court away afterwards cannot
+    retroactively un-double the decider and move every total on the table.
+  - Rests cannot come out even across a change — the rota stops part-way — so
+    `upValidate` drops the within-one rest check when the count changed, and
+    `upUneven` goes true, which puts the table on **points per round played**.
+    Nobody wins on extra court time. That is the existing safety net doing the
+    job it was built for.
+  - **`ops/uprising-courtchange.js` is the harness for this** (`node
+    ops/uprising-courtchange.js 6000`): random field, random count before and
+    after, random round to change at, asserting played rounds never move,
+    points on the board never move, nobody stands on a court that does not
+    exist, the night still finishes, receipts still reconstruct the table and
+    points stay conserved. Neither the unit tests nor `uprising-stress.js`
+    covered this — both fix the court count at setup.
 - **The first night advertises ONE prize**: `"secondPrize": false` in the JSON.
   The prize cards carry a single CHAMPION block and a LAST ROUND DOUBLES note
   in place of the runner-up, and no caption mentions a second prize — a prize
