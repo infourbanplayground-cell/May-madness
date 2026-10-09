@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="http://127.0.0.1:8901/lib/fonts.css" rel="stylesheet" />
+<style>html,body{width:1080px;height:1350px;}
+  :root{
+    --volt-rgb:0,245,200; --uv-rgb:157,107,255; --cream-rgb:242,240,247;
+    --volt:#00F5C8; --uv:#9D6BFF; --cream:#F2F0F7; --muted:#9A95A8;
+    --muted2:#8A84A2; --warn:#FF4D6D; --line:rgba(var(--cream-rgb),.12);
+    --neon:rgba(var(--volt-rgb),.55);
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{position:relative;overflow:hidden;background:#06060A;color:var(--cream);
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wash{position:absolute;inset:0;background:
+      radial-gradient(ellipse 90% 55% at 12% 4%,rgba(var(--uv-rgb),.17),transparent),
+      radial-gradient(ellipse 80% 55% at 92% 8%,rgba(var(--volt-rgb),.15),transparent),
+      radial-gradient(ellipse 70% 50% at 50% 100%,rgba(var(--volt-rgb),.10),transparent),
+      linear-gradient(180deg,#030305,#06060A 58%,#04040A);}
+  .grid{position:absolute;inset:0;background-image:
+      linear-gradient(rgba(var(--volt-rgb),.05) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(var(--volt-rgb),.05) 1px,transparent 1px);
+    background-size:60px 60px;}
+  .grain{position:absolute;inset:0;opacity:.26;mix-blend-mode:overlay;background-image:var(--grain);}
+  .pad{position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;}
+  .disp{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;letter-spacing:.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .top{display:flex;align-items:center;gap:16px;}
+  .mark{width:46px;height:46px;border:1px solid var(--neon);background:rgba(var(--volt-rgb),.12);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(var(--volt-rgb),.30);}
+  .top .nm{font-size:30px;}
+  .top .sub{margin-left:auto;font-size:12px;font-weight:800;letter-spacing:.3em;color:var(--uv);}
+  .lede{color:var(--muted);line-height:1.45;}
+  .lede b{color:var(--cream);font-weight:800;}
+  .host{font-family:'JetBrains Mono',monospace;font-weight:700;letter-spacing:.2em;color:var(--volt);}
+  .host small{display:block;color:var(--muted2);letter-spacing:.2em;margin-top:6px;}
+  .foot{padding-top:30px;border-top:1px solid var(--line);
+    display:flex;align-items:flex-end;justify-content:space-between;gap:26px;}
+  .fact b{display:block;font-family:'Archivo';font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;text-transform:uppercase;white-space:nowrap;}
+  .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
+    text-transform:uppercase;color:var(--muted2);margin-top:5px;}
+.pad{padding:60px 64px 54px;}
+  h2{font-size:84px;line-height:.88;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.42);}
+  .lede{font-size:22px;margin-top:22px;max-width:920px;}
+  .scoreline{border:1px solid var(--neon);background:rgba(var(--volt-rgb),.08);
+    box-shadow:0 0 36px rgba(var(--volt-rgb),.18);padding:30px 36px;text-align:center;}
+  .sl{font-family:'JetBrains Mono',monospace;font-weight:700;line-height:1;}
+  .sl .n{font-size:96px;color:var(--volt);}
+  .sl .n.o{color:var(--cream);}
+  .sl .dash{font-size:60px;color:var(--muted2);margin:0 26px;vertical-align:14px;}
+  .cap{font-size:17px;color:var(--muted2);margin-top:16px;}
+  .two{}
+  .th{font-size:13px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--muted2);margin-bottom:12px;}
+  .tr{display:flex;align-items:center;gap:24px;border:1px solid var(--line);
+    padding:20px 24px;margin-bottom:9px;background:rgba(var(--cream-rgb),.025);}
+  .tr.hi{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
+  .tr .lab{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;font-size:21px;width:210px;flex:0 0 auto;}
+  .tr.hi .lab{color:var(--uv);}
+  .tr .val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;
+    width:96px;flex:0 0 auto;color:var(--cream);}
+  .tr .exp{flex:1;font-size:17px;color:var(--muted2);}
+  .tr .exp b{color:var(--cream);}
+  .note{font-size:17px;line-height:1.5;color:var(--muted2);margin-top:16px;}
+  .note b{color:var(--cream);}
+  .fact b{font-size:38px;} .fact i{font-size:11px;}
+  .host{font-size:14px;text-align:right;}
+</style>
+</head><body>
+<div class="wash"></div><div class="grid"></div><div class="grain"></div>
+<div class="pad">
+  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="nm disp">UPRISING</span>
+      <span class="sub">How a match works</span></div>
+  <div>
+    <h2 class="disp">Win 11 rallies<br>and it is <em>over</em></h2>
+    <p class="lede">Every rally you win is one point. <b>No 15-30-40, no deuce, no games,
+       no sets.</b> First pair to 11 wins and the match stops there — so a score is
+       always 11 and whatever the other pair got.</p>
+  </div>
+
+  <div class="scoreline">
+    <div class="sl"><span class="n">11</span><span class="dash">&#8211;</span><span class="n o">7</span></div>
+    <div class="cap">Around 17 rallies in all. Seven or eight minutes. Then you walk to your next court.</div>
+  </div>
+
+  <div class="two">
+    <div class="th">Two things are called points. They are not the same.</div>
+    <div class="tr">
+      <span class="lab">In the match</span>
+      <span class="val">0&#8211;11</span>
+      <span class="exp">Rallies you won. Decides who wins <b>this match</b>.</span>
+    </div>
+    <div class="tr hi">
+      <span class="lab">On the table</span>
+      <span class="val">1&#8211;8</span>
+      <span class="exp">What that result pays you. Decides who wins <b>the night</b>.</span>
+    </div>
+    <p class="note">Win 11&#8211;7 on Court 2 and you take <b>6 points</b> — not 11.
+       The 11 only decided the match. Highest total after 14 rounds wins; there is no
+       number to reach.</p>
+  </div>
+
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">11</b><i>To win a match</i></span>
+      <span class="fact"><b class="disp">15</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp">~8 min</b><i>A match</i></span>
+    </div>
+    <span class="host">AMERICANO.URBANPADEL.OM</span>
+  </div>
+</div>
+</body></html>

@@ -11,8 +11,9 @@ import { readdirSync } from 'fs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const dir = join(root, 'brand/uprising/posts');
-const SIZES = { 'post-1-hero': [1080, 1350], 'post-2-ladder': [1080, 1350],
-                'post-3-prizes': [1080, 1350], 'post-story': [1080, 1920] };
+const SIZES = { 'post-1-hero': [1080, 1350], 'post-2-match': [1080, 1350],
+                'post-3-ladder': [1080, 1350], 'post-4-prizes': [1080, 1350],
+                'post-story': [1080, 1920] };
 const base = process.env.UP_BASE || ('file://' + dir + '/');
 
 // This container pins Chromium at a fixed path and has no headless-shell, so

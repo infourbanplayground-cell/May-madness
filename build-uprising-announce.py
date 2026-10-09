@@ -5,9 +5,15 @@ A three-card carousel at 1080x1350 (Instagram's portrait crop, the largest the
 feed will show) plus a 1080x1920 story card:
 
   post-1-hero.png     what it is, when, and the one line that sells it
-  post-2-ladder.png   how it works, with the ladder as the hero
-  post-3-prizes.png   what it costs, what you win, and why anyone can win it
+  post-2-match.png    how ONE match is scored, and the two things called points
+  post-3-ladder.png   how you move between courts, and what each one pays
+  post-4-prizes.png   what it costs, what you win, and why anyone can win it
   post-story.png      the whole thing on one tall card
+
+The match card is not optional. The owner of the club read the first draft of
+this announcement and asked "first to 11 points?" — because the word POINTS
+means two different things in this format and no card said so. If the person
+who commissioned it had to ask, every player will.
 
 Every figure is derived, never typed. The date, entry and prizes come from
 uprising-social.json; the court count, round count, target, running time and
@@ -185,8 +191,78 @@ page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
   .host{font-size:15px;text-align:right;white-space:nowrap;} .host small{font-size:12px;}
 """)
 
-# ── 2. the ladder ──────────────────────────────────────────────────────────
-page("post-2-ladder.html", 1080, 1350, "60px 64px 54px", f"""
+# ── 2. what a match actually is ────────────────────────────────────────────
+page("post-2-match.html", 1080, 1350, "60px 64px 54px", f"""
+  {header("How a match works")}
+  <div>
+    <h2 class="disp">Win {F['target']} rallies<br>and it is <em>over</em></h2>
+    <p class="lede">Every rally you win is one point. <b>No 15-30-40, no deuce, no games,
+       no sets.</b> First pair to {F['target']} wins and the match stops there — so a score is
+       always {F['target']} and whatever the other pair got.</p>
+  </div>
+
+  <div class="scoreline">
+    <div class="sl"><span class="n">{F['target']}</span><span class="dash">&#8211;</span><span class="n o">7</span></div>
+    <div class="cap">Around {F['target'] + 6} rallies in all. Seven or eight minutes. Then you walk to your next court.</div>
+  </div>
+
+  <div class="two">
+    <div class="th">Two things are called points. They are not the same.</div>
+    <div class="tr">
+      <span class="lab">In the match</span>
+      <span class="val">0&#8211;{F['target']}</span>
+      <span class="exp">Rallies you won. Decides who wins <b>this match</b>.</span>
+    </div>
+    <div class="tr hi">
+      <span class="lab">On the table</span>
+      <span class="val">{F['lose'][str(F['courts'])]}&#8211;{F['win']['1']}</span>
+      <span class="exp">What that result pays you. Decides who wins <b>the night</b>.</span>
+    </div>
+    <p class="note">Win {F['target']}&#8211;7 on Court 2 and you take <b>{F['win']['2']} points</b> — not {F['target']}.
+       The {F['target']} only decided the match. Highest total after {F['scoring']} rounds wins; there is no
+       number to reach.</p>
+  </div>
+
+  <div class="foot">
+    <div style="display:flex;gap:40px">
+      <span class="fact"><b class="disp">{F['target']}</b><i>To win a match</i></span>
+      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp">~8 min</b><i>A match</i></span>
+    </div>
+    <span class="host">{S['host'].upper()}</span>
+  </div>
+""", """
+  h2{font-size:84px;line-height:.88;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.42);}
+  .lede{font-size:22px;margin-top:22px;max-width:920px;}
+  .scoreline{border:1px solid var(--neon);background:rgba(var(--volt-rgb),.08);
+    box-shadow:0 0 36px rgba(var(--volt-rgb),.18);padding:30px 36px;text-align:center;}
+  .sl{font-family:'JetBrains Mono',monospace;font-weight:700;line-height:1;}
+  .sl .n{font-size:96px;color:var(--volt);}
+  .sl .n.o{color:var(--cream);}
+  .sl .dash{font-size:60px;color:var(--muted2);margin:0 26px;vertical-align:14px;}
+  .cap{font-size:17px;color:var(--muted2);margin-top:16px;}
+  .two{}
+  .th{font-size:13px;font-weight:800;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--muted2);margin-bottom:12px;}
+  .tr{display:flex;align-items:center;gap:24px;border:1px solid var(--line);
+    padding:20px 24px;margin-bottom:9px;background:rgba(var(--cream-rgb),.025);}
+  .tr.hi{border-color:rgba(var(--uv-rgb),.5);background:rgba(var(--uv-rgb),.08);}
+  .tr .lab{font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;font-size:21px;width:210px;flex:0 0 auto;}
+  .tr.hi .lab{color:var(--uv);}
+  .tr .val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;
+    width:96px;flex:0 0 auto;color:var(--cream);}
+  .tr .exp{flex:1;font-size:17px;color:var(--muted2);}
+  .tr .exp b{color:var(--cream);}
+  .note{font-size:17px;line-height:1.5;color:var(--muted2);margin-top:16px;}
+  .note b{color:var(--cream);}
+  .fact b{font-size:38px;} .fact i{font-size:11px;}
+  .host{font-size:14px;text-align:right;}
+""")
+
+# ── 3. the ladder ──────────────────────────────────────────────────────────
+page("post-3-ladder.html", 1080, 1350, "60px 64px 54px", f"""
   {header("How it works")}
   <div>
     <h2 class="disp">Win and you<br>go <em>up a court</em></h2>
@@ -226,7 +302,7 @@ page("post-2-ladder.html", 1080, 1350, "60px 64px 54px", f"""
 """)
 
 # ── 3. what you win ────────────────────────────────────────────────────────
-page("post-3-prizes.html", 1080, 1350, "60px 64px 54px", f"""
+page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
   {header("What you win")}
   <div>
     <h2 class="disp">Two ways<br>to <em>take it</em></h2>
@@ -284,7 +360,8 @@ page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
     <div class="kick mono">New · {S['cadenceLine']}</div>
     <h1 class="disp">Climb to<br><em>Court One</em></h1>
     <p class="lede">Come on your own. A different partner almost every round, and the court
-       you are standing on is your position.</p>
+       you are standing on is your position. Every match is <b>first to {F['target']}</b> —
+       straight rallies, no games, no sets.</p>
   </div>
   {ladder(rows_note=False)}
   <div class="when">
@@ -339,8 +416,16 @@ Come on your own. No partner needed.
 down — the court you're standing on is your position. You play with a
 different partner almost every round.
 
+*How a match works:* every rally you win is a point. No 15-30-40, no games,
+no sets. First pair to {F['target']} wins and you move on — so a score is always
+{F['target']}-something.
+
+*How the night is won:* the {F['target']} decides the match and then goes nowhere near
+the table. What you bank is what the COURT pays — {F['win']['1']} for a win on Court 1,
+down to {F['win'][str(F['courts'])]} on Court {F['courts']}. Highest total after {F['scoring']} rounds takes the night.
+
 • {F['matches']} matches each — not three
-• {F['target']} points a match, {S['start']}–{END}
+• First to {F['target']}, {S['start']}–{END}
 • {S['entry']} {CUR} · {S['cap']} places, then a waitlist
 • Champion takes {S['championPrize']} {CUR}
 • THE CLIMB — most points above your own average — plays the next one free
@@ -352,16 +437,20 @@ Reply to claim a place. Monthly from here.
 {S['host']}
 
 {HR}
-INSTAGRAM — carousel caption (4 cards, hero first)
+INSTAGRAM — carousel caption (5 cards, hero first)
 {HR}
 
 {S['promise']}
 
 {S['name']} is a new monthly padel social, and the first one is {DATE_LONG}.
 
-Four courts stacked into one ladder. Win your match and you climb a court.
-Lose and you drop one. Points are worth more the higher you get — so there's
-nothing to gain from sitting at the bottom beating people you should beat.
+Every match is first to {F['target']} — straight rallies, no games, no sets. Win it and
+you climb a court. Lose and you drop one.
+
+Here is the bit worth reading twice: the {F['target']} decides the match and nothing else.
+What you bank is what the court pays — {F['win']['1']} for a win on Court 1, {F['win'][str(F['courts'])]} on Court {F['courts']}.
+So there is nothing to gain from camping at the bottom beating people you
+should beat.
 
 {F['matches']} matches in {F['minutes'] // 60}h{F['minutes'] % 60:02d}. A different partner almost every round. You do
 not need to bring anyone.
