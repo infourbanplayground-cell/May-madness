@@ -1,0 +1,88 @@
+UPRISING — 16 players, 3 courts, 1 shuffle round
+======================================================================
+12 on court, 4 resting each round · first to 11
+points: C1 8/4  C2 6/3  C3 4/2
+
+THE DRAW (check-in order — nobody has form on night one)
+----------------------------------------------------------------------
+  Court 1:  Ali, Hamed, Fatma, Aisha
+  Court 2:  Layla, Maryam, Khalid, Huda
+  Court 3:  Sara, Omar, Yousef, Noor, Salim, Nasser, Tariq, Rania
+
+ROUND 1  — SHUFFLE, scores nothing
+----------------------------------------------------------------------
+  Court 1 [no points]  Aisha + Hamed            9 - 11  >  Ali + Fatma
+  Court 2 [no points]  Layla + Tariq  <        11 - 2      Noor + Sara
+  Court 3 [no points]  Nasser + Yousef          8 - 11  >  Rania + Salim
+  resting: Maryam, Omar, Huda, Khalid
+
+  THE SHUFFLE RANKING — everyone by margin over 1 round.
+  Anyone who played NO shuffle match has no margin and goes to the middle.
+    Court 1: Layla (+9), Tariq (+9), Salim (+3), Rania (+3)
+    Court 2: Ali (+2), Fatma (+2), Khalid (rested), Huda (rested)
+    Court 3: Omar (rested), Maryam (rested), Hamed (-2), Aisha (-2), Yousef (-3), Nasser (-3), Sara (-9), Noor (-9)
+
+ROUND 2
+----------------------------------------------------------------------
+  Court 1 [8/4]  Ali + Salim              9 - 11  >  Fatma + Rania
+  Court 2 [6/3]  Huda + Yousef  <        11 - 6      Khalid + Noor
+  Court 3 [4/2]  Aisha + Omar  <         11 - 5      Maryam + Nasser
+  resting: Sara, Tariq, Hamed, Layla
+
+  the ladder now (a RANKING, not seats — a court holds more
+  than four between rounds because four of you are resting;
+  the next round seats the top 12 of this order):
+    Court 1: Layla, Yousef, Fatma, Huda, Tariq, Rania
+    Court 2: Ali, Omar, Salim, Aisha
+    Court 3: Sara, Noor, Hamed, Maryam, Khalid, Nasser
+
+ROUND 3
+----------------------------------------------------------------------
+  Court 1 [8/4]  Fatma + Tariq  <        11 - 3      Huda + Layla
+  Court 2 [6/3]  Aisha + Khalid           4 - 11  >  Omar + Salim
+  Court 3 [4/2]  Maryam + Sara  <        11 - 7      Nasser + Hamed
+  resting: Noor, Yousef, Ali, Rania
+
+  the ladder now (a RANKING, not seats — a court holds more
+  than four between rounds because four of you are resting;
+  the next round seats the top 12 of this order):
+    Court 1: Omar, Yousef, Fatma, Salim, Tariq, Rania
+    Court 2: Ali, Sara, Layla, Maryam, Huda
+    Court 3: Noor, Hamed, Khalid, Aisha, Nasser
+
+TABLE after 3 rounds
+----------------------------------------------------------------------
+  Ranked on POINTS PER SCORING MATCH, not raw total — part-way
+  through the night some have played more than others, because
+  four sit out each round. It evens out by the end (9 each), and
+  the table switches back to raw total when it does.
+
+  1.  Fatma       16 pts    8.0/match  2 played   Court 1
+  2.  Tariq        8 pts    8.0/match  1 played   Court 1
+  3.  Rania        8 pts    8.0/match  1 played   Court 1
+  4.  Yousef       6 pts    6.0/match  1 played   Court 1
+  5.  Omar        10 pts    5.0/match  2 played   Court 1
+  6.  Salim       10 pts    5.0/match  2 played   Court 1
+  7.  Huda        10 pts    5.0/match  2 played   Court 2
+  8.  Sara         4 pts    4.0/match  1 played   Court 2
+  9.  Ali          4 pts    4.0/match  1 played   Court 2
+  10. Layla        4 pts    4.0/match  1 played   Court 2
+  11. Aisha        7 pts    3.5/match  2 played   Court 3
+  12. Maryam       6 pts    3.0/match  2 played   Court 2
+  13. Khalid       6 pts    3.0/match  2 played   Court 3
+  14. Noor         3 pts    3.0/match  1 played   Court 3
+  15. Nasser       4 pts    2.0/match  2 played   Court 3
+  16. Hamed        2 pts    2.0/match  1 played   Court 3
+
+CHECKS
+----------------------------------------------------------------------
+  four to a court, nobody in two places, resters not playing
+  rest list matches the rota drawn before the first serve
+  the shuffle paid nothing and set the ladder by margin
+  every court move is win=up / lose=down, clamped to 3 courts
+  every total re-added by hand from 8/4 6/3 4/2
+  every total reconstructed from the player's own receipt
+  points conserved: courts paid 108, table holds 108
+  upValidate on the night so far
+
+  all 8 checks pass
