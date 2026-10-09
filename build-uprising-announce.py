@@ -47,6 +47,13 @@ FONTS = os.environ.get("UP_FONTS",
     "1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap")
 
 CUR = S["currency"]
+# On night one THE CLIMB cannot be awarded — see uprising-social.json. The post
+# must advertise the prize that will actually be handed out.
+FIRST = bool(S.get("firstNight"))
+SECOND_NAME = "Strongest finish" if FIRST else "The Climb"
+SECOND_RULE = ("Most points in the second half of the night minus the first. "
+               "Nothing to do with how you started.") if FIRST else \
+              "Most points above your own average. Open to anyone in the room."
 END = (datetime.datetime.combine(DT, datetime.time(int(S["start"][:2]), int(S["start"][3:])))
        + datetime.timedelta(minutes=F["minutes"])).strftime("%H:%M")
 
@@ -316,13 +323,11 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
       <span class="v disp">{S['championPrize']} {CUR}</span>
     </div>
     <div class="prize climb">
-      <div class="pl"><span class="t disp">The Climb</span>
-        <span class="d">Most points above your own average. Open to anyone in the room.</span></div>
+      <div class="pl"><span class="t disp">{SECOND_NAME}</span>
+        <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
     </div>
-    <p class="note">Measured over 200 simulated seasons: a single scratch prize sends
-       <b>70%</b> of nights to the same three players. The handicap prize is
-       <b>21%</b> — and it self-corrects, because winning it raises your own bar.</p>
+    <p class="note">{"One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar."}</p>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px">
@@ -372,7 +377,7 @@ page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
     <div style="display:flex;gap:46px">
       <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
       <span class="fact"><b class="disp">{S['championPrize']} {CUR}</b><i>Champion</i></span>
-      <span class="fact"><b class="disp">Free</b><i>Next month, for the climb</i></span>
+      <span class="fact"><b class="disp">Free</b><i>Next month, for {"the finish" if FIRST else "the climb"}</i></span>
     </div>
   </div>
   <div class="hostline"><span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span></div>
@@ -428,7 +433,7 @@ down to {F['win'][str(F['courts'])]} on Court {F['courts']}. Highest total after
 • First to {F['target']}, {S['start']}–{END}
 • {S['entry']} {CUR} · {S['cap']} places, then a waitlist
 • Champion takes {S['championPrize']} {CUR}
-• THE CLIMB — most points above your own average — plays the next one free
+• {"STRONGEST FINISH — biggest second half — plays the next one free" if FIRST else "THE CLIMB — most points above your own average — plays the next one free"}
 
 Round one is the shuffle: it decides which court you start on and scores
 nothing, so nobody is placed by a draw.
@@ -456,7 +461,7 @@ should beat.
 not need to bring anyone.
 
 {S['entry']} {CUR} · {S['cap']} places · {S['start']} start
-Champion {S['championPrize']} {CUR}. Biggest climb above your own average plays next month free.
+Champion {S['championPrize']} {CUR}. {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.
 
 Link in bio to the live ladder.
 

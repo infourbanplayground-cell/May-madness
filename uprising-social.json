@@ -43,6 +43,23 @@
   "currency": "OMR",
   "championPrize": 15,
   "climbPrize": "A free entry to the next UPRISING",
+
+  "firstNight": true,
+  "_firstNight": [
+    "THE CLIMB is 'most points per round above your own average', and on the",
+    "very first night nobody has an average — every baseline falls back to the",
+    "field average, which is the same number for everyone, so the rule collapses",
+    "into 'most points' and awards the champion both prizes. Measured: 2000 of",
+    "2000 simulated first nights.",
+    "",
+    "So while firstNight is true the second prize is the STRONGEST FINISH —",
+    "most points in the second half of the night minus the first. It needs no",
+    "history, it is the champion only 7% of the time, and unlike 'biggest rise",
+    "up the ladder' it is not inverted (that one goes 80% to whoever the shuffle",
+    "dropped to Court 4 and can never be won from Court 1).",
+    "",
+    "Set this to false after the first night and the posts switch to THE CLIMB."
+  ],
   "cap": 16,
 
   "signupVia": "WhatsApp the club",

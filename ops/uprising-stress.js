@@ -10,7 +10,7 @@ const {
   UP, upSeedLadder, upMakeRestRota, upBuildRound, upStandings, upReceipt,
   upValidate, upCourts, upRestCount, upUneven, upScoringRounds, upScoringRound,
   upDoubleFinal, upRoundPoints, upFairRounds, upPlanRounds, upTotals,
-  upCurrentCourts, upClimbPath, upPrizes, upPairKey,
+  upCurrentCourts, upClimbPath, upPrizes, upPairKey, upFinisher,
 } = E;
 
 let rngState = 1;
@@ -147,9 +147,30 @@ function audit(night, cfg, tag) {
     check(path.length === night.rounds.length + 1, `${id}: climb path ${path.length} long`, ctx);
     path.forEach(c => check(c >= 1 && c <= C, `${id}: climb path visits court ${c}`, ctx));
   });
+  // THE CLIMB is deliberately NOT awarded when nobody in the room has history:
+  // every baseline falls back to the field average, so the rule collapses into
+  // "most points" and hands the champion both prizes. These nights carry no
+  // baselines, so the second prize must be the strongest finish instead.
   const pz = upPrizes(night);
-  check(!!pz.champion && !!pz.climb, 'prizes did not resolve', ctx);
+  check(!!pz.champion, 'no champion', ctx);
   check(pz.champion.id === rows[0].id, 'champion is not the top of the table', ctx);
+  check(pz.secondRule === 'finisher', `secondRule is ${pz.secondRule} with no history`, ctx);
+  check(pz.climb === null, 'THE CLIMB was awarded with nobody holding a baseline', ctx);
+  if (upScoringRounds(night) > 1 && rows.some(r => r.played > 1))
+    check(!!pz.finisher, 'no second prize at all', ctx);
+
+  // and with history in the room it must come back
+  const withBase = {};
+  rows.slice(0, 2).forEach(r => { withBase[r.id] = r.perRound; });
+  const pz2 = upPrizes(night, {}, withBase);
+  check(pz2.secondRule === 'climb', 'the climb did not return once a baseline existed', ctx);
+  check(!!pz2.climb, 'climb null despite a baseline', ctx);
+
+  // per-round figures must be internally consistent
+  rows.forEach(r => {
+    check(Math.abs(r.perRound - (r.played ? r.total / r.played : 0)) < 1e-9,
+      `${r.id}: perRound ${r.perRound} does not match ${r.total}/${r.played}`, ctx);
+  });
 }
 
 // ── the sweep ──────────────────────────────────────────────────────────────

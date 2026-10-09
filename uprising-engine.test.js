@@ -8,6 +8,7 @@ const {
   upValidate, upPairKey,
   upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
   upScoringRound, upScoringRounds, upPlanRounds, upNightMinutes, upRoundMinutes,
+  upFinisher,
   upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
 } = E;
 
@@ -750,5 +751,83 @@ test("resting through the shuffle is marked as the shuffle, not as a normal rest
     assert.equal(row.resting, true);
     assert.equal(row.shuffle, true, "a rest during the shuffle is still the shuffle");
     assert.equal(row.points, 0);
+  });
+});
+
+// ── the prizes ─────────────────────────────────────────────────────────────
+
+function playedNight(n = 16, scoring = 14, seed = 5, pick) {
+  const night = newNight(n, {}, scoring + 1);
+  night.shuffle = true;
+  let s = seed;
+  const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+  for (let r = 0; r < scoring + 1; r++) {
+    const round = upBuildRound(night);
+    round.courts.forEach(m => {
+      const aWins = pick ? pick(m, night) : rnd() < 0.5;
+      const loser = Math.floor(rnd() * UP.TARGET);
+      m.score1 = aWins ? UP.TARGET : loser;
+      m.score2 = aWins ? loser : UP.TARGET;
+    });
+    night.rounds.push(round);
+  }
+  return night;
+}
+
+test("the first night does not hand one person both prizes", () => {
+  // With no history every baseline is the field average — the same number for
+  // everybody — so "most above your own average" is just "most points". This
+  // was the champion in 2000 of 2000 simulated first nights.
+  for (let k = 0; k < 40; k++) {
+    const night = playedNight(16, 14, k * 977 + 5);
+    const pz = upPrizes(night, {}, {});                 // no baselines at all
+    assert.equal(pz.secondRule, "finisher", "with no history the rule must switch");
+    assert.equal(pz.climb, null, "THE CLIMB cannot be awarded on the first night");
+    assert.ok(pz.finisher, "a second prize must still exist");
+    assert.ok(pz.champion);
+  }
+});
+
+test("once anyone has history, THE CLIMB is awarded again", () => {
+  const night = playedNight(16, 14, 31);
+  const baselines = { [night.playerIds[3]]: 2.0 };      // one returning player
+  const pz = upPrizes(night, {}, baselines);
+  assert.equal(pz.secondRule, "climb");
+  assert.ok(pz.climb, "with a baseline in the room the climb is live again");
+});
+
+test("baselines are per scoring round, so night lengths are comparable", () => {
+  // A 14-round night then a 10-round night. On raw totals everyone looked
+  // worse and the climb fell to the champion; per round they are comparable.
+  const long = playedNight(16, 14, 1234);
+  const base = {};
+  upStandings(long).forEach(r => { if (r.played > 0) base[r.id] = r.perRound; });
+  const short = playedNight(16, 10, 5678);
+  const rows = upStandings(short, {}, base);
+  const below = rows.filter(r => r.vsBaseline < 0).length;
+  assert.ok(below > 3 && below < 13,
+    `${below} of 16 below baseline — a fair night should be a mix, not a sweep`);
+  rows.forEach(r => {
+    assert.ok(Math.abs(r.perRound - r.total / r.played) < 1e-9);
+    assert.ok(Math.abs(r.vsBaseline - (r.perRound - r.baseline)) < 1e-9);
+  });
+});
+
+test("the strongest finish is not the champion by construction", () => {
+  let same = 0;
+  for (let k = 0; k < 60; k++) {
+    const night = playedNight(16, 14, k * 613 + 11);
+    const pz = upPrizes(night, {}, {});
+    if (pz.finisher && pz.finisher.id === pz.champion.id) same++;
+  }
+  assert.ok(same < 20, `the finisher was the champion ${same} of 60 times`);
+});
+
+test("the finisher ignores the shuffle and rounds spent resting", () => {
+  const night = playedNight(20, 10, 77);                // 4 rest every round
+  upFinisher(night).forEach(f => {
+    const rec = upReceipt(night, f.id);
+    assert.equal(f.played, rec.filter(r => !r.shuffle && !r.resting).length);
+    assert.equal(f.first + f.second, rec.reduce((n, r) => n + (r.points || 0), 0));
   });
 });

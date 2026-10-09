@@ -514,6 +514,38 @@ the best against themselves.
 generous. A newcomer can win THE CLIMB on their first night. For a format whose
 whole job is converting people who have never played, that is a feature.
 
+#### How THE CLIMB is actually calculated
+
+> `your points per scoring round  −  your own average points per scoring round`
+
+**Per round, not per night.** Nights are sized to the clock, so one may run 14
+scoring rounds and the next 10. Compared as raw totals, 14 of 16 players came
+out "worse" on the shorter night and the prize fell to whoever lost least —
+which is the champion. Per round, the two are comparable.
+
+Your average is the mean of your per-round figures across every **completed**
+UPRISING you have played. An abandoned night is not form; tonight is not form.
+
+#### It cannot be awarded on the first night
+
+With no history, every baseline falls back to the field average — **the same
+number for everybody** — so "most above your own average" reduces to "most
+points", and the champion takes both prizes. Measured: **2,000 of 2,000**
+simulated first nights.
+
+So on a night where nobody in the room has played before, the second prize is
+the **STRONGEST FINISH**: points in the second half of your night minus the
+first. It needs no history, and it is the champion only **7%** of the time.
+
+It is tilted toward people the shuffle started low — 41% of wins to Court 4
+starters against 10% to Court 1 — because there is more room to improve from
+the bottom. That is a tilt, not an inversion, and it is the reason this and not
+*biggest rise up the ladder*, which goes **80%** to Court 4 starters and can
+**never** be won from Court 1.
+
+The engine refuses rather than guesses: `upPrizes` returns `climb: null` and
+`secondRule: "finisher"` when nobody holds a baseline.
+
 ### What not to award
 
 **Do not make "biggest climb up the ladder" a prize if the opening ladder is

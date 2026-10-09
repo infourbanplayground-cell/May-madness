@@ -994,9 +994,15 @@ function upStandings(night, byId = {}, baselines = {}) {
     m.team2.forEach(p => { match[p] += m.score2; against[p] += m.score1; played[p]++; if (!aWon) wins[p]++; });
   }));
 
+  // A baseline has to be PER SCORING ROUND, not a night total. Nights are not
+  // all the same length — the planner sizes them to the clock — and comparing
+  // a total earned over 14 rounds with one earned over 10 made 14 of 16
+  // players look like they had got worse, which then handed THE CLIMB to the
+  // champion as the least-bad of them.
+  const perRound = id => (played[id] ? (total[id] || 0) / played[id] : 0);
   const scored = upPlayerIds(night).filter(id => played[id] > 0);
   const fieldAvg = scored.length
-    ? scored.reduce((s, id) => s + total[id], 0) / scored.length : 0;
+    ? scored.reduce((s, id) => s + perRound(id), 0) / scored.length : 0;
 
   const rows = upPlayerIds(night).map(id => {
     // A baseline can arrive on the player record or in the `baselines` map the
@@ -1029,9 +1035,12 @@ function upStandings(night, byId = {}, baselines = {}) {
       court: courts[id] || start[id] || UP.COURTS,
       startCourt: start[id] || UP.COURTS,
       partners: [...partners[id]],
+      // Everything below is in POINTS PER SCORING ROUND, so it compares across
+      // nights of different lengths.
+      perRound: perRound(id),
       baseline: base,
       firstTimer: own == null,
-      vsBaseline: (total[id] || 0) - base,
+      vsBaseline: perRound(id) - base,
     };
   });
   // CHAMPION: most points, match points break the tie — unless some players
@@ -1046,17 +1055,57 @@ function upStandings(night, byId = {}, baselines = {}) {
   return rows;
 }
 
-// The two prizes. CHAMPION is scratch and is won on merit; THE CLIMB is the
-// handicap and is open to anyone — measured at 21% of nights going to a top-3
-// player, against 70% for scratch alone.
+// Who finished strongest: points in the second half of their night minus
+// points in the first. Computable from one night alone, which is the whole
+// point of it — see upPrizes.
+function upFinisher(night) {
+  return upPlayerIds(night).map(id => {
+    const rec = upReceipt(night, id).filter(r => !r.shuffle && !r.resting);
+    const h = Math.floor(rec.length / 2);
+    const first = rec.slice(0, h).reduce((n, r) => n + (r.points || 0), 0);
+    const second = rec.slice(h).reduce((n, r) => n + (r.points || 0), 0);
+    return { id, first, second, swing: second - first, played: rec.length };
+  }).filter(r => r.played > 1)
+    .sort((a, b) => (b.swing - a.swing) || (b.second - a.second)
+                    || String(a.id).localeCompare(String(b.id)));
+}
+
+// The prizes. CHAMPION is scratch and is won on merit. THE CLIMB is the
+// handicap — most points per round above your own average — and is open to
+// anyone: measured at 21% of nights going to a top-3 player against 70% for
+// scratch alone.
+//
+// THE CLIMB CANNOT BE AWARDED ON THE FIRST NIGHT. With no history every
+// baseline falls back to the field average, which is the same number for
+// everybody, so "most above your average" collapses into "most points" — the
+// champion, in 2000 of 2000 simulated first nights. Handing one person both
+// prizes is not a rounding error, it is the second prize not existing.
+//
+// So when nobody in the room has played before, the second prize is the
+// STRONGEST FINISH instead: most points in the second half of the night minus
+// the first. It needs no history, it is the champion only 7% of the time, and
+// unlike "biggest rise up the ladder" it is not inverted — that one goes 80%
+// to whoever the shuffle dropped to the bottom court and can never be won from
+// Court 1, which is why UPRISING.md rejected it.
 function upPrizes(night, byId = {}, baselines = {}) {
   const rows = upStandings(night, byId, baselines);
   const eligible = rows.filter(r => r.played > 0);
-  if (!eligible.length) return { champion: null, climb: null };
+  if (!eligible.length) return { champion: null, climb: null, finisher: null, secondRule: "none" };
   const champion = eligible[0];
-  const climb = [...eligible].sort((a, b) => (b.vsBaseline - a.vsBaseline)
-                                             || (b.total - a.total))[0];
-  return { champion, climb };
+
+  const anyHistory = eligible.some(r => !r.firstTimer);
+  const climb = anyHistory
+    ? [...eligible].sort((a, b) => (b.vsBaseline - a.vsBaseline)
+                                   || (b.total - a.total))[0]
+    : null;
+
+  const swings = upFinisher(night);
+  const byId2 = {}; eligible.forEach(r => { byId2[r.id] = r; });
+  const top = swings.find(s => byId2[s.id]);
+  const finisher = top ? { ...byId2[top.id], swing: top.swing } : null;
+
+  return { champion, climb, finisher,
+           secondRule: anyHistory ? "climb" : "finisher" };
 }
 
 // Round by round, what one player did and what it paid. The scoring is only
@@ -2492,8 +2541,12 @@ function App() {
       // Only a FINISHED night is form. An abandoned one is a few scores and a
       // walk-off, and an active one is tonight.
       if (t.format !== "uprising" || t.status !== "completed") return;
+      // PER SCORING ROUND, not the night total. The planner sizes nights to
+      // the clock, so a 14-round night and a 10-round night produce totals
+      // that cannot be compared — stored raw, every player looked worse on the
+      // shorter night and THE CLIMB fell to the champion.
       upStandings(t, byId).forEach(r => {
-        if (r.played > 0) (got[r.id] = got[r.id] || []).push(r.total);
+        if (r.played > 0) (got[r.id] = got[r.id] || []).push(r.perRound);
       });
     });
     const out = {};

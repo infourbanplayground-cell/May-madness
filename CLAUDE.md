@@ -163,6 +163,16 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   WhatsApp and Instagram copy generated from the same facts. The renderer fails
   on any element that runs off its canvas; pass `PW_CHROMIUM` in a container
   where Playwright has no headless shell.
+- **THE CLIMB is per scoring round, and cannot be awarded on night one.**
+  Baselines are points per round — nights are sized to the clock, so comparing
+  a 14-round total with a 10-round total made 14 of 16 players look worse and
+  handed the prize to the champion. And with no history at all every baseline
+  is the field average, the same number for everyone, so the rule collapses
+  into "most points": the champion won both in 2000 of 2000 simulated first
+  nights. `upPrizes` now returns `climb: null, secondRule: "finisher"` in that
+  case and the second prize is the STRONGEST FINISH (second half minus first),
+  which is the champion only 7% of the time. Flip `firstNight` in
+  `uprising-social.json` to false after the first night.
 - **First UPRISING: Saturday 17 Oct 2026, 17:30–20:00, 7 OMR, 16 places.**
   Champion 15 OMR; THE CLIMB takes a free entry to the next one rather than
   cash — it costs 7 OMR of foregone entry instead of 15 in vouchers and brings
