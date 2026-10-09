@@ -668,6 +668,34 @@ if _new != _app:
 if len(OG_DESC) > 150:
     print(f"  !! og:description is {len(OG_DESC)} chars — WhatsApp will cut it at ~150")
 
+# ── the app's home screen ──────────────────────────────────────────────────
+# The same splice again, for the facts the HOME screen prints. Only what the
+# engine cannot know goes in: when, how much, what you win. The court count,
+# the target and the points table are read from the inlined engine by the
+# component itself, exactly as the RULES screen reads them — two sources for
+# one number is how a rules page ends up disagreeing with the scoring.
+NEXT_START = "const UP_NEXT = {"
+NEXT_END = "// ═══ END UPRISING NEXT NIGHT"
+NEXT = ("const UP_NEXT = {\n"
+        f'  date: "{S["date"]}",\n'
+        f'  dateLabel: "{DATE_SHORT.title()}",\n'
+        f'  entry: "{S["entry"]} {CUR}",\n'
+        f'  cap: {S["cap"]},\n'
+        f'  champion: "{CHAMP_FULL}",\n'
+        f'  signupVia: "{S["signupVia"]}",\n'
+        f'  cadence: "{S["cadenceLine"]}"\n'
+        "};\n")
+_app = open(APP).read()
+_i, _j = _app.find(NEXT_START), _app.find(NEXT_END)
+if _i < 0 or _j < 0 or _j < _i:
+    sys.exit("!! americano-index.html has no UPRISING NEXT NIGHT block — the "
+             "markers were renamed or removed; see the Home component")
+_new = _app[:_i] + NEXT + _app[_j:]
+if _new != _app:
+    open(APP, "w").write(_new)
+    print("  rewrote UP_NEXT in americano-index.html"
+          " — rebuild and deploy the app for it to go live")
+
 # ── the copy ───────────────────────────────────────────────────────────────
 # Written here rather than kept in a doc, so the sentence that quotes "15
 # matches" is regenerated from the same facts as the card that prints it.

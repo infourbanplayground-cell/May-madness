@@ -201,6 +201,9 @@
   }
   .wrap{position:relative;z-index:2;}
   main{max-width:1160px;margin:0 auto;padding:26px 18px 112px;}
+  /* 112px is the room the fixed bottom nav needs. With the nav hidden the
+     homepage would otherwise end in a hole that reads as a rendering fault. */
+  main.nonav{padding-bottom:40px;}
   .screen{display:flex;flex-direction:column;gap:26px;animation:riseIn .19s var(--ease-out);}
 
   header.top{
@@ -208,7 +211,13 @@
     border-bottom:1px solid var(--line);padding:11px 18px;
     display:flex;align-items:center;justify-content:space-between;gap:14px;
   }
-  .brand{display:flex;align-items:center;gap:13px;min-width:0;}
+  /* The brand is a <button> now — it is where the login hides. Everything
+     here is undoing the UA button styling; it must look exactly as it did
+     when it was a div, because a header that looks tappable invites taps. */
+  .brand{display:flex;align-items:center;gap:13px;min-width:0;
+    background:transparent;border:0;padding:0;margin:0;font:inherit;color:inherit;
+    text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .brand:focus-visible{outline:2px solid var(--volt);outline-offset:4px;}
   /* The mark is a square plate with an outlined volt glyph, not a
      rounded gradient pill. Radius 0 is the rule. */
   .brand .mark{
@@ -2345,6 +2354,156 @@ function Admin({ guests, newName, setNewName, onAdd, onRename, onDelete }) {
 // Every number on this screen is read from the engine, never typed. A rules
 // page that can disagree with the scoring is worse than no rules page: players
 // trust it, and the first time it is wrong they stop trusting the table too.
+// ── home ────────────────────────────────────────────────────────
+// What anybody who taps the link sees when there is no night running.
+//
+// Before this the first screen was Setup — a scorer's form, shown to a guest
+// who cannot use any of it. The link in the sign-up post goes here, so this is
+// the page doing the explaining that the post no longer does.
+//
+// ═══ UPRISING NEXT NIGHT — GENERATED, DO NOT EDIT ═════════════════════
+// Written by build-uprising-announce.py from uprising-social.json. Only what
+// the ENGINE cannot know lives here — when, how much, what you win. The court
+// count, the target and the points table are read from the inlined engine
+// below, exactly as the RULES screen reads them, so this page cannot advertise
+// a number the scoring contradicts.
+const UP_NEXT = {
+  date: "2026-10-10",
+  dateLabel: "Sat 10 Oct",
+  entry: "7 OMR",
+  cap: 16,
+  champion: "15 OMR voucher",
+  signupVia: "WhatsApp the club",
+  cadence: "One Saturday a month"
+};
+// ═══ END UPRISING NEXT NIGHT ══════════════════════════════════════════
+
+function Home({ cfg }) {
+  // Same derivation the RULES screen uses when no night is live, so the two
+  // screens cannot disagree — and so a scorer part-way through setup sees the
+  // night they are about to run, not a brochure for a different one.
+  const C = Math.min(UP.COURTS, Math.max(2, Number(cfg.upcourts) || UP.COURTS));
+  const target = Number(cfg.uppoints) || UP.TARGET;
+  const shuffle = !!cfg.upshuffle;
+  const players = UP_NEXT.cap || 4 * C;
+  const scoring = cfg.upfinish
+    ? upPlanRounds(Number(cfg.upfinish), target, { shuffle, players, courts: C })
+    : (Number(cfg.uprounds) || UP.ROUNDS);
+  const matches = scoring + (shuffle ? 1 : 0);
+
+  // Local date parts, never toISOString(): the server is UTC and Oman is
+  // UTC+4, which has moved a date back a day in this repo before. A past date
+  // hides the block rather than advertising a night that has been and gone.
+  const now = new Date();
+  const today = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  const nd = Number((UP_NEXT.date || "").replace(/-/g, "")) || 0;
+  const upcoming = nd >= today;
+
+  const Step = ({ n, head, children }) => (
+    <div className="rule"><span className="rn">{n}</span>
+      <div><b>{head}</b><p>{children}</p></div></div>
+  );
+
+  return (
+    <div className="screen">
+      <div>
+        <Eyebrow>{UP_NEXT.cadence} · Urban Playground</Eyebrow>
+        <div className="display">Climb to <em>Court One</em></div>
+        <p className="lede">
+          <b style={{ color: "var(--cream)" }}>Come on your own.</b> {C} courts, one ladder — win
+          your match and you move up a court, lose it and you move down. You play with a different
+          partner almost every round, and the court you are standing on is your position.
+        </p>
+      </div>
+
+      {upcoming && (
+        <div className="hair">
+          <div className="sect">The next one</div>
+          <div className="facts" style={{ marginTop: 12 }}>
+            {/* No clock time. The start is fixed when the court is confirmed,
+                and a page that says 17:30 before that is wrong on the one
+                surface people screenshot. Same rule as the posters. */}
+            {[[UP_NEXT.dateLabel, "The next night"],
+              [UP_NEXT.entry, "To play"],
+              ["Up to " + UP_NEXT.cap, "Places"],
+              [UP_NEXT.champion, "To the champion"]].map(([a, b2]) => (
+              <div className="fact" key={a}><b>{a}</b><i>{b2}</i></div>
+            ))}
+          </div>
+          <p className="note" style={{ marginTop: 14 }}>
+            <b style={{ color: "var(--cream)" }}>No partner needed</b> — turn up alone and the
+            draw does the rest. {UP_NEXT.signupVia} to claim a place; after {UP_NEXT.cap} it is a
+            waitlist.
+          </p>
+        </div>
+      )}
+
+      <div className="hair">
+        <div className="sect">How a match works</div>
+        <p className="note" style={{ margin: "10px 0 14px" }}>
+          Every rally you win is a point. No 15-30-40, no deuce, no games, no sets.
+          <b style={{ color: "var(--cream)" }}> First pair to {target} wins</b> and the match stops
+          there — so a score always looks like {target}-something. Then you walk to your next court.
+        </p>
+        <div className="facts">
+          {[["0–" + target, "In the match — decides this match"],
+            [UP.LOSE[C] + "–" + UP.WIN[1], "On the table — decides the night"]].map(([a, b2]) => (
+            <div className="fact" key={a}><b>{a}</b><i>{b2}</i></div>
+          ))}
+        </div>
+        <p className="note" style={{ marginTop: 14 }}>
+          Two different things are called points, and this is the one everybody asks about: the{" "}
+          {target} decides the match and then goes nowhere near the table.
+          <b style={{ color: "var(--cream)" }}> What you bank is what the court pays.</b>
+        </p>
+      </div>
+
+      <div className="hair">
+        <div className="sect">The ladder</div>
+        <div className="ptab" style={{ marginTop: 12 }}>
+          <div className="ph"><span>Court</span><span>Win</span><span>Lose</span></div>
+          {Array.from({ length: C }, (_, i) => i + 1).map(c => (
+            <div className={"pr" + (c === 1 ? " top" : "")} key={c}>
+              <span>Court {c}</span><span><b>{UP.WIN[c]}</b></span><span>{UP.LOSE[c]}</span>
+            </div>
+          ))}
+        </div>
+        <p className="note" style={{ marginTop: 14 }}>
+          Points are worth more the higher you climb, so there is nothing to gain from camping at
+          the bottom beating people you should beat. Read the diagonal:{" "}
+          <b style={{ color: "var(--cream)" }}>losing on Court 1 is worth winning on Court {Math.min(3, C)}</b>.
+        </p>
+      </div>
+
+      <div className="hair" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {shuffle && (
+          <Step n="1" head="Round one is the shuffle">
+            You play one match and it scores <b>nothing</b>. All it decides is which court you
+            start on — so where you begin is won, not drawn.
+          </Step>
+        )}
+        <Step n={shuffle ? "2" : "1"} head="Up or down, every round">
+          Winners climb a court together, losers drop one. Court 1 winners stay on Court 1;
+          Court {C} losers stay on Court {C}.
+        </Step>
+        <Step n={shuffle ? "3" : "2"} head="New partners on arrival">
+          The four of you are ranked by points so far and paired <b>1 + 4 against 2 + 3</b> — the
+          closest match the four of you can make.
+        </Step>
+        <Step n={shuffle ? "4" : "3"} head={plural(matches, "match") + " each"}>
+          Highest total at the end takes the night. There is no score to reach — you accumulate,
+          and the last round is worth double.
+        </Step>
+      </div>
+
+      <div className="hair note">
+        When the night starts this page becomes the live board — your court, your partner, your
+        score and the table, updating as the results go in. Nothing to install.
+      </div>
+    </div>
+  );
+}
+
 function Rules({ t, cfg }) {
   const live = t && t.format === "uprising" ? t : null;
   const players = live ? live.playerIds.length : 16;
@@ -2548,6 +2707,29 @@ function App() {
   const tournaments = data.tournaments || [];
   const active = tournaments.find(t => t.status === "active");
 
+  // The tabs appear when there is a night to follow. Before one starts there
+  // is nothing behind four of the five — a Board and Standings of nothing, an
+  // empty History — and a row of tabs leading to empty screens reads as a
+  // broken app rather than as a club that has not started yet.
+  //
+  // A scorer keeps them regardless: they have to reach Setup, Players and
+  // Admin to CREATE the night, so hiding the nav from them would lock them out
+  // of the only screens that make the nav appear.
+  const showNav = !!active || canEdit;
+
+  // THIS MUST STAY ABOVE the `if (!loaded) return` below. Put after it, the
+  // effect runs on the loaded render and not on the loading one, which is
+  // "rendered more hooks than during the previous render" — React 18 throws
+  // #310 and unmounts the tree, so the page is BLANK rather than slightly
+  // wrong. Caught by the headless shell test, not by reading it.
+  //
+  // What it does: a scorer sitting on Players when the night ends, who then
+  // logs out, would be left on a screen with no way back, because the nav that
+  // got them there has just gone. Snap to the one view that always exists.
+  useEffect(() => {
+    if (!showNav && view !== "board") setView("board");
+  }, [showNav, view]);
+
   function persist(next) {
     setData(next);
     clearTimeout(saveTimer.current);
@@ -2723,17 +2905,35 @@ function App() {
   if (role === "admin") navDefs.push({ id: "admin", label: "Admin" });
   // The header used to say AMERICANO on an UPRISING night, with the format
   // demoted to the subtitle. The wordmark is the thing people photograph.
-  const headerName = active && active.format === "uprising" ? "Uprising"
+  // The homepage is entirely about UPRISING, so the header said AMERICANO over
+  // it — the default cfg.format is "americano" and nobody has touched setup.
+  // The wordmark is the thing people photograph; it has to agree with the page
+  // under it.
+  const onHome = !active && !canEdit;
+  const headerName = onHome ? "Uprising"
+                   : active && active.format === "uprising" ? "Uprising"
                    : active ? "Americano"
                    : cfg.format === "uprising" ? "Uprising" : "Americano";
+  // "Guest view" is scorer-speak for "you are nobody", printed under the
+  // wordmark on the one screen the public actually lands on.
   const headerSub = active
     ? active.name.replace(new RegExp("^" + headerName + "\\s+", "i"), "")
-    : (canEdit ? "Ready to set up" : "Guest view");
+    : (canEdit ? "Ready to set up" : UP_NEXT.cadence);
 
   return (
     <Fragment>
       <header className="top">
-        <div className="brand">
+        {/* The login is BEHIND THE MARK. Players outnumber scorers forty to
+            one and a LOGIN button in the corner invites every one of them to
+            try the one thing on screen they have no business touching. Tapping
+            the mark opens it; there is nothing else to find.
+
+            It is a <button> rather than a div with onClick so it keeps the tap
+            target, the focus ring and the keyboard. The label is on the button
+            and not visible, which is the only clue a screen reader gets. */}
+        <button className="brand" type="button"
+          aria-label={canEdit ? headerName : "Scorer login"}
+          onClick={() => { if (!canEdit) { setModal("login"); setPin(""); setLoginErr(false); } }}>
           {/* A drawn mark, not an emoji: the emoji renders in whatever face
               the OS supplies and carries its own colours, which is the one
               thing a palette cannot override. This is the climb. */}
@@ -2747,13 +2947,11 @@ function App() {
             <span className="name">{headerName}</span>
             <span className="sub">{headerSub}</span>
           </span>
-        </div>
-        {canEdit
-          ? <button className="btn ghost" onClick={logout}>{role}</button>
-          : <button className="btn pill" onClick={() => { setModal("login"); setPin(""); setLoginErr(false); }}>Login</button>}
+        </button>
+        {canEdit && <button className="btn ghost" onClick={logout}>{role}</button>}
       </header>
 
-      <main>
+      <main className={showNav ? "" : "nonav"}>
         {view === "board" && (active
           ? <Board t={active} byId={byId} canEdit={canEdit} roundIdx={roundIdx} setRoundIdx={setRoundIdx}
               drafts={drafts} setDrafts={setDrafts} editing={editing} setEditing={setEditing}
@@ -2761,7 +2959,9 @@ function App() {
               onOpenCourts={() => { setCourtsPick(active.courtCount); setModal("courts"); }}
               onOpenJoin={() => setModal("join")}
               onAbandon={() => setModal("abandon")} />
-          : <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />)}
+          : (canEdit
+            ? <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />
+            : <Home cfg={cfg} />))}
 
         {view === "standings" && <Standings t={shownT} byId={byId}
           onReceipt={id => { setReceipt({ id, tid: shownT.id }); setModal("receipt"); }}
@@ -2782,12 +2982,12 @@ function App() {
         )}
       </main>
 
-      <nav className="bottom">
+      {showNav && <nav className="bottom">
         {navDefs.map(n => (
           <button key={n.id} className={view === n.id ? "on" : ""}
             onClick={() => { if (n.id === "standings") setHistoryId(null); setView(n.id); }}>{n.label}</button>
         ))}
-      </nav>
+      </nav>}
 
       {modal === "login" && (
         <Sheet title="Scorer login" onClose={() => setModal(null)}>
