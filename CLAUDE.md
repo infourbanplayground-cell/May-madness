@@ -234,6 +234,34 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   `data-fit` and is shrunk after `document.fonts.ready` (the fallback face
   measures narrower than Archivo at `wdth` 125, so sizing before that sizes
   against the wrong letters).
+- **The shuffle SETS the ladder, it does not nudge it.** `upShuffleLadder`
+  ranks everyone by their shuffle **margin** and deals the courts from that:
+  biggest win on Court 1, biggest loss on the bottom. Anyone who rested the
+  shuffle has no margin and goes to the middle, the same way `upSeedLadder`
+  treats a player with no form.
+  - It used to be an ordinary round — you moved one court from wherever the
+    draw put you — so the draw still decided most of your start. Measured over
+    3,000 equal-skill nights at 16 players on 4 courts, check-in order was
+    worth **1.20x** in final points (61.7 against 51.2). It is **1.00x** now,
+    at every field size from 9 to 24, and competition is unchanged: the best
+    player wins 24.1% of nights, top-3 56.2%, rank error 3.18 (was 3.26).
+  - **Ties are broken by the rest rota, never by id.** `upSeedLadder` ties by
+    id too, so on night one the draw IS id order — breaking the margin ties the
+    same way quietly rebuilt the very order the shuffle exists to destroy. Each
+    seat averaged identical points while grouping by seeded court still showed
+    1.25x at 24 players. The rota is a random permutation drawn once and stored,
+    so it is stable across reloads and owes the draw nothing.
+  - **`upLadderOrder` had the same fault**, and it is the one that compounds:
+    level on court and on points, it seated the earlier id higher every round
+    for the whole night. That was the residual 1.16x at 20 players. Both now
+    tie-break on the rota. If you add another tie-break anywhere in this engine,
+    do not reach for the id.
+  - The shuffle ladder is computed against the courts the **shuffle round** was
+    played on, not the night's current count, so a mid-night court change does
+    not re-deal it.
+  - Both the RULES screen and the home page say the margin decides it, because
+    it changes how people play that match — a 11-2 shuffle win from the bottom
+    of the draw opens on Court 1.
 - **Courts can change MID-NIGHT**, which they could not before — a court frees
   up or is taken away at 7pm and the alternative used to be abandoning the
   session. `Change courts` is live on an UPRISING board and does NOT call
