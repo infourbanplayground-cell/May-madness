@@ -321,6 +321,23 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     nights as well as changing the courts, asserting that no played round's
     matches change and no points on the board move. Instrumented to confirm the
     path actually runs — 1,266 of 3,000 nights, not a vacuous pass.
+- **The lockup is `brand/uprising/lockup.html`**, rendered by
+  `node ops/render-uprising-lockup.mjs` to two TRANSPARENT PNGs:
+  `uprising-lockup.png` (volt, for dark) and `uprising-lockup-dark.png` (near
+  black, for light). A transparent file goes wherever somebody drops it, and
+  one ink only works on half of those places.
+  - `omitBackground: true` on the element, whose 90px padding IS the margin —
+    the glow reaches 60px, and a halo sliced square at the file edge looks
+    like a bad export on every background.
+  - The renderer reads the PNG back and checks the **alpha is real**: corners
+    transparent, not wholly transparent, and under 90% opaque, because an
+    opaque dark rectangle looks perfect on a dark slide and ruins a white one
+    with nothing on screen to tell you which you have. It also sweeps the
+    outer rows and columns for ink touching the crop.
+  - The tagline is tracked out to the wordmark's measured width at render
+    time, after `document.fonts.ready` — a lockup reads as one object only
+    when its two lines share an edge, and the fallback face measures nothing
+    like Archivo at `wdth` 125.
 - **urbanpadel.om carries an UPRISING panel**, between NOW PLAYING and THE
   CLUB, under the heading ONE SATURDAY A MONTH. It is NOT a volume and must not
   read as a second NOW PLAYING: its own accent (`--volt` #00F5C8) against the

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link href="../fonts/fonts.css" rel="stylesheet" />
+<style>
+  /* The UPRISING lockup on NOTHING — rendered with omitBackground so the PNG
+     carries real alpha. Two inks, because a transparent file goes wherever
+     somebody drops it: the volt version for dark backgrounds, the near-black
+     one for light. Pass INK=dark to the renderer for the second.
+
+     No background, no plate, no grain. Everything that made the cards look
+     like the cards lived in the page behind this, and a lockup that carries
+     its own backdrop cannot be put on anything. */
+  :root{ --ink:#00F5C8; --sub:#F2F0F7; --glow:0 0 60px rgba(0,245,200,.38); }
+  html[data-ink="dark"]{ --ink:#06060A; --sub:#06060A; --glow:none; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:transparent;}
+  body{
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    display:inline-block;
+  }
+  /* The crop happens on #lock, so its padding IS the transparent margin.
+     90px because the glow reaches 60px and a logo whose halo is sliced off
+     square at the file edge looks like a bad export on every background. */
+  #lock{ display:flex; flex-direction:column; align-items:center; padding:90px 96px; }
+
+  .mark{
+    width:96px;height:96px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    border:3px solid var(--ink); margin-bottom:26px;
+    box-shadow:var(--glow);
+  }
+  .mark svg{display:block;}
+
+  .word{
+    font-family:'Archivo'; font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase; letter-spacing:.005em;
+    font-size:150px; line-height:.86; color:var(--ink);
+    text-shadow:var(--glow); white-space:nowrap;
+  }
+  /* The tagline is set to the exact width of the wordmark above it, tracked
+     out to fill — a lockup reads as one object only when its two lines share
+     an edge. The renderer measures and sets the letter-spacing. */
+  .tag{
+    font-family:'Archivo',sans-serif; font-style:normal; font-weight:800;
+    text-transform:uppercase; font-size:30px; color:var(--sub);
+    white-space:nowrap; margin-top:20px;
+    opacity:.92;
+  }
+  html[data-ink="dark"] .tag{ opacity:.78; }
+</style>
+</head>
+<body>
+<div id="lock">
+  <span class="mark">
+    <svg viewBox="0 0 100 100" width="52" height="52" aria-hidden="true">
+      <path d="M18 64 L50 32 L82 64" fill="none" stroke="currentColor"
+            stroke-width="13" stroke-linecap="square" style="stroke:var(--ink)"/>
+    </svg>
+  </span>
+  <div class="word" id="word">UPRISING</div>
+  <div class="tag" id="tag">Climb to Court One</div>
+</div>
+</body>
+</html>
