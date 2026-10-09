@@ -284,6 +284,25 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   against 0.1550 for perfect knowledge and 0.5982 for the worst split. The
   bottleneck is which court you are on, not how the four of you are divided, so
   it is not worth a rule players would have to be told about.
+- **Walk-ins are added from the CHECK-IN screen**, not the Admin tab. Type a
+  name into the roster search and the button under it creates the player and
+  ticks them in, in one tap. 314 names sync from the series DB and somebody
+  always turns up who is not one of them; the only route in used to be the
+  Admin tab, which is admin-only and — since the nav now hides before a night
+  starts — unreachable for a scorer.
+  - Two duplicate guards, both tested: if the typed name already exists the
+    button says **Check in <name>** and ticks that person instead of forking
+    the roster, and it disappears entirely once they are checked in. Matching
+    is case-insensitive.
+  - Guests persist under `state.guests`. The API deletes `state.players` on
+    save (the roster is a live read from August Attack's DB) but leaves
+    `guests` alone, so a walk-in survives the night and is in the list next
+    month.
+  - **Joining an UPRISING night ALREADY IN PROGRESS is still not possible** —
+    "Late arrival" remains Americano-only. `upValidate` checks each round's
+    rest count against the CURRENT field size, so adding a seventeenth player
+    at round 6 fails validation on rounds 1 to 5. The same per-round-history
+    fix the court change needed would do it; it has not been done.
 - **Courts can change MID-NIGHT**, which they could not before — a court frees
   up or is taken away at 7pm and the alternative used to be abandoning the
   session. `Change courts` is live on an UPRISING board and does NOT call

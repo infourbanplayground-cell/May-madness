@@ -1778,7 +1778,7 @@ function Sheet({ title, onClose, children }) {
 }
 
 // ── setup ───────────────────────────────────────────────────────
-function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
+function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest }) {
   const selCount = Object.values(sel).filter(Boolean).length;
   const suggested = selCount >= 4 ? (selCount % 2 === 0 ? selCount - 1 : selCount) : 0;
   const needed = selCount >= 4 ? maxCourtsFor(selCount) : 0;
@@ -2096,7 +2096,38 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart }) {
                   onClick={() => setSel({})}>Clear all</button>
               )}
             </div>
-            {roster.length === 0 && <div className="note">No player matches “{q}”.</div>}
+            {/* Walk-ins. 314 people are synced from the series DB, but somebody
+                always turns up who has never played — and before this the only
+                way in was the Admin tab, which is admin-only and, since the
+                nav hides before a night starts, unreachable for a scorer. So
+                the adder lives in the search box: type the name, tap once,
+                they are created AND checked in. */}
+            {canEdit && (() => {
+              const n = q.trim();
+              if (!n) return null;
+              const dupe = people.find(p => p.name.toLowerCase() === n.toLowerCase());
+              if (dupe) {
+                // Do not make a second Ali. If the name already exists, the
+                // button checks that person in instead of forking the roster.
+                if (sel[dupe.id]) return null;
+                return (
+                  <button className="btn" style={{ width: "100%", marginBottom: 12 }}
+                    onClick={() => { setSel(x => ({ ...x, [dupe.id]: true })); setQ(""); }}>
+                    Check in {dupe.name}
+                  </button>
+                );
+              }
+              return (
+                <button className="btn" style={{ width: "100%", marginBottom: 12 }}
+                  onClick={() => {
+                    const id = onAddGuest && onAddGuest(n);
+                    if (id) { setSel(x => ({ ...x, [id]: true })); setQ(""); }
+                  }}>
+                  + Add “{n}” and check them in
+                </button>
+              );
+            })()}
+            {roster.length === 0 && !q.trim() && <div className="note">No players yet.</div>}
             <div className="chipgrid">
               {roster.map(p => (
                 <button key={p.id} className={"chip" + (sel[p.id] ? " on" : "")}
@@ -3125,6 +3156,18 @@ function App() {
     persist({ ...data, guests: [...guests, { id: uid("g"), name: n }] });
     setNewName("");
   }
+  // Same thing, but it RETURNS the id — the check-in screen needs it to tick
+  // the new player immediately, and `people` will not have rebuilt yet when
+  // the button handler runs.
+  function addGuestNamed(name) {
+    const n = (name || "").trim();
+    if (!n) return null;
+    const existing = people.find(p => p.name.toLowerCase() === n.toLowerCase());
+    if (existing) return existing.id;
+    const id = uid("g");
+    persist({ ...data, guests: [...guests, { id, name: n }] });
+    return id;
+  }
 
   if (!loaded) return <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", color: "var(--muted2)" }}>Loading…</div>;
 
@@ -3195,7 +3238,8 @@ function App() {
               onOpenJoin={() => setModal("join")}
               onAbandon={() => setModal("abandon")} />
           : (canEdit
-            ? <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel} onStart={startSession} />
+            ? <Setup people={people} canEdit={canEdit} cfg={cfg} setCfg={setCfg} sel={sel} setSel={setSel}
+                onStart={startSession} onAddGuest={addGuestNamed} />
             : <Home cfg={cfg} />))}
 
         {view === "standings" && <Standings t={shownT} byId={byId}
