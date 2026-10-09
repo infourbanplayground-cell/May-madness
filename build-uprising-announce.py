@@ -54,6 +54,10 @@ SECOND_NAME = "Strongest finish" if FIRST else "The Climb"
 SECOND_RULE = ("Most points in the second half of the night minus the first. "
                "Nothing to do with how you started.") if FIRST else \
               "Most points above your own average. Open to anyone in the room."
+# The posts carry the DATE but no clock times and no durations — the owner
+# fixes the start when the court is confirmed, and a poster that has to be
+# reshot because the time moved is worse than one that never claimed it.
+# S["start"] and F["minutes"] still drive the RULES screen inside the app.
 END = (datetime.datetime.combine(DT, datetime.time(int(S["start"][:2]), int(S["start"][3:])))
        + datetime.timedelta(minutes=F["minutes"])).strftime("%H:%M")
 
@@ -175,7 +179,7 @@ page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
   </div>
   <div class="when">
     <div class="day disp">{DT.day} {DT.strftime("%b").upper()}</div>
-    <div class="dl">{DT.strftime("%A").upper()} &nbsp;·&nbsp; {S['start']} &#8211; {END} &nbsp;·&nbsp; DOORS {S['doors']}</div>
+    <div class="dl">{DT.strftime("%A").upper()} &nbsp;·&nbsp; NO PARTNER NEEDED</div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px">
@@ -234,7 +238,7 @@ page("post-2-match.html", 1080, 1350, "60px 64px 54px", f"""
     <div style="display:flex;gap:40px">
       <span class="fact"><b class="disp">{F['target']}</b><i>To win a match</i></span>
       <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
-      <span class="fact"><b class="disp">~8 min</b><i>A match</i></span>
+      <span class="fact"><b class="disp">{F['courts']}</b><i>Courts</i></span>
     </div>
     <span class="host">{S['host'].upper()}</span>
   </div>
@@ -291,7 +295,7 @@ page("post-3-ladder.html", 1080, 1350, "60px 64px 54px", f"""
       <span class="fact"><b class="disp">{F['courts']}</b><i>Courts</i></span>
       <span class="fact"><b class="disp">{F['scoring']}</b><i>Scoring rounds</i></span>
       <span class="fact"><b class="disp">{F['target']}</b><i>Point match</i></span>
-      <span class="fact"><b class="disp">2h30</b><i>Start to finish</i></span>
+      <span class="fact"><b class="disp">{F['players']}</b><i>Players</i></span>
     </div>
     <span class="host">{S['host'].upper()}</span>
   </div>
@@ -333,7 +337,7 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
     <div style="display:flex;gap:40px">
       <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
       <span class="fact"><b class="disp">{S['cap']}</b><i>Places only</i></span>
-      <span class="fact"><b class="disp">{DT.day} {DT.strftime("%b").upper()}</b><i>{DT.strftime("%a").upper()} · {S["start"]}</i></span>
+      <span class="fact"><b class="disp">{DT.day} {DT.strftime("%b").upper()}</b><i>{DT.strftime("%A").upper()}</i></span>
     </div>
     <span class="host">{S['signupVia'].upper()}<small>{S['host'].upper()}</small></span>
   </div>
@@ -371,7 +375,7 @@ page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
   {ladder(rows_note=False)}
   <div class="when">
     <div class="day disp">{DATE_SHORT}</div>
-    <div class="dl">{S['start']} &#8211; {END} &nbsp;·&nbsp; {S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places</div>
+    <div class="dl">{S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places &nbsp;·&nbsp; no partner needed</div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:46px">
@@ -430,7 +434,7 @@ the table. What you bank is what the COURT pays — {F['win']['1']} for a win on
 down to {F['win'][str(F['courts'])]} on Court {F['courts']}. Highest total after {F['scoring']} rounds takes the night.
 
 • {F['matches']} matches each — not three
-• First to {F['target']}, {S['start']}–{END}
+• First to {F['target']}, straight rallies
 • {S['entry']} {CUR} · {S['cap']} places, then a waitlist
 • Champion takes {S['championPrize']} {CUR}
 • {"STRONGEST FINISH — biggest second half — plays the next one free" if FIRST else "THE CLIMB — most points above your own average — plays the next one free"}
@@ -457,10 +461,10 @@ What you bank is what the court pays — {F['win']['1']} for a win on Court 1, {
 So there is nothing to gain from camping at the bottom beating people you
 should beat.
 
-{F['matches']} matches in {F['minutes'] // 60}h{F['minutes'] % 60:02d}. A different partner almost every round. You do
-not need to bring anyone.
+{F['matches']} matches. A different partner almost every round. You do not need to
+bring anyone.
 
-{S['entry']} {CUR} · {S['cap']} places · {S['start']} start
+{S['entry']} {CUR} · {S['cap']} places
 Champion {S['championPrize']} {CUR}. {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.
 
 Link in bio to the live ladder.
