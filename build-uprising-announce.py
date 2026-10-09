@@ -587,6 +587,87 @@ story("story-5-claim.html", f"""
   .row.hi .v{color:var(--volt);}
 """)
 
+# ── the link preview ───────────────────────────────────────────────────────
+# 1200x630, the one size WhatsApp, iMessage and every other unfurler agrees on.
+#
+# This is the card that does the explaining now: the sign-up post is a header
+# and a numbered list, and the link under it is what tells somebody who has
+# never heard of UPRISING what they would be turning up to. It gets ONE glance
+# at thumbnail size in a chat, so it carries the name, the one-line rule and
+# the three numbers that decide whether you reply — and nothing else.
+page("og-card.html", 1200, 630, "54px 60px", f"""
+  <div class="top">{MARK}<span class="nm disp">{S['name']}</span>
+    <span class="sub">Urban Playground</span></div>
+  <div>
+    <h2 class="disp">Climb to <em>Court One</em></h2>
+    <p class="lede">Come alone. <b>{F['courts']} courts, one ladder</b> — win your match
+       and you go up a court, lose it and you go down. Every match is first to {F['target']}.</p>
+  </div>
+  <div class="foot">
+    <div style="display:flex;gap:38px;align-items:flex-end">
+      <span class="fact"><b class="disp">{DT.day} {DT.strftime("%b").upper()}</b><i>{DAY}</i></span>
+      <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
+      <span class="fact"><b class="disp"><u>Up to</u>{S['cap']}</b><i>Places</i></span>
+      <span class="fact"><b class="disp">0</b><i>Partners needed</i></span>
+    </div>
+    <span class="host">{S['host'].upper()}</span>
+  </div>
+""", """
+  .top .nm{font-size:26px;} .top .sub{font-size:11px;}
+  h2{font-size:62px;line-height:.92;margin-top:4px;}
+  h2 em{font-style:italic;color:var(--volt);text-shadow:0 0 40px rgba(var(--volt-rgb),.45);}
+  .lede{font-size:21px;margin-top:16px;max-width:1010px;}
+  .foot{padding-top:22px;}
+  .fact b{font-size:34px;} .fact i{font-size:10px;}
+  .host{font-size:13px;text-align:right;white-space:nowrap;}
+""")
+
+# ── the meta tags on the app ───────────────────────────────────────────────
+# Spliced into americano-index.html between markers, the same way the engine
+# is spliced in by build-americano-app.py. They live there rather than being
+# hand-written because the description carries the DATE: typed once it is right
+# for a month and quietly wrong after that, on the one surface nobody re-reads.
+APP = os.path.join(HERE, "americano-index.html")
+OG_START = "<meta property=\"og:type\" content=\"website\" />"
+OG_END = "<!-- ═══ END UPRISING LINK PREVIEW"
+
+# WhatsApp truncates a description at roughly 150 characters and shows the rest
+# to nobody, so the sentence that explains the format comes first and the three
+# figures that decide whether somebody replies come second.
+OG_DESC = (f"Come alone, no partner needed. {F['courts']} courts, one ladder: win and "
+           f"you go up a court, lose and you go down. {DATE_SHORT.title()} · "
+           f"{S['entry']} {CUR} · up to {S['cap']} places.")
+OG = "\n".join([
+    OG_START,
+    '<meta property="og:site_name" content="Urban Playground" />',
+    f'<meta property="og:url" content="https://{S["host"]}/" />',
+    f'<meta property="og:title" content="{S["name"]} — {S["tagline"].rstrip(".")}" />',
+    f'<meta property="og:description" content="{OG_DESC}" />',
+    f'<meta property="og:image" content="https://{S["host"]}/og-card.jpg" />',
+    '<meta property="og:image:width" content="1200" />',
+    '<meta property="og:image:height" content="630" />',
+    f'<meta property="og:image:alt" content="{S["name"]} — {S["tagline"].lower()} '
+    f'{F["courts"]} courts, one ladder." />',
+    '<meta name="twitter:card" content="summary_large_image" />',
+    f'<meta name="description" content="{S["name"]} — a {S["cadence"]} padel social at '
+    f'Urban Playground. {F["courts"]} courts, one ladder: win and you climb, lose and '
+    f'you drop. Come on your own." />',
+    "",
+])
+_app = open(APP).read()
+_i, _j = _app.find(OG_START), _app.find(OG_END)
+if _i < 0 or _j < 0 or _j < _i:
+    sys.exit("!! americano-index.html has no UPRISING LINK PREVIEW block — the "
+             "markers were renamed or removed; see the head of that file")
+_new = _app[:_i] + OG + _app[_j:]
+if _new != _app:
+    open(APP, "w").write(_new)
+    print("  rewrote the link-preview tags in americano-index.html"
+          " — rebuild and deploy the app for them to go live")
+
+if len(OG_DESC) > 150:
+    print(f"  !! og:description is {len(OG_DESC)} chars — WhatsApp will cut it at ~150")
+
 # ── the copy ───────────────────────────────────────────────────────────────
 # Written here rather than kept in a doc, so the sentence that quotes "15
 # matches" is regenerated from the same facts as the card that prints it.

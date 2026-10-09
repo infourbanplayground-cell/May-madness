@@ -15,7 +15,9 @@ const dir = join(root, 'brand/uprising/posts');
 // named story-* is a 1080x1920 full-screen story. Keyed off the name rather
 // than a list, so adding a sixth story card needs no edit here — a story
 // rendered at 1350 would be silently letterboxed, not fail.
-const size = n => n.startsWith('story-') ? [1080, 1920] : [1080, 1350];
+const size = n => n.startsWith('story-') ? [1080, 1920]
+               : n.startsWith('og-')    ? [1200, 630]
+               : [1080, 1350];
 const base = process.env.UP_BASE || ('file://' + dir + '/');
 
 // This container pins Chromium at a fixed path and has no headless-shell, so

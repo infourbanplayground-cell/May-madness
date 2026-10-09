@@ -63,13 +63,18 @@ def main():
     L.append(f"⬛🟩 *{S['name']} · {WHEN}* 🟩⬛")
     L.append(f"_{S['tagline']}_")
     L.append("")
-    L.append(RULE)
-    L.append("📍 Urban Playground")
-    L.append(f"🗓️ {DATE_STR}")
-    L.append(f"💸 {S['entry']} {CUR}")
-    L.append(f"🏆 Champion — *{CHAMP}*")
-    L.append("🤝 *No partner needed* — come on your own")
-    L.append(RULE)
+    # Four lines and a link. The format used to be explained here in a block
+    # the owner called too long, and it was: a sign-up post is read at a glance
+    # by people who have already decided, and scrolled past by everyone else.
+    # The explaining is the LINK's job now — americano-index.html carries
+    # og: tags and a 1200x630 card, so the preview under this post is the
+    # format. Hence the link sits above the list, where the preview renders,
+    # rather than at the bottom as a footnote.
+    L.append(f"🗓️ {DATE_STR}  ·  📍 Urban Playground")
+    L.append(f"💸 {S['entry']} {CUR}  ·  🏆 {CHAMP}")
+    L.append("🤝 *Come alone* — no partner needed")
+    L.append("")
+    L.append(f"👇 What it is: https://{S['host']}")
     L.append("")
 
     if full:
@@ -105,9 +110,6 @@ def main():
     L += [f"{i}-" for i in range(1, WL_SIZE + 1)]
     L.append("")
     L.append(f"⚠️ *{CAP} places only* · first come, first on")
-    L.append(f"🎾 {S['host']}")
-    L.append("")
-    L.append("*CLIMB TO COURT ONE.* 🔺")
 
     out = "\n".join(L)
     print(out)
