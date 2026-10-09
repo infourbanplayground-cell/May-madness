@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://urbanpadel.om/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Archivo:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
   /* ──────────────────────────────────────────────────────────────
      URBAN PLAYGROUND: house hub.
@@ -43,6 +43,7 @@
     --orange:  #F56530;   /* house accent */
     --orange-d:#C74A1E;
     --live:    #C6FF00;   /* the running volume's accent, Blackout Lime */
+    --volt:    #00F5C8;   /* UPRISING — a monthly night, not a volume */
     /* NOTE for the next volume: --live covers everything except three rgba()
        glows that need the colour as components, not as a token. Search for
        rgba(198,255,0 and move those too, or the panel glows in the OLD
@@ -203,6 +204,55 @@
     color:var(--court); background:var(--live);
     padding:13px 30px 11px;
     box-shadow:0 0 26px rgba(198,255,0,.40);
+  }
+
+  /* ── UPRISING (the monthly one-nighter, not a volume) ──────────
+     Its own accent, volt, so it reads as a different thing from the
+     running series rather than a second NOW PLAYING. Set as type:
+     there is no UPRISING lockup asset, and the posts set the wordmark
+     as type as well, at Archivo wdth 125. */
+  .up {
+    display:block; text-decoration:none; color:inherit; overflow:hidden;
+    padding:24px 18px 22px; text-align:center; margin-bottom:38px;
+    --tickc:var(--volt);
+    box-shadow:0 18px 46px rgba(0,0,0,.55);
+    transition:transform .16s var(--e-out), box-shadow .16s var(--e-out);
+  }
+  .up .glow {
+    position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(ellipse 60% 55% at 50% 32%, rgba(0,245,200,.13), transparent 70%);
+  }
+  .up .head {
+    position:relative; display:flex; align-items:center; justify-content:space-between;
+    gap:10px; flex-wrap:wrap; margin-bottom:12px;
+  }
+  .up .kick { color:var(--volt); }
+  .up .kick i { background:var(--volt); box-shadow:0 0 10px var(--volt); }
+  .up .stamp { color:var(--volt); border-color:rgba(0,245,200,.45); }
+  .up .stamp::before { background:var(--volt); box-shadow:0 0 9px var(--volt); }
+  .upmark {
+    position:relative; font-family:'Archivo',sans-serif; font-style:italic;
+    font-variation-settings:'wdth' 125,'wght' 900;
+    /* 11.6vw, not 13.5: at 414px the word needed 365px in a 346px box and
+       lost its G off the edge. Archivo at wdth 125 italic is far wider than
+       it measures in a fallback face — the same trap DESIGN.md records for
+       the Blackout lockup. Checked at 320, 375, 414 and 768. */
+    font-size:clamp(34px,11.6vw,76px); line-height:.92; letter-spacing:.005em;
+    color:var(--volt); text-shadow:0 0 44px rgba(0,245,200,.4);
+  }
+  .up .tagline {
+    position:relative; font-family:'Teko',sans-serif; font-weight:600;
+    font-size:clamp(19px,4.4vw,25px); letter-spacing:.1em; margin-top:8px;
+  }
+  .up .tagline b { color:var(--volt); font-weight:400; }
+  .upline {
+    position:relative; font-size:14px; line-height:1.55; color:var(--dim);
+    margin:14px auto 0; max-width:430px;
+  }
+  .upline b { color:var(--ink); font-weight:700; }
+  .up .cta {
+    color:var(--court); background:var(--volt);
+    box-shadow:0 0 26px rgba(0,245,200,.38);
   }
 
   /* ── SERVICE CARDS ── */
@@ -407,6 +457,28 @@
     </picture>
     <div class="tagline">LIGHTS <b>OUT.</b></div>
     <span class="cta">ENTER →</span>
+  </a>
+
+  <!-- ── UPRISING ────────────────────────────────────────────── -->
+  <!-- Not a volume and not NOW PLAYING: a one-night social that runs once a
+       month alongside whichever series is live. Everything between the
+       GENERATED markers is written by build-uprising-announce.py from
+       uprising-social.json — the date above all, which is right for a month
+       and quietly wrong after that on the one page every visitor sees. -->
+  <div class="sec"><span>ONE SATURDAY A MONTH</span><div class="line"></div></div>
+
+  <a href="https://americano.urbanpadel.om" class="up tick">
+    <div class="glow"></div>
+    <div class="head">
+      <span class="kick"><i></i><!--UP:WHEN-->TOMORROW · SAT 10 OCT<!--/UP:WHEN--></span>
+      <span class="stamp">NEW</span>
+    </div>
+    <div class="upmark">UPRISING</div>
+    <div class="tagline">CLIMB TO <b>COURT ONE.</b></div>
+    <p class="upline"><b>Come on your own.</b> Four courts, one ladder — win your match and you
+       move up a court, lose it and you move down. A different partner almost every round.
+       <!--UP:FACTS-->7 OMR · up to 16 places · 9 matches each · champion takes a 15 OMR voucher.<!--/UP:FACTS--></p>
+    <span class="cta">HOW IT WORKS →</span>
   </a>
 
   <!-- ── THE CLUB ────────────────────────────────────────────── -->

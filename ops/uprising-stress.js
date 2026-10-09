@@ -9,7 +9,7 @@ const E = require('/home/user/May-madness/uprising-engine.js');
 const {
   UP, upSeedLadder, upMakeRestRota, upBuildRound, upStandings, upReceipt,
   upValidate, upCourts, upRestCount, upUneven, upScoringRounds, upScoringRound,
-  upDoubleFinal, upRoundPoints, upFairRounds, upPlanRounds, upTotals,
+  upDoubleFinal, upRoundPoints, upFairRounds, upPlanRounds, upTotals, upRoundDoubled,
   upCurrentCourts, upClimbPath, upPrizes, upPairKey, upFinisher, upShuffleRounds,
 } = E;
 

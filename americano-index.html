@@ -1141,6 +1141,32 @@ function upPlayerIds(night) {
   return night.playerIds || (night.players || []).map(p => p.id);
 }
 
+// Was THIS round doubled? Once a round has been played the answer is frozen
+// onto it, because the night can be lengthened afterwards — "we have the court
+// for one more" — and the last round would otherwise stop being the last. That
+// silently un-doubles a round people watched and moves every total on the
+// board: measured, the leader went from 32 points to 24 without a ball being
+// hit. A score that changes after the fact is the one thing a table may not do.
+function upRoundDoubled(night, r) {
+  if (r && r.doubled !== undefined) return !!r.doubled;
+  return !!(upDoubleFinal(night) && r && r.roundNum === upRoundsTotal(night));
+}
+
+// Lengthen or shorten the night. Cannot drop below the rounds already played
+// (or below one scoring round), and freezes the doubling on everything already
+// played before the finish line moves.
+function upSetRounds(night, n) {
+  const played = (night.rounds || []).filter(upRoundDone).length;
+  const floor = Math.max(played, upShuffleRounds(night) + 1);
+  const want = Math.max(floor, Math.min(40, Math.floor(Number(n) || 0)));
+  if (want === upRoundsTotal(night)) return night;
+  const rounds = (night.rounds || []).map(r =>
+    (upRoundDone(r) && r.doubled === undefined)
+      ? { ...r, doubled: upRoundDoubled(night, r) }
+      : r);
+  return { ...night, numRounds: want, rounds };
+}
+
 function upTotals(night) {
   const total = {};
   const N = upRoundsTotal(night), dbl = upDoubleFinal(night);
@@ -1148,7 +1174,7 @@ function upTotals(night) {
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
     if (!upScoringRound(night, r.roundNum)) return;   // the shuffle pays nothing
-    const isFinal = dbl && r.roundNum === N;
+    const isFinal = upRoundDoubled(night, r);
     const aWon = m.score1 > m.score2;
     m.team1.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, aWon, isFinal); });
     m.team2.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, !aWon, isFinal); });
@@ -1323,7 +1349,7 @@ function upReceipt(night, playerId) {
   const out = [];
   let running = 0;
   (night.rounds || []).forEach(r => {
-    const isFinal = dbl && r.roundNum === N;
+    const isFinal = upRoundDoubled(night, r);
     const m = (r.courts || []).find(x =>
       (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
     if (!m) {
@@ -2157,7 +2183,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
 
 // ── live board ──────────────────────────────────────────────────
 function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, editing, setEditing,
-                 onCommit, onFinish, onOpenCourts, onOpenJoin, onAbandon }) {
+                 onCommit, onFinish, onOpenCourts, onOpenRounds, onOpenJoin, onAbandon }) {
   const isUp = t.format === "uprising";
   const ri = Math.min(roundIdx, t.rounds.length - 1);
   const round = t.rounds[ri];
@@ -2284,7 +2310,10 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
               rebuildTail — that is the classic Americano circle method and
               would overwrite the ladder. UPRISING builds one round at a time,
               so changing the count is a change to the NEXT round only. */}
-          <button className="btn small" onClick={onOpenCourts}>Change courts</button>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button className="btn small" onClick={onOpenCourts}>Change courts</button>
+            <button className="btn small" onClick={onOpenRounds}>Rounds</button>
+          </div>
         </div>
       )}
 
@@ -2947,6 +2976,7 @@ function App() {
   const [drafts, setDrafts] = useState({});
   const [editing, setEditing] = useState({});
   const [courtsPick, setCourtsPick] = useState(null);
+  const [roundsPick, setRoundsPick] = useState(null);
   const [query, setQuery] = useState("");
   const [newName, setNewName] = useState("");
   const [statsId, setStatsId] = useState(null);
@@ -3235,6 +3265,7 @@ function App() {
               drafts={drafts} setDrafts={setDrafts} editing={editing} setEditing={setEditing}
               onCommit={commitScore} onFinish={finishSession}
               onOpenCourts={() => { setCourtsPick(active.courtCount); setModal("courts"); }}
+              onOpenRounds={() => { setRoundsPick(upRoundsTotal(active)); setModal("rounds"); }}
               onOpenJoin={() => setModal("join")}
               onAbandon={() => setModal("abandon")} />
           : (canEdit
@@ -3367,6 +3398,56 @@ function App() {
                 saveT(next);
                 setModal(null);
               }}>Apply</button>
+          </Sheet>
+        );
+      })()}
+
+      {modal === "rounds" && active && (() => {
+        // "We have the court for another twenty minutes." The night's length
+        // was fixed at setup and the only way to react was to stop early or
+        // run over; upBuildRound simply refuses past numRounds.
+        const now = upRoundsTotal(active);
+        const played = active.rounds.filter(upRoundDone).length;
+        const pick = roundsPick == null ? now : roundsPick;
+        const floorR = Math.max(played, upShuffleRounds(active) + 1);
+        const scoring = pick - upShuffleRounds(active);
+        const left = Math.max(0, pick - active.rounds.length);
+        const mins = nightMinutes(pick, active.pointsPerMatch || UP.TARGET);
+        const done = active.rounds.filter(upRoundDone);
+        const lastWasDoubled = done.length && upRoundDoubled(active, done[done.length - 1]);
+        return (
+          <Sheet title="How many rounds" onClose={() => setModal(null)}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", marginTop: 4 }}>
+              <button className="btn" style={{ padding: "10px 20px", fontSize: 22 }}
+                disabled={pick <= floorR} onClick={() => setRoundsPick(Math.max(floorR, pick - 1))}>−</button>
+              <span className="disp" style={{ fontSize: 46, minWidth: 70, textAlign: "center" }}>{pick}</span>
+              <button className="btn" style={{ padding: "10px 20px", fontSize: 22 }}
+                disabled={pick >= 40} onClick={() => setRoundsPick(Math.min(40, pick + 1))}>+</button>
+            </div>
+            <div className="note" style={{ marginTop: 14, textAlign: "center" }}>
+              {plural(scoring, "scoring round")}{upShuffleRounds(active)
+                ? ` + ${plural(upShuffleRounds(active), "shuffle round")}` : ""} · about {asClock(mins)} in all
+            </div>
+            <div className="note" style={{ marginTop: 10 }}>
+              {played} {played === 1 ? "round is" : "rounds are"} already played and cannot be undone here.
+              {pick > now && ` ${plural(pick - now, "more round")} to play after this one.`}
+              {pick < now && ` The night will stop ${plural(now - pick, "round")} earlier.`}
+            </div>
+            {pick > now && lastWasDoubled && (
+              <div className="note" style={{ marginTop: 10, color: "var(--warn)" }}>
+                The last round already played was <b>double points</b> and keeps them — they are
+                on the board. The new final round will double as well, so the night ends with two.
+              </div>
+            )}
+            {left === 0 && pick > now && (
+              <div className="note" style={{ marginTop: 10 }}>
+                The night had finished; adding a round reopens it.
+              </div>
+            )}
+            <button className="btn" style={{ width: "100%", marginTop: 18 }} disabled={pick === now}
+              onClick={() => { saveT(upSetRounds(active, pick)); setModal(null); }}>
+              {pick > now ? `Play ${plural(pick - now, "more round")}` : `Finish ${plural(now - pick, "round")} earlier`}
+            </button>
           </Sheet>
         );
       })()}

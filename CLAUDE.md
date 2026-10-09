@@ -303,6 +303,37 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
+- **The night can be lengthened or shortened MID-NIGHT** — "we have the court
+  for one more". `Rounds` on the board, beside `Change courts`; `upSetRounds`
+  does it. It cannot go below the rounds already played, nor below one scoring
+  round.
+  - **A round's doubling is FROZEN onto it once played** (`upRoundDoubled`
+    reads `round.doubled` if set, else derives). Without this, adding a round
+    stops the old final being the final and silently un-doubles a round people
+    watched: measured, the leader went from 32 points to 24 without a ball
+    being hit. `upSetRounds` stamps every completed round before the finish
+    line moves.
+  - A consequence worth saying out loud, and the sheet does: extend AFTER the
+    final has been played and the night ends with TWO double rounds — the old
+    one keeps its points because they are already on the board, and the new
+    last round doubles as well. You cannot take points back.
+  - `ops/uprising-courtchange.js` now moves the finish line on about 40% of its
+    nights as well as changing the courts, asserting that no played round's
+    matches change and no points on the board move. Instrumented to confirm the
+    path actually runs — 1,266 of 3,000 nights, not a vacuous pass.
+- **urbanpadel.om carries an UPRISING panel**, between NOW PLAYING and THE
+  CLUB, under the heading ONE SATURDAY A MONTH. It is NOT a volume and must not
+  read as a second NOW PLAYING: its own accent (`--volt` #00F5C8) against the
+  running series' lime, and the wordmark is set as TYPE because there is no
+  UPRISING lockup asset.
+  - The date and figures sit between `<!--UP:WHEN-->` / `<!--UP:FACTS-->`
+    markers and are written by `build-uprising-announce.py` from
+    uprising-social.json. Deploy with `bash ops/deploy-landing.sh`.
+  - The wordmark is `clamp(34px,11.6vw,76px)`, not 13.5vw: at 414px it needed
+    365px in a 346px box and lost its G off the edge — Archivo at `wdth` 125
+    italic is far wider than any fallback measures. Checked at 320, 360, 375,
+    414, 768 and 1100.
+  - The page's Archivo request had to gain its `ital` and `wdth` axes for this.
 - **Courts can change MID-NIGHT**, which they could not before — a court frees
   up or is taken away at 7pm and the alternative used to be abandoning the
   session. `Change courts` is live on an UPRISING board and does NOT call

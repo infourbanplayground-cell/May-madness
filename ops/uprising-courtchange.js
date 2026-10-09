@@ -54,12 +54,33 @@ for (let t = 0; t < TRIALS; t++) {
   // THE CHANGE. This is all the app does: set the number and carry on.
   night.courtCount = c1;
 
-  check(JSON.stringify(night.rounds) === before, "a played round changed", ctx);
+  // And, half the time, the organiser also moves the finish line — "we have
+  // the court for one more" or "we are running late". upSetRounds freezes the
+  // doubling on everything already played; without that, lengthening the
+  // night un-doubles a round people watched and every total moves.
+  const extend = rnd() < 0.5 ? ri(-2, 3) : 0;
+
+  let n2 = night;
+  if (extend) n2 = E.upSetRounds(night, E.upRoundsTotal(night) + extend);
+  Object.assign(night, n2);
+
+  const playedBefore = JSON.parse(before).filter(r =>
+    (r.courts || []).some(m => Number.isFinite(m.score1)));
+  const playedAfter = (night.rounds || []).filter(r =>
+    (r.courts || []).some(m => Number.isFinite(m.score1)));
+  check(playedAfter.length === playedBefore.length, "a played round vanished or appeared", ctx);
+  playedAfter.forEach((r, k) => {
+    const b4 = playedBefore[k];
+    check(JSON.stringify(r.courts) === JSON.stringify(b4.courts),
+      `round ${r.roundNum}: its matches changed`, ctx);
+  });
+  check(E.upRoundsTotal(night) >= playedAfter.length,
+    "the night is now shorter than the rounds already played", ctx);
   const ptsAfter = E.upTotals(night);
   // Totals may legitimately move ONLY by the final-round doubling, and only if
   // the final round has been played — which it has not here.
   check(ids.every(id => (ptsBefore[id] || 0) === (ptsAfter[id] || 0)),
-    "points on the board moved when a court was added/removed", ctx);
+    "points on the board moved when the courts or the round count changed", ctx);
 
   const courtsAfter = E.upCurrentCourts(night);
   const Cnow = E.upCourts(night);
@@ -113,10 +134,10 @@ for (let t = 0; t < TRIALS; t++) {
 
   // Points conserved: what the courts paid out is what the table holds.
   let owed = 0;
-  const dbl = E.upDoubleFinal(night);
+  
   night.rounds.forEach(r => {
     if (!E.upScoringRound(night, r.roundNum)) return;
-    const isFinal = dbl && r.roundNum === night.numRounds;
+    const isFinal = E.upRoundDoubled(night, r);
     r.courts.forEach(m => {
       owed += 2 * E.upRoundPoints(m.court, true, isFinal);
       owed += 2 * E.upRoundPoints(m.court, false, isFinal);
@@ -126,7 +147,7 @@ for (let t = 0; t < TRIALS; t++) {
   check(owed === held, `points conserved: courts owe ${owed}, table holds ${held}`, ctx);
 }
 
-console.log(`${TRIALS} nights with a mid-night court change`);
+console.log(`${TRIALS} nights with a mid-night court change and/or a moved finish line`);
 if (problems.length) {
   const uniq = [...new Set(problems)];
   console.log(`\n!! ${problems.length} failures (${uniq.length} distinct):`);

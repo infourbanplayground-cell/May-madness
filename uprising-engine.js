@@ -511,6 +511,32 @@ function upPlayerIds(night) {
   return night.playerIds || (night.players || []).map(p => p.id);
 }
 
+// Was THIS round doubled? Once a round has been played the answer is frozen
+// onto it, because the night can be lengthened afterwards — "we have the court
+// for one more" — and the last round would otherwise stop being the last. That
+// silently un-doubles a round people watched and moves every total on the
+// board: measured, the leader went from 32 points to 24 without a ball being
+// hit. A score that changes after the fact is the one thing a table may not do.
+function upRoundDoubled(night, r) {
+  if (r && r.doubled !== undefined) return !!r.doubled;
+  return !!(upDoubleFinal(night) && r && r.roundNum === upRoundsTotal(night));
+}
+
+// Lengthen or shorten the night. Cannot drop below the rounds already played
+// (or below one scoring round), and freezes the doubling on everything already
+// played before the finish line moves.
+function upSetRounds(night, n) {
+  const played = (night.rounds || []).filter(upRoundDone).length;
+  const floor = Math.max(played, upShuffleRounds(night) + 1);
+  const want = Math.max(floor, Math.min(40, Math.floor(Number(n) || 0)));
+  if (want === upRoundsTotal(night)) return night;
+  const rounds = (night.rounds || []).map(r =>
+    (upRoundDone(r) && r.doubled === undefined)
+      ? { ...r, doubled: upRoundDoubled(night, r) }
+      : r);
+  return { ...night, numRounds: want, rounds };
+}
+
 function upTotals(night) {
   const total = {};
   const N = upRoundsTotal(night), dbl = upDoubleFinal(night);
@@ -518,7 +544,7 @@ function upTotals(night) {
   (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
     if (!upMatchDone(m)) return;
     if (!upScoringRound(night, r.roundNum)) return;   // the shuffle pays nothing
-    const isFinal = dbl && r.roundNum === N;
+    const isFinal = upRoundDoubled(night, r);
     const aWon = m.score1 > m.score2;
     m.team1.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, aWon, isFinal); });
     m.team2.forEach(p => { total[p] = (total[p] || 0) + upRoundPoints(m.court, !aWon, isFinal); });
@@ -693,7 +719,7 @@ function upReceipt(night, playerId) {
   const out = [];
   let running = 0;
   (night.rounds || []).forEach(r => {
-    const isFinal = dbl && r.roundNum === N;
+    const isFinal = upRoundDoubled(night, r);
     const m = (r.courts || []).find(x =>
       (x.team1 || []).includes(playerId) || (x.team2 || []).includes(playerId));
     if (!m) {
@@ -852,5 +878,6 @@ if (typeof module !== "undefined" && module.exports) {
     UP_PACE, upRoundMinutes, upNightMinutes, upPlanRounds,
     upMakeRestRota, upRestRota, upRestingFor, upLadderOrder, upUneven,
     upRoundCourts, upCourtsAt, upShuffleLadder, upShuffled, upShuffleRounds,
+    upRoundDoubled, upSetRounds,
   };
 }

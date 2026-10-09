@@ -711,6 +711,26 @@ if _new != _app:
     print("  rewrote UP_NEXT in americano-index.html"
           " — rebuild and deploy the app for it to go live")
 
+# ── the club's front door ──────────────────────────────────────────────────
+# landing/index.html carries an UPRISING panel; its date and figures are
+# written here rather than typed, for the same reason as the app's: right for
+# a month and quietly wrong after that, on the page every visitor sees first.
+LAND = os.path.join(HERE, "landing", "index.html")
+_land = open(LAND).read()
+_when = (f"{WHEN} · {DATE_SHORT}" if WHEN in ("TONIGHT", "TOMORROW") else DATE_SHORT)
+_facts = (f"{S['entry']} {CUR} · up to {S['cap']} places · "
+          f"{plural(EACH, 'match')} each · champion takes a {CHAMP_FULL}.")
+for tag, val in (("UP:WHEN", _when), ("UP:FACTS", _facts)):
+    a, b = f"<!--{tag}-->", f"<!--/{tag}-->"
+    i, j = _land.find(a), _land.find(b)
+    if i < 0 or j < 0:
+        sys.exit(f"!! landing/index.html has no {tag} markers")
+    _land = _land[:i + len(a)] + val + _land[j:]
+if _land != open(LAND).read():
+    open(LAND, "w").write(_land)
+    print("  rewrote the UPRISING panel in landing/index.html"
+          " — deploy with bash ops/deploy-landing.sh")
+
 # ── the copy ───────────────────────────────────────────────────────────────
 # Written here rather than kept in a doc, so the sentence that quotes "15
 # matches" is regenerated from the same facts as the card that prints it.
