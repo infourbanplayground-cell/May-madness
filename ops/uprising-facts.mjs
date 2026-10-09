@@ -11,16 +11,28 @@ const require = createRequire(import.meta.url);
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const E = require(join(root, 'uprising-engine.js'));
 
-const players = 16, courts = 4, target = 11, budget = 150, shuffle = true;
+const S = require(join(root, 'uprising-social.json'));
+
+const target = 11, budget = 150, shuffle = true;
+const players = S.cap || 16;
+// The court count is the club's, not the format's — see _courts in the JSON.
+const courts = Math.max(2, Math.min(S.courts || E.UP.COURTS, Math.floor(players / 4), E.UP.COURTS));
 const scoring = E.upPlanRounds(budget, target, { shuffle, players, courts });
-const matches = scoring + (shuffle ? 1 : 0);
+const rounds = scoring + (shuffle ? 1 : 0);
+const resting = players - courts * 4;
+// ROUNDS and MATCHES EACH are the same number only when nobody rests. With 16
+// on 3 courts the night is 13 rounds and 9 matches each, and a post that
+// advertises the round count as "matches each" overstates it by two thirds.
+const matchesEach = (scoring * 4 * courts) / players;
 
 console.log(JSON.stringify({
-  players, courts, target, shuffle, scoring, matches,
+  players, courts, target, shuffle, scoring, rounds,
+  matches: matchesEach,
+  even: Number.isInteger(matchesEach),
   onCourt: courts * 4,
-  resting: players - courts * 4,
-  minutes: E.upNightMinutes(matches, target),
-  doubleFinal: players - courts * 4 === 0,
+  resting,
+  minutes: E.upNightMinutes(rounds, target),
+  doubleFinal: resting === 0,
   win: Object.fromEntries(Array.from({ length: courts }, (_, i) => [i + 1, E.UP.WIN[i + 1]])),
   lose: Object.fromEntries(Array.from({ length: courts }, (_, i) => [i + 1, E.UP.LOSE[i + 1]])),
 }, null, 2));

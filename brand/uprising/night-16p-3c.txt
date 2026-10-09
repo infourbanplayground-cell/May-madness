@@ -1,0 +1,112 @@
+UPRISING — 16 players, 3 courts
+================================================================
+12 on court, 4 resting · 13 rounds (1 shuffle + 12 scoring) · 9 matches each · 130 min
+last round doubles: NO (somebody is resting)
+
+1. THE SEEDING  (before a ball is hit)
+----------------------------------------------------------------
+Check-in order sets it on night one — nobody has form yet.
+  Court 1:  P01  P02  P03  P04
+  Court 2:  P05  P06  P07  P08
+  Court 3:  P09  P10  P11  P12  P13  P14  P15  P16
+  (Court 3 holds 7 — seeds 13-16 are clamped to the bottom court,
+   not to a Court 4 that nobody is playing on.)
+
+2. THE REST ROTA  (fixed now, known for the whole night)
+----------------------------------------------------------------
+  R 1 (shuffle)  resting: P08  P03  P14  P09
+  R 2           resting: P02  P15  P07  P04
+  R 3           resting: P06  P05  P01  P16
+  R 4           resting: P13  P10  P12  P11
+  R 5           resting: P09  P14  P03  P08
+  R 6           resting: P02  P15  P07  P04
+  R 7           resting: P06  P05  P01  P16
+  R 8           resting: P13  P10  P12  P11
+  R 9           resting: P09  P14  P03  P08
+  R10           resting: P02  P15  P07  P04
+  R11           resting: P06  P05  P01  P16
+  R12           resting: P13  P10  P12  P11
+  R13           resting: P09  P14  P03  P08
+
+  per player:
+    P01  rests 3x  rounds 3,7,11
+    P02  rests 3x  rounds 2,6,10
+    P03  rests 4x  rounds 1,5,9,13
+    P04  rests 3x  rounds 2,6,10
+    P05  rests 3x  rounds 3,7,11
+    P06  rests 3x  rounds 3,7,11
+    P07  rests 3x  rounds 2,6,10
+    P08  rests 4x  rounds 1,5,9,13
+    P09  rests 4x  rounds 1,5,9,13
+    P10  rests 3x  rounds 4,8,12
+    P11  rests 3x  rounds 4,8,12
+    P12  rests 3x  rounds 4,8,12
+    P13  rests 3x  rounds 4,8,12
+    P14  rests 4x  rounds 1,5,9,13
+    P15  rests 3x  rounds 2,6,10
+    P16  rests 3x  rounds 3,7,11
+  -> everyone rests 3 or 4 times, nobody twice in a row.
+
+3. ROUND 1 — THE SHUFFLE  (the only round that exists at the start)
+----------------------------------------------------------------
+  Court 1:  P01 + P05   v   P02 + P04
+  Court 2:  P06 + P11   v   P07 + P10
+  Court 3:  P12 + P16   v   P13 + P15
+  resting:  P08  P03  P14  P09
+  scores NOTHING. It only decides who starts where.
+
+  say team 1 wins every court 11-7:
+    Court 1 next: P01  P03  P05  P06  P11
+    Court 2 next: P02  P04  P08  P12  P16
+    Court 3 next: P07  P09  P10  P13  P14  P15
+
+4. ROUNDS 2-13  (each one built from the last one's results)
+----------------------------------------------------------------
+There is no pre-made schedule. Who you play depends on where you
+climbed to, so the app builds each round when the last one is in.
+
+  ROUND 2
+    Court 1 [8/4]  P01 + P06  v  P03 + P05
+    Court 2 [6/3]  P08 + P16  v  P11 + P12
+    Court 3 [4/2]  P09 + P14  v  P10 + P13
+    resting: P02 P15 P07 P04
+  ROUND 3
+    Court 1 [8/4]  P11 + P10  v  P12 + P03
+    Court 2 [6/3]  P13 + P04  v  P08 + P02
+    Court 3 [4/2]  P09 + P15  v  P14 + P07
+    resting: P06 P05 P01 P16
+  ROUND 4
+    Court 1 [8/4]  P08 + P06  v  P01 + P02
+    Court 2 [6/3]  P03 + P15  v  P09 + P05
+    Court 3 [4/2]  P14 + P16  v  P04 + P07
+    resting: P13 P10 P12 P11
+
+  … rounds 5-12 the same way …
+
+  ROUND 13  (last)
+    Court 1 [8/4]  P01 + P15  v  P11 + P10
+    Court 2 [6/3]  P05 + P13  v  P07 + P16
+    Court 3 [4/2]  P12 + P02  v  P06 + P04
+    resting: P09 P14 P03 P08
+
+5. THE TABLE at the end of that simulated night
+----------------------------------------------------------------
+   1. P01    68 pts   9 matches   seeded Court 1
+   2. P11    55 pts   9 matches   seeded Court 3
+   3. P10    54 pts   9 matches   seeded Court 3
+   4. P15    43 pts   9 matches   seeded Court 3
+   5. P05    43 pts   9 matches   seeded Court 2
+   6. P07    42 pts   9 matches   seeded Court 2
+   7. P09    40 pts   9 matches   seeded Court 3
+   8. P08    40 pts   9 matches   seeded Court 2
+   9. P12    39 pts   9 matches   seeded Court 3
+  10. P03    38 pts   9 matches   seeded Court 1
+  11. P02    36 pts   9 matches   seeded Court 1
+  12. P14    35 pts   9 matches   seeded Court 3
+  13. P06    33 pts   9 matches   seeded Court 2
+  14. P16    30 pts   9 matches   seeded Court 3
+  15. P13    30 pts   9 matches   seeded Court 3
+  16. P04    22 pts   9 matches   seeded Court 1
+
+  ranked on total points (everyone played 9)
+  validate: clean

@@ -77,6 +77,19 @@ FIRST = bool(S.get("firstNight"))
 # block and no caption mentions a runner-up — a second prize that is advertised
 # and then not handed out is worse than never having offered it.
 SECOND = bool(S.get("secondPrize"))
+# The last round only doubles when NOBODY rests — whoever is sitting it out
+# could not win it. With 16 on 3 courts, 4 rest, so every line that promises a
+# double finish has to vanish with it rather than being quietly wrong on the
+# night. Same for "matches each": 13 ROUNDS is 9 matches each once 4 of 16 are
+# off court, and the two are the same number only when nobody rests.
+DBL = bool(F.get("doubleFinal"))
+RESTS = int(F.get("resting") or 0)
+EACH = int(F.get("matches") or 0)
+
+
+def plural(n, word):
+    """1 player / 2 players / 1 match / 2 matches."""
+    return f"{n} {word}" + ("" if n == 1 else ("es" if word[-1] in "sxz" or word[-2:] in ("ch", "sh") else "s"))
 SECOND_NAME = "Strongest finish" if FIRST else "The Climb"
 SECOND_RULE = ("Most points in the second half of the night minus the first. "
                "Nothing to do with how you started.") if FIRST else \
@@ -322,8 +335,8 @@ page("post-3-ladder.html", 1080, 1350, "60px 64px 54px", f"""
       <i>Round one scores nothing. It decides where you start, so your court is won, not drawn.</i></div>
     <div class="step"><span class="n mono">02</span><b>New partners</b>
       <i>Re-paired on arrival, closest match possible. Ten different partners in a night.</i></div>
-    <div class="step"><span class="n mono">03</span><b>Last round doubles</b>
-      <i>Highest total wins. One night in three is decided in the final round.</i></div>
+    <div class="step"><span class="n mono">03</span><b>{"Last round doubles" if DBL else plural(RESTS, "player") + " rests a round"}</b>
+      <i>{"Highest total wins. One night in three is decided in the final round." if DBL else f"{F['onCourt']} play at once, so {RESTS} sit out — on a rota drawn before the first serve, so everyone rests the same number of times."}</i></div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px;align-items:flex-end">
@@ -365,7 +378,7 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
         <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
     </div>''' if SECOND else ""}
-    <p class="note">{("One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar.") if SECOND else f"There is no score to reach and no last-match shoot-out. A win on Court 1 is worth {F['win']['1']} and a win on Court {F['courts']} is worth {F['win'][str(F['courts'])]}, so the table rewards <b>climbing and staying up there</b> — and the last round counts double, which is why one night in three is still open when it starts."}</p>
+    <p class="note">{("One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar.") if SECOND else f"There is no score to reach and no last-match shoot-out. A win on Court 1 is worth {F['win']['1']} and a win on Court {F['courts']} is worth {F['win'][str(F['courts'])]}, so the table rewards <b>climbing and staying up there</b>.{' The last round counts double, which is why one night in three is still open when it starts.' if DBL else ''}"}</p>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px;align-items:flex-end">
@@ -532,9 +545,8 @@ story("story-4-prizes.html", f"""
         <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
     </div>''' if SECOND else f'''<div class="prize note">
-      <div class="pl"><span class="t disp">Last round doubles</span>
-        <span class="d">Worth twice the points, so the night is not over
-        until it is. One in three is decided there.</span></div>
+      <div class="pl"><span class="t disp">{"Last round doubles" if DBL else "Every round counts"}</span>
+        <span class="d">{"Worth twice the points, so the night is not over until it is. One in three is decided there." if DBL else f"There is no score to reach and no final — you accumulate over {plural(EACH, 'match')}, and the table is live all night."}</span></div>
     </div>'''}
   </div>
   <div class="hostline"><span class="host">{S['entry']} {CUR} TO PLAY &nbsp;·&nbsp; {DATE_SHORT}</span></div>
@@ -734,7 +746,7 @@ bottom. Highest total at the end takes the night. 👑
 • {S['entry']} {CUR} · up to {S['cap']} places, then a waitlist
 • 👑 Champion takes a *{CHAMP_FULL}*{f'''
 • ⚡ {"STRONGEST FINISH — biggest second half of the night — plays the next one FREE" if FIRST else "THE CLIMB — most points above your own average — plays the next one FREE"}''' if SECOND else ""}
-• 🔥 Last round is worth DOUBLE
+{"• 🔥 Last round is worth DOUBLE" if DBL else "• 🪜 " + plural(F["courts"], "court") + ", one ladder, " + plural(EACH, "match") + " each"}
 
 Round one is the shuffle: it decides which court you start on and scores
 nothing, so nobody is placed by a draw. You earn where you stand.
@@ -753,7 +765,7 @@ one. Up to {F['matches']} matches, a new partner almost every round, come on you
 own. First to {F['target']} — straight rallies, no games, no sets.
 
 {S['entry']} {CUR} · up to {S['cap']} places · champion takes a {CHAMP_FULL}
-Last round counts double, so it is not over until it is over.
+{"Last round counts double, so it is not over until it is over." if DBL else "The table is live all night — highest total at the end takes it."}
 
 👍 to claim a place → {S['host']}
 
@@ -807,7 +819,7 @@ Up to {F['matches']} matches. A different partner almost every round. You do not
 to bring anyone.
 
 {S['entry']} {CUR} · up to {S['cap']} places
-Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.' if SECOND else " Last round counts double."}
+Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.' if SECOND else (" Last round counts double." if DBL else " Highest total at the end takes it.")}
 
 Link in bio to the live ladder.
 

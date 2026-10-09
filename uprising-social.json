@@ -82,6 +82,23 @@
   ],
   "cap": 16,
 
+  "courts": 3,
+  "_courts": [
+    "How many courts the club actually has on the night. NOT a rule of the",
+    "format — the ladder, the points table and the climb all live in",
+    "uprising-engine.js. This is the one number the engine cannot know, and",
+    "everything downstream reads it through ops/uprising-facts.mjs: the cards,",
+    "the captions, the sign-up list, the link preview and the app's home page.",
+    "",
+    "It changes more than the ladder's height. With 16 players on 3 courts, 4",
+    "rest every round, which means: 9 matches each instead of 15, a 130-minute",
+    "night instead of 150, and NO double final — whoever is resting the last",
+    "round could not win it, so the engine switches the doubling off. Anything",
+    "advertising 'last round counts double' has to disappear with it, which is",
+    "why that line is conditional on facts.doubleFinal everywhere rather than",
+    "typed into nine files of copy."
+  ],
+
   "signupVia": "WhatsApp the club",
   "waitlist": true
 }

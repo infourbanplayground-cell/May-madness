@@ -72,6 +72,7 @@ def main():
     # rather than at the bottom as a footnote.
     L.append(f"🗓️ {DATE_STR}  ·  📍 Urban Playground")
     L.append(f"💸 {S['entry']} {CUR}  ·  🏆 {CHAMP}")
+    L.append(f"🪜 {F['courts']} courts  ·  {F['matches']} matches each")
     L.append("🤝 *Come alone* — no partner needed")
     L.append("")
     L.append(f"👇 What it is: https://{S['host']}")
@@ -96,8 +97,15 @@ def main():
               for c in range(1, F["courts"] + 1)]
         L.append("Highest total at the end takes the night.")
         L.append("")
-        L.append(f"🔁 Up to {F['matches']} matches each, a new partner almost")
-        L.append("every round. Last round counts DOUBLE.")
+        L.append(f"🔁 {F['matches']} matches each, a new partner almost")
+        if F.get("doubleFinal"):
+            L.append("every round. Last round counts DOUBLE.")
+        else:
+            # 4 of 16 rest each round at 3 courts, and the last round does NOT
+            # double — whoever is sitting it out could not win it. Advertising
+            # a double finish and then not running one is the kind of thing
+            # players remember.
+            L.append(f"every round. {F['resting']} rest each round, on a rota.")
         L.append("")
         L.append(RULE)
         L.append("")
