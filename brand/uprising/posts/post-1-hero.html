@@ -43,10 +43,15 @@
   .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted2);margin-top:5px;}
 .pad{padding:60px 64px 54px;}
+  .top{justify-content:space-between;}
+  .top .sub{margin-left:0;}
   .kick{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
-  h1{font-size:112px;line-height:.86;margin-top:26px;}
-  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
-  .lede{font-size:26px;margin-top:30px;max-width:900px;}
+  /* The name is the hero. It is set to fill the width rather than to a fixed
+     size, so a longer name would shrink instead of running off the card. */
+  h1.wordmark{white-space:nowrap;font-size:184px;line-height:.84;margin-top:24px;color:var(--volt);
+    text-shadow:0 0 70px rgba(var(--volt-rgb),.45);letter-spacing:-.005em;}
+  .strap{font-size:46px;line-height:1;margin-top:18px;color:var(--cream);}
+  .lede{font-size:24px;margin-top:26px;max-width:900px;}
   .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:30px 0;}
   .day{font-size:100px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
   .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
@@ -57,17 +62,17 @@
 </head><body>
 <div class="wash"></div><div class="grid"></div><div class="grain"></div>
 <div class="pad">
-  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="nm disp">UPRISING</span>
-      <span class="sub">Urban Playground</span></div>
+  <div class="top"><span class="mark"><svg viewBox="0 0 100 100" width="24" height="24"><path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/></svg></span><span class="sub">Urban Playground</span></div>
   <div>
     <div class="kick mono">New · One Saturday a month</div>
-    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <h1 class="disp wordmark" data-fit>UPRISING</h1>
+    <div class="strap disp">Climb to Court One.</div>
     <p class="lede">A new padel social. <b>Come on your own</b> — you play with a different
        partner almost every round, and the court you are standing on is your position.</p>
   </div>
   <div class="when">
-    <div class="day disp">17 OCT</div>
-    <div class="dl">SATURDAY &nbsp;·&nbsp; NO PARTNER NEEDED</div>
+    <div class="day disp">TOMORROW</div>
+    <div class="dl">SAT 10 OCT &nbsp;·&nbsp; NO PARTNER NEEDED</div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px">

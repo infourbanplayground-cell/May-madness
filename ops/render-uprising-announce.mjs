@@ -30,6 +30,24 @@ for (const f of readdirSync(dir).filter(x => x.endsWith('.html')).sort()) {
   await p.goto(base + f, { waitUntil: 'load' });
   await p.evaluate(() => document.fonts.ready);
   await p.waitForTimeout(700);
+
+  // Shrink-to-fit, applied AFTER the fonts load — the fallback face measures
+  // narrower than Archivo at wdth 125, so anything sized before fonts.ready is
+  // sized against the wrong letters. Same mechanism as the Blackout brand
+  // renderer, and for the same reason: UPRISING at 184px lost its G off the
+  // right edge of the card.
+  const shrunk = await p.evaluate(() => {
+    const out = [];
+    document.querySelectorAll('[data-fit]').forEach(e => {
+      const start = parseFloat(getComputedStyle(e).fontSize);
+      let size = start;
+      while (size > 8 && e.scrollWidth > e.clientWidth) {
+        size -= 1; e.style.fontSize = size + 'px';
+      }
+      if (size !== start) out.push(`${e.className.toString().slice(0,24)} ${start}→${size}px`);
+    });
+    return out;
+  });
   const fit = await p.evaluate(([w, h]) => {
     const over = [];
     document.querySelectorAll('.pad *').forEach(e => {
@@ -37,6 +55,13 @@ for (const f of readdirSync(dir).filter(x => x.endsWith('.html')).sort()) {
       if (!r.width) return;
       if (r.right > w + .5 || r.bottom > h + .5 || r.left < -.5 || r.top < -.5)
         over.push(`${(e.className || e.tagName).toString().slice(0, 28)} ${Math.round(r.left)},${Math.round(r.top)}→${Math.round(r.right)},${Math.round(r.bottom)}`);
+      // A box can sit inside the canvas while the TEXT in it runs out the side.
+      // That is how the Blackout lockup shipped with letters sliced off and
+      // every assertion passed: they were all about the element, none about
+      // where the ink landed. scrollWidth is the ink.
+      if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow === 'visible'
+          && e.childElementCount === 0 && e.textContent.trim())
+        over.push(`TEXT CLIPPED: "${e.textContent.trim().slice(0, 22)}" needs ${e.scrollWidth}px in ${e.clientWidth}px`);
     });
     const d = document.querySelector('.disp');
     return { h: document.body.scrollHeight, over: [...new Set(over)],
@@ -49,6 +74,7 @@ for (const f of readdirSync(dir).filter(x => x.endsWith('.html')).sort()) {
   const ok = !fit.over.length && fit.h <= h && !errs.length;
   if (!ok) bad++;
   console.log(`${ok ? '  ok ' : '  !! '}${name}  ${w}x${h}  content ${fit.h}px` +
+    (shrunk.length ? `  [fit: ${shrunk.join(', ')}]` : '') +
     (fit.over.length ? `\n       overflow: ${fit.over.join('\n                 ')}` : '') +
     (errs.length ? `\n       ${errs.join('; ')}` : ''));
   await p.close();

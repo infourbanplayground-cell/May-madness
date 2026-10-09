@@ -163,6 +163,14 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   WhatsApp and Instagram copy generated from the same facts. The renderer fails
   on any element that runs off its canvas; pass `PW_CHROMIUM` in a container
   where Playwright has no headless shell.
+- **Both renderers check the INK, not just the box.** An element can sit inside
+  the canvas while the text in it runs out the side — `scrollWidth > clientWidth`
+  is the test. UPRISING at 184px lost its G off the right edge of the hero and
+  the old box-only check passed it, which is the same failure DESIGN.md records
+  for the Blackout lockup. Display type that must fill a width carries
+  `data-fit` and is shrunk after `document.fonts.ready` (the fallback face
+  measures narrower than Archivo at `wdth` 125, so sizing before that sizes
+  against the wrong letters).
 - **THE CLIMB is per scoring round, and cannot be awarded on night one.**
   Baselines are points per round — nights are sized to the clock, so comparing
   a 14-round total with a 10-round total made 14 of 16 players look worse and
@@ -173,11 +181,15 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   case and the second prize is the STRONGEST FINISH (second half minus first),
   which is the champion only 7% of the time. Flip `firstNight` in
   `uprising-social.json` to false after the first night.
-- **First UPRISING: Saturday 17 Oct 2026, 17:30–20:00, 7 OMR, 16 places.**
-  Champion 15 OMR; THE CLIMB takes a free entry to the next one rather than
-  cash — it costs 7 OMR of foregone entry instead of 15 in vouchers and brings
-  the winner back, which is what a monthly format needs. Change the date in the
-  JSON and every card and caption re-renders.
+- **First UPRISING: Saturday 10 Oct 2026, 7 OMR, 16 places.**
+  Champion 15 OMR; the second prize takes a free entry to the next one rather
+  than cash — it costs 7 OMR of foregone entry instead of 15 in vouchers and
+  brings the winner back, which is what a monthly format needs. Change the date
+  in the JSON and every card and caption re-renders, including the date block,
+  which reads TOMORROW or TONIGHT while that is true and the date otherwise.
+  **The posts carry no clock times and no durations** — the start is fixed when
+  the court is confirmed, and a poster reshot because the time moved is worse
+  than one that never claimed it. The app's RULES screen still carries both.
 - June Fury (Vol.1) used to share this directory. It now has its own at
   `/var/www/june.urbanpadel.om/public`, still on port 3001, so the landing
   page's archive link survives.

@@ -29,6 +29,13 @@ const fit = await p.evaluate(() => {
     if (!r.width) return;
     if (r.right > 1080.5 || r.bottom > 1350.5 || r.left < -0.5 || r.top < -0.5)
       over.push(`${e.className || e.tagName}  ${Math.round(r.left)},${Math.round(r.top)} → ${Math.round(r.right)},${Math.round(r.bottom)}`);
+    // A box can sit inside the canvas while the TEXT in it runs out the side.
+    // UPRISING at 184px lost its G off the right edge of the announcement hero
+    // and this checker passed, because it was measuring the element and not
+    // where the ink landed. scrollWidth is the ink.
+    if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflow === 'visible'
+        && e.childElementCount === 0 && e.textContent.trim())
+      over.push(`TEXT CLIPPED: "${e.textContent.trim().slice(0, 22)}" needs ${e.scrollWidth}px in ${e.clientWidth}px`);
   });
   const h1 = getComputedStyle(document.querySelector('h1'));
   return { h: document.body.scrollHeight, over: [...new Set(over)],

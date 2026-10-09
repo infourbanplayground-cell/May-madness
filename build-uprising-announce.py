@@ -39,6 +39,14 @@ F = json.loads(subprocess.check_output(
 y, m, d = (int(x) for x in S["date"].split("-"))
 DT = datetime.date(y, m, d)
 DAY = DT.strftime("%A").upper()
+# Announced the night before, so the date block says TOMORROW while that is
+# true — it is the most persuasive word available and it expires by itself.
+# Computed from the real clock, not hardcoded, so a rebuild on the day says
+# TONIGHT and a rebuild after it says the date.
+_TODAY = datetime.date.today()
+WHEN = ("TONIGHT" if DT == _TODAY
+        else "TOMORROW" if DT == _TODAY + datetime.timedelta(days=1)
+        else f'{DT.day} {DT.strftime("%b").upper()}')
 DATE_LONG = f'{DT.strftime("%A")} {DT.day} {DT.strftime("%B")}'
 DATE_SHORT = f'{DT.strftime("%a").upper()} {DT.day} {DT.strftime("%b").upper()}'
 
@@ -170,16 +178,17 @@ LADDER_CSS = """
 
 # ── 1. hero ────────────────────────────────────────────────────────────────
 page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
-  {header()}
+  <div class="top">{MARK}<span class="sub">Urban Playground</span></div>
   <div>
     <div class="kick mono">New · {S['cadenceLine']}</div>
-    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <h1 class="disp wordmark" data-fit>{S['name']}</h1>
+    <div class="strap disp">{S['tagline']}</div>
     <p class="lede">A new padel social. <b>Come on your own</b> — you play with a different
        partner almost every round, and the court you are standing on is your position.</p>
   </div>
   <div class="when">
-    <div class="day disp">{DT.day} {DT.strftime("%b").upper()}</div>
-    <div class="dl">{DT.strftime("%A").upper()} &nbsp;·&nbsp; NO PARTNER NEEDED</div>
+    <div class="day disp">{WHEN}</div>
+    <div class="dl">{DATE_SHORT} &nbsp;·&nbsp; NO PARTNER NEEDED</div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px">
@@ -190,10 +199,15 @@ page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
     <span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span>
   </div>
 """, """
+  .top{justify-content:space-between;}
+  .top .sub{margin-left:0;}
   .kick{font-size:13px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
-  h1{font-size:112px;line-height:.86;margin-top:26px;}
-  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
-  .lede{font-size:26px;margin-top:30px;max-width:900px;}
+  /* The name is the hero. It is set to fill the width rather than to a fixed
+     size, so a longer name would shrink instead of running off the card. */
+  h1.wordmark{white-space:nowrap;font-size:184px;line-height:.84;margin-top:24px;color:var(--volt);
+    text-shadow:0 0 70px rgba(var(--volt-rgb),.45);letter-spacing:-.005em;}
+  .strap{font-size:46px;line-height:1;margin-top:18px;color:var(--cream);}
+  .lede{font-size:24px;margin-top:26px;max-width:900px;}
   .when{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:30px 0;}
   .day{font-size:100px;line-height:.9;color:var(--volt);text-shadow:0 0 44px rgba(var(--volt-rgb),.4);}
   .dl{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
@@ -364,18 +378,19 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
 
 # ── 4. story ───────────────────────────────────────────────────────────────
 page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
-  {header()}
+  <div class="top">{MARK}<span class="sub">Urban Playground</span></div>
   <div>
     <div class="kick mono">New · {S['cadenceLine']}</div>
-    <h1 class="disp">Climb to<br><em>Court One</em></h1>
+    <h1 class="disp wordmark" data-fit>{S['name']}</h1>
+    <div class="strap disp">{S['tagline']}</div>
     <p class="lede">Come on your own. A different partner almost every round, and the court
        you are standing on is your position. Every match is <b>first to {F['target']}</b> —
        straight rallies, no games, no sets.</p>
   </div>
   {ladder(rows_note=False)}
   <div class="when">
-    <div class="day disp">{DATE_SHORT}</div>
-    <div class="dl">{S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places &nbsp;·&nbsp; no partner needed</div>
+    <div class="day disp">{WHEN}</div>
+    <div class="dl">{DATE_SHORT} &nbsp;·&nbsp; {S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places</div>
   </div>
   <div class="foot">
     <div style="display:flex;gap:46px">
@@ -386,10 +401,13 @@ page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
   </div>
   <div class="hostline"><span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span></div>
 """, LADDER_CSS + """
+  .top{justify-content:space-between;}
+  .top .sub{margin-left:0;}
   .kick{font-size:14px;font-weight:700;letter-spacing:.3em;text-transform:uppercase;color:var(--uv);}
-  h1{font-size:132px;line-height:.85;margin-top:28px;}
-  h1 em{font-style:italic;color:var(--volt);text-shadow:0 0 50px rgba(var(--volt-rgb),.45);}
-  .lede{font-size:27px;margin-top:30px;}
+  h1.wordmark{white-space:nowrap;font-size:176px;line-height:.84;margin-top:26px;color:var(--volt);
+    text-shadow:0 0 70px rgba(var(--volt-rgb),.45);letter-spacing:-.005em;}
+  .strap{font-size:44px;line-height:1;margin-top:16px;color:var(--cream);}
+  .lede{font-size:24px;margin-top:24px;}
   .rung .cn{width:190px;font-size:21px;}
   .rung{padding:26px 24px;}
   .rung .pts{font-size:30px;}
@@ -417,7 +435,7 @@ rather than editing this by hand.
 WHATSAPP — the group post (paste with post-1-hero.png)
 {HR}
 
-*{S['name']}* — a new padel social. {DATE_LONG}.
+*{S['name']}* — a new padel social. {WHEN.title()}, {DATE_LONG}.
 
 Come on your own. No partner needed.
 
@@ -451,7 +469,7 @@ INSTAGRAM — carousel caption (5 cards, hero first)
 
 {S['promise']}
 
-{S['name']} is a new monthly padel social, and the first one is {DATE_LONG}.
+{S['name']} is a new monthly padel social, and the first one is {WHEN.lower()} — {DATE_LONG}.
 
 Every match is first to {F['target']} — straight rallies, no games, no sets. Win it and
 you climb a court. Lose and you drop one.
@@ -475,7 +493,7 @@ Link in bio to the live ladder.
 STORY — text over post-story.png
 {HR}
 
-NEW · {DATE_LONG}
+{WHEN} · {DATE_LONG}
 Come alone. {S['cap']} places.
 Link sticker → {S['host']}
 
