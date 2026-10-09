@@ -109,6 +109,9 @@ CSS = """
     font-variation-settings:'wdth' 125,'wght' 900;text-transform:uppercase;white-space:nowrap;}
   .fact i{display:block;font-style:normal;font-weight:800;letter-spacing:.2em;
     text-transform:uppercase;color:var(--muted2);margin-top:5px;}
+  .fact b u{display:block;text-decoration:none;font-family:'Archivo',sans-serif;
+    font-style:normal;font-variation-settings:normal;font-weight:800;
+    font-size:.32em;letter-spacing:.2em;color:var(--muted2);margin-bottom:2px;}
 """
 
 MARK = ("""<span class="mark"><svg viewBox="0 0 100 100" width="24" height="24">"""
@@ -191,9 +194,9 @@ page("post-1-hero.html", 1080, 1350, "60px 64px 54px", f"""
     <div class="dl">{DATE_SHORT} &nbsp;·&nbsp; NO PARTNER NEEDED</div>
   </div>
   <div class="foot">
-    <div style="display:flex;gap:40px">
-      <span class="fact"><b class="disp">{F['players']}</b><i>Places only</i></span>
-      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+    <div style="display:flex;gap:40px;align-items:flex-end">
+      <span class="fact"><b class="disp"><u>Up to</u>{F['players']}</b><i>Places</i></span>
+      <span class="fact"><b class="disp"><u>Up to</u>{F['matches']}</b><i>Matches each</i></span>
       <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
     </div>
     <span class="host">{S['host'].upper()}<small>{S['promise'].upper()}</small></span>
@@ -249,9 +252,9 @@ page("post-2-match.html", 1080, 1350, "60px 64px 54px", f"""
   </div>
 
   <div class="foot">
-    <div style="display:flex;gap:40px">
+    <div style="display:flex;gap:40px;align-items:flex-end">
       <span class="fact"><b class="disp">{F['target']}</b><i>To win a match</i></span>
-      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+      <span class="fact"><b class="disp"><u>Up to</u>{F['matches']}</b><i>Matches each</i></span>
       <span class="fact"><b class="disp">{F['courts']}</b><i>Courts</i></span>
     </div>
     <span class="host">{S['host'].upper()}</span>
@@ -305,11 +308,11 @@ page("post-3-ladder.html", 1080, 1350, "60px 64px 54px", f"""
       <i>Highest total wins. One night in three is decided in the final round.</i></div>
   </div>
   <div class="foot">
-    <div style="display:flex;gap:40px">
+    <div style="display:flex;gap:40px;align-items:flex-end">
       <span class="fact"><b class="disp">{F['courts']}</b><i>Courts</i></span>
       <span class="fact"><b class="disp">{F['scoring']}</b><i>Scoring rounds</i></span>
       <span class="fact"><b class="disp">{F['target']}</b><i>Point match</i></span>
-      <span class="fact"><b class="disp">{F['players']}</b><i>Players</i></span>
+      <span class="fact"><b class="disp"><u>Up to</u>{F['players']}</b><i>Players</i></span>
     </div>
     <span class="host">{S['host'].upper()}</span>
   </div>
@@ -337,7 +340,7 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
   <div>
     <div class="prize win">
       <div class="pl"><span class="t disp">Champion</span>
-        <span class="d">Most points after {F['scoring']} scoring rounds.</span></div>
+        <span class="d">Most points once the last round is played.</span></div>
       <span class="v disp">{S['championPrize']} {CUR}</span>
     </div>
     <div class="prize climb">
@@ -348,9 +351,9 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
     <p class="note">{"One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar."}</p>
   </div>
   <div class="foot">
-    <div style="display:flex;gap:40px">
+    <div style="display:flex;gap:40px;align-items:flex-end">
       <span class="fact"><b class="disp">{S['entry']} {CUR}</b><i>To play</i></span>
-      <span class="fact"><b class="disp">{S['cap']}</b><i>Places only</i></span>
+      <span class="fact"><b class="disp"><u>Up to</u>{S['cap']}</b><i>Places</i></span>
       <span class="fact"><b class="disp">{DT.day} {DT.strftime("%b").upper()}</b><i>{DT.strftime("%A").upper()}</i></span>
     </div>
     <span class="host">{S['signupVia'].upper()}<small>{S['host'].upper()}</small></span>
@@ -390,11 +393,11 @@ page("post-story.html", 1080, 1920, "120px 64px 110px", f"""
   {ladder(rows_note=False)}
   <div class="when">
     <div class="day disp">{WHEN}</div>
-    <div class="dl">{DATE_SHORT} &nbsp;·&nbsp; {S['entry']} {CUR} &nbsp;·&nbsp; {S['cap']} places</div>
+    <div class="dl">{DATE_SHORT} &nbsp;·&nbsp; {S['entry']} {CUR} &nbsp;·&nbsp; up to {S['cap']} places</div>
   </div>
   <div class="foot">
-    <div style="display:flex;gap:46px">
-      <span class="fact"><b class="disp">{F['matches']}</b><i>Matches each</i></span>
+    <div style="display:flex;gap:46px;align-items:flex-end">
+      <span class="fact"><b class="disp"><u>Up to</u>{F['matches']}</b><i>Matches each</i></span>
       <span class="fact"><b class="disp">{S['championPrize']} {CUR}</b><i>Champion</i></span>
       <span class="fact"><b class="disp">Free</b><i>Next month, for {"the finish" if FIRST else "the climb"}</i></span>
     </div>
@@ -449,11 +452,11 @@ no sets. First pair to {F['target']} wins and you move on — so a score is alwa
 
 *How the night is won:* the {F['target']} decides the match and then goes nowhere near
 the table. What you bank is what the COURT pays — {F['win']['1']} for a win on Court 1,
-down to {F['win'][str(F['courts'])]} on Court {F['courts']}. Highest total after {F['scoring']} rounds takes the night.
+down to {F['win'][str(F['courts'])]} on Court {F['courts']}. Highest total at the end takes the night.
 
-• {F['matches']} matches each — not three
+• Up to {F['matches']} matches each — not three
 • First to {F['target']}, straight rallies
-• {S['entry']} {CUR} · {S['cap']} places, then a waitlist
+• {S['entry']} {CUR} · up to {S['cap']} places, then a waitlist
 • Champion takes {S['championPrize']} {CUR}
 • {"STRONGEST FINISH — biggest second half — plays the next one free" if FIRST else "THE CLIMB — most points above your own average — plays the next one free"}
 
@@ -479,10 +482,10 @@ What you bank is what the court pays — {F['win']['1']} for a win on Court 1, {
 So there is nothing to gain from camping at the bottom beating people you
 should beat.
 
-{F['matches']} matches. A different partner almost every round. You do not need to
-bring anyone.
+Up to {F['matches']} matches. A different partner almost every round. You do not need
+to bring anyone.
 
-{S['entry']} {CUR} · {S['cap']} places
+{S['entry']} {CUR} · up to {S['cap']} places
 Champion {S['championPrize']} {CUR}. {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.
 
 Link in bio to the live ladder.
@@ -494,7 +497,7 @@ STORY — text over post-story.png
 {HR}
 
 {WHEN} · {DATE_LONG}
-Come alone. {S['cap']} places.
+Come alone. Up to {S['cap']} places.
 Link sticker → {S['host']}
 
 {HR}
@@ -502,7 +505,7 @@ THE ONE-LINER, if you only get a sentence
 {HR}
 
 "Four courts, one ladder — win and you climb, lose and you drop.
- {F['matches']} matches, no partner needed, {S['entry']} {CUR}."
+ Up to {F['matches']} matches, no partner needed, {S['entry']} {CUR}."
 
 {HR}
 WHAT NOT TO PROMISE
