@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link href="../fonts/fonts.css" rel="stylesheet" />
+<style>
+  /* The CHAMPION seal, on nothing — a sticker in the literal sense: it gets
+     dropped on a photo of the winner, so it carries no backdrop of its own.
+     Rendered with omitBackground, and the renderer checks the alpha is real.
+
+     Everything that identifies the night is on it, because a sticker outlives
+     the caption it was posted with. */
+  :root{
+    --volt:#00F5C8; --ink:#06060A; --cream:#F2F0F7;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:transparent;}
+  body{font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;display:inline-block;}
+  #seal{position:relative;width:1100px;height:1100px;padding:0;margin:90px;}
+
+  /* NO outer glow. The first version had one, and it is the reason this file
+     only worked on a dark page: a 70px soft halo of volt is invisible on
+     black and a cyan smear on anything else — and a transparent sticker is
+     for dropping wherever somebody likes. The whole seal is therefore one
+     SOLID DARK DISC (the filled circle in the svg below), which carries its
+     own contrast onto a white slide, a court photo or a story background.
+     The glow belongs to the feed card, where there is a background to light,
+     and winner-post.html draws it behind this file. */
+  .ring{position:absolute;inset:0;}
+  .plate{
+    position:absolute;inset:78px;border-radius:50%;
+    background:transparent;
+    border:5px solid var(--volt);
+    box-shadow:inset 0 0 90px rgba(0,245,200,.14);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 90px;
+  }
+  .mark{
+    width:124px;height:124px;border:5px solid var(--volt);
+    display:flex;align-items:center;justify-content:center;margin-bottom:34px;
+  }
+  .kick{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px;
+    letter-spacing:.34em;color:var(--volt);text-transform:uppercase;
+  }
+  /* The name is the whole point of the sticker, so it is sized to fill the
+     plate and shrunk only if a long one needs it (data-fit, after the fonts
+     are in — the fallback face measures nothing like Archivo at wdth 125). */
+  .name{
+    font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    text-transform:uppercase;color:var(--cream);line-height:.9;letter-spacing:.005em;
+    font-size:150px;margin:24px 0 22px;white-space:nowrap;
+  }
+  .rule{width:300px;height:4px;background:var(--volt);box-shadow:0 0 18px rgba(0,245,200,.7);}
+  .meta{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:34px;
+    letter-spacing:.2em;color:var(--cream);text-transform:uppercase;margin-top:28px;
+  }
+  /* Hidden when the night has no score to put on it — an empty line is better
+     than a placeholder, and a placeholder is better than a wrong number. */
+  .meta #pts:empty{display:none;}
+  .meta small{display:block;font-size:24px;letter-spacing:.24em;color:var(--volt);margin-top:16px;}
+  /* The curved text around the rim. SVG textPath, because CSS cannot set type
+     on a circle and a ring of rotated spans kerns like a ransom note. */
+  .rim{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:38px;
+    letter-spacing:.42em;fill:var(--volt);text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div id="seal">
+  <svg class="ring" viewBox="0 0 1100 1100" aria-hidden="true">
+    <defs>
+      <!-- Both arcs run LEFT TO RIGHT. The bottom one sweeps the other way
+           (flag 0) so its text reads the right way up; the obvious path —
+           carrying on clockwise from the right — runs right to left and sets
+           the words mirrored, which is exactly how the first render shipped. -->
+      <path id="rimtop" d="M 50,550 A 500,500 0 0 1 1050,550" fill="none"/>
+      <!-- Its radius is the TOP arc's plus the cap height: the bottom text
+           hangs inside its baseline, so matching the radii would sit it a
+           line lower than the top and the ring would look lopsided. -->
+      <path id="rimbot" d="M 22,550 A 528,528 0 0 0 1078,550" fill="none"/>
+    </defs>
+    <!-- The disc itself. Everything else sits on top of it, so the rim text
+         has something to be legible against wherever the sticker lands. -->
+    <circle cx="550" cy="550" r="544" fill="#06060A" fill-opacity=".95"/>
+    <circle cx="550" cy="550" r="536" fill="none" stroke="rgba(0,245,200,.40)" stroke-width="2"/>
+    <text class="rim"><textPath href="#rimtop" startOffset="50%" text-anchor="middle">Urban Playground</textPath></text>
+    <text class="rim"><textPath href="#rimbot" startOffset="50%" text-anchor="middle">Climb to Court One</textPath></text>
+  </svg>
+
+  <div class="plate">
+    <span class="mark">
+      <svg viewBox="0 0 100 100" width="54" height="54" aria-hidden="true">
+        <path d="M18 64 L50 32 L82 64" fill="none" stroke="#00F5C8" stroke-width="13" stroke-linecap="square"/>
+      </svg>
+    </span>
+    <div class="kick">Champion</div>
+    <div class="name" id="name" data-fit>SALIM AL BUSAIDI</div>
+    <div class="rule"></div>
+    <div class="meta" id="meta">
+      <span id="pts">104 POINTS</span>
+      <small id="when">UPRISING · 10 OCT 2026</small>
+    </div>
+  </div>
+</div>
+</body>
+</html>

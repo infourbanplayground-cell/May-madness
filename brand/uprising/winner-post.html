@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<link href="../fonts/fonts.css" rel="stylesheet" />
+<style>
+  /* The feed card the sticker goes out on — 1080x1350.
+     The seal itself is the PNG rendered from winner-sticker.html, dropped in
+     as an <img>, so the two can never drift apart: there is one seal, and this
+     page shows the file that gets posted.
+
+     Deliberately almost empty. The seal carries the night, the name and the
+     score; anything else here is competing with it. */
+  :root{
+    --volt:#00F5C8; --ink:#06060A; --cream:#F2F0F7; --dim:#6E6B7A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    width:1080px;height:1350px;background:var(--ink);overflow:hidden;
+    font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
+    position:relative;display:flex;flex-direction:column;align-items:center;
+    padding:84px 72px 76px;
+  }
+  /* One light source, behind the seal, so it reads as lit rather than pasted. */
+  body::before{
+    content:'';position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    width:1180px;height:1180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,245,200,.16) 0%,rgba(0,245,200,.05) 42%,transparent 68%);
+  }
+  .top{position:relative;text-align:center;}
+  .series{
+    font-family:'Archivo';font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+    font-size:72px;letter-spacing:.01em;color:var(--volt);text-transform:uppercase;
+    line-height:.92;white-space:nowrap;
+  }
+  .vol{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:22px;
+    letter-spacing:.42em;color:var(--dim);text-transform:uppercase;margin-top:20px;
+  }
+  .seal{position:relative;flex:1;display:flex;align-items:center;justify-content:center;width:100%;}
+  .seal img{width:884px;height:884px;display:block;}
+  .foot{position:relative;text-align:center;}
+  .line{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:25px;
+    letter-spacing:.2em;color:var(--cream);text-transform:uppercase;
+  }
+  .next{
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:19px;
+    letter-spacing:.26em;color:var(--dim);text-transform:uppercase;margin-top:18px;
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="series" id="series">UPRISING</div>
+    <div class="vol" id="vol">Night One &middot; Urban Playground</div>
+  </div>
+  <div class="seal"><img id="sealimg" src="winner-sticker.png" alt="" /></div>
+  <div class="foot">
+    <div class="line" id="line">Climbed to Court One</div>
+    <div class="next" id="next">One Saturday a month</div>
+  </div>
+</body>
+</html>

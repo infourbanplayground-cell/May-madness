@@ -368,6 +368,33 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     time, after `document.fonts.ready` — a lockup reads as one object only
     when its two lines share an edge, and the fallback face measures nothing
     like Archivo at `wdth` 125.
+- **The champion's sticker is `brand/uprising/winner-sticker.html`**, rendered
+  with the feed card that uses it by
+  `node ops/render-uprising-winner.mjs --name "..." --points 104`:
+  `winner-sticker.png` (transparent seal, to drop on a photo of the winner) and
+  `winner-post.png` (1080x1350, the seal on a lit backdrop). The name, points,
+  date and night label are **arguments**, so next month needs no code change;
+  the night and the date are on the seal itself, because a sticker outlives the
+  caption it was posted with.
+  - The post page `<img>`s the PNG the sticker step just wrote, so the card can
+    only ever show the file that actually gets handed out.
+  - **The seal is a solid dark disc and carries NO outer glow.** The first
+    version had a 70px volt halo, which is invisible on black and a cyan smear
+    on anything else — and a transparent sticker is for dropping wherever
+    somebody likes. The glow belongs to `winner-post.html`, which has a
+    background to light. Checked composited on white, cream and a mid-tone.
+  - The rim text is SVG `textPath` (CSS cannot set type on a circle). **Both
+    arcs run left to right**; the bottom one sweeps the other way, because
+    carrying on clockwise from the right sets the words mirrored — which is
+    exactly how the first render came out.
+  - Same checks as the lockup renderer: real alpha, no ink at the crop edge,
+    and the face measured against one it cannot be. The font probe asks for
+    **Archivo italic**, the style the page actually uses: a face nothing on the
+    page draws is never fetched and measures as the fallback, which reported a
+    failure when nothing was wrong.
+  - With no `--points` the line is **omitted**, not defaulted — it defaulted to
+    "CHAMPION", which the kicker above the name already says, and the first
+    card went out saying it twice.
 - **urbanpadel.om carries an UPRISING panel**, between NOW PLAYING and THE
   CLUB, under the heading ONE SATURDAY A MONTH. It is NOT a volume and must not
   read as a second NOW PLAYING: its own accent (`--volt` #00F5C8) against the
