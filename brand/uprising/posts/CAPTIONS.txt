@@ -67,6 +67,28 @@ a court. 7 OMR, up to 9 matches, a 15 OMR voucher to the champion.
 Last call — 👍 and you are in.
 
 ====================================================================
+WHATSAPP 5 — don't be late (send about 90 minutes before)
+====================================================================
+
+This is the ONE message that carries a clock time. The posters deliberately
+do not, because the start moves until the court is confirmed — so check
+`start` in uprising-social.json is still right before you send this.
+
+⏰ *UPRISING starts at 17:30 sharp.*
+
+Round one is the *shuffle* — one match, scores nothing, and it is the match
+that decides which court you start the night on. Everyone is ranked by how
+far they won or lost it by: biggest win opens on Court 1.
+
+*Miss it and you miss the night.* Once the first round is on court the ladder
+is running and there is no way to add somebody to it — it is not a drop-in.
+
+🚪 Courts from 17:15, first serve 17:30
+📍 Urban Playground
+
+Be on court, racket in hand, by 17:30. 🔺
+
+====================================================================
 WHATSAPP 4 — the answer to "what even is it?"
 ====================================================================
 
