@@ -1941,6 +1941,21 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
             const eachLo = selCount ? Math.floor(slots / selCount) : 0;
             const eachHi = selCount && slots % selCount ? eachLo + 1 : eachLo;
             const eachTxt = eachLo === eachHi ? plural(eachLo, "match") : `${eachLo}-${eachHi} matches`;
+            // COURT TIME, shuffle included — which is a different number from
+            // matches-each as soon as anybody rests, because the shuffle is
+            // deliberately kept OFF the rest rota.
+            //
+            // Whenever somebody rests, total court time can never divide the
+            // field evenly at ANY field size — the slot count simply does not
+            // go. So the unevenness has to land somewhere, and it is put on
+            // the round that pays nothing rather than on the rounds that
+            // decide the night. Worth stating: "9 matches each" is true of
+            // SCORING matches, and twelve of the sixteen actually play ten.
+            const upShuf = upShuffleRounds({ shuffle: cfg.upshuffle });
+            const allSlots = rounds * 4 * upC;
+            const ctLo = selCount ? Math.floor(allSlots / selCount) : 0;
+            const ctHi = selCount && allSlots % selCount ? ctLo + 1 : ctLo;
+            const shufPlayers = Math.min(selCount, 4 * upC);
             const fair = selCount >= 8 ? upFairRounds(selCount, upC, 40) : [];
             const evenRests = upR === 0 || (fair || []).includes(sc);
             const restsEach = (sc * upR) / selCount;
@@ -1996,6 +2011,13 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                                     out evenly, so this field always ranks per round — which is fair, just less
                                     tidy. Drop to {4 * upC} or go up to {4 * upC + upC} and it comes out exact.</Fragment>}
                             </Fragment>}
+                      {upR > 0 && upShuf > 0 && (
+                        <Fragment>{" "}That is <b>scoring</b> matches. {shufPlayers} of you also play
+                          the shuffle, so time on court is {ctLo === ctHi ? plural(ctLo, "match") : `${ctLo}-${ctHi} matches`}.
+                          With anybody resting the total can never divide evenly at any field size, so
+                          the shuffle is kept off the rest rota and the unevenness lands on the one
+                          round that pays nothing.</Fragment>
+                      )}
                       {" "}{cfg.upshuffle
                         ? "Where everyone starts is decided on court, by the shuffle — nobody is placed by a draw."
                         : "The opening ladder is seeded by form, not drawn — a random draw hands a Court 1 starter 7x the chance of a Court 4 starter."}{" "}

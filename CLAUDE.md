@@ -324,6 +324,15 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - It printed the ROUND COUNT as "matches each" until Oct 2026 — "13 matches
     each" and, one clause later in the same sentence, "plays 9". Rounds and
     matches-each are the same number only when nobody rests.
+  - **"Matches each" is SCORING matches. Court time is a third number.** The
+    shuffle is deliberately kept off the rest rota, so at 16 on 3 courts
+    everyone plays 9 scoring matches but twelve of them play 10 matches in
+    all. That is not a leak: whenever anybody rests, total court time cannot
+    divide the field evenly at ANY size — the slots simply do not go — so the
+    unevenness has to land somewhere, and it is put on the one round that pays
+    nothing rather than on the rounds that decide the night. Both the setup
+    advisory and `ops/uprising-fairness.js` now print court time beside
+    matches-each instead of leaving the difference implicit.
 - **The night can be lengthened or shortened MID-NIGHT** — "we have the court
   for one more". `Rounds` on the board, beside `Change courts`; `upSetRounds`
   does it. It cannot go below the rounds already played, nor below one scoring

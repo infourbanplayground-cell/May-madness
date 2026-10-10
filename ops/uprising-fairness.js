@@ -55,6 +55,10 @@ for (let n = 8; n <= 24; n++) {
   const bySeed = {}; for (let c = 1; c <= courts; c++) bySeed[c] = { s: 0, n: 0 };
   const byRestWhen = { early: { s: 0, n: 0 }, late: { s: 0, n: 0 } };
   let playedMin = 99, playedMax = 0, restMin = 99, restMax = 0, partMin = 99, partMax = 0;
+  // COURT TIME counts the shuffle; matches-each does not. They differ as
+  // soon as anybody rests, and with anybody resting the total can never
+  // divide the field evenly — so this column is reported, not asserted.
+  let ctMin = 99, ctMax = 0;
   let uneven = 0;
 
   for (let t = 0; t < TRIALS; t++) {
@@ -76,6 +80,11 @@ for (let n = 8; n <= 24; n++) {
         const b = r.roundNum <= half ? byRestWhen.early : byRestWhen.late;
         b.s += pts[id]; b.n++;
       });
+      let ct = 0;
+      T0.rounds.forEach(r => (r.courts || []).forEach(m => {
+        if ([...m.team1, ...m.team2].includes(id)) ct++;
+      }));
+      ctMin = Math.min(ctMin, ct); ctMax = Math.max(ctMax, ct);
       const pset = new Set();
       T0.rounds.forEach(r => (r.courts || []).forEach(m => {
         const team = [m.team1, m.team2].find(x => x && x.includes(id));
@@ -95,6 +104,7 @@ for (let n = 8; n <= 24; n++) {
     played: playedMin === playedMax ? String(playedMax) : `${playedMin}-${playedMax}`,
     rests: restMin === restMax ? String(restMax) : `${restMin}-${restMax}`,
     partners: `${partMin}-${partMax}`,
+    court: ctMin === ctMax ? String(ctMax) : `${ctMin}-${ctMax}`,
     seedAdv, rotaAdv,
     fair: playedMin === playedMax,
   };
@@ -106,15 +116,18 @@ for (let n = 8; n <= 24; n++) {
   if (rotaAdv > 1.05) problems.push(`${n}p: WHEN you rest is worth ${rotaAdv.toFixed(2)}x`);
 }
 
-const h = ["players", "courts", "resting", "rounds", "matches ea", "rests ea", "partners", "draw", "rest timing"];
+const h = ["players", "courts", "resting", "rounds", "scoring ea", "court time", "rests ea", "partners", "draw", "rest timing"];
 const w = h.map(x => x.length);
-const cell = r => [r.n, r.courts, r.rest, r.scoring + 1, r.played, r.rests, r.partners,
+const cell = r => [r.n, r.courts, r.rest, r.scoring + 1, r.played, r.court, r.rests, r.partners,
   r.seedAdv.toFixed(2) + "x", r.rotaAdv.toFixed(2) + "x"];
 rows.forEach(r => cell(r).forEach((v, i) => { w[i] = Math.max(w[i], String(v).length); }));
 
 console.log(`UPRISING fairness — ${TRIALS} nights per row, every player identical`);
 console.log(`150-minute budget, first to ${TARGET}, one shuffle round.`);
-console.log(`"draw" and "rest timing" are 1.00x when the format decides nothing.\n`);
+console.log(`"draw" and "rest timing" are 1.00x when the format decides nothing.`);
+console.log(`"scoring ea" is what the table is built from. "court time" adds the`);
+console.log(`shuffle, which pays nothing and is kept off the rest rota on purpose —`);
+console.log(`with anybody resting the total can never divide the field evenly.\n`);
 console.log(h.map((x, i) => x.padStart(w[i])).join("  "));
 console.log(w.map(x => "-".repeat(x)).join("  "));
 rows.forEach(r => console.log(cell(r).map((v, i) => String(v).padStart(w[i])).join("  ")
