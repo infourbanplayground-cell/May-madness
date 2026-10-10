@@ -86,6 +86,41 @@ test("falls back to the closest split when all three are used", () => {
   assert.deepEqual([A.sort(), B.sort()].sort(), [["a", "d"], ["b", "c"]].sort());
 });
 
+test("when all three splits are used it takes the OLDEST, not the closest", () => {
+  const totals = { a: 40, b: 30, c: 20, d: 10 };
+  const seen = new Set([upPairKey("a", "d"), upPairKey("b", "c"), upPairKey("a", "c"),
+                        upPairKey("b", "d"), upPairKey("a", "b"), upPairKey("c", "d")]);
+  // a+d / b+c is the closest match AND was played last round. Handing it back
+  // is how the same two ended up partners two rounds running.
+  const lastUsed = new Map([
+    [upPairKey("a", "d"), 9], [upPairKey("b", "c"), 9],
+    [upPairKey("a", "c"), 7], [upPairKey("b", "d"), 7],
+    [upPairKey("a", "b"), 8], [upPairKey("c", "d"), 8],
+  ]);
+  const [A, B] = upPairCourt(["a", "b", "c", "d"], totals, seen, lastUsed);
+  assert.deepEqual([A.sort(), B.sort()].sort(), [["a", "c"], ["b", "d"]].sort());
+});
+
+test("nobody partners the same player two rounds running", () => {
+  // Eight on two courts is the worst case for this: the field is small enough
+  // that every court exhausts its splits and keeps going.
+  const t = newNight(8, {}, 0);
+  t.numRounds = 16;
+  let prev = {};
+  while ((t.rounds || []).length < t.numRounds) {
+    const r = upBuildRound(t);
+    const now = {};
+    r.courts.forEach(m => [m.team1, m.team2].forEach(T => {
+      assert.notEqual(prev[T[0]], T[1],
+        `${T[0]} and ${T[1]} partnered again in round ${r.roundNum}`);
+      now[T[0]] = T[1]; now[T[1]] = T[0];
+    }));
+    prev = now;
+    r.courts.forEach((m, i) => { m.score1 = 11; m.score2 = i % 7; });
+    t.rounds.push(r);
+  }
+});
+
 test("refuses a court that is not four players", () => {
   assert.throws(() => upPairCourt(["a", "b", "c"], {}, new Set()), /exactly 4/);
 });

@@ -277,6 +277,33 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     so they never consume a scoring round's rest slot and nobody sits out both.
   - `upPlanRounds` subtracts the real count; planning for one would overrun the
     finish time by a round.
+- **Nobody partners the same player two rounds running.** `upPairCourt` ranks
+  the four by running total and pairs 1+4 v 2+3, skipping any split that
+  repeats a partnership. There are only three ways to split four players, so a
+  court whose four stay together exhausts them in three rounds — and the
+  fallback used to return `splits[0]`, the closest match, which is very often
+  the pairing those four had **last round**. Measured on a 12-player, 3-court,
+  13-scoring-round night: the fallback fires on 27% of courts and produced
+  **14 back-to-back repeats a night**, about one per round. It now takes the
+  **least recently used** split (`upPairLastUsed` maps a pair to the round it
+  last appeared in, and a split is only as fresh as its freshest half), which
+  cannot pick last round's while any other exists.
+  - **0 back-to-back at every field size from 8 to 24**, and fewer repeats
+    overall (30.7 a night against 33.1 at 12 players) because spreading the
+    splits delays exhaustion. Both tests fail against the old fallback —
+    checked by sabotage, `p07 and p04 partnered again in round 10`.
+  - Repeats of *older* partnerships are unavoidable and are not a fault: 8
+    players on 2 courts has only 28 possible pairs and plays 30 slots.
+- **A corrected score does NOT re-deal the round already on the board.** The
+  app deals the next round the instant the last score is locked, so fixing a
+  typo in a finished round leaves the next round dealt from the wrong result.
+  It bit the first UPRISING live: round 3's Court 1 was entered 10-11 and
+  corrected to 11-10, and round 4 kept the losers on Court 1 and sent the
+  winners down. Only a court-count change re-deals (and only a round with no
+  scores in it). Until that is fixed, re-deal by hand: rebuild the round with
+  `upBuildRound` on the corrected state and write it into `americano_state`,
+  refusing unless the round still has no scores and the earlier rounds are
+  unchanged.
 - **Margin is for the shuffle and nothing else.** Scoring stays flat 8/6/4/2 and
   ignores the score; pairing within a court still ranks on running court-points.
   Measured over 104,000 courts, ranking the pairing on point difference instead

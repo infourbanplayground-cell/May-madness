@@ -891,7 +891,19 @@ function upSeedLadder(playerIds, form = {}, courtCount = 0) {
 // Not nine — once a group settles on a court, three rounds exhausts the three
 // splits. A "one up, one down, two stay" ladder was tested as a way to churn
 // membership faster and is worse on both counts, so pairs travel together.
-function upPairCourt(ids, totals = {}, seen = new Set()) {
+//
+// WHEN ALL THREE SPLITS ARE USED the oldest one is taken, not the first. This
+// is the case that actually bites: a settled court exhausts its three splits
+// in three rounds and then repeats forever, and returning splits[0] handed
+// back whatever the running totals ranked closest — which is very often the
+// pairing those same four had LAST ROUND. Measured on a 12-player, 3-court,
+// 13-scoring-round night: the fallback fires on 27% of courts and produced
+// 14 back-to-back repeats a night, about one per round. Least-recently-used
+// cannot pick last round's split while any other exists, so it goes to zero.
+//
+// `lastUsed` maps a pair key to the round it was last played in; without it
+// the function behaves exactly as it did before.
+function upPairCourt(ids, totals = {}, seen = new Set(), lastUsed = new Map()) {
   if (ids.length !== 4) throw new Error(`a court needs exactly 4 players, got ${ids.length}`);
   const t = p => totals[p] || 0;
   const on = [...ids].sort((a, b) => (t(b) - t(a)) || String(a).localeCompare(String(b)));
@@ -901,7 +913,13 @@ function upPairCourt(ids, totals = {}, seen = new Set()) {
     [[on[0], on[1]], [on[2], on[3]]],
   ];
   const fresh = splits.find(([A, B]) => !seen.has(upPairKey(...A)) && !seen.has(upPairKey(...B)));
-  return fresh || splits[0];
+  if (fresh) return fresh;
+  // Age a split by its MOST RECENT half: a split is only as fresh as the
+  // freshest partnership in it. Ties keep the original order, so among equally
+  // stale splits the closest match still wins.
+  const age = ([A, B]) => Math.max(lastUsed.get(upPairKey(...A)) || 0,
+                                   lastUsed.get(upPairKey(...B)) || 0);
+  return splits.reduce((best, s) => (age(s) < age(best) ? s : best), splits[0]);
 }
 
 // ── scoring ────────────────────────────────────────────────────────────────
@@ -1079,6 +1097,23 @@ function upSeenPairs(night) {
   return seen;
 }
 
+// The same thing with the round number attached, so that when a court has
+// used all three of its splits the pairing can take the OLDEST rather than
+// the first — which is what stops the same two playing together two rounds
+// running. Indexed by round number, not position, so a round that is re-dealt
+// does not make an old partnership look recent.
+function upPairLastUsed(night) {
+  const last = new Map();
+  (night.rounds || []).forEach((r, i) => {
+    const n = r.roundNum || i + 1;
+    (r.courts || []).forEach(m => {
+      if (m.team1) last.set(upPairKey(...m.team1), Math.max(last.get(upPairKey(...m.team1)) || 0, n));
+      if (m.team2) last.set(upPairKey(...m.team2), Math.max(last.get(upPairKey(...m.team2)) || 0, n));
+    });
+  });
+  return last;
+}
+
 // The ladder as an ORDER, not just a court number. With nobody resting the two
 // are the same thing. With somebody resting they are not: if a Court 1 player
 // sits out, Court 1 has three, and the round has to be seated from the ranking
@@ -1118,6 +1153,7 @@ function upBuildRound(night) {
   const C = upCourts(night);
   const totals = upTotals(night);
   const seen = upSeenPairs(night);
+  const lastUsed = upPairLastUsed(night);
   const roundNum = rounds.length + 1;
 
   const sitOuts = upRestingFor(night, roundNum);
@@ -1128,8 +1164,9 @@ function upBuildRound(night) {
   const out = { roundNum, sitOuts, courts: [] };
   for (let c = 1; c <= C; c++) {
     const on = playing.slice((c - 1) * 4, c * 4);
-    const [A, B] = upPairCourt(on, totals, seen);
+    const [A, B] = upPairCourt(on, totals, seen, lastUsed);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
+    lastUsed.set(upPairKey(...A), roundNum); lastUsed.set(upPairKey(...B), roundNum);
     out.courts.push({ court: c, team1: A, team2: B, score1: null, score2: null });
   }
   return out;
