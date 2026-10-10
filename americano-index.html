@@ -1933,6 +1933,14 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
               : Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
             const rounds = sc + upShuffleRounds({ shuffle: cfg.upshuffle });
             const mins = nightMinutes(rounds, tgt);
+            // ROUNDS and MATCHES EACH are the same number only when nobody
+            // rests. This line used to print the round count as "matches
+            // each" and then, one clause later, print the real figure — it
+            // told the organiser 13 matches each and 9 in the same sentence.
+            const slots = sc * 4 * upC;
+            const eachLo = selCount ? Math.floor(slots / selCount) : 0;
+            const eachHi = selCount && slots % selCount ? eachLo + 1 : eachLo;
+            const eachTxt = eachLo === eachHi ? plural(eachLo, "match") : `${eachLo}-${eachHi} matches`;
             const fair = selCount >= 8 ? upFairRounds(selCount, upC, 40) : [];
             const evenRests = upR === 0 || (fair || []).includes(sc);
             const restsEach = (sc * upR) / selCount;
@@ -1962,7 +1970,10 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                   : <Fragment>
                       <b style={{ color: "var(--cream)" }}>
                         {plural(selCount, "player")} on {plural(upC, "court")},{" "}
-                        {plural(sc, "scoring round")}{cfg.upshuffle ? ` after the shuffle — ${rounds} matches each` : ""}.
+                        {plural(rounds, "round")}
+                        {upShuffleRounds({ shuffle: cfg.upshuffle })
+                          ? ` (${sc} that score + ${plural(upShuffleRounds({ shuffle: cfg.upshuffle }), "shuffle round")})` : ""}
+                        {" "}— <span style={{ color: eachLo === eachHi ? "var(--volt)" : "var(--warn)" }}>{eachTxt} each</span>.
                       </b>{" "}
                       {upR === 0
                         ? <Fragment>Nobody sits out and the last round is worth double.</Fragment>
@@ -1989,7 +2000,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                         ? "Where everyone starts is decided on court, by the shuffle — nobody is placed by a draw."
                         : "The opening ladder is seeded by form, not drawn — a random draw hands a Court 1 starter 7x the chance of a Court 4 starter."}{" "}
                       <b style={{ color: mins > 180 ? "var(--warn)" : "var(--cream)" }}>
-                        {rounds} {cfg.upshuffle ? "matches" : "rounds"} of first to {tgt} runs about {asClock(mins)}
+                        {plural(rounds, "round")} of first to {tgt} runs about {asClock(mins)}
                       </b>
                       {mins > 180
                         ? " — over three hours. Drop the target or the round count."
@@ -3428,6 +3439,30 @@ function App() {
               {plural(scoring, "scoring round")}{upShuffleRounds(active)
                 ? ` + ${plural(upShuffleRounds(active), "shuffle round")}` : ""} · about {asClock(mins)} in all
             </div>
+            {/* Whether THIS number shares the court time out evenly. The
+                organiser is changing the one figure that decides it, so it has
+                to be on the screen they are changing it on — and the number
+                that matters is matches EACH, which is not the round count as
+                soon as anybody rests. */}
+            {(() => {
+              const C = upCourts(active), field = active.playerIds.length;
+              const slots = scoring * 4 * C;
+              const lo = Math.floor(slots / field), hi = slots % field ? lo + 1 : lo;
+              const even = lo === hi;
+              const fair = (upFairRounds(field, C, 40) || [])
+                .filter(x => x !== scoring && nightMinutes(x + upShuffleRounds(active), active.pointsPerMatch || UP.TARGET) <= 200);
+              return (
+                <div className="note" style={{ marginTop: 10, textAlign: "center",
+                  color: even ? "var(--volt)" : "var(--warn)" }}>
+                  {even
+                    ? `${plural(lo, "match")} each — everyone plays the same.`
+                    : `${lo}-${hi} matches each — NOT the same for everyone, so the table ranks on points per round.`}
+                  {!even && fair.length
+                    ? ` ${fair.slice(-2).join(" or ")} scoring rounds would be even.`
+                    : ""}
+                </div>
+              );
+            })()}
             <div className="note" style={{ marginTop: 10 }}>
               {played} {played === 1 ? "round is" : "rounds are"} already played and cannot be undone here.
               {pick > now && ` ${plural(pick - now, "more round")} to play after this one.`}

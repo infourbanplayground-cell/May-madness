@@ -303,6 +303,27 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
+- **`ops/uprising-fairness.js` is the fairness audit** (`node
+  ops/uprising-fairness.js 1500`). Every player is given identical skill, so
+  anything that shows up is the format and not the padel. It sweeps 8 to 24 and
+  asks four questions: does everyone get the same number of MATCHES, the same
+  number of RESTS, does the DRAW predict the finish, does WHEN you rest predict
+  it. The last two should read 1.00x; it fails above 1.05x.
+  - Current result: **the draw and the rest rota are 1.00x at every field size**
+    (1.03x at 19 and 23, inside noise). Rests are within one everywhere.
+  - Equal play holds everywhere EXCEPT **17, 19, 21 and 23 on four courts**,
+    where the only even round count is 17/19/21/23 scoring rounds — three hours
+    plus — so the planner fills the clock instead and some play one more match.
+    `upUneven` then puts the table on points per round, which is the designed
+    answer, not a hole.
+- **The setup screen states all of this before the night starts**, and the
+  Rounds sheet restates it whenever the organiser moves the finish line: how
+  many rounds, how many MATCHES EACH, whether that is the same for everybody,
+  and which round counts would be even if it is not. Both print matches-each in
+  volt when it is even and warn-red when it is not.
+  - It printed the ROUND COUNT as "matches each" until Oct 2026 — "13 matches
+    each" and, one clause later in the same sentence, "plays 9". Rounds and
+    matches-each are the same number only when nobody rests.
 - **The night can be lengthened or shortened MID-NIGHT** — "we have the court
   for one more". `Rounds` on the board, beside `Change courts`; `upSetRounds`
   does it. It cannot go below the rounds already played, nor below one scoring
