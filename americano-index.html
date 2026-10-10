@@ -901,25 +901,41 @@ function upSeedLadder(playerIds, form = {}, courtCount = 0) {
 // 14 back-to-back repeats a night, about one per round. Least-recently-used
 // cannot pick last round's split while any other exists, so it goes to zero.
 //
+// IN THE DECIDING ROUND THE TOP TWO ARE NEVER PARTNERS. 1+2 v 3+4 is the most
+// lopsided of the three splits, and in the last round it does not just make a
+// bad match — it takes the title out of the leaders' hands, because they both
+// win or both lose and the night is settled by who they happened to draw.
+// This is not hypothetical: the first UPRISING's round 13 was the planned
+// final and the engine put the 1st and 2nd placed players together on Court 1.
+// All three splits had been used, and least-recently-used reached past the
+// closest match (played the round before) for the lopsided one (played nine
+// rounds earlier). Freshness is worth nothing in the last round — nobody
+// partners anybody again — so in the decider that split is excluded outright,
+// whether or not it is fresh, and the other two are chosen between as usual.
+// The organiser had to add a fourteenth round to undo it.
+//
 // `lastUsed` maps a pair key to the round it was last played in; without it
-// the function behaves exactly as it did before.
-function upPairCourt(ids, totals = {}, seen = new Set(), lastUsed = new Map()) {
+// and without `decider` the function behaves exactly as it did before.
+function upPairCourt(ids, totals = {}, seen = new Set(), lastUsed = new Map(), decider = false) {
   if (ids.length !== 4) throw new Error(`a court needs exactly 4 players, got ${ids.length}`);
   const t = p => totals[p] || 0;
   const on = [...ids].sort((a, b) => (t(b) - t(a)) || String(a).localeCompare(String(b)));
   const splits = [
     [[on[0], on[3]], [on[1], on[2]]],   // 1+4 v 2+3 — the closest match
     [[on[0], on[2]], [on[1], on[3]]],
-    [[on[0], on[1]], [on[2], on[3]]],
+    [[on[0], on[1]], [on[2], on[3]]],   // 1+2 v 3+4 — the top two together
   ];
-  const fresh = splits.find(([A, B]) => !seen.has(upPairKey(...A)) && !seen.has(upPairKey(...B)));
+  // Never in the decider. Two candidates always remain, so this can never
+  // fail to seat the court.
+  const usable = decider ? splits.slice(0, 2) : splits;
+  const fresh = usable.find(([A, B]) => !seen.has(upPairKey(...A)) && !seen.has(upPairKey(...B)));
   if (fresh) return fresh;
   // Age a split by its MOST RECENT half: a split is only as fresh as the
   // freshest partnership in it. Ties keep the original order, so among equally
   // stale splits the closest match still wins.
   const age = ([A, B]) => Math.max(lastUsed.get(upPairKey(...A)) || 0,
                                    lastUsed.get(upPairKey(...B)) || 0);
-  return splits.reduce((best, s) => (age(s) < age(best) ? s : best), splits[0]);
+  return usable.reduce((best, s) => (age(s) < age(best) ? s : best), usable[0]);
 }
 
 // ── scoring ────────────────────────────────────────────────────────────────
@@ -1161,10 +1177,15 @@ function upBuildRound(night) {
   if (playing.length !== 4 * C)
     throw new Error(`${playing.length} players to seat on ${C} courts, not ${4 * C}`);
 
+  // The round that is currently the last one is the decider, same basis the
+  // doubling uses. Extending the night afterwards does not reach back and
+  // re-pair it, exactly as it does not un-double it.
+  const decider = roundNum === N;
+
   const out = { roundNum, sitOuts, courts: [] };
   for (let c = 1; c <= C; c++) {
     const on = playing.slice((c - 1) * 4, c * 4);
-    const [A, B] = upPairCourt(on, totals, seen, lastUsed);
+    const [A, B] = upPairCourt(on, totals, seen, lastUsed, decider);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
     lastUsed.set(upPairKey(...A), roundNum); lastUsed.set(upPairKey(...B), roundNum);
     out.courts.push({ court: c, team1: A, team2: B, score1: null, score2: null });

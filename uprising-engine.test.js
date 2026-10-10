@@ -121,6 +121,51 @@ test("nobody partners the same player two rounds running", () => {
   }
 });
 
+test("the deciding round never puts the top two together", () => {
+  const totals = { a: 68, b: 66, c: 44, d: 38 };
+  // Every split used, and the closest one (a+d / b+c) is the most recent —
+  // which is what made least-recently-used reach for a+b. This is the first
+  // UPRISING's round 13, to the numbers.
+  const seen = new Set([upPairKey("a", "d"), upPairKey("b", "c"), upPairKey("a", "c"),
+                        upPairKey("b", "d"), upPairKey("a", "b"), upPairKey("c", "d")]);
+  const lastUsed = new Map([
+    [upPairKey("a", "d"), 12], [upPairKey("b", "c"), 12],
+    [upPairKey("a", "c"), 0],  [upPairKey("b", "d"), 6],
+    [upPairKey("a", "b"), 4],  [upPairKey("c", "d"), 5],
+  ]);
+  const [A, B] = upPairCourt(["a", "b", "c", "d"], totals, seen, lastUsed, true);
+  const together = [A, B].some(T => T.includes("a") && T.includes("b"));
+  assert.ok(!together, "the top two were partners in the decider");
+});
+
+test("the decider excludes the top-two split even when it is the only fresh one", () => {
+  const totals = { a: 68, b: 66, c: 44, d: 38 };
+  const seen = new Set([upPairKey("a", "d"), upPairKey("b", "c"),
+                        upPairKey("a", "c"), upPairKey("b", "d")]);
+  const [A, B] = upPairCourt(["a", "b", "c", "d"], totals, seen, new Map(), true);
+  assert.ok(![A, B].some(T => T.includes("a") && T.includes("b")),
+    "took the fresh top-two split in the decider");
+});
+
+test("a whole night never pairs the top two of a court in the last round", () => {
+  for (const n of [8, 12, 16]) {
+    const t = newNight(n, {}, 0);
+    t.numRounds = 14;
+    while ((t.rounds || []).length < t.numRounds) {
+      const r = upBuildRound(t);
+      r.courts.forEach((m, i) => { m.score1 = 11; m.score2 = (i * 3) % 9; });
+      t.rounds.push(r);
+    }
+    const totals = upTotals({ ...t, rounds: t.rounds.slice(0, t.numRounds - 1) });
+    t.rounds[t.numRounds - 1].courts.forEach(m => {
+      const four = [...m.team1, ...m.team2].sort((x, y) => (totals[y] || 0) - (totals[x] || 0));
+      const top = [m.team1, m.team2].find(T => T.includes(four[0]));
+      assert.ok(!top.includes(four[1]),
+        `${n} players: court ${m.court}'s top two are partners in the last round`);
+    });
+  }
+});
+
 test("refuses a court that is not four players", () => {
   assert.throws(() => upPairCourt(["a", "b", "c"], {}, new Set()), /exactly 4/);
 });

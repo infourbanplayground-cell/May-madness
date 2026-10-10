@@ -294,6 +294,28 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     checked by sabotage, `p07 and p04 partnered again in round 10`.
   - Repeats of *older* partnerships are unavoidable and are not a fault: 8
     players on 2 courts has only 28 possible pairs and plays 30 slots.
+- **IN THE DECIDING ROUND THE TOP TWO ARE NEVER PARTNERS.** 1+2 v 3+4 is the
+  most lopsided of the three splits, and in the last round it does not merely
+  make a bad match — it takes the title out of the leaders' hands, because
+  they both win or both lose and the night is settled by who they drew.
+  `upPairCourt` takes a `decider` flag (`roundNum === upRoundsTotal`, the same
+  basis the doubling uses) and excludes that split outright, fresh or not;
+  two candidates always remain, so the court can always be seated.
+  - **This is what the least-recently-used rule above cost on night one.**
+    Round 13 was the planned final; all three splits on Court 1 had been
+    used, the closest (1st+4th v 2nd+3rd) had been played in round 12, and
+    LRU reached past it for the lopsided one last seen in round 4 — putting
+    Abdu (1st, 68) and Abo Sam (2nd, 66) together. The organiser had to add a
+    fourteenth round to undo it. Measured over 4,500 nights at 8/12/16
+    players: the old fresh-first rule paired the leaders in the last round on
+    **2.7%** of nights, LRU without this guard on **29.7%**, and with it on
+    **0%** — the 3.1% the harness still reports are all cases where 2nd and
+    3rd are LEVEL on points, where the leader must partner one of two
+    indistinguishable players. Back-to-back repeats stay at 0.
+  - Freshness is worth nothing in the last round — nobody partners anybody
+    again — so there is no trade here, only a rule that was missing.
+  - Extending the night afterwards does NOT re-pair the round that was the
+    decider when it was dealt, exactly as it does not un-double it.
 - **A corrected score does NOT re-deal the round already on the board.** The
   app deals the next round the instant the last score is locked, so fixing a
   typo in a finished round leaves the next round dealt from the wrong result.
