@@ -74,19 +74,15 @@ This is the ONE message that carries a clock time. The posters deliberately
 do not, because the start moves until the court is confirmed — so check
 `start` in uprising-social.json is still right before you send this.
 
-⏰ *UPRISING starts at 17:30 sharp.*
+⏰ *UPRISING starts at 18:00 sharp.*
 
-Round one is the *shuffle* — one match, scores nothing, and it is the match
-that decides which court you start the night on. Everyone is ranked by how
-far they won or lost it by: biggest win opens on Court 1.
+Round one is the *shuffle* — it sets the court everyone starts on.
 
-*Miss it and you miss the night.* Once the first round is on court the ladder
-is running and there is no way to add somebody to it — it is not a drop-in.
+Nobody can start it until all 16 of us are on court, so one person
+late holds up the whole room. And once it is running you cannot be slotted
+in — there is no late entry.
 
-🚪 Courts from 17:15, first serve 17:30
-📍 Urban Playground
-
-Be on court, racket in hand, by 17:30. 🔺
+Be there by 17:45, racket in hand for 18:00. 🔺
 
 ====================================================================
 WHATSAPP 4 — the answer to "what even is it?"

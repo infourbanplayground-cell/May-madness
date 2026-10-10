@@ -815,17 +815,13 @@ do not, because the start moves until the court is confirmed — so check
 
 ⏰ *{S['name']} starts at {S['start']} sharp.*
 
-Round one is the *shuffle* — one match, scores nothing, and it is the match
-that decides which court you start the night on. Everyone is ranked by how
-far they won or lost it by: biggest win opens on Court 1.
+Round one is the *shuffle* — it sets the court everyone starts on.
 
-*Miss it and you miss the night.* Once the first round is on court the ladder
-is running and there is no way to add somebody to it — it is not a drop-in.
+Nobody can start it until all {S['cap']} of us are on court, so one person
+late holds up the whole room. And once it is running you cannot be slotted
+in — there is no late entry.
 
-🚪 Courts from {S['doors']}, first serve {S['start']}
-📍 Urban Playground
-
-Be on court, racket in hand, by {S['start']}. 🔺
+Be there by {S['doors']}, racket in hand for {S['start']}. 🔺
 
 {HR}
 WHATSAPP 4 — the answer to "what even is it?"
