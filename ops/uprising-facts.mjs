@@ -23,8 +23,14 @@ const ov = S.courtsOverride || {};
 const wanted = (ov.date && ov.date === S.date && ov.courts) || S.courts || E.UP.COURTS;
 const courts = Math.max(2, Math.min(wanted, Math.floor(players / 4), E.UP.COURTS));
 const overridden = courts !== (S.courts || E.UP.COURTS);
-const scoring = E.upPlanRounds(budget, target, { shuffle, players, courts });
-const rounds = scoring + (shuffle ? 1 : 0);
+// The round count is the DEFAULT the app would set up, not what a clock would
+// allow — UP.ROUNDS is the night's total, shuffle included, and the setup
+// screen opens on it. This used to plan against the 150-minute budget, which
+// was right while the app did too; once the app defaulted to 12 on the board
+// the posts would have gone out advertising 13, which is the one thing this
+// file exists to make impossible. The budget is still what sizes `minutes`.
+const rounds = E.UP.ROUNDS;
+const scoring = rounds - (shuffle ? 1 : 0);
 const resting = players - courts * 4;
 // ROUNDS and MATCHES EACH are the same number only when nobody rests. With 16
 // on 3 courts the night is 13 rounds and 9 matches each, and a post that
