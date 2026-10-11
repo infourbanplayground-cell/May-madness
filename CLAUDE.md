@@ -527,6 +527,37 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   case and the second prize is the STRONGEST FINISH (second half minus first),
   which is the champion only 7% of the time. Flip `firstNight` in
   `uprising-social.json` to false after the first night.
+- **UPRISING runs EVERY SATURDAY**, not monthly as the first announcement
+  said. `cadence` / `cadenceLine` in the JSON are the only place the rhythm is
+  written, and `date` is always the NEXT night — roll it forward by seven
+  after each one and every card, caption, the link preview and the landing
+  panel re-render.
+  - The cadence was TYPED in two more places: the landing panel's heading
+    (`ONE SATURDAY A MONTH`) and three captions saying "monthly" / "next
+    month". Going weekly made all of them silently wrong on the surfaces
+    people actually read. They are spliced now — `<!--UP:CADENCE-->` beside
+    the existing WHEN/FACTS markers, and `NEXT_ONE` / `RHYTHM` derived from
+    `cadence` in the builder.
+  - **`<!--UP:COURTS-->` too.** The panel's own sentence read "Four courts,
+    one ladder" in prose while the figures in the same paragraph were
+    generated — so on the three-court night the page contradicted itself a
+    line apart. Proved the splice is live by setting courts to 3 and watching
+    it say "Three", not by trusting an unchanged build.
+  - `firstNight` is **false** since 10 Oct was played; the copy says "the next
+    one is" rather than "the first one is", and dropped "a brand new padel
+    night".
+  - WHEN is TONIGHT / TOMORROW / a date. Printing it beside DATE_LONG gave
+    "17 Oct, Saturday 17 October" once the night was more than a day out, so
+    `URGENT` now gates it to the two words that add something.
+- **Cloudflare caches `og-card.jpg` for four hours, so re-uploading it is not
+  enough.** The crawler asks for the same URL and gets the old picture, with
+  `cf-cache-status: HIT` and a 200 that looks exactly like a successful
+  deploy — it happened here, a new card for a new date while WhatsApp kept
+  unfurling the old one. `ops/make-og-jpeg.py` now stamps the `og:image` tag
+  with the image's own content hash (`?v=<sha256[:10]>`), so a changed image
+  is a changed URL that no cache can get wrong and an unchanged one keeps its
+  cached copy. Verify by fetching **the URL the crawler is given**, not the
+  bare path.
 - **First UPRISING: Saturday 10 Oct 2026, 7 OMR, 16 places.**
   Champion takes a 15 OMR **voucher** and that is the only prize advertised.
   Change the date

@@ -48,6 +48,9 @@ WHEN = ("TONIGHT" if DT == _TODAY
         else "TOMORROW" if DT == _TODAY + datetime.timedelta(days=1)
         else f'{DT.day} {DT.strftime("%b").upper()}')
 DATE_LONG = f'{DT.strftime("%A")} {DT.day} {DT.strftime("%B")}'
+# True only when WHEN is a word rather than a date; used to decide whether it
+# is worth printing beside the full date at all.
+URGENT = WHEN in ("TONIGHT", "TOMORROW")
 DATE_SHORT = f'{DT.strftime("%a").upper()} {DT.day} {DT.strftime("%b").upper()}'
 
 # Local, not Google. Chromium in this container does not trust the agent
@@ -73,6 +76,14 @@ PAYS = ", ".join(
 # On night one THE CLIMB cannot be awarded — see uprising-social.json. The post
 # must advertise the prize that will actually be handed out.
 FIRST = bool(S.get("firstNight"))
+# "Monthly" was typed into three captions and "next month" into two more.
+# The series went weekly and every one of them was silently wrong, on the
+# posts people actually read. Derived from cadenceLine, which is the one
+# place the rhythm lives.
+CADENCE = S["cadenceLine"]                     # "Every Saturday"
+CADENCE_LOW = CADENCE[0].lower() + CADENCE[1:]  # "every Saturday"
+NEXT_ONE = {"weekly": "next week", "monthly": "next month"}.get(S.get("cadence"), "next time")
+RHYTHM = {"weekly": "weekly", "monthly": "monthly"}.get(S.get("cadence"), S.get("cadence", ""))
 # One prize, or two. With SECOND off, the prize cards carry a single CHAMPION
 # block and no caption mentions a runner-up — a second prize that is advertised
 # and then not handed out is worse than never having offered it.
@@ -378,7 +389,7 @@ page("post-4-prizes.html", 1080, 1350, "60px 64px 54px", f"""
         <span class="d">{SECOND_RULE}</span></div>
       <span class="v disp small">{S['climbPrize']}</span>
     </div>''' if SECOND else ""}
-    <p class="note">{("One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from next month it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar.") if SECOND else f"There is no score to reach and no last-match shoot-out. A win on Court 1 is worth {F['win']['1']} and a win on Court {F['courts']} is worth {F['win'][str(F['courts'])]}, so the table rewards <b>climbing and staying up there</b>.{' The last round counts double, which is why one night in three is still open when it starts.' if DBL else ''}"}</p>
+    <p class="note">{("One prize only ever goes to the best player in the room, and three of them would take 70% of the nights. This one is open to everybody — on the first night it is whoever finishes strongest, and from {NEXT_ONE} it becomes THE CLIMB: most points above <b>your own</b> average." if FIRST else "Measured over 200 simulated seasons: a single scratch prize sends <b>70%</b> of nights to the same three players. The handicap prize is <b>21%</b> — and it self-corrects, because winning it raises your own bar.") if SECOND else f"There is no score to reach and no last-match shoot-out. A win on Court 1 is worth {F['win']['1']} and a win on Court {F['courts']} is worth {F['win'][str(F['courts'])]}, so the table rewards <b>climbing and staying up there</b>.{' The last round counts double, which is why one night in three is still open when it starts.' if DBL else ''}"}</p>
   </div>
   <div class="foot">
     <div style="display:flex;gap:40px;align-items:flex-end">
@@ -720,7 +731,18 @@ _land = open(LAND).read()
 _when = (f"{WHEN} · {DATE_SHORT}" if WHEN in ("TONIGHT", "TOMORROW") else DATE_SHORT)
 _facts = (f"{S['entry']} {CUR} · up to {S['cap']} places · "
           f"{plural(EACH, 'match')} each · champion takes a {CHAMP_FULL}.")
-for tag, val in (("UP:WHEN", _when), ("UP:FACTS", _facts)):
+# The heading was TYPED here while the date and figures beside it were
+# generated, so when the series went from monthly to weekly the panel still
+# read "ONE SATURDAY A MONTH" above a date seven days out. One copy, in the
+# JSON, spliced like everything else.
+_cadence = S["cadenceLine"].upper()
+# "Four courts" was typed into the panel's own sentence while the figures in
+# the same paragraph were generated. On the three-court night the page read
+# "Four courts, one ladder" directly above facts derived from three.
+_WORDS = {2: "Two", 3: "Three", 4: "Four"}
+_courts = _WORDS.get(F["courts"], str(F["courts"]))
+for tag, val in (("UP:WHEN", _when), ("UP:FACTS", _facts), ("UP:CADENCE", _cadence),
+                 ("UP:COURTS", _courts)):
     a, b = f"<!--{tag}-->", f"<!--/{tag}-->"
     i, j = _land.find(a), _land.find(b)
     if i < 0 or j < 0:
@@ -745,7 +767,7 @@ rather than editing this by hand.
 WHATSAPP 1 — the announcement (paste with post-1-hero.png)
 {HR}
 
-🏆 *{S['name']}* — a brand new padel night. *{WHEN.title()}, {DATE_LONG}.*
+🏆 *{S['name']}* — {'a brand new padel night' if FIRST else 'the padel night where you climb for your place'}. *{f'{WHEN.title()}, ' if URGENT else ''}{DATE_LONG}.*
 
 Come on your own. No partner needed. You will play with a different
 partner almost every round.
@@ -774,14 +796,14 @@ bottom. Highest total at the end takes the night. 👑
 Round one is the shuffle: it decides which court you start on and scores
 nothing, so nobody is placed by a draw. You earn where you stand.
 
-*Reply with a 👍 to claim a place.* Monthly from here.
+*Reply with a 👍 to claim a place.* {CADENCE} from here.
 {S['host']}
 
 {HR}
 WHATSAPP 2 — the short one (for busy groups, or a forward)
 {HR}
 
-🏆 *{S['name']}* — {WHEN.lower()}, {DATE_SHORT.title()}.
+🏆 *{S['name']}* — {f'{WHEN.lower()}, ' if URGENT else ''}{DATE_SHORT.title()}.
 
 {F['courts']} courts, one ladder. Win and you climb a court, lose and you drop
 one. Up to {F['matches']} matches, a new partner almost every round, come on your
@@ -846,7 +868,7 @@ INSTAGRAM — carousel caption (5 cards, hero first)
 
 {S['promise']}
 
-{S['name']} is a new monthly padel social, and the first one is {WHEN.lower()} — {DATE_LONG}.
+{S['name']} is a {'new ' if FIRST else ''}{RHYTHM} padel social{', and the first one is' if FIRST else ', and the next one is'} {f'{WHEN.lower()} — ' if URGENT else ''}{DATE_LONG}.
 
 Every match is first to {F['target']} — straight rallies, no games, no sets. Win it and
 you climb a court. Lose and you drop one.
@@ -860,7 +882,7 @@ Up to {F['matches']} matches. A different partner almost every round. You do not
 to bring anyone.
 
 {S['entry']} {CUR} · up to {S['cap']} places
-Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays next month free.' if SECOND else (" Last round counts double." if DBL else " Highest total at the end takes it.")}
+Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays {NEXT_ONE} free.' if SECOND else (" Last round counts double." if DBL else " Highest total at the end takes it.")}
 
 Link in bio to the live ladder.
 
@@ -915,7 +937,7 @@ WHAT NOT TO PROMISE
 · Not a second prize, a runner-up prize or a free entry. There is ONE prize
   this night and the cards say so. If one is added later, set secondPrize in
   uprising-social.json and re-render rather than promising it in a message.'''}
-· Not a finals night, a season table or a league. This is one night, monthly.
+· Not a finals night, a season table or a league. This is one night, {CADENCE_LOW.lower()}.
 · Not "{S['championPrize']} {CUR}" on its own — it is a {KIND or "prize"}, and every line above
   says so. Somebody turning up expecting cash and being handed a {KIND or "prize"} was
   misled by our own poster.

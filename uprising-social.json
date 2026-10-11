@@ -9,10 +9,11 @@
     "contradicts. Only the things the engine cannot know — when, how much, what",
     "you win — live here.",
     "",
-    "DATE. Saturday 10 Oct — tomorrow, announced the night before. One day to",
-    "fill 16 places is the risk the owner chose to take; the post leans on it",
-    "rather than hiding it, which is why the date block reads TOMORROW while",
-    "that is true. Change `date` and everything re-renders, including that.",
+    "DATE. The series runs EVERY SATURDAY, not monthly as the first",
+    "announcement said. `date` is always the NEXT one; roll it forward by",
+    "seven after each night and every card, caption, the link preview and the",
+    "landing panel re-render, including the date block, which reads TOMORROW",
+    "or TONIGHT while that is true and the date otherwise.",
     "",
     "PRIZES. ONE prize for the first night: the champion takes a 15 OMR voucher",
     "and nothing else is advertised (see secondPrize below). championPrizeKind",
@@ -27,10 +28,11 @@
     "of nights to the top three players and the handicap 21%, so it is worth",
     "turning back on once there is history to compute it from.",
     "",
-    "CADENCE LINE. Keep it vague enough to be true: the first post said \"first",
-    "Saturday night of the month\" while advertising the 17th, which is the",
-    "third. Nobody will check the maths on \"one Saturday a month\"; everybody",
-    "notices a date that contradicts the line above it."
+    "CADENCE LINE. `cadenceLine` is the only place the rhythm is written. It",
+    "was \"One Saturday a month\" while the series was monthly, and it was",
+    "TYPED into landing/index.html as a heading as well, which is how a page",
+    "ends up contradicting its own JSON. It is spliced from here now, between",
+    "UP:CADENCE markers, the same way the date and the figures are."
   ],
 
   "name": "UPRISING",
@@ -38,11 +40,11 @@
   "promise": "Come alone. Leave with ten.",
   "host": "americano.urbanpadel.om",
 
-  "date": "2026-10-10",
+  "date": "2026-10-17",
   "doors": "17:45",
   "start": "18:00",
-  "cadence": "monthly",
-  "cadenceLine": "One Saturday a month",
+  "cadence": "weekly",
+  "cadenceLine": "Every Saturday",
 
   "entry": 7,
   "currency": "OMR",
@@ -64,21 +66,17 @@
   ],
 
 
-  "firstNight": true,
+  "firstNight": false,
   "_firstNight": [
-    "THE CLIMB is 'most points per round above your own average', and on the",
-    "very first night nobody has an average — every baseline falls back to the",
-    "field average, which is the same number for everyone, so the rule collapses",
-    "into 'most points' and awards the champion both prizes. Measured: 2000 of",
-    "2000 simulated first nights.",
+    "FALSE since the first night was played on 10 Oct 2026. While it was true",
+    "the posts called the advertised date \"the first one\", and THE CLIMB was",
+    "replaced by the STRONGEST FINISH, because on night one nobody has an",
+    "average: every baseline falls back to the field average, the same number",
+    "for everyone, so the rule collapses into \"most points\" and awards the",
+    "champion both prizes. Measured: 2000 of 2000 simulated first nights.",
     "",
-    "So while firstNight is true the second prize is the STRONGEST FINISH —",
-    "most points in the second half of the night minus the first. It needs no",
-    "history, it is the champion only 7% of the time, and unlike 'biggest rise",
-    "up the ladder' it is not inverted (that one goes 80% to whoever the shuffle",
-    "dropped to Court 4 and can never be won from Court 1).",
-    "",
-    "Set this to false after the first night and the posts switch to THE CLIMB."
+    "With history behind it THE CLIMB is computable again — though nothing",
+    "renders it while secondPrize is false."
   ],
   "cap": 16,
 
