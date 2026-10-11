@@ -262,6 +262,25 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - Both the RULES screen and the home page say the margin decides it, because
     it changes how people play that match — a 11-2 shuffle win from the bottom
     of the draw opens on Court 1.
+- **A night is 12 ROUNDS ON THE BOARD by default**, shuffle included — the
+  owner's call after the first one ran to 14 and felt long. `UP.ROUNDS` is 12
+  and means the TOTAL, the same thing `numRounds` counts and `upRoundsTotal`
+  falls back to; at first-to-11 a round is ten minutes, so twelve is two hours
+  of play.
+  - The organiser's own field is still **scoring** rounds — "asked for 15 and
+    given 14 is the wrong kind of surprise" — so only its DEFAULT changed, to
+    `defaultScoringRounds()` = `UP.ROUNDS` minus the shuffle count. Picking two
+    shuffle rounds therefore still gives twelve on the board, not thirteen.
+    That helper lives in the app and is deliberately **not** `up`-prefixed:
+    that prefix is the engine's, and `build-americano-app.py` refuses any
+    `up*()` call it cannot find in the engine (it caught this).
+  - The setup default is now **"Set rounds myself"**, not the 2h30 clock —
+    the chip reads `Set rounds myself · 12 rds` and the clock chips are still
+    there. Checked in a browser at 1, 2 and 0 shuffle rounds: 12 on the board
+    every time, and the uneven-rest warning still fires (16 on 3 courts with
+    10 scoring rounds).
+  - If you change `UP.ROUNDS`, the tests follow it — they used to hard-code
+    the nine beside the constant and broke when it moved.
 - **The shuffle can be 0, 1 or 2 rounds.** `night.shuffle` is a COUNT, read by
   `upShuffleRounds` — `true` still means 1, so nights created before this keep
   working. Chosen on the setup screen; margins SUM across the shuffle rounds,

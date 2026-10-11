@@ -640,7 +640,13 @@ const asClock = mins => Math.floor(mins / 60) + "h" + String(mins % 60).padStart
 
 const UP = {
   COURTS: 4,
-  ROUNDS: 9,
+  // ROUNDS is the night's TOTAL rounds on the board, shuffle included — the
+  // same thing `numRounds` counts and `upRoundsTotal` falls back to. Twelve
+  // after the first live night: nine was a two-hour budget at first-to-16,
+  // and at first-to-11 a round is ten minutes, so twelve is two hours of
+  // play. The organiser asked for twelve on the board; with the default
+  // single shuffle that is eleven rounds that score.
+  ROUNDS: 12,
   FIELD: 16,
   TARGET: 16,            // a match is first to 16 points
   FINAL_MULT: 2,         // the last round is worth double
@@ -1557,6 +1563,18 @@ function upValidate(night) {
 }
 // ══ END UPRISING ENGINE ════════════════════════════════════════════════════════
 
+// UP.ROUNDS is the night's TOTAL rounds, shuffle included. The organiser's
+// own field is SCORING rounds — asked for 15 and given 14 is the wrong kind
+// of surprise — so the DEFAULT has to be the total minus whatever shuffle is
+// set, or choosing two shuffle rounds quietly makes the night a round longer
+// than the twelve that was asked for. Lives here, not in the engine: the
+// engine knows nothing about cfg. Deliberately NOT `up`-prefixed: that
+// prefix is reserved for engine names, and build-americano-app.py refuses
+// any up*() call it cannot find in the engine.
+function defaultScoringRounds(shuffle) {
+  return Math.max(2, UP.ROUNDS - upShuffleRounds({ shuffle }));
+}
+
 function circlePairRounds(n) {
   const arr = Array.from({ length: n }, (_, i) => i);
   if (n % 2 === 1) arr.push(-1);
@@ -1988,7 +2006,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
             const sc = cfg.upfinish
               ? upPlanRounds(Number(cfg.upfinish), tgt,
                   { shuffle: cfg.upshuffle, players: Math.max(8, selCount), courts: upC })
-              : Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+              : Math.max(2, Math.min(40, Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)));
             const rounds = sc + upShuffleRounds({ shuffle: cfg.upshuffle });
             const mins = nightMinutes(rounds, tgt);
             // ROUNDS and MATCHES EACH are the same number only when nobody
@@ -2118,6 +2136,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                   <span className="label">{lab}</span>
                   <input className="field num" type="number" min={key === "upcourts" ? 2 : 1} max={key === "courts" || key === "upcourts" ? 4 : undefined}
                     value={cfg[key]}
+                    placeholder={key === "uprounds" ? String(defaultScoringRounds(cfg.upshuffle)) : undefined}
                     onChange={e => setCfg(c => ({ ...c, [key]: e.target.value }))} />
                 </label>
               ))}
@@ -2150,7 +2169,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                         <button key={v} type="button" className={"rchip" + (on ? " on" : "")}
                           style={{ padding: "9px 13px", fontSize: 12 }}
                           onClick={() => setCfg(c => ({ ...c, upfinish: v }))}>
-                          {lab}{v ? ` · ${sc} rds` : ""}
+                          {lab}{v ? ` · ${sc} rds` : ` · ${Math.max(2, Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)) + upShuffleRounds({ shuffle: cfg.upshuffle })} rds`}
                         </button>
                       );
                     })}
@@ -2754,7 +2773,7 @@ function Home({ cfg }) {
   const players = UP_NEXT.cap || 4 * C;
   const scoring = cfg.upfinish
     ? upPlanRounds(Number(cfg.upfinish), target, { shuffle, players, courts: C })
-    : (Number(cfg.uprounds) || UP.ROUNDS);
+    : (Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle));
   const matches = scoring + shuf;
   // Rounds and matches-each are the same number only when nobody rests. With
   // 16 on 3 courts the night is 13 rounds and 9 matches each.
@@ -2890,7 +2909,7 @@ function Rules({ t, cfg }) {
   const shuffle = shuf > 0;
   const scoring = live ? upScoringRounds(live)
     : (cfg.upfinish ? upPlanRounds(Number(cfg.upfinish), target, { shuffle, players, courts: C })
-                    : (Number(cfg.uprounds) || UP.ROUNDS));
+                    : (Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)));
   const matches = scoring + shuf;
   const resting = Math.max(0, players - 4 * C);
   const dbl = resting === 0;
@@ -3060,8 +3079,8 @@ function App() {
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
   const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
-                                   upcourts: UP_NEXT.courts || UP.COURTS, uppoints: 11, uprounds: 15,
-                                   upshuffle: true, upfinish: 150, format: "americano" });
+                                   upcourts: UP_NEXT.courts || UP.COURTS, uppoints: 11, uprounds: "",
+                                   upshuffle: true, upfinish: 0, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [receipt, setReceipt] = useState(null);
   const [drafts, setDrafts] = useState({});
@@ -3184,7 +3203,7 @@ function App() {
       const upScoring = cfg.upfinish
         ? upPlanRounds(Number(cfg.upfinish), Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET)),
             { shuffle: cfg.upshuffle, players: ids.length, courts: upCourtCount })
-        : Math.max(2, Math.min(40, Number(cfg.uprounds) || UP.ROUNDS));
+        : Math.max(2, Math.min(40, Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)));
       const upRounds = upScoring + upShuffleRounds({ shuffle: cfg.upshuffle });
       const ladder0 = upSeedLadder(ids, upForm, upCourtCount);
       const seedT = {

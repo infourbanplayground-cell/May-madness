@@ -10,7 +10,13 @@
 
 const UP = {
   COURTS: 4,
-  ROUNDS: 9,
+  // ROUNDS is the night's TOTAL rounds on the board, shuffle included — the
+  // same thing `numRounds` counts and `upRoundsTotal` falls back to. Twelve
+  // after the first live night: nine was a two-hour budget at first-to-16,
+  // and at first-to-11 a round is ten minutes, so twelve is two hours of
+  // play. The organiser asked for twelve on the board; with the default
+  // single shuffle that is eleven rounds that score.
+  ROUNDS: 12,
   FIELD: 16,
   TARGET: 16,            // a match is first to 16 points
   FINAL_MULT: 2,         // the last round is worth double

@@ -233,29 +233,30 @@ test("an unfinished match moves nobody", () => {
 
 // ── a whole night ──────────────────────────────────────────────────────────
 
-test("nine rounds stay four to a court, every round, every time", () => {
+test("a full night stays four to a court, every round, every time", () => {
   for (let seed = 0; seed < 50; seed++) {
     let s = seed * 2654435761 % 4294967296;
     const rnd = () => (s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296;
     const night = newNight(16);
     for (let r = 0; r < UP.ROUNDS; r++) playRound(night, () => rnd() < 0.5);
     assert.deepEqual(upValidate(night), [], `seed ${seed}`);
-    assert.equal(night.rounds.length, 9);
+    assert.equal(night.rounds.length, UP.ROUNDS);
     // every player played every round
     const played = {};
     night.rounds.forEach(r => r.courts.forEach(m => [...m.team1, ...m.team2].forEach(p => {
       played[p] = (played[p] || 0) + 1;
     })));
     Object.entries(played).forEach(([p, n]) =>
-      assert.equal(n, 9, `${p} played ${n} rounds, not 9`));
+      assert.equal(n, UP.ROUNDS, `${p} played ${n} rounds, not ${UP.ROUNDS}`));
     assert.equal(Object.keys(played).length, 16, "somebody sat out");
   }
 });
 
-test("a tenth round is refused", () => {
+test("one round past the end is refused", () => {
   const night = newNight(16);
   for (let r = 0; r < UP.ROUNDS; r++) playRound(night);
-  assert.throws(() => upBuildRound(night), /already 9 rounds long/);
+  assert.throws(() => upBuildRound(night),
+    new RegExp(`already ${UP.ROUNDS} rounds long`));
 });
 
 test("the next round is refused until this one is finished", () => {
