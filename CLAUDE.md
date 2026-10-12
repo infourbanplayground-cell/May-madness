@@ -691,10 +691,27 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - The champions block is drawn **only when the final has been won**. An
     undecided final renders both names grey with no scores, which is the
     line-up state and reads correctly as "this is about to happen".
-  - Checked by rendering the real painter headlessly at four states — full
-    bracket, final drawn but unplayed, semis only, and the longest names the
-    roster can produce. `drawGroupCard` is a top-level function so a Playwright
-    page can call it directly with a hand-made `d`; no session fixture needed.
+  - **The final and the champions carry FACES.** Photos come off the `/photos`
+    store as **base64 data URLs**, merged onto the player record before any
+    screen reads it — so drawing one into the canvas is not a cross-origin draw
+    and cannot taint it, unlike the Cloudinary session photos the line-up card
+    has to guard against. About three quarters of a knockout field has one;
+    the rest get an initial on a dark disc, which is a real state and not an
+    error path (Session 2's champion pair is one of each).
+  - Faces only where they are big enough to read. A quarter-final row is ~44px
+    tall, and a face in it lands at about 16px once a story is scaled to a
+    phone — a smudge that also steals the width the name needs. The final is
+    drawn **1.55x** the other rounds for this; at 1.18 it was marked as the
+    final but its faces were still 35px.
+  - The champions' two faces are drawn **left to right**, matching the order of
+    the two names beside them. Drawn right-to-left they put the second player
+    first, which reads as the wrong person having won.
+  - Checked by rendering the real painter headlessly: the **actual Session 1
+    and 2 brackets out of the live DB**, through the app's own
+    `buildGroupCards`, plus four synthetic states — full bracket, final drawn
+    but unplayed, semis only, and the longest names the roster can produce.
+    `buildGroupCards` and `drawGroupCard` are top-level functions, so a
+    Playwright page can call them directly with a state fetched from the API.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.

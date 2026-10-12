@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "2c644d0e9f7c";
+  var V = "697991194b3b";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -5090,7 +5090,7 @@ function gcGroup(g, d, x, y, w, h) {
 }
 
 // ── the painter ───────────────────────────────────────────────────────────
-function gcPaint(g, kind, d, logo) {
+function gcPaint(g, kind, d, logo, faces) {
   g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);
 
   // the volume's two washes, same corners as every other card in the set
@@ -5143,7 +5143,7 @@ function gcPaint(g, kind, d, logo) {
   // ── body ──
   const BOT = LU_H - 360;
   if (kind === "bracket") {
-    gcBracket(g, d, L, TOP, W, BOT - TOP);
+    gcBracket(g, d, L, TOP, W, BOT - TOP, faces || new Map());
   } else {
     const groups = d.groups || [];
     const n = Math.max(1, groups.length);
@@ -5194,7 +5194,7 @@ function gcPaint(g, kind, d, logo) {
 // The champion block is the payoff the card was missing. It is drawn only when
 // the final has actually been won — a card that announces an empty winner is
 // worse than one that stops at the semis.
-function gcBracket(g, d, x, y, w, h) {
+function gcBracket(g, d, x, y, w, h, faces) {
   const cols = (d.cols || []).filter(c => c.ties && c.ties.length);
   if (!cols.length) return;
 
@@ -5212,8 +5212,12 @@ function gcBracket(g, d, x, y, w, h) {
   const CGAP = 44;
   const band = h - (champ ? CH + CGAP : 0);
   const avail = band - cols.length * (LBL + SGAP) - (ties - cols.length) * RGAP;
-  // The final is drawn 1.18x the others, so the row count it costs is not 1.
-  const units = ties + (fin ? 0.18 : 0);
+  // The final is drawn 1.55x the others, so the row count it costs is not 1.
+  // 1.18 was enough to mark it as the final and not enough to carry a face:
+  // its rows came out 52px, the faces 35px, and at story-on-a-phone scale that
+  // is a smudge. At 1.55 they are 52px of face, which is the size the
+  // champions block proves works.
+  const units = ties + (fin ? 0.55 : 0);
   const th = Math.max(72, Math.min(132, avail / units));
 
   // A two-round night does not have enough ties to fill the band, and the row
@@ -5223,7 +5227,7 @@ function gcBracket(g, d, x, y, w, h) {
   // block first and centring it keeps a short bracket together and leaves a
   // full one exactly where it was.
   const rowsH = cols.reduce((n, c) =>
-    n + LBL + c.ties.length * (c.label === "FINAL" ? th * 1.18 : th)
+    n + LBL + c.ties.length * (c.label === "FINAL" ? th * 1.55 : th)
       + (c.ties.length - 1) * RGAP + SGAP, 0) - SGAP;
   const contentH = rowsH + (champ ? CGAP + CH : 0);
   let cy = y + Math.max(0, (h - contentH) / 2);
@@ -5234,7 +5238,7 @@ function gcBracket(g, d, x, y, w, h) {
     const inset = ci * STEP;
     const cx = x + inset, cw = w - inset * 2;
     const isFinal = col.label === "FINAL";
-    const rowH = isFinal ? th * 1.18 : th;
+    const rowH = isFinal ? th * 1.55 : th;
 
     g.font = '700 19px "JetBrains Mono", monospace';
     g.fillStyle = isFinal ? "#C6FF00" : "#9A9A9A";
@@ -5245,17 +5249,29 @@ function gcBracket(g, d, x, y, w, h) {
     cy += LBL;
     col.ties.forEach(t => {
       const rh = (rowH - 4) / 2;
-      [[t.a, t.aWon, t.aScore], [t.b, t.bWon, t.bScore]].forEach(([nm, won, sc], k) => {
+      [[t.a, t.aWon, t.aScore, t.aPics], [t.b, t.bWon, t.bScore, t.bPics]].forEach(([nm, won, sc, pics], k) => {
         const ry = cy + k * (rh + 4);
         g.fillStyle = won ? "rgba(198,255,0,.10)" : "rgba(15,15,15,.9)";
         g.fillRect(cx, ry, cw, rh);
         g.strokeStyle = won ? "#C6FF00" : "rgba(110,110,110,.3)";
         g.lineWidth = won ? 3 : 2;
         g.strokeRect(cx + 1.5, ry + 1.5, cw - 3, rh - 3);
-        const size = stFit(g, nm || "TBD", cw - 48 - 70, Math.round(rh * 0.5), 900);
+        // Faces, but ONLY on the final. A quarter-final row is ~44px tall, so
+        // a face in it lands at about 16px once a story is rendered on a phone
+        // — unrecognisable, and it steals the width the name needs. The final
+        // is the one round with the height to carry them.
+        let tx = cx + 24;
+        if (isFinal && pics && pics.length) {
+          const fr = rh * 0.40;
+          pics.slice(0, 2).forEach((q, j) => {
+            gcFace(g, q, cx + 20 + fr + j * fr * 1.55, ry + rh / 2, fr, faces);
+          });
+          tx = cx + 20 + fr * 2.55 + fr + 18;
+        }
+        const size = stFit(g, nm || "TBD", cx + cw - 70 - 24 - tx, Math.round(rh * 0.5), 900);
         g.font = `italic 900 ${size}px Archivo, sans-serif`;
         g.fillStyle = nm ? (won ? "#F2F2F2" : "#8A8A8A") : "#5A5A5A";
-        g.fillText(nm || "TBD", cx + 24, ry + rh / 2 + size * 0.34);
+        g.fillText(nm || "TBD", tx, ry + rh / 2 + size * 0.34);
         if (sc) {
           g.font = `700 ${Math.round(rh * 0.42)}px "JetBrains Mono", monospace`;
           g.fillStyle = won ? "#C6FF00" : "#6E6E6E";
@@ -5289,7 +5305,22 @@ function gcBracket(g, d, x, y, w, h) {
       let tx = x + 28;
       for (const ch of "CHAMPIONS") { g.fillText(ch, tx, by + 44); tx += g.measureText(ch).width + 4; }
     }
-    const size = stFit(g, champ, w - 56, 70, 900);
+    // The champions get the biggest faces on the card — at this size they
+    // still read once a story is scaled down to a phone, which is the whole
+    // reason the earlier rounds do not get them.
+    const cp = fin ? (fin.aWon ? fin.aPics : fin.bPics) : null;
+    let right = x + w - 28;
+    if (cp && cp.length) {
+      const fr = 52;
+      // Left to right, so the faces are in the same order as the two names
+      // beside them. Drawn right-to-left they put the second player's face
+      // first, which reads as the wrong person winning.
+      cp.slice(0, 2).forEach((q, j) => {
+        gcFace(g, q, x + w - 36 - fr - (1 - j) * fr * 1.6, by + bh / 2 + 8, fr, faces);
+      });
+      right = x + w - 36 - fr * 2.6 - fr - 20;
+    }
+    const size = stFit(g, champ, right - (x + 28), 70, 900);
     g.font = `italic 900 ${size}px Archivo, sans-serif`;
     g.fillStyle = "#F2F2F2";
     g.fillText(champ, x + 28, by + bh - 34);
@@ -5298,10 +5329,40 @@ function gcBracket(g, d, x, y, w, h) {
 
 async function drawGroupCard(kind, d) {
   const logo = await luImg("assets/up-logo-tight.png");
+  // Only the rounds with room for a face are drawn with one, so only those are
+  // fetched. luImg resolves null rather than rejecting, so a photo that will
+  // not load costs an initial, not the card.
+  const urls = [];
+  (d.cols || []).forEach(c => (c.ties || []).forEach(t =>
+    [...(t.aPics || []), ...(t.bPics || [])].forEach(q => { if (q.url) urls.push(q.url); })));
+  const uniq = [...new Set(urls)];
+  const loaded = await Promise.all(uniq.map(luImg));
+  const faces = new Map();
+  uniq.forEach((u, i) => { if (loaded[i]) faces.set(u, loaded[i]); });
   const c = document.createElement("canvas");
   c.width = LU_W; c.height = LU_H;
-  gcPaint(c.getContext("2d"), kind, d, logo);
+  gcPaint(c.getContext("2d"), kind, d, logo, faces);
   return c.toDataURL("image/png");
+}
+
+// One face, round, with the initial when there is no photo. The ring is what
+// stops a dark photo dissolving into a dark card.
+function gcFace(g, q, cx, cy, r, faces) {
+  const im = q && q.url ? faces.get(q.url) : null;
+  g.save();
+  g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.clip();
+  if (im) {
+    luCover(g, im, cx - r, cy - r, r * 2, r * 2);
+  } else {
+    g.fillStyle = "#1A1A1A"; g.fillRect(cx - r, cy - r, r * 2, r * 2);
+    g.font = `italic 900 ${Math.round(r * 0.95)}px Archivo, sans-serif`;
+    g.fillStyle = "#6E6E6E"; g.textAlign = "center";
+    g.fillText((q && q.init) || "?", cx, cy + r * 0.34);
+    g.textAlign = "left";
+  }
+  g.restore();
+  g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2);
+  g.strokeStyle = "rgba(198,255,0,.55)"; g.lineWidth = 2.5; g.stroke();
 }
 
 
@@ -5393,6 +5454,19 @@ function buildGroupCards(session, state, idx) {
 
   // ── THE BRACKET ── only the rounds this night actually has.
   const b = session.bracket || {};
+  // The two faces behind a team name. Photos are merged onto the player record
+  // from the /photos store before any screen reads it, and they are base64 data
+  // URLs — so drawing one into the canvas is NOT a cross-origin draw and cannot
+  // taint it. Not everybody has one: about three quarters of a knockout field
+  // does, so the initial is a real state, not an error path.
+  const pics = id => {
+    const t = teams.find(x => x.id === id);
+    if (!t) return [];
+    return [t.p1Id, t.p2Id].map(pid => {
+      const pl = players.find(q => q.id === pid) || {};
+      return { url: pl.photoUrl || "", init: ((pl.name || "?").trim()[0] || "?").toUpperCase() };
+    });
+  };
   const tie = m => {
     if (!m) return null;
     const w = m.winner;
@@ -5400,6 +5474,7 @@ function buildGroupCards(session, state, idx) {
       a: nm(m.team1Id).toUpperCase(), b: nm(m.team2Id).toUpperCase(),
       aWon: w === "team1", bWon: w === "team2",
       aScore: m.score ? String(m.score.t1) : "", bScore: m.score ? String(m.score.t2) : "",
+      aPics: pics(m.team1Id), bPics: pics(m.team2Id),
     };
   };
   const cols = [
