@@ -674,8 +674,29 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   that open each receipt, and head-to-head against you.
 - Roster cards carry a photo slot, a streak chip and form bars.
 - Worth watching runs four axes, de-duplicated against the podium.
-- Still carried from Vol.7 and NOT rebuilt: the KO bracket layout, the teams and
-  groups screens, and the photo wall. **Court assignment was never built** — the
+- **THE BRACKET share card reads as a bracket**, not as a list. It cannot be
+  three columns — at 1080 wide that leaves ~300px a slot and
+  "ALMUNTASER & MUATASIM" does not fit at any size worth reading, which is why
+  the rounds stack. Stacked, though, it was three labelled blocks of identical
+  rows with the champion drawn exactly like a quarter-final loser. Three things
+  fix it without taking the width back: each round is **inset** from the one
+  before so the card visibly narrows, a **chevron** between rounds pushes the
+  eye down the tree, and the **CHAMPIONS block** at the foot gives the card the
+  payoff it had none of.
+  - The block is **measured and centred**, not pinned to the foot of the band.
+    Row height is capped, so a two-round night does not fill it — pinning the
+    champions down there put all the slack in ONE 280px hole in the middle of
+    the card. Centring keeps a short bracket together and leaves a full one
+    exactly where it was.
+  - The champions block is drawn **only when the final has been won**. An
+    undecided final renders both names grey with no scores, which is the
+    line-up state and reads correctly as "this is about to happen".
+  - Checked by rendering the real painter headlessly at four states — full
+    bracket, final drawn but unplayed, semis only, and the longest names the
+    roster can produce. `drawGroupCard` is a top-level function so a Playwright
+    page can call it directly with a hand-made `d`; no session fixture needed.
+- Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
+  teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
 - Known: the RANK screen gates every tab, including ALL-TIME, behind "first match
   played", so the carried all-time ladder is invisible until the first Vol.8

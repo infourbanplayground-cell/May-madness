@@ -3916,61 +3916,125 @@ function gcPaint(g, kind, d, logo) {
 
 // ── the knockout, round by round ──────────────────────────────────────────
 //
-// Not a tree. A bracket tree wants landscape: at 1080 wide, three columns leave
-// about 300px a slot, and "ALMUNTASER & MUATASIM" does not fit in 300px at any
-// size you would want to read on a phone — the first version of this card had
-// names running through their own scores and out past the border.
+// Not three columns. A bracket tree wants landscape: at 1080 wide, three
+// columns leave about 300px a slot, and "ALMUNTASER & MUATASIM" does not fit in
+// 300px at any size you would want to read on a phone — the first version of
+// this card had names running through their own scores and out past the border.
 //
-// Stacked rounds give every tie the full width of the card, which is the one
-// thing a doubles name actually needs, and they read top to bottom the way a
-// story card is already read. The cost is the connecting lines, which were
-// carrying no information a reader of eight names could not infer.
+// So the rounds stack, which gives every tie the width a doubles name actually
+// needs and reads top to bottom the way a story card is already read. The cost
+// used to be that it did not read as a BRACKET at all: three labelled blocks of
+// identical rows, no sense of anything narrowing, and the night's champion
+// drawn exactly like a quarter-final loser. Three things fix that without
+// taking the width back:
+//
+//   · each round is INSET from the one before, so the card visibly narrows
+//   · a chevron between rounds, so the eye is pushed down the tree
+//   · the final is taller, and the champions get the foot of the card
+//
+// The champion block is the payoff the card was missing. It is drawn only when
+// the final has actually been won — a card that announces an empty winner is
+// worse than one that stops at the semis.
 function gcBracket(g, d, x, y, w, h) {
   const cols = (d.cols || []).filter(c => c.ties && c.ties.length);
   if (!cols.length) return;
 
-  // Fill the band: all the ties across all the rounds share the height, so a
-  // night that only reached the semis is not drawn as a third of a card.
+  // Who won the night, if anyone has yet.
+  const last = cols[cols.length - 1];
+  const fin = last.label === "FINAL" ? last.ties[0] : null;
+  const champ = fin ? (fin.aWon ? fin.a : fin.bWon ? fin.b : "") : "";
+  const CH = champ ? 190 : 0;
+
   const ties = cols.reduce((n, c) => n + c.ties.length, 0);
   // RGAP separates one TIE from the next; the 4px inside a tie binds its two
   // rows together. At 10 the two gaps were close enough that a round of four
   // ties read as one list of eight names.
-  const LBL = 34, SGAP = 26, RGAP = 26;
-  const avail = h - cols.length * (LBL + SGAP) - (ties - cols.length) * RGAP;
-  const th = Math.max(72, Math.min(132, avail / ties));
+  const LBL = 34, SGAP = 30, RGAP = 26, STEP = 52;
+  const CGAP = 44;
+  const band = h - (champ ? CH + CGAP : 0);
+  const avail = band - cols.length * (LBL + SGAP) - (ties - cols.length) * RGAP;
+  // The final is drawn 1.18x the others, so the row count it costs is not 1.
+  const units = ties + (fin ? 0.18 : 0);
+  const th = Math.max(72, Math.min(132, avail / units));
 
-  let cy = y;
-  cols.forEach(col => {
+  // A two-round night does not have enough ties to fill the band, and the row
+  // height is capped, so the slack has to go somewhere. Pinning the champions
+  // to the foot of the band put all of it in ONE GAP in the middle of the
+  // card — 280px of nothing between the final and the winners. Measuring the
+  // block first and centring it keeps a short bracket together and leaves a
+  // full one exactly where it was.
+  const rowsH = cols.reduce((n, c) =>
+    n + LBL + c.ties.length * (c.label === "FINAL" ? th * 1.18 : th)
+      + (c.ties.length - 1) * RGAP + SGAP, 0) - SGAP;
+  const contentH = rowsH + (champ ? CGAP + CH : 0);
+  let cy = y + Math.max(0, (h - contentH) / 2);
+  const top = cy;
+  cols.forEach((col, ci) => {
+    // Each round sits inside the one before it. This is the whole reason the
+    // card reads as a bracket rather than as a list of results.
+    const inset = ci * STEP;
+    const cx = x + inset, cw = w - inset * 2;
+    const isFinal = col.label === "FINAL";
+    const rowH = isFinal ? th * 1.18 : th;
+
     g.font = '700 19px "JetBrains Mono", monospace';
-    g.fillStyle = "#9A9A9A";
+    g.fillStyle = isFinal ? "#C6FF00" : "#9A9A9A";
     {
-      let tx = x;
+      let tx = cx;
       for (const ch of col.label) { g.fillText(ch, tx, cy + 18); tx += g.measureText(ch).width + 3; }
     }
     cy += LBL;
     col.ties.forEach(t => {
-      const rh = (th - 4) / 2;
+      const rh = (rowH - 4) / 2;
       [[t.a, t.aWon, t.aScore], [t.b, t.bWon, t.bScore]].forEach(([nm, won, sc], k) => {
         const ry = cy + k * (rh + 4);
         g.fillStyle = won ? "rgba(198,255,0,.10)" : "rgba(15,15,15,.9)";
-        g.fillRect(x, ry, w, rh);
+        g.fillRect(cx, ry, cw, rh);
         g.strokeStyle = won ? "#C6FF00" : "rgba(110,110,110,.3)";
         g.lineWidth = won ? 3 : 2;
-        g.strokeRect(x + 1.5, ry + 1.5, w - 3, rh - 3);
-        const size = stFit(g, nm || "TBD", w - 48 - 70, Math.round(rh * 0.5), 900);
+        g.strokeRect(cx + 1.5, ry + 1.5, cw - 3, rh - 3);
+        const size = stFit(g, nm || "TBD", cw - 48 - 70, Math.round(rh * 0.5), 900);
         g.font = `italic 900 ${size}px Archivo, sans-serif`;
         g.fillStyle = nm ? (won ? "#F2F2F2" : "#8A8A8A") : "#5A5A5A";
-        g.fillText(nm || "TBD", x + 24, ry + rh / 2 + size * 0.34);
+        g.fillText(nm || "TBD", cx + 24, ry + rh / 2 + size * 0.34);
         if (sc) {
           g.font = `700 ${Math.round(rh * 0.42)}px "JetBrains Mono", monospace`;
           g.fillStyle = won ? "#C6FF00" : "#6E6E6E";
-          g.fillText(sc, x + w - 24 - g.measureText(sc).width, ry + rh / 2 + rh * 0.15);
+          g.fillText(sc, cx + cw - 24 - g.measureText(sc).width, ry + rh / 2 + rh * 0.15);
         }
       });
-      cy += th + RGAP;
+      cy += rowH + RGAP;
     });
     cy += SGAP - RGAP;
+    // The chevron between rounds. Small, dim, and pointing the way the tree
+    // goes — enough to say "and then", not enough to compete with a name.
+    if (ci < cols.length - 1) {
+      const mx = x + w / 2, my = cy - SGAP / 2 - 2, s = 13;
+      g.strokeStyle = "rgba(198,255,0,.45)"; g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(mx - s, my - s / 2); g.lineTo(mx, my + s / 2); g.lineTo(mx + s, my - s / 2);
+      g.stroke();
+    }
   });
+
+  // ── champions ──
+  if (champ) {
+    const by = top + rowsH + CGAP, bh = CH;
+    g.fillStyle = "rgba(198,255,0,.08)";
+    g.fillRect(x, by, w, bh);
+    g.strokeStyle = "#C6FF00"; g.lineWidth = 3;
+    g.strokeRect(x + 1.5, by + 1.5, w - 3, bh - 3);
+    g.font = '700 19px "JetBrains Mono", monospace';
+    g.fillStyle = "#C6FF00";
+    {
+      let tx = x + 28;
+      for (const ch of "CHAMPIONS") { g.fillText(ch, tx, by + 44); tx += g.measureText(ch).width + 4; }
+    }
+    const size = stFit(g, champ, w - 56, 70, 900);
+    g.font = `italic 900 ${size}px Archivo, sans-serif`;
+    g.fillStyle = "#F2F2F2";
+    g.fillText(champ, x + 28, by + bh - 34);
+  }
 }
 
 async function drawGroupCard(kind, d) {
