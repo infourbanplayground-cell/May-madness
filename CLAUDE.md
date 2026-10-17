@@ -335,6 +335,24 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     again — so there is no trade here, only a rule that was missing.
   - Extending the night afterwards does NOT re-pair the round that was the
     decider when it was dealt, exactly as it does not un-double it.
+- **The table is ON THE BOARD**, under the courts, as it stands after the round
+  on screen — scroll back to round 3 and you get round 3's, the same convention
+  the ladder above it already uses. Built with `calcStandings`, never
+  re-derived: a board that can disagree with the Standings screen is worse than
+  one that makes you switch tabs. Whoever is resting the round on screen is
+  dimmed, so the rester is findable without reading all thirteen rows.
+- **`isEvenSchedule` must ask the ENGINE, not assume.** It returned `true`
+  unconditionally for UPRISING on the grounds that "nobody ever sits out" —
+  which is only so when the field is a multiple of four. At 13 players on 3
+  courts one rests every round, `upStandings` ranks on points per round, and
+  the screen printed raw totals beside that order: **rank 2 showed 38 points
+  sitting above a rank 3 showing 40**, with nothing on screen to explain it.
+  It now returns `!upUneven(t)`, which is the engine's own answer.
+  - The warning line quotes `r.played` for UPRISING, not `scheduledMatchCounts`
+    — that counts every appearance on a court INCLUDING the shuffle, so it
+    would have printed "10-11 matches" under a table built from 9-10.
+  - Checked in a browser both ways: 16 on 4 courts shows raw totals and no
+    warning, 13 on 3 shows the average with the total in brackets.
 - **A corrected score does NOT re-deal the round already on the board.** The
   app deals the next round the instant the last score is locked, so fixing a
   typo in a finished round leaves the next round dealt from the wrong result.

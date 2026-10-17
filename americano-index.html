@@ -1803,9 +1803,16 @@ function scheduledMatchCounts(t) {
 // 4 courts over 6 rounds, where the least-played group never won at all), while
 // the per-match average brings every group back to roughly its fair share.
 function isEvenSchedule(t) {
-  // UPRISING is always even — nobody ever sits out — and its table is ranked on
-  // court-weighted points, so the points-per-match fallback must never kick in.
-  if (t && t.format === "uprising") return true;
+  // UPRISING does NOT always come out even. Nobody sits out only when the field
+  // is a multiple of four; 13 players on 3 courts rests one EVERY round, and
+  // then upStandings ranks on points per round played — the engine decides
+  // that, in upUneven, and this has to ask it.
+  //
+  // It returned true unconditionally, which meant the table was SORTED by the
+  // average while the screen PRINTED the raw total: on a 13-player night rank 2
+  // showed 38 points sitting above a rank 3 showing 40, with nothing on screen
+  // to explain it. The engine was right and the screen was lying about it.
+  if (t && t.format === "uprising") return !upUneven(t);
   const v = Object.values(scheduledMatchCounts(t));
   return v.length === 0 || Math.max(...v) === Math.min(...v);
 }
@@ -2294,6 +2301,7 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
 // ── live board ──────────────────────────────────────────────────
 function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, editing, setEditing,
                  onCommit, onFinish, onOpenCourts, onOpenRounds, onOpenJoin, onAbandon }) {
+  const [tableOpen, setTableOpen] = useState(true);
   const isUp = t.format === "uprising";
   const ri = Math.min(roundIdx, t.rounds.length - 1);
   const round = t.rounds[ri];
@@ -2318,6 +2326,19 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
   // appear, or the first person to win one will ask why their eight points
   // never arrived.
   const isShuffle = isUp && !upScoringRound(t, round.roundNum);
+
+  // The table AS IT STANDS AFTER the round on screen — the same convention the
+  // ladder above already uses. On the live round that is the live table; scroll
+  // back to round 3 and you get round 3's, which is the only answer that does
+  // not contradict the courts you are looking at.
+  //
+  // Built with calcStandings, not re-derived here. A board that can disagree
+  // with the Standings screen is worse than one that makes you switch tabs.
+  const boardTable = calcStandings({ ...t, rounds: t.rounds.slice(0, ri + 1) }, byId);
+  // When the schedule cannot give everyone the same number of matches the
+  // table ranks on points per MATCH, and the number shown has to say so —
+  // otherwise the leader appears to have fewer points than someone below them.
+  const boardByAvg = !isEvenSchedule(t);
 
   return (
     <div className="screen">
@@ -2588,6 +2609,65 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
         })}
       </div>
 
+      {/* THE TABLE, on the board. Everyone asks "where am I?" between rounds
+          and the answer was a tab away, which on a scoring phone means losing
+          the round you were entering. It sits UNDER the courts: entering the
+          score is the job, the table is the context. */}
+      {boardTable.length > 0 && (
+        <div className="hair">
+          <div className="label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>{ri === t.rounds.length - 1 ? "Standings" : `Standings after round ${round.roundNum}`}</span>
+            <button className="btn small" onClick={() => setTableOpen(o => !o)}>
+              {tableOpen ? "Hide" : "Show"}
+            </button>
+          </div>
+          {tableOpen && (
+            <Fragment>
+              {boardByAvg && (
+                <div className="note" style={{ marginTop: 10, color: "var(--muted)" }}>
+                  Not everyone plays the same number of matches, so this ranks on
+                  {" "}<b style={{ color: "var(--cream)" }}>points per match</b>. The total is in brackets.
+                </div>
+              )}
+              <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 2 }}>
+                {boardTable.map((r, i) => {
+                  // Anyone on court in the round being looked at is lit, so the
+                  // four names in front of you are findable without reading all
+                  // thirteen rows.
+                  const onCourt = (round.courts || []).some(m =>
+                    [...(m.team1 || []), ...(m.team2 || [])].includes(r.id));
+                  return (
+                    <div key={r.id} style={{
+                      display: "flex", alignItems: "center", gap: 10, padding: "7px 2px",
+                      borderBottom: i === boardTable.length - 1 ? "none" : "1px solid rgba(255,255,255,.05)",
+                      opacity: onCourt ? 1 : .55,
+                    }}>
+                      <span className="mono" style={{ width: 22, textAlign: "right", color: "var(--muted)", fontSize: 12 }}>
+                        {i + 1}
+                      </span>
+                      <span style={{ flex: 1, fontWeight: onCourt ? 700 : 500, fontSize: 14 }}>
+                        {r.name}
+                      </span>
+                      {isUp && r.court != null && (
+                        <span className="mono" style={{ fontSize: 11, color: "var(--muted)" }}>C{r.court}</span>
+                      )}
+                      <span className="mono" style={{ fontSize: 14, color: "var(--volt)", minWidth: 42, textAlign: "right" }}>
+                        {boardByAvg ? r.avg.toFixed(1) : r.points}
+                      </span>
+                      {boardByAvg && (
+                        <span className="mono" style={{ fontSize: 11, color: "var(--muted)", minWidth: 30, textAlign: "right" }}>
+                          ({r.points})
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </Fragment>
+          )}
+        </div>
+      )}
+
       {canFinish && <button className="btn" onClick={onFinish}>Finish session 🏆</button>}
 
       {/* A session with unscored matches can never be finished, so without this
@@ -2613,7 +2693,10 @@ function Standings({ t, byId, onPodium, onReceipt }) {
   );
   const table = calcStandings(t, byId);
   const byAvg = !isEvenSchedule(t);
-  const counts = Object.values(scheduledMatchCounts(t));
+  // scheduledMatchCounts counts every appearance on a court, which for UPRISING
+  // includes the shuffle — court time, not the matches the table is built from.
+  // Quoting it here would print "10-11 matches" under a table ranking 9-10.
+  const counts = isUp ? table.map(r => r.played) : Object.values(scheduledMatchCounts(t));
   return (
     <div className="screen">
       <div>
