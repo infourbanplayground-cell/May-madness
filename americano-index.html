@@ -597,6 +597,23 @@
 
 const { useState, useEffect, useMemo, useRef, Fragment } = React;
 
+// The token is `role.exp.sig`, exp in seconds — readable here without asking
+// the server anything. Anything that has passed its exp is not a session, and
+// the role stored beside it is not a permission.
+function tokenExp(tok) {
+  const parts = String(tok || "").split(".");
+  const n = parts.length >= 2 ? Number(parts[1]) : 0;
+  return Number.isFinite(n) && n > 0 ? n * 1000 : 0;
+}
+function liveToken() {
+  const tok = LS.get("am-token");
+  if (tok && tokenExp(tok) > Date.now()) return tok;
+  // Expired or malformed: clear BOTH, so nothing downstream can read a role
+  // the server will not honour.
+  if (tok || LS.get("am-role")) { LS.set("am-token", ""); LS.set("am-role", ""); }
+  return "";
+}
+
 // ── storage / small helpers ──────────────────────────────────────
 const LS = {
   get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } },
@@ -3154,8 +3171,13 @@ function History({ tournaments, byId, onOpen }) {
 function App() {
   const [data, setData] = useState({ players: [], guests: [], tournaments: [] });
   const [loaded, setLoaded] = useState(false);
-  const [role, setRole] = useState(LS.get("am-role"));
-  const [token, setTokenState] = useState(LS.get("am-token"));
+  // THE ROLE MUST NOT OUTLIVE THE TOKEN. This is the root cause of 17 Oct:
+  // the token is `role.exp.sig` and dies on a timer, while am-role sat in
+  // local storage forever — so the app showed a fully editable board to a
+  // scorer whose every save came back 401. The exp is in the token in plain
+  // text, so this needs no network call and no new endpoint.
+  const [role, setRole] = useState(liveToken() ? LS.get("am-role") : "");
+  const [token, setTokenState] = useState(liveToken());
   const [view, setView] = useState("board");
   const [modal, setModal] = useState(null);
   const [pin, setPin] = useState("");

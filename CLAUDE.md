@@ -382,6 +382,29 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - Replayed headlessly end to end: stale token -> banner + mirror, refresh ->
     restore offered, restore -> night back, PIN -> banner clears and pending
     clears; and a local copy BEHIND the server is correctly not offered.
+- **THE ROOT CAUSE WAS A ROLE THAT OUTLIVED ITS TOKEN.** `TOKEN_TTL` was
+  **12 hours** while `am-role` in local storage had no expiry at all, so any
+  scorer who signed in more than half a day before a night — Friday setup for
+  a Saturday night — opened a fully editable board holding a dead token. It
+  was not a fluke; it would have happened every week.
+  - The token is `role.exp.sig` with exp in plain seconds, so the app reads it
+    locally — no network call, no new endpoint. `liveToken()` clears **both**
+    the token and the role once exp has passed, and the role is seeded from it,
+    so the UI can no longer claim a permission the server will not honour.
+  - `TOKEN_TTL` is now **30 days** (`ops/raise-americano-token-ttl.py`, backup
+    at `/root/api.js.bak-*`), which spans a month of Saturdays. The PIN is a
+    shared club code on a scoring phone, not a bank credential; a phone that
+    stays signed in is the point.
+  - Checked both ways in a browser: a token two days past exp signs out and
+    cannot score, a 30-day token stays signed in.
+- **The logout trap, for anyone on an old build.** The logo only opens the
+  login when it thinks you are signed OUT, so a stale role made the PIN
+  unreachable — the only way in was to tap the role pill in the header to log
+  out first, then the logo. The banner opens the sheet directly now.
+- **`americano_state` has NO history table**, unlike `aa_*`, `ss_*` and `bo_*`
+  which all carry `*_state_history` and `*_recovery_dumps`. A successful save
+  can still overwrite a good one with no undo, and two phones scoring at once
+  is last-write-wins. Not addressed.
 - **Do not deploy while a night is being played.** The 17 Oct build went out at
   18:51, mid-session. It did not cause the 401s and cannot reload an already
   open page, but shipping into a live night is how a bad build would.
