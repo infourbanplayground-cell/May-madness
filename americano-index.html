@@ -3176,11 +3176,58 @@ function App() {
   const [historyId, setHistoryId] = useState(null);
   const [podiumId, setPodiumId] = useState(null);
   const saveTimer = useRef(null);
+  // The save used to be fire-and-forget: `.catch(() => {})`, and no look at
+  // res.ok at all. On 17 Oct 2026 a scoring phone kept a stale role in local
+  // storage but no valid token, so the UI stayed fully editable while every
+  // POST /save came back 401 — 32 of them over an hour and three quarters,
+  // all silent. The night existed only in this page's memory, and the first
+  // refresh replaced it with the server's copy from a week earlier.
+  const [saveErr, setSaveErr] = useState(null);   // {status, at} or null
+  const [restorable, setRestorable] = useState(null);
+  const dataRef = useRef(null);
+  const retryRef = useRef(null);
+
+  useEffect(() => { dataRef.current = data; }, [data]);
+
+  // A failed save retries on its own. The API was down for thirteen minutes on
+  // 17 Oct while the box rebooted; with this, that heals by itself instead of
+  // silently dropping every round played in the window. A 401 is NOT retried —
+  // the token is the problem and only the PIN fixes it.
+  useEffect(() => {
+    clearInterval(retryRef.current);
+    if (!saveErr || saveErr.status === 401) return;
+    retryRef.current = setInterval(() => {
+      if (dataRef.current) sendSave(dataRef.current);
+    }, 15000);
+    return () => clearInterval(retryRef.current);
+  }, [saveErr]);
 
   useEffect(() => {
     fetch("/state").then(r => r.json()).then(r => {
       if (r && r.ok) setData(d => ({ players: [], guests: [], tournaments: [], ...r.state }));
       setLoaded(true);
+      // Is there work on THIS device that never reached the server? Offered,
+      // not applied: another phone may have saved good scores since, and
+      // silently restoring over them would turn one lost night into two.
+      try {
+        if (LS.get("am-pending") === "1") {
+          const local = JSON.parse(LS.get("am-state") || "null");
+          const at = Number(LS.get("am-state-at") || 0);
+          const mine = (local && local.tournaments) || [];
+          const theirs = (r && r.ok && r.state && r.state.tournaments) || [];
+          // How much PLAY a state records. Counting rounds is not enough: a
+          // night where six scores were entered and no new round was dealt has
+          // exactly as many rounds as the server's copy, and that is the most
+          // common way to lose work. Scored matches is the thing that grows
+          // with every lock, so it is what gets compared.
+          const weight = ts => ts.reduce((n, t) => n + (t.rounds || []).reduce(
+            (m, r) => m + (r.courts || []).filter(c => c && c.score1 != null && c.score2 != null).length, 0), 0)
+            + ts.length;
+          if (mine.length && weight(mine) > weight(theirs)) {
+            setRestorable({ state: local, at });
+          }
+        }
+      } catch (e) {}
     }).catch(() => setLoaded(true));
   }, []);
 
@@ -3217,16 +3264,38 @@ function App() {
     if (!showNav && view !== "board") setView("board");
   }, [showNav, view]);
 
+  // The local mirror. Written on EVERY change, before the network is involved,
+  // so a refresh, a crash or a dead battery costs nothing the server has not
+  // got. `am-pending` is the claim that this copy is ahead of the server; a
+  // successful save is the only thing that clears it, which is what stops a
+  // stale copy on one phone resurrecting itself over another phone's good work.
+  function mirror(next) {
+    try {
+      LS.set("am-state", JSON.stringify(next));
+      LS.set("am-state-at", String(Date.now()));
+      LS.set("am-pending", "1");
+    } catch (e) { /* quota, private mode — the save is still the real path */ }
+  }
+
+  function sendSave(next) {
+    return fetch("/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + LS.get("am-token") },
+      body: JSON.stringify({ state: next })
+    }).then(r => {
+      if (r.ok) { setSaveErr(null); LS.set("am-pending", ""); return true; }
+      // 401 is the one that matters: the token is gone or expired, and no
+      // amount of retrying fixes it. Everything else is worth retrying.
+      setSaveErr({ status: r.status, at: Date.now() });
+      return false;
+    }).catch(() => { setSaveErr({ status: 0, at: Date.now() }); return false; });
+  }
+
   function persist(next) {
     setData(next);
+    mirror(next);
     clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => {
-      fetch("/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: "Bearer " + LS.get("am-token") },
-        body: JSON.stringify({ state: next })
-      }).catch(() => {});
-    }, 400);
+    saveTimer.current = setTimeout(() => sendSave(next), 400);
   }
   const saveT = nextT => persist({ ...data, tournaments: tournaments.map(x => x.id === nextT.id ? nextT : x) });
 
@@ -3367,6 +3436,10 @@ function App() {
         if (r && r.ok) {
           LS.set("am-token", r.token); LS.set("am-role", r.role);
           setTokenState(r.token); setRole(r.role); setModal(null); setLoginErr(false); setPin("");
+          // Signing in is exactly the moment the stuck save can go. Without
+          // this the banner stays red until the next score is entered, and a
+          // night that ends right after signing in never saves at all.
+          if (dataRef.current) sendSave(dataRef.current);
         } else setLoginErr(true);
       }).catch(() => setLoginErr(true));
   }
@@ -3421,8 +3494,48 @@ function App() {
     ? active.name.replace(new RegExp("^" + headerName + "\\s+", "i"), "")
     : (canEdit ? "Ready to set up" : UP_NEXT.cadence);
 
+  const savedAgo = saveErr ? Math.max(0, Math.round((Date.now() - saveErr.at) / 60000)) : 0;
+
   return (
     <Fragment>
+      {/* NOT SAVING. The whole point is that this cannot be missed and cannot
+          be dismissed — the failure it replaces was a swallowed promise that
+          let two hours of scoring look completely normal. It sits above the
+          header so it is on every screen, not just the board. */}
+      {saveErr && (
+        <div role="alert" onClick={() => { if (saveErr.status === 401) { setModal("login"); setPin(""); setLoginErr(false); } }}
+          // STICKY, above the sticky header. Left in normal flow it scrolls
+          // away the moment the scorer moves down to a court — which is where
+          // they spend the whole night, so the one warning that matters would
+          // be off screen exactly when it is needed. Caught in a screenshot,
+          // not by reading it: the DOM check passed while the banner sat above
+          // the fold.
+          style={{ background: "var(--warn)", color: "#0B0B0F", padding: "12px 16px",
+                   fontWeight: 800, fontSize: 13, letterSpacing: ".04em", lineHeight: 1.35,
+                   position: "sticky", top: 0, zIndex: 60,
+                   cursor: saveErr.status === 401 ? "pointer" : "default" }}>
+          {saveErr.status === 401
+            ? "NOT SAVING — you are signed out. Tap here and enter the PIN. Nothing is lost; this device is holding tonight."
+            : `NOT SAVING — the server did not take the last change${savedAgo ? ` (${savedAgo} min ago)` : ""}. Still trying. This device is holding tonight, so keep scoring.`}
+        </div>
+      )}
+
+      {/* Work this device did that never reached the server. Offered rather
+          than applied: another phone may have saved since, and restoring over
+          that would turn one lost night into two. */}
+      {restorable && (
+        <div style={{ background: "var(--volt)", color: "#0B0B0F", padding: "12px 16px", fontSize: 13, lineHeight: 1.4,
+                      position: "sticky", top: 0, zIndex: 59 }}>
+          <b>This device has a session the server never got.</b>{" "}
+          {restorable.at ? new Date(restorable.at).toLocaleString() : ""}
+          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+            <button className="btn small" style={{ background: "#0B0B0F", color: "var(--volt)" }}
+              onClick={() => { persist(restorable.state); setRestorable(null); }}>Restore it</button>
+            <button className="btn small" style={{ background: "transparent", color: "#0B0B0F", borderColor: "#0B0B0F" }}
+              onClick={() => { LS.set("am-pending", ""); setRestorable(null); }}>Discard</button>
+          </div>
+        </div>
+      )}
       <header className="top">
         {/* The login is BEHIND THE MARK. Players outnumber scorers forty to
             one and a LOGIN button in the corner invites every one of them to

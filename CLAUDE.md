@@ -353,6 +353,38 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     would have printed "10-11 matches" under a table built from 9-10.
   - Checked in a browser both ways: 16 on 4 courts shows raw totals and no
     warning, 13 on 3 shows the average with the total in brackets.
+- **THE NIGHT OF 17 OCT 2026 WAS LOST, AND THE SAVE WAS SILENT.** 32 POST
+  /save, 17:55 to 19:37, **every one a 401**, no login all day, and
+  `americano_state.updated_at` still reading 10 Oct. The phone kept a stale
+  `am-role` in local storage but no valid token, so the UI stayed fully
+  editable while nothing reached the server; the app held the night only in
+  React state and the first refresh replaced it with the week-old server copy.
+  The cause was one line: `}).catch(() => {});` — no `res.ok`, no status, a
+  rejected save indistinguishable from a successful one.
+  - **`persist` mirrors to localStorage BEFORE the network**, under `am-state`,
+    with `am-pending` as the claim that this device is ahead. Only a successful
+    save clears it. On load, if pending is set and the local copy records MORE
+    SCORED MATCHES than the server's, the app offers to restore it — offered,
+    never applied, because another phone may have saved since and silently
+    overwriting that turns one lost night into two. Counting rounds is not
+    enough: six scores locked without a new round is the commonest way to lose
+    work and leaves the round count identical.
+  - **A failed save raises a banner that cannot be missed or dismissed**, and
+    it is `position: sticky; top: 0` ABOVE the sticky header. In normal flow it
+    scrolled away the moment the scorer moved down to a court, which is where
+    they spend the whole night — the DOM assertion passed while the banner sat
+    above the fold, and only a screenshot showed it.
+  - **A 401 is not retried** — the token is the problem and only the PIN fixes
+    it, so the banner opens the login sheet. Everything else retries every 15s,
+    which is what the 13-minute reboot that night needed.
+  - **Signing in flushes immediately.** Without it the banner stays red until
+    the next score, and a night that ends just after signing in never saves.
+  - Replayed headlessly end to end: stale token -> banner + mirror, refresh ->
+    restore offered, restore -> night back, PIN -> banner clears and pending
+    clears; and a local copy BEHIND the server is correctly not offered.
+- **Do not deploy while a night is being played.** The 17 Oct build went out at
+  18:51, mid-session. It did not cause the 401s and cannot reload an already
+  open page, but shipping into a live night is how a bad build would.
 - **A corrected score does NOT re-deal the round already on the board.** The
   app deals the next round the instant the last score is locked, so fixing a
   typo in a finished round leaves the next round dealt from the wrong result.
