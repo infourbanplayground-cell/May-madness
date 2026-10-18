@@ -1216,6 +1216,38 @@ function upBuildRound(night) {
   return out;
 }
 
+// ── re-dealing after a correction ──────────────────────────────────────────
+//
+// A score corrected in a round that is already finished changes who should be
+// on which court in every round after it. The app deals the next round the
+// instant the last score of a round is locked, so by the time a typo is
+// noticed the wrong round is already on the board — and it stayed there.
+//
+// It bit the first UPRISING live: round 3's Court 1 was entered 10-11 and
+// corrected to 11-10, and round 4 kept the losers on Court 1 and sent the
+// winners down. It had to be repaired by hand against the database.
+//
+// Every round after `fromIdx` with NO scores in it is re-dealt from the
+// corrected history. A round with so much as one score is history and is left
+// alone — the same rule the mid-night court change uses. A correction
+// therefore cannot reach back into matches people have already played, which
+// is right: those happened, whatever the sheet says now.
+function upRedealFrom(night, fromIdx) {
+  const rounds = (night.rounds || []).slice();
+  const scored = r => (r.courts || []).some(m => m.score1 != null || m.score2 != null);
+  for (let i = Math.max(0, fromIdx + 1); i < rounds.length; i++) {
+    if (scored(rounds[i])) continue;
+    let next;
+    try { next = upBuildRound({ ...night, rounds: rounds.slice(0, i) }); }
+    catch (e) { break; }   // the round before it is unfinished; nothing to deal from
+    // A doubling already stamped onto this round is a fact about the night's
+    // length, not about who is playing, so it survives the re-deal.
+    if (rounds[i] && rounds[i].doubled !== undefined) next.doubled = rounds[i].doubled;
+    rounds[i] = next;
+  }
+  return rounds;
+}
+
 // ── standings ──────────────────────────────────────────────────────────────
 
 function upPlayerIds(night) {
@@ -3424,11 +3456,15 @@ function App() {
       ...r, courts: r.courts.map((mm, j) => j !== mi ? mm : { ...mm, score1: s1, score2: s2 })
     });
     if (active.format === "uprising") {
-      // The ladder has moved, so the next round can now be drawn. Built only
-      // when the LAST round on the board is complete: editing a score in an
-      // earlier round must not append a duplicate round behind the scorer's
-      // back, and later rounds are left alone because re-pairing them would
-      // rewrite matches people have already played.
+      // A CORRECTION to a round that is already finished moves the ladder, and
+      // the round after it is usually already on the board — dealt from the
+      // wrong result. upRedealFrom re-deals every later round that has nothing
+      // scored in it; one with so much as a single score is history and is
+      // left alone, because those matches were played.
+      rounds = upRedealFrom({ ...active, rounds }, ri);
+      // And the next round can now be drawn. Built only when the LAST round on
+      // the board is complete, so editing an earlier score cannot append a
+      // duplicate round behind the scorer's back.
       const nextT = { ...active, rounds };
       if (upRoundDone(rounds[rounds.length - 1]) && rounds.length < upRoundsTotal(active)) {
         try { rounds = [...rounds, upBuildRound(nextT)]; }

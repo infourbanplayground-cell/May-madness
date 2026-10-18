@@ -5,7 +5,7 @@ const E = require("./uprising-engine.js");
 const {
   UP, upSeedLadder, upPairCourt, upRoundPoints, upRoundDone, upCourtsAfter,
   upCurrentCourts, upBuildRound, upTotals, upStandings, upPrizes, upClimbPath,
-  upValidate, upPairKey,
+  upValidate, upPairKey, upRedealFrom,
   upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
   upScoringRound, upScoringRounds, upPlanRounds, upNightMinutes, upRoundMinutes,
   upFinisher,
@@ -164,6 +164,57 @@ test("a whole night never pairs the top two of a court in the last round", () =>
         `${n} players: court ${m.court}'s top two are partners in the last round`);
     });
   }
+});
+
+test("a corrected score re-deals the round already on the board", () => {
+  // The first UPRISING, to the shape: a round finishes, the next is dealt from
+  // it, and only then is the score found to be the wrong way round.
+  const night = newNight(12, {}, 0);
+  night.courtCount = 3; night.numRounds = 8;
+  for (let r = 0; r < 3; r++) playRound(night, () => true);     // team1 wins everywhere
+  const dealt = upBuildRound(night);
+  night.rounds.push(dealt);                                      // on the board, unscored
+  const before = JSON.stringify(dealt.courts.map(m => [m.team1, m.team2]));
+
+  // flip court 1 of the round just finished
+  const c1 = night.rounds[2].courts.find(m => m.court === 1);
+  [c1.score1, c1.score2] = [c1.score2, c1.score1];
+
+  const rounds = upRedealFrom(night, 2);
+  const after = JSON.stringify(rounds[3].courts.map(m => [m.team1, m.team2]));
+  assert.notEqual(after, before, "the next round was not re-dealt after the correction");
+
+  // and it must now agree with what the engine says the ladder is
+  const want = upCurrentCourts({ ...night, rounds: rounds.slice(0, 3) });
+  rounds[3].courts.forEach(m => [...m.team1, ...m.team2].forEach(p =>
+    assert.equal(want[p], m.court, `${p} is on court ${m.court}, ladder says ${want[p]}`)));
+  assert.equal(rounds.length, 4, "re-dealing must not add or drop a round");
+});
+
+test("a re-deal never touches a round that has been played", () => {
+  const night = newNight(12, {}, 0);
+  night.courtCount = 3; night.numRounds = 8;
+  for (let r = 0; r < 4; r++) playRound(night, () => true);
+  const played = JSON.stringify(night.rounds.slice(0, 4));
+  const c1 = night.rounds[1].courts.find(m => m.court === 1);
+  [c1.score1, c1.score2] = [c1.score2, c1.score1];
+  const rounds = upRedealFrom(night, 1);
+  // rounds 3 and 4 carry scores, so they are history and stay exactly as they were
+  assert.equal(JSON.stringify(rounds.slice(2, 4)), JSON.stringify(night.rounds.slice(2, 4)),
+    "a played round was re-dealt");
+  assert.equal(rounds.length, 4);
+});
+
+test("re-dealing keeps a doubling already stamped on the round", () => {
+  const night = newNight(12, {}, 0);
+  night.courtCount = 3; night.numRounds = 4;
+  for (let r = 0; r < 3; r++) playRound(night, () => true);
+  const last = upBuildRound(night); last.doubled = true;
+  night.rounds.push(last);
+  const c1 = night.rounds[2].courts.find(m => m.court === 1);
+  [c1.score1, c1.score2] = [c1.score2, c1.score1];
+  const rounds = upRedealFrom(night, 2);
+  assert.equal(rounds[3].doubled, true, "the doubling was lost in the re-deal");
 });
 
 test("refuses a court that is not four players", () => {

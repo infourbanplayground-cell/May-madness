@@ -569,6 +569,38 @@ function upBuildRound(night) {
   return out;
 }
 
+// ── re-dealing after a correction ──────────────────────────────────────────
+//
+// A score corrected in a round that is already finished changes who should be
+// on which court in every round after it. The app deals the next round the
+// instant the last score of a round is locked, so by the time a typo is
+// noticed the wrong round is already on the board — and it stayed there.
+//
+// It bit the first UPRISING live: round 3's Court 1 was entered 10-11 and
+// corrected to 11-10, and round 4 kept the losers on Court 1 and sent the
+// winners down. It had to be repaired by hand against the database.
+//
+// Every round after `fromIdx` with NO scores in it is re-dealt from the
+// corrected history. A round with so much as one score is history and is left
+// alone — the same rule the mid-night court change uses. A correction
+// therefore cannot reach back into matches people have already played, which
+// is right: those happened, whatever the sheet says now.
+function upRedealFrom(night, fromIdx) {
+  const rounds = (night.rounds || []).slice();
+  const scored = r => (r.courts || []).some(m => m.score1 != null || m.score2 != null);
+  for (let i = Math.max(0, fromIdx + 1); i < rounds.length; i++) {
+    if (scored(rounds[i])) continue;
+    let next;
+    try { next = upBuildRound({ ...night, rounds: rounds.slice(0, i) }); }
+    catch (e) { break; }   // the round before it is unfinished; nothing to deal from
+    // A doubling already stamped onto this round is a fact about the night's
+    // length, not about who is playing, so it survives the re-deal.
+    if (rounds[i] && rounds[i].doubled !== undefined) next.doubled = rounds[i].doubled;
+    rounds[i] = next;
+  }
+  return rounds;
+}
+
 // ── standings ──────────────────────────────────────────────────────────────
 
 function upPlayerIds(night) {
@@ -935,7 +967,7 @@ function upValidate(night) {
 if (typeof module !== "undefined" && module.exports) {
   module.exports = {
     UP, upPlayerIds, upSeedLadder, upPairCourt, upRoundPoints, upMatchDone, upRoundDone,
-    upCourtsAfter, upCurrentCourts, upSeenPairs, upPairLastUsed, upBuildRound, upTotals,
+    upCourtsAfter, upCurrentCourts, upSeenPairs, upPairLastUsed, upBuildRound, upRedealFrom, upTotals,
     upStandings, upPrizes, upClimbPath, upValidate, upPairKey, upFinisher,
     upCourts, upRoundsTotal, upRestCount, upFairRounds, upDoubleFinal, upReceipt,
     upScoringRound, upScoringRounds,

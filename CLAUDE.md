@@ -408,16 +408,23 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - **Do not deploy while a night is being played.** The 17 Oct build went out at
   18:51, mid-session. It did not cause the 401s and cannot reload an already
   open page, but shipping into a live night is how a bad build would.
-- **A corrected score does NOT re-deal the round already on the board.** The
-  app deals the next round the instant the last score is locked, so fixing a
-  typo in a finished round leaves the next round dealt from the wrong result.
-  It bit the first UPRISING live: round 3's Court 1 was entered 10-11 and
-  corrected to 11-10, and round 4 kept the losers on Court 1 and sent the
-  winners down. Only a court-count change re-deals (and only a round with no
-  scores in it). Until that is fixed, re-deal by hand: rebuild the round with
-  `upBuildRound` on the corrected state and write it into `americano_state`,
-  refusing unless the round still has no scores and the earlier rounds are
-  unchanged.
+- **A corrected score RE-DEALS the rounds after it** (`upRedealFrom`). The app
+  deals the next round the instant the last score of a round is locked, so by
+  the time a typo is spotted the wrong round is already on the board. It used
+  to stay there: the first UPRISING entered round 3's Court 1 as 10-11,
+  corrected it to 11-10, and round 4 kept the losers on Court 1 and sent the
+  winners down — repaired by hand against the database. It bit again on 17 Oct.
+  - Every round after the corrected one with **nothing scored in it** is
+    re-dealt from the corrected history. A round with so much as one score is
+    history and is left alone — the same rule the mid-night court change uses.
+    A correction cannot reach back into matches people have already played,
+    which is right: those happened.
+  - A doubling already stamped onto a re-dealt round survives it. The stamp is
+    a fact about the night's length, not about who is playing.
+  - Three unit tests, proved to fail against the old behaviour by making
+    `upRedealFrom` a no-op, plus the correction driven through the real score
+    pad in a browser: round 4 re-dealt, rounds 1-3 untouched, the new round
+    agreeing with `upCurrentCourts` player for player.
 - **Margin is for the shuffle and nothing else.** Scoring stays flat 8/6/4/2 and
   ignores the score; pairing within a court still ranks on running court-points.
   Measured over 104,000 courts, ranking the pairing on point difference instead
