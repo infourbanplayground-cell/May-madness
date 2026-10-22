@@ -15,7 +15,11 @@ export function proxy(request: NextRequest) {
     pathname.startsWith('/api/auth/') ||
     // Booking without an account. Guarded inside the route by phone
     // validation, a per-number cap and a per-IP burst limit.
-    pathname === '/api/bookings/public'
+    pathname === '/api/bookings/public' ||
+    // Front-desk board. Guarded by the DESK_TOKEN link token inside the
+    // page and the route, so staff need no password.
+    pathname === '/desk' ||
+    pathname === '/api/desk'
   ) {
     return NextResponse.next()
   }
