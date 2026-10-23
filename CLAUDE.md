@@ -792,6 +792,45 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     but unplayed, semis only, and the longest names the roster can produce.
     `buildGroupCards` and `drawGroupCard` are top-level functions, so a
     Playwright page can call them directly with a state fetched from the API.
+- **The FINAL WEEK film is `build-finalweek-video.py`** — 1080x1920, ~35s, built
+  the same way as the announcement (deterministic `window.__seek(t)`, no CSS
+  animations, synthesized score):
+  ```bash
+  ssh urbanpadel 'curl -s localhost:3009/state' > $SP/bo.json
+  node ops/blackout-standings.mjs $SP/bo.json $SP/bo-standings.json
+  python3 build-finalweek-video.py && python3 build-finalweek-audio.py
+  node record-finalweek-video.mjs
+  ```
+  - **`ops/blackout-standings.mjs` is where every figure comes from.** It lifts
+    `calcPlayerStats` and friends OUT of `blackout-index.html` at run time — the
+    same trick as `make-winner-data.mjs` — and runs the app's own engine over
+    the live state, so the film cannot advertise a total the leaderboard
+    contradicts. The night-by-night race is the engine re-run over the first n
+    sessions, never a running sum of deltas: the streak bonus is not additive
+    and a sum would quietly disagree with the app. It also derives what is
+    still to come from `DOUBLE_FROM_SESSION` and the night list, so "the last
+    two are worth double" is read, not typed.
+  - **It never states what a doubled night is worth in points.** 2X applies to
+    everything except the streak bonus, so "the best night was +33, doubled
+    that is +66" is close and close is how a film ends up contradicting the
+    app. It prints the biggest night actually recorded and lets the reader do
+    the arithmetic.
+  - A race line **starts at the night that player joined**. Drawing a late
+    arrival as a flat line along the axis says they played those nights and
+    scored nothing, which is a different story from the one the table tells —
+    Hassan Salhi was fourth off four nights.
+  - **A `.fit` headline must also be `white-space:nowrap`.** The shrink pass
+    only fires when the text overflows, and a line with a space in it WRAPS
+    instead — so FINAL WEEK sat underneath 3 NIGHTS LEFT and HASSAN SALHI under
+    +64 with every assertion green. The recorder now also fails on **two blocks
+    in a scene overlapping each other**, which is the check that catches it:
+    the existing ones are both about width, and a wrapped line never overflows
+    anything. Tolerance is 14px because a Range box is a line box, not the ink
+    — proved by sabotage, the real bugs overlap by 54 and 94px.
+  - The score has a SHAPE rather than only climbing: it thins out across the
+    chart, where the picture is doing the work, and peaks on the 2X stamp and
+    the dates. The assertions check that shape, not a monotone rise.
+  - Captions are written by the same builder from the same figures.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
