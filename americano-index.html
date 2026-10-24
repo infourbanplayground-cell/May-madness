@@ -1232,6 +1232,22 @@ function upBuildRound(night) {
   // re-pair it, exactly as it does not un-double it.
   const decider = roundNum === N;
 
+  // WITHDRAWN 24 OCT 2026, MID-NIGHT. Seating returners first on the court
+  // they held does stop a rest costing you a court — but it makes somebody
+  // else pay, and on the first live night it picked the worst possible payer.
+  //
+  // Round 4: Court 2 had SIX claims. Khalili and Amjad had rested round 3 and
+  // held it, so they were seated first, and Ahmed Rawas — who had just won
+  // 11-3 on Court 3 — was pushed down instead. His partner Reaf went up. The
+  // rule SPLIT A WINNING PAIR, in front of everybody, against the one promise
+  // the board and every poster makes: win and you go up.
+  //
+  // That is a worse failure than the one it fixed. A returner quietly losing
+  // a court is invisible; a winner denied the climb he just earned is not.
+  // The seats are left computed below but unused — the right rule is probably
+  // that the overflow falls on whoever did NOT just win, which needs
+  // measuring, not a third guess during a live night.
+  //
   // A REST NEVER MOVES YOU — seat the returners first, on the court they held.
   //
   // Whenever anybody rests there are more claims on the seats than seats, and
@@ -1267,7 +1283,7 @@ function upBuildRound(night) {
 
   const out = { roundNum, sitOuts, courts: [] };
   for (let c = 1; c <= C; c++) {
-    const on = seats[c - 1];
+    const on = playing.slice((c - 1) * 4, c * 4);
     const [A, B] = upPairCourt(on, totals, seen, lastUsed, decider);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
     lastUsed.set(upPairKey(...A), roundNum); lastUsed.set(upPairKey(...B), roundNum);

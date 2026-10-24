@@ -451,42 +451,38 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
-- **A REST NEVER MOVES YOU — `upBuildRound` seats returners first.** Whenever
-  anybody rests there are more claims on the seats than seats (14 claims on 12
-  at 14 on 3 courts), so somebody who did not lose a match goes down EVERY
-  round, and the overflow CASCADES: five claims on Court 1 pushes one into
-  Court 2, which makes six there, which pushes one into Court 3. The engine
-  only gets to choose who absorbs it.
-  - Slicing the ladder into fours made it the player who had just rested, every
-    time: they banked nothing while the three they left banked, so they sat
-    lowest in their band. **Demoted on 10.6% of returns**, measured.
-  - **Ranking them HIGH in the band is not the fix** — it stops them absorbing
-    overflow and starts them filling gaps ABOVE, so a rest begins *promoting*
-    people. Both directions are the same pigeonhole. The rule that holds both
-    ways is to exempt them from the re-pack: they keep the court they held and
-    the players who were on court fill in around them.
-  - Six tests, all proved to fail by putting the plain slice back: court
-    unchanged by a rest, rejoins exactly once on a real court, never demoted,
-    never promoted, cannot rest off the bottom court or rest onto Court 1, and
-    **a field where nobody rests is ordered exactly as before** — which is the
-    guard that makes this safe for every night played so far, all of which were
-    12 on 3 with nobody resting.
-  - Clean through `uprising-stress.js` 25,000, `uprising-courtchange.js` 6,000
-    and the fairness sweep (draw and rota 1.00–1.03x everywhere). The stress
-    harness now carries the invariant itself, so every random field, court
-    count, shuffle count and score-edit replay checks it.
-  - **WHERE THE GUARANTEE STOPS.** It is only achievable while the resters
-    cannot themselves over-subscribe a court: five players who all held
-    Court 1 cannot all have one of its four seats, which is the same
-    pigeonhole the rule is about. Swept exhaustively, 8 to 32 players on 2,
-    3 and 4 courts, three shuffle counts and four seeds each:
-    - **exact at 2 courts to 12 players** (4 resting), breaks at 13 (5)
-    - **exact at 3 courts to 18 players** (6 resting), breaks at 19 (7)
-    - **exact at 4 courts to 21 players** (5 resting), breaks at 22 (6)
-    Every night this club can run is inside that — 4 courts and a cap of 16.
-    Above it the returner is treated like anyone else and moves a court; the
-    harness asserts strict equality only up to one court's worth of rest,
-    because past that no guarantee exists to assert.
+- **A REST NEVER MOVES YOU — TRIED, AND WITHDRAWN MID-NIGHT ON 24 OCT 2026.**
+  Whenever anybody rests there are more claims on the seats than seats, so
+  somebody who did not lose a match goes down every round and the overflow
+  cascades. Slicing the ladder into fours made it the player who had just
+  rested, every time — demoted on 10.6% of returns. Seating returners first on
+  the court they held fixed that, passed 79 unit tests proved by sabotage,
+  25,000 stress nights, 6,000 court-change nights and the fairness sweep, and
+  was deployed the afternoon of the first night that would use it.
+  - **It lasted four rounds.** Round 4: Court 2 had SIX claims. Khalili and
+    Amjad had rested round 3 and held it, so they were seated first and
+    **Ahmed Rawas — who had just won 11-3 on Court 3 — was pushed down
+    instead, while his partner Reaf went up.** It split a winning pair, in
+    front of everybody, against the one promise the board and every poster
+    makes: win and you go up.
+  - That is a worse failure than the one it fixed. A returner quietly losing
+    a court is invisible; a winner denied the climb he just earned is not.
+    **Visible correctness beats measured fairness on a social night.**
+  - Reverted and deployed mid-night, and round 4 re-dealt in the database with
+    `fixr4.js` (backup `/root/americano_state-1901.sql`). The round had no
+    scores in it, which is the same rule the app's own re-deal uses.
+  - **Nothing here was caught by any harness**, because every one of them
+    asserts structure — four to a court, nobody twice, points conserved — and
+    this was a question of WHO, which only looks wrong to somebody who knows
+    they just won. The three unit tests and the stress assertion are parked,
+    not deleted: they are the spec for whatever replaces the rule.
+  - **The likely right rule, unmeasured:** the overflow should fall on whoever
+    did NOT just win — protect winners first, then returners, then losers.
+    That needs measuring, not a third guess during a live night.
+  - **THE REAL LESSON: do not ship a scheduling change the afternoon of the
+    night that first exercises it.** The rule against deploying into a live
+    night was followed to the letter and missed the point — the damage was
+    done by a deploy hours earlier, into a field size that had never run.
 - **STILL NOT FIXED, and it is NOT the same thing: resting the first scoring
   round costs you points, not position.** At 14 on 3 over 15 rounds, 20,000
   equal-skill nights, the pair that first rests in round 2 wins the night

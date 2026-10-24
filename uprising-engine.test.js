@@ -1032,7 +1032,11 @@ test("a rester rejoins exactly once, on a real court", () => {
   }
 });
 
-test("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
+// SKIPPED 24 Oct 2026: the rule these assert was withdrawn mid-night after it
+// split a winning pair on the first live night that used it. See the comment in
+// upBuildRound. They are parked, not deleted — they are the spec for whatever
+// replaces it, and they still pass against the withdrawn implementation.
+test.skip("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
   // The one the whole change is for. 14 claims on 12 seats means somebody who
   // did not lose goes down every round — but it must never be the player who
   // was not even on court. Fails against the old raw-points ordering, which
@@ -1053,7 +1057,7 @@ test("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
   assert.ok(checked > 100, `only ${checked} returns checked — the harness is not exercising it`);
 });
 
-test("resting does not promote you either", () => {
+test.skip("resting does not promote you either", () => {
   // The mirror of the rule above: if a rest cannot cost you a court it must
   // not win you one, or resting becomes something to angle for.
   for (const [n, sc, seed] of [[13, 13, 5], [14, 14, 61], [15, 15, 77], [15, 10, 255],
@@ -1067,7 +1071,7 @@ test("resting does not promote you either", () => {
   }
 });
 
-test("a rest is not a way to dodge the bottom court", () => {
+test.skip("a rest is not a way to dodge the bottom court", () => {
   // Same rule stated where it would pay best: resting on the bottom court
   // cannot lift you off it, and resting on Court 1 cannot be used to hold it.
   for (const [n, sc] of [[13, 13], [14, 14], [15, 15]]) {

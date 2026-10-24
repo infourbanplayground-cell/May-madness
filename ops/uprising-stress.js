@@ -83,9 +83,10 @@ function audit(night, cfg, tag) {
     check(seen.size + (r.sitOuts || []).length === ids.length, `round ${r.roundNum}: ${seen.size + (r.sitOuts||[]).length} accounted for, not ${ids.length}`, ctx);
   });
 
-  // A REST NEVER MOVES YOU. The unit tests cover 13, 14 and 15 on 3 courts;
-  // this covers every field, court count, shuffle count and round count the
-  // harness can throw, including the score-edit replays.
+  // A REST NEVER MOVES YOU — WITHDRAWN 24 Oct 2026, mid-night, after it split
+  // a winning pair on the first live night that used it (see upBuildRound).
+  // The walk is kept and the assertion disabled rather than deleted: it is the
+  // spec for whatever replaces the rule, and re-enabling it is one word.
   //
   // Only checked where the court the player held still EXISTS: the court
   // count is fixed at setup here, but upCurrentCourts clamps to the current
@@ -107,7 +108,7 @@ function audit(night, cfg, tag) {
         // from 8 to 32 on 2, 3 and 4 courts. Above that it degrades, and the
         // degradation must stay graceful: one court either way, never a
         // plunge down the ladder.
-        if (R <= 4) {
+        if (false && R <= 4) {   // WITHDRAWN 24 Oct 2026 — see upBuildRound
           check(m.court === held[p],
             `${p} held court ${held[p]}, rested round ${i + 1}, came back on court ${m.court} in round ${j + 1}`, ctx);
         }
