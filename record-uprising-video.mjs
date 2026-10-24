@@ -14,15 +14,20 @@ import fs from 'fs';
 import path from 'path';
 
 const SP = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const SRC = path.join(SP, 'uprising.html');
-const FRAMES = path.join(SP, '_upframes');
-const SILENT = path.join(SP, 'video', 'uprising-silent.mp4');
+// SHORT=1 records the 15-second cut, and records it SILENT. A reel that
+// short is posted with a track chosen in Instagram, from a library that is
+// actually licensed for it — a bed of ours underneath only gets in the way,
+// and nothing in this repo can supply real music.
+const SHORT = !!process.env.SHORT;
+const SRC = path.join(SP, SHORT ? 'uprising-short.html' : 'uprising.html');
+const FRAMES = path.join(SP, SHORT ? '_upsframes' : '_upframes');
+const SILENT = path.join(SP, 'video', SHORT ? 'uprising-tonight.mp4' : 'uprising-silent.mp4');
 const FINAL = path.join(SP, 'video', 'uprising-night.mp4');
-const WAV = path.join(SP, 'video', 'uprising.wav');
+const WAV = SHORT ? '/nonexistent' : path.join(SP, 'video', 'uprising.wav');
 const FFMPEG = '/usr/bin/ffmpeg';
 const FPS = 30, W = 1080, H = 1920;
 
-if (!fs.existsSync(SRC)) { console.error('no page — run: python3 build-uprising-video.py'); process.exit(1); }
+if (!fs.existsSync(SRC)) { console.error(`no page — run: ${SHORT ? 'SHORT=1 ' : ''}python3 build-uprising-video.py`); process.exit(1); }
 if (!fs.existsSync(FFMPEG)) { console.error('need the apt ffmpeg (H.264); the bundled one is VP8-only'); process.exit(1); }
 
 fs.rmSync(FRAMES, { recursive: true, force: true });
@@ -63,11 +68,13 @@ if (pre.imgs.some(ok => !ok)) { console.error(`${pre.imgs.filter(o => !o).length
 // can be measured. The headlines are deliberately multi-line and full-bleed, so
 // their boxes are 1080px wide at every instant and say nothing.
 const widths = await pg.evaluate(() => {
-  window.__seek(29.90);                     // lets the fit pass build the span
+  const o = window.__outro;
+  if (o === undefined) return null;
+  window.__seek(o + 1.70);                  // lets the fit pass build the span
   const el = document.querySelector('#s8u .fitspan');
   if (!el) return null;
   const at = t => { window.__seek(t); return el.getBoundingClientRect().width; };
-  return [at(29.62), at(29.78), at(30.40)];
+  return [at(o + 1.42), at(o + 1.58), at(o + 2.20)];
 });
 if (!widths) { console.error('no .fitspan — the shrink-to-fit pass never ran'); process.exit(1); }
 if (!(widths[2] > widths[0] * 1.08)) {
@@ -227,7 +234,7 @@ if (fs.existsSync(WAV)) {
     '-movflags', '+faststart', FINAL], { stdio: ['ignore', 'ignore', 'inherit'] });
   out = FINAL;
 } else {
-  console.log('  (no audio bed yet — run python3 build-uprising-audio.py, then re-run)');
+  if (!SHORT) console.log('  (no audio bed yet — run python3 build-uprising-audio.py, then re-run)');
 }
 
 const mb = (fs.statSync(out).size / 1024 / 1024).toFixed(1);

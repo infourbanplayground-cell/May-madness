@@ -33,19 +33,37 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SP = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad"
 VID = os.path.join(SP, "video")
 OUT = os.path.join(SP, "uprising.html")
+OUT_SHORT = os.path.join(SP, "uprising-short.html")
 
 W, H = 1080, 1920
 # UPRISING's own palette, not Blackout's. Volt against near-black, with the
 # cream for body type; dim is the only grey.
 VOLT, INK, CREAM, DIM, VOID = "#00F5C8", "#0A0A10", "#F2F0F7", "#6E6B7A", "#06060A"
 
-SCENES = [0.00, 4.00, 8.20, 12.20, 17.40, 20.80, 24.40, 28.20]
-DUR = 32.60
-BEATS = [0.14, 1.05, 4.02, 8.22, 12.22, 14.00, 17.42, 18.90, 20.82, 24.42,
-         28.22, 29.50]
-# The two moments the film is built around: the double final and the cut to
-# the time. Both get a drop in the score.
-HERO = [17.42, 28.22]
+# Two cuts of the same film, as scene tables rather than two builders. ORDER
+# names which scenes are in the cut and in what sequence; SCENES gives each
+# one's start. The short cut keeps the five that carry the night and drops the
+# three that explain it — a 15-second reel is a hook, not a rulebook, and the
+# shuffle, the clock and the prize are what the caption and the link are for.
+#
+#   SHORT=1 python3 build-uprising-video.py
+FULL = dict(
+    order=[1, 2, 3, 4, 5, 6, 7, 8],
+    scenes=[0.00, 4.00, 8.20, 12.20, 17.40, 20.80, 24.40, 28.20],
+    dur=32.60,
+    beats=[0.14, 1.05, 4.02, 8.22, 12.22, 14.00, 17.42, 18.90, 20.82, 24.42,
+           28.22, 29.50],
+    # The two moments the film is built around: the double final and the cut
+    # to the time. Both get a drop in the score.
+    hero=[17.42, 28.22],
+)
+SHORT = dict(
+    order=[1, 2, 4, 5, 8],
+    scenes=[0.00, 3.00, 5.80, 9.40, 11.80],
+    dur=15.00,
+    beats=[0.14, 1.05, 3.02, 5.82, 7.60, 9.42, 11.82, 13.10],
+    hero=[9.42, 11.82],
+)
 
 DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
 MONS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
@@ -104,14 +122,19 @@ def main():
     urgent = when or f"{DAYS[DT.weekday()]} {DT.day} {MONS[DT.month - 1]}"
     datestamp = f"{DAYS[DT.weekday()][:3]} {DT.day} {MONS[DT.month - 1]}"
 
+    cut = SHORT if os.environ.get("SHORT") else FULL
+    order, scenes = list(cut["order"]), list(cut["scenes"])
+
     # Scene 5 exists only when the night actually ends on a double round. With
     # anybody resting the last round the engine switches the doubling off, and
     # a film still advertising it would be the one thing this pipeline exists
-    # to prevent.
-    scenes = list(SCENES)
-    live = [1, 2, 3, 4, 5, 6, 7, 8]
-    if not F["doubleFinal"]:
-        live.remove(5)
+    # to prevent. Dropping it closes the gap it left rather than holding dead
+    # air where it was.
+    if not F["doubleFinal"] and 5 in order:
+        i = order.index(5)
+        gap = (scenes[i + 1] if i + 1 < len(scenes) else cut["dur"]) - scenes[i]
+        order.pop(i); scenes.pop(i)
+        scenes = scenes[:i] + [x - gap for x in scenes[i:]]
 
     ladder = "".join(
         f'<div class="crt{" top" if c == 1 else ""}" id="k{c-1}">'
@@ -125,9 +148,12 @@ def main():
                else f"{hours:.0f} HOURS" if abs(hours - round(hours)) < 0.05
                else f"{hours:.1f} HOURS".replace(".0", ""))
 
+    dur = cut["dur"] - (gap if not F["doubleFinal"] and 5 in cut["order"] else 0)
     payload = json.dumps({
-        "scenes": scenes, "dur": DUR, "beats": BEATS, "hero": HERO,
-        "live": live, "courts": F["courts"], "cap": S["cap"],
+        "scenes": scenes, "order": order, "dur": dur,
+        "beats": [b for b in cut["beats"] if b < dur],
+        "hero": [h for h in cut["hero"] if h < dur],
+        "courts": F["courts"], "cap": S["cap"],
         "rounds": F["rounds"], "matches": F["matches"],
     })
 
@@ -144,10 +170,12 @@ def main():
         prize=S["championPrize"], kind=S["championPrizeKind"].upper(),
         start=S["start"], doors=S["doors"], host=S["host"].upper(),
     )
-    with open(OUT, "w") as f:
+    out = OUT_SHORT if os.environ.get("SHORT") else OUT
+    with open(out, "w") as f:
         f.write(html)
 
-    print(f"built uprising.html  {len(html.encode())/1024/1024:.1f}MB  {DUR:.1f}s")
+    print(f"built {os.path.basename(out)}  {len(html.encode())/1024/1024:.1f}MB  {dur:.1f}s"
+          f"  scenes {','.join(str(o) for o in order)}")
     print(f"  night     {S['date']} ({urgent.lower()}), doors {S['doors']}, start {S['start']}")
     print(f"  format    {F['courts']} courts, {F['rounds']} rounds, {F['matches']:g} matches each, "
           f"{runtime.lower()}, first to {F['target']}")
@@ -350,12 +378,14 @@ const outQuint=x=>1-Math.pow(1-x,5);
 const outExpo =x=>x>=1?1:1-Math.pow(2,-10*x);
 const outBack =x=>{{const c1=2.0,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}};
 const HERO=new Set(D.hero);
-// A scene the engine says does not apply is removed from the page outright,
-// not merely skipped: left in the DOM it would still be measured by the
+// A scene that is not in this cut is removed from the page outright, not
+// merely skipped: left in the DOM it would still be measured by the
 // recorder's overflow and overlap checks, and could be seen in a scrub.
-const LIVE=new Set(D.live);
+// AT maps a scene's NUMBER to when it starts, so the per-scene blocks below
+// do not care which cut is being built or what order the scenes come in.
+const AT=Object.fromEntries(D.order.map((n,i)=>[n, D.scenes[i]]));
 [...document.querySelectorAll('.scene')].forEach(el=>{{
-  if(!LIVE.has(Number(el.id.slice(1)))) el.remove();
+  if(AT[Number(el.id.slice(1))]===undefined) el.remove();
 }});
 
 function set(el,o,tr,fl){{
@@ -415,6 +445,9 @@ function energy(t){{
 }}
 
 const S=D.scenes, END=[...S.slice(1), DUR];
+// The outro's start, so the recorder can probe the widening entrance without
+// a time typed into it that goes stale the moment a scene table changes.
+window.__outro=AT[8];
 
 function seek(t){{
   fitOnce();
@@ -430,7 +463,7 @@ function seek(t){{
     `scaleX(${{outExpo(inv(t,0.02,0.60)).toFixed(3)}})`;
 
   for(let i=0;i<S.length;i++){{
-    const el=document.getElementById('s'+(i+1));
+    const el=document.getElementById('s'+D.order[i]);
     if(!el) continue;
     const o=Math.min(inv(t,S[i]-XF,S[i]+0.02), 1-inv(t,END[i],END[i]+XF));
     el.style.opacity=o.toFixed(3);
@@ -439,7 +472,7 @@ function seek(t){{
   const g=(i)=>document.getElementById(i);
 
   {{ // 1 · the night
-    const u=t-S[0];
+    const u=t-AT[1];
     rise(g('s1k'), u, 0.14, 0.50, 12);
     widen(g('s1t'), u, 0.40, 0.88);
     set(g('s1r'), 1, `scaleX(${{outQuint(inv(u,1.26,1.72)).toFixed(3)}})`);
@@ -448,7 +481,7 @@ function seek(t){{
   }}
 
   {{ // 2 · the shape of the night
-    const u=t-S[1];
+    const u=t-AT[2];
     rise(g('s2k'), u, 0.08, 0.40, 10);
     widen(g('s2t'), u, 0.18, 0.70, {{w0:72,blur:9}});
     set(g('s2r'), 1, `scaleX(${{outQuint(inv(u,1.06,1.48)).toFixed(3)}})`);
@@ -457,7 +490,7 @@ function seek(t){{
   }}
 
   {{ // 3 · the shuffle
-    const u=t-S[2];
+    const u=t-AT[3];
     rise(g('s3k'), u, 0.08, 0.40, 10);
     widen(g('s3t'), u, 0.18, 0.72, {{w0:70,blur:10}});
     rise(g('s3a'), u, 1.14, 0.48, 14);
@@ -466,7 +499,7 @@ function seek(t){{
 
   {{ // 4 · the ladder. The courts land from the BOTTOM up, which is the
      //     direction the night is about.
-    const u=t-S[3];
+    const u=t-AT[4];
     rise(g('s4k'), u, 0.08, 0.40, 10);
     widen(g('s4t'), u, 0.18, 0.68, {{w0:72,blur:9}});
     for(let i=0;i<D.courts;i++){{
@@ -478,7 +511,7 @@ function seek(t){{
   }}
 
   {{ // 5 · the decider. The 2X slams in rather than widening: it is a stamp.
-    const u=t-S[4];
+    const u=t-AT[5];
     rise(g('s5k'), u, 0.06, 0.34, 10);
     const q=outBack(inv(u,0.14,0.70));
     set(g('s5b'), inv(u,0.14,0.30),
@@ -488,11 +521,11 @@ function seek(t){{
   }}
 
   {{ // 6 · the clock
-    const u=t-S[5];
+    const u=t-AT[6];
     rise(g('s6k'), u, 0.06, 0.36, 10);
     const p=outExpo(inv(u,0.18,1.06));
     set(g('s6b'), inv(u,0.18,0.38), `scale(${{(0.94+0.06*p).toFixed(4)}})`);
-    g('s6v').textContent=Math.round(D.rounds*p);
+    const n6=g('s6v'); if(n6) n6.textContent=Math.round(D.rounds*p);
     widen(g('s6t'), u, 0.94, 0.60, {{w0:78,blur:8}});
     set(g('s6r'), 1, `scaleX(${{outQuint(inv(u,1.28,1.68)).toFixed(3)}})`);
     rise(g('s6n'), u, 1.50, 0.48, 14);
@@ -500,7 +533,7 @@ function seek(t){{
   }}
 
   {{ // 7 · the prize
-    const u=t-S[6];
+    const u=t-AT[7];
     rise(g('s7k'), u, 0.06, 0.36, 10);
     widen(g('s7t'), u, 0.16, 0.70, {{w0:68,blur:11}});
     set(g('s7s'), inv(u,0.84,1.10));
@@ -510,7 +543,7 @@ function seek(t){{
   }}
 
   {{ // 8 · when and where
-    const u=t-S[7];
+    const u=t-AT[8];
     widen(g('s8t'), u, 0.16, 0.78);
     set(g('s8r'), 1, `scaleX(${{outQuint(inv(u,0.76,1.20)).toFixed(3)}})`);
     set(g('s8d'), inv(u,1.00,1.28));
