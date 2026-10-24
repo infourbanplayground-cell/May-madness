@@ -511,7 +511,7 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   `state.guests` is local to this app: the roster is a live read from August
   Attack's table and `/save` deletes `state.players`, so a walk-in added on the
   check-in screen is pickable next week but holds no series or all-time points
-  in any volume and is invisible to Blackout. On **24 Oct 2026 eight of the
+  in any volume and is invisible to Blackout. On **24 Oct 2026 seven of the
   fourteen playing were guests**, and 20 had accumulated against a 286-name
   roster.
   - **Do not promote them blind.** Several are people who already have a
