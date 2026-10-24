@@ -451,36 +451,48 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
-- **KNOWN AND NOT FIXED: whoever rests the FIRST SCORING ROUND is penalised.**
-  Measured at 14 players on 3 courts over 15 rounds, 20,000 equal-skill nights:
-  the pair that first rests in round 2 wins the night **5.58%** of the time
-  against a 7.2% average — **z = −12.1**, mean finish 8.13 against 7.50. A
-  permutation control with the slot labels dealt at random spreads **1.04x**,
-  so the 1.43x observed is signal, not the noise floor of a seven-way split.
-  - The mechanism is `upLadderOrder`: you come back with ZERO points while the
-    three you left have banked, it sorts within a court on RAW points, and you
-    are the one sliced downward when the twelve are re-packed. The table
-    already solves exactly this with points per round (`upUneven`); the ladder
-    does not.
-  - **Neither obvious fix works.** Ranking the ladder on points per round
-    played takes it from 1.38x to 1.25x — still above the audit's 1.05x bar.
-    A second shuffle round does not flatten it either, it MOVES it: the
-    penalty lands on round 3 instead, z = −10.2. Both measured.
-  - Resting later is fine (rounds 3–7 are flat), and resting the SHUFFLE is
-    slightly GOOD (7.96%, z = +6.4) — it scores nothing, so there is nothing
-    to come back behind on.
-  - **It has never affected a night yet.** Every UPRISING so far has been 12
-    players on 3 courts, where nobody rests at all. It first bites at 14.
-  - Not a court-protection problem, which was the intuition worth checking:
-    controlled against players who PLAYED on the same court in the same round,
-    resting on Court 1 is **0.88x** (you forgo the biggest points) and on the
-    bottom court **1.45x** on a tiny base. Resting is a mild equaliser, not a
-    shield.
-- **Coming back from a rest you rejoin the LADDER, not your old court.** The
-  twelve who play are re-packed in ladder order every round, so a returner
-  lands on the same court 82% of the time, one lower 11.8%, one higher 6.2%
-  — and meets the same three players again **0.2%** of the time, with 2.08 of
-  their 3 opponents new on average.
+- **A REST NEVER MOVES YOU — `upBuildRound` seats returners first.** Whenever
+  anybody rests there are more claims on the seats than seats (14 claims on 12
+  at 14 on 3 courts), so somebody who did not lose a match goes down EVERY
+  round, and the overflow CASCADES: five claims on Court 1 pushes one into
+  Court 2, which makes six there, which pushes one into Court 3. The engine
+  only gets to choose who absorbs it.
+  - Slicing the ladder into fours made it the player who had just rested, every
+    time: they banked nothing while the three they left banked, so they sat
+    lowest in their band. **Demoted on 10.6% of returns**, measured.
+  - **Ranking them HIGH in the band is not the fix** — it stops them absorbing
+    overflow and starts them filling gaps ABOVE, so a rest begins *promoting*
+    people. Both directions are the same pigeonhole. The rule that holds both
+    ways is to exempt them from the re-pack: they keep the court they held and
+    the players who were on court fill in around them.
+  - Six tests, all proved to fail by putting the plain slice back: court
+    unchanged by a rest, rejoins exactly once on a real court, never demoted,
+    never promoted, cannot rest off the bottom court or rest onto Court 1, and
+    **a field where nobody rests is ordered exactly as before** — which is the
+    guard that makes this safe for every night played so far, all of which were
+    12 on 3 with nobody resting.
+  - Clean through `uprising-stress.js` 25,000, `uprising-courtchange.js` 6,000
+    and the fairness sweep (draw and rota 1.00–1.03x everywhere).
+- **STILL NOT FIXED, and it is NOT the same thing: resting the first scoring
+  round costs you points, not position.** At 14 on 3 over 15 rounds, 20,000
+  equal-skill nights, the pair that first rests in round 2 wins the night
+  **5.4%** of the time against a 7.2% average — **z = -13.5**, against a
+  permutation-control noise floor of **1.04x**. Seating returners properly did
+  not move this at all, because it was never about the court: you miss a round
+  while the field is still bunched, and the ladder compounds from there.
+  Ranking the band on points per round does not fix it either (1.38x -> 1.25x,
+  and it moves the penalty onto late resters), nor does a second shuffle round
+  (it relocates it to round 3, z = -10.2). All measured, none shipped.
+  - Resting the SHUFFLE is fine, slightly good even — it scores nothing, so
+    there is nothing to come back behind on.
+  - It is not a court-protection problem, which was the intuition worth
+    checking: controlled against players who PLAYED the same court in the same
+    round, resting on Court 1 is 0.88x and on the bottom court 1.45x.
+- **The ladder strip dims whoever is resting.** It shows where everyone
+  STANDS, resters included, because holding your court through a rest is the
+  rule. With nobody resting it always agreed with the match cards below it; at
+  14 players it stops, and the rung read "A · B · K · L" while A and L sat in
+  RESTING a few lines down. Same convention the standings table already uses.
 - **`ops/uprising-fairness.js` is the fairness audit** (`node
   ops/uprising-fairness.js 1500`). Every player is given identical skill, so
   anything that shows up is the format and not the padel. It sweeps 8 to 24 and

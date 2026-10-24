@@ -9,7 +9,7 @@ const {
   upCourts, upRestCount, upFairRounds, upDoubleFinal, upMakeRestRota, upReceipt,
   upScoringRound, upScoringRounds, upPlanRounds, upNightMinutes, upRoundMinutes,
   upFinisher,
-  upRestingFor, upLadderOrder, upUneven, upRoundsTotal,
+  upRestingFor, upLadderOrder, upUneven, upRoundsTotal, upPlayerIds,
 } = E;
 
 const ids = n => Array.from({ length: n }, (_, i) => `p${String(i).padStart(2, "0")}`);
@@ -962,4 +962,130 @@ test("the finisher ignores the shuffle and rounds spent resting", () => {
     assert.equal(f.played, rec.filter(r => !r.shuffle && !r.resting).length);
     assert.equal(f.first + f.second, rec.reduce((n, r) => n + (r.points || 0), 0));
   });
+});
+
+// ── resting and rejoining ──────────────────────────────────────────────────
+//
+// These exist because 14 players on 3 courts is the first field the series has
+// run where anybody rests at all: every UPRISING before it was 12 on 3, where
+// nobody sits out and none of this arises.
+//
+// The governing rule is A REST NEVER MOVES YOU. You climb by winning and drop
+// by losing, and a round you were not on court for is neither.
+
+// Walk a night and hand back every rest-then-return it contains.
+function rejoins(night) {
+  const out = [];
+  for (let i = 0; i < night.rounds.length - 1; i++) {
+    const held = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i) });
+    for (const p of night.rounds[i].sitOuts || []) {
+      // find the next round they actually appear on court in
+      for (let j = i + 1; j < night.rounds.length; j++) {
+        const m = (night.rounds[j].courts || [])
+          .find(c => [...c.team1, ...c.team2].includes(p));
+        if (m) { out.push({ id: p, restRound: i + 1, backRound: j + 1,
+                            held: held[p], back: m.court, shuffle: !upScoringRound(night, i + 1) }); break; }
+        if (!(night.rounds[j].sitOuts || []).includes(p))
+          throw new Error(`${p} is neither on a court nor resting in round ${j + 1}`);
+      }
+    }
+  }
+  return out;
+}
+
+test("resting does not change your court", () => {
+  // upCourtsAfter only moves players who were in a completed match.
+  const night = playedNight(14, 14, 404);
+  for (let i = 0; i < night.rounds.length; i++) {
+    const before = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i) });
+    const after = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i + 1) });
+    for (const p of night.rounds[i].sitOuts || []) {
+      if (!upScoringRound(night, i + 1)) continue;   // the shuffle re-deals by design
+      assert.equal(after[p], before[p],
+        `${p} rested round ${i + 1} and their court moved ${before[p]} -> ${after[p]}`);
+    }
+  }
+});
+
+test("a rester rejoins exactly once, on a real court", () => {
+  for (const seed of [11, 22, 33, 44]) {
+    const night = playedNight(14, 14, seed);
+    const C = upCourts(night);
+    night.rounds.forEach(r => {
+      const seen = new Set();
+      (r.courts || []).forEach(m => {
+        assert.ok(m.court >= 1 && m.court <= C, `court ${m.court} does not exist`);
+        [...m.team1, ...m.team2].forEach(p => {
+          assert.ok(!seen.has(p), `${p} is on two courts in round ${r.roundNum}`);
+          seen.add(p);
+        });
+      });
+      (r.sitOuts || []).forEach(p =>
+        assert.ok(!seen.has(p), `${p} is resting and playing in round ${r.roundNum}`));
+      assert.equal(seen.size + (r.sitOuts || []).length, night.playerIds.length,
+        `round ${r.roundNum} does not account for everybody`);
+    });
+    assert.ok(rejoins(night).length > 0, "no rest-then-return in the night at all");
+  }
+});
+
+test("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
+  // The one the whole change is for. 14 claims on 12 seats means somebody who
+  // did not lose goes down every round — but it must never be the player who
+  // was not even on court. Fails against the old raw-points ordering, which
+  // demoted a returner on about one return in nine.
+  let checked = 0;
+  for (const seed of [7, 19, 51, 88, 123, 404, 901]) {
+    const night = playedNight(14, 14, seed);
+    for (const r of rejoins(night)) {
+      if (r.shuffle) continue;              // the shuffle re-deals the ladder by design
+      checked++;
+      assert.ok(r.back <= r.held,
+        `${r.id} held court ${r.held}, rested round ${r.restRound}, `
+        + `and came back on court ${r.back}`);
+    }
+  }
+  assert.ok(checked > 100, `only ${checked} returns checked — the harness is not exercising it`);
+});
+
+test("resting does not promote you either", () => {
+  // The mirror of the rule above: if a rest cannot cost you a court it must
+  // not win you one, or resting becomes something to angle for.
+  for (const seed of [5, 61, 77, 255]) {
+    const night = playedNight(14, 14, seed);
+    for (const r of rejoins(night)) {
+      if (r.shuffle) continue;
+      assert.ok(r.back >= r.held,
+        `${r.id} held court ${r.held} and was PROMOTED to ${r.back} by resting`);
+    }
+  }
+});
+
+test("a rest is not a way to dodge the bottom court", () => {
+  // Same rule stated where it would pay best: resting on the bottom court
+  // cannot lift you off it, and resting on Court 1 cannot be used to hold it.
+  const night = playedNight(14, 14, 2026);
+  const C = upCourts(night);
+  for (const r of rejoins(night)) {
+    if (r.shuffle) continue;
+    if (r.held === C) assert.equal(r.back, C, `${r.id} rested off the bottom court`);
+    if (r.held === 1) assert.equal(r.back, 1, `${r.id} did not hold Court 1 through a rest`);
+  }
+});
+
+test("a field where nobody rests is ordered exactly as before", () => {
+  // The guard that makes this change safe for every night already played:
+  // 16 on 4 courts has no sitOuts, so the new key is empty every round and
+  // the ladder order is untouched.
+  for (const seed of [3, 300, 3000]) {
+    const night = playedNight(16, 11, seed);
+    night.rounds.forEach(r => assert.equal((r.sitOuts || []).length, 0));
+    const order = upLadderOrder(night);
+    const byCourtThenPts = upPlayerIds(night).slice().sort((a, b) => {
+      const c = upCurrentCourts(night), t = upTotals(night);
+      return (c[a] - c[b]) || ((t[b] || 0) - (t[a] || 0)) || 0;
+    });
+    assert.deepEqual(order.map(p => upCurrentCourts(night)[p]),
+                     byCourtThenPts.map(p => upCurrentCourts(night)[p]));
+  }
 });

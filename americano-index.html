@@ -1173,6 +1173,33 @@ function upLadderOrder(night) {
   const rota = upRestRota(night);
   const pos = {};
   rota.forEach((p, i) => { pos[p] = i; });
+  // A REST NEVER MOVES YOU. You go up by winning and down by losing, and a
+  // round you were not on court for is neither.
+  //
+  // With anybody resting, 4*courts seats have more than 4*courts claims on
+  // them every single round — at 14 on 3 courts, fourteen claims on twelve
+  // seats — so somebody who did not lose a match MUST go down, and the
+  // overflow CASCADES: five claims on Court 1 pushes one into Court 2, which
+  // makes six there, which pushes one into Court 3. The only question the
+  // engine gets to answer is who absorbs it.
+  //
+  // It used to be whoever was lowest on RAW points in the band, which is
+  // systematically the player who just rested: they banked nothing while the
+  // three they left banked. Measured over 20,000 equal-skill nights at 14 on
+  // 3 over 15 rounds, the pair that first rested in round 2 — the first
+  // scoring round — won the night 5.6% of the time against a 7.2% average,
+  // z = -12.1, against a permutation-control noise floor of 1.04x. They were
+  // demoted a court on 10.6% of their returns.
+  //
+  // Ranking the band on points per round does not fix it (1.38x -> 1.25x, and
+  // it moves the penalty onto late resters); a second shuffle round does not
+  // either, it just relocates the penalty to round 3. Both measured.
+  //
+  // Ranking a returner high in the band does not express it either: it stops
+  // them absorbing the overflow but then makes them first to fill a gap ABOVE,
+  // so a rest starts PROMOTING people. Both directions are the same pigeonhole.
+  // The rule is that a returner is exempt from the re-pack altogether, and
+  // that is applied in upBuildRound, which seats them before anybody else.
   return upPlayerIds(night).slice().sort((a, b) =>
     ((courts[a] || C) - (courts[b] || C))
     || ((totals[b] || 0) - (totals[a] || 0))
@@ -1205,9 +1232,42 @@ function upBuildRound(night) {
   // re-pair it, exactly as it does not un-double it.
   const decider = roundNum === N;
 
+  // A REST NEVER MOVES YOU — seat the returners first, on the court they held.
+  //
+  // Whenever anybody rests there are more claims on the seats than seats, and
+  // the overflow cascades: five claims on Court 1 pushes one down into Court 2,
+  // which makes six there, which pushes one into Court 3. Slicing the ladder
+  // into fours made the returner absorb that, because they banked nothing
+  // while the three they left banked and so sat lowest in their band.
+  // Measured at 14 on 3 over 15 rounds, they were demoted on 10.6% of returns,
+  // and the pair that first rested in round 2 won the night 5.6% of the time
+  // against a 7.2% average (z = -12.1, permutation-control noise floor 1.04x).
+  //
+  // Ranking them high in the band instead only swaps the fault round: they
+  // stop absorbing overflow and start filling gaps ABOVE, so a rest begins
+  // promoting people. Exempting them from the re-pack is the rule that holds
+  // in both directions — they keep the court they held, and the players who
+  // were actually on court fill in around them.
+  //
+  // Seats always go: 4*C seats, at most C*4 - 1 returners in practice and
+  // never more than the rest count, so the remainder is always fillable.
+  const back = new Set((rounds[rounds.length - 1] || {}).sitOuts || []);
+  const held = upCurrentCourts(night);
+  const seats = Array.from({ length: C }, () => []);
+  const returners = playing.filter(p => back.has(p));
+  returners.forEach(p => {
+    const c = Math.max(1, Math.min(C, held[p] || C));
+    if (seats[c - 1].length < 4) seats[c - 1].push(p);
+  });
+  const placed = new Set(returners.filter(p => seats.some(s => s.includes(p))));
+  const queue = playing.filter(p => !placed.has(p));
+  for (let c = 0; c < C; c++) {
+    while (seats[c].length < 4) seats[c].push(queue.shift());
+  }
+
   const out = { roundNum, sitOuts, courts: [] };
   for (let c = 1; c <= C; c++) {
-    const on = playing.slice((c - 1) * 4, c * 4);
+    const on = seats[c - 1];
     const [A, B] = upPairCourt(on, totals, seen, lastUsed, decider);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
     lastUsed.set(upPairKey(...A), roundNum); lastUsed.set(upPairKey(...B), roundNum);
@@ -2450,7 +2510,22 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
               return (
                 <div key={c} className={"rung" + (c === 1 ? " top" : "")}>
                   <span className="cn">COURT {c}</span>
-                  <span className="who">{on.map(nameOf).join("  ·  ")}</span>
+                  {/* The ladder is where everyone STANDS, resters included —
+                      holding your court through a rest is the rule, not an
+                      omission. But with nobody resting the strip and the match
+                      cards below it always agreed, and at 14 players they stop:
+                      the rung reads "A · B · K · L" while A and L are in
+                      RESTING a few lines down, which looks like a contradiction
+                      until you know the rule. Dimmed, the same way the
+                      standings table dims whoever is resting the round on
+                      screen. */}
+                  <span className="who">{on.map((p, i) => (
+                    <Fragment key={p}>
+                      {i ? "  ·  " : ""}
+                      <span style={(round.sitOuts || []).includes(p)
+                        ? { opacity: .42, fontStyle: "italic" } : undefined}>{nameOf(p)}</span>
+                    </Fragment>
+                  ))}</span>
                   {/* What this rung pays. "Court 1 is worth double Court 3"
                       means nothing as a sentence in a sign-up post; it means
                       something when it is written on the court you are
