@@ -451,6 +451,36 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
+- **KNOWN AND NOT FIXED: whoever rests the FIRST SCORING ROUND is penalised.**
+  Measured at 14 players on 3 courts over 15 rounds, 20,000 equal-skill nights:
+  the pair that first rests in round 2 wins the night **5.58%** of the time
+  against a 7.2% average — **z = −12.1**, mean finish 8.13 against 7.50. A
+  permutation control with the slot labels dealt at random spreads **1.04x**,
+  so the 1.43x observed is signal, not the noise floor of a seven-way split.
+  - The mechanism is `upLadderOrder`: you come back with ZERO points while the
+    three you left have banked, it sorts within a court on RAW points, and you
+    are the one sliced downward when the twelve are re-packed. The table
+    already solves exactly this with points per round (`upUneven`); the ladder
+    does not.
+  - **Neither obvious fix works.** Ranking the ladder on points per round
+    played takes it from 1.38x to 1.25x — still above the audit's 1.05x bar.
+    A second shuffle round does not flatten it either, it MOVES it: the
+    penalty lands on round 3 instead, z = −10.2. Both measured.
+  - Resting later is fine (rounds 3–7 are flat), and resting the SHUFFLE is
+    slightly GOOD (7.96%, z = +6.4) — it scores nothing, so there is nothing
+    to come back behind on.
+  - **It has never affected a night yet.** Every UPRISING so far has been 12
+    players on 3 courts, where nobody rests at all. It first bites at 14.
+  - Not a court-protection problem, which was the intuition worth checking:
+    controlled against players who PLAYED on the same court in the same round,
+    resting on Court 1 is **0.88x** (you forgo the biggest points) and on the
+    bottom court **1.45x** on a tiny base. Resting is a mild equaliser, not a
+    shield.
+- **Coming back from a rest you rejoin the LADDER, not your old court.** The
+  twelve who play are re-packed in ladder order every round, so a returner
+  lands on the same court 82% of the time, one lower 11.8%, one higher 6.2%
+  — and meets the same three players again **0.2%** of the time, with 2.08 of
+  their 3 opponents new on average.
 - **`ops/uprising-fairness.js` is the fairness audit** (`node
   ops/uprising-fairness.js 1500`). Every player is given identical skill, so
   anything that shows up is the format and not the padel. It sweeps 8 to 24 and
