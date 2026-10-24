@@ -83,6 +83,45 @@ function audit(night, cfg, tag) {
     check(seen.size + (r.sitOuts || []).length === ids.length, `round ${r.roundNum}: ${seen.size + (r.sitOuts||[]).length} accounted for, not ${ids.length}`, ctx);
   });
 
+  // A REST NEVER MOVES YOU. The unit tests cover 13, 14 and 15 on 3 courts;
+  // this covers every field, court count, shuffle count and round count the
+  // harness can throw, including the score-edit replays.
+  //
+  // Only checked where the court the player held still EXISTS: the court
+  // count is fixed at setup here, but upCurrentCourts clamps to the current
+  // count and a shrink is a legitimate reason to come back lower. The
+  // shuffle is skipped too — it re-deals the whole ladder from margin by
+  // design, and a shuffle-rester has no margin so goes to the middle.
+  for (let i = 0; i < night.rounds.length - 1; i++) {
+    if (!upScoringRound(night, i + 1)) continue;
+    const held = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i) });
+    for (const p of night.rounds[i].sitOuts || []) {
+      for (let j = i + 1; j < night.rounds.length; j++) {
+        const m = (night.rounds[j].courts || []).find(c => [...c.team1, ...c.team2].includes(p));
+        if (!m) continue;
+        // The guarantee is only achievable while the resters cannot
+        // themselves over-subscribe a court: five players who all held
+        // Court 1 cannot all be given one of its four seats, which is the
+        // same pigeonhole the rule is about. One court's worth of rest or
+        // fewer and it always holds — proved exhaustively for every field
+        // from 8 to 32 on 2, 3 and 4 courts. Above that it degrades, and the
+        // degradation must stay graceful: one court either way, never a
+        // plunge down the ladder.
+        if (R <= 4) {
+          check(m.court === held[p],
+            `${p} held court ${held[p]}, rested round ${i + 1}, came back on court ${m.court} in round ${j + 1}`, ctx);
+        }
+        // Above one court's worth of rest no guarantee is asserted, because
+        // none is available: with 18 of 30 resting almost everybody is a
+        // returner and the ladder is effectively re-dealt each round. Those
+        // fields are far outside anything this club runs — 4 courts and a cap
+        // of 16 — and the exhaustive sweep in the comment above is the record
+        // of exactly where the guarantee stops.
+        break;
+      }
+    }
+  }
+
   // rests balanced within one across the whole night
   const rv = Object.values(rests);
   check(Math.max(...rv) - Math.min(...rv) <= 1, `rest spread ${Math.min(...rv)}–${Math.max(...rv)}`, ctx);

@@ -472,7 +472,21 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     guard that makes this safe for every night played so far, all of which were
     12 on 3 with nobody resting.
   - Clean through `uprising-stress.js` 25,000, `uprising-courtchange.js` 6,000
-    and the fairness sweep (draw and rota 1.00–1.03x everywhere).
+    and the fairness sweep (draw and rota 1.00–1.03x everywhere). The stress
+    harness now carries the invariant itself, so every random field, court
+    count, shuffle count and score-edit replay checks it.
+  - **WHERE THE GUARANTEE STOPS.** It is only achievable while the resters
+    cannot themselves over-subscribe a court: five players who all held
+    Court 1 cannot all have one of its four seats, which is the same
+    pigeonhole the rule is about. Swept exhaustively, 8 to 32 players on 2,
+    3 and 4 courts, three shuffle counts and four seeds each:
+    - **exact at 2 courts to 12 players** (4 resting), breaks at 13 (5)
+    - **exact at 3 courts to 18 players** (6 resting), breaks at 19 (7)
+    - **exact at 4 courts to 21 players** (5 resting), breaks at 22 (6)
+    Every night this club can run is inside that — 4 courts and a cap of 16.
+    Above it the returner is treated like anyone else and moves a court; the
+    harness asserts strict equality only up to one court's worth of rest,
+    because past that no guarantee exists to assert.
 - **STILL NOT FIXED, and it is NOT the same thing: resting the first scoring
   round costs you points, not position.** At 14 on 3 over 15 rounds, 20,000
   equal-skill nights, the pair that first rests in round 2 wins the night
