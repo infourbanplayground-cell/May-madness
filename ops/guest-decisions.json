@@ -1,0 +1,496 @@
+{
+  "_comment": [
+    "One entry per guest. Set each value to:",
+    "   \"new\"          — a real new person, add them to the roster",
+    "   \"<player id>\"  — they already exist, merge into that record",
+    "   \"skip\"         — leave them as a guest for now",
+    "null is not a decision and the builder refuses it.",
+    "",
+    "A merge rewrites the guest's id to the roster id EVERYWHERE in",
+    "americano_state — every night's playerIds, every round's teams and",
+    "sit-outs, the rest rota and the opening ladder — so the points they",
+    "have already scored follow them. It is not reversible from here."
+  ],
+  "guests": {
+    "g_qo5udh00": {
+      "name": "Zo",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mpu7wekz_i856m",
+          "name": "Zorro",
+          "score": 0.57
+        }
+      ]
+    },
+    "g_g3kiopgj": {
+      "name": "Rami",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_msxai4rd_an01k",
+          "name": "Rawi",
+          "score": 0.75
+        },
+        {
+          "id": "p_mrw1wb8w_yzg4j",
+          "name": "AM",
+          "score": 0.67
+        },
+        {
+          "id": "p_mpy293hz_szy8w",
+          "name": "Sarmi",
+          "score": 0.67
+        },
+        {
+          "id": "p_mpv748m8_rq2fg",
+          "name": "Tamim",
+          "score": 0.67
+        }
+      ]
+    },
+    "g_gv2b3uew": {
+      "name": "Harith",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mpuuq2o3_n2tep",
+          "name": "Alharith",
+          "score": 0.86
+        },
+        {
+          "id": "p_mrt8ss18_0er5c",
+          "name": "Haitham",
+          "score": 0.77
+        },
+        {
+          "id": "p_mt79n1f8_s206w",
+          "name": "Laith",
+          "score": 0.73
+        },
+        {
+          "id": "p_mrt8ss18_1vft2",
+          "name": "Maitha",
+          "score": 0.67
+        }
+      ]
+    },
+    "g_7c1tlxg9": {
+      "name": "Omar s",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mq56iwkd_r3ses",
+          "name": "Omar Y",
+          "score": 0.83
+        },
+        {
+          "id": "p_mptqpbkf_6w3mx",
+          "name": "Omar Saqri",
+          "score": 0.75
+        },
+        {
+          "id": "p_msxai4rd_teisc",
+          "name": "Omar Almamari",
+          "score": 0.7
+        },
+        {
+          "id": "p_mrw1wb8w_c5m4y",
+          "name": "Zak S",
+          "score": 0.7
+        }
+      ]
+    },
+    "g_vyoyiyd0": {
+      "name": "Khalili",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mptqpbkf_6mdvh",
+          "name": "Khalil",
+          "score": 0.92
+        },
+        {
+          "id": "p_mt04mxde_jmv65",
+          "name": "Khalid",
+          "score": 0.77
+        },
+        {
+          "id": "p_mpv748m8_5zwmz",
+          "name": "Khalid",
+          "score": 0.77
+        },
+        {
+          "id": "p_mptqpbkf_rmgpl",
+          "name": "Khalil Ahmed",
+          "score": 0.63
+        }
+      ]
+    },
+    "g_ft39l47y": {
+      "name": "Omar",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mq56iwkd_r3ses",
+          "name": "Omar Y",
+          "score": 0.8
+        },
+        {
+          "id": "p_msxai4rd_teisc",
+          "name": "Omar Almamari",
+          "score": 0.7
+        },
+        {
+          "id": "p_mptqpbkf_owy70",
+          "name": "Omar Mazahmi",
+          "score": 0.7
+        },
+        {
+          "id": "p_mptqpbkf_6w3mx",
+          "name": "Omar Saqri",
+          "score": 0.7
+        }
+      ]
+    },
+    "g_u18zcjf9": {
+      "name": "Mohammed s",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mqs4d461_f4qa9",
+          "name": "Mohammed",
+          "score": 0.89
+        },
+        {
+          "id": "p_mqi2ahgl_cqxlc",
+          "name": "Mohammed",
+          "score": 0.89
+        },
+        {
+          "id": "p_mrcbbbcv_fv22x",
+          "name": "Mohammed Sadiq",
+          "score": 0.83
+        },
+        {
+          "id": "p_mqp9jgby_8m8wd",
+          "name": "Mohamed",
+          "score": 0.82
+        }
+      ]
+    },
+    "g_a9rseo2m": {
+      "name": "Al muhaneed",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mqp9jgby_7wsh3",
+          "name": "Muhanad",
+          "score": 0.8
+        },
+        {
+          "id": "p_mpv748m8_m3u0s",
+          "name": "Muhanad",
+          "score": 0.8
+        },
+        {
+          "id": "p_mqp9jgby_8m8wd",
+          "name": "Mohamed",
+          "score": 0.67
+        },
+        {
+          "id": "p_mqs4d461_f4qa9",
+          "name": "Mohammed",
+          "score": 0.62
+        }
+      ]
+    },
+    "g_egdcwjyw": {
+      "name": "Sankh",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_ms58qx1m_bz13p",
+          "name": "Nanki",
+          "score": 0.6
+        }
+      ]
+    },
+    "g_x3iyfwm2": {
+      "name": "Al muatasim",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_msq4trh5_pfohn",
+          "name": "Muatasim",
+          "score": 1.0
+        },
+        {
+          "id": "p_mptqpbkf_3d553",
+          "name": "Muatasim Sabri",
+          "score": 0.73
+        },
+        {
+          "id": "p_ms0efap4_9vq8a",
+          "name": "musallam",
+          "score": 0.62
+        },
+        {
+          "id": "p_mpv748m8_rq2fg",
+          "name": "Tamim",
+          "score": 0.62
+        }
+      ]
+    },
+    "g_zuxma95u": {
+      "name": "Moad",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mqi2ahgl_8z0jt",
+          "name": "moayed",
+          "score": 0.8
+        },
+        {
+          "id": "p_msq4trh5_vvgyg",
+          "name": "Mohd",
+          "score": 0.75
+        },
+        {
+          "id": "p_mqp9jgby_v47do",
+          "name": "Mohd",
+          "score": 0.75
+        },
+        {
+          "id": "p_mpv748m8_o5iva",
+          "name": "hmod",
+          "score": 0.75
+        }
+      ]
+    },
+    "g_kyyuux6d": {
+      "name": "Al maqbali",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mpy293hz_0k1oz",
+          "name": "3abadi",
+          "score": 0.67
+        },
+        {
+          "id": "p_mrm26p48_bvh14",
+          "name": "M.kalbani",
+          "score": 0.62
+        },
+        {
+          "id": "p_mpy293hz_dwjtv",
+          "name": "M Abri",
+          "score": 0.62
+        },
+        {
+          "id": "p_mptqpbkf_7stus",
+          "name": "Manhal",
+          "score": 0.62
+        }
+      ]
+    },
+    "g_jxltiwol": {
+      "name": "M hajri",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mpy293hz_dwjtv",
+          "name": "M Abri",
+          "score": 0.77
+        },
+        {
+          "id": "p_mptqpbkf_par8u",
+          "name": "Ali Hajri",
+          "score": 0.75
+        },
+        {
+          "id": "p_mrm26p48_bvh14",
+          "name": "M.kalbani",
+          "score": 0.7
+        },
+        {
+          "id": "p_mq82cxdf_k6x16",
+          "name": "Ali M",
+          "score": 0.7
+        }
+      ]
+    },
+    "g_ma8dcnhr": {
+      "name": "Talal Hashi",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mptqpbkf_2powz",
+          "name": "Talal Hasni",
+          "score": 0.91
+        },
+        {
+          "id": "p_mptqpbkf_aizcu",
+          "name": "Ali Al Hashmi",
+          "score": 0.76
+        },
+        {
+          "id": "p_mptqpbkf_luyvq",
+          "name": "Jamal Hasni",
+          "score": 0.73
+        },
+        {
+          "id": "p_mptqpbkf_3r3xw",
+          "name": "Talal Awadi",
+          "score": 0.73
+        }
+      ]
+    },
+    "g_nvrbszek": {
+      "name": "Umaima",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mrt8ss18_1vft2",
+          "name": "Maitha",
+          "score": 0.67
+        },
+        {
+          "id": "p_mptqpbkf_lq1cp",
+          "name": "Humaid",
+          "score": 0.67
+        },
+        {
+          "id": "p_msq4trh5_c5sej",
+          "name": "Muaiyad",
+          "score": 0.62
+        },
+        {
+          "id": "p_mrt8ss18_ls4qu",
+          "name": "Suliman",
+          "score": 0.62
+        }
+      ]
+    },
+    "g_64i04w6h": {
+      "name": "Reaf",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mptqpbkf_t058h",
+          "name": "Reza",
+          "score": 0.75
+        },
+        {
+          "id": "p_msg4ffog_r76lx",
+          "name": "AF",
+          "score": 0.67
+        }
+      ]
+    },
+    "g_z80fkzm6": {
+      "name": "Khalid s",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mt04mxde_jmv65",
+          "name": "Khalid",
+          "score": 0.86
+        },
+        {
+          "id": "p_mpv748m8_5zwmz",
+          "name": "Khalid",
+          "score": 0.86
+        },
+        {
+          "id": "p_mptqpbkf_xycet",
+          "name": "Khamis",
+          "score": 0.71
+        },
+        {
+          "id": "p_mptqpbkf_6mdvh",
+          "name": "Khalil",
+          "score": 0.71
+        }
+      ]
+    },
+    "g_lg53io81": {
+      "name": "Ahmed khalil",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mrm26p48_yh1bl",
+          "name": "Ahmed Kalbani",
+          "score": 0.8
+        },
+        {
+          "id": "p_mptqpbkf_msxgb",
+          "name": "Ahmed Hinai",
+          "score": 0.78
+        },
+        {
+          "id": "p_mptqpbkf_cy63m",
+          "name": "Ahmed Al Aadi",
+          "score": 0.73
+        },
+        {
+          "id": "p_msq4trh5_p17ge",
+          "name": "Ahmed Alsaidi",
+          "score": 0.72
+        }
+      ]
+    },
+    "g_30jzddd9": {
+      "name": "Abu.ammar",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mptqpbkf_3c9q2",
+          "name": "Abu Taymur",
+          "score": 0.74
+        },
+        {
+          "id": "p_mptqpbkf_pxvnt",
+          "name": "Abdu Aghbari",
+          "score": 0.67
+        },
+        {
+          "id": "p_mpy293hz_67d5k",
+          "name": "Abo Sam",
+          "score": 0.62
+        },
+        {
+          "id": "p_mr98bzjt_ip2dm",
+          "name": "abdulrahman",
+          "score": 0.6
+        }
+      ]
+    },
+    "g_cwjx7uvg": {
+      "name": "Amjad",
+      "decision": null,
+      "candidates": [
+        {
+          "id": "p_mq82cxdf_njm1c",
+          "name": "Anad",
+          "score": 0.67
+        },
+        {
+          "id": "p_mpv748m8_vz3d4",
+          "name": "Raad",
+          "score": 0.67
+        },
+        {
+          "id": "p_mthbje94_5cda1",
+          "name": "Ahmed",
+          "score": 0.6
+        },
+        {
+          "id": "p_mthawokw_ed6ms",
+          "name": "Ahmed",
+          "score": 0.6
+        }
+      ]
+    }
+  }
+}

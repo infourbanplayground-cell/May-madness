@@ -507,6 +507,37 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   rule. With nobody resting it always agreed with the match cards below it; at
   14 players it stops, and the rung read "A · B · K · L" while A and L sat in
   RESTING a few lines down. Same convention the standings table already uses.
+- **GUESTS ARE A DEAD END, and `ops/promote-guests.py` is the way out.**
+  `state.guests` is local to this app: the roster is a live read from August
+  Attack's table and `/save` deletes `state.players`, so a walk-in added on the
+  check-in screen is pickable next week but holds no series or all-time points
+  in any volume and is invisible to Blackout. On **24 Oct 2026 eight of the
+  fourteen playing were guests**, and 20 had accumulated against a 286-name
+  roster.
+  - **Do not promote them blind.** Several are people who already have a
+    record: matched against the roster, "Al muatasim" is Muatasim (1.00 once
+    the article is folded), "Khalili" is Khalil (0.92), "Harith" is Alharith
+    (0.86). A second record splits one person's history permanently and is far
+    harder to undo than it was to cause — see the Ghassan/ghassan pair.
+  - So every guest needs a decision and the script refuses to build without
+    one: `new`, a roster id to merge into, or `skip`. `--write-template`
+    writes `ops/guest-decisions.json` with candidates and scores and every
+    decision `null`.
+  - A promotion keeps the guest's OWN id, so every night they have played
+    still points at them and nothing is rewritten. A **merge** rewrites the id
+    everywhere in `americano_state` — playerIds, each round's teams and
+    sit-outs, the rest rota and `ladder0` — including OBJECT KEYS, because the
+    ladder and court maps are keyed by player id and a value-only walk leaves
+    a merged player standing on their own old court.
+  - **It refuses a merge that would put one person on two courts in the same
+    night** (proved: "Rami and Abdu Aghbari are both in Uprising 10/10/2026").
+  - Run it with no night being played: `DRY=1` first.
+  - The roster has duplicates of its own — Mohammed, Khalid, Muhanad and Mohd
+    each appear twice. Not addressed.
+  - **The real fix is upstream and not built:** the check-in walk-in button
+    should write to the shared roster rather than to `state.guests`, which
+    needs a new write route on the Americano API, since `/save` deliberately
+    refuses player writes.
 - **`ops/uprising-fairness.js` is the fairness audit** (`node
   ops/uprising-fairness.js 1500`). Every player is given identical skill, so
   anything that shows up is the format and not the padel. It sweeps 8 to 24 and
