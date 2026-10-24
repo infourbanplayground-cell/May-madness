@@ -2103,6 +2103,13 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
             const fits = (fair || []).filter(n => nightMinutes(n + shuf, tgt) <= 180);
             const nearest = fits.length ? fits[fits.length - 1] : null;
             const nearestTotal = nearest ? nearest + shuf : null;
+            // MATCHES EACH at that round count, which is not the round count.
+            // The sentence printed nearestTotal as "matches" — at 14 players
+            // on 3 courts it offered "14 scoring rounds would be exactly even
+            // (15 matches)" when 14 scoring rounds is 12 matches each and 15
+            // is the rounds on the board. Same fault CLAUDE.md records being
+            // fixed in the line above this one; it survived here.
+            const nearestEach = nearest && selCount ? (nearest * 4 * upC) / selCount : null;
             const nearestMins = nearest ? nightMinutes(nearestTotal, tgt) : 0;
 
             // Four courts seat sixteen. Past that the extra people are not
@@ -2138,7 +2145,8 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                               play one more match than others, so the table will rank on <b>points per round played</b>.
                               {nearestTotal
                                 ? <Fragment>{" "}<b style={{ color: "var(--cream)" }}>{nearest} scoring rounds</b>{" "}
-                                    would be exactly even ({nearestTotal} matches, {asClock(nearestMins)}).</Fragment>
+                                    would be exactly even ({plural(nearestEach, "match")} each,{" "}
+                                    {nearestTotal} rounds on the board, {asClock(nearestMins)}).</Fragment>
                                 : <Fragment>{" "}No round count that fits an evening shares {selCount} players
                                     out evenly, so this field always ranks per round — which is fair, just less
                                     tidy. Drop to {4 * upC} or go up to {4 * upC + upC} and it comes out exact.</Fragment>}
