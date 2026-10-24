@@ -995,21 +995,24 @@ function rejoins(night) {
 
 test("resting does not change your court", () => {
   // upCourtsAfter only moves players who were in a completed match.
-  const night = playedNight(14, 14, 404);
+  for (const [n, sc] of [[13, 13], [14, 14], [15, 15]]) {
+  const night = playedNight(n, sc, 404);
   for (let i = 0; i < night.rounds.length; i++) {
     const before = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i) });
     const after = upCurrentCourts({ ...night, rounds: night.rounds.slice(0, i + 1) });
     for (const p of night.rounds[i].sitOuts || []) {
       if (!upScoringRound(night, i + 1)) continue;   // the shuffle re-deals by design
       assert.equal(after[p], before[p],
-        `${p} rested round ${i + 1} and their court moved ${before[p]} -> ${after[p]}`);
+        `${n}p: ${p} rested round ${i + 1} and their court moved ${before[p]} -> ${after[p]}`);
     }
+  }
   }
 });
 
 test("a rester rejoins exactly once, on a real court", () => {
-  for (const seed of [11, 22, 33, 44]) {
-    const night = playedNight(14, 14, seed);
+  for (const [n, sc, seed] of [[13, 13, 11], [14, 14, 22], [15, 15, 33], [15, 10, 44],
+                               [13, 13, 55], [14, 14, 66], [15, 15, 77]]) {
+    const night = playedNight(n, sc, seed);
     const C = upCourts(night);
     night.rounds.forEach(r => {
       const seen = new Set();
@@ -1035,13 +1038,15 @@ test("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
   // was not even on court. Fails against the old raw-points ordering, which
   // demoted a returner on about one return in nine.
   let checked = 0;
-  for (const seed of [7, 19, 51, 88, 123, 404, 901]) {
-    const night = playedNight(14, 14, seed);
+  for (const [n, sc, seed] of [[13, 13, 7], [13, 13, 19], [14, 14, 51], [14, 14, 88],
+                               [15, 15, 123], [15, 15, 404], [15, 10, 901],
+                               [13, 13, 2], [14, 14, 3], [15, 15, 5]]) {
+    const night = playedNight(n, sc, seed);
     for (const r of rejoins(night)) {
       if (r.shuffle) continue;              // the shuffle re-deals the ladder by design
       checked++;
       assert.ok(r.back <= r.held,
-        `${r.id} held court ${r.held}, rested round ${r.restRound}, `
+        `${n}p: ${r.id} held court ${r.held}, rested round ${r.restRound}, `
         + `and came back on court ${r.back}`);
     }
   }
@@ -1051,12 +1056,13 @@ test("YOU DO NOT LOSE YOUR COURT BY RESTING", () => {
 test("resting does not promote you either", () => {
   // The mirror of the rule above: if a rest cannot cost you a court it must
   // not win you one, or resting becomes something to angle for.
-  for (const seed of [5, 61, 77, 255]) {
-    const night = playedNight(14, 14, seed);
+  for (const [n, sc, seed] of [[13, 13, 5], [14, 14, 61], [15, 15, 77], [15, 10, 255],
+                               [13, 13, 9], [14, 14, 90], [15, 15, 900]]) {
+    const night = playedNight(n, sc, seed);
     for (const r of rejoins(night)) {
       if (r.shuffle) continue;
       assert.ok(r.back >= r.held,
-        `${r.id} held court ${r.held} and was PROMOTED to ${r.back} by resting`);
+        `${n}p: ${r.id} held court ${r.held} and was PROMOTED to ${r.back} by resting`);
     }
   }
 });
@@ -1064,12 +1070,14 @@ test("resting does not promote you either", () => {
 test("a rest is not a way to dodge the bottom court", () => {
   // Same rule stated where it would pay best: resting on the bottom court
   // cannot lift you off it, and resting on Court 1 cannot be used to hold it.
-  const night = playedNight(14, 14, 2026);
-  const C = upCourts(night);
-  for (const r of rejoins(night)) {
-    if (r.shuffle) continue;
-    if (r.held === C) assert.equal(r.back, C, `${r.id} rested off the bottom court`);
-    if (r.held === 1) assert.equal(r.back, 1, `${r.id} did not hold Court 1 through a rest`);
+  for (const [n, sc] of [[13, 13], [14, 14], [15, 15]]) {
+    const night = playedNight(n, sc, 2026);
+    const C = upCourts(night);
+    for (const r of rejoins(night)) {
+      if (r.shuffle) continue;
+      if (r.held === C) assert.equal(r.back, C, `${n}p: ${r.id} rested off the bottom court`);
+      if (r.held === 1) assert.equal(r.back, 1, `${n}p: ${r.id} did not hold Court 1 through a rest`);
+    }
   }
 });
 
