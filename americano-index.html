@@ -2002,6 +2002,24 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
         : `Heads up: on ${plural(useCourts, "court")} no round count shares ${selCount} players out evenly — this one gives ${schedule.now.min}–${schedule.now.max} matches each — so the standings will rank on points per match.`)
     : null;
 
+  // The UPRISING lede described a DEFAULT night — "four courts, nine rounds,
+  // nobody sits out ... the last round is worth double" — sitting directly
+  // above an advisory computed from the real setup. At 14 players on 3 courts
+  // all four of those claims are wrong, and the two paragraphs contradicted
+  // each other on the same screen. Same rule as the RULES tab: a description
+  // that can disagree with the scoring is worse than none.
+  const upLede = (() => {
+    const C = Math.max(2, Math.min(
+      Number(cfg.upcourts) || UP.COURTS, Math.max(2, Math.floor(selCount / 4)), UP.COURTS));
+    const resting = Math.max(0, selCount - 4 * C);
+    const t = Math.max(4, Math.min(99, Number(cfg.uppoints) || UP.TARGET));
+    const scoring = cfg.upfinish
+      ? upPlanRounds(Number(cfg.upfinish), t,
+          { shuffle: cfg.upshuffle, players: Math.max(8, selCount), courts: C })
+      : Math.max(2, Math.min(40, Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)));
+    return { courts: C, resting, rounds: scoring + upShuffleRounds({ shuffle: cfg.upshuffle }) };
+  })();
+
   return (
     <div className="screen">
       <div>
@@ -2013,8 +2031,12 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
         <p className="lede">
           {cfg.format === "uprising"
             ? <Fragment>
-                Four courts, nine rounds, nobody sits out. Win and you move <b>up</b> a court; lose and you
-                go down. Points are worth more the higher you climb, and the last round is worth double.
+                {plural(upLede.courts, "court")}, {plural(upLede.rounds, "round")}, {upLede.resting
+                  ? <Fragment>{plural(upLede.resting, "player")} {upLede.resting === 1 ? "rests" : "rest"} each round</Fragment>
+                  : <Fragment>nobody sits out</Fragment>}. Win and you move <b>up</b> a court; lose and you
+                go down. Points are worth more the higher you climb{upLede.resting
+                  ? <Fragment>.</Fragment>
+                  : <Fragment>, and the last round is worth double.</Fragment>}
               </Fragment>
             : <Fragment>
                 Partners rotate every round — no fixed teams. Every point your pair wins adds to <b>your own</b> total,
