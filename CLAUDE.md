@@ -966,6 +966,36 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     chart, where the picture is doing the work, and peaks on the 2X stamp and
     the dates. The assertions check that shape, not a monotone rise.
   - Captions are written by the same builder from the same figures.
+- **The 18-SECOND HYPE CUT is `build-hype-video.py`**, led by photographs —
+  a different film from the 35-second one, not a trim of it. That one argues
+  (race chart, form read); this is a hook: four beats, the club's own faces
+  under them, the dates. Figures still come from `ops/blackout-standings.mjs`.
+  ```bash
+  ops/crop-session-photos.sh
+  python3 build-hype-audio.py && python3 build-hype-video.py
+  node record-hype-video.mjs
+  ```
+  - **The session photos arrive already branded** — border, footer bar and a
+    URL, one of them still `attack.urbanpadel.om` from Vol.6. Used as-is that
+    is a frame inside a frame with two different URLs on screen, so
+    `ops/crop-session-photos.sh` strips 3% a side and 16% off the foot and
+    fills 1080x1920 before the builder sees them.
+  - **The picture changes on a hit, not between them** — that is the whole
+    difference between a cut and a slideshow. Nine cuts on the beat table the
+    score shares, each photo pushing in slowly, directions alternating so
+    consecutive cuts do not all drift the same way.
+  - **A tinting overlay must sit UNDER the type.** The magenta 2X wash was at
+    `z-index:7` against the scenes' 5, so it tinted the headline too and
+    "DOUBLE POINTS." rendered grey and ghosted over a lit photograph. It is
+    `z-index:4` now — it belongs to the picture.
+  - **Type over a photograph needs a surface, not just a shadow.** Four
+    standings rows over four lit torsos were unreadable on a gradient alone;
+    they sit on a `.plate` with a lime top rule. The scrim is also heavier
+    from 54% down, where all the copy lives.
+  - The bed is **`build-hype-audio.py`**, deliberately not the synthwave one —
+    see its own notes. The recorder reads the outro's start off the page
+    (`window.__outro`) rather than carrying times that go stale when the cut
+    changes.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
