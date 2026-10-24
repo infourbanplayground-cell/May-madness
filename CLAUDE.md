@@ -451,6 +451,36 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     rest count against the CURRENT field size, so adding a seventeenth player
     at round 6 fails validation on rounds 1 to 5. The same per-round-history
     fix the court change needed would do it; it has not been done.
+- **NOBODY MOVES MORE THAN ONE COURT FROM WHERE THEY LAST PLAYED.** The
+  owner's rule, called live on 24 Oct 2026: Khalili lost on Court 1 in round 2
+  (down to 2), rested round 3, and the round-4 overflow put him on Court 3.
+  Two legal single steps — but one happened while he was off court, so from
+  the side of the court he went 1 to 3 without playing a ball.
+  - It is a **cap, not an exemption**, which is why it succeeded where the
+    returner-first rule failed. It protects nobody from the overflow; it
+    limits how far the overflow can carry you and then picks the person who
+    can absorb it without breaking their own cap.
+  - **A player who just won is NEVER the one moved to make room.** If the only
+    candidate won, the swap does not happen and the jump stands. That order
+    was settled the hard way the same night: a winner pushed back down happens
+    in front of everybody and contradicts the one line on the board, while a
+    jump is noticed by the player it happens to and explains in a sentence.
+  - "Just won" means **the round just played**, not the last match they
+    played. Amjad won in round 2, took the court it earned him and then
+    rested, so he had nothing outstanding and was the right person to absorb
+    round 4's overflow. The looser test pushed Reaf down instead, and Reaf had
+    won round 3.
+  - **It reduces, it does not eliminate.** Measured on identical nights, 2,000
+    round transitions at 13/14/15/17 players: two-court jumps **189 -> 55**,
+    winners pushed down **42 -> 43**. A big win on the first and a wash on the
+    second, and the test asserts those bounds rather than zero — with more
+    claims than seats, somebody who did not lose goes down every round.
+  - **Winners being pushed down is NOT caused by any of this** and predates
+    all of it: the plain ladder slice does it 42 times in 2,000 transitions.
+    What the withdrawn returner-first rule did was make it hit Rawas in the
+    one round everybody was watching.
+  - With nobody resting nothing fires: every player's last appearance is the
+    round just played and every move is exactly one court.
 - **A REST NEVER MOVES YOU — TRIED, AND WITHDRAWN MID-NIGHT ON 24 OCT 2026.**
   Whenever anybody rests there are more claims on the seats than seats, so
   somebody who did not lose a match goes down every round and the overflow

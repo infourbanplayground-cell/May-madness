@@ -1232,58 +1232,89 @@ function upBuildRound(night) {
   // re-pair it, exactly as it does not un-double it.
   const decider = roundNum === N;
 
-  // WITHDRAWN 24 OCT 2026, MID-NIGHT. Seating returners first on the court
-  // they held does stop a rest costing you a court — but it makes somebody
-  // else pay, and on the first live night it picked the worst possible payer.
+  // NOBODY MOVES MORE THAN ONE COURT FROM WHERE THEY LAST PLAYED.
   //
-  // Round 4: Court 2 had SIX claims. Khalili and Amjad had rested round 3 and
-  // held it, so they were seated first, and Ahmed Rawas — who had just won
-  // 11-3 on Court 3 — was pushed down instead. His partner Reaf went up. The
-  // rule SPLIT A WINNING PAIR, in front of everybody, against the one promise
-  // the board and every poster makes: win and you go up.
+  // The owner's rule, called on the night of 24 Oct 2026 watching it happen:
+  // Khalili lost on Court 1 in round 2 (down to 2), rested round 3, and the
+  // round-4 overflow put him on Court 3. Two legal single steps — but one of
+  // them happened while he was off court, so from the side of the court he
+  // went from Court 1 to Court 3 without playing a ball in between.
   //
-  // That is a worse failure than the one it fixed. A returner quietly losing
-  // a court is invisible; a winner denied the climb he just earned is not.
-  // The seats are left computed below but unused — the right rule is probably
-  // that the overflow falls on whoever did NOT just win, which needs
-  // measuring, not a third guess during a live night.
+  // This is the rule that satisfies BOTH complaints of that night. The
+  // earlier attempt — seat returners first, exempt from the overflow — made
+  // a winner pay instead and split a winning pair (see the withdrawal note
+  // in the history). This does not exempt anybody; it caps how far the
+  // overflow can carry you, and then picks the person who can absorb it
+  // without breaking their own cap, PREFERRING SOMEBODY WHO DID NOT JUST WIN.
   //
-  // A REST NEVER MOVES YOU — seat the returners first, on the court they held.
+  // On that round-4 board the only violation was Khalili, and Amjad could
+  // take it at a cost of nothing — he last played Court 3, so dropping to
+  // Court 3 is no movement at all, and he had rested rather than won.
   //
-  // Whenever anybody rests there are more claims on the seats than seats, and
-  // the overflow cascades: five claims on Court 1 pushes one down into Court 2,
-  // which makes six there, which pushes one into Court 3. Slicing the ladder
-  // into fours made the returner absorb that, because they banked nothing
-  // while the three they left banked and so sat lowest in their band.
-  // Measured at 14 on 3 over 15 rounds, they were demoted on 10.6% of returns,
-  // and the pair that first rested in round 2 won the night 5.6% of the time
-  // against a 7.2% average (z = -12.1, permutation-control noise floor 1.04x).
+  // Best effort, not a guarantee: the swap needs a partner who is legal both
+  // ways, and sometimes there is none. It never makes a violation worse and
+  // it never changes who is resting.
   //
-  // Ranking them high in the band instead only swaps the fault round: they
-  // stop absorbing overflow and start filling gaps ABOVE, so a rest begins
-  // promoting people. Exempting them from the re-pack is the rule that holds
-  // in both directions — they keep the court they held, and the players who
-  // were actually on court fill in around them.
-  //
-  // Seats always go: 4*C seats, at most C*4 - 1 returners in practice and
-  // never more than the rest count, so the remainder is always fillable.
-  const back = new Set((rounds[rounds.length - 1] || {}).sitOuts || []);
-  const held = upCurrentCourts(night);
-  const seats = Array.from({ length: C }, () => []);
-  const returners = playing.filter(p => back.has(p));
-  returners.forEach(p => {
-    const c = Math.max(1, Math.min(C, held[p] || C));
-    if (seats[c - 1].length < 4) seats[c - 1].push(p);
+  // With nobody resting every player's last appearance is the round just
+  // played and every move is exactly one court, so nothing here fires — the
+  // seating is the plain ladder slice, as it has always been.
+  const lastPlayed = {};
+  (night.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+    if (!upMatchDone(m)) return;
+    [...m.team1, ...m.team2].forEach(p => { lastPlayed[p] = m.court; });
+  }));
+  // Protected: won the round JUST PLAYED, so their climb is still owed. Not
+  // "won the last match they played" — Amjad won in round 2, took the court
+  // that win earned him and then rested, so he has nothing outstanding and is
+  // exactly the right person to absorb an overflow. Using the looser test
+  // pushed Reaf down instead, and Reaf had won round 3.
+  const justWon = new Set();
+  (last ? last.courts || [] : []).forEach(m => {
+    if (!upMatchDone(m)) return;
+    (m.score1 > m.score2 ? m.team1 : m.team2).forEach(p => justWon.add(p));
   });
-  const placed = new Set(returners.filter(p => seats.some(s => s.includes(p))));
-  const queue = playing.filter(p => !placed.has(p));
-  for (let c = 0; c < C; c++) {
-    while (seats[c].length < 4) seats[c].push(queue.shift());
+  const seats = Array.from({ length: C }, (_, c) => playing.slice(c * 4, c * 4 + 4));
+  const tooFar = (p, court) =>
+    lastPlayed[p] !== undefined && Math.abs(court - lastPlayed[p]) > 1;
+
+  for (let pass = 0; pass < 2 * C; pass++) {
+    let moved = false;
+    for (let c = 0; c < C; c++) {
+      for (let i = 0; i < seats[c].length; i++) {
+        const p = seats[c][i];
+        if (!tooFar(p, c + 1)) continue;
+        const dir = lastPlayed[p] < c + 1 ? -1 : 1;
+        const d = c + dir;
+        if (d < 0 || d >= C || tooFar(p, d + 1)) continue;
+        // Among the players who could legally take p's seat, take the one who
+        // did NOT just win: a winner pushed back down is the failure this
+        // rule's predecessor shipped, and it is the more visible of the two.
+        // A player who just won is NEVER the one moved to make room. If the
+        // only candidate won, the swap does not happen and the two-court jump
+        // stands. That order is deliberate and was settled the hard way on 24
+        // Oct 2026: pushing a winner back down is the more visible wrong of
+        // the two — it happens in front of everybody and contradicts the one
+        // line on the board — while a jump is noticed by the player it
+        // happens to and explains in a sentence.
+        let best = -1;
+        for (let k = 0; k < seats[d].length; k++) {
+          const q = seats[d][k];
+          if (tooFar(q, c + 1) || justWon.has(q)) continue;
+          best = k; break;
+        }
+        if (best < 0) continue;
+        const q = seats[d][best];
+        seats[d][best] = p;
+        seats[c][i] = q;
+        moved = true;
+      }
+    }
+    if (!moved) break;
   }
 
   const out = { roundNum, sitOuts, courts: [] };
   for (let c = 1; c <= C; c++) {
-    const on = playing.slice((c - 1) * 4, c * 4);
+    const on = seats[c - 1];
     const [A, B] = upPairCourt(on, totals, seen, lastUsed, decider);
     seen.add(upPairKey(...A)); seen.add(upPairKey(...B));
     lastUsed.set(upPairKey(...A), roundNum); lastUsed.set(upPairKey(...B), roundNum);

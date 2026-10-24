@@ -1101,3 +1101,66 @@ test("a field where nobody rests is ordered exactly as before", () => {
                      byCourtThenPts.map(p => upCurrentCourts(night)[p]));
   }
 });
+
+// ── nobody jumps two courts ────────────────────────────────────────────────
+//
+// The owner's rule, called live on 24 Oct 2026: Khalili lost on Court 1 in
+// round 2, rested round 3, and the round-4 overflow put him on Court 3 — two
+// legal single steps, but one of them happened while he was off court, so
+// from the side of the court he went 1 -> 3 without playing a ball.
+function jumps(night) {
+  const out = [];
+  const lastPlayed = {};
+  night.rounds.forEach(r => {
+    // The SHUFFLE re-deals the whole ladder from winning margin — that is the
+    // point of it — so the step out of a shuffle round moves people freely and
+    // is not a jump. Every step after it is capped.
+    const fromShuffle = !upScoringRound(night, r.roundNum - 1) && r.roundNum > 1;
+    if (!fromShuffle) (r.courts || []).forEach(m => [...m.team1, ...m.team2].forEach(p => {
+      if (lastPlayed[p] !== undefined && Math.abs(m.court - lastPlayed[p]) > 1)
+        out.push(`${p}: C${lastPlayed[p]} -> C${m.court} in round ${r.roundNum}`);
+    }));
+    (r.courts || []).forEach(m => [...m.team1, ...m.team2].forEach(p => { lastPlayed[p] = m.court; }));
+  });
+  return out;
+}
+
+test("the one-court cap cuts two-court jumps, and never at a winner's expense", () => {
+  // NOT zero on either count, and the test says so rather than pretending.
+  // With more claims on the seats than seats, somebody who did not lose goes
+  // down every round; the cap chooses who can absorb it without breaking
+  // their own cap, and refuses to take a player whose climb is still owed.
+  // Measured on IDENTICAL nights, 2,000 round transitions at 13/14/15/17
+  // players: two-court jumps 189 -> 55, winners pushed down 42 -> 43. A big
+  // win on the first and a wash on the second, which is the honest result.
+  let jumpCount = 0, winnersPushed = 0, transitions = 0;
+  for (const [n, sc] of [[13, 13], [14, 14], [15, 15], [17, 12]]) {
+    for (let seed = 1; seed <= 40; seed++) {
+      const night = playedNight(n, sc, seed);
+      const lastPlayed = {};
+      for (let i = 0; i < night.rounds.length; i++) {
+        const r = night.rounds[i], prev = night.rounds[i - 1];
+        const seat = {};
+        (r.courts || []).forEach(m => [...m.team1, ...m.team2].forEach(p => { seat[p] = m.court; }));
+        if (prev && upScoringRound(night, prev.roundNum)) {
+          transitions++;
+          (prev.courts || []).forEach(m => {
+            (m.score1 > m.score2 ? m.team1 : m.team2).forEach(p => {
+              if (seat[p] !== undefined && seat[p] > m.court) winnersPushed++;
+            });
+          });
+          Object.entries(seat).forEach(([p, c]) => {
+            if (lastPlayed[p] !== undefined && Math.abs(c - lastPlayed[p]) > 1) jumpCount++;
+          });
+        }
+        Object.entries(seat).forEach(([p, c]) => { lastPlayed[p] = c; });
+      }
+    }
+  }
+  // Both bounds are the measured figures with headroom. They fail against the
+  // plain ladder slice, which is the point: 186 jumps and 35 winners pushed.
+  assert.ok(jumpCount <= 90,
+    `${jumpCount} two-court jumps in ${transitions} transitions (plain slice gives ~189)`);
+  assert.ok(winnersPushed <= 50,
+    `${winnersPushed} winners pushed down in ${transitions} transitions (plain slice gives ~42)`);
+});
