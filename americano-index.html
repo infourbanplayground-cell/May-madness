@@ -1684,6 +1684,36 @@ function defaultScoringRounds(shuffle) {
   return Math.max(2, UP.ROUNDS - upShuffleRounds({ shuffle }));
 }
 
+// The round count to RECOMMEND: the one that gives everybody the same number
+// of matches and lands closest to the club's usual night length.
+//
+// "Even" is the hard requirement — the organiser has to be told which counts
+// share the rests out, and at 13 players there is exactly one. Among those,
+// closest-to-the-norm beats longest-that-fits: the old advisory suggested the
+// longest even count inside three hours, which at 15 players is 16 rounds and
+// 2h40 when 11 rounds is just as even and finishes at 1h50.
+//
+// UP.ROUNDS is the norm (12 rounds, about two hours at first to 11), so the
+// target is whatever that many rounds takes at the target score actually set.
+// Returns SCORING rounds, which is what the organiser's own field holds, or
+// null when nothing even fits an evening.
+//
+// Not `up`-prefixed: that belongs to the engine, and build-americano-app.py
+// refuses any up*() call it cannot find there.
+function recommendedScoring(players, courts, tgt, shuffle) {
+  const shuf = upShuffleRounds({ shuffle });
+  const fair = upFairRounds(players, courts, 40);
+  const want = nightMinutes(UP.ROUNDS, tgt);
+  // No rest means every count is even and upFairRounds has nothing to say, so
+  // the norm itself is the answer.
+  if (!fair || !fair.length) return Math.max(2, UP.ROUNDS - shuf);
+  const fits = fair.filter(sc => nightMinutes(sc + shuf, tgt) <= 180);
+  if (!fits.length) return null;
+  return fits.reduce((best, sc) =>
+    Math.abs(nightMinutes(sc + shuf, tgt) - want)
+      < Math.abs(nightMinutes(best + shuf, tgt) - want) ? sc : best);
+}
+
 function circlePairRounds(n) {
   const arr = Array.from({ length: n }, (_, i) => i);
   if (n % 2 === 1) arr.push(-1);
@@ -2307,6 +2337,26 @@ function Setup({ people, canEdit, cfg, setCfg, sel, setSel, onStart, onAddGuest 
                 <div className="hair" style={{ paddingTop: 0, borderTop: 0 }}>
                   <div className="label" style={{ marginBottom: 9 }}>Everyone off court by</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                    {/* THE RECOMMENDATION, first and lit. The clock chips pick a
+                        round count that fills the time, which is only even by
+                        luck: at 15 players "2h30" lands on a count where some
+                        play one more match than others. This one is even by
+                        construction and closest to the club's usual night, and
+                        it is the chip most organisers should just tap. */}
+                    {(() => {
+                      const rec = recommendedScoring(selCount, upC2, tgt, cfg.upshuffle);
+                      if (!rec || selCount < 8) return null;
+                      const board = rec + upShuffleRounds({ shuffle: cfg.upshuffle });
+                      const on = !Number(cfg.upfinish)
+                        && Math.max(2, Number(cfg.uprounds) || defaultScoringRounds(cfg.upshuffle)) === rec;
+                      return (
+                        <button type="button" className={"rchip" + (on ? " on" : "")}
+                          style={{ padding: "9px 13px", fontSize: 12 }}
+                          onClick={() => setCfg(c => ({ ...c, upfinish: 0, uprounds: String(rec) }))}>
+                          Recommended &middot; {board} rds
+                        </button>
+                      );
+                    })()}
                     {[[120, "2h"], [150, "2h30"], [180, "3h"], [0, "Set rounds myself"]].map(([v, lab]) => {
                       const on = (Number(cfg.upfinish) || 0) === v;
                       const sc = v ? upPlanRounds(v, tgt, { shuffle: cfg.upshuffle,

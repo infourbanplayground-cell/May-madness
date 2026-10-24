@@ -506,6 +506,28 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     plus — so the planner fills the clock instead and some play one more match.
     `upUneven` then puts the table on points per round, which is the designed
     answer, not a hole.
+- **The setup screen RECOMMENDS a round count**, as the first chip in the
+  "Everyone off court by" row: `Recommended · 15 rds`. It sets the organiser's
+  own scoring-rounds field, so tapping it is the same as typing the number.
+  - `recommendedScoring()` (app-level, deliberately not `up`-prefixed) takes
+    the even counts from `upFairRounds` and picks the one landing CLOSEST to
+    the club's usual night — `UP.ROUNDS` rounds at whatever target is set —
+    rather than the longest that fits three hours. At 15 players the longest
+    is 16 rounds and 2h40 when 11 rounds is just as even and finishes at 1h50.
+    With nobody resting every count is even and `upFairRounds` returns null,
+    so the norm itself is the answer.
+  - **The clock chips are even only by luck.** They fill the time: at 15
+    players "2h30" lands on a count where some play one more match than
+    others. That is what the recommendation exists to stop an organiser doing
+    by default.
+  - Checked in a browser at 13, 14, 15 and 16 — recommends 14, 15, 11 and 12
+    rounds on the board, and the advisory confirms equal play at each.
+- **The round count does NOT carry across field sizes**, which is the trap on
+  a night where turnout differs from the plan. On 3 courts: 13 players is even
+  only at 13 scoring rounds, 14 at 7 or 14, and 15 at 5, 10 or 15. Setting up
+  15 players with the 14 that was right for 14 players quietly breaks equal
+  play. 12 and 16 rest nobody, so any count is even and the double final
+  returns.
 - **The setup screen states all of this before the night starts**, and the
   Rounds sheet restates it whenever the organiser moves the finish line: how
   many rounds, how many MATCHES EACH, whether that is the same for everybody,
