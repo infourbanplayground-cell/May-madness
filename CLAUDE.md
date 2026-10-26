@@ -1030,6 +1030,31 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     cannot pass. `APP=<old build>` points it at another build — proved by
     flipping the table to A1 v A2, which fails on both the letter rule and on
     "no quarter-final repeats a group match".
+- **The logo WITHOUT a background is `ops/render-blackout-transparent.mjs`.**
+  All the shipped brand art is rendered ONTO #050505 and is opaque, so dropping
+  `blackout-lockup.png` on anything that is not true black puts a black slab on
+  the design. The renderer transforms the SHIPPED pages rather than redrawing
+  them — strips the page background and the scan/glow overlays, which print
+  lime stripes over whatever the logo is placed on — and writes five cut-outs:
+  `blackout-lockup-transparent{,-dark}.png`,
+  `blackout-stack-transparent{,-dark}.png` and `blackout-mark-transparent.png`.
+  - **TWO INKS**, the same rule as the UPRISING lockup: a transparent file goes
+    wherever somebody drops it and one ink only works on half of those places.
+  - On the light version the lime OUT becomes **magenta**. Lime on white is
+    about 1.4:1 — the same failure DESIGN.md already records for cream on a
+    volt fill, which "looked fine in a screenshot and was very nearly
+    invisible". The mark keeps its lime: it carries its own dark bars, so it
+    reads on either background and needs no second version.
+  - It trims to the ink and gives back a fixed 56px margin, because the source
+    canvas is laid out for a dark slide and a straight export carries a wide
+    transparent border on one side and almost none on the other — on a cut-out
+    that reads as the logo sitting off-centre in whatever it is placed into.
+  - Checks: the alpha is REAL (corners clear, not wholly transparent, under 90%
+    opaque — an opaque rectangle looks perfect on a dark slide and ruins a
+    white one), the margin is really clear (which is also the no-ink-at-the-crop
+    check), and Archivo was drawn, measured against the same stack falling back.
+    Proved by compositing all five on black, dark blue, white, cream and a
+    mid-tone.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
