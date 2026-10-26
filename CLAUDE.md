@@ -1020,10 +1020,13 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     the two runners-up leaves the slots where they were. If the club wants A1
     and C1 able to meet in a semi-final rather than a final, swap the middle
     two rows of `CROSS`.
-  - **The manual seed editor does not rewrite the `s1`/`s2` label strings**, so
-    26 Oct's stored bracket reads "A1 v B2" against a team from group D. The
-    labels are cosmetic — they drive the bracket screen and the share cards,
-    not the scoring — but they are wrong on screen. Not fixed in the database.
+  - **26 Oct's stored bracket reads "A1 v B2" against a team from group D.**
+    `QFSeedingModal` is not the culprit — it keeps `s2` with the team it moves.
+    `BracketEditModal` is: it was the only way to change WHO is in a match and
+    it never touched `s1`/`s2`. Both editors now re-derive the label from the
+    team's own group standings. The labels are cosmetic — they drive the
+    bracket screen and the share cards, not the scoring — but 26 Oct's are
+    still wrong in the database, which is not fixed.
   - `ops/check-seeding.mjs` runs the rule against a real night using the app's
     own normalised standings, and reads the `CROSS` table out of the shipped
     file rather than retyping it, so a build that drifts back to merit seeding
@@ -1055,6 +1058,49 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     check), and Archivo was drawn, measured against the same stack falling back.
     Proved by compositing all five on black, dark blue, white, cream and a
     mid-tone.
+- **A CORRECTED GROUP SCORE REDRAWS THE BRACKET IN EVERY FORMAT.** Reported
+  from the 26 Oct night — "if the score is incorrect after correcting it
+  doesn't change who's through" — and it was true on any night that was not
+  three groups.
+  - The auto re-seed was deliberately limited to 3-group sessions, on the
+    argument that other formats take a fixed top-N per group where a late
+    result "rarely changes who is in". Wrong twice: a correction can drop a
+    team from 2nd to 3rd, and on a top-2 night 3rd does not qualify at all;
+    and now that the draw crosses by letter, the order inside a group IS the
+    fixture, so swapping 1st and 2nd changes two quarter-finals.
+  - The guards that protect real work are unchanged and are the ones that
+    matter: nothing is redrawn once a knockout match has a result
+    (`koLocked`), or once the organiser has arranged the bracket by hand
+    (`seedManual`). Both are asserted.
+  - **The re-seed is an effect inside `BracketTab`**, so it fires when the
+    bracket screen is open, not the instant the score is locked on another
+    tab. In practice the organiser goes and looks; it is worth knowing when
+    reading the state straight out of the database.
+  - When it CANNOT redraw — the knockout has started and a group result has
+    changed since — the locked line now says so in magenta instead of only
+    "seeding is locked". Silently showing a bracket that disagrees with the
+    tables under it is how this went unnoticed for a whole night.
+- **CHANGING WHO IS IN A KNOCKOUT MATCH NO LONGER DEMANDS A SCORE.** The other
+  half of the same report: "when I change the names after correcting, I have
+  to input scores."
+  - `BracketEditModal` carries the two team pickers, but its only save was the
+    one that locks a RESULT — disabled with "PICK BOTH SCORES" until a score
+    is entered, always writing `...derived` plus a `celebrate()` banner saying
+    somebody had gone through. Correcting a pairing on a match nobody had
+    played meant inventing a score, and the match then counted as played.
+  - There is now a **Save teams only — no score** action, shown once the teams
+    have actually been changed. It re-derives both seed labels from the group
+    tables and **clears any result already on the match**, with a line saying
+    so — a score belonged to the two teams that played it, and leaving it
+    attached to two different names is the same class of lie as a stale label.
+  - `ops/check-ko-edit.mjs` drives both faults through the REAL components:
+    `BracketTab` is a top-level function, so the page mounts it directly with
+    a chosen session rather than clicking four brittle hops down from the home
+    screen. It reads the session the component WROTE, not the pixels — a
+    bracket row can look right while the state behind it carries a result
+    nobody played. `APP=<build>` points it at another build; against the one
+    before the fix, A is not redrawn and B reports "there is no way to save a
+    team change without a score".
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.

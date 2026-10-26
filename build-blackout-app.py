@@ -408,6 +408,19 @@ def add_screens(s, report):
                            # The owner's 26 Oct call: the four-group draw
                            # crosses by letter, not by merit.
                            ("ko seeding", SCREENS.KO_SEED_OLD, SCREENS.KO_SEED_NEW),
+                           # A corrected group score must redraw the bracket in
+                           # every format, and changing who is in a knockout
+                           # match must not demand a score. Both reported from
+                           # the 26 Oct night; the button splices anchor on the
+                           # Blackout LockButton, so they follow "ko lock".
+                           ("reseed: all formats", SCREENS.RESEED_OLD, SCREENS.RESEED_NEW),
+                           ("reseed: copy", SCREENS.RESEED_COPY_OLD, SCREENS.RESEED_COPY_NEW),
+                           ("reseed: locked notice", SCREENS.RESEED_LOCK_OLD, SCREENS.RESEED_LOCK_NEW),
+                           ("ko teams: signature", SCREENS.KO_TEAMS_SIG_OLD, SCREENS.KO_TEAMS_SIG_NEW),
+                           ("ko teams: mount", SCREENS.KO_TEAMS_MOUNT_OLD, SCREENS.KO_TEAMS_MOUNT_NEW),
+                           ("ko teams: seed labels", SCREENS.KO_TEAMS_CALC_OLD, SCREENS.KO_TEAMS_CALC_NEW),
+                           ("ko teams: lock labels", SCREENS.KO_TEAMS_BTN_OLD, SCREENS.KO_TEAMS_BTN_NEW),
+                           ("ko teams: save teams", SCREENS.KO_TEAMS_ROW_OLD, SCREENS.KO_TEAMS_ROW_NEW),
                            ):
         assert old in s, f"{name}: anchor no longer matches"
         s = s.replace(old, new, 1)

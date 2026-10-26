@@ -6044,3 +6044,192 @@ KO_SEED_NEW = """      } else {
         }));
         applyBracket({ qf, sf: [], final: null } );
       }"""
+
+
+# ── A corrected group score must redraw the bracket, in EVERY format ──────
+# Reported from the 26 Oct night: "if the score is incorrect after correcting
+# it doesn't change who's through."
+#
+# It was true, and only for 4-group nights. The auto re-seed was deliberately
+# limited to 3 groups on the argument that the other formats "take a fixed
+# top-N per group, where a late result reorders the group but rarely changes
+# who is in". That was wrong twice over:
+#
+#   · it DOES change who is in. A corrected score can move a team from 2nd to
+#     3rd, and on a top-2 night 3rd does not qualify at all.
+#   · and since the draw now crosses by LETTER, the order inside a group is
+#     the whole fixture: 1st plays one group's runner-up and 2nd plays
+#     another's, so swapping 1st and 2nd changes two quarter-finals.
+#
+# The guards that actually protect anything are unchanged and are the ones
+# that matter: nothing is redrawn once a knockout match has been played
+# (koLocked), or once the organiser has arranged the bracket by hand
+# (seedManual). Everything else was format gatekeeping.
+RESEED_OLD = """  // DELIBERATELY LIMITED TO 3-GROUP SESSIONS. That format seeds 8 from 3
+  // groups, so two of the three third-place teams qualify and their ranking
+  // decides both the last QF seed and who plays the qualifier — the part that
+  // actually moved when a late result landed. The other formats take a fixed
+  // top-N per group, where a late result reorders the group but rarely changes
+  // who is in, so re-seeding them is churn on a live bracket for little gain.
+  //
+  // Re-seeding is skipped whenever it could destroy something: once any
+  // knockout match has a result (koLocked), or when an admin has deliberately
+  // arranged the seeding by hand (seedManual). Silent, so a tie or an
+  // incomplete group just waits for the organizer rather than popping alerts.
+  const autoReseedFormat = getSessionGroups(session).length === 3;
+  useEffect(() => {
+    if (!canScore || !groupStageComplete) return;
+    if (koLocked || session.seedManual) return;
+    if (!autoReseedFormat) {
+      // Other formats keep the original behaviour: seed once, never redraw.
+      if (!bracketEmpty) return;
+    } else if (!bracketEmpty && session.seedSig === seedInputSig) {
+      return;  // already current
+    }
+    seedQF(true);
+  }, [canScore, groupStageComplete, bracketEmpty, koLocked, autoReseedFormat, session.seedManual, session.seedSig, seedInputSig]);"""
+RESEED_NEW = """  // EVERY FORMAT, not just three groups. This used to be limited to 3-group
+  // nights on the argument that the others take a fixed top-N per group and a
+  // late result "rarely changes who is in". Both halves were wrong: a
+  // correction can drop a team from 2nd to 3rd, and on a top-2 night 3rd does
+  // not qualify at all; and since the draw crosses by letter, the order inside
+  // a group IS the fixture, so swapping 1st and 2nd changes two
+  // quarter-finals. Reported from the 26 Oct night, where a corrected group
+  // score left the bracket saying the wrong people were through.
+  //
+  // Re-seeding is still skipped whenever it could destroy something: once any
+  // knockout match has a result (koLocked), or when an admin has deliberately
+  // arranged the seeding by hand (seedManual). Silent, so a tie or an
+  // incomplete group just waits for the organizer rather than popping alerts.
+  useEffect(() => {
+    if (!canScore || !groupStageComplete) return;
+    if (koLocked || session.seedManual) return;
+    if (!bracketEmpty && session.seedSig === seedInputSig) return;  // already current
+    seedQF(true);
+  }, [canScore, groupStageComplete, bracketEmpty, koLocked, session.seedManual, session.seedSig, seedInputSig]);
+
+  // Whether the bracket on screen was drawn from the group results as they
+  // stand NOW. When it was not and nothing can be redrawn — because the
+  // knockout has started — the screen has to say so. Silently showing a
+  // bracket that disagrees with the tables underneath it is how "it doesn't
+  // change who's through" goes unnoticed until somebody is on the wrong court.
+  const seedStale = !bracketEmpty && !!session.seedSig && session.seedSig !== seedInputSig;"""
+
+# The format sentence under the bracket: there is one behaviour now, so there
+# is one sentence. The third branch described the format that no longer exists.
+RESEED_COPY_OLD = """                {session.seedManual
+                  ? <><I.alert size={10} /> Seeded by hand — it won't follow group-result changes. Re-seed to resume auto.</>
+                  : autoReseedFormat
+                  ? <>Seeding follows the group results automatically until a knockout score is entered.</>
+                  : <>Seeded from the final group standings. Edit a group result and re-seed to redraw.</>}"""
+RESEED_COPY_NEW = """                {session.seedManual
+                  ? <><I.alert size={10} /> Seeded by hand — it won't follow group-result changes. Re-seed to resume auto.</>
+                  : <>Seeding follows the group results automatically until a knockout score is entered.</>}"""
+
+# And the locked line gains the warning. It is the one place a scorer looks
+# after correcting a group score, and until now it only said "locked".
+RESEED_LOCK_OLD = """          ? <div className="text-[10px] text-stone-500 flex items-center gap-1 px-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>"""
+RESEED_LOCK_NEW = """          ? <div className="px-1 space-y-1">
+              <div className="text-[10px] text-stone-500 flex items-center gap-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>
+              {seedStale && <div className="flex gap-2 p-2" style={{ background:"rgba(255,46,136,.10)", border:"1px solid rgba(255,46,136,.4)" }}>
+                <I.alert size={12} className="shrink-0 mt-0.5" style={{ color:"#FF2E88" }} />
+                <div className="text-[10px]" style={{ color:"#CFCFCF" }}>
+                  <span className="font-bold" style={{ color:"#FF2E88" }}>A group result changed after this bracket was drawn.</span>{" "}
+                  The knockout has already been played, so nothing is redrawn — this bracket may no longer match the group tables. Fix the pairings by hand if it matters.
+                </div>
+              </div>}
+            </div>"""
+
+
+# ── Changing WHO is in a knockout match must not demand a score ──────────
+# Reported from the 26 Oct night: "when I change the names after correcting,
+# I have to input scores I need to change."
+#
+# True, and it is the only way the bracket's pairings can be corrected by
+# hand. BracketEditModal carries the two team pickers, but the only button
+# that saves anything is the one that locks a RESULT: it is disabled with
+# "PICK BOTH SCORES" until a score is entered, and it always writes
+# `...derived` — winner, loss type and score — plus a celebrate() banner
+# announcing that somebody has gone through. So correcting a pairing on a
+# match nobody has played forces the organiser to invent a score, and the
+# match is then a played one.
+#
+# It also never refreshed s1/s2, which are the seed labels drawn beside each
+# name — which is why 26 Oct's stored bracket reads "A1 v B2" against a team
+# out of group D.
+#
+# So: a second action that saves the TEAMS alone. It appears only when the
+# teams have actually been changed, it re-derives both seed labels from the
+# group tables, and it CLEARS any result already on the match — a score
+# belonged to the two teams that played it, and leaving it attached to two
+# different names would be the same class of lie as the stale labels.
+KO_TEAMS_SIG_OLD = """function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onReset }) {"""
+KO_TEAMS_SIG_NEW = """function BracketEditModal({ match, teams, state, session, isAdmin, onClose, onSave, onReset }) {"""
+
+KO_TEAMS_MOUNT_OLD = """      {edit && <BracketEditModal match={edit} teams={teams} state={state} isAdmin={isAdmin} onClose={() => setEdit(null)}"""
+KO_TEAMS_MOUNT_NEW = """      {edit && <BracketEditModal match={edit} teams={teams} state={state} session={session} isAdmin={isAdmin} onClose={() => setEdit(null)}"""
+
+KO_TEAMS_CALC_OLD = """  const titles = { r16: "ROUND OF 16", qf: "QUARTERFINAL", sf: "SEMIFINAL", final: "FINAL", thirdsPlayoff: "3RDS QUALIFIER" };"""
+KO_TEAMS_CALC_NEW = """  const titles = { r16: "ROUND OF 16", qf: "QUARTERFINAL", sf: "SEMIFINAL", final: "FINAL", thirdsPlayoff: "3RDS QUALIFIER" };
+  // The seed label is a fact about where a team FINISHED, so it is read back
+  // off the group tables rather than carried along with the slot. Left alone
+  // it says "B2" beside a team out of group D, which is what the bracket on
+  // the server said all through the 26 Oct knockout.
+  const seedLabelOf = (tid) => {
+    const t = teams.find(x => x.id === tid);
+    if (!t || !t.group || !session) return null;
+    try {
+      const rows = calcGroupStandingsNormalized(session, t.group);
+      const i = rows.findIndex(r => r.team && r.team.id === tid);
+      return i >= 0 ? t.group + (i + 1) : null;
+    } catch (e) { return null; }
+  };
+  const teamsChanged = (t1 || "") !== (match.team1Id || "") || (t2 || "") !== (match.team2Id || "");
+  const hadResult = !!match.winner;"""
+
+KO_TEAMS_BTN_OLD = """        <LockButton
+          why={s1 === null || s2 === null ? "PICK BOTH SCORES"
+             : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+             : !canConfirm ? "PICK BOTH TEAMS" : null}
+          onLock={() => {
+            celebrate(lbl(derived.winner === "team1" ? t1 : t2) + " GO THROUGH");
+            onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() });
+            onClose();
+          }} />"""
+KO_TEAMS_BTN_NEW = """        <LockButton
+          why={s1 === null || s2 === null ? "PICK BOTH SCORES"
+             : s1 === s2 ? "SCORES CAN'T BE LEVEL"
+             : !canConfirm ? "PICK BOTH TEAMS" : null}
+          onLock={() => {
+            celebrate(lbl(derived.winner === "team1" ? t1 : t2) + " GO THROUGH");
+            onSave({ team1Id: t1 || null, team2Id: t2 || null,
+                     s1: seedLabelOf(t1) || match.s1, s2: seedLabelOf(t2) || match.s2,
+                     ...derived, resultAt: Date.now() });
+            onClose();
+          }} />"""
+
+# The teams-only action sits ABOVE the score pad's own row, because it is a
+# different job: fixing who is playing, not recording what they did.
+KO_TEAMS_ROW_OLD = """      {isAdmin && match.round === "qf" && <Btn variant="secondary" className="w-full" onClick={() => { onReset(); onClose(); }}>Reset SFs + Final</Btn>}"""
+KO_TEAMS_ROW_NEW = """      {isAdmin && teamsChanged && t1 && t2 && (
+        <div className="space-y-1.5">
+          <Btn variant="secondary" className="w-full"
+            onClick={() => {
+              // No celebrate(), no resultAt: nobody has gone through, the
+              // pairing was simply wrong. Any result already on this match
+              // belonged to the teams that played it and is cleared with them.
+              onSave({ team1Id: t1, team2Id: t2,
+                       s1: seedLabelOf(t1) || null, s2: seedLabelOf(t2) || null,
+                       winner: null, lossType: null, score: null, resultAt: null });
+              onClose();
+            }}>
+            Save teams only — no score
+          </Btn>
+          <div className="text-[10px] px-1" style={{ color: hadResult ? "#FF2E88" : "#9A9A9A" }}>
+            {hadResult
+              ? "This match already has a result. Changing who is in it clears that score — it belonged to the two teams that played it."
+              : "Fixes who is playing whom. The score pad below is for recording the result."}
+          </div>
+        </div>
+      )}
+      {isAdmin && match.round === "qf" && <Btn variant="secondary" className="w-full" onClick={() => { onReset(); onClose(); }}>Reset SFs + Final</Btn>}"""

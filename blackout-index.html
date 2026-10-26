@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "301427c332ea";
+  var V = "4f73a4fabb1d";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -9629,29 +9629,32 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
   // was drawn changes who finished 1st/2nd/3rd, and therefore who should be
   // playing whom — that used to require a hand-patch to fix.
   //
-  // DELIBERATELY LIMITED TO 3-GROUP SESSIONS. That format seeds 8 from 3
-  // groups, so two of the three third-place teams qualify and their ranking
-  // decides both the last QF seed and who plays the qualifier — the part that
-  // actually moved when a late result landed. The other formats take a fixed
-  // top-N per group, where a late result reorders the group but rarely changes
-  // who is in, so re-seeding them is churn on a live bracket for little gain.
+  // EVERY FORMAT, not just three groups. This used to be limited to 3-group
+  // nights on the argument that the others take a fixed top-N per group and a
+  // late result "rarely changes who is in". Both halves were wrong: a
+  // correction can drop a team from 2nd to 3rd, and on a top-2 night 3rd does
+  // not qualify at all; and since the draw crosses by letter, the order inside
+  // a group IS the fixture, so swapping 1st and 2nd changes two
+  // quarter-finals. Reported from the 26 Oct night, where a corrected group
+  // score left the bracket saying the wrong people were through.
   //
-  // Re-seeding is skipped whenever it could destroy something: once any
+  // Re-seeding is still skipped whenever it could destroy something: once any
   // knockout match has a result (koLocked), or when an admin has deliberately
   // arranged the seeding by hand (seedManual). Silent, so a tie or an
   // incomplete group just waits for the organizer rather than popping alerts.
-  const autoReseedFormat = getSessionGroups(session).length === 3;
   useEffect(() => {
     if (!canScore || !groupStageComplete) return;
     if (koLocked || session.seedManual) return;
-    if (!autoReseedFormat) {
-      // Other formats keep the original behaviour: seed once, never redraw.
-      if (!bracketEmpty) return;
-    } else if (!bracketEmpty && session.seedSig === seedInputSig) {
-      return;  // already current
-    }
+    if (!bracketEmpty && session.seedSig === seedInputSig) return;  // already current
     seedQF(true);
-  }, [canScore, groupStageComplete, bracketEmpty, koLocked, autoReseedFormat, session.seedManual, session.seedSig, seedInputSig]);
+  }, [canScore, groupStageComplete, bracketEmpty, koLocked, session.seedManual, session.seedSig, seedInputSig]);
+
+  // Whether the bracket on screen was drawn from the group results as they
+  // stand NOW. When it was not and nothing can be redrawn — because the
+  // knockout has started — the screen has to say so. Silently showing a
+  // bracket that disagrees with the tables underneath it is how "it doesn't
+  // change who's through" goes unnoticed until somebody is on the wrong court.
+  const seedStale = !bracketEmpty && !!session.seedSig && session.seedSig !== seedInputSig;
 
   const lbl = (id) => {
     if (id === "PLAYOFF_TBD") return "Qualifier TBD";
@@ -9873,14 +9876,21 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
       {/* Bracket tree (4 QF) or fallback list */}
       {isAdmin && b.qf.length === 4 && !(b.r16?.length) && (
         koLocked
-          ? <div className="text-[10px] text-stone-500 flex items-center gap-1 px-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>
+          ? <div className="px-1 space-y-1">
+              <div className="text-[10px] text-stone-500 flex items-center gap-1"><I.alert size={10} /> Seeding is locked — a score is already recorded.</div>
+              {seedStale && <div className="flex gap-2 p-2" style={{ background:"rgba(255,46,136,.10)", border:"1px solid rgba(255,46,136,.4)" }}>
+                <I.alert size={12} className="shrink-0 mt-0.5" style={{ color:"#FF2E88" }} />
+                <div className="text-[10px]" style={{ color:"#CFCFCF" }}>
+                  <span className="font-bold" style={{ color:"#FF2E88" }}>A group result changed after this bracket was drawn.</span>{" "}
+                  The knockout has already been played, so nothing is redrawn — this bracket may no longer match the group tables. Fix the pairings by hand if it matters.
+                </div>
+              </div>}
+            </div>
           : <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="text-[10px] text-stone-500 flex items-center gap-1">
                 {session.seedManual
                   ? <><I.alert size={10} /> Seeded by hand — it won't follow group-result changes. Re-seed to resume auto.</>
-                  : autoReseedFormat
-                  ? <>Seeding follows the group results automatically until a knockout score is entered.</>
-                  : <>Seeded from the final group standings. Edit a group result and re-seed to redraw.</>}
+                  : <>Seeding follows the group results automatically until a knockout score is entered.</>}
               </div>
               <div className="flex gap-1.5">
                 {session.seedManual && <Btn variant="ghost" onClick={() => seedQF()}><I.bolt size={12} /> Re-seed</Btn>}
@@ -9907,7 +9917,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
           </>
       }
 
-      {edit && <BracketEditModal match={edit} teams={teams} state={state} isAdmin={isAdmin} onClose={() => setEdit(null)}
+      {edit && <BracketEditModal match={edit} teams={teams} state={state} session={session} isAdmin={isAdmin} onClose={() => setEdit(null)}
         onSave={(d) => updateSession(s => {
           const nb = { ...s.bracket };
           if (edit.round === "r16") nb.r16 = (nb.r16||[]).map(m => m.id === edit.id ? { ...m, ...d } : m);
@@ -10066,7 +10076,7 @@ function BracketRow({ match, lbl, onClick, big }) {
   </button>;
 }
 
-function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onReset }) {
+function BracketEditModal({ match, teams, state, session, isAdmin, onClose, onSave, onReset }) {
   const [t1, setT1] = useState(match.team1Id || "");
   const [t2, setT2] = useState(match.team2Id || "");
   const initS1 = match?.score?.t1 ?? (match?.winner ? (match.winner === "team1" ? 6 : 3) : null);
@@ -10076,6 +10086,21 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
   const [confirmed, setConfirmed] = useState(false);
   const lbl = (id) => { const t = teams.find(t => t.id === id); if (!t) return "?"; const p1 = state.players.find(p => p.id === t.p1Id)?.name?.split(" ")[0] || "?"; const p2 = state.players.find(p => p.id === t.p2Id)?.name?.split(" ")[0] || "?"; return `${p1} & ${p2}`; };
   const titles = { r16: "ROUND OF 16", qf: "QUARTERFINAL", sf: "SEMIFINAL", final: "FINAL", thirdsPlayoff: "3RDS QUALIFIER" };
+  // The seed label is a fact about where a team FINISHED, so it is read back
+  // off the group tables rather than carried along with the slot. Left alone
+  // it says "B2" beside a team out of group D, which is what the bracket on
+  // the server said all through the 26 Oct knockout.
+  const seedLabelOf = (tid) => {
+    const t = teams.find(x => x.id === tid);
+    if (!t || !t.group || !session) return null;
+    try {
+      const rows = calcGroupStandingsNormalized(session, t.group);
+      const i = rows.findIndex(r => r.team && r.team.id === tid);
+      return i >= 0 ? t.group + (i + 1) : null;
+    } catch (e) { return null; }
+  };
+  const teamsChanged = (t1 || "") !== (match.team1Id || "") || (t2 || "") !== (match.team2Id || "");
+  const hadResult = !!match.winner;
   const maxScore = match.round === "final" ? 9 : 7;
   const derived = (s1 !== null && s2 !== null && s1 !== s2) ? scoreToResult(s1, s2) : null;
   const canConfirm = t1 && t2 && derived;
@@ -10108,6 +10133,27 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
           </>;
         })()}
       </>}
+      {isAdmin && teamsChanged && t1 && t2 && (
+        <div className="space-y-1.5">
+          <Btn variant="secondary" className="w-full"
+            onClick={() => {
+              // No celebrate(), no resultAt: nobody has gone through, the
+              // pairing was simply wrong. Any result already on this match
+              // belonged to the teams that played it and is cleared with them.
+              onSave({ team1Id: t1, team2Id: t2,
+                       s1: seedLabelOf(t1) || null, s2: seedLabelOf(t2) || null,
+                       winner: null, lossType: null, score: null, resultAt: null });
+              onClose();
+            }}>
+            Save teams only — no score
+          </Btn>
+          <div className="text-[10px] px-1" style={{ color: hadResult ? "#FF2E88" : "#9A9A9A" }}>
+            {hadResult
+              ? "This match already has a result. Changing who is in it clears that score — it belonged to the two teams that played it."
+              : "Fixes who is playing whom. The score pad below is for recording the result."}
+          </div>
+        </div>
+      )}
       {isAdmin && match.round === "qf" && <Btn variant="secondary" className="w-full" onClick={() => { onReset(); onClose(); }}>Reset SFs + Final</Btn>}
       <div className="flex gap-2 pt-2">
         {confirmed && <Btn variant="ghost" onClick={() => setConfirmed(false)}>← Edit</Btn>}
@@ -10118,7 +10164,9 @@ function BracketEditModal({ match, teams, state, isAdmin, onClose, onSave, onRes
              : !canConfirm ? "PICK BOTH TEAMS" : null}
           onLock={() => {
             celebrate(lbl(derived.winner === "team1" ? t1 : t2) + " GO THROUGH");
-            onSave({ team1Id: t1 || null, team2Id: t2 || null, ...derived, resultAt: Date.now() });
+            onSave({ team1Id: t1 || null, team2Id: t2 || null,
+                     s1: seedLabelOf(t1) || match.s1, s2: seedLabelOf(t2) || match.s2,
+                     ...derived, resultAt: Date.now() });
             onClose();
           }} />
       </div>
