@@ -330,7 +330,7 @@ def add_screens(s, report):
 
     # Views go immediately before App, so every component they use is defined.
     a = s.index("function App() {")
-    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.LUEDIT + SCREENS.CUTCARD + SCREENS.CUTCARD2 + SCREENS.AVATARS + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.VIEWS + "\n" + s[a:]
+    s = s[:a] + SCREENS.CELEBRATE + SCREENS.COUNTUP + SCREENS.SHARED_SCORE + SCREENS.EXTRAS + SCREENS.CHROME + SCREENS.UIUX + SCREENS.KO_PHOTOS + ("" if "recap" in SKIP else SCREENS.RECAP2) + SCREENS.SHARE + SCREENS.LINEUP + SCREENS.LUEDIT + SCREENS.CUTCARD + SCREENS.CUTCARD2 + SCREENS.AVATARS + SCREENS.GROUPCARDS + SCREENS.GROUPCARDS_BUILD + SCREENS.SOCIAL + SCREENS.SOCIAL2 + SCREENS.WALL + SCREENS.VIEWS + "\n" + s[a:]
     report(f"views: +{len(SCREENS.CHROME) + len(SCREENS.SHARE) + len(SCREENS.VIEWS)} bytes "
            f"before App (chrome + share cards + ME + roster)")
 
@@ -402,6 +402,9 @@ def add_screens(s, report):
                            ("player extras", SCREENS.PLAYERTAIL_OLD, SCREENS.PLAYERTAIL_NEW),
                            ("spotlight calc", SCREENS.SPOT_CALC_OLD, SCREENS.SPOT_CALC_NEW),
                            ("count-up (me)", SCREENS.COUNT_ME_OLD, SCREENS.COUNT_ME_NEW),
+                           # The giant portrait screen beside the courts. A
+                           # route, not a tab — see the note in blackout_screens.
+                           ("wall route", SCREENS.WALL_ROUTE_OLD, SCREENS.WALL_ROUTE_NEW),
                            ):
         assert old in s, f"{name}: anchor no longer matches"
         s = s.replace(old, new, 1)

@@ -5620,3 +5620,373 @@ AV_CARD_NEW = """    try {
 AV_POS_OLD = """      style={{ ...commonStyle, objectPosition: "center 28%" }} />;  // bias crop toward faces (upper third)"""
 AV_POS_NEW = """      style={{ ...commonStyle,
                 objectPosition: player.photoUrl.startsWith("data:") ? "center 28%" : "center" }} />;"""
+
+
+# ── THE WALL (?tv=) ───────────────────────────────────────────────────────
+# The club has a giant screen in portrait beside the courts, and the ask was to
+# make the GROUPS and TEAMS pages readable on it. Reflowing those two screens
+# was the obvious route and the wrong one: they are the screens a scorer uses
+# all night, with 10-21px type, tap targets and one group at a time behind a
+# chip row. Making them scale to 1920px tall means every change is a change to
+# the court-side tool, and the one thing the wall must never do is break the
+# phone that is entering the scores.
+#
+# So the wall is its own route on the same state: `?tv=groups`, `?tv=teams`, or
+# `?tv=1` to alternate between them. Nothing is tappable, every group is on
+# screen at once, and the type is sized in a single unit derived from the
+# viewport so one page serves a 1080x1920 panel and a 4K portrait display
+# without a second layout.
+WALL = r"""
+// ══ THE WALL — the giant portrait screen beside the courts ════════════════
+// Read-only, auto-refreshing, no chrome. Everything is sized in `wu()`, which
+// is one percent of the viewport's short-for-portrait dimension, clamped
+// against width so a landscape screen degrades instead of overflowing.
+const WALL_CYCLE = 22;      // seconds a slide holds before the other takes over
+const WALL_REFRESH = 20;    // seconds between pulls — the wall is never stale
+
+// One unit = 1% of the height, capped so an accidentally-landscape screen
+// shrinks the whole page rather than running its rows off the bottom.
+const wu = (n) => `calc(var(--wu) * ${n})`;
+
+function tvMode() {
+  const q = new URLSearchParams(window.location.search).get("tv");
+  if (q === null) return null;
+  const v = (q || "1").toLowerCase();
+  return (v === "groups" || v === "teams") ? v : "cycle";
+}
+
+// Which night the wall is showing. The newest night still in play, because
+// that is the one being played in front of the screen; the newest night at all
+// once they are all finished, so the wall still has something to say; and an
+// explicit `&s=<id>` wins, for the rare case of putting an old night back up.
+function wallSession(state) {
+  const ss = state.sessions || [];
+  const want = new URLSearchParams(window.location.search).get("s");
+  if (want) { const hit = ss.find(x => x.id === want); if (hit) return hit; }
+  const byDate = [...ss].sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
+  return byDate.find(x => !x.completed) || byDate[0] || null;
+}
+
+// The Avatar component takes its size as a number of pixels and derives its
+// border from it, so it cannot be driven by a viewport unit. A face on the
+// wall has to scale with everything else, so the wall draws its own.
+function WallFace({ player, side, dim }) {
+  const [err, setErr] = useState(false);
+  const base = { width: side, height: side, flex: "0 0 auto", borderRadius: 0,
+                 border: `${wu(0.1)} solid #050505`, opacity: dim ? 0.5 : 1 };
+  if (player && player.photoUrl && !err) {
+    return <img src={player.photoUrl} alt="" onError={() => setErr(true)}
+      style={{ ...base, objectFit: "cover",
+               objectPosition: player.photoUrl.startsWith("data:") ? "center 28%" : "center" }} />;
+  }
+  const nm = (player && player.name) || "?";
+  const key = (player && (player.id || player.name)) || "?";
+  const palette = ["#C6FF00", "#FF2E88", "#2A2A2A", "#C6FF00", "#3A3A3A", "#FF2E88"];
+  const tint = palette[Math.abs(key.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
+  const lum = parseInt(tint.slice(1, 3), 16) * 0.299 + parseInt(tint.slice(3, 5), 16) * 0.587
+            + parseInt(tint.slice(5, 7), 16) * 0.114;
+  return <div style={{ ...base, background: tint, display: "grid", placeItems: "center",
+      color: lum > 140 ? "#050505" : "#F2F2F2", fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+      fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: `calc(${side} * 0.44)`, lineHeight: 1 }}>
+    {(nm[0] || "?").toUpperCase()}
+  </div>;
+}
+
+function WallPanel({ children, accent }) {
+  return <div style={{ display: "flex", flexDirection: "column", minHeight: 0, padding: wu(1.1),
+      background: "rgba(10,10,10,.94)",
+      backgroundImage: `linear-gradient(180deg,${accent || "#C6FF00"},rgba(198,255,0,.05))`,
+      backgroundSize: `${wu(0.22)} 100%`, backgroundRepeat: "no-repeat",
+      border: "1px solid rgba(110,110,110,.22)", position: "relative", overflow: "hidden" }}>
+    {children}
+  </div>;
+}
+
+// A group's head: the letter, the name, and how far through its fixtures it is.
+function WallGroupHead({ g, right, rightLit }) {
+  return <div style={{ display: "flex", alignItems: "center", gap: wu(0.8), flex: "0 0 auto",
+      position: "relative", zIndex: 1 }}>
+    <div style={{ width: wu(3.2), height: wu(3.2), display: "grid", placeItems: "center",
+        background: "rgba(198,255,0,.12)", border: "1px solid rgba(198,255,0,.45)",
+        fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+        fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: wu(2), lineHeight: 1, color: "#C6FF00" }}>{g}</div>
+    <div style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+        fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: wu(1.95), lineHeight: 1,
+        color: "#F2F2F2" }}>GROUP {g}</div>
+    <div style={{ marginLeft: "auto", fontFamily: "'Archivo',sans-serif", fontWeight: 800,
+        fontSize: wu(1.05), letterSpacing: ".18em", color: rightLit ? "#C6FF00" : "#CFCFCF" }}>{right}</div>
+  </div>;
+}
+
+// ── GROUPS: every table at once ───────────────────────────────────────────
+function WallGroup({ session, state, g, qualIds }) {
+  const teams = (session.teams || []).filter(t => t.group === g);
+  const rows = calcGroupStandings(session, g);
+  const top = getTopOfGroup(session, g);
+  const fx = groupFixtures(session, g);
+  const first = (id) => { const p = state.players.find(x => x.id === id); return p ? p.name.split(" ")[0] : "?"; };
+  const lbl = (t) => t ? `${first(t.p1Id)} & ${first(t.p2Id)}` : "?";
+  const pl = (id) => state.players.find(x => x.id === id);
+
+  // What is happening on court right now, which is the one thing a spectator
+  // wants from a wall. A fixture with a match record but no winner has been
+  // opened by the scorer and not locked, so it is being played; one with no
+  // record at all has not started.
+  // Before a ball is hit every team is level on nothing, so marking two of
+  // them as qualifying and one as top of the group is not a prediction, it is
+  // the draw order wearing a lime stripe. Suppressed until the group has a
+  // result to rank on.
+  const unplayed = fx.played === 0;
+  const live = fx.pairs.find(p => p.match && !p.played);
+  const next = fx.pairs.find(p => !p.match);
+  const foot = live ? { lit: true, k: "ON COURT", v: `${lbl(live.a)} v ${lbl(live.b)}` }
+    : next ? { lit: false, k: "NEXT", v: `${lbl(next.a)} v ${lbl(next.b)}` }
+    : { lit: true, k: "GROUP", v: "COMPLETE" };
+
+  return <WallPanel>
+    {/* The letter again, oversized and almost invisible, so a glance from the
+        far end of the court finds the right table without reading it. */}
+    <div data-ghost="1" style={{ position: "absolute", right: wu(0.6), bottom: wu(-1.6), fontFamily: "'Archivo',sans-serif",
+        fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: wu(11),
+        lineHeight: 1, color: "rgba(242,242,242,.04)", pointerEvents: "none" }}>{g}</div>
+    <WallGroupHead g={g} right={`${fx.played}/${fx.total} PLAYED`} rightLit={fx.played < fx.total} />
+    {teams.length === 0
+      ? <div style={{ flex: 1, display: "grid", placeItems: "center", fontFamily: "'Archivo',sans-serif",
+            fontWeight: 800, fontSize: wu(1.3), letterSpacing: ".14em", color: "#CFCFCF" }}>NOT DRAWN</div>
+      : <div style={{ flex: 1, minHeight: 0, display: "grid", position: "relative", zIndex: 1,
+            gridTemplateColumns: `${wu(1.9)} 1fr ${wu(3)} ${wu(3.4)} ${wu(4.2)}`,
+            gridAutoRows: "1fr", alignContent: "stretch", marginTop: wu(0.7) }}>
+          {["", "TEAM", "W", "GD", "PTS"].map((h, i) => (
+            <div key={i} style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: wu(0.85),
+                letterSpacing: ".2em", color: "#CFCFCF", alignSelf: "end", paddingBottom: wu(0.5),
+                textAlign: i >= 2 ? (i === 4 ? "right" : "center") : "left" }}>{h}</div>
+          ))}
+          {rows.map((r, i) => {
+            const q = !unplayed && qualIds.has(r.team.id);
+            const cell = { borderTop: "1px solid rgba(110,110,110,.16)", display: "flex",
+                           alignItems: "center", minWidth: 0 };
+            return <React.Fragment key={r.team.id}>
+              <div style={{ ...cell, justifyContent: "center",
+                  boxShadow: q ? `inset ${wu(0.2)} 0 0 #C6FF00` : "none",
+                  fontFamily: "'JetBrains Mono',monospace", fontSize: wu(1.15), fontWeight: 700,
+                  color: q ? "#C6FF00" : "#6E6E6E" }}>{i + 1}</div>
+              <div style={{ ...cell, gap: wu(0.5), paddingLeft: wu(0.5) }}>
+                <div style={{ display: "flex", flex: "0 0 auto", gap: wu(0.15) }}>
+                  <WallFace player={pl(r.team.p1Id)} side={wu(2.4)} />
+                  <WallFace player={pl(r.team.p2Id)} side={wu(2.4)} />
+                </div>
+                <span style={{ minWidth: 0, fontFamily: "'Archivo',sans-serif", fontWeight: 800,
+                    fontSize: wu(1.55), lineHeight: 1.05, color: "#F2F2F2", whiteSpace: "nowrap",
+                    overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {!unplayed && r.team.id === top && <span style={{ color: "#C6FF00", marginRight: wu(0.25) }}>&#9650;</span>}
+                  {lbl(r.team)}
+                </span>
+                {r.byes > 0 && <span style={{ flex: "0 0 auto", padding: `${wu(0.1)} ${wu(0.35)}`,
+                    background: "rgba(255,46,136,.14)", border: "1px solid rgba(255,46,136,.4)",
+                    fontFamily: "'JetBrains Mono',monospace", fontSize: wu(0.8), fontWeight: 700,
+                    color: "#FF2E88" }}>+BYE</span>}
+              </div>
+              <div style={{ ...cell, justifyContent: "center", fontFamily: "'JetBrains Mono',monospace",
+                  fontSize: wu(1.5), color: "#F2F2F2" }}>{r.wins}</div>
+              <div style={{ ...cell, justifyContent: "center", fontFamily: "'JetBrains Mono',monospace",
+                  fontSize: wu(1.35), color: "#CFCFCF" }}>{r.gd > 0 ? "+" : ""}{r.gd}</div>
+              <div style={{ ...cell, justifyContent: "flex-end", fontFamily: "'Archivo',sans-serif",
+                  fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900", fontSize: wu(2.1),
+                  color: q ? "#C6FF00" : "#F2F2F2" }}>{r.pts}</div>
+            </React.Fragment>;
+          })}
+        </div>}
+    <div style={{ flex: "0 0 auto", display: "flex", alignItems: "baseline", gap: wu(0.6),
+        marginTop: wu(0.7), paddingTop: wu(0.6), borderTop: "1px solid rgba(110,110,110,.16)",
+        position: "relative", zIndex: 1, minWidth: 0 }}>
+      <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: wu(0.9),
+          letterSpacing: ".24em", color: foot.lit ? "#C6FF00" : "#6E6E6E", flex: "0 0 auto" }}>{foot.k}</span>
+      <span style={{ minWidth: 0, fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: wu(1.2),
+          color: foot.lit ? "#F2F2F2" : "#9A9A9A", whiteSpace: "nowrap", overflow: "hidden",
+          textOverflow: "ellipsis" }}>{foot.v}</span>
+    </div>
+  </WallPanel>;
+}
+
+// ── TEAMS: who is in, and where ───────────────────────────────────────────
+function WallTeams({ session, state, g, seedOf }) {
+  const teams = (session.teams || []).filter(t => t.group === g);
+  const pl = (id) => state.players.find(x => x.id === id);
+  const nm = (id) => { const p = pl(id); return p ? p.name : "?"; };
+  return <WallPanel>
+    <WallGroupHead g={g} right={`${teams.length} / 4`} />
+    {teams.length === 0
+      ? <div style={{ flex: 1, display: "grid", placeItems: "center", fontFamily: "'Archivo',sans-serif",
+            fontWeight: 800, fontSize: wu(1.3), letterSpacing: ".14em", color: "#CFCFCF" }}>NOT DRAWN</div>
+      : <div style={{ flex: 1, minHeight: 0, display: "grid", gridAutoRows: "1fr", marginTop: wu(0.7) }}>
+          {teams.map(t => {
+            const seed = seedOf(t.id);
+            return <div key={t.id} style={{ display: "flex", alignItems: "center", gap: wu(0.7),
+                borderTop: "1px solid rgba(110,110,110,.16)", minWidth: 0 }}>
+              <span style={{ flex: "0 0 auto", width: wu(2.6), textAlign: "center",
+                  padding: `${wu(0.12)} 0`, fontFamily: "'JetBrains Mono',monospace", fontSize: wu(0.95),
+                  fontWeight: 700,
+                  background: seed && seed <= 4 ? "#C6FF00" : "rgba(242,242,242,.06)",
+                  border: "1px solid rgba(242,242,242,.14)",
+                  color: seed && seed <= 4 ? "#050505" : "#9A9A9A" }}>{seed ? `S${seed}` : "–"}</span>
+              <div style={{ display: "flex", flex: "0 0 auto", gap: wu(0.15) }}>
+                <WallFace player={pl(t.p1Id)} side={wu(3.1)} />
+                <WallFace player={pl(t.p2Id)} side={wu(3.1)} />
+              </div>
+              {/* Full names here, not first names: the teams slide is the one
+                  that answers "which Mohammed is that", and there are four of
+                  them on the roster. */}
+              <div style={{ minWidth: 0, display: "flex", flexDirection: "column", gap: wu(0.1) }}>
+                {[t.p1Id, t.p2Id].map((id, k) => (
+                  <span key={k} style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800,
+                      fontSize: wu(1.3), lineHeight: 1.1, color: k ? "#CFCFCF" : "#F2F2F2",
+                      whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nm(id)}</span>
+                ))}
+              </div>
+            </div>;
+          })}
+        </div>}
+  </WallPanel>;
+}
+
+function WallPage({ state, refreshNow, lastSync }) {
+  const mode = tvMode();
+  const [slide, setSlide] = useState(mode === "teams" ? "teams" : "groups");
+  // When this page last had the night in front of it. App only sets lastSync
+  // on a REFRESH, so a wall that has just been opened would read "--:--" while
+  // showing data seconds old; the mount is a sync too.
+  const [seen, setSeen] = useState(() => new Date());
+
+  // The wall pulls for itself rather than leaning on App's poll, which is
+  // skipped entirely on a device signed in to score — and the screen beside
+  // the courts is very often that device.
+  useEffect(() => {
+    const t = setInterval(() => { refreshNow(); setSeen(new Date()); }, WALL_REFRESH * 1000);
+    return () => clearInterval(t);
+  }, [refreshNow]);
+
+  useEffect(() => {
+    if (mode !== "cycle") return;
+    const t = setInterval(() => setSlide(s => (s === "groups" ? "teams" : "groups")), WALL_CYCLE * 1000);
+    return () => clearInterval(t);
+  }, [mode]);
+
+  const session = wallSession(state);
+  const groups = session ? getSessionGroups(session) : [];
+  const qualIds = useMemo(() => (session ? qualifyingTeamIds(session) : new Set()), [session]);
+  const fxAll = session ? sessionFixtures(session) : { total: 0, played: 0 };
+  const idx = session ? (state.sessions || []).findIndex(s => s.id === session.id) : -1;
+
+  // Seeds, exactly as the TEAMS tab derives them: the organiser's manual order
+  // if one is set, otherwise all-time points. Repeated rather than shared
+  // because the tab's copy is tangled with its editing state.
+  const seedOf = useMemo(() => {
+    if (!session) return () => null;
+    const teams = session.teams || [];
+    const lifetime = (state.players || []).map(p => {
+      const st = calcPlayerStats(p.id, state.sessions);
+      const prev = Object.values(p.prevSeriesPts || {}).reduce((a, b) => a + (Number(b) || 0), 0)
+                 + (p.prevSeriesPoints || 0);
+      return { id: p.id, pts: st.totalPts + prev };
+    }).sort((a, b) => b.pts - a.pts);
+    const rankOf = (pid) => { const i = lifetime.findIndex(e => e.id === pid); return i === -1 ? 999 : i; };
+    const auto = [...teams].sort((a, b) =>
+      (rankOf(a.p1Id) + rankOf(a.p2Id)) - (rankOf(b.p1Id) + rankOf(b.p2Id)));
+    const ms = session.manualSeeds || null;
+    const order = ms
+      ? ms.map(id => teams.find(t => t.id === id)).filter(Boolean).concat(teams.filter(t => !ms.includes(t.id)))
+      : auto;
+    return (tid) => { const i = order.findIndex(t => t.id === tid); return i >= 0 && i < 8 ? i + 1 : null; };
+  }, [session, state.players, state.sessions]);
+
+  // What qualification is for THIS night, said the same way the phone says it.
+  const N = groups.length;
+  const qLabel = N === 4 && session && session.thirdPlaceMode === "all4r16" ? "ALL THIRDS QUALIFY"
+    : N === 3 ? "TOP 2 + BEST THIRDS QUALIFY"
+    : session ? `TOP ${getQualifyCount(session)} QUALIFY` : "";
+
+  // Two columns past four groups. One column is what makes the type big; a
+  // fifth group in one column would make every row shorter than a name.
+  const cols = N > 4 ? 2 : 1;
+  const stamp = lastSync && lastSync > seen ? lastSync : seen;
+  const hhmm = (d) => d ? `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` : "--:--";
+
+  return <div className="wall" style={{ "--wu": "min(1vh, 1.78vw)", position: "fixed", inset: 0,
+      background: "#050505", color: "#F2F2F2", display: "flex", flexDirection: "column",
+      padding: wu(1.4), gap: wu(1), overflow: "hidden" }}>
+    {/* ── HEAD ── */}
+    <div style={{ flex: "0 0 auto", display: "flex", alignItems: "flex-end", gap: wu(1.2),
+        paddingBottom: wu(0.9), borderBottom: `${wu(0.18)} solid #C6FF00` }}>
+      {/* BoMark writes its size onto the svg's width/height ATTRIBUTES, which
+          do not take calc(), so the mark is sized by the box around it and
+          told to fill it. */}
+      <div style={{ width: wu(3.4), height: wu(3.4), flex: "0 0 auto" }}>
+        <BoMark size={100} style={{ width: "100%", height: "100%" }} />
+      </div>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: wu(3.4), lineHeight: 0.92,
+            letterSpacing: "-.01em" }}>BLACKOUT</div>
+        <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: wu(1),
+            letterSpacing: ".34em", color: "#C6FF00", marginTop: wu(0.3) }}>
+          VOL.8 &middot; {slide === "groups" ? "GROUP TABLES" : "THE TEAMS"}
+        </div>
+      </div>
+      <div style={{ marginLeft: "auto", textAlign: "right", flex: "0 0 auto" }}>
+        {session ? <>
+          <div style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+              fontVariationSettings: "'wdth' 112,'wght' 900", fontSize: wu(2.4), lineHeight: 1 }}>
+            SESSION {idx + 1}
+          </div>
+          <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: wu(1.3), marginTop: wu(0.35),
+              color: "#CFCFCF" }}>
+            {fmtNightDate(session.date)} &middot; {fxAll.played}/{fxAll.total} PLAYED
+          </div>
+        </> : null}
+      </div>
+      {session && session.doublePoints && (
+        <div style={{ flex: "0 0 auto", padding: `${wu(0.4)} ${wu(0.9)}`, background: "#FF2E88",
+            color: "#050505", fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: wu(2), lineHeight: 1 }}>2X</div>
+      )}
+    </div>
+
+    {/* ── BODY ── */}
+    {!session
+      ? <div style={{ flex: 1, display: "grid", placeItems: "center", fontFamily: "'Archivo',sans-serif",
+            fontWeight: 800, fontSize: wu(2), letterSpacing: ".16em", color: "#6E6E6E" }}>NO SESSION YET</div>
+      : <div style={{ flex: 1, minHeight: 0, display: "grid", gap: wu(1),
+            gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`,
+            gridTemplateRows: `repeat(${Math.ceil(N / cols)}, minmax(0,1fr))` }}>
+          {groups.map(g => slide === "groups"
+            ? <WallGroup key={g} session={session} state={state} g={g} qualIds={qualIds} />
+            : <WallTeams key={g} session={session} state={state} g={g} seedOf={seedOf} />)}
+        </div>}
+
+    {/* ── FOOT ── the qualification rule, the slide, and proof it is live ── */}
+    <div style={{ flex: "0 0 auto", display: "flex", alignItems: "center", gap: wu(1),
+        paddingTop: wu(0.7), borderTop: "1px solid rgba(110,110,110,.22)" }}>
+      <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: wu(1),
+          letterSpacing: ".26em", color: "#C6FF00" }}>{slide === "groups" ? qLabel : "BLACKOUT SERIES"}</div>
+      {mode === "cycle" && (
+        <div style={{ display: "flex", gap: wu(0.4), marginLeft: wu(0.4) }}>
+          {["groups", "teams"].map(s => <span key={s} style={{ width: wu(1.2), height: wu(0.3),
+              background: s === slide ? "#C6FF00" : "rgba(242,242,242,.18)" }} />)}
+        </div>
+      )}
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: wu(0.6),
+          fontFamily: "'JetBrains Mono',monospace", fontSize: wu(1), color: "#6E6E6E" }}>
+        <span style={{ width: wu(0.55), height: wu(0.55), background: "#C6FF00", borderRadius: 0 }} />
+        UPDATED {hhmm(stamp)}
+      </div>
+    </div>
+  </div>;
+}
+"""
+
+# The wall is a route, not a tab: the same early return the public leaderboard
+# and the photo wall already use. Returning here keeps the header, the nav, the
+# save banner and the pull-to-refresh strip off a screen nobody can touch.
+WALL_ROUTE_OLD = """  if (isPhotosMode) return <PublicPhotosPage state={state} />;"""
+WALL_ROUTE_NEW = """  if (isPhotosMode) return <PublicPhotosPage state={state} />;
+  if (tvMode()) return <WallPage state={state} refreshNow={refreshNow} lastSync={lastSync} />;"""

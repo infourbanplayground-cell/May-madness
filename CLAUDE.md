@@ -999,6 +999,56 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
+- **THE WALL is `?tv=`, a ROUTE and not a tab** — the giant portrait screen
+  beside the courts. `?tv=groups`, `?tv=teams`, `?tv=1` to alternate every 22s,
+  `&s=<session id>` to pin a particular night. It returns early in `App()`
+  beside `?public` and `?photos`, so the header, the nav, the save banner and
+  pull-to-refresh are all off a screen nobody can touch.
+  - It is a SEPARATE route on purpose. The obvious move was to make `GroupsTab`
+    and `TeamsTab` responsive, but those are the screens a scorer uses all
+    night — 10-21px type, tap targets, one group at a time behind a chip row —
+    and then every wall tweak is a change to the court-side tool. The wall must
+    never be able to break the phone entering the scores.
+  - **Every size is `wu(n)` = n × `min(1vh, 1.78vw)`**, so one page serves a
+    1080x1920 panel and a 4K portrait display with no second layout, and a TV
+    somebody forgot to rotate shrinks instead of running off the bottom.
+  - The wall PULLS FOR ITSELF every 20s. App's own poll is skipped entirely
+    when `canScore`, and the screen beside the courts is very often the device
+    that is signed in to score.
+  - **Nothing is marked as qualifying before a ball is hit.** With every team
+    level on nothing, the lime stripe and the ▲ are not a prediction, they are
+    the draw order wearing the club's colour. Suppressed while `fx.played === 0`.
+  - Each group's footer says **ON COURT** (a fixture with a match record and no
+    winner — the scorer has opened it) or **NEXT** (no record yet), which is
+    the one thing a spectator actually wants from a wall.
+  - It draws its own faces (`WallFace`): `Avatar` takes its size as a NUMBER of
+    pixels and derives its border from it, so it cannot be driven by a viewport
+    unit.
+  - **`ops/check-wall.mjs` is the harness** — 3 sizes × 6 states (tonight
+    undrawn, a complete 4-group night, the uneven 3-group night with byes, both
+    slides, the cycle). It asserts the page does not scroll, no panel leaves the
+    wall, no text is clipped, **no two leaf text boxes overlap**, the face is
+    really drawn, and every group's table is actually on screen.
+    - The overlap check is the one that matters: a grid cell with no overflow
+      rule lets a name run out over the W column instead of clipping, which
+      every width assertion passes. `SABOTAGE=narrow` squeezes the team column
+      and `SABOTAGE=nofont` drops the webfont; both go red, which is how they
+      were proved. `ONLY=<substring>` narrows the sweep.
+    - **Archivo is measured against ITSELF FALLING BACK** (`'Archivo',serif`
+      against `serif`), not against serif or mono: with the webfont gone the
+      stack resolves to the body's sans-serif, which is wider than serif and
+      narrower than mono, so the old comparison passed with no Archivo on the
+      page at all.
+    - The probe must NOT carry `font-variation-settings`: the skin contains
+      `[style*="wdth"]{font-family:'Archivo' !important}`, so any inline style
+      mentioning the width axis has Archivo forced onto it and all three probes
+      measured the same face. Found by asking the browser which important rule
+      matched the probe.
+    - Chromium here does not trust the agent proxy's CA, so React, Babel and
+      the Google Fonts stylesheet all fail and there is no page to check at
+      all. The harness serves the three CDN scripts from local copies and the
+      fonts from `brand/fonts/`, and serves the real `version.txt` — served
+      wrong, the app's update check reloads the page forever.
 - Known: the RANK screen gates every tab, including ALL-TIME, behind "first match
   played", so the carried all-time ladder is invisible until the first Vol.8
   result is entered.
