@@ -5990,3 +5990,57 @@ function WallPage({ state, refreshNow, lastSync }) {
 WALL_ROUTE_OLD = """  if (isPhotosMode) return <PublicPhotosPage state={state} />;"""
 WALL_ROUTE_NEW = """  if (isPhotosMode) return <PublicPhotosPage state={state} />;
   if (tvMode()) return <WallPage state={state} refreshNow={refreshNow} lastSync={lastSync} />;"""
+
+
+# ── The four-group draw crosses by LETTER, not by merit ───────────────────
+# The owner's call, live on 26 Oct 2026: A1 plays D2 and B1 plays C2.
+#
+# What the app did instead was rank all four winners against each other, rank
+# all four runners-up against each other, and apply the standard 1v8 / 4v5 /
+# 3v6 / 2v7 template. That is a defensible seeding — the strongest winner draws
+# the weakest runner-up — but it is NOT the draw the club plays, and it has two
+# practical faults on a social night:
+#
+#   · it can pair two teams out of the same group, so a quarter-final repeats a
+#     match they have just played. The clash-swap in seedStandardBracket exists
+#     only to paper over that, and it works by moving a team to a seed it did
+#     not earn.
+#   · it is not predictable from the group tables. Players can read "A1 plays
+#     D2" off the wall before the last group match finishes; they cannot read
+#     "the best runner-up by game difference plays the fourth-best winner".
+#
+# The letter rule has neither fault: the four quarter-finals are A/D, B/C, C/B
+# and D/A, so no group can meet itself and no swap is ever needed. Slots 1 and
+# 2 feed SF1 and slots 3 and 4 feed SF2, so A1 and B1 are on one half and C1
+# and D1 on the other.
+KO_SEED_OLD = """      } else {
+        // N === 4: all four winners take seeds 1-4, all four runners-up 5-8,
+        // each tier ranked by wins ▶ GD ▶ GF. 1v8 then means the strongest
+        // winner draws the weakest runner-up, and 4v5 gives the best
+        // runner-up the weakest winner.
+        const qf = qfFromTiers([[...winners].sort(compareThirds), [...runners].sort(compareThirds)]);
+        if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
+        applyBracket({ qf, sf: [], final: null } );
+      }"""
+KO_SEED_NEW = """      } else {
+        // N === 4: the groups CROSS BY LETTER -- A1 v D2, B1 v C2, C1 v B2,
+        // D1 v A2 -- which is the draw the club plays and the one players can
+        // read off the group tables before the last match finishes.
+        //
+        // It replaces a merit seeding (winners ranked 1-4, runners-up 5-8,
+        // then 1v8 / 4v5 / 3v6 / 2v7). That one could draw two teams out of
+        // the same group, which is the only reason seedStandardBracket carries
+        // a clash-swap; by letter, every quarter-final is two different groups
+        // and no swap can ever be needed.
+        //
+        // Slots 1-2 feed SF1 and slots 3-4 feed SF2, so A1 and B1 are on one
+        // half of the draw and C1 and D1 on the other.
+        const CROSS = [[0, 3], [1, 2], [2, 1], [3, 0]];   // winner index -> runner-up index
+        const qf = CROSS.map(([w, r], i) => ({
+          id: uid("qf"), slot: i + 1,
+          team1Id: winners[w].id, s1: winners[w].seed,
+          team2Id: runners[r].id, s2: runners[r].seed,
+          winner: null,
+        }));
+        applyBracket({ qf, sf: [], final: null } );
+      }"""

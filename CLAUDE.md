@@ -996,6 +996,40 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     see its own notes. The recorder reads the outro's start off the page
     (`window.__outro`) rather than carrying times that go stale when the cut
     changes.
+- **THE FOUR-GROUP DRAW CROSSES BY LETTER** — A1 v D2, B1 v C2, C1 v B2,
+  D1 v A2. The owner's call, live on 26 Oct 2026, correcting the bracket by
+  hand mid-night.
+  - What the app did instead was rank the four winners against each other and
+    the four runners-up against each other and apply the standard 1v8 / 4v5 /
+    3v6 / 2v7 template, which on 26 Oct produced **A1 v B2, C1 v D2, B1 v C2,
+    D1 v A2**. Defensible as seeding; not the draw the club plays.
+  - Two faults beyond that. It can pair two teams out of the SAME group, which
+    is the only reason `seedStandardBracket` carries a clash-swap — and the
+    swap fixes it by moving a team to a seed it did not earn. And it is not
+    predictable from the group tables: players can read "A1 plays D2" off the
+    wall before the last group match finishes, but not "the best runner-up by
+    game difference plays the fourth-best winner". By letter, every
+    quarter-final is two different groups and no swap can ever fire.
+  - Spliced as `KO_SEED_OLD`/`KO_SEED_NEW` rather than fixed in
+    `september-surge-index.html`: Vol.7 ran the merit seeding and its file
+    should keep saying so.
+  - **Slots 1-2 feed SF1 and 3-4 feed SF2**, so A1 and B1 are on one half and
+    C1 and D1 on the other — the conventional way a letter-crossed bracket is
+    written down. Tonight's hand-fixed bracket has the same four fixtures in a
+    different slot order (A/D with C/B in SF1), because an in-place swap of
+    the two runners-up leaves the slots where they were. If the club wants A1
+    and C1 able to meet in a semi-final rather than a final, swap the middle
+    two rows of `CROSS`.
+  - **The manual seed editor does not rewrite the `s1`/`s2` label strings**, so
+    26 Oct's stored bracket reads "A1 v B2" against a team from group D. The
+    labels are cosmetic — they drive the bracket screen and the share cards,
+    not the scoring — but they are wrong on screen. Not fixed in the database.
+  - `ops/check-seeding.mjs` runs the rule against a real night using the app's
+    own normalised standings, and reads the `CROSS` table out of the shipped
+    file rather than retyping it, so a build that drifts back to merit seeding
+    cannot pass. `APP=<old build>` points it at another build — proved by
+    flipping the table to A1 v A2, which fails on both the letter rule and on
+    "no quarter-final repeats a group match".
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.

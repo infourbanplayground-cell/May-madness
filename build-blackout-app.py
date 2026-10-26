@@ -405,6 +405,9 @@ def add_screens(s, report):
                            # The giant portrait screen beside the courts. A
                            # route, not a tab — see the note in blackout_screens.
                            ("wall route", SCREENS.WALL_ROUTE_OLD, SCREENS.WALL_ROUTE_NEW),
+                           # The owner's 26 Oct call: the four-group draw
+                           # crosses by letter, not by merit.
+                           ("ko seeding", SCREENS.KO_SEED_OLD, SCREENS.KO_SEED_NEW),
                            ):
         assert old in s, f"{name}: anchor no longer matches"
         s = s.replace(old, new, 1)

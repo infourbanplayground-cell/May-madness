@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "413971870f5d";
+  var V = "301427c332ea";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -9530,12 +9530,25 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
         const sf = pairs.map((p, i) => ({ id: uid("sf"), slot: i + 1, team1Id: p.a.id, team2Id: p.b.id, s1: p.a.seed, s2: p.b.seed, winner: null }));
         applyBracket({ qf: [], sf, final: null } );
       } else {
-        // N === 4: all four winners take seeds 1-4, all four runners-up 5-8,
-        // each tier ranked by wins ▶ GD ▶ GF. 1v8 then means the strongest
-        // winner draws the weakest runner-up, and 4v5 gives the best
-        // runner-up the weakest winner.
-        const qf = qfFromTiers([[...winners].sort(compareThirds), [...runners].sort(compareThirds)]);
-        if (!qf) { if (!silent) alert("Need 8 qualifiers to seed the quarterfinals"); return; }
+        // N === 4: the groups CROSS BY LETTER -- A1 v D2, B1 v C2, C1 v B2,
+        // D1 v A2 -- which is the draw the club plays and the one players can
+        // read off the group tables before the last match finishes.
+        //
+        // It replaces a merit seeding (winners ranked 1-4, runners-up 5-8,
+        // then 1v8 / 4v5 / 3v6 / 2v7). That one could draw two teams out of
+        // the same group, which is the only reason seedStandardBracket carries
+        // a clash-swap; by letter, every quarter-final is two different groups
+        // and no swap can ever be needed.
+        //
+        // Slots 1-2 feed SF1 and slots 3-4 feed SF2, so A1 and B1 are on one
+        // half of the draw and C1 and D1 on the other.
+        const CROSS = [[0, 3], [1, 2], [2, 1], [3, 0]];   // winner index -> runner-up index
+        const qf = CROSS.map(([w, r], i) => ({
+          id: uid("qf"), slot: i + 1,
+          team1Id: winners[w].id, s1: winners[w].seed,
+          team2Id: runners[r].id, s2: runners[r].seed,
+          winner: null,
+        }));
         applyBracket({ qf, sf: [], final: null } );
       }
       return;
