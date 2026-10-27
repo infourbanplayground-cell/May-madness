@@ -1101,6 +1101,30 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     nobody played. `APP=<build>` points it at another build; against the one
     before the fix, A is not redrawn and B reports "there is no way to save a
     team change without a score".
+- **The standings post is `build-standings-post.py` + `render-standings-post.mjs`**
+  — four 1080x1350 feed cards and a 1080x1920 story, built mid-season with
+  nights still to play: the table, the gap, the form player, and what is left.
+  Every figure comes from `ops/blackout-standings.mjs`, so it cannot advertise
+  a total the leaderboard contradicts. Captions in `STANDINGS-CAPTIONS.txt`.
+  - **It never says what a doubled night is worth in points**, the same rule
+    the final-week film works under. It prints the biggest night actually
+    recorded and the fact that the remaining nights are double, and lets the
+    reader do the arithmetic.
+  - The **form player is picked from the data** (most finals won per night
+    played, among the top six), not named in the source, so next week's run
+    does not keep this week's story after the facts have moved.
+  - It **refuses to build** if the number of remaining nights is not two, or if
+    the season file disagrees that both are double — the cards say TWO NIGHTS
+    LEFT in 50px type and a post wrong on its own headline is worse than none.
+  - The card shell (faces, wash, scanlines, shrink-to-fit) is imported from
+    `build-announce-post.py`; two copies of it is how two posts drift apart.
+  - **`data-fit` must never go on a `flex:1` element.** Its box is the full
+    flex width at any font size, so the loop never sees it get narrower and
+    runs to the 8px floor — every name on the table card rendered at 8px with
+    the renderer's own checks green, because nothing had overflowed. The name
+    is an inline-block inside the flex cell now.
+  - The story's bottom block was under Instagram's reply bar (~200px); the
+    address and the club line both sat inside it.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
