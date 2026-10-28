@@ -996,6 +996,37 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     see its own notes. The recorder reads the outro's start off the page
     (`window.__outro`) rather than carrying times that go stale when the cut
     changes.
+- **The 7-SECOND FINAL-ROUND CUT is `build-lastround-video.py`** (+
+  `build-lastround-audio.py`, `record-lastround-video.mjs`). Four beats and one
+  idea: FINAL ROUND, the top four, the sharpest gap at the top, the date and
+  that it is double. Not a trim of the 18-second cut — at seven seconds there
+  is no case to argue, only a fact to land and a date to leave behind.
+  - **The hook is read off the table, not written in the source**: whichever of
+    2nd-to-3rd or 1st-to-2nd is the smaller gap, with the copy pluralised from
+    the number. On 28 Oct that was ONE POINT between 2nd and 3rd, with a prize
+    boundary on it.
+  - It **refuses to build** unless exactly one night remains and the season
+    file has it as a double — the cut says FINAL ROUND and ONE NIGHT LEFT in
+    188px type.
+  - Fonts come from the repo's `brand/fonts/`, not the scratchpad: a fresh
+    container has no scratchpad, and the old video builders read theirs from
+    one.
+  - **`.fit` is the FRAME-width pass and must never go on a flex cell.** A
+    `flex:1` cell is the leftover space at any font size, so measuring its name
+    against the 1080px frame let MUNTASER HASNI need 620px in a 615px cell and
+    spill into the points column. `.fitcell` is the second pass, bounded by the
+    cell's own `clientWidth` — safe because `flex:1;min-width:0` makes that
+    width independent of the content. Same trap as the standings post.
+  - Rows are absolutely positioned and **each needs an explicit `top`**:
+    without one they all take the same static position and the four stack on
+    each other. The recorder's overlap check caught it.
+  - Energy must be **clamped at the point it is made**. The beat window opens
+    20ms before the hit so the flash is not late, which makes `(1-u)^3` exceed
+    one and a shock-ring radius of `(1-h)*R` negative — `IndexSizeError` from
+    `arc()` mid-capture.
+  - `/opt/pw-browsers/chromium-1194` is gone; use the `/opt/pw-browsers/chromium`
+    symlink, as the other harnesses here do. `numpy` is on **python3.13** in
+    this container, not the default `python3` (3.11).
 - **THE FOUR-GROUP DRAW CROSSES BY LETTER** — A1 v D2, B1 v C2, C1 v B2,
   D1 v A2. The owner's call, live on 26 Oct 2026, correcting the bracket by
   hand mid-night.
