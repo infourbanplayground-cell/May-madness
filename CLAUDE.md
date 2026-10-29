@@ -1027,6 +1027,33 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - `/opt/pw-browsers/chromium-1194` is gone; use the `/opt/pw-browsers/chromium`
     symlink, as the other harnesses here do. `numpy` is on **python3.13** in
     this container, not the default `python3` (3.11).
+- **The 15-SECOND STORY CUT is `build-story-video.py`** (+
+  `build-story-audio.py`, `record-story-video.mjs`). The 7-second cut is a
+  reminder; this is the sell, and it ends on two asks — PLAY (the cap, the
+  entry, the voucher, "drop your name in the group") and COME WATCH (the time,
+  the venue, the address). Six scenes: TOMORROW, the table, the gap, the
+  double, then the two CTAs.
+  - **Fifteen seconds because that is ONE story card.** Longer and Instagram
+    splits it, and the half that gets dropped is the half carrying both asks.
+  - The start time is **parsed out of `blackout-season.json`'s own schedule
+    line**, not typed: the night-9 signup sheet already went out with 5:30 PM
+    and two assets quoting different times is the fault worth engineering
+    against. The team cap is imported from `ops/signup-post.py` for the same
+    reason. It refuses to build if the schedule line carries no time.
+  - It does **not** say "every point counts twice", which the WhatsApp sheet
+    does — 2X skips the streak bonus, so that sentence is very nearly true and
+    still wrong. DOUBLE POINTS on its own is exactly true.
+  - It also refuses unless the last night is **exactly one day away**, since
+    the cut opens on the word TOMORROW.
+  - Effects, all pure functions of t: chromatic split (via `text-shadow`, NOT
+    stacked copies — duplicates are extra leaf text nodes sitting on top of
+    each other, which is what the recorder's overlap check exists to catch),
+    speed lines out of the vanishing point, shock rings, a bar-locked sweep
+    band under the type, letterbox bars that punch in on each cut, clip-path
+    row wipes, and points that count up.
+  - **The flash frame belongs UNDER the letterbox**, at two frames and a third
+    opacity. Above the bars at half for 90ms it washed the whole frame,
+    including the bars, and read as a strobe rather than as a cut.
 - **THE FOUR-GROUP DRAW CROSSES BY LETTER** — A1 v D2, B1 v C2, C1 v B2,
   D1 v A2. The owner's call, live on 26 Oct 2026, correcting the bracket by
   hand mid-night.
