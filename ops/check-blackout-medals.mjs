@@ -14,6 +14,7 @@ import fs from 'fs';
 import path from 'path';
 
 const OUT = path.resolve('brand/medals-blackout');
+const SABOTAGE = process.env.SABOTAGE || '';
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 let bad = 0;
 
@@ -25,16 +26,50 @@ for (const size of [50, 25]) for (const p of [1, 2, 3]) {
   await pg.goto('file://' + src);
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => document.querySelector('svg')?.dataset.centred === '1');
+  // Applied AFTER the page's own fit-and-centre pass, which is the only way to
+  // prove these assertions can go red: SABOTAGE=widen blows the wordmark past
+  // the ring, SABOTAGE=unshift throws away the pair's centring translate.
+  if (SABOTAGE) await pg.evaluate((s) => {
+    const w = document.getElementById('word');
+    if (s === 'widen' && w) w.setAttribute('font-size', Number(w.getAttribute('font-size')) * 1.6);
+    if (s === 'unshift') document.getElementById('lockup')?.removeAttribute('transform');
+  }, SABOTAGE);
   const r = await pg.evaluate(() => {
     const svg = document.querySelector('svg');
     const vb = svg.viewBox.baseVal;
     const C = vb.width / 2;
     const n = document.getElementById('num'), s = document.getElementById('suf');
-    const img = svg.querySelector('image');
-    const ib = img.getBBox();
+    // "The logo" is the mark AND the word under it, which are centred on the
+    // disc as one stacked pair — the mark alone sits above centre by design,
+    // so measuring it on its own reports every cut-out as off.
+    //
+    // getBBox() is in the element's OWN user space and does not include its
+    // ancestors' transforms, so the page's centring translate is invisible to
+    // it. Read the group's own transform and add it, or this reports the
+    // offset the page has already corrected.
+    const lock = document.getElementById('lockup');
+    const tf = lock?.transform.baseVal.consolidate()?.matrix;
+    const tx = tf ? tf.e : 0, ty = tf ? tf.f : 0;
+    const raw = (lock || svg.querySelector('image')).getBBox();
+    const box = { x: raw.x + tx, y: raw.y + ty,
+                  width: raw.width, height: raw.height };
+    const rawW = document.getElementById('word')?.getBBox();
+    const wb = rawW && { x: rawW.x + tx, y: rawW.y + ty,
+                         width: rawW.width, height: rawW.height };
     const mark = {
-      dx: (ib.x + ib.width / 2) - C, dy: (ib.y + ib.height / 2) - C,
-      w: ib.width / vb.width * 100,
+      dx: (box.x + box.width / 2) - C, dy: (box.y + box.height / 2) - C,
+      w: box.width / vb.width * 100,
+      word: document.getElementById('word')?.textContent || '',
+      // The word must fit the CHORD of the disc at its own height, not the
+      // disc's width: it does not sit on the diameter, so the space it has is
+      // narrower than the field is, and checking it against the field is how a
+      // wordmark ends up touching the ring.
+      wordFits: (() => {
+        if (!wb) return true;
+        const rl = vb.width * 0.5 * 0.864;
+        const yoff = (wb.y + wb.height / 2) - C;
+        return wb.width <= 2 * Math.sqrt(Math.max(0, rl * rl - yoff * yoff));
+      })(),
     };
     const arc = svg.querySelector('textPath')?.textContent || '';
     if (!n || !s) {
@@ -60,7 +95,15 @@ for (const size of [50, 25]) for (const p of [1, 2, 3]) {
   // The logo is the mark in this layout and sits on the disc's centre; in the
   // other it rides above it, so only the horizontal is checked there.
   if (Math.abs(r.mark.dx) > 0.5) flags.push(`logo ${r.mark.dx.toFixed(1)} units off centre`);
-  if (r.layout === 'logo' && Math.abs(r.mark.dy) > 0.5) flags.push('logo not vertically centred');
+  // The mark and the word are one stacked pair; 1.5 units is 0.3% of a 50mm
+  // disc and absorbs the difference between a glyph's ink box and its line box.
+  if (r.layout === 'logo' && Math.abs(r.mark.dy) > 1.5) {
+    flags.push(`logo ${r.mark.dy.toFixed(1)} units off vertically`);
+  }
+  if (r.layout === 'logo' && r.mark.word !== 'BLACKOUT') {
+    flags.push(`the word reads "${r.mark.word}", not BLACKOUT`);
+  }
+  if (!r.mark.wordFits) flags.push('BLACKOUT runs past the ring');
   if (r.layout === 'logo' && !/^\dST|^\dND|^\dRD/.test(r.arc)) {
     // The ghost is decorative. If the arc does not say the placement in words,
     // nothing on the cut-out does, and it cannot be sorted at the prize table.
@@ -70,7 +113,8 @@ for (const size of [50, 25]) for (const p of [1, 2, 3]) {
   if (r.sufRight !== undefined && r.sufRight > r.limit) flags.push('suffix runs past the ring');
   if (flags.length) bad++;
   console.log(`${size}mm ${p}: ${r.layout} · ${what} off ${r.off.toFixed(2)} units `
-    + `(${r.pct.toFixed(3)}%) · logo ${r.mark.w.toFixed(0)}% wide`
+    + `(${r.pct.toFixed(3)}%) · logo ${r.mark.w.toFixed(0)}% wide, `
+    + `${r.mark.dy >= 0 ? '+' : ''}${r.mark.dy.toFixed(1)} vert`
     + (r.arc ? ` · arc "${r.arc}"` : ' · no arc')
     + (flags.length ? `\n  !! ${flags.join(' | ')}` : '  ok'));
   await pg.close();
@@ -104,7 +148,8 @@ await pg.waitForLoadState('load');
 const drawn = await pg.evaluate(() =>
   [...document.images].every(i => i.complete && i.naturalWidth > 0));
 if (!drawn) { console.error('!! a cut-out did not render on the proof sheet'); bad++; }
-const proof = path.join(OUT, 'PROOF.png');
+// A sabotaged run must never overwrite the shippable proof sheet.
+const proof = path.join(OUT, SABOTAGE ? 'PROOF-sabotage.png' : 'PROOF.png');
 await pg.screenshot({ path: proof, fullPage: true });
 await pg.close();
 await browser.close();

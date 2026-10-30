@@ -5,14 +5,16 @@ and **25mm (1in)**. They are not one artwork scaled — arc text that reads at
 50mm turns to mush at half the diameter, so 25mm is a separate cut with the arc
 dropped.
 
-**The logo is the mark and the placement is a ghost behind it.** The numeral
-fills the field at 20% opacity, clipped to just inside the hairline ring, with
-the Blackout mark dead centre on top of it at full strength.
+**The logo is the mark with BLACKOUT set under it, and the placement is a ghost
+behind them.** The numeral fills the field at 20% opacity, clipped to just
+inside the hairline ring; the mark and the word sit on top of it at full
+strength and are centred on the disc as one stacked pair.
 
 | | 50mm | 25mm |
 |---|---|---|
 | Lime ring + hairline | yes | yes |
-| Blackout mark, centred | 0.50 × radius | 0.56 × radius |
+| Blackout mark | 0.40 × radius | 0.40 × radius |
+| BLACKOUT, as type | 0.26 × radius | 0.30 × radius |
 | Ghost placement behind it | 1.02 × radius | 1.12 × radius |
 | `1ST PLACE · VOL.8` arc | yes | yes, volume dropped |
 | Squares at 3 and 9 o'clock | yes | — |
@@ -61,9 +63,18 @@ python3 build-blackout-medals.py --way metal    # gold / silver / bronze
 `--way metal` exists only for if these ever have to sit beside conventional
 ribbons.
 
-**The mark, not the lockup.** The horizontal Blackout lockup carries a sub-line
-of small type that is under a millimetre tall at 50mm and prints as grey fuzz,
-so the square mark is what sits in the centre.
+**BLACKOUT is set as live type, not placed as the lockup PNG.** The horizontal
+lockup carries a sub-line of small type that is under a millimetre tall at 50mm
+and prints as grey fuzz. The word is drawn in the volume's display face —
+Archivo italic at `wdth` 125 / `wght` 900 — in the lockup's own two inks, BLACK
+in ink and OUT in the accent, so it can be fitted to the disc at either size.
+
+**It is fitted to the CHORD, not to the width.** The word does not sit on the
+diameter, so the space it has is narrower than the field is wide; sizing it
+against the field is how a wordmark ends up touching the ring. The page
+measures it after `document.fonts.ready` and shrinks it until it fits the chord
+at its own height — before that it would be measuring the fallback face, which
+is nothing like Archivo at `wdth` 125.
 
 **The ghost is clipped to just inside the hairline ring.** Unclipped it runs off
 the disc into the bleed, so the crop reads as an accident — and on the square
@@ -110,6 +121,18 @@ italic glyph's ink does not sit centred inside its advance: "1ST" measured
 bearing. The page measures the ghost's box once the font has loaded and shifts
 it onto the centre.
 
+**The mark and the word** are centred on the disc as one pair, by measurement.
+They are laid out from an estimate of a capital's height (0.72em) and the real
+ink box differs by a few per cent, which left the lockup 3% of the radius low
+at 25mm. Estimate to lay out, measure to place.
+
+A trap worth knowing if you touch the harness: **`getBBox()` is in the
+element's own user space and does not include its ancestors' transforms**, so
+the page's centring translate is invisible to it. `ops/check-blackout-medals.mjs`
+reads the group's own transform and adds it; without that it reports the exact
+offset the page has already corrected, which is how this looked unfixed through
+two rebuilds.
+
 **The numeral**, in `--layout numeral`. `text-anchor="middle"` centres the
 numeral *and* its ordinal suffix together, which leaves the numeral itself well
 left of centre; correcting that with a hand-tuned nudge per digit was still 2–6%
@@ -122,9 +145,19 @@ suffix off its right edge.
 `svg[data-centred="1"]`, and fails the cut-out if it never appears. Screenshot
 any earlier and every one ships with the mark off-centre — the exact bug the
 pass exists to prevent. `ops/check-blackout-medals.mjs` reports the offset for
-all six; it should read 0.00 units. It also checks the logo is on the disc's
-centre in both axes, and that the arc really states the placement — the one
+all six; it should read 0.00 units. It also checks that the mark-and-word pair
+is on the disc's centre in both axes, that the word really reads BLACKOUT, that
+it clears the ring, and that the arc really states the placement — the one
 thing the ghost cannot be trusted to say.
+
+```bash
+SABOTAGE=widen   node ops/check-blackout-medals.mjs   # word past the ring
+SABOTAGE=unshift node ops/check-blackout-medals.mjs   # centring thrown away
+```
+
+Both are applied *after* the page's own fit-and-centre pass, which is the only
+way to prove those assertions can go red; a sabotaged run writes
+`PROOF-sabotage.png` so it can never overwrite the real proof sheet.
 
 ### The bottom arc
 

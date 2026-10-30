@@ -184,12 +184,40 @@ def svg(place, size_mm, accent, mark_b64, bleed=True, layout="logo"):
             f'font-variation-settings="\'wdth\' 125, \'wght\' 900" fill="{accent}"'
             f'{bold(accent, ghost)}>{p["ord_"]}{p["suf"]}</text></g>')
 
-        # The logo, dead centre, at full strength.
-        mw = R * (0.50 if big else 0.56)
-        parts.append(f'<image href="data:image/png;base64,{mark_b64}" '
-                     f'x="{c-mw/2:.1f}" y="{c-mw/2:.1f}" '
+        # The logo, dead centre, at full strength: the mark with BLACKOUT set
+        # under it, the same order and the same two inks as the real lockup
+        # (BLACK in ink, OUT in the accent). The horizontal lockup PNG is not
+        # used because it carries a sub-line of small type that is under a
+        # millimetre tall at 50mm and prints as grey fuzz; the word is set as
+        # live type instead so it can be fitted to the disc at either size.
+        #
+        # The pair is treated as one stacked lockup and centred on the disc as
+        # a whole, so the mark sits above centre and the word below it.
+        mw = R * (0.40 if big else 0.40)
+        ws = R * (0.26 if big else 0.30)
+        cap = ws * 0.72                     # cap height of a run of capitals
+        gap = R * 0.095
+        top = c - (mw + gap + cap) / 2
+        # The two are wrapped so the page can centre the PAIR vertically once
+        # the font has loaded. `cap` above is an estimate of a capital's height
+        # (0.72em); the real ink box differs by a few per cent, which left the
+        # lockup 3% of the radius low at 25mm. Estimate to lay it out, measure
+        # to place it — the same rule as everything else here.
+        parts.append(f'<g id="lockup">'
+                     f'<image href="data:image/png;base64,{mark_b64}" '
+                     f'x="{c-mw/2:.1f}" y="{top:.1f}" '
                      f'width="{mw:.1f}" height="{mw:.1f}" '
                      f'preserveAspectRatio="xMidYMid meet"/>')
+        wy = top + mw + gap + cap
+        parts.append(
+            f'<text id="word" x="{c:.1f}" y="{wy:.1f}" text-anchor="middle" '
+            f'font-family="Archivo" font-style="italic" font-size="{ws:.1f}" '
+            f'font-variation-settings="\'wdth\' 125, \'wght\' 900" '
+            f'letter-spacing="{-ws*0.012:.2f}" '
+            f'data-yoff="{wy - c - cap/2:.2f}" data-rlimit="{r_hair - R*0.012:.2f}" '
+            f'data-fs0="{ws:.1f}">'
+            f'<tspan fill="{INK}">BLACK</tspan>'
+            f'<tspan fill="{accent}">OUT</tspan></text></g>')
 
         # BECAUSE THE GHOST IS DECORATIVE, THE ARC HAS TO CARRY THE PLACEMENT IN
         # WORDS — at BOTH sizes. A cut-out whose only statement of "1st" is a
@@ -286,6 +314,33 @@ document.fonts.ready.then(() => {{
     const gb = ghost.getBBox();
     ghost.setAttribute('x',
       (Number(ghost.getAttribute('x')) + (C - (gb.x + gb.width / 2))).toFixed(2));
+  }}
+
+  // BLACKOUT is shrunk to the chord of the disc at its own height, not to the
+  // disc's width: the word does not sit on the diameter, so the space it has
+  // is narrower than the field is wide, and sizing it against the field is how
+  // a wordmark ends up touching the ring. Measured after the font loads — the
+  // fallback face is nothing like Archivo at wdth 125, so a fit computed any
+  // earlier is a fit against the wrong letters.
+  const word = document.getElementById('word');
+  if (word) {{
+    const y = Number(word.dataset.yoff), rl = Number(word.dataset.rlimit);
+    const max = 2 * Math.sqrt(Math.max(0, rl * rl - y * y)) * 0.92;
+    let fs = Number(word.getAttribute('font-size'));
+    for (let i = 0; i < 60 && word.getBBox().width > max; i++) {{
+      fs *= 0.97;
+      word.setAttribute('font-size', fs.toFixed(3));
+    }}
+    const wb = word.getBBox();
+    word.setAttribute('x',
+      (Number(word.getAttribute('x')) + (C - (wb.x + wb.width / 2))).toFixed(2));
+    svg.dataset.wordFit = (fs / Number(word.dataset.fs0 || fs)).toFixed(3);
+
+    // Now centre the mark and the word as ONE pair on the disc.
+    const lock = document.getElementById('lockup');
+    const lb = lock.getBBox();
+    lock.setAttribute('transform',
+      `translate(0 ${{(C - (lb.y + lb.height / 2)).toFixed(2)}})`);
   }}
   if (!num || !suf) {{ svg.dataset.centred = '1'; return; }}
   const nb = num.getBBox();
