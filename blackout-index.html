@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "15c0e9f979a2";
+  var V = "3631d8b0a94d";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2959,9 +2959,34 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
     const t = (s.teams || []).find(x => x.id === tid);
     return t ? [nameOf(t.p1Id), nameOf(t.p2Id)] : null;
   };
+  // EARNINGS ARE VOUCHERS *AND* CASH, AND THE TWO ARE NOT THE SAME THING.
+  // This counted night vouchers only, so the season's three biggest cheques —
+  // the whole reason anyone plays nine nights — were missing from the one list
+  // headed TOP EARNERS. The night prize is a voucher and the season prize is
+  // cash, so they are tracked apart and shown apart: a player cannot spend one
+  // where they spend the other, and a single merged number would tell them
+  // they have more of whichever they happen to need.
+  //
+  // The cash lands on the same event as `paid` above — the season being over —
+  // so the list can never show money as earned while the tracker still has it
+  // outstanding.
   const earners = {};
-  doneNights.forEach(s => { (champsOf(s) || []).forEach(n => { earners[n] = (earners[n] || 0) + voucher; }); });
-  const top = Object.entries(earners).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const bump = (n, kind, amt) => {
+    if (!n) return;
+    earners[n] = earners[n] || { voucher: 0, cash: 0 };
+    earners[n][kind] += amt;
+  };
+  doneNights.forEach(s => { (champsOf(s) || []).forEach(n => bump(n, "voucher", voucher)); });
+  if (seasonDone) {
+    SEASON_PRIZES.forEach((amt, i) => {
+      const e = leaderboard[i];
+      if (e && e.player) bump(e.player.name, "cash", amt);
+    });
+  }
+  const top = Object.entries(earners)
+    .map(([n, v]) => [n, v, v.voucher + v.cash])
+    .sort((a, b) => b[2] - a[2])
+    .slice(0, 6);
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
@@ -2985,7 +3010,7 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
           letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>
-          SEASON PRIZES &middot; IF IT ENDED NOW
+          SEASON PRIZES &middot; {seasonDone ? "CASH" : "CASH \u00b7 IF IT ENDED NOW"}
         </div>
         {SEASON_PRIZES.map((amt, i) => {
           const e = leaderboard[i];
@@ -3025,14 +3050,25 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 
         {top.length > 0 && <>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
-            letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>TOP EARNERS SO FAR</div>
+            letterSpacing: ".26em", color: "#9A9A9A", marginTop: 22 }}>
+            {seasonDone ? "TOP EARNERS" : "TOP EARNERS SO FAR"}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
-            {top.map(([n, v]) => (
+            {top.map(([n, v, tot]) => (
               <div key={n} style={{ padding: 10, border: "1px solid rgba(255,255,255,.07)" }}>
                 <div style={{ fontWeight: 800, fontSize: 13, whiteSpace: "nowrap",
                   overflow: "hidden", textOverflow: "ellipsis" }}>{n}</div>
                 <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 18,
-                  color: "#C6FF00", marginTop: 3 }}>{v} OMR</div>
+                  color: "#C6FF00", marginTop: 3 }}>{tot} OMR</div>
+                {/* The split, always — a player who has 14 in vouchers and 75
+                    in cash needs to know which is which before they turn up
+                    expecting to spend it. Magenta is the cash, the same ink
+                    the season prizes carry above. */}
+                <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+                  fontSize: 10, letterSpacing: ".1em", marginTop: 4 }}>
+                  <span style={{ color: "#C6FF00" }}>{v.voucher} VOUCHER</span>
+                  <span style={{ color: "#6E6E6E" }}> &middot; </span>
+                  <span style={{ color: v.cash ? "#FF2E88" : "#6E6E6E" }}>{v.cash} CASH</span>
+                </div>
               </div>
             ))}
           </div>
