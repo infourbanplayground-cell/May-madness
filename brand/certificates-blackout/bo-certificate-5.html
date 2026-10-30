@@ -98,7 +98,7 @@ body{
 .wash{background:linear-gradient(to bottom, transparent 54%, rgba(123,43,255,.16) 100%);}
 
 .edge{position:absolute;inset:7mm;border:.6pt solid rgba(242,242,242,.14);}
-.rule{position:absolute;top:7mm;left:7mm;right:7mm;height:2.4mm;background:#FF2E88;}
+.rule{position:absolute;top:7mm;left:7mm;right:7mm;height:2.4mm;background:#C6FF00;}
 .rulebot{position:absolute;bottom:7mm;left:7mm;right:7mm;height:.9mm;background:#C6FF00;}
 /* The app's card marker is four corner ticks, 16x2px. Same marker, in mm. */
 .tick{position:absolute;background:#C6FF00;}
@@ -112,9 +112,9 @@ body{
   letter-spacing:.34em;color:#9A9A9A;text-transform:uppercase;margin-top:3.4mm;}
 
 .kickwrap{display:flex;align-items:center;gap:5mm;margin-top:5.4mm;}
-.kickwrap .ln{width:22mm;height:.7pt;background:#FF2E88;opacity:.5;}
+.kickwrap .ln{width:22mm;height:.7pt;background:#C6FF00;opacity:.5;}
 .kicker{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:7.4pt;
-  letter-spacing:.40em;color:#FF2E88;white-space:nowrap;}
+  letter-spacing:.40em;color:#C6FF00;white-space:nowrap;}
 
 /* Vol.8's display face, and no shadow of any kind. */
 .place{font-family:'Archivo',sans-serif;font-style:italic;
@@ -155,6 +155,17 @@ body{
 .body{font-size:8.8pt;color:#9A9A9A;margin-top:4.6mm;max-width:160mm;line-height:1.65;}
 .body b{color:#F2F2F2;font-weight:800;}
 
+/* A blank sheet has no figures under the name, so the same spacing leaves a
+   30mm hole between the body copy and the seal and the whole thing reads
+   top-heavy. The stack is opened up to fill it rather than the header being
+   unpinned, which would let the lockup drift away from the top rule. The plate
+   also grows: it is going to be written on, and 18mm takes a signature
+   comfortably without reading as a blank slab (Vol.7 records 22mm doing that). */
+body.blank .awarded{margin-top:9.4mm;}
+body.blank .nameplate{height:18mm;margin-top:6mm;}
+body.blank .namehint{margin-top:3mm;}
+body.blank .body{margin-top:12mm;}
+
 /* A single centred stack at the foot: seal, award date, imprint. Vol.7 records
    flanking the seal with a date plate and a director plate and the three
    crowding each other, so there is one column and no director box. */
@@ -167,7 +178,7 @@ body{
 .serial{position:absolute;left:0;right:0;bottom:10mm;text-align:center;
   font-family:'JetBrains Mono',monospace;font-size:5.8pt;letter-spacing:.28em;
   color:#6E6E6E;text-transform:uppercase;}
-</style></head><body>
+</style></head><body class="blank">
 <div class="layer grid"></div>
 <div class="layer scan"></div>
 <div class="layer wash"></div>
@@ -188,7 +199,7 @@ body{
 
   <div class="kickwrap">
     <span class="ln"></span>
-    <span class="kicker">PROVISIONAL · THE SEASON IS NOT FINISHED</span>
+    <span class="kicker">CERTIFICATE OF ACHIEVEMENT</span>
     <span class="ln"></span>
   </div>
   <div class="place">5TH PLACE</div>
@@ -199,9 +210,9 @@ body{
   </div>
 
   <div class="awarded">This certificate is proudly awarded to</div>
-  <div class="plate nameplate"><div class="typed">Munther Rahbi</div></div>
+  <div class="plate nameplate"></div>
   <div class="namehint">Name</div>
-  <div class="stats" style="--second:#7B2BFF"><div class="cell"><div class="num">147</div><div class="cap">POINTS</div></div><div class="cell"><div class="num">7</div><div class="cap">NIGHTS</div></div><div class="cell"><div class="num">1</div><div class="cap">NIGHTS WON</div></div></div>
+  
 
   <div class="body">
     for finishing <b>FIFTH</b> in the <b>Blackout Series</b> at Urban Playground —
@@ -229,5 +240,5 @@ body{
          preserveAspectRatio="xMidYMid meet"/>
 </svg>
 <div class="issued">Awarded <span>30 October 2026</span></div>
-<div class="serial">Provisional · not a final result · Blackout Series · VOL.8 · Urban Playground · Muscat, Oman</div>
+<div class="serial">Blackout Series · VOL.8 · Urban Playground · Muscat, Oman</div>
 </body></html>

@@ -75,6 +75,11 @@ for (const f of files) {
       'mono embedded': loaded.includes('JetBrains Mono'),
       images: [...document.images].every(i => i.complete && i.naturalWidth > 0),
       centred: document.querySelector('svg')?.dataset.centred === '1',
+      // Whether mono is REQUIRED is a fact about the artwork, not about its
+      // size: the 25mm numeral cut drops the arc, the 25mm logo cut cannot
+      // (the ghost is decorative, so the arc is the only thing that says which
+      // placement this is). Ask the page instead of assuming from the diameter.
+      hasArc: !!document.querySelector('textPath'),
     };
   });
 
@@ -92,11 +97,10 @@ for (const f of files) {
 
   const bad = [];
   for (const [k, ok] of Object.entries(checks)) {
-    if (ok !== false || k === 'images') continue;
-    // Only the 50mm cut sets arc text; at 25mm the arc is deliberately dropped,
-    // so the mono face never loads there and requiring it flags every small
-    // cut-out as broken.
-    if (k === 'mono embedded' && artMm < 40) continue;
+    if (ok !== false || k === 'images' || k === 'hasArc') continue;
+    // A cut that sets no arc text never loads the mono face, so requiring it
+    // there flags a perfectly good cut-out as broken.
+    if (k === 'mono embedded' && !checks.hasArc) continue;
     bad.push(k === 'centred' ? 'numeral not centred' : `FONT: ${k}`);
   }
   if (!checks.images) bad.push('the mark failed to load');

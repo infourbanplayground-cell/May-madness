@@ -26,26 +26,53 @@ for (const size of [50, 25]) for (const p of [1, 2, 3]) {
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => document.querySelector('svg')?.dataset.centred === '1');
   const r = await pg.evaluate(() => {
-    const n = document.getElementById('num'), s = document.getElementById('suf');
-    const vb = document.querySelector('svg').viewBox.baseVal;
-    const nb = n.getBBox(), sb = s.getBBox();
+    const svg = document.querySelector('svg');
+    const vb = svg.viewBox.baseVal;
     const C = vb.width / 2;
-    return {
-      off: (nb.x + nb.width / 2) - C,
-      pct: ((nb.x + nb.width / 2) - C) / vb.width * 100,
-      gap: sb.x - (nb.x + nb.width),
-      // the suffix must not run past the hairline ring
-      sufRight: sb.x + sb.width, limit: C + vb.width * 0.5 * 0.876,
+    const n = document.getElementById('num'), s = document.getElementById('suf');
+    const img = svg.querySelector('image');
+    const ib = img.getBBox();
+    const mark = {
+      dx: (ib.x + ib.width / 2) - C, dy: (ib.y + ib.height / 2) - C,
+      w: ib.width / vb.width * 100,
     };
+    const arc = svg.querySelector('textPath')?.textContent || '';
+    if (!n || !s) {
+      // The logo layout: the placement is one ghost string, which text-anchor
+      // centres on its own, and the logo is the thing that must be dead centre.
+      const g = svg.querySelector('g[opacity] text');
+      const gb = g.getBBox();
+      return { layout: 'logo', mark, arc,
+               off: (gb.x + gb.width / 2) - C,
+               pct: ((gb.x + gb.width / 2) - C) / vb.width * 100 };
+    }
+    const nb = n.getBBox(), sb = s.getBBox();
+    return { layout: 'numeral', mark, arc,
+             off: (nb.x + nb.width / 2) - C,
+             pct: ((nb.x + nb.width / 2) - C) / vb.width * 100,
+             gap: sb.x - (nb.x + nb.width),
+             // the suffix must not run past the hairline ring
+             sufRight: sb.x + sb.width, limit: C + vb.width * 0.5 * 0.876 };
   });
   const flags = [];
-  if (Math.abs(r.pct) > 0.15) flags.push(`numeral ${r.pct.toFixed(2)}% off centre`);
-  if (r.gap < 0) flags.push('suffix overlaps the numeral');
-  if (r.sufRight > r.limit) flags.push('suffix runs past the ring');
+  const what = r.layout === 'logo' ? 'ghost' : 'numeral';
+  if (Math.abs(r.pct) > 0.15) flags.push(`${what} ${r.pct.toFixed(2)}% off centre`);
+  // The logo is the mark in this layout and sits on the disc's centre; in the
+  // other it rides above it, so only the horizontal is checked there.
+  if (Math.abs(r.mark.dx) > 0.5) flags.push(`logo ${r.mark.dx.toFixed(1)} units off centre`);
+  if (r.layout === 'logo' && Math.abs(r.mark.dy) > 0.5) flags.push('logo not vertically centred');
+  if (r.layout === 'logo' && !/^\dST|^\dND|^\dRD/.test(r.arc)) {
+    // The ghost is decorative. If the arc does not say the placement in words,
+    // nothing on the cut-out does, and it cannot be sorted at the prize table.
+    flags.push(`the arc does not state the placement ("${r.arc}")`);
+  }
+  if (r.gap !== undefined && r.gap < 0) flags.push('suffix overlaps the numeral');
+  if (r.sufRight !== undefined && r.sufRight > r.limit) flags.push('suffix runs past the ring');
   if (flags.length) bad++;
-  console.log(`${size}mm ${p}: centre off ${r.off.toFixed(2)} units `
-    + `(${r.pct.toFixed(3)}%) · suffix gap ${r.gap.toFixed(1)}`
-    + (flags.length ? `  !! ${flags.join(' | ')}` : '  ok'));
+  console.log(`${size}mm ${p}: ${r.layout} · ${what} off ${r.off.toFixed(2)} units `
+    + `(${r.pct.toFixed(3)}%) · logo ${r.mark.w.toFixed(0)}% wide`
+    + (r.arc ? ` · arc "${r.arc}"` : ' · no arc')
+    + (flags.length ? `\n  !! ${flags.join(' | ')}` : '  ok'));
   await pg.close();
 }
 

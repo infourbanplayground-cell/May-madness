@@ -9,16 +9,19 @@ A4 landscape (297 x 210mm), 300 DPI, full bleed. Five placements.
 | `bo-certificate-N.png` | 3510 x 2481 preview / for sending as an image |
 | `bo-certificate-N.html` | the artboard, self-contained (fonts and marks inlined) |
 
+**What is checked in here is the BLANK set** — a ruled name plate, no figures,
+nothing claimed. Print these and write the names in at the prize-giving.
+
 ## Rebuilding
 
 ```bash
-# blank name lines — print these BEFORE the last night and write names in
 python3 build-blackout-certificates.py
 node render-blackout-certificates.mjs
 python3.13 pack-blackout-certificate-pdfs.py
 ```
 
-With the names and figures read off the live app:
+If you ever want them pre-printed, with the names and figures read off the live
+app:
 
 ```bash
 ssh urbanpadel 'curl -s localhost:3009/state' > $SP/bo.json
@@ -30,9 +33,9 @@ node render-blackout-certificates.mjs && python3.13 pack-blackout-certificate-pd
 `img2pdf` and Pillow are installed on **python3.13** in this container, not on
 the default `python3` (3.11).
 
-## The names are read, never typed
+## If a name IS printed, it is read, never typed
 
-Every name and every figure on these sheets comes from
+Every name and every figure a sheet can carry comes from
 `ops/blackout-standings.mjs`, which lifts the app's own scoring engine out of
 `blackout-index.html` and runs it over the live state. A certificate cannot
 award a placement or print a total that the leaderboard contradicts.
@@ -45,7 +48,13 @@ FINISHED` and the top rule turns magenta, so a provisional sheet cannot be
 mistaken for a final one at arm's length. The imprint line carries it too.
 
 Run with no `--standings` at all and you get blank name lines and no figures —
-which claims nothing, and is the right thing to print in advance.
+which claims nothing, and is what is shipped here.
+
+**The blank sheet has its own spacing**, under `body.blank`. Without the figures
+under the name the same layout leaves a 30mm hole between the body copy and the
+seal and the whole thing reads top-heavy, so the stack opens up to fill it. The
+header is deliberately *not* unpinned to do this: centring the column would let
+the lockup drift away from the top rule.
 
 ## Design notes
 
@@ -84,8 +93,9 @@ The sheet is near-black, so a black pen on it is invisible. The name field
 therefore sits on its own light plate (`#EFEFEA`, not pure white, so it does not
 glare against the black field), with a lime cap bar along its top edge so it
 reads as a labelled field belonging to the frame rather than as a white box
-dropped on the sheet. 15mm is enough to write a name in without taking the eye
-off the placement.
+dropped on the sheet. **18mm on a blank sheet**, 15mm when a name is printed —
+enough to write in without reading as a blank slab, which Vol.7 records 22mm
+doing.
 
 **Both modes use the same plate.** A typed name prints in `#0A0A0A` on the plate
 rather than on the dark ground, so a pre-printed certificate and a handwritten

@@ -1189,7 +1189,7 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   ```bash
   ssh urbanpadel 'curl -s localhost:3009/state' > $SP/bo.json
   node ops/blackout-standings.mjs $SP/bo.json $SP/bo-standings.json
-  python3 build-blackout-certificates.py --standings $SP/bo-standings.json
+  python3 build-blackout-certificates.py   # add --standings <json> to type names
   node render-blackout-certificates.mjs && python3.13 pack-blackout-certificate-pdfs.py
   python3 build-blackout-medals.py && node render-blackout-medals.mjs
   node ops/check-blackout-medals.mjs && python3.13 pack-blackout-medal-pdfs.py
@@ -1198,7 +1198,29 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   + PDF + a combined `bo-certificates-1-to-5.pdf`); medals in
   `brand/medals-blackout/` — 50mm and 25mm, each as a **`-disc.png` cut-out**
   (transparent outside the circle) and a `-bleed.png` artboard with 3mm bleed.
-  - **IT REFUSES TO PRINT A NAME WHILE A NIGHT IS STILL TO PLAY.** The names and
+  - **WHAT IS CHECKED IN IS THE BLANK SET** — a ruled name plate, no figures,
+    nothing claimed; the names go on by hand at the prize-giving. The blank
+    sheet has its own spacing under `body.blank`, because without the figures
+    under the name the same layout leaves a 30mm hole above the seal and reads
+    top-heavy. The header is deliberately NOT unpinned to fix that: centring
+    the column lets the lockup drift away from the top rule.
+  - **ON THE MEDALS THE LOGO IS THE MARK AND THE PLACEMENT IS A GHOST** behind
+    it at 20%, clipped to just inside the hairline ring (unclipped it runs into
+    the bleed and you can read "1ST" sitting outside its own sticker), with the
+    opacity on the GROUP — at 20% on fill and stroke separately they composite
+    to ~36% where they overlap and the glyph reads as outlined, not bolder.
+    **The arc therefore has to carry the placement in words at BOTH sizes**: a
+    cut-out whose only claim to "1st" is a 20%-opacity shape cannot be sorted
+    at the prize table, which is the whole job of a medal insert. So whether
+    mono is required is read off the artwork (does the page set arc text?) and
+    not assumed from the diameter — the 25mm *numeral* cut drops the arc, the
+    25mm *logo* cut cannot. `--layout numeral` is the other way round.
+  - **The ghost is centred by measurement too.** `text-anchor="middle"` centres
+    on the ADVANCE width, and an italic glyph's ink is not centred inside its
+    advance — "1ST" sat **1.4% of the disc** right of centre, because the `1`
+    carries a wide left side bearing.
+  - **IF A NAME IS PRINTED IT IS READ, NEVER TYPED, AND IT REFUSES TO PRINT ONE
+    WHILE A NIGHT IS STILL TO PLAY.** The names and
     every figure come from `ops/blackout-standings.mjs`, which runs the app's own
     engine over the live state, so a certificate cannot award a placement the
     leaderboard contradicts — and the top five is not a fact until the season is

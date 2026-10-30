@@ -246,6 +246,17 @@ body{{
 .body{{font-size:8.8pt;color:{MUTED};margin-top:4.6mm;max-width:160mm;line-height:1.65;}}
 .body b{{color:{INK};font-weight:800;}}
 
+/* A blank sheet has no figures under the name, so the same spacing leaves a
+   30mm hole between the body copy and the seal and the whole thing reads
+   top-heavy. The stack is opened up to fill it rather than the header being
+   unpinned, which would let the lockup drift away from the top rule. The plate
+   also grows: it is going to be written on, and 18mm takes a signature
+   comfortably without reading as a blank slab (Vol.7 records 22mm doing that). */
+body.blank .awarded{{margin-top:9.4mm;}}
+body.blank .nameplate{{height:18mm;margin-top:6mm;}}
+body.blank .namehint{{margin-top:3mm;}}
+body.blank .body{{margin-top:12mm;}}
+
 /* A single centred stack at the foot: seal, award date, imprint. Vol.7 records
    flanking the seal with a date plate and a director plate and the three
    crowding each other, so there is one column and no director box. */
@@ -258,7 +269,7 @@ body{{
 .serial{{position:absolute;left:0;right:0;bottom:10mm;text-align:center;
   font-family:'JetBrains Mono',monospace;font-size:5.8pt;letter-spacing:.28em;
   color:{MUTED2};text-transform:uppercase;}}
-</style></head><body>
+</style></head><body class="{'named' if name else 'blank'}">
 <div class="layer grid"></div>
 <div class="layer scan"></div>
 <div class="layer wash"></div>

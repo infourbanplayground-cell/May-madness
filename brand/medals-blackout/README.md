@@ -5,13 +5,17 @@ and **25mm (1in)**. They are not one artwork scaled — arc text that reads at
 50mm turns to mush at half the diameter, so 25mm is a separate cut with the arc
 dropped.
 
+**The logo is the mark and the placement is a ghost behind it.** The numeral
+fills the field at 20% opacity, clipped to just inside the hairline ring, with
+the Blackout mark dead centre on top of it at full strength.
+
 | | 50mm | 25mm |
 |---|---|---|
 | Lime ring + hairline | yes | yes |
-| Blackout mark | yes | yes |
-| `BLACKOUT · VOL.8` arc | yes | — |
+| Blackout mark, centred | 0.50 × radius | 0.56 × radius |
+| Ghost placement behind it | 1.02 × radius | 1.12 × radius |
+| `1ST PLACE · VOL.8` arc | yes | yes, volume dropped |
 | Squares at 3 and 9 o'clock | yes | — |
-| Numeral | 0.74 × radius | 0.80 × radius |
 
 ## Files
 
@@ -59,8 +63,26 @@ ribbons.
 
 **The mark, not the lockup.** The horizontal Blackout lockup carries a sub-line
 of small type that is under a millimetre tall at 50mm and prints as grey fuzz,
-so the square mark rides above the numeral instead and the one arc carries what
-the mark does not: the series and the volume.
+so the square mark is what sits in the centre.
+
+**The ghost is clipped to just inside the hairline ring.** Unclipped it runs off
+the disc into the bleed, so the crop reads as an accident — and on the square
+artboard you can read "1ST" sitting outside its own sticker.
+
+**Its opacity goes on the group, not on the fill and the stroke separately.** At
+20% each they composite to about 36% where they overlap, which gives the glyph a
+lighter rim and makes it read as *outlined* rather than as bolder.
+
+**Because the ghost is decorative, the arc carries the placement in words — at
+both sizes.** A cut-out whose only claim to "1st" is a 20%-opacity shape is not
+one anybody can sort at the prize table, and that is the whole job of a medal
+insert. The volume is dropped at 25mm so the remaining words can be set larger.
+The other layout is one flag away:
+
+```bash
+python3 build-blackout-medals.py --layout logo      # default
+python3 build-blackout-medals.py --layout numeral   # placement solid and centred
+```
 
 **Squares, not diamonds.** Vol.7 set the 3- and 9-o'clock markers as rotated
 diamonds. This volume has radius 0 and no rotated geometry anywhere, so they sit
@@ -80,22 +102,29 @@ in its own colour with `paint-order="stroke fill"`, which fattens the glyph
 evenly on every edge while leaving the counters open. Much past 0.08 and the
 `1`'s spur and the `3`'s bowls start to close up.
 
-### Centring the numeral
+### Centring, which is measured and not eyeballed
 
-The placement numeral is the mark, so it sits dead centre — and centre here is
-**measured, not eyeballed**. `text-anchor="middle"` centres the numeral *and*
-its ordinal suffix together, which leaves the numeral itself well left of
-centre; correcting that with a hand-tuned nudge per digit was still 2–6% out in
-Vol.7, because the right factor depends on the glyph, the size and the font's
-real advance widths. So the two are separate elements and the page measures the
-numeral's box once the font has loaded, then puts the numeral on the centre and
-hangs the suffix off its right edge.
+**The ghost.** `text-anchor="middle"` centres on the ADVANCE width, and an
+italic glyph's ink does not sit centred inside its advance: "1ST" measured
+**1.4% of the disc** off to the right, because the `1` carries a wide left side
+bearing. The page measures the ghost's box once the font has loaded and shifts
+it onto the centre.
+
+**The numeral**, in `--layout numeral`. `text-anchor="middle"` centres the
+numeral *and* its ordinal suffix together, which leaves the numeral itself well
+left of centre; correcting that with a hand-tuned nudge per digit was still 2–6%
+out in Vol.7, because the right factor depends on the glyph, the size and the
+font's real advance widths. So the two are separate elements and the page
+measures the numeral's box, then puts the numeral on the centre and hangs the
+suffix off its right edge.
 
 **The renderer must wait for that pass.** It screenshots only once the page sets
 `svg[data-centred="1"]`, and fails the cut-out if it never appears. Screenshot
 any earlier and every one ships with the mark off-centre — the exact bug the
 pass exists to prevent. `ops/check-blackout-medals.mjs` reports the offset for
-all six; it should read 0.00 units.
+all six; it should read 0.00 units. It also checks the logo is on the disc's
+centre in both axes, and that the arc really states the placement — the one
+thing the ghost cannot be trusted to say.
 
 ### The bottom arc
 
@@ -114,8 +143,9 @@ sets it mirrored.
 - **Archivo was really drawn**, measured against the same stack falling back.
   Mono is checked for being embedded rather than width-probed, because JetBrains
   Mono is installed system-wide in this container — see the certificates README.
-  It is only required on the 50mm cut; at 25mm the arc is deliberately dropped,
-  so the face never loads there.
+  Whether it is required at all is read off the artwork (does the page set any
+  arc text?) rather than assumed from the diameter: the 25mm *numeral* cut drops
+  the arc, the 25mm *logo* cut cannot.
 - 300 DPI at both sizes.
 
 Proved by sabotage:
