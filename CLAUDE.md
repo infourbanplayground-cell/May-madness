@@ -1183,6 +1183,76 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     is an inline-block inside the flex cell now.
   - The story's bottom block was under Instagram's reply bar (~200px); the
     address and the club line both sat inside it.
+- **The prize-giving artwork is `build-blackout-certificates.py` (top 5) and
+  `build-blackout-medals.py` (top 3)**, with `render-*.mjs` beside each and
+  `pack-*-pdfs.py` to make the print shop's files:
+  ```bash
+  ssh urbanpadel 'curl -s localhost:3009/state' > $SP/bo.json
+  node ops/blackout-standings.mjs $SP/bo.json $SP/bo-standings.json
+  python3 build-blackout-certificates.py --standings $SP/bo-standings.json
+  node render-blackout-certificates.mjs && python3.13 pack-blackout-certificate-pdfs.py
+  python3 build-blackout-medals.py && node render-blackout-medals.mjs
+  node ops/check-blackout-medals.mjs && python3.13 pack-blackout-medal-pdfs.py
+  ```
+  Certificates land in `brand/certificates-blackout/` (A4 landscape, 300 DPI PNG
+  + PDF + a combined `bo-certificates-1-to-5.pdf`); medals in
+  `brand/medals-blackout/` — 50mm and 25mm, each as a **`-disc.png` cut-out**
+  (transparent outside the circle) and a `-bleed.png` artboard with 3mm bleed.
+  - **IT REFUSES TO PRINT A NAME WHILE A NIGHT IS STILL TO PLAY.** The names and
+    every figure come from `ops/blackout-standings.mjs`, which runs the app's own
+    engine over the live state, so a certificate cannot award a placement the
+    leaderboard contradicts — and the top five is not a fact until the season is
+    over. `--provisional` overrides it, and then the sheet says so in magenta in
+    the kicker and the top rule, not in a footnote. Run with no `--standings` for
+    blank name lines, which is the right thing to print *before* the last night.
+  - **NO SOFT GLOWS, anywhere.** Vol.7's certificate hung a 4mm and an 18mm
+    shadow off the placement numeral. `build-blackout-brand.py` already records
+    why that is wrong here: Chromium tiles big blurred shadows and the seams
+    print as hard-edged rectangles. Vol.8's sheet is hard edges throughout, and
+    the placement is carried by size and colour alone.
+  - **Placement is carried by the numeral and the label, never by fading** — the
+    lesson Vol.7 recorded after stepping 4th and 5th down to a dimmer accent and
+    watching it print washed out. All five sheets lead lime. What changes is the
+    numeral, the label, and whether the second voice is magenta (the champion,
+    because magenta is the one thing that scores) or violet (the rest, because
+    violet is structure). **There is no gold/silver/bronze** — it is not in this
+    palette — though `--way metal` is one flag away on the medals if they ever
+    have to sit beside conventional ribbons.
+  - **Violet is never set as type.** `uv` is 3.1:1 on `#050505`; it is the label
+    caps, a ring in the seal and a wash under the foot, and nothing else.
+  - **`ops/font_bundle.py` is why these can be rebuilt at all.** Vol.7's builders
+    read a bundle from `/tmp/certs/fonts/bundle.css`, which a fresh container
+    does not have. This inlines `brand/fonts/` as data URLs, so the HTML renders
+    with no network and no substitution at the print shop.
+  - **The mono face cannot be checked with a width probe here.** JetBrains Mono
+    is installed system-wide in this container (`fc-match` resolves it), so the
+    stack falls through to the system copy with the bundle stripped and the
+    probe passes with nothing embedded — which is exactly how an HTML artboard
+    reaches a print shop that does not have the face. Archivo gets the width
+    probe (it is installed nowhere); mono is checked for being in
+    `document.fonts` and loaded.
+  - **The certificate's bounds check is geometric, not `scrollHeight`.** The page
+    is `overflow:hidden` at a fixed mm size, so `scrollHeight` can never exceed
+    `clientHeight` — Vol.7's overflow assertion was vacuous and would have passed
+    a sheet whose body copy had run under the seal. Every leaf text run is
+    measured with a Range and must sit inside the printed frame, and no two may
+    overlap. Proved by sabotage: `SABOTAGE=nofont` goes red on the face and on
+    the kicker colliding with the placement, `SABOTAGE=long` on a name clipped
+    inside its plate.
+  - **A cut-out's alpha is checked, not assumed** — corners clear, not wholly
+    transparent, under 90% opaque, and the ink covering ~78.5% of the square
+    (which is what a disc inscribed in one covers). An opaque square looks
+    perfect on a dark slide and ruins a white one with nothing on screen to tell
+    you which you have. `SABOTAGE=opaque` proves it goes red.
+  - **`ops/check-blackout-medals.mjs` is the proof sheet**: it reports where the
+    numeral actually landed (it is centred by a measurement the page makes after
+    the font loads, and a pass that silently did nothing looks identical to one
+    that worked) and composites all six cut-outs on black, white, cream and a
+    mid-tone. It embeds the PNGs as data URLs — a page built with `setContent`
+    has no base URL, so a `file://` `<img>` is blocked and every cut-out renders
+    as a broken-image glyph while the screenshot still succeeds.
+  - `img2pdf` and Pillow are on **python3.13** in this container, not the default
+    `python3` (3.11) — the same split numpy has for the video builders.
 - Still carried from Vol.7 and NOT rebuilt: the KO bracket SCREEN layout, the
   teams and groups screens, and the photo wall. **Court assignment was never built** — the
   owner said it is not needed.
