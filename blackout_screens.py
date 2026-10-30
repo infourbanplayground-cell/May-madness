@@ -897,7 +897,7 @@ function drawStory(kind, d) {
     g.strokeStyle = "#C6FF00"; g.lineWidth = 4;
     g.strokeRect(L, 860, W, 420);
     (d.champs || []).forEach((n, i) => stDisp(g, n.toUpperCase(), L + 44, 990 + i * 110, 74, "#F2F2F2", W - 88));
-    stMono(g, "14 OMR VOUCHER EACH", L + 44, 1220, 28, "#FF2E88", 4);
+    stMono(g, SEASON_VOUCHER + " OMR VOUCHER EACH", L + 44, 1220, 28, "#FF2E88", 4);
     if (d.score) stDisp(g, d.score, L, 1420, 96, "#9A9A9A", W);
     stMono(g, "BLACKOUT.URBANPADEL.OM", L, ST_H - 220, 26, "#6E6E6E", 5);
   }
@@ -1208,9 +1208,21 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
   if (!open) return null;
   const sessions = state.sessions || [];
   const doneNights = sessions.filter(s => s.completed);
-  const voucher = 14, perTeam = 2;
-  const pool = voucher * perTeam * SESSIONS_TOTAL + SEASON_PRIZES.reduce((a, b) => a + b, 0);
-  const paid = doneNights.length * voucher * perTeam;
+  // Read, not typed. This used to carry its own 14 beside a pool derived from
+  // blackout-season.json, so moving the voucher in the one file that is meant
+  // to be the single source of truth would have changed every surface except
+  // the one that counts the money.
+  const voucher = SEASON_VOUCHER, perTeam = 2;
+  const seasonPot = SEASON_PRIZES.reduce((a, b) => a + b, 0);
+  const pool = voucher * perTeam * SESSIONS_TOTAL + seasonPot;
+  // THE SEASON PRIZES ARE PAID WHEN THE SEASON ENDS. `paid` counted night
+  // vouchers only and nothing could ever mark the season prizes paid, so the
+  // moment the last night completed the tracker said "155 OMR LEFT" for ever
+  // — at a prize-giving where the money had just been handed over. They are
+  // awarded on the final night by definition, so finishing the season is the
+  // event, and there is no separate flag to forget to set.
+  const seasonDone = doneNights.length >= SESSIONS_TOTAL;
+  const paid = doneNights.length * voucher * perTeam + (seasonDone ? seasonPot : 0);
   const left = pool - paid;
   const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
   const champsOf = s => {
@@ -1453,7 +1465,14 @@ DASH_TAIL_NEW = """      {/* ── LAST NIGHT + PRIZE TRACKER (Vol.8) ── */
           <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
             fontSize:22,marginTop:6}}>{pool} OMR</div>
           <div style={{fontSize:11,color:"#9A9A9A",marginTop:4}}>
-            {(state.sessions || []).filter(s => s.completed).length * 28} paid so far
+            {/* Same figures as PrizeSheet, and derived the same way: a typed 28
+                here is a second place for the voucher to drift from the file
+                that is meant to decide it. */}
+            {(() => {
+              const done = (state.sessions || []).filter(s => s.completed).length;
+              const pot = SEASON_PRIZES.reduce((a, b) => a + b, 0);
+              return done * SEASON_VOUCHER * 2 + (done >= SESSIONS_TOTAL ? pot : 0);
+            })()} paid so far
           </div>
         </button>
       </div>

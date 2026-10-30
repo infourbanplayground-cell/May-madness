@@ -186,10 +186,14 @@ SEASON = [
     ("const DOUBLE_FROM_SESSION = 7;", f"const DOUBLE_FROM_SESSION = {CFG['doubleFromSession']};"),
     ("const SEASON_PRIZES = [75, 50, 30];",
      "const SEASON_PRIZES = [%s];\n"
+     "// The night voucher, per winning player. PrizeSheet used to type its own\n"
+     "// 14 beside a pool derived from this file, so changing the voucher here\n"
+     "// would have moved every surface except the one that counts the money.\n"
+     "const SEASON_VOUCHER = %d;\n"
      "// The scheduled finals night, so the countdown works before any session\n"
      "// exists -- which is when people are deciding whether to sign up.\n"
      'const FINALS_DATE = "%s";' % (", ".join(str(p) for p in CFG["seasonPrizes"]),
-                                    CFG["finalsDate"])),
+                                    CFG["voucher"], CFG["finalsDate"])),
     # The prose under those constants describes Vol.7's shape — eight nights,
     # session 9 dropped. Left stale it tells the next maintainer the wrong thing
     # about this volume. (The heading itself already says VOL.8: the rename pass

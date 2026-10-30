@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "4f73a4fabb1d";
+  var V = "15c0e9f979a2";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -63,14 +63,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Blackout Series" />
 <title>BLACKOUT SERIES · Urban Playground</title>
-<meta name="description" content="Blackout Series — Vol.8 of the Urban Social Series. Social padel in Oman, Mon &amp; Wed 5:30 PM all October. New partners every session, everyone ranked, 407 OMR prize pool." />
+<meta name="description" content="Blackout Series — Vol.8 of the Urban Social Series. Social padel in Oman, Mon &amp; Wed 5:30 PM all October. New partners every session, everyone ranked, 412 OMR prize pool." />
 
 <!-- Link preview. WhatsApp is how this gets shared, and without these it
      pasted as a bare grey link with no image and no context. -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Urban Playground" />
 <meta property="og:title" content="BLACKOUT SERIES · Urban Social Series Vol.8" />
-<meta property="og:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all October. New partners every session, everyone ranked, 407 OMR prize pool." />
+<meta property="og:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all October. New partners every session, everyone ranked, 412 OMR prize pool." />
 <meta property="og:url" content="https://blackout.urbanpadel.om/" />
 <meta property="og:image" content="https://blackout.urbanpadel.om/assets/blackout-og.png" />
 <meta property="og:image:width" content="1200" />
@@ -78,7 +78,7 @@
 <meta property="og:image:alt" content="Blackout Series — Lights out." />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="BLACKOUT SERIES · Urban Social Series Vol.8" />
-<meta name="twitter:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all October. 407 OMR prize pool." />
+<meta name="twitter:description" content="Social padel in Oman. Mon &amp; Wed, 5:30 PM, all October. 412 OMR prize pool." />
 <meta name="twitter:image" content="https://blackout.urbanpadel.om/assets/blackout-og.png" />
 
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FF6B7A'/%3E%3Cstop offset='50%25' style='stop-color:%23FF2E43'/%3E%3Cstop offset='100%25' style='stop-color:%23B3121F'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 10 C 35 25 30 40 35 55 C 38 65 30 70 28 75 C 35 70 45 75 50 90 C 55 75 65 70 72 75 C 70 70 62 65 65 55 C 70 40 65 25 50 10 Z' fill='url(%23g)'/%3E%3C/svg%3E" />
@@ -1096,7 +1096,11 @@ const DOUBLE_FROM_SESSION = 8;
 // A later volume SETS these for itself; it does not inherit them.
 const SESSIONS_TOTAL = 9;
 // Season prizes, set by the owner for Vol.8: 75 / 50 / 30 OMR.
-const SEASON_PRIZES = [75, 50, 30];
+const SEASON_PRIZES = [75, 50, 35];
+// The night voucher, per winning player. PrizeSheet used to type its own
+// 14 beside a pool derived from this file, so changing the voucher here
+// would have moved every surface except the one that counts the money.
+const SEASON_VOUCHER = 14;
 // The scheduled finals night, so the countdown works before any session
 // exists -- which is when people are deciding whether to sign up.
 const FINALS_DATE = "2026-10-30";
@@ -2931,9 +2935,21 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
   if (!open) return null;
   const sessions = state.sessions || [];
   const doneNights = sessions.filter(s => s.completed);
-  const voucher = 14, perTeam = 2;
-  const pool = voucher * perTeam * SESSIONS_TOTAL + SEASON_PRIZES.reduce((a, b) => a + b, 0);
-  const paid = doneNights.length * voucher * perTeam;
+  // Read, not typed. This used to carry its own 14 beside a pool derived from
+  // blackout-season.json, so moving the voucher in the one file that is meant
+  // to be the single source of truth would have changed every surface except
+  // the one that counts the money.
+  const voucher = SEASON_VOUCHER, perTeam = 2;
+  const seasonPot = SEASON_PRIZES.reduce((a, b) => a + b, 0);
+  const pool = voucher * perTeam * SESSIONS_TOTAL + seasonPot;
+  // THE SEASON PRIZES ARE PAID WHEN THE SEASON ENDS. `paid` counted night
+  // vouchers only and nothing could ever mark the season prizes paid, so the
+  // moment the last night completed the tracker said "155 OMR LEFT" for ever
+  // — at a prize-giving where the money had just been handed over. They are
+  // awarded on the final night by definition, so finishing the season is the
+  // event, and there is no separate flag to forget to set.
+  const seasonDone = doneNights.length >= SESSIONS_TOTAL;
+  const paid = doneNights.length * voucher * perTeam + (seasonDone ? seasonPot : 0);
   const left = pool - paid;
   const nameOf = id => (state.players.find(p => p.id === id) || {}).name || "?";
   const champsOf = s => {
@@ -3888,7 +3904,7 @@ function drawStory(kind, d) {
     g.strokeStyle = "#C6FF00"; g.lineWidth = 4;
     g.strokeRect(L, 860, W, 420);
     (d.champs || []).forEach((n, i) => stDisp(g, n.toUpperCase(), L + 44, 990 + i * 110, 74, "#F2F2F2", W - 88));
-    stMono(g, "14 OMR VOUCHER EACH", L + 44, 1220, 28, "#FF2E88", 4);
+    stMono(g, SEASON_VOUCHER + " OMR VOUCHER EACH", L + 44, 1220, 28, "#FF2E88", 4);
     if (d.score) stDisp(g, d.score, L, 1420, 96, "#9A9A9A", W);
     stMono(g, "BLACKOUT.URBANPADEL.OM", L, ST_H - 220, 26, "#6E6E6E", 5);
   }
@@ -7459,7 +7475,14 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
             fontSize:22,marginTop:6}}>{pool} OMR</div>
           <div style={{fontSize:11,color:"#9A9A9A",marginTop:4}}>
-            {(state.sessions || []).filter(s => s.completed).length * 28} paid so far
+            {/* Same figures as PrizeSheet, and derived the same way: a typed 28
+                here is a second place for the voucher to drift from the file
+                that is meant to decide it. */}
+            {(() => {
+              const done = (state.sessions || []).filter(s => s.completed).length;
+              const pot = SEASON_PRIZES.reduce((a, b) => a + b, 0);
+              return done * SEASON_VOUCHER * 2 + (done >= SESSIONS_TOTAL ? pot : 0);
+            })()} paid so far
           </div>
         </button>
       </div>
@@ -7895,7 +7918,7 @@ September Surge is done and dusted — new season, new partners, new rivalries �
 ━━━━━━━━━━━━━━━━━━━━
 
 🗓️ 8 sessions total · Sessions 7 & 8 pay *DOUBLE POINTS* 🔥
-💰 *407 OMR prize pool* up for grabs
+💰 *412 OMR prize pool* up for grabs
 
 ━━━━━━━━━━━━━━━━━━━━
 Series points reset to *zero* — your *all-time* total carries over 👑
