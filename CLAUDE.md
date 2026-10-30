@@ -146,8 +146,51 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   one and the current setup when there is not. A rules page that can disagree
   with the scoring is worse than none: players trust it, and the first time it
   is wrong they stop trusting the table too.
-- The shareable format graphic is `brand/uprising/format-card.html`, rendered by
-  `node ops/render-uprising-card.mjs` to a 1080x1350 PNG. The renderer **fails if
+- **THE INFOGRAPHIC is `build-uprising-infographic.py` +
+  `ops/render-uprising-infographic.mjs`** — `brand/uprising/infographic-feed.png`
+  (1080x1350) and `-story.png` (1080x1920). One page that explains the whole
+  format: the ladder with its points table, the night as a strip of rounds, and
+  the three rules.
+  - **EVERY FIGURE IS READ OUT OF THE ENGINE, none is typed.** It runs
+    `ops/uprising-facts.mjs`, the same source the announcement and the sign-up
+    list use, so the court count, the points table, the round count, the
+    running time and whether the final doubles cannot disagree with the app.
+  - It **derives rather than states** the three things that are only true for
+    some set-ups: "a win on Court 3 banks what a loss on Court 1 does" prints
+    only when `WIN[3] === LOSE[1]`; the double final only when nobody rests;
+    and "N matches each" is the engine's matches-each, with the uneven case
+    spelled out instead of rounded.
+  - **It REFUSES to build if the tagline names a different number.** `promise`
+    in the JSON read "Come alone. Leave with ten." — true at fifteen rounds on
+    three courts, and wrong once the default moved to twelve on four, where
+    everyone plays ELEVEN. The card would have printed "eleven matches, eleven
+    different partners" nine lines above "Leave with ten". It is
+    **"Leave with eleven."** now; the announcement cards, their captions and
+    the video still carry the old line in their shipped outputs and will pick
+    the new one up when they are next built.
+  - **The margin is the test, not the bitmap edge.** A card has a declared
+    padding and that padding IS the design. The footer's host line ran 59px
+    past the 64px padding on both sizes — and stopped 5px short of the crop, so
+    every assertion that only watched 1080 was green. The renderer measures
+    against the `.pad` padding box.
+  - **Overlap is checked per LINE box and only across BLOCKS.**
+    `getBoundingClientRect()` on a run that wraps spans the whole paragraph and
+    overlaps every sibling in it, and inline runs inside one paragraph share
+    line boxes by definition — a `<b>` sitting on the text around it is how
+    prose works. `getClientRects()` plus "different block ancestors" is the
+    only version of this check that is not all false positives.
+  - Sabotage: `SABOTAGE=nofont` drops the stylesheet, `SABOTAGE=wide` squeezes
+    a fixed-width cell with the wrap off. Lengthening the TEXT proves nothing —
+    it wraps, the row grows taller and nothing overflows, which is a legitimate
+    pass.
+  - The headline does **not** scale with the canvas. A story is taller, not
+    wider, and scaling the type with the height put CLIMB TO COURT ONE onto
+    three lines in a 1080px box.
+- **SUPERSEDED: `brand/uprising/format-card.html`** and
+  `ops/render-uprising-card.mjs`. Its numbers were hand-written and are now
+  wrong — it advertises "up to 15 matches" and "leave with ten" against an
+  engine that says 11 and 11. Use the infographic above; this is kept only
+  until somebody confirms nothing else links the old PNG. The renderer **fails if
   any element runs off the canvas** and if the display face is not Archivo at
   `wdth` 125 — the Blackout lockup once shipped with letters sliced off by the
   edge of the bitmap while every assertion passed, because they were all about
