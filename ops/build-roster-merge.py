@@ -32,9 +32,11 @@ SOURCES = [
     dict(key="jh", name="July Heat",       page="july-heat-index.html",       prefix="jh_"),
     dict(key="aa", name="August Attack",   page="august-attack-index.html",   prefix="aa_"),
     dict(key="ss", name="September Surge", page="september-surge-index.html", prefix="ss_"),
+    dict(key="bo", name="Blackout Series",  page="blackout-index.html",        prefix="bo_"),
 ]
 TARGETS = {
-    "blackout": dict(name="Blackout Series", prefix="bo_", api="/opt/blackout-api"),
+    "blackout": dict(name="Blackout Series",   prefix="bo_", api="/opt/blackout-api"),
+    "national": dict(name="56 National Series", prefix="na_", api="/opt/national-api"),
 }
 
 NEEDED = ["getPlayerTeam", "teamWon", "teamGroupResults", "calcGroupStandings",
