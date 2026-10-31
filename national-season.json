@@ -1,0 +1,143 @@
+{
+  "_comment": [
+    "56 NATIONAL SERIES — Vol.9 of the Urban Social Series. November 2026.",
+    "Single source of truth for the season's numbers: the app, the brand art and",
+    "the signup posts all read this file so none of them can advertise a figure",
+    "the others contradict. Same discipline as blackout-season.json.",
+    "",
+    "SCHEDULE. Mondays and Wednesdays through November 2026 — nine nights, which",
+    "is every Mon/Wed the month has. The owner's call on 31 Oct 2026: no Friday",
+    "night, and National Day is marked on WED 18 NOVEMBER, which is the real",
+    "one. The design handoff put a National Day night on Fri 20 Nov; that is not",
+    "what we are running.",
+    "",
+    "PRIZE POOL. 14 x 2 players x 9 nights = 252, plus 160 of season prizes, is",
+    "412 — the same budget Vol.8 paid out. Derived from these parts rather than",
+    "typed, so changing a part here is the only way to move it.",
+    "",
+    "DOUBLE NIGHTS ARE A LIST, NOT A THRESHOLD. Vol.8 used doubleFromSession:",
+    "every night from the 8th onward counted double. That cannot express 'the",
+    "National Day night is double' when the night after it is not. The engine",
+    "already reads a per-session doublePoints flag, so a list is what the app",
+    "actually honours; doubleFromSession stays only for Vol.8's own copy.",
+    "",
+    "ASSUMPTION TO CONFIRM: three double nights — National Day (S6) plus the",
+    "last two (S8, S9), which is Vol.8's 'last two' rule with the National Day",
+    "night added because the design puts a 2X badge on it. Drop S6 or the last",
+    "two if that is one too many; nothing but the points moves either way, since",
+    "vouchers are per night won regardless."
+  ],
+
+  "volume": "VOL.9",
+  "name": "56 NATIONAL SERIES",
+  "nameTitle": "56 National Series",
+  "nameAr": "السلسلة الوطنية",
+  "shortName": "NATIONAL",
+  "tagline": "Same court. Different story.",
+  "month": "November",
+  "monthUpper": "NOVEMBER",
+  "host": "national.urbanpadel.om",
+
+  "sessions": 9,
+  "seasonPrizes": [75, 50, 35],
+  "voucher": 14,
+  "entry": 7,
+  "finalsCut": false,
+
+  "schedule": "Mon & Wed, 5:30 PM",
+  "nights": ["2026-11-02", "2026-11-04", "2026-11-09", "2026-11-11",
+             "2026-11-16", "2026-11-18", "2026-11-23", "2026-11-25",
+             "2026-11-30"],
+  "finalsDate": "2026-11-30",
+  "doubleNights": ["2026-11-18", "2026-11-25", "2026-11-30"],
+  "nationalDay": "2026-11-18",
+  "nationalDayLabel": "NATIONAL DAY NIGHT",
+  "nationalDayLabelAr": "العيد الوطني",
+
+  "previousVolumes": ["June Fury", "July Heat", "August Attack",
+                      "September Surge", "Blackout Series"],
+  "previousVolume": "Blackout Series",
+  "previousHost": "blackout.urbanpadel.om",
+
+  "palette": {
+    "bg": "#B8141F",
+    "deep": "#9E1520",
+    "flag": "#D7202E",
+    "ivory": "#F7F1E6",
+    "ink": "#1A0A0C",
+    "muted": "#6B5A52",
+    "rose": "#F2B8BC",
+    "green": "#087A3F",
+    "inactive": "#CBBDB6",
+    "white": "#FFFFFF"
+  },
+
+  "_paletteNotes": [
+    "Straight from the handoff's token list. The jobs are not interchangeable:",
+    "",
+    "  bg        the red base, everywhere, under the khanjar tile at 14%",
+    "  deep      rows and bands that sit ON the base and must still read",
+    "  flag      live states and accents — the loud red",
+    "  ivory     hero cards and anything that has to carry dark type",
+    "  ink       text, CTAs and the tab bar",
+    "  muted     secondary text ON IVORY only",
+    "  rose      labels on red",
+    "  green     NATIONAL DAY ONLY. It is the flag's green and it means the",
+    "            18th. Use it anywhere else and it stops meaning anything.",
+    "  inactive  tab text that is not the current tab",
+    "",
+    "ink on ivory is the readable pair; rose on bg is the label pair. There is",
+    "no dark-on-red combination that clears 4.5:1, so type on the base is white",
+    "or rose and never ink."
+  ],
+
+  "shape": {
+    "arch": "168px 168px 28px 28px",
+    "photoArch": "160px 160px 0 0",
+    "pill": "999px",
+    "sheet": "28px",
+    "doubleLine": "0 0 0 4px <bg>, 0 0 0 6px #F7F1E6"
+  },
+
+  "_shapeNotes": [
+    "NO SQUARE BLOCKS. Hero cards are arches, everything else is a pill, icons",
+    "sit in circles. This is the whole difference between this volume and",
+    "Blackout, which was radius 0 everywhere — so a component carried over",
+    "unchanged reads as Vol.8 no matter what colour it is wearing.",
+    "",
+    "There are NO DROP SHADOWS. Depth is the double-line ring only."
+  ],
+
+  "landmarks": [
+    { "id": "nizwa",  "nameEn": "Nizwa Fort",     "nameAr": "قلعة نزوى",  "asset": "mon-nizwa" },
+    { "id": "riyam",  "nameEn": "Riyam Burner",   "nameAr": "مبخرة ريام", "asset": "mon-burner" },
+    { "id": "alam",   "nameEn": "Al Alam Palace", "nameAr": "قصر العلم",  "asset": "mon-alam" },
+    { "id": "bahla",  "nameEn": "Bahla Tower",    "nameAr": "برج بهلاء",  "asset": "mon-tower" }
+  ],
+
+  "_landmarkNotes": [
+    "PLACEHOLDER ARTWORK AND AN UNCONFIRMED MAPPING. The handoff says both in",
+    "as many words: the silhouettes are placeholder vector drawings to be",
+    "replaced with commissioned artwork in the same slots, and the",
+    "landmark-per-session assignment is the product owner's to confirm.",
+    "Nothing is assigned to a session here until it is.",
+    "",
+    "RULE FROM THE HANDOFF: no mosques in any landmark artwork."
+  ],
+
+  "_serverNotes": [
+    "PORT 3011, NOT 3010. The obvious next number after Vol.8's 3009 is taken:",
+    "the chisel process that carries the SSH-over-HTTPS tunnel binds 127.0.0.1",
+    ":3010 on the VPS. It is not a club service, but it is listening and it can",
+    "re-bind, and an API that loses its port at a restart fails in the middle of",
+    "a night rather than at deploy time."
+  ],
+
+  "server": {
+    "port": 3011,
+    "unit": "national-api",
+    "appDir": "/opt/national-api",
+    "webRoot": "/var/www/national.urbanpadel.om/public",
+    "tablePrefix": "na_"
+  }
+}
