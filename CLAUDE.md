@@ -834,6 +834,127 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
+### 56 National Series (Vol.9 — LIVE APP)
+- URL: https://national.urbanpadel.om — November 2026, nine Mon/Wed nights.
+- Local copy: `national-index.html`, **generated** by `build-national-app.py`
+  from `blackout-index.html`. Do not hand-edit it: fix Vol.8 and re-run, the
+  same inheritance chain every volume since July Heat has used. Every rename is
+  asserted, so a string that stops matching fails the build rather than
+  shipping a half-rebranded app.
+- Season numbers live in **`national-season.json`** — nine nights, 7 OMR entry,
+  14 OMR vouchers, season 75/50/35, pool **412** (derived: 14 x 2 x 9 + 160).
+- **DOUBLE NIGHTS ARE A LIST, NOT A THRESHOLD.** Vol.8's `doubleFromSession`
+  cannot say "National Day is double but the night after is not".
+  `doubleNights` holds the dates; the engine already honours a per-session
+  flag. Currently 18, 25 and 30 Nov — **the three are an assumption and need
+  the owner's confirmation.**
+- API: `/opt/national-api/api.js` — systemd: `national-api` — port **3011**,
+  not 3010: the chisel tunnel binds 127.0.0.1:3010 on the VPS and can re-bind.
+  Tables **`na_*`**. Stand it up with `ops/create-national.sh` (idempotent).
+- Roster: `python3 ops/build-roster-merge.py national` then the sync script.
+  Already run — **338 players, 270 holding all-time points, 40 photos.**
+- Build + deploy: `python3 build-national-app.py && bash ops/deploy-national.sh`
+
+#### The re-skin
+The handoff is in `brand/national/handoff/`. Red ground, ivory arches, ink type,
+khanjar tile, masar band, no square blocks, no drop shadows.
+
+- **A COLOUR SWEEP IS NOT A RE-SKIN, AND THE FIRST PASS PROVED IT.** The page
+  came out red and still read as Vol.8, because the things that make a volume
+  are shape, hierarchy and which colour carries which job — none of which a
+  find-and-replace moves. What it took:
+  - **The surfaces are `.sg-card` and `.sg-hero`** — September Surge class
+    names, three volumes old. The first attempt styled `.card` and
+    `[class*="Card"]`, matched nothing, and left every surface the same red as
+    the page behind it.
+  - **An ivory hero is an INVERSION, not a recolour.** Blackout is light type
+    on dark cards; this is dark type on ivory. No sweep can do that, so the
+    skin flips the hero's copy to ink and leaves rows light-on-deep-red.
+  - **Specificity decides, not order.** An inherited layer carries
+    `*:not(a):not(b):not(c){border-radius:2px}` at (0,3,0), which beats a plain
+    `.sg-hero` written a thousand lines later: the arch lost silently. The
+    build corrects that rule at source AND the arch carries a 3-attribute
+    `:not()` chain. Same trap took the page ground: `html:not(.light) body`
+    (0,1,2) beat `html, body` (0,0,2), so the page rendered on `--paper`, a
+    token still pointing at a Surge value.
+  - **Tokens defined as other tokens are invisible to the sweep.** `--paper`,
+    `--plate`, `--sg-plate-2`, `--ember`, `--ice`, `--tick` carried no hex for
+    it to rewrite. They are re-pointed in the skin's `:root`.
+  - **Three-digit hex too.** `"#111"` is the roster photo slot's background:
+    338 near-black tiles on a red page, through a sweep that only matched
+    six-digit literals.
+  - **A universal pill is wrong.** 999px on a tall block is an ELLIPSE. The
+    countdown came out as four ovals under a lozenge. The sweep sets the 28px
+    sheet; the skin pills buttons, fields, the tab bar and chips.
+- **`ops/check-national-skin.mjs` IS THE HARNESS** (`node
+  ops/check-national-skin.mjs`). It runs the real app against the real Vol.9
+  state on **all five tabs** — the first version swept the home screen alone
+  and called the page clean while four screens were unmeasured, which is
+  exactly where a sweep misses things. It asserts: no element computes a Vol.8
+  colour, every text run clears WCAG AA **composited down the ancestor chain**
+  (reading `backgroundColor` alone reports rgba(0,0,0,0) as black and hands
+  back a confident 1.00:1), no surface is square, nothing runs past the right
+  edge, **no two text runs overlap**, the watermark is still a ghost, and
+  Archivo was really drawn.
+  - `APP=blackout-index.html` must go red — it does, on every check.
+  - `SABOTAGE=noskin` / `nofont` / `longname`, `ONLY=<tab>`, `WHY=<text>`
+    (which prints every rule that sets one run's colour, in cascade order).
+  - **`SABOTAGE=noskin` once passed, and the sabotage was the bug.** Three
+    style blocks in the page begin "56 NATIONAL SERIES · VOL.9 SKIN" — the
+    wording sweep rewrites the volume name inside two INHERITED skin layers'
+    banner comments — so it cut an August-era layer and everything stayed
+    green. The block is `<style id="vol9-skin">` now and the sabotage asserts
+    it removed something with a Vol.9 token in it.
+  - **The overlap check measures a RANGE over the text, not the element box.**
+    Nowrap text wider than its box does not widen the box: "56 NATIONAL
+    SERIES" sat on top of SYNCED while its div measured a comfortable 180px
+    and every width assertion passed. Per line box, and only across different
+    block ancestors — anything else is all false positives. Chrome (the sticky
+    header, the floating nav) is compared against chrome only, since it is
+    *meant* to sit over the page.
+- **The watermark is the hero's ghost, and `.sg-hero *` ate it.** The volume
+  numeral is a 170px tint behind the copy. The flip-to-ink rule beats an
+  inline colour, so it rendered at full opacity — a near-black 09 lying across
+  the eyebrow and the headline. It carries `.vol-mark` and `aria-hidden` now;
+  the alpha lives in the skin beside the rule that was overriding it, and the
+  harness measures the EFFECTIVE alpha rather than trusting what the build
+  wrote.
+- **The arch clips its own content.** A 168px corner eats 54px off each side at
+  45px down: the eyebrow rendered as "& WED · 5:30 PM · ALL NOVEMB", MON and ER
+  cut off by the radius with nothing overflowing any box. The hero's top
+  padding is derived from the curve (92px, where the radius takes 14px a side).
+- **`height:auto` on a PORTRAIT mark is what broke the header.** A rule written
+  for Blackout's 3100x840 wordmark threw away the club logo's inline
+  `height:44`, let a 324x505 image take its natural width and capped it at the
+  container — 152px of a 428px row, squeezing the volume name to 81px for a
+  line that needs ~250. Capping the width instead made it 96x150, a logo three
+  times the height of the header. Height pinned, width follows.
+  - The volume name is **15px**, and the number came off the live bar: a clone
+    measured outside the header said 203px when the real render was 252.
+  - The header sub-line is shortened to "URBAN SOCIAL · VOL.9" in the build.
+    "56 NATIONAL SERIES" is ten characters longer than "BLACKOUT" and something
+    had to give; shrinking the type instead would go under the handoff's 11px
+    floor on the one line that is on every screen.
+- **THE "NOT SAVING" BANNER WAS WHITE ON ITS OWN BACKGROUND.** Vol.8 drew it
+  `background:"#C6FF00", color:"#fff"` — white on lime, ~1.6:1, a Vol.8 bug we
+  inherited. Swept by role it became white on IVORY: 1.07:1, a blank cream bar.
+  This is the one piece of UI in the app whose entire job is to be impossible
+  to miss. It is ink on ivory now.
+- **Rose is an accent, not a text colour.** Measured on the base red: ivory
+  5.83:1, `--rose-txt` #F2D0D3 4.72:1, inactive 4.40:1, rose 3.64:1. The app
+  uses its muted tone for whole sentences, so copy is ivory or --rose-txt and
+  rose keeps the dots, rules and fills. Flag red on IVORY is 4.38:1 — under AA
+  for the hero's 22px figures (the large-text allowance starts at 24px, or
+  18.66px at 700), so hero accents are the base red at 5.83:1.
+- **The Surge-era steel greys** (#C3CAD6, #D5DAE3, #A8B0BE, #78818F, #6B7484)
+  are set on the `.text-stone-*` utilities by two inherited layers and no
+  Blackout rule mentions them, so the first sweep left them: "No sessions yet"
+  and "Ranking locked" rendered as a cold blue-grey on a warm red.
+- **Still placeholder / unconfirmed:** the landmark artwork and the
+  landmark-per-session mapping (the handoff says the product owner confirms it;
+  **no mosques**), the Arabic line in the lockup (needs Noto Kufi vendored
+  through `ops/vendor-fonts.py`), and the three double nights.
+
 ### Blackout Series (Vol.8 — LIVE APP)
 - URL: https://blackout.urbanpadel.om — October 2026, nine nights
 - Local copy: `blackout-index.html`, **generated** by `build-blackout-app.py`

@@ -1,0 +1,400 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   56 NATIONAL SERIES · VOL.9 SKIN
+   ───────────────────────────────────────────────────────────────────────
+   Appended as the LAST style block, after every Blackout override layer.
+   Each volume's skin is an append-only layer on the one before, so nothing
+   above needs deleting.
+
+   The colour sweep in build-national-app.py already re-pointed every
+   literal by ROLE. This layer enforces the four things a sweep cannot,
+   all of them from brand/national/handoff/HANDOFF.md:
+
+     1. the red ground, with the khanjar tile over it
+     2. NO SQUARE BLOCKS — pills everywhere, arches for hero cards
+     3. NO DROP SHADOWS — depth is the double-line ring and nothing else
+     4. the tab bar as an ink pill floating off the bottom
+
+   It does not touch layout, structure, or scoring.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · TOKENS ────────────────────────────────────────────────────────
+   Named tokens re-pointed so anything added later inherits National rather
+   than a Blackout value that happens to still be spelled as a variable.
+   The historical names are kept — the JSX references them inline in well
+   over a hundred places, and renaming them is a separate job from
+   re-skinning.
+   ────────────────────────────────────────────────────────────────────── */
+:root {
+  --bg: #B8141F;          /* the red base */
+  --deep: #9E1520;        /* rows, bands, anything ON the base */
+  --flag: #D7202E;        /* live, accents */
+  --ivory: #F7F1E6;       /* hero cards, and bright type on red */
+  --ink: #1A0A0C;         /* text on ivory, CTAs, the tab bar */
+  --muted-ink: #6B5A52;   /* secondary text ON IVORY ONLY */
+  --rose: #F2B8BC;        /* labels on red — AN ACCENT, NOT A TEXT COLOUR */
+  --rose-txt: #F2D0D3;    /* the readable tier of it: 4.72:1 on the base */
+  --green: #087A3F;       /* NATIONAL DAY ONLY */
+  --inactive: #CBBDB6;
+
+  /* Historical names, re-pointed. */
+  --ink2: #9E1520;
+  --orange: #F7F1E6;
+  --orange-br: #FFFFFF;
+  --red: #F7F1E6;
+  --blue: #D7202E;
+  --blue-deep: #9E1520;
+  --blue-soft: #F2B8BC;
+  --gold: #D7202E;
+  --cream: #FFFFFF;
+  --muted: #F2B8BC;
+  --muted2: #CBBDB6;
+  --line: rgba(247,241,230,.18);
+  --line-2: rgba(247,241,230,.12);
+  --surface: #9E1520;
+  --surface-2: #9E1520;
+  --hairline: rgba(247,241,230,.18);
+
+  /* The ones the sweep could not reach, because they are defined as another
+     token rather than as a literal — so there was no hex for it to rewrite and
+     they quietly kept pointing at a Vol.6/7 value. `--plate` was
+     rgba(7,12,17,.94), a blue-black, which is a September Surge colour two
+     volumes old still being used as a sheet background. */
+  --paper: #B8141F;
+  --panel: rgba(158,21,32,.82);
+  --plate: rgba(158,21,32,.94);
+  --plate-2: rgba(247,241,230,.05);
+  --sg-plate-1: rgba(158,21,32,.94);
+  --sg-plate-2: rgba(158,21,32,.96);
+  --sg-text-2: #F7F1E6;
+  --ember: #7C0F18;
+  --hair: rgba(247,241,230,.22);
+  --neon: rgba(247,241,230,.5);
+  --ice: #F7F1E6;
+  --tick: #F2B8BC;
+  --yellow: #F7F1E6;
+  --surge-base: #B8141F;
+  --surge-void: #9E1520;
+  /* NO GLOWS. Depth here is the double-line ring; a 90px bloom on a red ground
+     is a smudge, and this token is read by a dozen components. */
+  --glow: none;
+
+  /* NO SQUARE BLOCKS. Anything still reading a radius token gets a rounded
+     value, so a component added later cannot reintroduce Blackout's corners.
+     The sheet is the default and the pill is for chips — see the shape rules
+     below for why a universal pill is wrong. */
+  --sheet: 28px;
+  --arch: 168px 168px 28px 28px;
+  --radius: 28px;
+  --radius-sm: 999px;
+  --radius-lg: 28px;
+}
+
+/* ── 2 · THE GROUND ────────────────────────────────────────────────────
+   Red base at 100%, khanjar tile over it at 14% and 132px, which are the
+   handoff's figures. The tile is a repeating SVG rather than the supplied
+   PNG so the page carries no extra request: at 132px it is a texture, not
+   an illustration, and nobody is reading its detail.
+   ────────────────────────────────────────────────────────────────────── */
+/* AN !important ON `html, body` IS NOT ENOUGH, AND THIS IS WHY. An inherited
+   layer carries `html:not(.light) body { background: none, var(--paper)
+   !important }` — specificity (0,1,2) against this rule's (0,0,2) — so it won
+   and the page rendered on `--paper`, which was still pointing at a Surge
+   value. Same class of loss as the arch against the universal radius rule.
+   The matching selector is repeated here, later in the sheet, which is what
+   actually decides it. */
+html, body,
+html:not(.light) body,
+html:not(.dark) body {
+  background: var(--bg) !important;
+  background-attachment: fixed !important;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: .14;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,.9) 0 2px, transparent 3px),
+    repeating-linear-gradient(45deg,  rgba(255,255,255,.45) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,.45) 0 1px, transparent 1px 22px);
+  background-size: 132px 132px, 132px 132px, 132px 132px, 132px 132px;
+}
+#root, main, nav { position: relative; z-index: 1; }
+
+/* The masar band, as the page's top edge. 24px, pill, inset 14 — the first
+   thing down the screen in the handoff's Sessions layout. */
+body::after {
+  content: "";
+  position: fixed; left: 14px; right: 14px; top: 6px; height: 10px;
+  z-index: 60; pointer-events: none; border-radius: 999px;
+  background: var(--deep);
+  background-image:
+    repeating-linear-gradient(90deg,
+      rgba(247,241,230,.95) 0 3px, transparent 3px 10px),
+    repeating-linear-gradient(90deg,
+      rgba(215,32,46,.9) 5px 8px, transparent 8px 20px);
+}
+
+/* ── 3 · NO SQUARE BLOCKS ──────────────────────────────────────────────
+   Pills everywhere, arches for heroes. The sweep pilled every INLINE
+   radius; these are the classed ones.
+   ────────────────────────────────────────────────────────────────────── */
+/* A PILL ONLY WHERE A PILL IS A PILL. 999px on a tall block is an ellipse,
+   not a stadium — the first pass pilled everything and the countdown came out
+   as four ovals under a lozenge. So: buttons and fields are pills (they are
+   short by construction), card-shaped things take the sheet radius, and
+   deliberate circles stay circles. */
+button, input, select, textarea { border-radius: 999px !important; }
+[class*="rounded-"] { border-radius: var(--sheet) !important; }
+.rounded-full, [style*="50%"] { border-radius: 50% !important; }
+/* Tailwind's own small radii are chips in this app — a count, a tag, a state
+   dot's label — and those do want the pill. */
+.rounded, .rounded-sm, .rounded-md, .rounded-lg { border-radius: 999px !important; }
+
+/* ── 4 · THE SURFACES ──────────────────────────────────────────────────
+   THE CARDS ARE .sg-card AND .sg-hero — September Surge class names, three
+   volumes old and still carrying the chrome. The first re-skin targeted
+   `.card` and `[class*="Card"]`, matched nothing, and left every surface
+   the same red as the page behind it.
+
+   Blackout is light type on dark cards; National is DARK TYPE ON IVORY.
+   That is an inversion, not a recolour, and no colour sweep can do it — so
+   it is done here: the hero becomes ivory and everything inside it flips to
+   ink, while rows stay on the deep red with light type.
+   ────────────────────────────────────────────────────────────────────── */
+/* THE :not() CHAIN IS NOT DECORATION. An inherited layer carries
+   `*:not(…):not(…):not(…){border-radius:2px}` at specificity (0,3,0), which
+   beats a plain `.sg-hero` no matter how late it is written — the arch lost
+   silently and the hero rendered with 2px corners. Three attribute selectors
+   take this to (0,4,0), which wins. The build also corrects that rule's own
+   value, so this only has to beat it for the arch. */
+.sg-hero:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--ivory) !important;
+  border: 0 !important;
+  border-radius: var(--arch) !important;
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--ivory) !important;
+  /* THE PADDING IS DERIVED FROM THE ARCH, NOT CHOSEN. A 168px corner clips its
+     own content: at 45px below the top edge the curve eats 54px off EACH side,
+     and the eyebrow rendered as "& WED · 5:30 PM · ALL NOVEMB" — MON and ER
+     cut off by the radius, with every width assertion green because nothing
+     had overflowed its box. At 100px down the curve takes 14px a side, which
+     a line of caps can live with. 92px of top padding is what puts the first
+     line there. The side padding is the rest of that 14. */
+  padding: 92px 26px 22px !important;
+}
+/* The lockup is a RED banner, and on an ivory hero it reads as a sticker
+   stuck to the card. The header already carries it two inches above; inside
+   the hero the type does the work, which is what the handoff's own hero does
+   (a medallion and a name, no lockup). */
+.sg-hero img[src*="lockup"] { display: none !important; }
+.sg-hero, .sg-hero * { color: var(--ink) !important; }
+/* The accent, back where it reads. NOT --flag: measured, flag red on ivory is
+   4.38:1, which is under AA for the 22px figures in the hero's stat row (22px
+   at weight 400 is not large text — the allowance starts at 24px, or 18.66px
+   at 700). The base red is 5.83:1 on ivory and reads as the same colour at a
+   glance; --flag keeps its job on the red ground, where it is the loud one. */
+.sg-hero [style*="242, 184, 188"], .sg-hero [style*="#F2B8BC"],
+.sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
+/* Secondary copy on ivory is the handoff's muted ink, not a grey. */
+.sg-hero [style*="203, 189, 182"], .sg-hero [style*="#CBBDB6"],
+.sg-hero .text-stone-400, .sg-hero .text-stone-500 { color: var(--muted-ink) !important; }
+/* Anything that was a tint of the lead is now an ivory tint ON ivory, which
+   is nothing. Give those blocks the base red at a low alpha instead. */
+.sg-hero [style*="247, 241, 230, 0.0"], .sg-hero [style*="247, 241, 230, 0.1"] {
+  background: rgba(184,20,31,.07) !important;
+}
+
+/* THE VOLUME WATERMARK IS THE ONE THING IN THE HERO THAT MUST NOT GO INK.
+   It is a 170px numeral sitting behind the eyebrow and the headline, and it
+   works only as a ghost — on Blackout it was a 6% tint of the lead. The rule
+   above (`.sg-hero *`) is exactly what broke it: it beats the element's own
+   inline colour, so the ghost rendered at full opacity and a near-black 09 lay
+   across the copy. The build gives it `.vol-mark` for this; the alpha lives
+   here, next to the rule that would otherwise overwrite it.
+   Both sizes (170px on the home hero, 150px on the screen headers) carry it. */
+.sg-hero .vol-mark, .vol-mark {
+  color: rgba(26,10,12,.055) !important;
+  z-index: 0 !important;
+}
+/* ...and the copy sits ON it, not under it: the watermark is absolutely
+   positioned and comes first in the markup, so without this the headline shares
+   its stacking context at the same level and the ghost can paint over type that
+   has its own background. */
+.sg-hero > *:not(.vol-mark) { position: relative; z-index: 1; }
+
+.sg-card {
+  background: var(--deep) !important;
+  border: 1px solid rgba(247,241,230,.18) !important;
+  border-radius: 28px !important;
+  box-shadow: none !important;
+}
+
+/* ── 5 · NO DROP SHADOWS ───────────────────────────────────────────────
+   Depth is the double-line ring and nothing else. Blackout leaned on glows
+   and they read as smudges on a red ground.
+   ────────────────────────────────────────────────────────────────────── */
+* { text-shadow: none !important; }
+.sg-card, .sg-hero > * { box-shadow: none !important; }
+
+/* ── 6 · THE TAB BAR ───────────────────────────────────────────────────
+   An ink pill floating off the bottom. The nav is
+   `nav.fixed.bottom-0.inset-x-0`, and a bare `nav.fixed` rule LOSES to the
+   earlier skin layers, which are more specific — so this matches the full
+   class list it actually carries.
+   ────────────────────────────────────────────────────────────────────── */
+body nav.fixed.bottom-0.inset-x-0 {
+  left: 12px !important; right: 12px !important; bottom: 14px !important;
+  inset-inline: 12px !important;
+  width: auto !important;
+  background: var(--ink) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  padding: 5px !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+body nav.fixed.bottom-0.inset-x-0 button,
+body nav.fixed.bottom-0.inset-x-0 a {
+  color: var(--inactive) !important;
+  background: transparent !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+/* The app marks the current tab a few different ways; catch all of them
+   rather than guessing which one survived three volumes. */
+body nav.fixed.bottom-0.inset-x-0 [aria-current],
+body nav.fixed.bottom-0.inset-x-0 .active,
+body nav.fixed.bottom-0.inset-x-0 [data-active="true"],
+body nav.fixed.bottom-0.inset-x-0 [class*="text-white"] {
+  background: #FFFFFF !important;
+  color: var(--bg) !important;
+}
+
+/* ── 7 · THE HEADER, AND TYPE ON RED ───────────────────────────────────
+   The header is `.sticky.top-0`. It sits under the masar band, so it takes
+   the base red rather than a blur of whatever scrolled under it.
+
+   There is no dark-on-red pairing that clears 4.5:1, so type on the base is
+   white or rose and never ink. Ink appears only ON ivory, or as a fill
+   carrying white text.
+   ────────────────────────────────────────────────────────────────────── */
+header, .sticky.top-0 {
+  background: var(--bg) !important;
+  border-bottom: 1px solid rgba(247,241,230,.18) !important;
+  backdrop-filter: none !important;
+  padding-top: 14px !important;
+}
+/* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
+   up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
+   which is 28px wide — fine. An earlier line here read
+   `header img { max-width:100%; height:auto }`, written for the Blackout
+   WORDMARK (3100x840, which really did run off the right-hand side). On a
+   portrait mark that same rule threw the inline height away, let the image
+   take its natural width and capped it at the container: the button became
+   152px of a 428px row, the volume name was squeezed to 81px for a line that
+   needs ~195, and the ellipsis fired on a header that had simply run out of
+   bar. Capping the WIDTH then made it 96x150 — a logo three times the height
+   of the header.
+   So the height is pinned and the width follows it, which is what the markup
+   asked for in the first place. The generic rule keeps the job it was written
+   for — never wider than the bar — and stops touching the height. */
+header img, .sticky.top-0 img { max-width: 100%; object-fit: contain; }
+header button.shrink-0 img, .sticky.top-0 button.shrink-0 img {
+  height: 40px !important; width: auto !important; max-width: none !important;
+}
+
+/* The name's box is a plain flex item with no grow, so it took its share of
+   whatever was left rather than the room it needs. With the mark back to 26px
+   there is plenty: ~250px against the ~195 the name wants and the 176 the
+   line under it wants. The ellipsis stays as the backstop for a longer volume
+   name later, and the overlap check in ops/check-national-skin.mjs is what
+   proves the two are not touching — measured on the live header with a Range,
+   because nowrap text that is wider than its box does not widen the box and
+   every width assertion passes while the words sit on each other. */
+header .max-w-3xl > div, .sticky.top-0 .max-w-3xl > div { gap: 10px !important; }
+header .min-w-0, .sticky.top-0 .min-w-0,
+header [style*="min-width: 0"], .sticky.top-0 [style*="min-width: 0"] {
+  flex: 1 1 auto !important; min-width: 0 !important;
+}
+/* 17px, measured: the name renders 252px at the inherited 20px — a clone
+   measured outside the header said 203, which is why the number here comes
+   from what the overlap check reads off the live bar and not from arithmetic.
+   At 17px it needs exactly the 214 it has, which is where the ellipsis still
+   fires — so 15px, which needs 189 and leaves the name whole. */
+header [style*="min-width: 0"] > div:first-child,
+.sticky.top-0 [style*="min-width: 0"] > div:first-child {
+  font-size: 15px !important;
+  overflow: hidden; text-overflow: ellipsis;
+}
+header [style*="min-width: 0"] > div:last-child,
+.sticky.top-0 [style*="min-width: 0"] > div:last-child {
+  overflow: hidden; text-overflow: ellipsis;
+}
+
+/* THE HEADER'S MICRO-CAPS GO IVORY, NOT ROSE. Rose on the base red is 3.64:1
+   and inactive is 3.91:1 — both fine as a LABEL beside something, which is the
+   job the handoff gives them, and both under AA for an 11px run that is the
+   only thing in its box. "URBAN SOCIAL SERIES · VOL.9" and "SYNCED" are the
+   two, and they are the first and last thing on every screen. Ivory on the
+   base is 5.8:1.
+   Matched on the literals the JSX sets inline, in both notations React can
+   emit, because these are inline styles and nothing else in the sheet can
+   outrank them without !important. */
+header [style*="#CBBDB6"], .sticky.top-0 [style*="#CBBDB6"],
+header [style*="203, 189, 182"], .sticky.top-0 [style*="203, 189, 182"],
+header [style*="#F2B8BC"], .sticky.top-0 [style*="#F2B8BC"],
+header [style*="242, 184, 188"], .sticky.top-0 [style*="242, 184, 188"] {
+  color: var(--ivory) !important;
+}
+/* ...but not the status dot, which is a 6px square of colour and carries no
+   type at all — turning it ivory removes the one thing that distinguishes
+   SYNCING from SYNCED. */
+header [style*="border-radius: 50%"], .sticky.top-0 [style*="borderRadius"] {
+  color: inherit !important;
+}
+
+body { color: #FFFFFF; }
+
+/* THE TWO READABLE TIERS, AND ROSE IS NOT ONE OF THEM. The handoff gives rose
+   as "labels on red", and as a label beside something it is fine — but the app
+   uses its muted tone for whole sentences ("Standings appear after the first
+   match", "Pick your name once and this screen is yours"), and rose on the
+   base is 3.64:1. Measured on #B8141F: ivory 5.83:1, --rose-txt 4.72:1,
+   inactive 4.40:1, rose 3.64:1. So copy is ivory or --rose-txt, and rose keeps
+   the jobs that are not type — dots, rules, fills.
+   The sweep re-points the literals it can see in the stylesheets; this catches
+   the ones written INLINE, which nothing can outrank without !important.
+   The hero's own rules are above this and more specific (0,2,0 against 0,1,0),
+   so an ivory hero still flips its copy to ink. */
+.text-stone-300, .text-stone-400, .text-stone-500, .text-stone-600,
+.text-neutral-300, .text-neutral-400, .text-neutral-500,
+.text-gray-300, .text-gray-400, .text-gray-500 { color: var(--rose-txt) !important; }
+[style*="#F2B8BC"], [style*="242, 184, 188"], [style*="242,184,188"],
+[style*="#CBBDB6"], [style*="203, 189, 182"], [style*="203,189,182"] {
+  color: var(--rose-txt) !important;
+}
+
+/* ── 8 · NATIONAL DAY ──────────────────────────────────────────────────
+   The flag's green, and it means the 18th. It is applied by the app on a
+   2X session and nowhere else; spend it on ordinary urgency and the night
+   it belongs to stops meaning anything.
+   ────────────────────────────────────────────────────────────────────── */
+.national-day, [data-double="true"] {
+  background: var(--green) !important;
+  color: #FFFFFF !important;
+  border-radius: 999px !important;
+}
+
+
+/* ── 9 · MINIMUM TYPE SIZE ─────────────────────────────────────────────
+   The handoff sets a floor of 11px and the app runs 8px and 9px caps — a
+   Blackout habit that worked on flat black and does not on a red ground
+   with a tile over it. Raised rather than redesigned: the labels keep their
+   tracking and their place, they just stop being unreadable.
+   ────────────────────────────────────────────────────────────────────── */
+[style*="fontSize:8"], [style*="fontSize: 8"],
+[style*="font-size:8px"], [style*="font-size: 8px"] { font-size: 11px !important; }
+[style*="fontSize:9"], [style*="fontSize: 9"],
+[style*="font-size:9px"], [style*="font-size: 9px"] { font-size: 11px !important; }
+[style*="fontSize:10"], [style*="font-size:10px"] { font-size: 11px !important; }
+.text-\[8px\], .text-\[9px\], .text-\[10px\] { font-size: 11px !important; }

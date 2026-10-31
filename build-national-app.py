@@ -130,11 +130,226 @@ SHARE_NAMES = [
     ("blackout-season.json", "national-season.json"),
 ]
 
+# ── Two things no rename or skin rule can reach ───────────────────────────
+INHERITED = [
+    # The volume watermark behind the hero is the literal "08", set at 170px.
+    # It is not "VOL.8", so no wording rule touches it — the first re-skin put
+    # a two-foot-tall EIGHT on Vol.9's home screen.
+    # It also has to change COLOUR: it is a tint of the lead, which on
+    # Blackout's black card was a faint lime ghost and on an ivory hero is
+    # white on cream — invisible. Ink at a few per cent is the same gesture on
+    # the new ground. Matched before the sweep, so the value here is Vol.8's.
+    #
+    # THE INLINE COLOUR IS NOT ENOUGH, AND SETTING IT ALONE MADE THIS WORSE.
+    # The skin flips everything inside an ivory hero to ink with
+    # `.sg-hero * { color: var(--ink) !important }` — which beats an inline
+    # style — so the 170px ghost rendered at FULL OPACITY, a two-foot near-black
+    # numeral across the eyebrow and the headline. It needs a hook the skin can
+    # exempt, so it gets a class; both sizes share this exact tail, so one rule
+    # carries them. The alpha then lives in ops/national-skin.css beside the
+    # rule that was overriding it, where the two cannot drift apart.
+    ('color:"rgba(198,255,0,.06)",pointerEvents:"none"}}>08</div>',
+     'color:"rgba(26,10,12,.055)",pointerEvents:"none"}} className="vol-mark"'
+     ' aria-hidden="true">09</div>'),
+    # A universal rule from an inherited skin layer — three :not() pseudo
+    # classes, so specificity (0,3,0) — which beats any single-class selector
+    # a later layer can write. It set every corner to 2px and quietly won
+    # against the arch. This volume is pills everywhere, so the default it
+    # imposes is simply corrected at source rather than fought. It becomes the
+    # SHEET radius, not a pill, for the reason round_inline() records: a
+    # universal 999px turns every tall block into an ellipse.
+    ('*:not(.rounded-full):not([style*="border-radius: 50"]):not([style*="border-radius:50"]) {\n'
+     '  border-radius: 2px !important;\n}',
+     '*:not(.rounded-full):not([style*="border-radius: 50"]):not([style*="border-radius:50"]) {\n'
+     '  border-radius: 28px !important;\n}'),
+    # The roster card's photo placeholder: initials in the hairline colour on
+    # the card-black slot. On Blackout that was charcoal on near-black, which
+    # is a deliberate ghost. Swept by role it becomes deep red on deep red —
+    # 2.32:1, and it is on 338 cards. The placeholder should be quiet, not
+    # absent, so it goes to rose, which is 5.15:1 on the slot. Matched before
+    # the sweep, so the value here is Vol.8's.
+    ('fontSize: 26, color: "#2A2A2A" }}>', 'fontSize: 26, color: "#F2B8BC" }}>'),
+    # THE "NOT SAVING" BANNER WAS WHITE ON ITS OWN BACKGROUND. Vol.8 drew it
+    # as `background:"#C6FF00", color:"#fff"` — white on lime, about 1.6:1,
+    # which is a Vol.8 bug we inherited rather than caused. Swept by role it
+    # became white on IVORY: 1.07:1, i.e. a blank cream bar. This is the one
+    # piece of UI in the app that exists to be impossible to miss — CLAUDE.md
+    # records the night it cost — so it is ink on ivory, 16.6:1, which is also
+    # the loudest thing that can appear on a red page.
+    ('zIndex: 50, background: "#C6FF00", color: "#fff"',
+     'zIndex: 50, background: "#F7F1E6", color: "#1A0A0C"'),
+    # THE HEADER SUB-LINE IS SHORTENED, because the volume name above it grew.
+    # "BLACKOUT" is eight characters; "56 NATIONAL SERIES" is eighteen, set
+    # italic at wdth 118 — and with the sub-line at its full length the two of
+    # them ran under the SYNCED button. Nothing overflowed a box, so no width
+    # check saw it; they simply collided.
+    # Shortening the sub-line is the right half to give up: the series name is
+    # spelled out in full directly above it, and this line's job is the volume
+    # number. Shrinking the type instead would mean going under the handoff's
+    # 11px floor on the one line that is on every screen.
+    # (matched AFTER the wording table has already moved VOL.8 to VOL.9)
+    ('URBAN SOCIAL SERIES &middot; VOL.9', 'URBAN SOCIAL &middot; VOL.9'),
+]
+
+SHEET = str(int(float(CFG["shape"]["sheet"].rstrip("px"))))
+
 ASSETS = [
     ("assets/blackout-lockup.webp", "assets/national-lockup.webp"),
     ("assets/blackout-lockup.png", "assets/national-lockup.png"),
     ("assets/blackout-og.png", "assets/national-og.png"),
 ]
+
+
+# ── Palette: Blackout (lime lead, magenta accent, true black)
+#            -> 56 National Series (ivory on flag red, ink for fills)
+#
+# THIS IS NOT A COLOUR SWAP, IT IS A ROLE SWAP, and the two systems are built
+# the opposite way round: Blackout is a dark page with one bright accent;
+# National is a RED page with ivory surfaces and dark ink. So each Blackout
+# token is mapped by the JOB IT DOES, not by hue.
+#
+#   lime     the lead — live, wins, primary fills, every number that matters.
+#            On red the bright thing is IVORY, and a lime fill carrying black
+#            text becomes an ivory fill carrying red text, which is exactly
+#            the handoff's SHARE button and its hero cards.
+#   magenta  the rare one — double points, "you", urgency. It becomes ROSE,
+#            which is the handoff's own label colour on red. The obvious pick
+#            was flag red, and it was measured at 1.60:1 against the deep red
+#            the cards sit on — invisible. The handoff only ever uses flag red
+#            as a FILL carrying white text, never as type on red, and the
+#            audit is why that is. Inside an ivory hero the skin turns it back
+#            into flag red, where it reads at 4.8:1.
+#            It does NOT become the flag green, which the handoff reserves for
+#            National Day and nothing else — spend it on ordinary urgency and
+#            the 18th stops meaning anything.
+#   blacks   the page and its cards become the red base and the deep red the
+#            handoff uses for rows and bands.
+#   greys    text on black becomes text on red: white for primary, rose for
+#            labels, and the handoff's inactive tone for what is switched off.
+#
+# Two passes through sentinels, so no rule can eat another's output.
+COLOURS = [
+    # was         sentinel    becomes      what it is
+    ("#C6FF00", "@@P@@",   "#F7F1E6"),   # lead: Lime -> Ivory
+    ("#FF2E88", "@@S@@",   "#F2B8BC"),   # accent: Magenta -> Rose
+    ("#C4215F", "@@S2@@",  "#9E1520"),   # deep variant of the accent
+    ("#FF8FBE", "@@S3@@",  "#F2B8BC"),   # soft variant -> Rose
+    ("#0A0A0A", "@@BG@@",  "#9E1520"),   # card black -> deep red (rows, bands)
+    ("#050505", "@@BG2@@", "#B8141F"),   # app background -> the red base
+    ("#F2F2F2", "@@FG@@",  "#FFFFFF"),   # primary text, now on red
+    # SECONDARY TEXT GOES LIGHT, NOT ROSE. Measured on the red ground: rose
+    # #F2B8BC is 3.64:1 and the inactive tone #CBBDB6 is 4.4:1, both under AA
+    # for body copy — and this is where the app's secondary copy lives, which
+    # on Blackout's black was 5-7:1. The handoff's own answer is that there is
+    # no dark-on-red pair, so type on the base is light; these are the two
+    # light tiers that clear it, the second measured at 4.72:1.
+    ("#9A9A9A", "@@MU@@",  "#F2D0D3"),   # muted -> light rose, 4.72:1
+    ("#CFCFCF", "@@MU2@@", "#F7F1E6"),   # ink-2 -> Ivory, 5.83:1
+    ("#6E6E6E", "@@MU3@@", "#F2D0D3"),   # muted-2 -> light rose
+    ("#2A2A2A", "@@HL@@",  "#9E1520"),   # hairline -> deep red
+    # THREE-DIGIT HEX. The sweep matches six-digit literals, so `#111` went
+    # through untouched — and it is the background of the roster card's photo
+    # slot, 338 near-black tiles on a red page. `#fff` is already white and is
+    # listed so the count says it was looked at rather than missed.
+    ('"#111"', "@@SH1@@", '"#9E1520"'),
+    ('"#fff"', "@@SH2@@", '"#FFFFFF"'),
+    # THE SURGE-ERA STEEL GREYS. Two inherited skin layers set the
+    # .text-stone-* utilities to a family of blue-greys that no Blackout rule
+    # mentions — so nothing in the first sweep touched them, and "No sessions
+    # yet" and "Ranking locked" rendered in #C3CAD6 at 3.94:1, a cold grey on
+    # a warm red. They are the same two tiers as above.
+    ("#C3CAD6", "@@G1@@",  "#F7F1E6"),
+    ("#D5DAE3", "@@G2@@",  "#F7F1E6"),
+    ("#A8B0BE", "@@G3@@",  "#F2D0D3"),
+    ("#78818F", "@@G4@@",  "#F2D0D3"),
+    ("#6B7484", "@@G5@@",  "#F2D0D3"),
+]
+
+# The same tokens written as rgb() components, for the tints built from them.
+# Missing one of these leaves a Blackout glow around a National element — the
+# exact failure the landing page's --live rollover produces.
+RGBS = [
+    ("198,255,0",   "@@RP@@",  "247,241,230"),
+    ("255,46,136",  "@@RS@@",  "242,184,188"),
+    ("5,5,5",       "@@RB@@",  "184,20,31"),
+    ("242,242,242", "@@RF@@",  "255,255,255"),
+    ("110,110,110", "@@RM@@",  "242,208,211"),
+    # THE SURFACE TINTS. Blackout's cards are near-black rgba() built from
+    # these three, and no hex rule touches them — so the first re-skin put
+    # near-black cards on a red page and the contrast audit found ivory type
+    # sitting on them at 3.6:1. They are the deep red the handoff uses for
+    # rows and bands.
+    ("14,14,14",    "@@RC1@@", "158,21,32"),
+    ("20,20,20",    "@@RC2@@", "158,21,32"),
+    ("10,10,10",    "@@RC3@@", "158,21,32"),
+]
+
+
+def sweep(s, table, report, label):
+    """Two-pass replace through sentinels, so no rule can eat another's output."""
+    missing = []
+    for old, sent, _ in table:
+        if old not in s:
+            missing.append(old)
+        s = s.replace(old, sent)
+    for _, sent, new in table:
+        s = s.replace(sent, new)
+    assert "@@" not in s, "a sentinel survived the second pass"
+    report(f"{label}: {len(table) - len(missing)}/{len(table)} matched"
+           + (f"; not present: {', '.join(missing)}" if missing else ""))
+    return s
+
+
+def round_inline(s, report):
+    """NO SQUARE BLOCKS — the handoff's first shape rule.
+
+    Blackout was radius 0 everywhere, which is the single reason a component
+    carried over unchanged still reads as Vol.8 no matter what colour it is
+    wearing. Every inline radius is re-pointed; deliberate circles are left.
+
+    THE DEFAULT IS THE SHEET, NOT THE PILL. The first version made every
+    inline radius 999px, on the grounds that the handoff's shape list leads
+    with the pill. It does — for CHIPS. 999px on a 120px-tall block is not a
+    pill, it is an ellipse: the countdown cells came out as four ovals, the
+    section cards as lozenges, and the home screen read as a bubble bath
+    rather than as the handoff's arches-and-sheets. A pill only looks like a
+    pill when the box is much wider than it is tall, and nothing at build time
+    knows how tall a box will be. So the sweep sets the sheet radius, which is
+    right at any height, and the skin pills the things that ARE short by
+    definition — buttons, inputs, the tab bar and the chips.
+    """
+    n = [0, 0]
+
+    def rep(m):
+        if m.group(0).endswith('"50%"') or m.group(0).endswith("50%"):
+            n[1] += 1
+            return m.group(0)
+        n[0] += 1
+        return "borderRadius: " + SHEET
+
+    s = re.sub(r'borderRadius:\s*(?:"[^"]*"|\d+|[A-Za-z_$][\w$]*)', rep, s)
+    report(f"shape: {n[0]} inline radii set to the {SHEET}px sheet, "
+           f"{n[1]} circles kept")
+    assert n[0] > 0, "no inline radii found — has the app's style shape changed?"
+    return s
+
+
+def apply_skin(s, report):
+    skin = open(os.path.join(HERE, "ops", "national-skin.css")).read()
+    i = s.rfind("</body>")
+    assert i > 0, "no </body> to append the skin before"
+    # THE BLOCK IS NAMED, and that is not decoration. Two inherited skin layers
+    # (the August Attack and September Surge ones) carry their own banner
+    # comments, and the wording sweep rewrites the volume name inside them — so
+    # the shipped page holds THREE style blocks whose first line reads
+    # "56 NATIONAL SERIES · VOL.9 SKIN", and only the last is this one. A
+    # harness looking for that banner finds the wrong block: SABOTAGE=noskin
+    # deleted an August-era layer, every check stayed green, and a sabotage
+    # that silently does nothing is worse than no sabotage at all.
+    s = (s[:i] + '<style id="vol9-skin">\n' + skin + "\n</style>\n" + s[i:])
+    report(f"skin: {len(skin)} bytes appended as the last style block"
+           ' (id="vol9-skin")')
+    return s
 
 
 def plain(s, table, report, label, required=True):
@@ -193,11 +408,16 @@ def main():
           f"{os.path.basename(SRC)} ({len(src)/1024:.0f}KB)")
     s = src
     s = plain(s, TEXT, report, "wording")
+    s = plain(s, INHERITED, report, "inherited quirks")
     s = plain(s, ASSETS, report, "assets")
     s = plain(s, SHARE_NAMES, report, "downloaded filenames")
     s = plain(s, ARCHIVE, report, "previous volume's archive link")
     s = plain(s, SEASON, report, "season shape")
     s = double_by_date(s, report)
+    s = sweep(s, COLOURS, report, "colours")
+    s = sweep(s, RGBS, report, "rgb triples")
+    s = round_inline(s, report)
+    s = apply_skin(s, report)
 
     # A build id the page carries and version.txt must match: the self-healing
     # update check compares the two, and a mismatch makes every visitor reload
@@ -216,7 +436,8 @@ def main():
     # the handful of mentions that are deliberately about Vol.8.
     leftovers = {t: s.count(t) for t in
                  ("BLACKOUT SERIES", "Blackout Series", "BLACKOUT",
-                  "blackout.urbanpadel.om", "VOL.8", "Vol.8", "blackout-")
+                  "blackout.urbanpadel.om", "VOL.8", "Vol.8", "blackout-",
+                  "#C6FF00", "#FF2E88", "198,255,0")
                  if s.count(t)}
     # The all-time volume list names every previous volume by design, and the
     # final-standings link points at Vol.8's archive. Anything beyond that is a
