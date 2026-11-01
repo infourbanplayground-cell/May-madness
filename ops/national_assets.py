@@ -33,6 +33,11 @@ import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "..", "brand", "national", "handoff", "assets")
+# Silhouettes drawn here rather than shipped by the handoff. The handoff's four
+# are placeholder vectors it asks to have replaced; these are the same idiom
+# (flat fill, 60 units tall, 4 units of padding in the viewBox) and are
+# ORIGINAL geometric drawings, not traced from anything.
+MINE = os.path.join(HERE, "..", "brand", "national", "silhouettes")
 
 # The handoff's filenames, under the names the skin and the app use.
 SVGS = {
@@ -42,7 +47,13 @@ SVGS = {
     "mon-burner":  "mon-burner-white.svg",
     "mon-alam":    "mon-alam-white.svg",
     "mon-tower":   "mon-tower-white.svg",
+    # Drawn here — see MINE.
+    "mon-clock":    "mon-clock-white.svg",
+    "mon-gate":     "mon-gate-white.svg",
+    "mon-pavilion": "mon-pavilion-white.svg",
+    "mon-sail":     "mon-sail-white.svg",
 }
+OURS = {"mon-clock", "mon-gate", "mon-pavilion", "mon-sail"}
 PNGS = {"khanjar": "khanjar-tile-red.png"}
 
 # What a landmark is drawn in, by role. The handoff's medallion is a red disc
@@ -78,17 +89,29 @@ def _data_url(svg):
     third, and these go into a stylesheet that is already the biggest thing the
     skin adds. The characters escaped are the ones that would end the url()
     or be read as CSS.
+
+    SPACES AND BOTH QUOTE MARKS ARE ENCODED, and that is not tidiness. An
+    unquoted `url()` may not contain a space, a quote or a bracket — so a URL
+    carrying any of them works inside url("...") and silently draws NOTHING
+    unquoted. That is what the announcement cards' medallions did: nine plain
+    red discs that looked entirely deliberate.
+    The first fix folded the SVG's double quotes to single ones, which made it
+    safe in a double-quoted HTML attribute and still illegal unquoted — half a
+    fix, and it looked identical to none. Encoding every one of them makes a
+    single string safe in all three places it has to live: a stylesheet, an
+    inline style attribute, and a JS template literal.
     """
     s = re.sub(r"\s+", " ", svg)
-    for a, b in [("%", "%25"), ("#", "%23"), ('"', "'"), ("<", "%3C"),
-                 (">", "%3E"), ("{", "%7B"), ("}", "%7D")]:
+    for a, b in [("%", "%25"), ("#", "%23"), ('"', "%22"), ("'", "%27"),
+                 ("<", "%3C"), (">", "%3E"), ("{", "%7B"), ("}", "%7D"),
+                 (" ", "%20"), ("(", "%28"), (")", "%29")]:
         s = s.replace(a, b)
     return "data:image/svg+xml;charset=utf-8," + s
 
 
 def raw_svg(name, ink=None):
     """The stripped (and optionally recoloured) SVG source itself."""
-    path = os.path.join(SRC, SVGS[name])
+    path = os.path.join(MINE if name in OURS else SRC, SVGS[name])
     svg = _strip(open(path, encoding="utf-8").read())
     if ink:
         svg = _recolour(svg, INKS.get(ink, ink))

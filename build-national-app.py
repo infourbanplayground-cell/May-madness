@@ -790,9 +790,13 @@ def main():
     # final-standings link points at Vol.8's archive. Anything beyond that is a
     # rename that stopped matching.
     # Deliberate: the all-time volume list names every previous volume, the
-    # signup post links Vol.8's final standings, and DOUBLE_NIGHTS carries a
-    # comment explaining what Vol.8 did differently.
-    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 1}
+    # signup post links Vol.8's final standings, and TWO code comments explain
+    # what Vol.8 did differently — DOUBLE_NIGHTS (a threshold, not a list) and
+    # the skin's note on the tagline's second ink. A comment naming the volume
+    # it is contrasting with is the point of the comment; the check is for
+    # renames that stopped matching, and it stays tight rather than being
+    # loosened to "any number".
+    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 2}
     bad = {k: v for k, v in leftovers.items() if v > allowed.get(k, 0)}
 
     # ANY OTHER VOLUME'S HOST, in any casing. The named checks above only ever

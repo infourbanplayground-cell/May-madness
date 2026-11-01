@@ -14,6 +14,11 @@ its own luminance and alpha preserved, so the edges stay clean at any size.
   python3.13 ops/national-logo.py            # write every variation
   python3.13 ops/national-logo.py --sheet    # ...and a contact sheet to look at
 
+SHIPPED: g-white-mono. The owner's call — one ink, no ball accent. It is the
+cleanest against the khanjar tile (an accent ball adds a third colour to a
+ground that already has a pattern on it) and it needs no second cut for the
+National Day night, since white is in the flag either way.
+
 Pillow is on python3.13 in this container, not the default python3 (3.11).
 """
 import argparse
@@ -42,6 +47,7 @@ VARIANTS = {
     "c-ivory-green":  (IVORY, GREEN, "ivory mark, green ball — warmer than (b) against the tile"),
     "d-ink-red":      (INK,   FLAG,  "ink mark, flag-red ball — for ivory cards and light print"),
     "e-ivory-mono":   (IVORY, IVORY, "one ink, no accent — the quietest, for busy grounds"),
+    "g-white-mono":   (WHITE, WHITE, "PURE WHITE, no accent — the shipped cut"),
     "f-white-red":    (WHITE, FLAG,  "pure white mark, flag-red ball — the loudest on red"),
 }
 

@@ -1077,9 +1077,56 @@ standings LINK and left the sentence above it naming the volume before last.
   rule — "from Session 8, the last two nights" — which is not how this volume
   works at all, since the nights are a list. Both derive from the schedule now,
   via `NATIONAL_DAY_LABEL` in the page.
-- **Not yet built for Vol.9:** `build-announce-post.py`, `ops/signup-post.py`
-  and `build-standings-post.py` are all still Blackout's. The in-app copy is
-  correct; the rendered social cards are not Vol.9's and should not go out.
+#### The posts — `build-national-post.py` + `render-national-post.mjs`
+Four 1080x1350 feed cards (hero, the nine nights, the format, the money) and a
+1080x1920 story, plus `CAPTIONS.txt` (the WhatsApp post, the Instagram caption
+and a sticker plan). Output in `brand/national/posts/`.
+- **NOT a fork of `build-announce-post.py`.** Vol.8's builder reads its fonts
+  from a scratchpad a fresh container does not have, and imports Vol.7's payout
+  out of `build-announce-video.py`. This reads `ops/font_bundle.py` and takes
+  every figure from `national-season.json`.
+- **The arch is a DOME here**, not the app's `168px`. That figure is an arch on
+  a short wide hero and a plain rounded rectangle on a card three times as
+  tall — the shape is an Omani door and has to be recognisable at the size it
+  is drawn. Percentages, so it holds whatever proportions the card has.
+- **A DATA URL MUST BE SAFE UNQUOTED.** The medallions rendered as nine plain
+  red discs — which looked entirely deliberate — because an unquoted `url()`
+  may not contain a space, a quote or a bracket. The first fix folded the
+  SVG's double quotes to single ones: safe in an HTML attribute, still illegal
+  unquoted, and identical to no fix at all. `ops/national_assets.py` now
+  percent-encodes every one of them, so one string is safe in a stylesheet, an
+  inline style and a JS template literal.
+- Sabotage: `SABOTAGE=nofont` / `noart` / `long`, `ONLY=<card>`.
+  - **`long` has to SQUEEZE THE CELL, not lengthen the text.** A 41-character
+    landmark name still needed 517px of the 780 a row has, so the run went
+    green for the honest reason that the design has room. Narrowing the cell
+    with the wrap off is the real risk, and is what the clipped check exists
+    for.
+- **Still Blackout's and not yet rebuilt:** `ops/signup-post.py` (the WhatsApp
+  numbered sheet) and `build-standings-post.py` (mid-season). The announcement
+  set above is Vol.9's.
+
+#### The landmark silhouettes
+- The handoff's four (`mon-nizwa`, `mon-burner`, `mon-alam`, `mon-tower`) are
+  its own placeholders, which it asks to have replaced in the same slots.
+- Four more are **drawn here** in `brand/national/silhouettes/` — clock tower,
+  gateway, pavilion and the sail-form museum — in the same idiom (flat fill, 60
+  units tall, 4 units of padding in the viewBox). They are original geometric
+  drawings. `ops/national_assets.py` serves both sets through one table.
+- **STOCK PREVIEWS AND THIRD-PARTY LOGOS CANNOT BE USED.** A watermarked
+  VectorStock/Shutterstock comp is not licensed art, and an institution's own
+  logo is not a landmark silhouette. Reference for *which* landmarks, yes;
+  artwork, no. The same sheet also leads with the Grand Mosque, and the
+  handoff's rule is **no mosques**.
+- **`ops/check-silhouettes.mjs` is the proof sheet** — every silhouette on the
+  medallion it is actually drawn in, at 48, 74 and 150px. A silhouette has one
+  job, to be recognisable as its building at 48px on a phone, and the only way
+  to know is to look at it there. It fails any disc with no ink in it: a path
+  that failed to parse renders as an empty red circle that looks like a design
+  choice.
+  - The clock FACE has to be a **cut-out**. Drawn as a filled disc it was white
+    on a white shaft and simply vanished; a single-ink silhouette can only show
+    an interior detail as a hole.
 
 - **Still placeholder / unconfirmed:** the landmark artwork itself (placeholder
   vectors, to be replaced with commissioned work in the same slots), the
