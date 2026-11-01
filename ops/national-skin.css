@@ -90,49 +90,153 @@
 }
 
 /* ── 2 · THE GROUND ────────────────────────────────────────────────────
-   Red base at 100%, khanjar tile over it at 14% and 132px, which are the
-   handoff's figures. The tile is a repeating SVG rather than the supplied
-   PNG so the page carries no extra request: at 132px it is a texture, not
-   an illustration, and nobody is reading its detail.
+   THE ARTWORK IS THE HANDOFF'S, NOT AN IMPRESSION OF IT. The first version of
+   this file drew the khanjar tile as four CSS gradients (two dots and a
+   cross-hatch) and the masar band as two repeating-linear-gradients. Both
+   look like the brief from across the room; neither is the brief, and the
+   repo has shipped the real files since the day the handoff landed.
+   A build-time token of the form A-colon-name is replaced with a data: URL
+   — see
+   ops/national_assets.py, which also strips the 8KB C2PA manifest wrapped
+   around every ~400-byte SVG.
    ────────────────────────────────────────────────────────────────────── */
-/* AN !important ON `html, body` IS NOT ENOUGH, AND THIS IS WHY. An inherited
-   layer carries `html:not(.light) body { background: none, var(--paper)
-   !important }` — specificity (0,1,2) against this rule's (0,0,2) — so it won
-   and the page rendered on `--paper`, which was still pointing at a Surge
-   value. Same class of loss as the arch against the universal radius rule.
-   The matching selector is repeated here, later in the sheet, which is what
-   actually decides it. */
 html, body,
 html:not(.light) body,
 html:not(.dark) body {
   background: var(--bg) !important;
   background-attachment: fixed !important;
 }
-body::before {
+
+/* The khanjar tile: 132x132 repeat at opacity .14, which are the handoff's
+   own figures. The source is 288px, so it is drawn at less than half size —
+   at 132 it is a texture and nobody reads its detail, which is the point. */
+/* !important ON THE IMAGE, BECAUSE AN INHERITED LAYER TURNS IT OFF. A July
+   Heat-era block carries `body::before, body::after { background-image: none
+   !important }` to kill ITS volume's motif, and an ordinary declaration here
+   loses to it however late it is written. The tile and the band both rendered
+   as flat colour — the band as a deep red bar on a red header, which is to
+   say as nothing at all, with no error anywhere. */
+/* `html body::before` AS WELL, for the same reason again: one of the inherited
+   layers qualifies its override with `html`, which is (0,0,3) against this
+   rule's (0,0,2) and wins even with !important on both. The band came back and
+   the tile did not, which is how it was found — and it is the third time in
+   this skin that specificity, not order, decided. */
+body::before,
+html body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   opacity: .14;
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 70% 60%, rgba(255,255,255,.9) 0 2px, transparent 3px),
-    repeating-linear-gradient(45deg,  rgba(255,255,255,.45) 0 1px, transparent 1px 22px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,.45) 0 1px, transparent 1px 22px);
-  background-size: 132px 132px, 132px 132px, 132px 132px, 132px 132px;
+  background-image: url("@@A:khanjar@@") !important;
+  background-size: 132px 132px !important;
+  background-repeat: repeat !important;
 }
 #root, main, nav { position: relative; z-index: 1; }
 
-/* The masar band, as the page's top edge. 24px, pill, inset 14 — the first
-   thing down the screen in the handoff's Sessions layout. */
+/* ── THE MASAR BAND ────────────────────────────────────────────────────
+   The woven turban band, and the first thing down the screen. To the
+   handoff's spec: 24px tall, 14px side inset, pill radius, deep red ground
+   with masar-band-white.svg tiled at its native 40x24.
+   It was 10px of hand-rolled gradient before, which at that height reads as a
+   stripe rather than as weaving — the band has a pattern and you have to be
+   able to see it.
+   ────────────────────────────────────────────────────────────────────── */
 body::after {
   content: "";
-  position: fixed; left: 14px; right: 14px; top: 6px; height: 10px;
+  position: fixed; left: 14px; right: 14px; top: 6px; height: 24px;
   z-index: 60; pointer-events: none; border-radius: 999px;
-  background: var(--deep);
-  background-image:
-    repeating-linear-gradient(90deg,
-      rgba(247,241,230,.95) 0 3px, transparent 3px 10px),
-    repeating-linear-gradient(90deg,
-      rgba(215,32,46,.9) 5px 8px, transparent 8px 20px);
+  background-color: var(--deep) !important;
+  background-image: url("@@A:masar-white@@") !important;
+  background-size: 40px 24px !important;
+  background-repeat: repeat-x !important;
+}
+
+/* THE SAME WEAVE THREADS THE PAGE, not just its top edge. The handoff runs a
+   masar strip under the champions photo as well as across the top — it is the
+   volume's rule, the way the scanline was Blackout's. So it is also the
+   header's bottom edge and the foot of every ivory arch, where a flat
+   hairline was doing the job of a motif. 12px and the red cut, which is what
+   the handoff uses for a strip inside a card. */
+header::after, .sticky.top-0::after,
+.sg-hero::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 12px;
+  pointer-events: none;
+  background-color: var(--deep);
+  background-image: url("@@A:masar-red@@");
+  background-size: 20px 12px;
+  background-repeat: repeat-x;
+}
+header, .sticky.top-0, .sg-hero { position: relative; }
+/* The hero's strip sits INSIDE the arch, so it has to be clipped by it —
+   otherwise a 12px rectangle hangs off the bottom corners of a rounded card.
+   The arch's own overflow does that, and the card's bottom padding makes room
+   so the strip never runs under the last line of type. */
+.sg-hero { overflow: hidden; }
+
+/* THE FADE ABOVE THE TAB BAR. The handoff's last global rule: content below
+   the fold fades out over 56px directly above the bar, so a row is never
+   half-hidden behind a floating pill — it goes quiet first. */
+body > #root::after, #root::after {
+  content: "";
+  position: fixed; left: 0; right: 0; bottom: 0; height: 102px;
+  z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(184,20,31,0) 0%, var(--bg) 55%);
+}
+
+/* ── THE LANDMARK MEDALLION ────────────────────────────────────────────
+   A night's badge: a red disc carrying an Omani landmark in white. The
+   markup side is in build-national-app.py (the silhouette is a per-session
+   data URL, so it cannot live in a static stylesheet); this is the disc it
+   sits on.
+   The handoff's hero medallion is 64px with a double ring; a row's is 44px
+   and plain. This is the row's, at the 48px the row already allowed for.
+   ────────────────────────────────────────────────────────────────────── */
+/* THE :not() CHAIN AGAIN — fourth time in this file. The inherited universal
+   radius rule is (0,3,0) and excludes only elements whose INLINE style names a
+   50% radius; a class cannot beat it however loud. A disc that silently became
+   a 28px rounded square is exactly the kind of thing that looks like a design
+   decision. */
+.na-medallion:not([data-a]):not([data-b]):not([data-c]) {
+  border-radius: 50% !important;
+  background-color: var(--bg);
+  background-repeat: no-repeat;
+  background-position: center 54%;
+  /* 62% of the disc: the silhouettes carry 4px of their own padding in the
+     viewBox, so a landmark drawn edge to edge touches the rim. */
+  background-size: 62% auto;
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 4px var(--flag);
+}
+/* THE HERO'S MEDALLION is the handoff's 64px disc with its double ring — the
+   row's is 48px and plain. It sits above the copy, centred, with the landmark
+   named under it in both scripts. */
+.na-hero-mark {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  margin-bottom: 14px;
+}
+.na-medallion-lg:not([data-a]):not([data-b]):not([data-c]) {
+  width: 64px !important; height: 64px !important;
+  background-color: var(--bg) !important;
+  box-shadow: 0 0 0 3px var(--ivory), 0 0 0 5px var(--flag) !important;
+}
+.na-hero-landmark {
+  font-family: 'Archivo', sans-serif; font-weight: 800;
+  font-size: 11px; letter-spacing: .16em; color: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* The row eyebrow carries the landmark's name, and at the .24em it inherited
+   "MON 9 NOV · AL ALAM PALACE" wrapped to two lines — which pushed the title
+   down and made every third row a different height. .14em fits the longest
+   name we have with room to spare, and the handoff's own figure for a label
+   is .16em, so this was never the tracking the design asked for. */
+.jh-mock-sess [style*="letter-spacing: 0.24em"],
+.jh-mock-sess [style*="letterSpacing"] { letter-spacing: .14em !important; }
+
+/* The live night's disc takes the flag red and a brighter rim, which is the
+   one place the row says "now" without a word. */
+.na-medallion[data-live="1"] {
+  background-color: var(--flag);
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 5px var(--ivory);
 }
 
 /* ── 3 · NO SQUARE BLOCKS ──────────────────────────────────────────────
@@ -282,7 +386,9 @@ header, .sticky.top-0 {
   background: var(--bg) !important;
   border-bottom: 1px solid rgba(247,241,230,.18) !important;
   backdrop-filter: none !important;
-  padding-top: 14px !important;
+  /* 36px, not 14: the band is 24px at top 6, and the handoff puts it ABOVE the
+     header rather than behind it. At 14 the club mark sat under the weave. */
+  padding-top: 36px !important;
 }
 /* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
    up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
@@ -319,11 +425,14 @@ header [style*="min-width: 0"], .sticky.top-0 [style*="min-width: 0"] {
 /* 17px, measured: the name renders 252px at the inherited 20px — a clone
    measured outside the header said 203, which is why the number here comes
    from what the overlap check reads off the live bar and not from arithmetic.
-   At 17px it needs exactly the 214 it has, which is where the ellipsis still
-   fires — so 15px, which needs 189 and leaves the name whole. */
+   The "56" mark then took 32px back, so it is 14px: measured on the live bar
+   it needs 193 of the 200 it has. The harness asserts no run is ellipsised —
+   a backstop that fires is a layout that did not fit, and it is invisible to
+   every other check here because clipping is what ellipsis does INSTEAD of
+   overflowing. */
 header [style*="min-width: 0"] > div:first-child,
 .sticky.top-0 [style*="min-width: 0"] > div:first-child {
-  font-size: 15px !important;
+  font-size: 14px !important;
   overflow: hidden; text-overflow: ellipsis;
 }
 header [style*="min-width: 0"] > div:last-child,

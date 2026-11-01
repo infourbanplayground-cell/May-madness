@@ -950,10 +950,74 @@ khanjar tile, masar band, no square blocks, no drop shadows.
   are set on the `.text-stone-*` utilities by two inherited layers and no
   Blackout rule mentions them, so the first sweep left them: "No sessions yet"
   and "Ranking locked" rendered as a cold blue-grey on a warm red.
-- **Still placeholder / unconfirmed:** the landmark artwork and the
-  landmark-per-session mapping (the handoff says the product owner confirms it;
-  **no mosques**), the Arabic line in the lockup (needs Noto Kufi vendored
-  through `ops/vendor-fonts.py`), and the three double nights.
+#### The motifs — `ops/national_assets.py`
+**A RED APP WITH VOL.8'S FURNITURE IS A RECOLOUR, NOT A VOLUME.** The first
+re-skin passed every check in the harness while carrying none of the identity:
+no khanjar tile, no masar weave, no landmarks, no "56" mark, no Arabic. The
+handoff ships all of it and says in as many words that it IS the design.
+
+- **The artwork is the handoff's own, never an impression of it.** The first
+  skin drew the khanjar tile as four CSS gradients and the masar band as two
+  repeating gradients — which look like the brief from across the room and are
+  not the brief, while `brand/national/handoff/assets/` held the real files the
+  whole time.
+- `ops/national_assets.py` inlines them as data URLs, and the skin names them
+  with a build-time `A:<name>` token rather than carrying base64.
+  - **Every SVG is 8KB of C2PA manifest around ~400 bytes of drawing.** The
+    masar band would have been 8KB of signature repeated as a background tile.
+    The manifest is provenance for the file on disk; it is stripped.
+  - Landmarks are **recoloured on the way through**, because the handoff ships
+    a white cut of all four and a red cut of only some. A half-set is worse
+    than a rule.
+- **`!important` IS NOT ENOUGH, AND SPECIFICITY DECIDED FOUR TIMES.** A July
+  Heat-era layer carries `body::before, body::after { background-image: none
+  !important }`; another qualifies its override with `html`, which is (0,0,3)
+  against a plain `body::before`'s (0,0,2) and wins with !important on both.
+  The band came back and the tile did not. The medallion needed the same
+  3-attribute `:not()` chain the arch does, or the universal radius rule turned
+  the disc into a 28px rounded square.
+- **The landmark mapping is the handoff's placeholder and the build says so.**
+  The silhouettes are placeholder drawings, the per-session assignment is the
+  product owner's to confirm, and **no mosques** — all three recorded in
+  `national-season.json` and in the builder. None of that is a reason to ship
+  no motif, which is what the first pass did. It cycles the four in order,
+  deterministically, so a night always wears the same landmark.
+- **The Arabic is set in Noto Kufi, SUBSETTED to the words the app uses.**
+  `national-season.json`'s `arabic` block is the only list; `ops/vendor-fonts.py`
+  asks Google for a `text=` cut, which takes the face from 120KB a weight to
+  16. A `text=` response carries **no unicode-range at all** — the subset is
+  the range — so the Latin loop's range filter matched nothing and silently
+  vendored no Arabic.
+  - The cost of subsetting is a word added elsewhere falling back in silence,
+    which is the same failure the Latin faces are vendored to prevent. So the
+    covered codepoints go to `brand/fonts/kufi-coverage.txt` and
+    **`build-national-app.py` refuses to build** if it is about to ship a
+    character that face cannot draw.
+  - Noto Kufi also has to be in the page's **font link**. An Arabic string set
+    in a stack naming a face nobody fetched is drawn in whatever the device
+    has — here DejaVu, a text face.
+- **The harness asserts each motif BY NAME**, because they are all
+  background-images and a missing one is a flat rectangle in the right colour:
+  `khanjar y  masar y  header-weave y  "56" y  arabic y  medallions 9/9`.
+  - `SABOTAGE=noart` blanks the artwork and leaves the colours and shapes
+    alone — i.e. reproduces exactly what the first re-skin shipped — and all
+    four go red.
+  - **`url("")` starts with `url(` and draws nothing.** The first version of
+    the check tested for the syntax of an image and reported the medallions as
+    drawn with every data URL stripped. It tests for a real `data:image/` now.
+  - **The seeded pass is not optional.** Vol.9 has no nights yet, so the
+    landmark lookup, the artwork and the "DATE · LANDMARK" eyebrow render zero
+    times against the live state and every assertion about them passes having
+    seen nothing. The harness serves the season's own nine dates and checks
+    the medallion on a screen with something to draw.
+- **An ellipsis that fires is a layout that did not fit**, and no other check
+  here sees it: clipping is what `text-overflow` does INSTEAD of overflowing,
+  so there is nothing past any edge and nothing overlapping. "56 NATIONAL
+  SERI…" sat in the one bar on every screen. The harness fails any run whose
+  `scrollWidth` exceeds its `clientWidth`.
+- **Still placeholder / unconfirmed:** the landmark artwork itself (placeholder
+  vectors, to be replaced with commissioned work in the same slots), the
+  landmark-per-session mapping, and the three double nights.
 
 ### Blackout Series (Vol.8 — LIVE APP)
 - URL: https://blackout.urbanpadel.om — October 2026, nine nights

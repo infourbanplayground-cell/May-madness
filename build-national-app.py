@@ -7,12 +7,22 @@ than a hand-fork means Vol.8 fixes can be pulled forward by re-running this, and
 every substitution is asserted, so a rename that stops matching fails the build
 instead of shipping a half-rebranded app.
 
-WHAT THIS PASS DOES NOT DO: the National re-skin. This is the "working app
-first" build — the volume's identity, numbers, host and schedule, on Vol.8's
-markup and Vol.8's black-and-lime skin. The red/ivory/arch system in
-brand/national/handoff/ is a separate pass, and keeping them apart means the
-club can run night one on a correct app rather than waiting for a correct
-*looking* one.
+THE RE-SKIN IS PART OF THIS BUILD. It is three things, and only the first is
+a find-and-replace:
+
+  · the colour sweep (COLOURS / RGBS), by ROLE rather than by hue
+  · ops/national-skin.css, appended as the last style block, which carries
+    everything a sweep cannot do — the inversion to ivory heroes, the shapes,
+    and the handoff's own artwork
+  · MOTIFS, below: markup changes, because a stylesheet cannot put a landmark
+    medallion on a session row or a "56" mark in the header. Those are the
+    volume's identity, and the first pass shipped without them: a red app with
+    Blackout's furniture is a recolour, not a volume.
+
+The artwork is the handoff's own (ops/national_assets.py), never an
+approximation of it — the first skin drew the khanjar tile as four CSS
+gradients and the masar band as two repeating gradients, which look like the
+brief from across the room and are not the brief.
 
 What it NEVER changes: the scoring engine, the bracket seeding, the API
 contract. Five volumes have now been stood up this way and the one thing that
@@ -29,6 +39,9 @@ import json
 import os
 import re
 import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "ops"))
+from national_assets import assets as national_assets      # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "blackout-index.html")
@@ -191,6 +204,155 @@ INHERITED = [
     ('URBAN SOCIAL SERIES &middot; VOL.9', 'URBAN SOCIAL &middot; VOL.9'),
 ]
 
+# ── The Arabic, and the face that has to be able to draw it ───────────────
+AR = {k: v for k, v in CFG["arabic"].items() if k != "_note"}
+
+
+def check_arabic():
+    """Refuse to ship a word Noto Kufi was not subsetted for.
+
+    ops/vendor-fonts.py cuts the Arabic face down to the characters in
+    CFG["arabic"] — 120KB a weight becomes 16 — and the cost of that is a word
+    added anywhere else rendering in the container's DejaVu with nothing on
+    screen to say so. A silent font fallback is the exact failure the Latin
+    faces were vendored to prevent; this is the Arabic half of it.
+    """
+    cov = os.path.join(HERE, "brand", "fonts", "kufi-coverage.txt")
+    if not os.path.exists(cov):
+        raise AssertionError("brand/fonts/kufi-coverage.txt is missing — "
+                             "run python3 ops/vendor-fonts.py")
+    have = set(open(cov, encoding="utf-8").read())
+    want = {c for v in AR.values() for c in v}
+    missing = sorted(want - have)
+    if missing:
+        raise AssertionError(
+            "the vendored Noto Kufi cannot draw " + " ".join(missing)
+            + " — add the word to national-season.json's `arabic` block and "
+              "re-run ops/vendor-fonts.py")
+    return len(have)
+
+
+# ── MOTIFS ────────────────────────────────────────────────────────────────
+# Markup, not style, because a stylesheet cannot put a mark in the header or a
+# landmark on a session row. Each of these is a thing the handoff specifies and
+# the first re-skin shipped without.
+A = national_assets()
+
+# The "56" mark, to the handoff's own recipe: white fill, a 1.2px ink stroke,
+# and TWO offset shadows — ink at +1.5px and the flag's green at +3px. The
+# green is the only place in the chrome it appears; everywhere else in this
+# volume it means National Day and nothing else.
+MARK_56 = (
+    '<span aria-hidden="true" style={{fontFamily:"\'Archivo\',sans-serif",fontStyle:"italic",'
+    'fontVariationSettings:"\'wdth\' 125,\'wght\' 900",fontSize:26,lineHeight:.9,'
+    'color:"#FFFFFF",WebkitTextStroke:"1.2px #1A0A0C",paintOrder:"stroke fill",'
+    'textShadow:"1.5px 1.5px 0 #1A0A0C, 3px 3px 0 #087A3F",flexShrink:0,'
+    'letterSpacing:"-.02em",marginRight:2}}>56</span>'
+)
+
+# The landmark art, and the rule that picks one per night.
+#
+# THE MAPPING IS THE HANDOFF'S PLACEHOLDER AND SAYS SO. The handoff is explicit
+# that the landmark-per-session assignment is the product owner's to confirm,
+# and the silhouettes themselves are placeholder vector drawings to be replaced
+# with commissioned artwork in the same slots. Neither of those is a reason to
+# ship no motif at all, which is what the first re-skin did — a volume whose
+# whole identity is Omani landmarks, with none on screen. It cycles the four in
+# order, deterministically, so the same night always wears the same landmark
+# and swapping the mapping later is a line in national-season.json.
+#
+# Rule from the handoff, carried here so it cannot be lost: NO MOSQUES.
+LANDMARK_JS = (
+    "const LANDMARK_ART = {\n"
+    + "".join(f'  {l["asset"]!r}: {A["mon-" + l["asset"].split("-")[1] + "@white"]!r},\n'
+             for l in CFG["landmarks"])
+    + "};\n"
+    + "const LANDMARKS = " + json.dumps(CFG["landmarks"], ensure_ascii=False) + ";\n"
+    + "// Deterministic, and NOT random: a night that changed its landmark on\n"
+      "// every render would be noise rather than a label.\n"
+      "function landmarkFor(i) { return LANDMARKS[((i % LANDMARKS.length) "
+      "+ LANDMARKS.length) % LANDMARKS.length]; }\n"
+    # WHICH NIGHT IS NEXT, by the same index the rows use — so the hero and
+    # the row for that night always wear the same landmark. The first night
+    # not yet completed; before any exist, night one.
+    + "function nextNightIndex(st) {\n"
+      "  const ss = (st && st.sessions) || [];\n"
+      "  const i = ss.findIndex(s => !s.completed);\n"
+      "  return i < 0 ? Math.max(0, ss.length - 1) : i;\n"
+      "}\n"
+)
+
+MOTIFS = [
+    # 0 · The landmark table and its lookup, in front of the first screen that
+    #     uses it.
+    ("function SessionsView({", LANDMARK_JS + "\nfunction SessionsView({"),
+    # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
+    #     sunrise drawn out of four absolutely-positioned spans — a stand-in
+    #     invented here, while the handoff specifies a "56" lockup and the
+    #     repo ships the art to build it.
+    ('<span style={{width:30,height:30,flexShrink:0,position:"relative",background:"#C6FF00"}}>',
+     '<span style={{display:"none"}}>'),
+    # 2 · ...and the Arabic line the handoff sets under every title. It
+    #     replaces "URBAN SOCIAL", which was a shortening forced on us by the
+    #     header running out of bar — the Arabic is shorter AND is the thing
+    #     the brand actually asks for.
+    ('URBAN SOCIAL &middot; VOL.9</div>',
+     '<span style={{fontFamily:"\'Noto Kufi Arabic\',sans-serif",fontWeight:700}}>'
+     + AR["series"] + '</span> &middot; VOL.9</div>'),
+    # 3 · The mark itself, in the slot the sunrise vacated.
+    ('<div style={{minWidth:0}}>\n              <div style={{fontStyle:"italic"',
+     MARK_56 + '\n            <div style={{minWidth:0}}>\n'
+     '              <div style={{fontStyle:"italic"'),
+    # 4 · NOTO KUFI HAS TO BE ASKED FOR. The page's font link carries Archivo
+    #     and JetBrains Mono; an Arabic string set in a stack that names a face
+    #     nobody fetched is drawn in whatever the device has, which in this
+    #     container is DejaVu — a text face, not a display one. Subsetted to
+    #     the words in national-season.json, so this costs about 16KB.
+    ("&family=JetBrains+Mono:wght@400;500;700&display=swap\" rel=\"stylesheet\"",
+     "&family=JetBrains+Mono:wght@400;500;700"
+     "&family=Noto+Kufi+Arabic:wght@500;700&display=swap\" rel=\"stylesheet\""),
+    # 5 · THE SESSION ROW GETS ITS LANDMARK MEDALLION. The handoff draws each
+    #     night as a circle carrying an Omani landmark, with the eyebrow
+    #     reading "DATE · LANDMARK" — it is how a night is told apart at a
+    #     glance, and it is most of what makes the screen Omani rather than
+    #     merely red. The slot it replaces was a bordered square holding the
+    #     session number, which the row's own title already carries.
+    ('''<div style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
+                 background:liveNow ? "rgba(198,255,0,.12)" : "rgba(255,255,255,.03)",
+                 border:`1px solid ${liveNow ? "rgba(198,255,0,.5)" : "rgba(110,110,110,.3)"}`,
+                 fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
+                 fontSize:24,color:liveNow ? "#C6FF00" : "#CFCFCF"}}>{num}</div>''',
+     '''<div className="na-medallion" data-live={liveNow ? "1" : "0"}
+                 title={landmarkFor(idx).nameEn}
+                 style={{flex:"0 0 auto",width:48,height:48,
+                 backgroundImage:`url("${LANDMARK_ART[landmarkFor(idx).asset]}")`}} />'''),
+    # 6a · THE HOME HERO CARRIES THE NEXT NIGHT'S MEDALLION. The handoff's
+    #      hero is a landmark disc above the copy; ours had the volume ghost
+    #      and nothing else, so the first screen a player opens showed none of
+    #      the identity the rest of the app now wears. It names the landmark
+    #      underneath, for the same reason the rows do: a disc nobody can name
+    #      is decoration.
+    ('''<div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+             letterSpacing:".34em",color:"#C6FF00"}}>''',
+     '''<div className="na-hero-mark" style={{position:"relative"}}>
+          <div className="na-medallion na-medallion-lg"
+               title={landmarkFor(nextNightIndex(state)).nameEn}
+               style={{backgroundImage:`url("${LANDMARK_ART[landmarkFor(nextNightIndex(state)).asset]}")`}} />
+          <div className="na-hero-landmark">
+            {landmarkFor(nextNightIndex(state)).nameEn.toUpperCase()}
+            <span style={{fontFamily:"'Noto Kufi Arabic',sans-serif",fontWeight:700,marginInlineStart:8}}>
+              {landmarkFor(nextNightIndex(state)).nameAr}</span>
+          </div>
+        </div>
+        <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+             letterSpacing:".34em",color:"#C6FF00"}}>'''),
+    # 6b · ...and the eyebrow says which landmark it is, so the circle is a
+    #     label and not decoration.
+    ('''{ weekday:"short", day:"numeric", month:"short" }).toUpperCase() : "NO DATE"}</div>''',
+     '''{ weekday:"short", day:"numeric", month:"short" }).toUpperCase() : "NO DATE"}'''
+     ''' &middot; {landmarkFor(idx).nameEn.toUpperCase()}</div>'''),
+]
+
 SHEET = str(int(float(CFG["shape"]["sheet"].rstrip("px"))))
 
 ASSETS = [
@@ -336,6 +498,27 @@ def round_inline(s, report):
 
 def apply_skin(s, report):
     skin = open(os.path.join(HERE, "ops", "national-skin.css")).read()
+    # THE SKIN NAMES THE HANDOFF'S ARTWORK, IT DOES NOT DRAW IT. `@@A:name@@`
+    # becomes a data: URL from ops/national_assets.py. Doing it here rather
+    # than committing a stylesheet full of base64 keeps the skin readable and
+    # means re-exported artwork is picked up by a rebuild rather than by a
+    # hand-edit — the first version drew the tile and the band as CSS
+    # gradients, which is an approximation of a brief that shipped its own art.
+    art = national_assets()
+    used = set()
+
+    def put(m):
+        k = m.group(1)
+        if k not in art:
+            raise AssertionError(f"the skin asks for asset {k!r}, which "
+                                 f"ops/national_assets.py does not have")
+        used.add(k)
+        return art[k]
+
+    skin, n = re.subn(r"@@A:([a-z0-9@-]+)@@", put, skin)
+    assert n, "the skin references no artwork — the handoff's motifs are missing"
+    report(f"artwork: {len(used)} asset(s) inlined, {n} reference(s), "
+           f"{sum(len(art[k]) for k in used) // 1024}KB")
     i = s.rfind("</body>")
     assert i > 0, "no </body> to append the skin before"
     # THE BLOCK IS NAMED, and that is not decoration. Two inherited skin layers
@@ -413,6 +596,10 @@ def main():
     s = plain(s, SHARE_NAMES, report, "downloaded filenames")
     s = plain(s, ARCHIVE, report, "previous volume's archive link")
     s = plain(s, SEASON, report, "season shape")
+    report(f"arabic: {check_arabic()} characters vendored in Noto Kufi")
+    # BEFORE the colour sweep, like every other markup rule here: the motifs
+    # carry Vol.8 literals in the text they match.
+    s = plain(s, MOTIFS, report, "motifs")
     s = double_by_date(s, report)
     s = sweep(s, COLOURS, report, "colours")
     s = sweep(s, RGBS, report, "rgb triples")

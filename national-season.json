@@ -59,6 +59,32 @@
   "previousVolume": "Blackout Series",
   "previousHost": "blackout.urbanpadel.om",
 
+  "arabic": {
+    "_note": [
+      "EVERY ARABIC STRING THE APP SETS, IN ONE PLACE — because the face is",
+      "SUBSETTED to exactly these characters. Google serves a cut-down woff2",
+      "for a `text=` request, which takes Noto Kufi Arabic from 120KB a weight",
+      "to a couple of KB; the whole point is that the brand's Arabic is drawn",
+      "in Kufi rather than silently falling back to the container's DejaVu,",
+      "and a 240KB download to set six words is how that gets dropped again.",
+      "",
+      "The cost of subsetting is that a word added anywhere else renders in",
+      "the fallback with nothing on screen to say so. So ops/vendor-fonts.py",
+      "writes the covered codepoints to brand/fonts/kufi-coverage.txt and",
+      "build-national-app.py REFUSES to build if any Arabic it is about to",
+      "ship is not covered. Add the word here, re-run the vendor script."
+    ],
+    "series": "السلسلة الوطنية",
+    "nationalDay": "العيد الوطني",
+    "sessions": "الجلسات",
+    "home": "الرئيسية",
+    "rank": "الترتيب",
+    "me": "صفحتي",
+    "players": "اللاعبون",
+    "recap": "ملخص الليلة",
+    "champions": "الأبطال",
+    "liveNow": "مباشر"
+  },
   "palette": {
     "bg": "#B8141F",
     "deep": "#9E1520",

@@ -70,6 +70,23 @@ if (SABOTAGE === 'longname') {
   if (app.includes('URBAN SOCIAL &middot; VOL.9'))
     throw new Error('sabotage anchor (longname) no longer matches');
 }
+if (SABOTAGE === 'noart') {
+  // Blank the handoff's artwork, leaving the colours and shapes exactly as
+  // they are. This is the state the first re-skin actually shipped in — a red
+  // app with no khanjar tile, no masar weave and no landmarks — and every
+  // check in this harness passed it. The motif assertions must go red.
+  const n = (app.match(/data:image\/(png|svg\+xml)[^"')]*/g) || []).length;
+  if (n < 3) throw new Error('sabotage anchor (noart) no longer matches');
+  app = app.replace(/url\("data:image\/(png|svg\+xml)[^"]*"\)/g, 'none');
+  // The landmark art is handed to React as a template literal, not written
+  // into the HTML as a url(), so the sweep above does not reach it — and the
+  // first version of this sabotage reported medallions 1/1 with the tile and
+  // the band both blanked, which is a sabotage that half worked.
+  const before = app;
+  app = app.replace(/const LANDMARK_ART = \{[\s\S]*?\n\};/,
+                    'const LANDMARK_ART = new Proxy({}, { get: () => "" });');
+  if (app === before) throw new Error('sabotage anchor (noart, landmarks) no longer matches');
+}
 if (SABOTAGE === 'nofont') {
   const a = '<link href="https://fonts.googleapis.com/css2?family=Archivo';
   if (!app.includes(a)) throw new Error('sabotage anchor (nofont) no longer matches');
@@ -96,7 +113,32 @@ const VERSION = fs.existsSync(APP + '.version')
   ? fs.readFileSync(APP + '.version', 'utf8').trim() : '';
 
 const state = fs.readFileSync(SC + '/na.json', 'utf8');
+// Whether there is anything for a medallion to sit on. With no nights created
+// the sessions screen is an empty-state card, and asserting medallions there
+// would fail for the right reason — so the check is gated on real data rather
+// than quietly dropped.
+const SESSIONS = (() => {
+  try { return (JSON.parse(state).state.sessions || []).length; } catch { return 0; }
+})();
 const photos = fs.readFileSync(SC + '/na-photos.json', 'utf8');
+
+// A STATE WITH NIGHTS IN IT, so the landmark medallions are actually
+// exercised. Vol.9 has not been played yet, so the real state has zero
+// sessions and every medallion assertion passes vacuously — the landmark
+// lookup, the artwork and the eyebrow would all ship having never rendered.
+// The nights are the season file's own dates, which is what the organiser
+// will create, not invented shapes.
+const SEEDED = (() => {
+  const st = JSON.parse(state);
+  const cfg = JSON.parse(fs.readFileSync('national-season.json', 'utf8'));
+  st.state.sessions = cfg.nights.map((d, i) => ({
+    id: 's' + i, name: 'Session ' + (i + 1), date: d,
+    groupCount: 4, qualifyCount: 2, teams: [], groupMatches: [],
+    bracket: { qf: [], sf: [], final: null }, waitlist: [],
+    doublePoints: cfg.doubleNights.includes(d), completed: false,
+  }));
+  return JSON.stringify(st);
+})();
 
 const srv = http.createServer({ maxHeaderSize: 1 << 20 }, (req, res) => {
   const u = (req.url || '/').split('?')[0];
@@ -284,6 +326,20 @@ const AUDIT = () => {
     });
   }
 
+  // 3a · NOTHING MAY BE ELLIPSISED. Every nowrap line in this app carries
+  // text-overflow:ellipsis as a backstop, and a backstop that is FIRING is a
+  // layout that did not fit — "56 NATIONAL SERI…" in the one bar that is on
+  // every screen, with no overflow and no overlap for any other check to see,
+  // because clipping is what ellipsis does instead of overflowing.
+  const clipped = [];
+  for (const e of visible) {
+    if (e.childElementCount) continue;
+    const t = (e.textContent || '').trim();
+    if (!t) continue;
+    if (e.scrollWidth > e.clientWidth + 1)
+      clipped.push(`"${t.slice(0, 26)}" needs ${e.scrollWidth}px in ${e.clientWidth}px`);
+  }
+
   // 3b · NO TWO TEXT RUNS MAY OVERLAP. This is the check that catches a
   // collision, and nothing else here does: "56 NATIONAL SERIES" ran straight
   // under the SYNCED button with every width assertion green, because nowrap
@@ -351,6 +407,29 @@ const AUDIT = () => {
              px: parseFloat(getComputedStyle(e).fontSize) };
   });
 
+  // 5b · THE MOTIFS ARE ON THE PAGE. This volume's identity is the khanjar
+  // tile, the masar weave and the landmark medallions, and all three are
+  // background-images that fail SILENTLY: a missing one is a flat rectangle
+  // in the right colour, which is exactly what the first re-skin shipped and
+  // what every other check here would pass. So each is asked for by name.
+  // `url("")` starts with url( and draws nothing, which is exactly what a
+  // blanked asset looks like — so the test is for a real image, not for the
+  // syntax of one. Found by sabotage: with every data URL stripped, the
+  // medallions still reported as drawn.
+  const drawn = (v) => /url\(["']?data:image\/[a-z+]+[;,]/.test(v);
+  const bgimg = (el, pseudo) => (el ? getComputedStyle(el, pseudo).backgroundImage : '') || 'none';
+  const motifs = {
+    khanjar: drawn(bgimg(document.body, '::before')),
+    masar: drawn(bgimg(document.body, '::after')),
+    masarHeader: drawn(bgimg(document.querySelector('header'), '::after')),
+    mark56: [...document.querySelectorAll('header span')]
+      .some(x => (x.textContent || '').trim() === '56'),
+    arabic: /[\u0600-\u06FF]/.test(document.querySelector('header')?.innerText || ''),
+    medallions: [...document.querySelectorAll('.na-medallion')]
+      .filter(x => drawn(bgimg(x))).length,
+    medallionTotal: document.querySelectorAll('.na-medallion').length,
+  };
+
   // 6 · Archivo really DRAWN, measured against the same stack falling back.
   // getComputedStyle reports the stylesheet and document.fonts.check() answers
   // true with zero faces loaded.
@@ -364,7 +443,7 @@ const AUDIT = () => {
   };
 
   return {
-    stale, bad, square, past, marks, overlap: [...new Set(overlap)],
+    stale, bad, square, past, marks, clipped, motifs, overlap: [...new Set(overlap)],
     archivo: probe("'Archivo',serif") !== probe('serif'),
     pageBg: getComputedStyle(document.body).backgroundColor,
     scrollX: document.documentElement.scrollWidth > W + 1,
@@ -443,6 +522,20 @@ for (const screen of SCREENS) {
     console.log(`    mark      ${a.marks.map(m => `"${m.text}" ${m.px}px a=${m.alpha}`).join(', ')}`);
 
   if (!a.archivo) F('Archivo was NOT drawn — it fell back');
+  const m = a.motifs;
+  console.log(`    motifs    khanjar ${m.khanjar ? 'y' : 'NO'}  masar ${m.masar ? 'y' : 'NO'}`
+    + `  header-weave ${m.masarHeader ? 'y' : 'NO'}  "56" ${m.mark56 ? 'y' : 'NO'}`
+    + `  arabic ${m.arabic ? 'y' : 'NO'}  medallions ${m.medallions}/${m.medallionTotal}`);
+  if (!m.khanjar) F('the khanjar tile is not drawn — the ground is flat colour');
+  if (!m.masar) F('the masar band is not drawn');
+  if (!m.masarHeader) F("the header's masar strip is not drawn");
+  if (!m.mark56) F('the "56" mark is not in the header');
+  if (!m.arabic) F('there is no Arabic in the header');
+  // A medallion with no art is a plain red disc, which looks deliberate.
+  if (m.medallionTotal !== m.medallions)
+    F(`${m.medallionTotal - m.medallions} landmark medallion(s) carry no artwork`);
+  if (screen === 'sessions' && SESSIONS && !m.medallionTotal)
+    F('the sessions screen has no landmark medallions');
   if (a.pageBg !== 'rgb(184, 20, 31)') F(`the page ground is ${a.pageBg}, not the National red`);
   if (a.scrollX) F('the page scrolls sideways');
   if (!n.nav || parseFloat(n.nav.radius) < 100 || n.nav.left < 4)
@@ -463,6 +556,10 @@ for (const screen of SCREENS) {
   if (staleU.length) {
     F(`${a.stale.length} element(s) still compute a Vol.8 colour`);
     for (const x of staleU.slice(0, 8)) console.log(`    !! ${x.hit} as ${x.prop} on ${x.where}`);
+  }
+  if (a.clipped.length) {
+    F(`${a.clipped.length} text run(s) clipped to an ellipsis`);
+    for (const c of [...new Set(a.clipped)].slice(0, 6)) console.log(`    !! ${c}`);
   }
   if (a.overlap.length) {
     F(`${a.overlap.length} pair(s) of text runs overlap`);
@@ -486,6 +583,63 @@ for (const screen of SCREENS) {
   }
 }
 
+// ── the seeded pass ─────────────────────────────────────────────────────────
+// The real Vol.9 state has no nights yet, so everything the landmark work
+// touches — the lookup, the artwork, the medallion, the "DATE · LANDMARK"
+// eyebrow — renders zero times in the sweep above and every assertion about it
+// passes having seen nothing. This serves the season's own nine dates and
+// checks the motif on a screen that has something to draw.
+if (!ONLY) {
+  await pg.route('**/state', r =>
+    r.fulfill({ status: 200, contentType: 'application/json', body: SEEDED }));
+  await pg.goto(ORIGIN + '/?seeded', { waitUntil: 'load' });
+  await pg.waitForSelector('nav.fixed.bottom-0', { timeout: 25000 });
+  await pg.evaluate(() => document.fonts.ready);
+  await pg.waitForTimeout(600);
+  if (!await openTab('sessions')) fail.push('[seeded] there is no SESSIONS tab');
+  await pg.waitForTimeout(800);
+
+  const a = await pg.evaluate(AUDIT);
+  const land = await pg.evaluate(() => {
+    const out = [...document.querySelectorAll('.na-medallion')].map(e => ({
+      art: /url\(["']?data:image\/svg/.test(getComputedStyle(e).backgroundImage),
+      name: e.getAttribute('title') || '',
+      size: Math.round(e.getBoundingClientRect().width),
+      radius: getComputedStyle(e).borderRadius,
+    }));
+    // The eyebrow must NAME the landmark, or the disc is decoration rather
+    // than a label — which is the difference between a motif and a sticker.
+    const eyebrows = [...document.querySelectorAll('.jh-mock-sess')]
+      .map(r => (r.innerText || '').split('\n')[0]);
+    return { out, eyebrows };
+  });
+  await pg.screenshot({ path: `${OUT}/sessions-seeded.png` });
+  seen.push('seeded');
+
+  const names = [...new Set(land.out.map(x => x.name))].filter(Boolean);
+  console.log(`\n  SEEDED  ${land.out.length} nights  ${OUT}/sessions-seeded.png`);
+  console.log(`    landmarks ${names.join(', ') || 'NONE'}`);
+  const F = (m) => fail.push(`[seeded] ${m}`);
+  if (!land.out.length) F('nine nights and no landmark medallions');
+  if (land.out.some(x => !x.art)) F('a medallion carries no landmark artwork');
+  if (land.out.some(x => x.radius !== '50%')) F('a medallion is not a circle');
+  if (land.out.some(x => x.size < 36)) F('a medallion is smaller than its slot');
+  // Four landmarks over nine nights: every one should get used, or the cycle
+  // is not cycling.
+  if (names.length !== 4) F(`${names.length} distinct landmarks over nine nights, expected 4`);
+  if (!land.eyebrows.some(t => /·/.test(t) && names.some(n => t.includes(n.toUpperCase()))))
+    F('no row eyebrow names its landmark');
+  if (a.clipped.length) F(`${a.clipped.length} text run(s) clipped: ${a.clipped[0]}`);
+  if (a.overlap.length) F(`${a.overlap.length} overlap(s): ${a.overlap[0]}`);
+  if (a.past.length) F(`${a.past.length} element(s) past the right edge`);
+  const badU2 = uniq(a.bad, x => x.text + x.px);
+  if (badU2.length) {
+    F(`${badU2.length} text run(s) under contrast`);
+    for (const b of badU2.slice(0, 6))
+      console.log(`    !! ${b.ratio}:1 (needs ${b.need}) ${b.px}px "${b.text}"`);
+  }
+}
+
 await pg.close();
 await browser.close();
 srv.close();
@@ -493,7 +647,7 @@ srv.close();
 if (errs.length) fail.push('page errors: ' + errs.slice(0, 3).join(' | '));
 // A sweep that quietly covered one screen is the hole this harness was written
 // to close, so the count is asserted rather than printed.
-const want = SCREENS.filter(s => !ONLY || s.includes(ONLY)).length;
+const want = SCREENS.filter(s => !ONLY || s.includes(ONLY)).length + (ONLY ? 0 : 1);
 if (seen.length !== want) fail.push(`only ${seen.length} of ${want} screens were measured`);
 
 if (fail.length) {
