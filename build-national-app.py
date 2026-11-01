@@ -329,7 +329,46 @@ def _double_label():
     return f"{word} {body}"
 
 
-BAND_JS = f"const LU_BAND = {A['masar']!r};\n"
+# THE MASAR TRIM FOR THE SHARE CARDS, as one top-level helper rather than a
+# closure inside one painter.
+#
+# It began as a `const luBand` inside luPaint, and the anchor that appended the
+# foot call matched TWICE — so gcPaint got `luBand(...)` too, with luBand not
+# in its scope: a ReferenceError that would have thrown on every bracket and
+# champions card the moment somebody shared one. ops/check-lineup.mjs drives
+# luPaint and never saw it. One helper, declared where all three painters can
+# reach it, is the shape that cannot go wrong that way.
+#
+# AND IT IS INSET AND PILLED, not a full-bleed stripe. The handoff's band is
+# "24px tall, 14px side inset, pill radius" — a trim on the edge of the page.
+# At 1080 wide a story is seen at about 430, so 56px and a 36px inset are that
+# same trim at this scale. Run full-bleed to the bitmap edge it stopped being a
+# trim and became a bar, which is the mistake already recorded for the page
+# band, and it crowded the night label at the foot.
+BAND_JS = f"""const LU_BAND = {A['masar']!r};
+let LU_BAND_IMG = null;
+function luWeave(g, y) {{
+  const b = LU_BAND_IMG;
+  if (!b) return;
+  const h = 56, pad = 36, x0 = pad, bw = LU_W - pad * 2;
+  // The width always keeps the art's own 100:56 ratio: a woven band stretched
+  // off its aspect is the one place a pattern looks obviously wrong.
+  const w = Math.round(h * b.width / b.height);
+  g.save();
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x0, y, bw, h, h / 2); else g.rect(x0, y, bw, h);
+  g.clip();
+  g.fillStyle = "#9E1520"; g.fillRect(x0, y, bw, h);
+  for (let x = x0; x < x0 + bw; x += w) g.drawImage(b, x, y, w, h);
+  g.restore();
+}}
+// Head and foot. The side inset is 36 and the edge offset 18, which is the
+// handoff's own 14-against-7 at this scale — the band is a trim ON the edge,
+// so it sits nearer to it than to the sides. Inset 36 all round instead, the
+// foot band needed the footer moved 54px up and that clipped the top of the
+// club mark behind the lower name plate.
+const luTrim = (g) => {{ luWeave(g, 18); luWeave(g, LU_H - 74); }};
+"""
 
 DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
@@ -516,37 +555,64 @@ MOTIFS = [
     #      exactly the "recolour, not a volume" fault the app itself had.
     #      The masar band is loaded beside the logo and tiled at the head and
     #      the foot of every card.
+    #      The band image is held in ONE module-level slot rather than threaded
+    #      through each painter's arguments: gcPaint and luPaintCut take
+    #      different parameters, and the first version's foot-band anchor
+    #      matched both luPaint's closing brace and gcPaint's — appending a
+    #      call to a closure that was not in gcPaint's scope. That is a
+    #      ReferenceError on every bracket and champions card, and
+    #      ops/check-lineup.mjs drives luPaint and never saw it.
     ('const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-national.png")]);',
      'const [im, logo, band] = await Promise.all([luImg(photo), '
-     'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);'),
-    ('luPaint(c.getContext("2d"), kind, d, img, logo, adj);',
-     'luPaint(c.getContext("2d"), kind, d, img, logo, adj, band);'),
-    ('    luPaint(g, kind, d, img, logo, adj);',
-     '    luPaint(g, kind, d, img, logo, adj, band);'),
+     'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
+     '  LU_BAND_IMG = LU_BAND_IMG || band;'),
     ('function luPaint(g, kind, d, im, logo, adj) {\n'
      '  adj = adj || LU_ADJ0;\n'
      '  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);',
-     'function luPaint(g, kind, d, im, logo, adj, band) {\n'
+     'function luPaint(g, kind, d, im, logo, adj) {\n'
      '  adj = adj || LU_ADJ0;\n'
-     '  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);\n'
-     '  // THE MASAR BAND, head and foot. Drawn FIRST at the head so the copy\n'
-     '  // sits clear of it, and last at the foot so nothing lands on it.\n'
-     '  // A card that is only the right colour is a recolour, not a volume.\n'
-     '  const luBand = (y) => {\n'
-     '    if (!band) return;\n'
-     '    const h = 56, w = Math.round(h * band.width / band.height);\n'
-     '    g.save(); g.beginPath(); g.rect(0, y, LU_W, h); g.clip();\n'
-     '    for (let x = 0; x < LU_W; x += w) g.drawImage(band, x, y, w, h);\n'
-     '    g.restore();\n'
-     '  };\n'
-     '  luBand(0);'),
-    # ...and the foot band, drawn after everything else. The anchor is
-    # luPaint's own closing brace — the last thing it draws is the footer's
-    # letter-spaced night label.
-    ('    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); '
-     'cx += g.measureText(ch).width + 6; }\n  }\n}',
-     '    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); '
-     'cx += g.measureText(ch).width + 6; }\n  }\n  luBand(LU_H - 56);\n}'),
+     '  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);'),
+    #      THE WHOLE FOOTER BLOCK COMES UP 20px, mark and label together.
+    #      The label sat 96 off the foot, which leaves 34px under it — and
+    #      once the trim is inset 36 as the handoff draws it, the band lands
+    #      on the label outright. Moving the LABEL alone put NIGHT 06 across
+    #      the club mark's PLAYGROUND arc: the two are one lockup and the gap
+    #      between them is the design, so they move by the same 20 or not at
+    #      all. All three painters shift together; a card whose footer sat at
+    #      a different height would read as a different set.
+    ('g.fillText(ch, cx, LU_H - 96);', 'g.fillText(ch, cx, LU_H - 116);'),
+    ('g.drawImage(off, (LU_W - lw) / 2, LU_H - 330);',
+     'g.drawImage(off, (LU_W - lw) / 2, LU_H - 350);'),
+    ('g.drawImage(off, (LU_W - lw) / 2, LU_H - 290);',
+     'g.drawImage(off, (LU_W - lw) / 2, LU_H - 310);'),
+    # The trim goes on LAST on each painter, so nothing can land on top of it.
+    # Each anchor is that painter's own closing brace, and each is unique.
+    ('  }\n}\n\n// Returns a data URL.',
+     '  }\n  luTrim(g);\n}\n\n// Returns a data URL.'),
+    # luPaintCut's closing: scanlines over everything, then the brace.
+    ('  for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);\n}',
+     '  for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);\n  luTrim(g);\n}'),
+    #      THE CARDS' NEUTRAL GREYS ARE MUD ON RED, and the colour sweep never
+    #      reached them: its table was built from the colours the DOM harness
+    #      can see, and these are canvas fillStyles. #8A8A8A on the base red is
+    #      about 1.9:1 — the night label under the club mark on every share
+    #      card, and the dim state on every losing name.
+    #      NOT done with a blanket sweep entry: #8A8A8A is also the "comeback"
+    #      swatch in the points-receipt legend, and mapping it to the muted
+    #      rose would make it identical to "streak" two rows below. A legend
+    #      with two segments the same colour is a worse bug than a dim one.
+    #      That legend still carries #8A8A8A and #4A4A4A and needs a palette
+    #      decision, not a find-and-replace.
+    ('g.fillStyle = "#8A8A8A";', 'g.fillStyle = "#F2D0D3";'),
+    ('g.fillStyle = out ? "#8A8A8A" : "#F2F2F2";',
+     'g.fillStyle = out ? "#F2B8BC" : "#FFFFFF";'),
+    ('g.fillStyle = nm ? (won ? "#F2F2F2" : "#8A8A8A") : "#5A5A5A";',
+     'g.fillStyle = nm ? (won ? "#FFFFFF" : "#F2B8BC") : "rgba(247,241,230,.35)";'),
+    # gcPaint's closing, which is where the broken `luBand` call landed. Its
+    # footer block is identical to luPaint's, so the brace alone is no anchor —
+    # it is pinned to the comment that opens the next section.
+    ('  }\n}\n\n// ── the knockout, round by round',
+     '  }\n  luTrim(g);\n}\n\n// ── the knockout, round by round'),
     # 6a · THE HOME HERO CARRIES THE NEXT NIGHT'S MEDALLION. The handoff's
     #      hero is a landmark disc above the copy; ours had the volume ghost
     #      and nothing else, so the first screen a player opens showed none of

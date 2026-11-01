@@ -171,15 +171,41 @@ html body::before {
    It is also where most of the green and ivory on a red screen comes from.
    The width keeps the art's own 100:56 ratio — a band stretched off its
    aspect is the one place a woven pattern looks obviously wrong. */
-body::after {
+/* IT IS THE HEADER'S ::before, AND `body::after` WAS BOTH WRONG PLACES AT ONCE.
+   The handoff lists this band as item 1 of the Sessions screen — ABOVE the
+   header, in flow, 24px tall at a 14px side inset with a pill radius. It was
+   written here as `position: fixed; top: 7px; z-index: 60`, which is not
+   above the header but ON it: a strip floating over the chrome, owned by no
+   component, that would have sat over a sheet as readily as over the brand
+   bar.
+   AND IT WAS INVISIBLE WHILE EVERY CHECK SAID IT WAS DRAWN. `body::after` is
+   the previous volume's scanline overlay, and three inherited layers own it —
+   including `html:not(.light) body::after { opacity:.14; mix-blend-mode:
+   multiply }`, which is (0,1,2) against a plain `body::after`'s (0,0,2) and
+   wins with !important on both. So the weave rendered at 14% MULTIPLIED over
+   the red: a flat dark pill with not one green pixel in it, while
+   `getComputedStyle` reported the background-image exactly as written and the
+   motif assertion went green. The fourth time in this skin that specificity,
+   not order, decided — and the first time it produced a passing check over
+   artwork that was not on the screen.
+   Moving it into the header's own ::before leaves all of that behind: no
+   inherited layer styles it, it is clipped and carried by the sticky chrome,
+   and it cannot lie over anything because the header's top padding is what
+   makes room for it. */
+header::before, .sticky.top-0::before {
   content: "";
-  position: fixed; left: 14px; right: 14px; top: 7px; height: 20px;
-  z-index: 60; pointer-events: none; border-radius: 999px;
-  background-color: var(--deep) !important;
-  background-image: url("@@A:masar@@") !important;
-  background-size: 36px 20px !important;
-  background-repeat: repeat-x !important;
+  position: absolute; left: 14px; right: 14px; top: 7px; height: 24px;
+  z-index: 1; pointer-events: none; border-radius: 999px;
+  background-color: var(--deep);
+  /* 43 x 24 is the art's own 100:56 ratio. A woven band stretched off its
+     aspect is the one place a pattern looks obviously wrong. */
+  background-image: url("@@A:masar@@");
+  background-size: 43px 24px;
+  background-repeat: repeat-x;
 }
+/* The header's own children must sit ABOVE it: the band is a trim on the
+   chrome, not a layer over the lockup. */
+header > *, .sticky.top-0 > * { position: relative; z-index: 2; }
 
 /* THE SAME WEAVE THREADS THE PAGE, not just its top edge. The handoff runs a
    masar strip under the champions photo as well as across the top — it is the
@@ -500,9 +526,12 @@ header, .sticky.top-0 {
   background: var(--bg) !important;
   border-bottom: 1px solid rgba(247,241,230,.18) !important;
   backdrop-filter: none !important;
-  /* 54px: the band is 44 tall and full width now, and the handoff puts it
-     ABOVE the header rather than behind it. */
-  padding-top: 34px !important;
+  /* THE BAND LIVES IN THIS PADDING. It is the header's ::before at top 7,
+     24 tall, so it ends at 31 — and the handoff puts it above the lockup, not
+     behind it. 44 leaves 13px between the weave and the club mark; at the old
+     34 the two were 3px apart, which reads as a collision rather than a trim.
+     If the band's height or offset moves, this moves with it. */
+  padding-top: 44px !important;
   /* ...and 30 at the foot, because the masar strip is drawn INSIDE the header
      as a pseudo-element: without room made for it the weave sat straight
      across the Arabic line. A ::after is not a text run and not a box in

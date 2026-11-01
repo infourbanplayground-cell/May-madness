@@ -20,10 +20,14 @@ import http from 'http';
 import path from 'path';
 
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const OUT = SC + '/vol9-cards';
+const APP = process.env.APP || 'national-index.html';
+// A sabotage run writes SOMEWHERE ELSE. Pointed at the Vol.8 build it used to
+// overwrite the Vol.9 cards and the contact sheet with Vol.8's, so the next
+// thing to open them showed black-and-lime cards from a run that was supposed
+// to fail — which is exactly what happened here.
+const OUT = SC + (APP === 'national-index.html' ? '/vol9-cards' : '/vol9-cards-sabotage');
 fs.mkdirSync(OUT, { recursive: true });
 
-const APP = process.env.APP || 'national-index.html';
 const app = fs.readFileSync(APP, 'utf8');
 const state = fs.readFileSync(SC + '/na.json', 'utf8');
 const PORT = 8129;
@@ -161,7 +165,13 @@ for (const c of cards) {
   // THE MASAR BAND HAS TO BE ON IT. A card that is merely the right colour is
   // a recolour, not a volume — the lesson the app itself had to learn twice.
   // The band carries the flag's green, which appears nowhere else on a card,
-  // so looking for green in the top and bottom 56 rows is the whole test.
+  // so looking for green where the trim is drawn is the whole test.
+  //
+  // The windows are the trim's OWN box (inset 36, 56 tall), not the first and
+  // last 56 rows of the bitmap. While the band ran full-bleed the two happened
+  // to be the same thing; once it was inset the row windows still clipped 20
+  // rows of it and passed on a sliver, which would go on passing if the trim
+  // drifted another 40px in.
   const weave = await pg.evaluate(async (url) => {
     const im = new Image();
     await new Promise(r => { im.onload = r; im.src = url; });
@@ -169,17 +179,19 @@ for (const c of cards) {
     cv.width = im.width; cv.height = im.height;
     cv.getContext('2d').drawImage(im, 0, 0);
     const g = cv.getContext('2d');
+    const PAD = 36, EDGE = 18, H = 56;
     const green = (y0) => {
-      const d = g.getImageData(0, y0, im.width, 56).data;
+      const w = im.width - PAD * 2;
+      const d = g.getImageData(PAD, y0, w, H).data;
       let n = 0;
       for (let i = 0; i < d.length; i += 4)
         if (d[i] < 80 && d[i + 1] > 85 && d[i + 1] < 170 && d[i + 2] < 110) n++;
-      return n / (im.width * 56);
+      return n / (w * H);
     };
-    return { head: green(0), foot: green(im.height - 56) };
+    return { head: green(EDGE), foot: green(im.height - EDGE - H) };
   }, c.url);
-  if (weave.head < 0.02) bad.push(`no masar band at the head (${(weave.head * 100).toFixed(1)}% green)`);
-  if (weave.foot < 0.02) bad.push(`no masar band at the foot (${(weave.foot * 100).toFixed(1)}% green)`);
+  if (weave.head < 0.08) bad.push(`no masar band at the head (${(weave.head * 100).toFixed(1)}% green)`);
+  if (weave.foot < 0.08) bad.push(`no masar band at the foot (${(weave.foot * 100).toFixed(1)}% green)`);
 
   if (bad.length) failed++;
   console.log(`lineup-${c.key}.png  ${stats.w}x${stats.h}  ${c.label}  `

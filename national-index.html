@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "aa78d11f8a70";
+  var V = "182528667891";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -4101,20 +4101,9 @@ function luCover(g, im, x, y, w, h) {
   g.drawImage(im, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
 }
 
-function luPaint(g, kind, d, im, logo, adj, band) {
+function luPaint(g, kind, d, im, logo, adj) {
   adj = adj || LU_ADJ0;
   g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);
-  // THE MASAR BAND, head and foot. Drawn FIRST at the head so the copy
-  // sits clear of it, and last at the foot so nothing lands on it.
-  // A card that is only the right colour is a recolour, not a volume.
-  const luBand = (y) => {
-    if (!band) return;
-    const h = 56, w = Math.round(h * band.width / band.height);
-    g.save(); g.beginPath(); g.rect(0, y, LU_W, h); g.clip();
-    for (let x = 0; x < LU_W; x += w) g.drawImage(band, x, y, w, h);
-    g.restore();
-  };
-  luBand(0);
 
   // ── the photo, and the grade that makes any photo look like this volume ──
   if (im) {
@@ -4278,16 +4267,16 @@ function luPaint(g, kind, d, im, logo, adj, band) {
     o.globalCompositeOperation = "source-in";
     o.fillStyle = "#F7F1E6";
     o.fillRect(0, 0, lw, lh);
-    g.drawImage(off, (LU_W - lw) / 2, LU_H - 330);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 350);
   }
   g.font = '700 26px "JetBrains Mono", monospace';
-  g.fillStyle = "#8A8A8A";
+  g.fillStyle = "#F2D0D3";
   {
     const t = d.foot || "";
     let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
-    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 116); cx += g.measureText(ch).width + 6; }
   }
-  luBand(LU_H - 56);
+  luTrim(g);
 }
 
 // Returns a data URL. The photo may taint the canvas, which only shows up at
@@ -4296,10 +4285,11 @@ async function drawLineup(kind, d, photo, adj) {
   // Both loads are same-origin or CORS-enabled and either may fail; the card is
   // designed to survive losing either one.
   const [im, logo, band] = await Promise.all([luImg(photo), luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);
+  LU_BAND_IMG = LU_BAND_IMG || band;
   const mk = (img) => {
     const c = document.createElement("canvas");
     c.width = LU_W; c.height = LU_H;
-    luPaint(c.getContext("2d"), kind, d, img, logo, adj, band);
+    luPaint(c.getContext("2d"), kind, d, img, logo, adj);
     return c;
   };
   try {
@@ -4703,12 +4693,13 @@ function luCoverAdj(g, im, x, y, w, h, adj) {
 // coordinates, so a scaled context is all a cheap preview needs.
 async function drawLineupAt(kind, d, photo, adj, scale) {
   const [im, logo, band] = await Promise.all([luImg(photo), luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);
+  LU_BAND_IMG = LU_BAND_IMG || band;
   const mk = (img) => {
     const c = document.createElement("canvas");
     c.width = Math.round(LU_W * scale); c.height = Math.round(LU_H * scale);
     const g = c.getContext("2d");
     g.scale(scale, scale);
-    luPaint(g, kind, d, img, logo, adj, band);
+    luPaint(g, kind, d, img, logo, adj);
     return c;
   };
   try { return mk(im).toDataURL(scale < 1 ? "image/jpeg" : "image/png", 0.86); }
@@ -4942,20 +4933,21 @@ function luPaintCut(g, kind, d, cut, logo, adj) {
     o.drawImage(logo, 0, 0, lw, lh);
     o.globalCompositeOperation = "source-in";
     o.fillStyle = "#F7F1E6"; o.fillRect(0, 0, lw, lh);
-    g.drawImage(off, (LU_W - lw) / 2, LU_H - 330);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 350);
   }
   g.font = '700 26px "JetBrains Mono", monospace';
-  g.fillStyle = "#8A8A8A";
+  g.fillStyle = "#F2D0D3";
   {
     const t = d.foot || "";
     let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
-    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 116); cx += g.measureText(ch).width + 6; }
   }
 
   // scanlines and grain, over everything including the type — the grain is
   // what stops a flat black ground banding on a phone screen.
   g.fillStyle = "rgba(0,0,0,.05)";
   for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);
+  luTrim(g);
 }
 
 // Renders the cut-out card at `scale`. Returns null when there is no cut-out to
@@ -5149,7 +5141,7 @@ function gcGroup(g, d, x, y, w, h) {
     const room = w - (nx - x) - 26 - tail;
     const size = stFit(g, r.name, room, Math.round(rh * 0.42), 900);
     g.font = `italic 900 ${size}px Archivo, sans-serif`;
-    g.fillStyle = out ? "#8A8A8A" : "#FFFFFF";
+    g.fillStyle = out ? "#F2B8BC" : "#FFFFFF";
     g.fillText(r.name, nx, ry + rh / 2 + size * 0.34);
 
     if (r.tail) {
@@ -5235,16 +5227,16 @@ function gcPaint(g, kind, d, logo, faces) {
     o.globalCompositeOperation = "source-in";
     o.fillStyle = "#F7F1E6";
     o.fillRect(0, 0, lw, lh);
-    g.drawImage(off, (LU_W - lw) / 2, LU_H - 290);
+    g.drawImage(off, (LU_W - lw) / 2, LU_H - 310);
   }
   g.font = '700 24px "JetBrains Mono", monospace';
-  g.fillStyle = "#8A8A8A";
+  g.fillStyle = "#F2D0D3";
   {
     const t = d.foot || "";
     let cx = (LU_W - (g.measureText(t).width + (t.length - 1) * 6)) / 2;
-    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); cx += g.measureText(ch).width + 6; }
+    for (const ch of t) { g.fillText(ch, cx, LU_H - 116); cx += g.measureText(ch).width + 6; }
   }
-  luBand(LU_H - 56);
+  luTrim(g);
 }
 
 // ── the knockout, round by round ──────────────────────────────────────────
@@ -5344,7 +5336,7 @@ function gcBracket(g, d, x, y, w, h, faces) {
         }
         const size = stFit(g, nm || "TBD", cx + cw - 70 - 24 - tx, Math.round(rh * 0.5), 900);
         g.font = `italic 900 ${size}px Archivo, sans-serif`;
-        g.fillStyle = nm ? (won ? "#FFFFFF" : "#8A8A8A") : "#5A5A5A";
+        g.fillStyle = nm ? (won ? "#FFFFFF" : "#F2B8BC") : "rgba(247,241,230,.35)";
         g.fillText(nm || "TBD", tx, ry + rh / 2 + size * 0.34);
         if (sc) {
           g.font = `700 ${Math.round(rh * 0.42)}px "JetBrains Mono", monospace`;
@@ -8023,6 +8015,28 @@ Drop your name + partner below to lock your spot 👇
 💥 *One flag. One court.* 👑`;
 
 const LU_BAND = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=';
+let LU_BAND_IMG = null;
+function luWeave(g, y) {
+  const b = LU_BAND_IMG;
+  if (!b) return;
+  const h = 56, pad = 36, x0 = pad, bw = LU_W - pad * 2;
+  // The width always keeps the art's own 100:56 ratio: a woven band stretched
+  // off its aspect is the one place a pattern looks obviously wrong.
+  const w = Math.round(h * b.width / b.height);
+  g.save();
+  g.beginPath();
+  if (g.roundRect) g.roundRect(x0, y, bw, h, h / 2); else g.rect(x0, y, bw, h);
+  g.clip();
+  g.fillStyle = "#9E1520"; g.fillRect(x0, y, bw, h);
+  for (let x = x0; x < x0 + bw; x += w) g.drawImage(b, x, y, w, h);
+  g.restore();
+}
+// Head and foot. The side inset is 36 and the edge offset 18, which is the
+// handoff's own 14-against-7 at this scale — the band is a trim ON the edge,
+// so it sits nearer to it than to the sides. Inset 36 all round instead, the
+// foot band needed the footer moved 54px up and that clipped the top of the
+// club mark behind the lower name plate.
+const luTrim = (g) => { luWeave(g, 18); luWeave(g, LU_H - 74); };
 // The schedule's own words for the double nights, so the WhatsApp copy
 // and the admin hint cannot drift from DOUBLE_NIGHTS.
 const NATIONAL_DAY_LABEL = 'Wed 18 Nov';
@@ -13137,15 +13151,41 @@ html body::before {
    It is also where most of the green and ivory on a red screen comes from.
    The width keeps the art's own 100:56 ratio — a band stretched off its
    aspect is the one place a woven pattern looks obviously wrong. */
-body::after {
+/* IT IS THE HEADER'S ::before, AND `body::after` WAS BOTH WRONG PLACES AT ONCE.
+   The handoff lists this band as item 1 of the Sessions screen — ABOVE the
+   header, in flow, 24px tall at a 14px side inset with a pill radius. It was
+   written here as `position: fixed; top: 7px; z-index: 60`, which is not
+   above the header but ON it: a strip floating over the chrome, owned by no
+   component, that would have sat over a sheet as readily as over the brand
+   bar.
+   AND IT WAS INVISIBLE WHILE EVERY CHECK SAID IT WAS DRAWN. `body::after` is
+   the previous volume's scanline overlay, and three inherited layers own it —
+   including `html:not(.light) body::after { opacity:.14; mix-blend-mode:
+   multiply }`, which is (0,1,2) against a plain `body::after`'s (0,0,2) and
+   wins with !important on both. So the weave rendered at 14% MULTIPLIED over
+   the red: a flat dark pill with not one green pixel in it, while
+   `getComputedStyle` reported the background-image exactly as written and the
+   motif assertion went green. The fourth time in this skin that specificity,
+   not order, decided — and the first time it produced a passing check over
+   artwork that was not on the screen.
+   Moving it into the header's own ::before leaves all of that behind: no
+   inherited layer styles it, it is clipped and carried by the sticky chrome,
+   and it cannot lie over anything because the header's top padding is what
+   makes room for it. */
+header::before, .sticky.top-0::before {
   content: "";
-  position: fixed; left: 14px; right: 14px; top: 7px; height: 20px;
-  z-index: 60; pointer-events: none; border-radius: 999px;
-  background-color: var(--deep) !important;
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=") !important;
-  background-size: 36px 20px !important;
-  background-repeat: repeat-x !important;
+  position: absolute; left: 14px; right: 14px; top: 7px; height: 24px;
+  z-index: 1; pointer-events: none; border-radius: 999px;
+  background-color: var(--deep);
+  /* 43 x 24 is the art's own 100:56 ratio. A woven band stretched off its
+     aspect is the one place a pattern looks obviously wrong. */
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=");
+  background-size: 43px 24px;
+  background-repeat: repeat-x;
 }
+/* The header's own children must sit ABOVE it: the band is a trim on the
+   chrome, not a layer over the lockup. */
+header > *, .sticky.top-0 > * { position: relative; z-index: 2; }
 
 /* THE SAME WEAVE THREADS THE PAGE, not just its top edge. The handoff runs a
    masar strip under the champions photo as well as across the top — it is the
@@ -13466,9 +13506,12 @@ header, .sticky.top-0 {
   background: var(--bg) !important;
   border-bottom: 1px solid rgba(247,241,230,.18) !important;
   backdrop-filter: none !important;
-  /* 54px: the band is 44 tall and full width now, and the handoff puts it
-     ABOVE the header rather than behind it. */
-  padding-top: 34px !important;
+  /* THE BAND LIVES IN THIS PADDING. It is the header's ::before at top 7,
+     24 tall, so it ends at 31 — and the handoff puts it above the lockup, not
+     behind it. 44 leaves 13px between the weave and the club mark; at the old
+     34 the two were 3px apart, which reads as a collision rather than a trim.
+     If the band's height or offset moves, this moves with it. */
+  padding-top: 44px !important;
   /* ...and 30 at the foot, because the masar strip is drawn INSIDE the header
      as a pseudo-element: without room made for it the weave sat straight
      across the Arabic line. A ::after is not a text run and not a box in

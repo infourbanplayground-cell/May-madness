@@ -65,9 +65,25 @@ if (SABOTAGE === 'noskin') {
 if (SABOTAGE === 'longname') {
   // Put the header back the way it collided: the full sub-line, and no
   // ellipsis on the volume name. The overlap check must go red.
-  app = app.replace('URBAN SOCIAL &middot; VOL.9', 'URBAN SOCIAL SERIES &middot; VOL.9')
-           .replace(/font-size: 17px !important;\n  overflow: hidden; text-overflow: ellipsis;/, '');
-  if (app.includes('URBAN SOCIAL &middot; VOL.9'))
+  // BOTH HALVES MUST LAND, and only the first used to be guarded. The second
+  // anchor carried a font-size that has since moved, so it silently matched
+  // nothing: the ellipsis stayed on, the long name was quietly clipped instead
+  // of colliding, and the sabotage passed. A half-applied sabotage is a check
+  // nobody is testing.
+  // IT HAS TO SQUEEZE THE CELL, not lengthen the name — the same lesson the
+  // posts' `long` sabotage records. Both halves of the old one also had to
+  // land and only the first was guarded: the second carried a font-size that
+  // has since moved, so it matched nothing, the ellipsis stayed on and the
+  // long name was quietly clipped instead of colliding. And once the header
+  // had its room back, "URBAN SOCIAL SERIES · VOL.9" simply FIT — a pass for
+  // the honest reason that the design has space, which proves nothing about
+  // the check. Narrowing the name cell with the ellipsis off is the real risk.
+  const before = app;
+  app = app.replace(/\n  overflow: hidden; text-overflow: ellipsis;/g, '')
+           .replace('</style>', 'header [style*="min-width: 0"]{max-width:90px !important}'
+                              + '</style>');
+  if (!/text-overflow/.test(before) || /text-overflow: ellipsis;/.test(app)
+      || app === before)
     throw new Error('sabotage anchor (longname) no longer matches');
 }
 if (SABOTAGE === 'noart') {
@@ -90,9 +106,24 @@ if (SABOTAGE === 'noart') {
 if (SABOTAGE === 'strip') {
   // Take the room back out from under the header's masar strip, which is how
   // the weave came to sit across the Arabic line.
-  const a = '  padding-bottom: 30px !important;';
+  // Put the weave back across the header's Arabic line. It used to do this by
+  // taking the header's bottom padding away — which stopped biting once the
+  // header's own children carried enough spacing of their own, so the sabotage
+  // passed and proved nothing. Growing the strip reaches the text whatever the
+  // padding is, and is the same fault: a decorative box lying on type.
+  const a = '  background-size: 20px 11px;';
   if (!app.includes(a)) throw new Error('sabotage anchor (strip) no longer matches');
-  app = app.replace(a, '  padding-bottom: 0 !important;');
+  app = app.replace(a, '  background-size: 20px 11px; height: 46px;');
+}
+if (SABOTAGE === 'ghost') {
+  // THE BAND SET AND NOT ON THE SCREEN. This is what `body::after` was really
+  // doing: the url() exactly as written, reported back by getComputedStyle,
+  // and rendering at 14% multiplied over the red with not one green pixel in
+  // it. Every motif assertion here was green over it. The ink check must go
+  // red; `masar y` will still print, which is the point.
+  const a = 'header::before, .sticky.top-0::before {';
+  if (!app.includes(a)) throw new Error('sabotage anchor (ghost) no longer matches');
+  app = app.replace(a, a + 'opacity:.14;mix-blend-mode:multiply;');
 }
 if (SABOTAGE === 'unstick') {
   // Put the header back the way it scrolled away: `position: relative`, which
@@ -457,9 +488,29 @@ const AUDIT = () => {
   // medallions still reported as drawn.
   const drawn = (v) => /url\(["']?data:image\/[a-z+]+[;,]/.test(v);
   const bgimg = (el, pseudo) => (el ? getComputedStyle(el, pseudo).backgroundImage : '') || 'none';
+  // A BACKGROUND-IMAGE CAN BE SET AND STILL NOT BE ON THE SCREEN, and asking
+  // the computed style is how that went unnoticed. The band was written on
+  // `body::after` — Vol.8's scanline overlay, which three inherited layers
+  // still own — and `html:not(.light) body::after{opacity:.14;
+  // mix-blend-mode:multiply}` beat it on specificity. It rendered at 14%
+  // multiplied over the red: a flat dark pill with no green in it, while this
+  // check read the url() back exactly as written and said `masar y`.
+  // So the band is also measured in INK. Its green is the flag's, it appears
+  // nowhere else in the chrome, and every other check here is blind to a
+  // decorative strip — so "is there green where the band is" is the only
+  // honest question. The pixels come from the screenshot the run already takes.
+  const bandBox = (() => {
+    const h = document.querySelector('header');
+    if (!h) return null;
+    const cs = getComputedStyle(h, '::before');
+    const r = h.getBoundingClientRect();
+    const top = r.top + parseFloat(cs.top || 0);
+    const hh = parseFloat(cs.height || 0);
+    return hh ? { x: r.left, y: top, w: r.width, h: hh } : null;
+  })();
   const motifs = {
     khanjar: drawn(bgimg(document.body, '::before')),
-    masar: drawn(bgimg(document.body, '::after')),
+    masar: drawn(bgimg(document.querySelector('header'), '::before')),
     masarHeader: drawn(bgimg(document.querySelector('header'), '::after')),
     mark56: [...document.querySelectorAll('header span')]
       .some(x => (x.textContent || '').trim() === '56'),
@@ -482,7 +533,8 @@ const AUDIT = () => {
   };
 
   return {
-    stale, bad, square, past, marks, clipped, motifs, strips: [...new Set(strips)], overlap: [...new Set(overlap)],
+    stale, bad, square, past, marks, clipped, motifs, bandBox,
+    strips: [...new Set(strips)], overlap: [...new Set(overlap)],
     archivo: probe("'Archivo',serif") !== probe('serif'),
     pageBg: getComputedStyle(document.body).backgroundColor,
     scrollX: document.documentElement.scrollWidth > W + 1,
@@ -599,6 +651,30 @@ for (const screen of SCREENS) {
     + `  arabic ${m.arabic ? 'y' : 'NO'}  medallions ${m.medallions}/${m.medallionTotal}`);
   if (!m.khanjar) F('the khanjar tile is not drawn — the ground is flat colour');
   if (!m.masar) F('the masar band is not drawn');
+  // ...and that it is really ON THE SCREEN. See the note beside bandBox: the
+  // band was set, reported as set, and rendering at 14% multiplied with no
+  // green pixel in it. The weave's green is the flag's and is in nothing else
+  // up there, so counting it inside the band's own box is the whole test.
+  if (a.bandBox) {
+    const g = await pg.evaluate(async ({ b, shot }) => {
+      const im = new Image();
+      await new Promise(r => { im.onload = r; im.src = shot; });
+      const cv = document.createElement('canvas');
+      cv.width = im.width; cv.height = im.height;
+      cv.getContext('2d').drawImage(im, 0, 0);
+      const dpr = im.width / window.innerWidth;
+      const d = cv.getContext('2d').getImageData(
+        Math.round(b.x * dpr), Math.round(b.y * dpr),
+        Math.round(b.w * dpr), Math.round(b.h * dpr)).data;
+      let n = 0;
+      for (let i = 0; i < d.length; i += 4)
+        if (d[i] < 90 && d[i + 1] > 80 && d[i + 1] < 175 && d[i + 2] < 115) n++;
+      return n / (d.length / 4);
+    }, { b: a.bandBox, shot: 'data:image/png;base64,'
+         + fs.readFileSync(shot).toString('base64') });
+    console.log(`    band      ${Math.round(a.bandBox.h)}px  green ${(g * 100).toFixed(1)}%`);
+    if (g < 0.03) F(`the masar band is set but not on the screen (${(g * 100).toFixed(1)}% green in its box)`);
+  } else F('the header carries no masar band');
   if (!m.masarHeader) F("the header's masar strip is not drawn");
   if (!m.mark56) F('the "56" mark is not in the header');
   if (!m.arabic) F('there is no Arabic in the header');

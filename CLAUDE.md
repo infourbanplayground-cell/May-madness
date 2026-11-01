@@ -1044,11 +1044,48 @@ app itself had to be taught twice.
   (both top-level) with a synthetic night — 8 players, 4 teams, two semis and a
   decided final — and then samples the **pixels**. `APP=blackout-index.html`
   goes red on all four cards, which is how each assertion was proved.
-- **The band is painted by `luPaint`**, head and foot, from `LU_BAND` — the
-  same `brand/national/masar-band.png` repeat unit the page and the posts use,
-  at 56px keeping the art's 100:56 ratio. The band carries the flag's green,
-  which appears nowhere else on a card, so "is there green in the top and
-  bottom 56 rows" is the whole test for it.
+- **The trim is `luWeave`/`luTrim`, a TOP-LEVEL helper, and that is not
+  tidiness.** It began as a `const luBand` closure inside `luPaint`, and the
+  anchor that appended the foot call matched **twice** — so `gcPaint` got
+  `luBand(...)` with luBand not in its scope: a ReferenceError that would have
+  thrown on every bracket and champions card the moment somebody shared one.
+  `check-lineup.mjs` drives `luPaint` and never saw it. `plain()` uses
+  `str.replace`, which replaces ALL occurrences and only checks presence, so a
+  second match is silent — anchor on something unique.
+  - All three painters (`luPaint`, `luPaintCut`, `gcPaint`) call `luTrim`, and
+    the band image lives in one module-level slot rather than being threaded
+    through three different parameter lists.
+- **The band is INSET AND PILLED, not a full-bleed stripe.** 56px tall, 36px
+  side inset, 18px off the top and bottom edge — the handoff's own "24 tall,
+  14 side inset, pill radius" at this scale, with the same 2:1 of side inset to
+  edge offset. Run full-bleed it stopped being a trim and became a bar, which
+  is the mistake already recorded for the page band, and at the foot it crowded
+  the night label.
+  - **The footer block moves as ONE.** Making room meant lifting the mark and
+    the night label together by 20px. Moving the label alone put NIGHT 06
+    across the club mark's PLAYGROUND arc; lifting the pair by 54 instead
+    clipped the top of the mark behind the lower name plate.
+- The band carries the flag's green, which appears nowhere else on a card, so
+  "is there green where the trim is drawn" is the whole test — measured in the
+  trim's **own box**, not the first and last 56 rows of the bitmap. While the
+  band was full-bleed the two were the same thing; once inset, the row windows
+  still clipped 20 rows of it and passed on a sliver.
+- **A sabotage run writes to `vol9-cards-sabotage/`.** Pointed at the Vol.8
+  build it used to overwrite the Vol.9 cards and the contact sheet, so the next
+  thing to open them showed black-and-lime cards from a run that was meant to
+  fail.
+- **The cards' neutral greys were mud on red and the colour sweep never reached
+  them** — its table was built from colours the DOM harness can see, and these
+  are canvas `fillStyle`s. `#8A8A8A` on the base red is about 1.9:1: the night
+  label under the club mark on every card, and the dim state on every losing
+  name. Done as targeted replacements, NOT a sweep entry: `#8A8A8A` is also the
+  "comeback" swatch in the points-receipt legend, and mapping it to the muted
+  rose would make it identical to "streak" two rows below.
+  - **Still outstanding:** that legend carries `#8A8A8A` and `#4A4A4A` on red
+    and needs a palette decision, not a find-and-replace. Seven segments and
+    only five legible tones on this ground; the obvious candidate is green for
+    the 2X bonus, which the handoff reserves for National Day — and 2X *is*
+    National Day, so it is the owner's call rather than ours.
 - **The ground check is the share of RED pixels, never the modal colour.** The
   ground is a gradient, so its red is spread over thousands of distinct triples
   while one flat ink name plate is exactly one — the mode is the plate every
@@ -1135,6 +1172,39 @@ in it. Two blocks fix it, and both are the handoff's own:
   the home screen had no green at all, and this is the one night of the nine
   that is an occasion. **Green is spent here and nowhere else**, which is the
   handoff's rule and the reason it still means something.
+- **THE PAGE BAND IS THE HEADER'S `::before`, AND `body::after` WAS BOTH WRONG
+  PLACES AT ONCE.** The handoff lists it as item 1 of the Sessions screen —
+  ABOVE the header, in flow, 24px tall at a 14px side inset with a pill radius.
+  It was written as `position: fixed; top: 7px; z-index: 60`, which is not
+  above the header but ON it: a strip floating over the chrome, owned by no
+  component, that would sit over a sheet as readily as over the brand bar.
+  - **And it was INVISIBLE while every check said it was drawn.** `body::after`
+    is the previous volume's scanline overlay and three inherited layers still
+    own it, including `html:not(.light) body::after { opacity:.14;
+    mix-blend-mode:multiply }` — (0,1,2) against a plain `body::after`'s
+    (0,0,2), winning with `!important` on both. The weave rendered at 14%
+    multiplied over the red: a flat dark pill with not one green pixel in it,
+    while `getComputedStyle` reported the url() exactly as written and the
+    motif assertion printed `masar y`. **The fourth time specificity rather
+    than order decided in this skin, and the first time it produced a passing
+    check over artwork that was not on the screen.**
+  - So the harness measures the band in **INK** as well: it reads the band's
+    own box out of the screenshot it already takes and counts the flag's green,
+    which is in nothing else up there. `SABOTAGE=ghost` puts the opacity and
+    the blend mode back and goes red at 0.0% green while `masar y` still
+    prints, which is the point.
+  - The header's top padding is 44px, which is what makes room for it — 7 + 24
+    leaves 13px to the club mark. At the old 34 the two were 3px apart and read
+    as a collision rather than as a trim.
+- **Two sabotages had gone quietly vacuous**, found while proving the above.
+  `strip` anchored on a `padding-bottom` value that had moved, so it threw
+  rather than ran; it now GROWS the strip to 46px, which reaches the text
+  whatever the padding is. `longname` only guarded the first of its two
+  replacements — the second carried a font-size that had moved, so the ellipsis
+  stayed on and the long name was quietly clipped instead of colliding; and
+  once the header had its room back, the longer sub-line simply FIT. It
+  squeezes the name cell now, the same lesson the posts' `long` sabotage
+  already records.
 - **A DECORATIVE STRIP IS INVISIBLE TO EVERY TEXT CHECK.** The masar trim is an
   `::after` — neither a text run nor a box in flow — so the clipped check and
   the overlap check were both blind to it, and it sat straight across the
