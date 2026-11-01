@@ -52,8 +52,9 @@ SVGS = {
     "mon-gate":     "mon-gate-white.svg",
     "mon-pavilion": "mon-pavilion-white.svg",
     "mon-sail":     "mon-sail-white.svg",
+    "mon-arcade":   "mon-arcade-white.svg",
 }
-OURS = {"mon-clock", "mon-gate", "mon-pavilion", "mon-sail"}
+OURS = {"mon-clock", "mon-gate", "mon-pavilion", "mon-sail", "mon-arcade"}
 PNGS = {"khanjar": "khanjar-tile-red.png"}
 
 # What a landmark is drawn in, by role. The handoff's medallion is a red disc

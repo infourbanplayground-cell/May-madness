@@ -1109,10 +1109,22 @@ and a sticker plan). Output in `brand/national/posts/`.
 #### The landmark silhouettes
 - The handoff's four (`mon-nizwa`, `mon-burner`, `mon-alam`, `mon-tower`) are
   its own placeholders, which it asks to have replaced in the same slots.
-- Four more are **drawn here** in `brand/national/silhouettes/` — clock tower,
-  gateway, pavilion and the sail-form museum — in the same idiom (flat fill, 60
-  units tall, 4 units of padding in the viewBox). They are original geometric
-  drawings. `ops/national_assets.py` serves both sets through one table.
+- Five more are **drawn here** in `brand/national/silhouettes/` — clock tower,
+  fort facade, three-arch gateway, pavilion and the sail-form museum — in the
+  same idiom (flat fill, 60 units tall, 4 units of padding in the viewBox).
+  They are original geometric drawings. `ops/national_assets.py` serves both
+  sets through one table.
+  - **Nothing uses them yet.** `landmarks` in `national-season.json` still
+    lists the handoff's four, because which landmark goes on which night is
+    the product owner's call. Swapping one is a line in that file.
+  - The crenellated parapet is **one helper**, not three hand-placed runs: the
+    fort, the gateway and the towers all carry the same one, and three copies
+    is how two of them end up a pixel out from the third.
+  - **The sail is not a triangle**, which is the one thing that building is
+    not — the first version drew it as one. Its leading edge is a long concave
+    sweep to the apex, with a seam down the face, a louvre block and an angled
+    wing on a continuous plinth. The seam is a cut-out, for the same reason the
+    clock face is.
 - **STOCK PREVIEWS AND THIRD-PARTY LOGOS CANNOT BE USED.** A watermarked
   VectorStock/Shutterstock comp is not licensed art, and an institution's own
   logo is not a landmark silhouette. Reference for *which* landmarks, yes;
