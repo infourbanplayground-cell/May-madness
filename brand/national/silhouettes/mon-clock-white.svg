@@ -1,2 +1,0 @@
-<!-- Clock tower. Original drawing; geometric primitives only. -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 28 68"><g fill="#FFFFFF"><path d="M0 60 H24 V51 H0 Z"></path><path d="M2.5 51 H21.5 V46 H2.5 Z"></path><path d="M8 46 V22 H16 V46 Z"></path><path fill-rule="evenodd" d="M4.5 22 V13 a7.5 7.5 0 0 1 15 0 V22 Z M12 12.5 m-4 0 a4 4 0 1 0 8 0 a4 4 0 1 0 -8 0 Z"></path><path d="M8.4 5 L12 0 L15.6 5 Z"></path></g></svg>

@@ -700,7 +700,10 @@ if (!ONLY) {
   const a = await pg.evaluate(AUDIT);
   const land = await pg.evaluate(() => {
     const out = [...document.querySelectorAll('.na-medallion')].map(e => ({
-      art: /url\(["']?data:image\/svg/.test(getComputedStyle(e).backgroundImage),
+      // ANY data:image, not just SVG. The owner's landmarks are converted
+      // PNGs, so an svg-only test reported every one of them as carrying no
+      // artwork — a check failing for the format rather than for the fault.
+      art: /url\(["']?data:image\//.test(getComputedStyle(e).backgroundImage),
       name: e.getAttribute('title') || '',
       size: Math.round(e.getBoundingClientRect().width),
       radius: getComputedStyle(e).borderRadius,

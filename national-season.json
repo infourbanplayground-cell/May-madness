@@ -135,12 +135,11 @@
   ],
 
   "landmarks": [
-    { "id": "clock",    "nameEn": "Clock Tower",     "nameAr": "برج الساعة",  "asset": "mon-clock" },
-    { "id": "nizwa",    "nameEn": "Nizwa Fort",      "nameAr": "قلعة نزوى",   "asset": "mon-gate" },
-    { "id": "riyam",    "nameEn": "Riyam Burner",    "nameAr": "مبخرة ريام",  "asset": "mon-burner" },
-    { "id": "muscat",   "nameEn": "Muscat Gate",     "nameAr": "بوابة مسقط",  "asset": "mon-arcade" },
-    { "id": "pavilion", "nameEn": "Corniche Dome",   "nameAr": "قبة الكورنيش", "asset": "mon-pavilion" },
-    { "id": "museum",   "nameEn": "Oman Across Ages","nameAr": "عمان عبر الزمان", "asset": "mon-sail" }
+    { "id": "nizwa",  "nameEn": "Nizwa Fort",      "nameAr": "قلعة نزوى",       "asset": "mon-fort" },
+    { "id": "muscat", "nameEn": "Muscat Gate",     "nameAr": "بوابة مسقط",      "asset": "mon-gatehouse" },
+    { "id": "riyam",  "nameEn": "Riyam Burner",    "nameAr": "مبخرة ريام",      "asset": "mon-burner-ph" },
+    { "id": "alam",   "nameEn": "Al Alam Palace",  "nameAr": "قصر العلم",       "asset": "mon-palace" },
+    { "id": "museum", "nameEn": "Oman Across Ages","nameAr": "عمان عبر الزمان", "asset": "mon-sail-ph" }
   ],
 
   "_landmarkNotes": [

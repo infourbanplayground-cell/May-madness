@@ -1162,43 +1162,46 @@ and a sticker plan). Output in `brand/national/posts/`.
   numbered sheet) and `build-standings-post.py` (mid-season). The announcement
   set above is Vol.9's.
 
-#### The landmark silhouettes
-- The handoff's four (`mon-nizwa`, `mon-burner`, `mon-alam`, `mon-tower`) are
-  its own placeholders, which it asks to have replaced in the same slots.
-- Five more are **drawn here** in `brand/national/silhouettes/` — clock tower,
-  fort facade, three-arch gateway, pavilion and the sail-form museum — in the
-  same idiom (flat fill, 60 units tall, 4 units of padding in the viewBox).
-  They are original geometric drawings. `ops/national_assets.py` serves both
-  sets through one table.
-  - **The season file now uses SIX of them** — Clock Tower, Nizwa Fort (the
-    drawn fort facade), Riyam Burner, Muscat Gate, Corniche Dome and Oman
-    Across Ages — the subjects from the owner's own reference sheet, minus the
-    Grand Mosque. `mon-alam` and `mon-tower` are retired: they read as a
-    colonnade and a chess rook at 48px and are not in the reference.
-  - The per-session MAPPING is still the owner's: the app cycles the list in
-    order, so re-ordering it changes which night gets which.
-  - The crenellated parapet is **one helper**, not three hand-placed runs: the
-    fort, the gateway and the towers all carry the same one, and three copies
-    is how two of them end up a pixel out from the third.
-  - **The sail is not a triangle**, which is the one thing that building is
-    not — the first version drew it as one. Its leading edge is a long concave
-    sweep to the apex, with a seam down the face, a louvre block and an angled
-    wing on a continuous plinth. The seam is a cut-out, for the same reason the
-    clock face is.
-- **STOCK PREVIEWS AND THIRD-PARTY LOGOS CANNOT BE USED.** A watermarked
-  VectorStock/Shutterstock comp is not licensed art, and an institution's own
-  logo is not a landmark silhouette. Reference for *which* landmarks, yes;
-  artwork, no. The same sheet also leads with the Grand Mosque, and the
-  handoff's rule is **no mosques**.
+#### The landmark silhouettes — `ops/national-landmarks.py`
+**THE OWNER SUPPLIED THEM AND NOTHING HERE IS DRAWN.** Five images — a
+crenellated fort gate with a clock face, a three-arch gatehouse, the incense
+burner, Al Alam's arcade with its flagstaff, and the sail-form museum. Five
+originals were drawn in this repo while that artwork was unavailable; all five
+were retired the moment it arrived, and the handoff's own four with them.
+- They arrive as dark ink on white at five sizes with five amounts of padding.
+  A medallion needs the opposite of all of that, so the converter makes them
+  one ink on transparent, trims to the drawing and pads to a known fraction —
+  **0.88, the handoff's own 60-in-68 proportion** — so nine discs read as one
+  set rather than five pictures that happen to be round.
+- **THE ALPHA COMES FROM THE DARKNESS, NOT FROM A THRESHOLD.** A hard cut turns
+  every antialiased edge into a staircase, which at 48px on a phone is the
+  difference between a building and a smudge. Luminance maps to alpha on a ramp
+  (clear at 238, solid at 96).
+  - The ramp is also what drops **watermarks**: a faint grey mark sits well
+    above its floor and lands at an alpha low enough to disappear. That is why
+    the cut is set from the PAPER end rather than the ink end.
+- It asserts the ink covers between 5% and 80% of its square. A ramp set wrong
+  gives a blank square, which on a red disc looks exactly like a design choice.
+- They are **PNGs, so they cannot be re-inked** the way an SVG's fill is
+  rewritten — the ink is baked at conversion. They are supplied as white, the
+  only ink a medallion uses, and answer to the same `@white` key the SVG ones
+  do so nothing downstream knows the difference.
+  - The harness's medallion check tested for `data:image/svg` and reported
+    every supplied landmark as carrying no artwork — a check failing for the
+    FORMAT rather than for the fault. It accepts any `data:image/` now.
+- The per-session MAPPING is still the owner's: the app cycles the list in
+  `national-season.json` in order, so re-ordering it changes which night gets
+  which.
 - **`ops/check-silhouettes.mjs` is the proof sheet** — every silhouette on the
-  medallion it is actually drawn in, at 48, 74 and 150px. A silhouette has one
-  job, to be recognisable as its building at 48px on a phone, and the only way
-  to know is to look at it there. It fails any disc with no ink in it: a path
-  that failed to parse renders as an empty red circle that looks like a design
-  choice.
-  - The clock FACE has to be a **cut-out**. Drawn as a filled disc it was white
-    on a white shaft and simply vanished; a single-ink silhouette can only show
-    an interior detail as a hole.
+  medallion it is actually drawn in, at 48, 74 and 150px, labelled SUPPLIED or
+  HANDOFF. A silhouette has one job, to be recognisable as its building at
+  48px on a phone, and the only way to know is to look at it there. It fails
+  any disc with no ink: a path that failed to parse, or a conversion that
+  produced nothing, renders as an empty red circle that looks deliberate.
+- **STOCK PREVIEWS AND THIRD-PARTY LOGOS ARE STILL NOT ARTWORK.** Earlier
+  reference arrived as watermarked VectorStock/Shutterstock comps; those were
+  reference for WHICH landmarks and never traced. The five in use are files
+  the owner supplied directly. The handoff's **no mosques** rule stands.
 
 - **Still placeholder / unconfirmed:** the landmark artwork itself (placeholder
   vectors, to be replaced with commissioned work in the same slots), the

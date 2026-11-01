@@ -48,14 +48,12 @@ SVGS = {
     "mon-burner":  "mon-burner-white.svg",
     "mon-alam":    "mon-alam-white.svg",
     "mon-tower":   "mon-tower-white.svg",
-    # Drawn here — see MINE.
-    "mon-clock":    "mon-clock-white.svg",
-    "mon-gate":     "mon-gate-white.svg",
-    "mon-pavilion": "mon-pavilion-white.svg",
-    "mon-sail":     "mon-sail-white.svg",
-    "mon-arcade":   "mon-arcade-white.svg",
 }
-OURS = {"mon-clock", "mon-gate", "mon-pavilion", "mon-sail", "mon-arcade"}
+# Silhouettes drawn in this repo. There are none: five were drawn while the
+# owner's own artwork was unavailable and all five were retired the moment it
+# arrived. The set is kept so the proof sheet and the harness can still say
+# which kind each landmark is without special-casing an empty case.
+OURS = set()
 PNGS = {"khanjar": "khanjar-tile-red.png"}
 # THE BAND, supplied by the owner and cut to its repeat unit. The source strip
 # is 941px carrying the same 100px motif nine and a bit times; tiling the
@@ -64,6 +62,17 @@ PNGS = {"khanjar": "khanjar-tile-red.png"}
 # flag's green and ivory — which is why it replaces the handoff's own band
 # rather than sitting beside it: it is the same motif, drawn properly.
 OURS_PNG = {"masar": "masar-band.png"}
+# THE LANDMARKS THE OWNER SUPPLIED, converted by ops/national-landmarks.py.
+# They are PNGs rather than SVGs, so they cannot be re-inked by rewriting a
+# fill attribute the way the drawn ones are — the ink is baked at conversion
+# time. They are supplied as WHITE, which is the only ink a medallion uses.
+LANDMARK_PNG = {
+    "mon-fort":      "mon-fort-white.png",
+    "mon-gatehouse": "mon-gatehouse-white.png",
+    "mon-burner-ph": "mon-burner-white.png",
+    "mon-sail-ph":   "mon-sail-white.png",
+    "mon-palace":    "mon-palace-white.png",
+}
 
 # What a landmark is drawn in, by role. The handoff's medallion is a red disc
 # with a white silhouette; on ivory the same shape is drawn in deep red.
@@ -135,10 +144,17 @@ def assets():
         if name.startswith("mon-"):
             for ink in ("white", "red", "ivory", "flag", "ink"):
                 out[f"{name}@{ink}"] = _data_url(raw_svg(name, ink))
-    for name, f in {**PNGS, **{k: v for k, v in OURS_PNG.items()}}.items():
-        base = MINE_PNG if name in OURS_PNG else SRC
+    for name, f in {**PNGS, **OURS_PNG, **LANDMARK_PNG}.items():
+        base = (MINE if name in LANDMARK_PNG
+                else MINE_PNG if name in OURS_PNG else SRC)
         with open(os.path.join(base, f), "rb") as fh:
-            out[name] = "data:image/png;base64," + base64.b64encode(fh.read()).decode()
+            url = "data:image/png;base64," + base64.b64encode(fh.read()).decode()
+        out[name] = url
+        # A supplied landmark answers to the same `@ink` key the drawn ones
+        # do, so nothing downstream has to know which kind it is — it just
+        # only ever has the one ink.
+        if name in LANDMARK_PNG:
+            out[name + "@white"] = url
     return out
 
 
