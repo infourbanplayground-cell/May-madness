@@ -23,11 +23,12 @@ grep -q "\"$BID\"" "$PAGE" || { echo "!! the page is not stamped with $BID — r
 echo "==> uploading  build $BID"
 scp -q "$PAGE" urbanpadel:/tmp/na.html
 scp -q "$PAGE.version" urbanpadel:/tmp/na.version
-# Vol.9's own art. up-logo-tight is the club mark and is not volume-specific,
-# so it still comes from Vol.8's directory.
+# Vol.9's own art, the club mark included: it is re-inked per volume
+# (ops/national-logo.py), so it comes from brand/national/ and not Vol.8's
+# directory.
 scp -q brand/national/national-lockup.png brand/national/national-lockup.webp \
        brand/national/national-og.png brand/national/national-icon.png \
-       brand/national/national-mark.png brand/blackout/up-logo-tight.png \
+       brand/national/national-mark.png brand/national/up-logo-national.png \
        urbanpadel:/tmp/
 
 ssh urbanpadel "set -e
@@ -35,7 +36,7 @@ ssh urbanpadel "set -e
   cp /tmp/na.html    $WEB/index.html
   cp /tmp/na.version $WEB/version.txt
   for f in national-lockup.png national-lockup.webp national-og.png \
-           national-icon.png national-mark.png up-logo-tight.png; do
+           national-icon.png national-mark.png up-logo-national.png; do
     cp /tmp/\$f $WEB/assets/\$f
   done
   echo '    page    ' \$(stat -c%s $WEB/index.html) bytes

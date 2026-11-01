@@ -49,6 +49,16 @@ DST = os.path.join(HERE, "national-index.html")
 CFG = json.load(open(os.path.join(HERE, "national-season.json")))
 
 POOL = CFG["voucher"] * 2 * CFG["sessions"] + sum(CFG["seasonPrizes"])
+
+# THE TAGLINE IS TWO BEATS, and the hero needs them separately because it sets
+# the second half in the accent ink. Split here, with the shape asserted, so a
+# one-sentence line fails the build rather than rendering as a headline with an
+# empty second colour.
+TAG = CFG["tagline"].strip()
+_parts = [x.strip() for x in re.findall(r"[^.!?]+[.!?]", TAG)]
+assert len(_parts) == 2, (
+    f"tagline must be two sentences for the hero's two inks, got {len(_parts)}: {TAG!r}")
+TAG_A, TAG_B = _parts
 PREV_POOL = 412          # what Vol.8 paid out, which this replaces
 
 # ── Wording ───────────────────────────────────────────────────────────────
@@ -74,13 +84,19 @@ TEXT = [
     ("OCTOBER", CFG["monthUpper"]),
     # Vol.8's tagline -> Vol.9's. Blackout's was a pun on its own name and
     # carrying it into a National volume would be meaningless.
-    ("LIGHTS <b>OUT.</b>", "SAME COURT. <b>DIFFERENT STORY.</b>"),
-    ("Lights Out.", CFG["tagline"]),
-    ("Lights out.", CFG["tagline"]),
-    # The hero sets the two words in different inks, so it is markup and not a
+    #
+    # ALL FOUR FORMS ARE DERIVED FROM THE ONE JSON KEY. Two of them used to be
+    # typed out here, so `tagline` in national-season.json was right on the
+    # surfaces that read the file and silently stale on the two the app
+    # actually shows biggest — the hero headline and the WhatsApp sign-off.
+    # Changing the line is one edit again.
+    ("LIGHTS <b>OUT.</b>", f"{TAG_A.upper()} <b>{TAG_B.upper()}</b>"),
+    ("Lights Out.", TAG),
+    ("Lights out.", TAG),
+    # The hero sets the two halves in different inks, so it is markup and not a
     # string — a plain "LIGHTS OUT." rule matches nothing and asserts.
     ('LIGHTS <span style={{color:"#C6FF00"}}>OUT.</span>',
-     'SAME COURT <span style={{color:"#C6FF00"}}>DIFFERENT STORY.</span>'),
+     f'{TAG_A.upper()} <span style={{{{color:"#C6FF00"}}}}>{TAG_B.upper()}</span>'),
     # Vol.8 shipped with Vol.7 as its "previous series"; Vol.9's is Vol.8.
     ('"June Fury", "July Heat", "August Attack", "September Surge"]',
      '"June Fury", "July Heat", "August Attack", "September Surge", "Blackout Series"]'),
@@ -242,12 +258,20 @@ A = national_assets()
 # and TWO offset shadows — ink at +1.5px and the flag's green at +3px. The
 # green is the only place in the chrome it appears; everywhere else in this
 # volume it means National Day and nothing else.
+# ...ON THE FLAG. The mark used to sit on the bare red header, which meant the
+# only National colour in the chrome was the one the whole page is already
+# made of. It now stands on a plaque carrying the flag's three bands — white,
+# red, green, with the red hoist bar down the left — so the white and the
+# green are present on every screen without being spent as accents anywhere
+# else. The green offset shadow comes OFF: against a green band it read as a
+# printing error rather than as depth.
 MARK_56 = (
-    '<span aria-hidden="true" style={{fontFamily:"\'Archivo\',sans-serif",fontStyle:"italic",'
+    '<span className="na-flag" aria-hidden="true">'
+    '<span style={{fontFamily:"\'Archivo\',sans-serif",fontStyle:"italic",'
     'fontVariationSettings:"\'wdth\' 125,\'wght\' 900",fontSize:26,lineHeight:.9,'
     'color:"#FFFFFF",WebkitTextStroke:"1.2px #1A0A0C",paintOrder:"stroke fill",'
-    'textShadow:"1.5px 1.5px 0 #1A0A0C, 3px 3px 0 #087A3F",flexShrink:0,'
-    'letterSpacing:"-.02em",marginRight:2}}>56</span>'
+    'textShadow:"1.5px 1.5px 0 #1A0A0C",'
+    'letterSpacing:"-.02em"}}>56</span></span>'
 )
 
 # The landmark art, and the rule that picks one per night.
@@ -262,6 +286,39 @@ MARK_56 = (
 # and swapping the mapping later is a line in national-season.json.
 #
 # Rule from the handoff, carried here so it cannot be lost: NO MOSQUES.
+def _long_date(d):
+    from datetime import date as _d
+    y, m, dd = (int(x) for x in d.split("-"))
+    t = _d(y, m, dd)
+    return t.strftime("%a %-d %b")
+
+
+def _short_date(d):
+    return _long_date(d)
+
+
+def _double_label():
+    """'Session 6' / 'Sessions 8 & 9' / 'Sessions 6, 8 & 9' — from the dates."""
+    nums = [CFG["nights"].index(d) + 1 for d in CFG["doubleNights"]
+            if d in CFG["nights"]]
+    assert len(nums) == len(CFG["doubleNights"]), (
+        "a doubleNights date is not in nights: "
+        f"{set(CFG['doubleNights']) - set(CFG['nights'])}")
+    word = "Session" if len(nums) == 1 else "Sessions"
+    if len(nums) == 1:
+        body = str(nums[0])
+    else:
+        body = ", ".join(str(n) for n in nums[:-1]) + f" & {nums[-1]}"
+    return f"{word} {body}"
+
+
+DATE_JS = (
+    "// The schedule's own words for the double nights, so the WhatsApp copy\n"
+    "// and the admin hint cannot drift from DOUBLE_NIGHTS.\n"
+    + f"const NATIONAL_DAY_LABEL = {_long_date(CFG['nationalDay'])!r};\n"
+    + f"const NATIONAL_DAY_LABEL_SHORT = {_short_date(CFG['nationalDay'])!r};\n"
+)
+
 LANDMARK_JS = (
     "const LANDMARK_ART = {\n"
     + "".join(f'  {l["asset"]!r}: {A["mon-" + l["asset"].split("-")[1] + "@white"]!r},\n'
@@ -282,10 +339,74 @@ LANDMARK_JS = (
       "}\n"
 )
 
+# ── THE WHATSAPP ANNOUNCEMENT, GENERATED ─────────────────────────────────
+# What the organiser copies out of the SESSIONS screen and pastes into the
+# group. It was inherited as a literal and it was WRONG IN VOL.8 ALREADY:
+# "8 sessions total · Sessions 7 & 8 pay DOUBLE POINTS" against a nine-night
+# season that doubled from the 8th. Swept into Vol.9 it also still read
+# "September Surge is done and dusted" — the archive rule rewrote the
+# standings LINK and left the sentence above it naming the volume before last.
+#
+# So it is derived, like every other figure in this repo. The session count,
+# the double nights, the previous volume, the pool, the entry and the tagline
+# all come from national-season.json, which means a post cannot advertise a
+# shape the app contradicts.
+ANNOUNCE = f"""🔥🔥🔥 *IT'S BACK* 🔥🔥🔥
+
+*{CFG['name']} · Urban Social Series Vol. 9*
+_{TAG}_ ⚡
+
+{CFG['previousVolume']} is done and dusted — new season, new partners, new rivalries 🏆
+
+━━━━━━━━━━━━━━━━━━━━
+📅 *{CFG['schedule'].upper().replace(', ', ' · ')} · ALL {CFG['monthUpper']}*
+📍 Urban Playground, Oman
+💸 {CFG['entry']} OMR per player
+━━━━━━━━━━━━━━━━━━━━
+
+🗓️ {CFG['sessions']} sessions total · {_double_label()} pay *DOUBLE POINTS* 🔥
+🇴🇲 *Session {CFG['nights'].index(CFG['nationalDay']) + 1}* is the *{CFG['nationalDayLabel']}*
+💰 *{POOL} OMR prize pool* up for grabs
+
+━━━━━━━━━━━━━━━━━━━━
+Series points reset to *zero* — your *all-time* total carries over 👑
+
+🏆 *{CFG['previousVolume']} final standings:*
+{CFG['previousHost']} ▶ Leaderboard
+
+📊 *{CFG['nameTitle']} live tracker:*
+https://{CFG['host']}
+━━━━━━━━━━━━━━━━━━━━
+
+Drop your name + partner below to lock your spot 👇
+
+⚠️ *16 teams max · first come, first served*
+💥 *{TAG}* 👑"""
+
+
 MOTIFS = [
+    # -1a · THE "HOW IT WORKS" SHEET CARRIED VOL.8'S DOUBLE NIGHTS. The
+    #        FORMAT button on the SESSIONS screen writes a WhatsApp explainer,
+    #        and its 2X line was the literal "Sessions 7 & 8" — wrong for
+    #        Vol.9, where the schedule says 6, 8 and 9, and which no reader
+    #        could tell apart from the generated figures around it.
+    ("⚡ *Sessions 7 & 8 pay DOUBLE points* — the table can still flip on the "
+     "last night, so it's never too late to join.",
+     f"⚡ *{_double_label()} pay DOUBLE points* — including the "
+     f"{CFG['nationalDayLabel'].lower()} on "
+     + "${NATIONAL_DAY_LABEL}" + ". The table can still flip on the last "
+     "night, so it's never too late to join."),
+    # -1b · ...and the admin hint beside the 2X toggle still described Vol.8's
+    #        rule ("from Session 8 — the last two nights"), which is not how
+    #        this volume works at all: the nights are a LIST, and the toggle
+    #        now defaults from the date.
+    ("`On by default from Session ${DOUBLE_FROM_SESSION} — the last two nights. "
+     "Turn off to override.`",
+     "`On by default — " + "${NATIONAL_DAY_LABEL_SHORT}" + " and the last two "
+     "nights are double. Turn off to override.`"),
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
-    ("function SessionsView({", LANDMARK_JS + "\nfunction SessionsView({"),
+    ("function SessionsView({", DATE_JS + LANDMARK_JS + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
     #     invented here, while the handoff specifies a "56" lockup and the
@@ -299,6 +420,14 @@ MOTIFS = [
     ('URBAN SOCIAL &middot; VOL.9</div>',
      '<span style={{fontFamily:"\'Noto Kufi Arabic\',sans-serif",fontWeight:700}}>'
      + AR["series"] + '</span> &middot; VOL.9</div>'),
+    # 2b · THE HAIRLINE DIVIDER GOES, now that the flag plaque stands where it
+    #      did. It was 1px plus two gaps — about 21px, almost exactly what the
+    #      plaque costs — and its job was to separate the club's mark from the
+    #      volume's. A plaque with its own ink ring does that better than a
+    #      rule does, and keeping both left the volume name 14px short of its
+    #      own line and firing the ellipsis.
+    ('<span style={{width:1,height:28,background:"rgba(255,255,255,.14)",flexShrink:0}} />',
+     ''),
     # 3 · The mark itself, in the slot the sunrise vacated.
     ('<div style={{minWidth:0}}>\n              <div style={{fontStyle:"italic"',
      MARK_56 + '\n            <div style={{minWidth:0}}>\n'
@@ -356,6 +485,14 @@ MOTIFS = [
 SHEET = str(int(float(CFG["shape"]["sheet"].rstrip("px"))))
 
 ASSETS = [
+    # THE CLUB MARK IS RE-INKED FOR THIS VOLUME. The shipped one is white with
+    # an ORANGE ball (#F56530) — a Blackout-era accent belonging to no colour
+    # here, and the first thing on every screen. Vol.9's cut is white with a
+    # GREEN ball: on the red ground a red ball is red-on-red inside a thin
+    # ivory ring and the dots turn to mud, which is a legibility result and
+    # not a decorative one. ops/national-logo.py builds six variations and a
+    # contact sheet composited on all five grounds.
+    ("assets/up-logo-tight.png", "assets/up-logo-national.png"),
     ("assets/blackout-lockup.webp", "assets/national-lockup.webp"),
     ("assets/blackout-lockup.png", "assets/national-lockup.png"),
     ("assets/blackout-og.png", "assets/national-og.png"),
@@ -496,6 +633,28 @@ def round_inline(s, report):
     return s
 
 
+def set_announcement(s, report):
+    """Swap the whole template literal, not a line of it.
+
+    Patching it line by line is how it got into this state: Vol.8's own
+    announcement was already advertising eight sessions for a nine-night
+    season, because each volume edited the lines it noticed.
+    """
+    pat = re.compile(r"(SEASON_ANNOUNCEMENT = `)(?:[^`\\]|\\.)*(`)", re.S)
+    s2, n = pat.subn(lambda m: m.group(1) + ANNOUNCE + m.group(2), s, count=1)
+    assert n == 1, "could not find SEASON_ANNOUNCEMENT to replace"
+    # The copy people actually read must not contradict the season file.
+    for claim in (f"{CFG['sessions']} sessions total", f"{POOL} OMR prize pool",
+                  f"{CFG['entry']} OMR per player", CFG["previousVolume"],
+                  CFG["host"], TAG):
+        assert claim in ANNOUNCE, f"the announcement lost {claim!r}"
+    assert "September Surge" not in ANNOUNCE, \
+        "the announcement still names the volume before last"
+    report(f"announcement: generated, {len(ANNOUNCE)} chars, "
+           f"{_double_label().lower()} double")
+    return s2
+
+
 def apply_skin(s, report):
     skin = open(os.path.join(HERE, "ops", "national-skin.css")).read()
     # THE SKIN NAMES THE HANDOFF'S ARTWORK, IT DOES NOT DRAW IT. `@@A:name@@`
@@ -600,6 +759,7 @@ def main():
     # BEFORE the colour sweep, like every other markup rule here: the motifs
     # carry Vol.8 literals in the text they match.
     s = plain(s, MOTIFS, report, "motifs")
+    s = set_announcement(s, report)
     s = double_by_date(s, report)
     s = sweep(s, COLOURS, report, "colours")
     s = sweep(s, RGBS, report, "rgb triples")

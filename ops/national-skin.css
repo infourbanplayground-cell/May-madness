@@ -107,9 +107,13 @@ html:not(.dark) body {
   background-attachment: fixed !important;
 }
 
-/* The khanjar tile: 132x132 repeat at opacity .14, which are the handoff's
-   own figures. The source is 288px, so it is drawn at less than half size —
-   at 132 it is a texture and nobody reads its detail, which is the point. */
+/* THE KHANJAR TILE AT 210, NOT THE HANDOFF'S 132. The handoff's figure was
+   set against a 375px frame; at 132 on a real phone the khanjar is small
+   enough to read as noise — you can tell something is there and not what. The
+   source art is 288px square, so 210 is still drawing it DOWN, and the dagger
+   is now legible as a dagger without competing with the type above it.
+   The opacity stays at .14: the pattern got bigger, not louder, and a larger
+   motif at the same alpha already reads as more present. */
 /* !important ON THE IMAGE, BECAUSE AN INHERITED LAYER TURNS IT OFF. A July
    Heat-era block carries `body::before, body::after { background-image: none
    !important }` to kill ITS volume's motif, and an ordinary declaration here
@@ -127,7 +131,7 @@ html body::before {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   opacity: .14;
   background-image: url("@@A:khanjar@@") !important;
-  background-size: 132px 132px !important;
+  background-size: 210px 210px !important;
   background-repeat: repeat !important;
 }
 #root, main, nav { position: relative; z-index: 1; }
@@ -181,6 +185,38 @@ body > #root::after, #root::after {
   position: fixed; left: 0; right: 0; bottom: 0; height: 102px;
   z-index: 2; pointer-events: none;
   background: linear-gradient(180deg, rgba(184,20,31,0) 0%, var(--bg) 55%);
+}
+
+/* ── THE FLAG PLAQUE, BEHIND THE "56" ─────────────────────────────────
+   The Omani flag as the mark's ground: a red hoist bar down the left, then
+   three equal bands — white, red, green. It is the one place in the chrome
+   that carries white and green, which is deliberate: the handoff reserves
+   green for National Day, so spending it as a general accent would take the
+   meaning off the 18th. On the flag it is not an accent, it is the flag.
+
+   The radius is 6px and that is NOT a breach of "no square blocks". That rule
+   is about surfaces — cards, rows, sheets — and a flag drawn as a pill or an
+   arch stops being a flag. The :not() chain is here for the same reason it is
+   on the arch and the medallion: the inherited universal rule is (0,3,0) and
+   would otherwise make this a 28px lozenge.
+
+   The 56 keeps its ink stroke, which is what lets one mark sit legibly across
+   all three bands. Its GREEN offset shadow is gone — against the green band it
+   read as mis-registered printing rather than as depth.
+   ────────────────────────────────────────────────────────────────────── */
+.na-flag:not([data-a]):not([data-b]):not([data-c]) {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  padding: 4px 8px 4px 13px;
+  margin-right: 2px;
+  border-radius: 6px !important;
+  background-image:
+    linear-gradient(90deg, var(--flag) 0 6px, transparent 6px),
+    linear-gradient(180deg,
+      #FFFFFF 0 34%, var(--flag) 34% 66%, var(--green) 66% 100%);
+  /* The same double-line ring the arches use, so the plaque belongs to the
+     system rather than looking stuck on. */
+  box-shadow: 0 0 0 1.5px var(--ink);
 }
 
 /* ── THE LANDMARK MEDALLION ────────────────────────────────────────────
@@ -299,6 +335,15 @@ button, input, select, textarea { border-radius: 999px !important; }
    glance; --flag keeps its job on the red ground, where it is the loud one. */
 .sg-hero [style*="242, 184, 188"], .sg-hero [style*="#F2B8BC"],
 .sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
+/* THE TAGLINE IS TWO BEATS AND HAS TO LOOK LIKE TWO. The hero sets its second
+   half in what was Vol.8's lead colour, which the sweep turned to ivory —
+   ivory type on an ivory card. `.sg-hero *` then painted it ink, so the line
+   rendered as one flat sentence and the markup that exists to split it was
+   doing nothing. Anything inside an ivory hero that names ivory as its own
+   colour was an accent before the sweep and is the base red now. */
+.sg-hero [style*="247, 241, 230"], .sg-hero [style*="#F7F1E6"] {
+  color: var(--bg) !important;
+}
 /* Secondary copy on ivory is the handoff's muted ink, not a grey. */
 .sg-hero [style*="203, 189, 182"], .sg-hero [style*="#CBBDB6"],
 .sg-hero .text-stone-400, .sg-hero .text-stone-500 { color: var(--muted-ink) !important; }
@@ -425,14 +470,16 @@ header [style*="min-width: 0"], .sticky.top-0 [style*="min-width: 0"] {
 /* 17px, measured: the name renders 252px at the inherited 20px — a clone
    measured outside the header said 203, which is why the number here comes
    from what the overlap check reads off the live bar and not from arithmetic.
-   The "56" mark then took 32px back, so it is 14px: measured on the live bar
-   it needs 193 of the 200 it has. The harness asserts no run is ellipsised —
+   The "56" mark took 32px back and the flag plaque behind it another 14, so
+   it is 13px: measured on the live bar it needs 179 of the 190 it has. Every
+   one of those numbers came off the rendered header, never off arithmetic —
+   a clone measured outside it under-reported the width by twenty pixels. The harness asserts no run is ellipsised —
    a backstop that fires is a layout that did not fit, and it is invisible to
    every other check here because clipping is what ellipsis does INSTEAD of
    overflowing. */
 header [style*="min-width: 0"] > div:first-child,
 .sticky.top-0 [style*="min-width: 0"] > div:first-child {
-  font-size: 14px !important;
+  font-size: 13px !important;
   overflow: hidden; text-overflow: ellipsis;
 }
 header [style*="min-width: 0"] > div:last-child,

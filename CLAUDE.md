@@ -1015,6 +1015,72 @@ handoff ships all of it and says in as many words that it IS the design.
   so there is nothing past any edge and nothing overlapping. "56 NATIONAL
   SERI…" sat in the one bar on every screen. The harness fails any run whose
   `scrollWidth` exceeds its `clientWidth`.
+#### The flag, the pattern, and the club mark
+- **The tagline is "One flag. One court."** and ALL FOUR forms are derived from
+  `tagline` in the season file. Two of them used to be typed into the build, so
+  the JSON was right on the surfaces that read it and silently stale on the two
+  the app shows biggest — the hero headline and the WhatsApp sign-off. The hero
+  sets the two beats in different inks, so the build asserts the line is two
+  sentences rather than rendering a headline with an empty second colour.
+  - The second beat is the BASE RED on ivory. It was Vol.8's lead, which the
+    sweep turned to ivory-on-ivory, and `.sg-hero *` then painted it ink — so
+    the line rendered flat and the markup that exists to split it did nothing.
+- **The "56" stands on a flag plaque** — red hoist bar, then white, red and
+  green bands. It is the one place in the chrome carrying white and green, and
+  that is deliberate: the handoff reserves green for National Day, so spending
+  it as a general accent would take the meaning off the 18th. On the flag it is
+  not an accent, it is the flag.
+  - The plaque's radius is **6px and that is not a breach of "no square
+    blocks"** — that rule is about surfaces, and a flag drawn as a pill stops
+    being a flag. It needs the same `:not()` chain the arch and the medallion
+    do, or the inherited (0,3,0) universal rule makes it a 28px lozenge.
+  - The mark's GREEN offset shadow came off: against the green band it read as
+    mis-registered printing rather than as depth.
+  - The plaque cost 14px of the header, so the **hairline divider is removed**
+    (1px plus two gaps, about 21px) — its job was to separate the club's mark
+    from the volume's, and a plaque with its own ink ring does that better. A
+    `[style*="width: 1px"]` rule looked right and matched nothing: React
+    serialises that declaration without the space. The markup rule is exact.
+- **The khanjar tile is 210px, not the handoff's 132.** That figure was set
+  against a 375px frame; at 132 on a real phone the khanjar reads as noise —
+  you can tell something is there and not what. The source is 288px square, so
+  210 is still drawing it down. The opacity stays at .14: the pattern got
+  bigger, not louder.
+- **The club mark is re-inked per volume — `ops/national-logo.py`.** The
+  shipped one is white with an ORANGE ball (#F56530), a Blackout-era accent
+  belonging to no colour here, and it is the first thing on every screen.
+  - Vol.9's cut is **white with a GREEN ball**, and that is a legibility result
+    rather than a decorative one: on the red ground a red ball is red-on-red
+    inside a thin ivory ring and the dots turn to mud.
+  - It classifies each pixel and re-inks it keeping its own luminance and
+    alpha, because a flood fill on antialiased art leaves an orange fringe
+    around every recoloured shape — the thing "it looks fine at 100%" hides.
+  - Six variations and a **contact sheet composited on all five grounds** the
+    mark will actually meet (red, deep red, ivory, white, black), which is the
+    lesson the UPRISING and Blackout cut-outs both record. It asserts no
+    Blackout-orange pixel survived: a classifier that quietly matched nothing
+    would look exactly like a successful run.
+  - Pillow is on **python3.13** here, not the default python3.
+
+#### The copy surfaces
+**THE WHATSAPP ANNOUNCEMENT IS GENERATED, and the inherited one was wrong in
+Vol.8 already**: "8 sessions total · Sessions 7 & 8 pay DOUBLE POINTS" against
+a nine-night season that doubled from the 8th. Swept into Vol.9 it also still
+read "September Surge is done and dusted" — the archive rule rewrote the
+standings LINK and left the sentence above it naming the volume before last.
+- It is replaced **wholesale**, not patched line by line, because patching the
+  lines somebody noticed is how it got into that state. The session count, the
+  double nights, the previous volume, the pool, the entry and the tagline all
+  come from `national-season.json`, and the build asserts each claim survives.
+- The **FORMAT sheet** (the SESSIONS screen's own explainer) carried the same
+  literal "Sessions 7 & 8", and the **admin 2X hint** still described Vol.8's
+  rule — "from Session 8, the last two nights" — which is not how this volume
+  works at all, since the nights are a list. Both derive from the schedule now,
+  via `NATIONAL_DAY_LABEL` in the page.
+- **Not yet built for Vol.9:** `build-announce-post.py`, `ops/signup-post.py`
+  and `build-standings-post.py` are all still Blackout's. The in-app copy is
+  correct; the rendered social cards are not Vol.9's and should not go out.
+
 - **Still placeholder / unconfirmed:** the landmark artwork itself (placeholder
   vectors, to be replaced with commissioned work in the same slots), the
   landmark-per-session mapping, and the three double nights.
