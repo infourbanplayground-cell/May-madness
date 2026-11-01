@@ -87,6 +87,13 @@ if (SABOTAGE === 'noart') {
                     'const LANDMARK_ART = new Proxy({}, { get: () => "" });');
   if (app === before) throw new Error('sabotage anchor (noart, landmarks) no longer matches');
 }
+if (SABOTAGE === 'strip') {
+  // Take the room back out from under the header's masar strip, which is how
+  // the weave came to sit across the Arabic line.
+  const a = '  padding-bottom: 30px !important;';
+  if (!app.includes(a)) throw new Error('sabotage anchor (strip) no longer matches');
+  app = app.replace(a, '  padding-bottom: 0 !important;');
+}
 if (SABOTAGE === 'unstick') {
   // Put the header back the way it scrolled away: `position: relative`, which
   // is what a rule anchoring its masar strip actually wrote.
@@ -347,6 +354,31 @@ const AUDIT = () => {
       clipped.push(`"${t.slice(0, 26)}" needs ${e.scrollWidth}px in ${e.clientWidth}px`);
   }
 
+  // 3a2 · NO DECORATIVE STRIP MAY LIE ACROSS TEXT. The masar weave is drawn
+  // as an ::after inside the header, the hero and the ivory panel — which is
+  // neither a text run nor a box in flow, so the clipped check and the
+  // overlap check are both blind to it. It sat straight across the header's
+  // Arabic line. Measured against the pseudo-element's own box.
+  const strips = [];
+  for (const sel of ['header', '.sg-hero', '.na-ivory']) {
+    for (const host of document.querySelectorAll(sel)) {
+      const cs = getComputedStyle(host, '::after');
+      const h = parseFloat(cs.height);
+      if (!h || cs.content === 'none') continue;
+      const hb = host.getBoundingClientRect();
+      const top = hb.bottom - h;
+      for (const e of host.querySelectorAll('*')) {
+        if (e.childElementCount) continue;
+        const t = (e.textContent || '').trim();
+        if (!t) continue;
+        const rg = document.createRange(); rg.selectNodeContents(e);
+        for (const q of rg.getClientRects())
+          if (q.bottom > top + 2 && q.top < hb.bottom - 2 && q.width > 1)
+            strips.push(`${sel} strip over "${t.slice(0, 24)}"`);
+      }
+    }
+  }
+
   // 3b · NO TWO TEXT RUNS MAY OVERLAP. This is the check that catches a
   // collision, and nothing else here does: "56 NATIONAL SERIES" ran straight
   // under the SYNCED button with every width assertion green, because nowrap
@@ -450,7 +482,7 @@ const AUDIT = () => {
   };
 
   return {
-    stale, bad, square, past, marks, clipped, motifs, overlap: [...new Set(overlap)],
+    stale, bad, square, past, marks, clipped, motifs, strips: [...new Set(strips)], overlap: [...new Set(overlap)],
     archivo: probe("'Archivo',serif") !== probe('serif'),
     pageBg: getComputedStyle(document.body).backgroundColor,
     scrollX: document.documentElement.scrollWidth > W + 1,
@@ -599,6 +631,10 @@ for (const screen of SCREENS) {
   if (a.clipped.length) {
     F(`${a.clipped.length} text run(s) clipped to an ellipsis`);
     for (const c of [...new Set(a.clipped)].slice(0, 6)) console.log(`    !! ${c}`);
+  }
+  if (a.strips.length) {
+    F(`${a.strips.length} decorative strip(s) lying across text`);
+    for (const x of a.strips.slice(0, 5)) console.log(`    !! ${x}`);
   }
   if (a.overlap.length) {
     F(`${a.overlap.length} pair(s) of text runs overlap`);

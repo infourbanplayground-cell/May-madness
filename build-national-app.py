@@ -472,6 +472,35 @@ MOTIFS = [
                  title={landmarkFor(idx).nameEn}
                  style={{flex:"0 0 auto",width:48,height:48,
                  backgroundImage:`url("${LANDMARK_ART[landmarkFor(idx).asset]}")`}} />'''),
+    # 5b · THE COUNTDOWN GOES IVORY. The home screen was red on red on red —
+    #      an ivory hero at the top and then four hundred pixels of deep-red
+    #      cards, which reads as one colour however many surfaces are in it.
+    #      The countdown is the natural second panel: it is a self-contained
+    #      block, it is the thing people actually look at between nights, and
+    #      an ivory plate halfway down gives the page a rhythm instead of a
+    #      wash. `.na-ivory` carries the ink flip, the same way `.sg-hero`
+    #      does. Matched before the sweep, so the values here are Vol.8's.
+    ('<div style={{ border: "1px solid rgba(255,46,136,.4)", background: "rgba(20,20,20,.96)",\n'
+     '                  padding: 16, marginTop: 20 }}>',
+     '<div className="na-ivory" style={{ padding: 18, marginTop: 20 }}>'),
+    # 5c · THE NATIONAL DAY PILL, which the handoff puts on the Sessions
+    #      screen and which the home screen had nothing of. It is the single
+    #      largest piece of green in the design and the one night of the nine
+    #      that is actually an occasion, so it belongs where everybody lands.
+    #      Green is spent HERE and nowhere else, which is the handoff's rule
+    #      and the reason it still means something.
+    ("      {/* ── NEXT UP ── */}",
+     '''      <div className="na-natday">
+        <div style={{flex:"1 1 auto",minWidth:0}}>
+          <div className="na-natday-when">{NATIONAL_DAY_LABEL.toUpperCase()} &middot; '''
+     + CFG["schedule"].split(",")[-1].strip().upper() + '''</div>
+          <div className="na-natday-title">''' + CFG["nationalDayLabel"] + '''</div>
+          <div className="na-natday-ar">''' + CFG["nationalDayLabelAr"] + '''</div>
+        </div>
+        <div className="na-natday-2x">2X</div>
+      </div>
+
+      {/* ── NEXT UP ── */}'''),
     # 6a · THE HOME HERO CARRIES THE NEXT NIGHT'S MEDALLION. The handoff's
     #      hero is a landmark disc above the copy; ours had the volume ghost
     #      and nothing else, so the first screen a player opens showed none of

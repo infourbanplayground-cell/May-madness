@@ -1056,6 +1056,22 @@ handoff ships all of it and says in as many words that it IS the design.
     from the volume's, and a plaque with its own ink ring does that better. A
     `[style*="width: 1px"]` rule looked right and matched nothing: React
     serialises that declaration without the space. The markup rule is exact.
+- **THE MASAR BAND IS THE OWNER'S OWN ARTWORK** — `brand/national/masar-band.png`,
+  cut to its **100x56 repeat unit** from the 941px strip they supplied. Tiling
+  the strip would repeat a rounding error every nine motifs and show as a
+  seam; the unit's left edge matches the next repeat's right edge on all 56
+  rows, which is checked at the point it is cut.
+  - It is the real weave — diamonds outlined in the flag's green over deep
+    red, between green rules and a flag-red stripe, finished with an ivory
+    line — and already in this volume's exact palette, which is why it
+    REPLACES the handoff's SVG rather than sitting beside it. It is also where
+    most of the green and ivory on a red screen comes from.
+  - **The proportions are the handoff's: thin and INSET.** 20px at inset 14 on
+    the page, an 11px trim inside cards. Blown up to a 44px full-bleed stripe
+    it stopped being a trim and became a header of its own, which is not what
+    the design does with it.
+  - The width always keeps the art's 100:56 ratio. A woven band stretched off
+    its aspect is the one place a pattern looks obviously wrong.
 - **The khanjar tile is 340px at .18**, against the handoff's 132 and .14.
   That figure was set against a 375px frame; at 132 on a real phone the emblem
   reads as noise — you can tell something is there and not what. At 340 each
@@ -1082,6 +1098,25 @@ handoff ships all of it and says in as many words that it IS the design.
     Blackout-orange pixel survived: a classifier that quietly matched nothing
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
+
+#### Ivory and green on the home screen
+The page was red on red on red — an ivory arch at the top and then four hundred
+pixels of deep-red cards, which reads as ONE colour however many surfaces are
+in it. Two blocks fix it, and both are the handoff's own:
+- **`.na-ivory`, the countdown panel.** Same inversion as the hero, same
+  double-line ring, with a masar trim at its foot. A PANEL and not an arch:
+  two arches on one screen reads as a mistake rather than as a system.
+- **`.na-natday`, the National Day pill** — green, with the date, the name in
+  italic caps, the Arabic and a white 2X disc. The handoff puts it on Sessions;
+  the home screen had no green at all, and this is the one night of the nine
+  that is an occasion. **Green is spent here and nowhere else**, which is the
+  handoff's rule and the reason it still means something.
+- **A DECORATIVE STRIP IS INVISIBLE TO EVERY TEXT CHECK.** The masar trim is an
+  `::after` — neither a text run nor a box in flow — so the clipped check and
+  the overlap check were both blind to it, and it sat straight across the
+  header's Arabic line. The harness measures each host's pseudo-element box
+  against the text inside it now; `SABOTAGE=strip` takes the room back out and
+  goes red.
 
 #### The copy surfaces
 **THE WHATSAPP ANNOUNCEMENT IS GENERATED, and the inherited one was wrong in

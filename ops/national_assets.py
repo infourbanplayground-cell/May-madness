@@ -38,6 +38,7 @@ SRC = os.path.join(HERE, "..", "brand", "national", "handoff", "assets")
 # (flat fill, 60 units tall, 4 units of padding in the viewBox) and are
 # ORIGINAL geometric drawings, not traced from anything.
 MINE = os.path.join(HERE, "..", "brand", "national", "silhouettes")
+MINE_PNG = os.path.join(HERE, "..", "brand", "national")
 
 # The handoff's filenames, under the names the skin and the app use.
 SVGS = {
@@ -56,6 +57,13 @@ SVGS = {
 }
 OURS = {"mon-clock", "mon-gate", "mon-pavilion", "mon-sail", "mon-arcade"}
 PNGS = {"khanjar": "khanjar-tile-red.png"}
+# THE BAND, supplied by the owner and cut to its repeat unit. The source strip
+# is 941px carrying the same 100px motif nine and a bit times; tiling the
+# strip would repeat a rounding error every nine motifs and show as a seam.
+# It is already in this volume's exact palette — flag red, deep red, the
+# flag's green and ivory — which is why it replaces the handoff's own band
+# rather than sitting beside it: it is the same motif, drawn properly.
+OURS_PNG = {"masar": "masar-band.png"}
 
 # What a landmark is drawn in, by role. The handoff's medallion is a red disc
 # with a white silhouette; on ivory the same shape is drawn in deep red.
@@ -127,8 +135,9 @@ def assets():
         if name.startswith("mon-"):
             for ink in ("white", "red", "ivory", "flag", "ink"):
                 out[f"{name}@{ink}"] = _data_url(raw_svg(name, ink))
-    for name, f in PNGS.items():
-        with open(os.path.join(SRC, f), "rb") as fh:
+    for name, f in {**PNGS, **{k: v for k, v in OURS_PNG.items()}}.items():
+        base = MINE_PNG if name in OURS_PNG else SRC
+        with open(os.path.join(base, f), "rb") as fh:
             out[name] = "data:image/png;base64," + base64.b64encode(fh.read()).decode()
     return out
 

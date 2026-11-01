@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "e0850fbf7c8a";
+  var V = "0c58de922f50";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2900,8 +2900,7 @@ function FinalsCountdown({ state, leaderboard, meId, setTab }) {
   );
 
   return (
-    <div style={{ border: "1px solid rgba(242,184,188,.4)", background: "rgba(158,21,32,.96)",
-                  padding: 16, marginTop: 20 }}>
+    <div className="na-ivory" style={{ padding: 18, marginTop: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
           letterSpacing: ".26em", color: "#F2B8BC" }}>
@@ -7389,6 +7388,15 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                  fontSize:22,color:"#F2B8BC",marginTop:2}}>{played.length}</div>
           </div>
         </div>
+      </div>
+
+      <div className="na-natday">
+        <div style={{flex:"1 1 auto",minWidth:0}}>
+          <div className="na-natday-when">{NATIONAL_DAY_LABEL.toUpperCase()} &middot; 5:30 PM</div>
+          <div className="na-natday-title">NATIONAL DAY NIGHT</div>
+          <div className="na-natday-ar">العيد الوطني</div>
+        </div>
+        <div className="na-natday-2x">2X</div>
       </div>
 
       {/* ── NEXT UP ── */}
@@ -13092,13 +13100,37 @@ html body::before {
    stripe rather than as weaving — the band has a pattern and you have to be
    able to see it.
    ────────────────────────────────────────────────────────────────────── */
+/* THE OWNER'S OWN BAND. The artwork is the enhancement — the handoff's SVG
+   is two rules and a row of plain lozenges; this is the real weave, diamonds
+   outlined in the flag's green over deep red, between green rules and a
+   flag-red stripe, finished with an ivory line. In this volume's exact
+   palette, which is why it replaces the handoff's band rather than sitting
+   beside it: same motif, drawn properly. It is also where most of the green
+   and ivory on a red screen comes from.
+   THE PROPORTIONS ARE THE HANDOFF'S, though: thin and INSET at the very top,
+   not a 44px full-bleed stripe. Blown up to 44 it stopped being a trim on
+   the page and became a header of its own, which is not what the design
+   does with it. 20px, inset 14, pill — bigger than the 10px it replaced and
+   carrying ten times the detail.
+   The width keeps the art's own 100:56 ratio: a woven band stretched off its
+   aspect is the one place a pattern looks obviously wrong.
+   OLD NOTE, superseded: */
+/* THE OWNER'S OWN BAND, and bigger: 44px against the handoff's 24. The
+   handoff's SVG is two rules and a row of plain lozenges; this is the real
+   weave — diamonds outlined in the flag's green over a deep red ground,
+   between green rules and a flag-red stripe, finished with an ivory line.
+   It already uses this volume's exact palette, which is why it replaces the
+   handoff's band rather than sitting beside it: same motif, drawn properly.
+   It is also where most of the green and ivory on a red screen comes from.
+   The width keeps the art's own 100:56 ratio — a band stretched off its
+   aspect is the one place a woven pattern looks obviously wrong. */
 body::after {
   content: "";
-  position: fixed; left: 14px; right: 14px; top: 6px; height: 24px;
+  position: fixed; left: 14px; right: 14px; top: 7px; height: 20px;
   z-index: 60; pointer-events: none; border-radius: 999px;
   background-color: var(--deep) !important;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2240%22%20height=%2224%22%20viewBox=%220%200%2040%2024%22%3E%3Crect%20y=%221%22%20width=%2240%22%20height=%222%22%20fill=%22%23FFFFFF%22%3E%3C/rect%3E%3Crect%20y=%2221%22%20width=%2240%22%20height=%222%22%20fill=%22%23FFFFFF%22%3E%3C/rect%3E%3Crect%20y=%225%22%20width=%2240%22%20height=%221%22%20fill=%22%23F2B8BC%22%3E%3C/rect%3E%3Crect%20y=%2218%22%20width=%2240%22%20height=%221%22%20fill=%22%23F2B8BC%22%3E%3C/rect%3E%3Cpath%20d=%22M0%2012%20L5%208%20L10%2012%20L5%2016%20Z%20M20%2012%20L25%208%20L30%2012%20L25%2016%20Z%22%20fill=%22%23FFFFFF%22%3E%3C/path%3E%3Cpath%20d=%22M10%2012%20L15%209%20L20%2012%20L15%2015%20Z%20M30%2012%20L35%209%20L40%2012%20L35%2015%20Z%22%20fill=%22none%22%20stroke=%22%23F2B8BC%22%20stroke-width=%221%22%3E%3C/path%3E%3Ccircle%20cx=%225%22%20cy=%2212%22%20r=%221%22%20fill=%22%23F2B8BC%22%3E%3C/circle%3E%3Ccircle%20cx=%2225%22%20cy=%2212%22%20r=%221%22%20fill=%22%23F2B8BC%22%3E%3C/circle%3E%3C/svg%3E") !important;
-  background-size: 40px 24px !important;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=") !important;
+  background-size: 36px 20px !important;
   background-repeat: repeat-x !important;
 }
 
@@ -13111,11 +13143,11 @@ body::after {
 header::after, .sticky.top-0::after,
 .sg-hero::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 12px;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 11px;
   pointer-events: none;
   background-color: var(--deep);
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2240%22%20height=%2224%22%20viewBox=%220%200%2040%2024%22%3E%3Crect%20y=%221%22%20width=%2240%22%20height=%222%22%20fill=%22%23D7202E%22%3E%3C/rect%3E%3Crect%20y=%2221%22%20width=%2240%22%20height=%222%22%20fill=%22%23D7202E%22%3E%3C/rect%3E%3Crect%20y=%225%22%20width=%2240%22%20height=%221%22%20fill=%22%23087A3F%22%3E%3C/rect%3E%3Crect%20y=%2218%22%20width=%2240%22%20height=%221%22%20fill=%22%23087A3F%22%3E%3C/rect%3E%3Cpath%20d=%22M0%2012%20L5%208%20L10%2012%20L5%2016%20Z%20M20%2012%20L25%208%20L30%2012%20L25%2016%20Z%22%20fill=%22%23D7202E%22%3E%3C/path%3E%3Cpath%20d=%22M10%2012%20L15%209%20L20%2012%20L15%2015%20Z%20M30%2012%20L35%209%20L40%2012%20L35%2015%20Z%22%20fill=%22none%22%20stroke=%22%23087A3F%22%20stroke-width=%221%22%3E%3C/path%3E%3Ccircle%20cx=%225%22%20cy=%2212%22%20r=%221%22%20fill=%22%23087A3F%22%3E%3C/circle%3E%3Ccircle%20cx=%2225%22%20cy=%2212%22%20r=%221%22%20fill=%22%23087A3F%22%3E%3C/circle%3E%3C/svg%3E");
-  background-size: 20px 12px;
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=");
+  background-size: 20px 11px;
   background-repeat: repeat-x;
 }
 /* ONLY THE HERO. The header already establishes a positioning context —
@@ -13325,6 +13357,42 @@ button, input, select, textarea { border-radius: 999px !important; }
    has its own background. */
 .sg-hero > *:not(.vol-mark) { position: relative; z-index: 1; }
 
+/* ── AN IVORY PANEL, AND THE GREEN THAT COMES WITH THE BAND ────────────
+   The home screen was red on red on red: an ivory arch at the top and then
+   four hundred pixels of deep-red cards, which reads as ONE colour however
+   many surfaces are in it. `.na-ivory` is the second plate — same inversion
+   as the hero, same double-line ring, and it carries a strip of the masar
+   band at its foot so the green and the ivory line come with it.
+   It is a PANEL and not an arch: two arches on one screen reads as a mistake
+   rather than as a system, so this takes the sheet radius.
+   ────────────────────────────────────────────────────────────────────── */
+.na-ivory:not([data-a]):not([data-b]):not([data-c]) {
+  position: relative;
+  background: var(--ivory) !important;
+  border: 0 !important;
+  border-radius: 28px !important;
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--ivory) !important;
+  overflow: hidden;
+  padding-bottom: 24px !important;
+}
+.na-ivory, .na-ivory * { color: var(--ink) !important; }
+/* Anything that was the lead accent inside it becomes the base red, the same
+   rule the hero uses — ivory type on an ivory plate is nothing. */
+.na-ivory [style*="247, 241, 230"], .na-ivory [style*="#F7F1E6"],
+.na-ivory [style*="242, 184, 188"], .na-ivory [style*="#F2B8BC"] {
+  color: var(--bg) !important;
+}
+/* ...and the hairline rings the countdown cells draw have to come back as
+   ink, or they vanish into the ivory. */
+.na-ivory [style*="border"] { border-color: rgba(26,10,12,.18) !important; }
+.na-ivory::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 11px;
+  background-color: var(--deep);
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=");
+  background-size: 20px 11px; background-repeat: repeat-x;
+}
+
 .sg-card {
   background: var(--deep) !important;
   border: 1px solid rgba(247,241,230,.18) !important;
@@ -13385,9 +13453,14 @@ header, .sticky.top-0 {
   background: var(--bg) !important;
   border-bottom: 1px solid rgba(247,241,230,.18) !important;
   backdrop-filter: none !important;
-  /* 36px, not 14: the band is 24px at top 6, and the handoff puts it ABOVE the
-     header rather than behind it. At 14 the club mark sat under the weave. */
-  padding-top: 36px !important;
+  /* 54px: the band is 44 tall and full width now, and the handoff puts it
+     ABOVE the header rather than behind it. */
+  padding-top: 34px !important;
+  /* ...and 30 at the foot, because the masar strip is drawn INSIDE the header
+     as a pseudo-element: without room made for it the weave sat straight
+     across the Arabic line. A ::after is not a text run and not a box in
+     flow, so neither the clipped check nor the overlap check could see it. */
+  padding-bottom: 20px !important;
 }
 /* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
    up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
@@ -13482,6 +13555,45 @@ body { color: #FFFFFF; }
 [style*="#F2B8BC"], [style*="242, 184, 188"], [style*="242,184,188"],
 [style*="#CBBDB6"], [style*="203, 189, 182"], [style*="203,189,182"] {
   color: var(--rose-txt) !important;
+}
+
+/* THE NATIONAL DAY PILL, to the handoff's own spec: a green pill carrying the
+   date, the name in italic caps and the Arabic, with a white 2X disc on the
+   right. The markup is in build-national-app.py — a stylesheet cannot add a
+   block the app does not have.
+   This is the ONLY place the flag's green is spent, and that is the point:
+   green on a red screen reads as an occasion exactly as long as there is one
+   occasion wearing it. */
+.na-natday {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--green) !important;
+  border-radius: 999px !important;
+  padding: 14px 14px 14px 24px;
+  margin-top: 16px;
+}
+.na-natday-when {
+  font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  font-size: 11px; letter-spacing: .16em; color: #FFFFFF;
+}
+.na-natday-title {
+  font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 118, 'wght' 900;
+  font-size: 19px; text-transform: uppercase; color: #FFFFFF;
+  margin-top: 3px; white-space: nowrap;
+}
+.na-natday-ar {
+  font-family: 'Noto Kufi Arabic', sans-serif; font-weight: 700;
+  font-size: 12px; color: rgba(255,255,255,.88); margin-top: 3px;
+}
+/* 52px, and a CIRCLE — it needs the same :not() chain everything round in
+   this skin needs, or the inherited universal radius rule makes it a
+   rounded square. */
+.na-natday-2x:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 auto; width: 52px; height: 52px; border-radius: 50% !important;
+  background: #FFFFFF; color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 125, 'wght' 900; font-size: 21px;
 }
 
 /* ── 8 · NATIONAL DAY ──────────────────────────────────────────────────

@@ -91,11 +91,16 @@ body{{position:relative}}
    is, and the two must not drift apart. */
 .tile{{position:absolute;inset:0;opacity:.18;pointer-events:none;
   background-image:url("{A['khanjar']}");background-size:340px 340px}}
-/* The masar band, top and bottom, as the frame — the volume's rule. */
-.band{{position:absolute;left:0;right:0;height:24px;pointer-events:none;
+/* The masar band, top and bottom, as the frame — the volume's rule, and the
+   owner's own artwork. Taller here than in the app (56 against 44) because a
+   post is looked at whole rather than scrolled past. The width keeps the
+   art's 100:56 ratio; a woven band stretched off its aspect looks wrong in a
+   way nothing else does. */
+.band{{position:absolute;left:0;right:0;height:56px;pointer-events:none;
   background-color:{P['deep']};
-  background-image:url("{A['masar-white']}");
-  background-size:40px 24px;background-repeat:repeat-x}}
+  background-image:url("{A['masar']}");
+  background-size:100px 56px;background-repeat:repeat-x}}
+.band.b{{transform:scaleY(-1)}}
 .band.t{{top:0}} .band.b{{bottom:0}}
 .pad{{position:relative;height:100%;padding:{pad + 24}px {pad}px {pad + 24}px;
   display:flex;flex-direction:column}}
