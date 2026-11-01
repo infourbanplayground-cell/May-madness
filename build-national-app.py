@@ -329,6 +329,8 @@ def _double_label():
     return f"{word} {body}"
 
 
+BAND_JS = f"const LU_BAND = {A['masar']!r};\n"
+
 DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
     "// and the admin hint cannot drift from DOUBLE_NIGHTS.\n"
@@ -338,7 +340,11 @@ DATE_JS = (
 
 LANDMARK_JS = (
     "const LANDMARK_ART = {\n"
-    + "".join(f'  {l["asset"]!r}: {A["mon-" + l["asset"].split("-")[1] + "@white"]!r},\n'
+    # THE ASSET NAME IS THE KEY. It used to be reconstructed from the second
+    # word of the name — fine while every asset was `mon-<word>`, and a
+    # KeyError the moment one was `mon-sail-ph`. Nothing is gained by
+    # rebuilding a string that is already in hand.
+    + "".join(f'  {l["asset"]!r}: {A[l["asset"] + "@white"]!r},\n'
              for l in CFG["landmarks"])
     + "};\n"
     + "const LANDMARKS = " + json.dumps(CFG["landmarks"], ensure_ascii=False) + ";\n"
@@ -423,7 +429,7 @@ MOTIFS = [
      "nights are double. Turn off to override.`"),
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
-    ("function SessionsView({", DATE_JS + LANDMARK_JS + "\nfunction SessionsView({"),
+    ("function SessionsView({", BAND_JS + DATE_JS + LANDMARK_JS + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
     #     invented here, while the handoff specifies a "56" lockup and the
@@ -501,6 +507,46 @@ MOTIFS = [
       </div>
 
       {/* ── NEXT UP ── */}'''),
+    # 5d · THE SHARE CARDS GET THE MOTIFS TOO. They are drawn on a CANVAS,
+    #      so the skin cannot reach them and ops/check-national-skin.mjs
+    #      cannot even see them — every assertion there reads the DOM, and a
+    #      canvas is one opaque element with a bitmap inside it. The colour
+    #      sweep did reach their hex literals, so they came out red; they
+    #      came out red with NONE of the volume's motifs on them, which is
+    #      exactly the "recolour, not a volume" fault the app itself had.
+    #      The masar band is loaded beside the logo and tiled at the head and
+    #      the foot of every card.
+    ('const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-national.png")]);',
+     'const [im, logo, band] = await Promise.all([luImg(photo), '
+     'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);'),
+    ('luPaint(c.getContext("2d"), kind, d, img, logo, adj);',
+     'luPaint(c.getContext("2d"), kind, d, img, logo, adj, band);'),
+    ('    luPaint(g, kind, d, img, logo, adj);',
+     '    luPaint(g, kind, d, img, logo, adj, band);'),
+    ('function luPaint(g, kind, d, im, logo, adj) {\n'
+     '  adj = adj || LU_ADJ0;\n'
+     '  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);',
+     'function luPaint(g, kind, d, im, logo, adj, band) {\n'
+     '  adj = adj || LU_ADJ0;\n'
+     '  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);\n'
+     '  // THE MASAR BAND, head and foot. Drawn FIRST at the head so the copy\n'
+     '  // sits clear of it, and last at the foot so nothing lands on it.\n'
+     '  // A card that is only the right colour is a recolour, not a volume.\n'
+     '  const luBand = (y) => {\n'
+     '    if (!band) return;\n'
+     '    const h = 56, w = Math.round(h * band.width / band.height);\n'
+     '    g.save(); g.beginPath(); g.rect(0, y, LU_W, h); g.clip();\n'
+     '    for (let x = 0; x < LU_W; x += w) g.drawImage(band, x, y, w, h);\n'
+     '    g.restore();\n'
+     '  };\n'
+     '  luBand(0);'),
+    # ...and the foot band, drawn after everything else. The anchor is
+    # luPaint's own closing brace — the last thing it draws is the footer's
+    # letter-spaced night label.
+    ('    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); '
+     'cx += g.measureText(ch).width + 6; }\n  }\n}',
+     '    for (const ch of t) { g.fillText(ch, cx, LU_H - 96); '
+     'cx += g.measureText(ch).width + 6; }\n  }\n  luBand(LU_H - 56);\n}'),
     # 6a · THE HOME HERO CARRIES THE NEXT NIGHT'S MEDALLION. The handoff's
     #      hero is a landmark disc above the copy; ours had the volume ghost
     #      and nothing else, so the first screen a player opens showed none of

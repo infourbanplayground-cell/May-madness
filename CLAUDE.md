@@ -1030,6 +1030,30 @@ handoff ships all of it and says in as many words that it IS the design.
   so there is nothing past any edge and nothing overlapping. "56 NATIONAL
   SERI…" sat in the one bar on every screen. The harness fails any run whose
   `scrollWidth` exceeds its `clientWidth`.
+#### The share cards — `ops/check-lineup.mjs`
+**THE SHARE CARDS ARE DRAWN ON A CANVAS, so the skin harness cannot see them
+at all.** Every assertion in `check-national-skin.mjs` reads the DOM — the
+computed colour of an element, the box of a text run — and a canvas is one
+opaque element with a bitmap inside it. The line-up, the champions, the bracket
+and the tables cards could all have stayed lime on black and that audit would
+have stayed green, because the only thing it can see is a 1080x1920 rectangle.
+They had, in fact, stayed Vol.8's shape: correctly red after the sweep and
+carrying **none of the motifs** — the same "recolour, not a volume" fault the
+app itself had to be taught twice.
+- `ops/check-lineup.mjs` calls the app's own `buildLineups` and `drawLineup`
+  (both top-level) with a synthetic night — 8 players, 4 teams, two semis and a
+  decided final — and then samples the **pixels**. `APP=blackout-index.html`
+  goes red on all four cards, which is how each assertion was proved.
+- **The band is painted by `luPaint`**, head and foot, from `LU_BAND` — the
+  same `brand/national/masar-band.png` repeat unit the page and the posts use,
+  at 56px keeping the art's 100:56 ratio. The band carries the flag's green,
+  which appears nowhere else on a card, so "is there green in the top and
+  bottom 56 rows" is the whole test for it.
+- **The ground check is the share of RED pixels, never the modal colour.** The
+  ground is a gradient, so its red is spread over thousands of distinct triples
+  while one flat ink name plate is exactly one — the mode is the plate every
+  time, and a near-black card with a few red chips on it passed. Vol.9's cards
+  are 83-85% red; Vol.8's are 0%.
 #### The flag, the pattern, and the club mark
 - **The tagline is "One flag. One court."** and ALL FOUR forms are derived from
   `tagline` in the season file. Two of them used to be typed into the build, so
