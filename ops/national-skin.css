@@ -107,13 +107,16 @@ html:not(.dark) body {
   background-attachment: fixed !important;
 }
 
-/* THE KHANJAR TILE AT 210, NOT THE HANDOFF'S 132. The handoff's figure was
-   set against a 375px frame; at 132 on a real phone the khanjar is small
-   enough to read as noise — you can tell something is there and not what. The
-   source art is 288px square, so 210 is still drawing it DOWN, and the dagger
-   is now legible as a dagger without competing with the type above it.
-   The opacity stays at .14: the pattern got bigger, not louder, and a larger
-   motif at the same alpha already reads as more present. */
+/* THE KHANJAR TILE AT 340 AND .18, against the handoff's 132 and .14.
+   The handoff's figure was set against a 375px frame; at 132 on a real phone
+   the emblem reads as noise — you can tell something is there and not what.
+   The source is 288px square and carries TWO emblems, so at 340 each one
+   lands around 170px: large enough to be the national emblem rather than a
+   speckle, and still a ground rather than a picture.
+   Above 340 the upscale starts to show. The art is a 288px bitmap and there
+   is no more detail in it to enlarge — the only way past that is higher-res
+   source art, not a bigger background-size. The alpha carries the rest of the
+   difference. */
 /* !important ON THE IMAGE, BECAUSE AN INHERITED LAYER TURNS IT OFF. A July
    Heat-era block carries `body::before, body::after { background-image: none
    !important }` to kill ITS volume's motif, and an ordinary declaration here
@@ -129,9 +132,9 @@ body::before,
 html body::before {
   content: "";
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: .14;
+  opacity: .18;
   background-image: url("@@A:khanjar@@") !important;
-  background-size: 210px 210px !important;
+  background-size: 340px 340px !important;
   background-repeat: repeat !important;
 }
 #root, main, nav { position: relative; z-index: 1; }
@@ -170,7 +173,13 @@ header::after, .sticky.top-0::after,
   background-size: 20px 12px;
   background-repeat: repeat-x;
 }
-header, .sticky.top-0, .sg-hero { position: relative; }
+/* ONLY THE HERO. The header already establishes a positioning context —
+   `sticky` does — and writing `position: relative` on it to anchor the masar
+   strip OVERRODE THE STICKY, so the header scrolled away and the fixed band
+   at the top was left floating over the content on its own. That is what
+   "a gradient in the top part that moves while you scroll" was: not a
+   gradient, the brand bar leaving. */
+.sg-hero { position: relative; }
 /* The hero's strip sits INSIDE the arch, so it has to be clipped by it —
    otherwise a 12px rectangle hangs off the bottom corners of a rounded card.
    The arch's own overflow does that, and the card's bottom padding makes room

@@ -86,10 +86,11 @@ html,body{{width:{w}px;height:{h}px;overflow:hidden;background:{P['bg']};
   font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
   color:#FFFFFF}}
 body{{position:relative}}
-/* The ground: the khanjar tile at the app's own 210px, not the handoff's 132.
-   A post is looked at on a phone the same way the app is. */
-.tile{{position:absolute;inset:0;opacity:.14;pointer-events:none;
-  background-image:url("{A['khanjar']}");background-size:210px 210px}}
+/* The ground: the khanjar tile at the app's own 340px and .18, not the
+   handoff's 132 and .14. A post is looked at on a phone the same way the app
+   is, and the two must not drift apart. */
+.tile{{position:absolute;inset:0;opacity:.18;pointer-events:none;
+  background-image:url("{A['khanjar']}");background-size:340px 340px}}
 /* The masar band, top and bottom, as the frame — the volume's rule. */
 .band{{position:absolute;left:0;right:0;height:24px;pointer-events:none;
   background-color:{P['deep']};

@@ -87,6 +87,13 @@ if (SABOTAGE === 'noart') {
                     'const LANDMARK_ART = new Proxy({}, { get: () => "" });');
   if (app === before) throw new Error('sabotage anchor (noart, landmarks) no longer matches');
 }
+if (SABOTAGE === 'unstick') {
+  // Put the header back the way it scrolled away: `position: relative`, which
+  // is what a rule anchoring its masar strip actually wrote.
+  const a = '.sg-hero { position: relative; }';
+  if (!app.includes(a)) throw new Error('sabotage anchor (unstick) no longer matches');
+  app = app.replace(a, 'header, .sticky.top-0, .sg-hero { position: relative; }');
+}
 if (SABOTAGE === 'nofont') {
   const a = '<link href="https://fonts.googleapis.com/css2?family=Archivo';
   if (!app.includes(a)) throw new Error('sabotage anchor (nofont) no longer matches');
@@ -504,6 +511,29 @@ for (const screen of SCREENS) {
     }, process.env.WHY);
     console.log('\n  WHY ' + JSON.stringify(why, null, 2));
   }
+  // THE CHROME MUST SURVIVE A SCROLL. Nothing here looked at the page in any
+  // state but the top of it, and a skin rule that set `position: relative` on
+  // the header to anchor its masar strip silently overrode Tailwind's
+  // `sticky` — so the brand bar scrolled away and the FIXED band at the top
+  // was left floating over the content on its own. Reported as "a gradient in
+  // the top part that moves while you scroll".
+  const scrolled = await pg.evaluate(async () => {
+    const h = document.querySelector('header');
+    const nav = document.querySelector('nav.fixed.bottom-0');
+    window.scrollTo(0, 600);
+    await new Promise(r => setTimeout(r, 300));
+    const y = window.scrollY;
+    const out = {
+      scrolled: Math.round(y),
+      headerPos: h ? getComputedStyle(h).position : 'none',
+      headerTop: h ? Math.round(h.getBoundingClientRect().top) : null,
+      navBottom: nav ? Math.round(innerHeight - nav.getBoundingClientRect().bottom) : null,
+    };
+    window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 250));
+    return out;
+  });
+
   const a = await pg.evaluate(AUDIT);
   const n = await pg.evaluate(NAMED);
   const shot = `${OUT}/${screen}.png`;
@@ -522,6 +552,15 @@ for (const screen of SCREENS) {
     console.log(`    mark      ${a.marks.map(m => `"${m.text}" ${m.px}px a=${m.alpha}`).join(', ')}`);
 
   if (!a.archivo) F('Archivo was NOT drawn — it fell back');
+  if (scrolled.scrolled > 40) {
+    // Only meaningful on a screen long enough to scroll.
+    if (scrolled.headerPos !== 'sticky')
+      F(`the header is ${scrolled.headerPos}, not sticky — it scrolls away`);
+    if (Math.abs(scrolled.headerTop) > 2)
+      F(`the header left the top of the screen on scroll (top ${scrolled.headerTop})`);
+    if (scrolled.navBottom !== null && Math.abs(scrolled.navBottom - 14) > 4)
+      F(`the tab bar moved on scroll (${scrolled.navBottom}px from the bottom)`);
+  }
   const m = a.motifs;
   console.log(`    motifs    khanjar ${m.khanjar ? 'y' : 'NO'}  masar ${m.masar ? 'y' : 'NO'}`
     + `  header-weave ${m.masarHeader ? 'y' : 'NO'}  "56" ${m.mark56 ? 'y' : 'NO'}`
@@ -599,6 +638,29 @@ if (!ONLY) {
   if (!await openTab('sessions')) fail.push('[seeded] there is no SESSIONS tab');
   await pg.waitForTimeout(800);
 
+  // THE CHROME MUST SURVIVE A SCROLL. Nothing here looked at the page in any
+  // state but the top of it, and a skin rule that set `position: relative` on
+  // the header to anchor its masar strip silently overrode Tailwind's
+  // `sticky` — so the brand bar scrolled away and the FIXED band at the top
+  // was left floating over the content on its own. Reported as "a gradient in
+  // the top part that moves while you scroll".
+  const scrolled = await pg.evaluate(async () => {
+    const h = document.querySelector('header');
+    const nav = document.querySelector('nav.fixed.bottom-0');
+    window.scrollTo(0, 600);
+    await new Promise(r => setTimeout(r, 300));
+    const y = window.scrollY;
+    const out = {
+      scrolled: Math.round(y),
+      headerPos: h ? getComputedStyle(h).position : 'none',
+      headerTop: h ? Math.round(h.getBoundingClientRect().top) : null,
+      navBottom: nav ? Math.round(innerHeight - nav.getBoundingClientRect().bottom) : null,
+    };
+    window.scrollTo(0, 0);
+    await new Promise(r => setTimeout(r, 250));
+    return out;
+  });
+
   const a = await pg.evaluate(AUDIT);
   const land = await pg.evaluate(() => {
     const out = [...document.querySelectorAll('.na-medallion')].map(e => ({
@@ -624,9 +686,13 @@ if (!ONLY) {
   if (land.out.some(x => !x.art)) F('a medallion carries no landmark artwork');
   if (land.out.some(x => x.radius !== '50%')) F('a medallion is not a circle');
   if (land.out.some(x => x.size < 36)) F('a medallion is smaller than its slot');
-  // Four landmarks over nine nights: every one should get used, or the cycle
-  // is not cycling.
-  if (names.length !== 4) F(`${names.length} distinct landmarks over nine nights, expected 4`);
+  // EVERY LANDMARK IN THE SEASON FILE SHOULD GET USED, or the cycle is not
+  // cycling. Read from the file rather than typed: the set was four and is
+  // six, and a hard-coded four failed for the right reason at the wrong time.
+  const want = JSON.parse(fs.readFileSync('national-season.json', 'utf8')).landmarks.length;
+  const expect = Math.min(want, land.out.length);
+  if (names.length !== expect)
+    F(`${names.length} distinct landmarks over ${land.out.length} nights, expected ${expect}`);
   if (!land.eyebrows.some(t => /·/.test(t) && names.some(n => t.includes(n.toUpperCase()))))
     F('no row eyebrow names its landmark');
   if (a.clipped.length) F(`${a.clipped.length} text run(s) clipped: ${a.clipped[0]}`);

@@ -135,18 +135,28 @@
   ],
 
   "landmarks": [
-    { "id": "nizwa",  "nameEn": "Nizwa Fort",     "nameAr": "قلعة نزوى",  "asset": "mon-nizwa" },
-    { "id": "riyam",  "nameEn": "Riyam Burner",   "nameAr": "مبخرة ريام", "asset": "mon-burner" },
-    { "id": "alam",   "nameEn": "Al Alam Palace", "nameAr": "قصر العلم",  "asset": "mon-alam" },
-    { "id": "bahla",  "nameEn": "Bahla Tower",    "nameAr": "برج بهلاء",  "asset": "mon-tower" }
+    { "id": "clock",    "nameEn": "Clock Tower",     "nameAr": "برج الساعة",  "asset": "mon-clock" },
+    { "id": "nizwa",    "nameEn": "Nizwa Fort",      "nameAr": "قلعة نزوى",   "asset": "mon-gate" },
+    { "id": "riyam",    "nameEn": "Riyam Burner",    "nameAr": "مبخرة ريام",  "asset": "mon-burner" },
+    { "id": "muscat",   "nameEn": "Muscat Gate",     "nameAr": "بوابة مسقط",  "asset": "mon-arcade" },
+    { "id": "pavilion", "nameEn": "Corniche Dome",   "nameAr": "قبة الكورنيش", "asset": "mon-pavilion" },
+    { "id": "museum",   "nameEn": "Oman Across Ages","nameAr": "عمان عبر الزمان", "asset": "mon-sail" }
   ],
 
   "_landmarkNotes": [
-    "PLACEHOLDER ARTWORK AND AN UNCONFIRMED MAPPING. The handoff says both in",
-    "as many words: the silhouettes are placeholder vector drawings to be",
-    "replaced with commissioned artwork in the same slots, and the",
-    "landmark-per-session assignment is the product owner's to confirm.",
-    "Nothing is assigned to a session here until it is.",
+    "SIX SUBJECTS, FROM THE OWNER'S OWN REFERENCE SHEET, drawn here in",
+    "brand/national/silhouettes/ rather than taken from it — the sheet was a",
+    "watermarked stock comp and a third party's logo, which are reference for",
+    "WHICH landmarks and not artwork. The sheet's seventh subject is the Grand",
+    "Mosque and the handoff's rule is no mosques, so it is not here.",
+    "",
+    "Two of the handoff's own four are still in use (the Riyam burner and, by",
+    "name, Nizwa) and two are retired: mon-alam and mon-tower read as a",
+    "colonnade and a chess rook at 48px, and neither is in the reference.",
+    "",
+    "THE PER-SESSION MAPPING IS STILL THE PRODUCT OWNER'S. The app cycles",
+    "these six in order, deterministically, so a night always wears the same",
+    "landmark; re-order this list to change which night gets which.",
     "",
     "RULE FROM THE HANDOFF: no mosques in any landmark artwork."
   ],

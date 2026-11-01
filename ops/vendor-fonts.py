@@ -55,8 +55,26 @@ import json
 import urllib.parse
 
 CFG = json.load(open(os.path.join(HERE, "national-season.json"), encoding="utf-8"))
-KUFI_TEXT = "".join(sorted({c for k, v in CFG["arabic"].items()
-                            if k != "_note" for c in v}))
+# EVERY ARABIC STRING THE APP CAN DRAW, not just the `arabic` block. The
+# landmark names and the National Day label are set in Kufi on the app's hero
+# and on the posts, and they live elsewhere in the file — so the first subset
+# covered the block and silently left those to fall back. Collected by walking
+# the whole config for Arabic script rather than by listing the keys, because
+# listing them is how the next one gets missed too.
+def _arabic_strings(node):
+    if isinstance(node, str):
+        if re.search(r"[\u0600-\u06FF]", node):
+            yield node
+    elif isinstance(node, dict):
+        for k, v in node.items():
+            if k != "_note":
+                yield from _arabic_strings(v)
+    elif isinstance(node, list):
+        for v in node:
+            yield from _arabic_strings(v)
+
+
+KUFI_TEXT = "".join(sorted({c for t in _arabic_strings(CFG) for c in t}))
 KUFI_URL = ("https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@500;700"
             "&text=" + urllib.parse.quote(KUFI_TEXT) + "&display=swap")
 ARABIC = "U+0600-06FF"

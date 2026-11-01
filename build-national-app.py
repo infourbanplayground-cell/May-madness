@@ -238,7 +238,24 @@ def check_arabic():
         raise AssertionError("brand/fonts/kufi-coverage.txt is missing — "
                              "run python3 ops/vendor-fonts.py")
     have = set(open(cov, encoding="utf-8").read())
-    want = {c for v in AR.values() for c in v}
+    # EVERY Arabic string in the config, not just the `arabic` block — the
+    # landmark names and the National Day label are set in Kufi too, on the
+    # app's hero and on the posts, and the first version of this guard did not
+    # look at them. It walks the config rather than listing keys, because
+    # listing them is how the next one gets missed.
+    def walk(node):
+        if isinstance(node, str):
+            if re.search(r"[\u0600-\u06FF]", node):
+                yield node
+        elif isinstance(node, dict):
+            for k, v in node.items():
+                if k != "_note":
+                    yield from walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                yield from walk(v)
+
+    want = {c for t in walk(CFG) for c in t}
     missing = sorted(want - have)
     if missing:
         raise AssertionError(

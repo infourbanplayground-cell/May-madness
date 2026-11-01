@@ -897,6 +897,14 @@ khanjar tile, masar band, no square blocks, no drop shadows.
   edge, **no two text runs overlap**, the watermark is still a ghost, and
   Archivo was really drawn.
   - `APP=blackout-index.html` must go red — it does, on every check.
+  - **THE CHROME MUST SURVIVE A SCROLL**, and nothing here looked at the page
+    in any state but the top of it. A skin rule writing `position: relative`
+    on the header to anchor its masar strip silently overrode Tailwind's
+    `sticky`: the brand bar scrolled away and the FIXED band at the top was
+    left floating over the content on its own. Reported as "a gradient in the
+    top part that moves while you scroll" — not a gradient, the header
+    leaving. `sticky` is already a positioning context; only `.sg-hero`
+    needed the rule. `SABOTAGE=unstick` puts it back and goes red.
   - `SABOTAGE=noskin` / `nofont` / `longname`, `ONLY=<tab>`, `WHY=<text>`
     (which prints every rule that sets one run's colour, in cascade order).
   - **`SABOTAGE=noskin` once passed, and the sabotage was the bug.** Three
@@ -996,6 +1004,13 @@ handoff ships all of it and says in as many words that it IS the design.
   - Noto Kufi also has to be in the page's **font link**. An Arabic string set
     in a stack naming a face nobody fetched is drawn in whatever the device
     has — here DejaVu, a text face.
+  - **THE SUBSET MUST COVER EVERY ARABIC STRING IN THE CONFIG, not just the
+    `arabic` block.** The landmark names and the National Day label are set in
+    Kufi on the hero and the posts and live elsewhere in the file, so the
+    first subset left them out: **ق ز ك ى were falling back**, which includes
+    قلعة نزوى on the home screen. Both the vendor script and the build guard
+    now WALK the config for Arabic script rather than listing keys — listing
+    them is how the next one gets missed.
 - **The harness asserts each motif BY NAME**, because they are all
   background-images and a missing one is a flat rectangle in the right colour:
   `khanjar y  masar y  header-weave y  "56" y  arabic y  medallions 9/9`.
@@ -1041,11 +1056,17 @@ handoff ships all of it and says in as many words that it IS the design.
     from the volume's, and a plaque with its own ink ring does that better. A
     `[style*="width: 1px"]` rule looked right and matched nothing: React
     serialises that declaration without the space. The markup rule is exact.
-- **The khanjar tile is 210px, not the handoff's 132.** That figure was set
-  against a 375px frame; at 132 on a real phone the khanjar reads as noise —
-  you can tell something is there and not what. The source is 288px square, so
-  210 is still drawing it down. The opacity stays at .14: the pattern got
-  bigger, not louder.
+- **The khanjar tile is 340px at .18**, against the handoff's 132 and .14.
+  That figure was set against a 375px frame; at 132 on a real phone the emblem
+  reads as noise — you can tell something is there and not what. At 340 each
+  of the source's two emblems lands around 170px.
+  - **Above 340 the upscale shows.** The art is a 288px bitmap and there is no
+    more detail in it to enlarge; the only way past that is higher-res source
+    art, not a bigger background-size. The alpha carries the rest.
+  - **DO NOT REDRAW THE KHANJAR.** A vector version was drawn and withdrawn on
+    the owner's instruction. The emblem is the handoff's and stays its own art.
+  - The post builder carries the same 340/.18, because the app and the posts
+    drifting apart is the fault worth engineering against.
 - **The club mark is re-inked per volume — `ops/national-logo.py`.** The
   shipped one is white with an ORANGE ball (#F56530), a Blackout-era accent
   belonging to no colour here, and it is the first thing on every screen.
@@ -1114,9 +1135,13 @@ and a sticker plan). Output in `brand/national/posts/`.
   same idiom (flat fill, 60 units tall, 4 units of padding in the viewBox).
   They are original geometric drawings. `ops/national_assets.py` serves both
   sets through one table.
-  - **Nothing uses them yet.** `landmarks` in `national-season.json` still
-    lists the handoff's four, because which landmark goes on which night is
-    the product owner's call. Swapping one is a line in that file.
+  - **The season file now uses SIX of them** — Clock Tower, Nizwa Fort (the
+    drawn fort facade), Riyam Burner, Muscat Gate, Corniche Dome and Oman
+    Across Ages — the subjects from the owner's own reference sheet, minus the
+    Grand Mosque. `mon-alam` and `mon-tower` are retired: they read as a
+    colonnade and a chess rook at 48px and are not in the reference.
+  - The per-session MAPPING is still the owner's: the app cycles the list in
+    order, so re-ordering it changes which night gets which.
   - The crenellated parapet is **one helper**, not three hand-placed runs: the
     fort, the gateway and the towers all carry the same one, and three copies
     is how two of them end up a pixel out from the third.
