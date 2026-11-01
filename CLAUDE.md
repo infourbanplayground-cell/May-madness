@@ -1256,6 +1256,77 @@ and a sticker plan). Output in `brand/national/posts/`.
   numbered sheet) and `build-standings-post.py` (mid-season). The announcement
   set above is Vol.9's.
 
+#### The opening film — `build-national-video.py`
+**IT IS NOT VOL.8'S HYPE CUT AND COULD NOT BE.** `build-hype-video.py` is a
+MID-SEASON film: every figure in it comes from `ops/blackout-standings.mjs`
+run over a live table, and its whole argument is who is winning and what is
+left. Vol.9 had played nothing when this was made. There is no table to argue
+from, and a film that invented one would be the worst thing in this repo. So
+this one argues what is true before a ball is hit: the name, the shape of the
+season, the one night that is an occasion, the money, and the date.
+```bash
+python3 build-national-video.py
+python3.13 build-national-audio.py       # numpy is on 3.13, not the default
+node record-national-video.mjs           # CONTACT=1 for a strip, no encode
+```
+1080x1920, 18s, five scenes at 0.00 / 3.60 / 7.60 / 11.40 / 14.80; output
+`national-opening.mp4` and `brand/national/posts/VIDEO-CAPTIONS.txt`.
+- **Every figure comes from `national-season.json`, and the POOL IS DERIVED**
+  — `voucher x 2 x sessions + seasonPrizes`, the same expression the app
+  build uses, so the two cannot disagree by having the total written down
+  twice. It never says what a doubled night is worth in points: 2X skips the
+  streak bonus, so multiplying it out is close, and close is how a film ends
+  up contradicting the app.
+- **IT REFUSES TO BUILD IF ITS OWN HEADLINE IS NOT TRUE.** The cut ends on
+  TOMORROW in 150px type, so it will not build unless night 1 really is
+  tomorrow, nor once the season has started, nor if National Day is not in
+  `doubleNights`, nor if the tagline is not two sentences. All four proved by
+  shifting the config and watching it exit 1. Every other check in this repo
+  is about where the ink landed; no amount of looking at the frame tells you
+  the sentence has gone stale.
+- **THREE HEADLINES WERE MISSING AND NOTHING FAILED.** `fitAll()` runs on
+  `document.fonts.ready`, by which time `__seek(0)` has already set
+  `display:none` on scenes 2-5 — and a hidden box measures 0, so `room` went
+  negative and the shrink loop ran every headline in them to the 10px floor.
+  No text had overflowed, nothing was clipped, nothing collided. It shows all
+  scenes while it measures now, throws rather than hitting the floor, and the
+  recorder fails any `.fitspan` whose box ends up under 40px.
+- **The clipped check runs on SETTLED frames only.** `scrollWidth` counts a
+  child's transform, and the money rows slide in from `translateX(44px)` — so
+  mid-entrance the column honestly reports 932px of content in an 888px box,
+  every scene, for ever. The frame-overflow and collision checks take every
+  mark: they measure Range boxes and gate on opacity, so they read motion
+  correctly.
+- **The story safe area is a check, not a habit.** Instagram draws its chrome
+  over roughly the top 170px and the reply bar over the bottom 200px, so the
+  recorder fails anything outside 170..1720 — and prints each scene's centre
+  beside the safe centre of 945. That is what caught the first cut being
+  top-heavy, with the copy around y=800 and 600px of dead ground beneath it,
+  which no check about overflow or collision can see.
+- **Nothing may sit under the masar trim**, which is a decorative box and so
+  invisible to all three text checks — the same blindness that let the weave
+  lie across the app header's Arabic line.
+- `line-height:.88` on a 210px numeral makes its line box SHORTER than the
+  glyphs in it, so the unit under the pool sat 20px inside the numeral's box
+  and the overlap check read it, correctly, as a collision. The arch's gap is
+  30px for that reason.
+- **The Arabic probe must be an ARABIC string.** Noto Kufi carries no Latin,
+  so a Latin probe measures the fallback either way and reports a failure when
+  nothing is wrong — the mirror of the UPRISING winner renderer's bug. Archivo
+  is still measured against ITSELF FALLING BACK, not against serif.
+- The film also carries the Kufi coverage guard, so it cannot set a character
+  the subsetted face was not cut to draw.
+- **The bed builds to the money and then OPENS OUT** (`build-national-audio.py`).
+  The Vol.8 beds all assert "only grows", which is right for a countdown and
+  wrong for an invitation: a bed still accelerating under "come and play"
+  reads as a countdown to something you have missed. It asserts the peak is
+  scene 4, that the first four grow, that scene 5 drops — and that it drops
+  less than 3dB, so the release is a release and not a collapse. Same voices
+  as the Vol.8 beds, seeded at 56 so runs are identical.
+- **The trim here is inset and pilled** (56 tall, 36 side, 18 off each edge),
+  matching the share cards. `build-national-post.py` still runs it full-bleed
+  at 56px and has not been brought in line.
+
 #### The landmark silhouettes — `ops/national-landmarks.py`
 **THE OWNER SUPPLIED THEM AND NOTHING HERE IS DRAWN.** Five images — a
 crenellated fort gate with a clock face, a three-arch gatehouse, the incense
