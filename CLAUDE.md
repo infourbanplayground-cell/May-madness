@@ -1176,6 +1176,64 @@ not a volume" fault the app itself had to be taught twice.
   them the hard-coded windows kept looking at the old rows and reported no
   band at all on a card that plainly had one.
 
+#### The other three cards — `national_group_cards.py` + `ops/check-cards.mjs`
+**THE DRAW, THE TABLES AND THE BRACKET HAD NEVER BEEN RENDERED BY ANYTHING.**
+`ops/check-lineup.mjs` drives `buildLineups`/`drawLineup`; the skin harness
+reads the DOM and a canvas is one opaque element with a bitmap inside it. So
+these three went out as Vol.8's composition swept red — violet corner wash,
+scanlines, square letter tiles, square rows, a centred club mark, no band, no
+medallion, no Arabic, no tile — AND overlapping themselves, with every harness
+in the repo green. The owner found both by looking at a card.
+- **The overlap was a FLOOR.** The caller divides the body evenly between the
+  groups; `gcGroup` then sized its rows `Math.max(52, Math.min(96, fit))`, so a
+  four-group night drew `62 + 4*(52+8) = 302px` into a 232px slot — 70px over,
+  every group, compounding, until GROUP B's header sat on GROUP A's last row.
+  **A floor that cannot be honoured does not make the row taller, it makes the
+  block taller than the space it was given.** `ngGroup` has none and sizes its
+  type from the row it got. `ngBracket`'s cap lost its floor for the same
+  reason.
+- Sixteen teams and four headers in one portrait card is 20 lines in ~1150px.
+  The rows ARE short; that is the arithmetic of the card, not something to
+  engineer around. The alternative is dropping the bottom team of the bottom
+  group, which is the team most likely to be looking.
+- `ngPaint` gives them the volume's chrome, sharing `national_cards.py`'s
+  vocabulary (`NC`, `ncBand`, `ncArt`) so the two sets cannot drift: the inset
+  pilled masar bands, the khanjar ground, the header row with the Arabic
+  opposite, the landmark medallion beside the headline (there is no arch on a
+  list card, so it holds the right edge of the headline block instead), pilled
+  rows, and the champions on the same ivory plate with its own weave that the
+  line-up card's result sits on.
+- **GREEN IS THE WINNER'S EDGE AND NOTHING ELSE** — a 7px bar down a qualifying
+  row and its hairline, matching what green means on the champion's plate.
+  Never a fill, never a lamp. The position NUMERAL is ivory: `#087A3F` on the
+  deep red is about 1.2:1, so the first render put the rank of every qualifying
+  team in a colour that is not there.
+- `#1A1A1A` is now in the COLOURS sweep (→ the volume's ink). It was in five
+  unswept places, including the disc a player's INITIAL is drawn on, which is
+  on every bracket card.
+- **`ops/check-cards.mjs` is the harness**, and it checks two different kinds
+  of thing because the two faults are not alike:
+  - **The overlap is geometry and is INVISIBLE in the bitmap.** A group header
+    landing on the row above it is ivory type on a deep-red pill, which no
+    colour sample tells apart from the same type 40px higher. So `ngGroup`
+    reports the slot it was handed and the rows it actually drew in
+    `NG_BLOCKS`, and the harness reads that back: a block must fit its slot,
+    no block may reach into the next one's, the last must clear the body, and
+    no row may fall under 34px.
+  - **The theme is ink**, so it is sampled: the share of RED pixels (never the
+    modal triple — the ground is flat and an ink plate is one colour, so the
+    mode can be the plate while the card is black), the masar band in its own
+    box at the head and the foot, and white ink inside the medallion's disc.
+  - Three shapes, and the four-group night first because that is the one that
+    overlapped. Every group match is given a result, or the through/alive/out
+    states render zero times and pass having seen nothing.
+  - `SABOTAGE=floor` puts the shipped bug back and goes red; `SABOTAGE=noart`
+    empties the medallion and goes red; `APP=blackout-index.html` goes red.
+  - **Vol.8's near-black is matched TIGHTLY (10) and its accents loosely (40).**
+    This volume's ink is `#1A0A0C`, 33 away from `#050505` on the loose metric,
+    so a 40-point window flagged the champions' own name as an inherited
+    colour.
+
 #### The flag, the pattern, and the club mark
 - **The tagline is "One flag. One court."** and ALL FOUR forms are derived from
   `tagline` in the season file. Two of them used to be typed into the build, so

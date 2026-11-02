@@ -399,6 +399,14 @@ const luTrim = (g) => {{ luWeave(g, 18); luWeave(g, LU_H - 74); }};
 import national_cards  # noqa: E402
 CARDS_JS = national_cards.painter(CFG['palette'])
 
+# ...and the OTHER three cards. national_cards.py gave the line-up cards this
+# volume's design and left the draw, the tables and the bracket wearing Vol.8's
+# — swept red, violet corner wash and all, with square tiles, square rows, a
+# centred mark and none of the motifs. The canvas is invisible to every DOM
+# harness here, so nothing complained and nothing would have.
+import national_group_cards  # noqa: E402
+GROUP_CARDS_JS = national_group_cards.painter(CFG['palette'])
+
 DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
     "// and the admin hint cannot drift from DOUBLE_NIGHTS.\n"
@@ -498,7 +506,8 @@ MOTIFS = [
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
     ("function SessionsView({",
-     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + "\nfunction SessionsView({"),
+     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + GROUP_CARDS_JS
+     + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
     #     invented here, while the handoff specifies a "56" lockup and the
@@ -621,6 +630,51 @@ MOTIFS = [
      '    ncPaint(g, kind, d, img, logo, adj, "photo");'),
     ('  luPaintCut(g, kind, d, cut, logo, adj);',
      '  ncPaint(g, kind, d, cut, logo, adj, "cut");'),
+    # 5f2 · AND THE DRAW, THE TABLES AND THE BRACKET, which the first pass
+    #       left behind entirely. Reported by the owner from the live night:
+    #       "there's overlap in the posts, also needs to be updated to the
+    #       newest theme" — two faults in one card and both real.
+    #       The OVERLAP was a floor. The caller divides the band evenly
+    #       between the groups, and gcGroup then sized its rows
+    #       `Math.max(52, Math.min(96, fit))` — so at four rows a block drew
+    #       62 + 4*(52+8) = 302px into a 232px slot, 70px over, every group,
+    #       compounding down the card until GROUP B's header sat on GROUP A's
+    #       last row. A floor that cannot be honoured does not make the row
+    #       taller; it makes the block taller than the space it was given.
+    #       ngGroup has no floor and sizes its type from the row it got.
+    #       The THEME was the same "recolour, not a volume" fault the app
+    #       needed teaching twice: these three were a true-black composition
+    #       swept red. ngPaint gives them the volume's chrome — the inset
+    #       masar bands, the khanjar ground, the header row with the Arabic
+    #       opposite, the landmark medallion, pilled rows, green as the
+    #       winner's EDGE and the champions on the same ivory plate the
+    #       line-up card's result sits on.
+    #       The band and the landmark art have to be loaded before the first
+    #       paint, for the same reason every other draw entry point does it:
+    #       a canvas draw of an undecoded image is a silent no-op, and an
+    #       empty medallion looks exactly like a design choice.
+    ('  const logo = await luImg("assets/up-logo-national.png");',
+     '  const [logo, band] = await Promise.all([\n'
+     '    luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
+     '  LU_BAND_IMG = LU_BAND_IMG || band;\n'
+     '  LU_TILE_IMG = LU_TILE_IMG || await luImg(LU_TILE);\n'
+     '  await ngPreload(d);'),
+    ('  gcPaint(c.getContext("2d"), kind, d, logo, faces);',
+     '  ngPaint(c.getContext("2d"), kind, d, logo, faces);'),
+    #       The key's swatches follow the rows they describe: THROUGH is the
+    #       flag's green, because that is what a green edge means everywhere
+    #       else in this set, and "still in it" is the flag red. Swept, they
+    #       were both ivory-ish and the key described nothing.
+    ('      ? [["#C6FF00", "THROUGH"],\n'
+     '         ["#FF2E88", session.thirdPlaceMode === "playoff" '
+     '? "IN THE PLAYOFF" : "STILL IN IT"]]\n'
+     '      : [["#C6FF00", groupsDone ? "THROUGH TO THE KNOCKOUT" '
+     ': "CURRENTLY QUALIFYING"]],',
+     '      ? [["' + CFG['palette']['green'] + '", "THROUGH"],\n'
+     '         ["' + CFG['palette']['flag'] + '", '
+     'session.thirdPlaceMode === "playoff" ? "IN THE PLAYOFF" : "STILL IN IT"]]\n'
+     '      : [["' + CFG['palette']['green'] + '", groupsDone '
+     '? "THROUGH TO THE KNOCKOUT" : "CURRENTLY QUALIFYING"]],'),
     ('function luPaint(g, kind, d, im, logo, adj) {\n'
      '  adj = adj || LU_ADJ0;\n'
      '  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);',
@@ -828,6 +882,13 @@ COLOURS = [
     ("#CFCFCF", "@@MU2@@", "#F7F1E6"),   # ink-2 -> Ivory, 5.83:1
     ("#6E6E6E", "@@MU3@@", "#F2D0D3"),   # muted-2 -> light rose
     ("#2A2A2A", "@@HL@@",  "#9E1520"),   # hairline -> deep red
+    # A NEUTRAL NEAR-BLACK SURFACE, in five places and never swept: the
+    # lost-team chip and the disabled-button ground in both inherited copies
+    # of the screens, and the disc a player's INITIAL is drawn on when they
+    # have no photo — which is on every bracket card. A neutral grey-black on
+    # a warm red reads as a hole punched in the page; this volume's near-black
+    # is its ink, which is a very dark red and sits on the ground.
+    ("#1A1A1A", "@@NB@@",  "#1A0A0C"),
     # THREE-DIGIT HEX. The sweep matches six-digit literals, so `#111` went
     # through untouched — and it is the background of the roster card's photo
     # slot, 338 near-black tiles on a red page. `#fff` is already white and is
