@@ -26,6 +26,7 @@ const APP = process.env.APP || 'national-index.html';
 // thing to open them showed black-and-lime cards from a run that was supposed
 // to fail — which is exactly what happened here.
 const OUT = SC + (APP !== 'national-index.html' ? '/vol9-cards-sabotage'
+                 : process.env.GREEN ? '/vol9-green-' + process.env.GREEN
                  : process.env.CUT ? '/vol9-cards-cutout'
                  : process.env.PHOTO ? '/vol9-cards-photo' : '/vol9-cards');
 fs.mkdirSync(OUT, { recursive: true });
@@ -48,7 +49,32 @@ const PHOTOS = (() => {
     : [p];
 })();
 
-const app = fs.readFileSync(APP, 'utf8');
+let app = fs.readFileSync(APP, 'utf8');
+
+// GREEN=<option> — a design SWEEP, not a check. Each option patches the
+// shipped painter before it is served, so every variant is the real card
+// rather than a mock-up of one and the only difference is the lines named
+// here. frame | arch | plate | frame-plate | arch-plate
+const GREEN = process.env.GREEN || '';
+if (GREEN) {
+  const patch = (a, b, why) => {
+    if (!app.includes(a)) throw new Error(`green option anchor gone: ${why}`);
+    app = app.replace(a, b);
+  };
+  const FRAME = '\n  g.strokeStyle = "#0CA856"; g.lineWidth = 6;\n'
+    + '  if (g.roundRect) { g.beginPath(); g.roundRect(26, 26, LU_W - 52, LU_H - 52, 34); g.stroke(); }\n';
+  if (/frame/.test(GREEN)) patch('  ncBand(g, 72);', FRAME + '  ncBand(g, 72);', 'frame');
+  if (/arch/.test(GREEN))
+    patch('  g.strokeStyle = A.IVORY; g.lineWidth = 5;\n  ncArchPath(g, A.ARCH_L',
+          '  g.strokeStyle = "#0CA856"; g.lineWidth = 7;\n  ncArchPath(g, A.ARCH_L', 'arch');
+  if (/plate/.test(GREEN))
+    patch('  g.restore();\n\n  const midY',
+          '  g.strokeStyle = "#0CA856"; g.lineWidth = 6;\n'
+        + '  g.beginPath();\n'
+        + '  if (g.roundRect) g.roundRect(PL + 3, PT + 3, PW - 6, PH - 6, PRAD - 3);\n'
+        + '  g.stroke();\n'
+        + '  g.restore();\n\n  const midY', 'plate');
+}
 const state = fs.readFileSync(SC + '/na.json', 'utf8');
 const PORT = 8129;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
