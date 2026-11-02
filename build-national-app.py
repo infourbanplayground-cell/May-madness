@@ -347,6 +347,12 @@ def _double_label():
 # band, and it crowded the night label at the foot.
 BAND_JS = f"""const LU_BAND = {A['masar']!r};
 let LU_BAND_IMG = null;
+// LOADED EAGERLY, not on the way through one painter. The slot used to be
+// filled only by drawLineup/drawLineupAt, and drawCutCardAt does not load the
+// band at all — so a NO-BACKGROUND card drawn before any photo card came out
+// with no masar trim on it, silently, depending only on which card somebody
+// opened first. Caught by rendering the cut-out card for the first time.
+luImg(LU_BAND).then(b => {{ LU_BAND_IMG = LU_BAND_IMG || b; }});
 function luWeave(g, y) {{
   const b = LU_BAND_IMG;
   if (!b) return;
@@ -566,6 +572,13 @@ MOTIFS = [
      'const [im, logo, band] = await Promise.all([luImg(photo), '
      'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
      '  LU_BAND_IMG = LU_BAND_IMG || band;'),
+    # ...and the cut-out path, which loads neither and would otherwise rely on
+    # a photo card having been drawn first.
+    ('const [cut, logo] = await Promise.all([luImg(cutUrl), '
+     'luImg("assets/up-logo-national.png")]);',
+     'const [cut, logo, band] = await Promise.all([luImg(cutUrl), '
+     'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
+     '  LU_BAND_IMG = LU_BAND_IMG || band;'),
     ('function luPaint(g, kind, d, im, logo, adj) {\n'
      '  adj = adj || LU_ADJ0;\n'
      '  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);',
@@ -592,6 +605,75 @@ MOTIFS = [
     # luPaintCut's closing: scanlines over everything, then the brace.
     ('  for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);\n}',
      '  for (let y = 0; y < LU_H; y += 8) g.fillRect(0, y, LU_W, 2);\n  luTrim(g);\n}'),
+    # 5e · THE PLAYERS ARE NOT GRADED. The inherited treatment darkened the
+    #      photo 34%, pushed contrast and took 62% of the saturation out, so
+    #      the picture became a ground for the type to sit on. On black that
+    #      is a look; on this red it is murk, and the owner's call is that
+    #      the people in the photograph should be sharp and full colour —
+    #      "no filter on the players, it needs to be more HD".
+    #      What stays is the FLOOR and the two end fades, which are not a
+    #      grade on anybody: without them the plates have nothing to sit on
+    #      and the photo has a hard edge across the card.
+    ('    if (LU_CAN_FILTER) {\n'
+     '      g.filter = `brightness(${(br * (1 - 0.34 * gr)).toFixed(3)}) `\n'
+     '               + `contrast(${(1 + 0.26 * gr).toFixed(3)}) `\n'
+     '               + `saturate(${(1 - 0.62 * gr).toFixed(3)})`;\n'
+     '      luCoverAdj(g, im, 0, top, LU_W, hh, adj);\n'
+     '      g.filter = "none";\n'
+     '    } else {',
+     '    if (LU_CAN_FILTER) {\n'
+     '      // Only what the organiser dialled in. `grade` no longer\n'
+     '      // desaturates: it is the strength of the LIGHT below, not a\n'
+     '      // wash over the people.\n'
+     '      g.filter = br === 1 ? "none" : `brightness(${br.toFixed(3)})`;\n'
+     '      luCoverAdj(g, im, 0, top, LU_W, hh, adj);\n'
+     '      g.filter = "none";\n'
+     '    } else {'),
+    #      ...and GREEN IN THE LIGHT. The handoff reserves green for National
+    #      Day and that rule holds for the chrome, but the owner asked for
+    #      more of it on the line-up cards specifically. It goes in as a lamp
+    #      and a pair of hairlines rather than as a tint: light in the room
+    #      behind the players, which is what the two lamps were always for.
+    ('    lamp(LU_W * 0.04, top + hh * 0.34, LU_W * 0.50, "255,46,136", 0.72);\n'
+     '    lamp(LU_W * 0.98, top + hh * 0.26, LU_W * 0.48, "198,255,0",  0.62);\n'
+     '    g.globalCompositeOperation = "source-over";',
+     '    lamp(LU_W * 0.02, top + hh * 0.40, LU_W * 0.56, "12,168,86",  0.92);\n'
+     '    lamp(LU_W * 1.00, top + hh * 0.30, LU_W * 0.50, "12,168,86",  0.62);\n'
+     '    lamp(LU_W * 0.50, top + hh * 0.06, LU_W * 0.42, "247,241,230", 0.30);\n'
+     '    g.globalCompositeOperation = "source-over";'),
+    #      A HAIRLINE ACROSS THE PHOTO WINDOW DOES NOTHING, which is worth
+    #      recording because it looked right in the source. The window closes
+    #      with a vertical fade to the ground at both ends, drawn AFTER
+    #      everything else — so a green rule at `top` and `top+hh` is painted
+    #      over by opaque red. Measured: 0% green on either row. The green has
+    #      to be light (the lamps above) or structure outside the window (the
+    #      winner's edge below), never a line inside it.
+    #      THE NO-BACKGROUND CARD GETS THE SAME LAMPS. luPaintCut has its own
+    #      pair, which the colour sweep turned rose and ivory along with
+    #      everything else — so the cut-out card carried no green at all while
+    #      the photo card beside it did. Two cards from one night that do not
+    #      look like one set is the fault worth engineering against.
+    ('  lamp(40, 760, 620, "255,46,136", 0.62);\n'
+     '  lamp(1050, 600, 600, "198,255,0", 0.56);',
+     '  lamp(20, 820, 700, "12,168,86", 0.88);\n'
+     '  lamp(1060, 660, 620, "12,168,86", 0.58);\n'
+     '  lamp(540, 300, 480, "247,241,230", 0.26);'),
+    #      THE WINNER'S PLATE IS EDGED IN THE FLAG'S GREEN. It is the one
+    #      place on the card where green means something — this pair won —
+    #      rather than being spent as decoration, which is the handoff's whole
+    #      argument for reserving it. The SCORE stays ivory: #087A3F on the
+    #      ink plate is about 2.6:1, fine for a 3px rule and not for 52px type.
+    ('    plate(baseY, (d.a || "").toUpperCase(), "", "#C6FF00", d.aScore);',
+     '    plate(baseY, (d.a || "").toUpperCase(), "", "#F7F1E6", d.aScore,\n'
+     '          false, "#0CA856");'),
+    ('  const plate = (y, name, chip, colour, score, dim) => {\n'
+     '    g.fillStyle = "rgba(15,15,15,.92)";\n'
+     '    g.fillRect(L, y, W, PH);\n'
+     '    g.strokeStyle = colour; g.lineWidth = 3;',
+     '  const plate = (y, name, chip, colour, score, dim, edge) => {\n'
+     '    g.fillStyle = "rgba(15,15,15,.92)";\n'
+     '    g.fillRect(L, y, W, PH);\n'
+     '    g.strokeStyle = edge || colour; g.lineWidth = edge ? 5 : 3;'),
     #      THE CARDS' NEUTRAL GREYS ARE MUD ON RED, and the colour sweep never
     #      reached them: its table was built from the colours the DOM harness
     #      can see, and these are canvas fillStyles. #8A8A8A on the base red is

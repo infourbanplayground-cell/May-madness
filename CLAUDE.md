@@ -1086,6 +1086,48 @@ app itself had to be taught twice.
     only five legible tones on this ground; the obvious candidate is green for
     the 2X bonus, which the handoff reserves for National Day — and 2X *is*
     National Day, so it is the owner's call rather than ours.
+- **THERE ARE THREE CARDS, AND ONLY ONE WAS EVER RENDERED.** `PHOTO=<dir>`
+  draws them over real session photographs and `CUT=<dir>` draws the
+  NO-BACKGROUND card — `luPaintCut`, a different painter that stands
+  background-removed players on the ground under a ghost word. Each writes to
+  its own folder. The no-photo washes exercise none of the photo window's
+  grade, lamps or floor, so a card checked only without one is two-thirds
+  unchecked.
+  - Cut-outs come from Cloudinary's `e_background_removal` (`luCutoutUrl`
+    rewrites the URL and asks for png — jpeg has no alpha). The harness
+    serves both locally: a cross-origin draw taints the canvas, `toDataURL`
+    throws, and the app falls back to the photo-less card.
+  - **The cut-out card had NO masar trim**, found the first time it was ever
+    rendered. `luTrim` reads one module-level slot that only `drawLineup` and
+    `drawLineupAt` filled — and `drawCutCardAt` loads neither the band nor
+    anything else — so whether the trim appeared depended on which kind of
+    card somebody happened to open first. The band is loaded eagerly at
+    module scope now AND by every draw entry point.
+  - **The ground check excludes the photo window.** luPaint draws the
+    photograph into rows 420..1560, 59% of the card, legitimately not red —
+    counting it dropped a perfectly good photo card to 50% and failed it.
+    Outside that window both kinds are the same thing, and both read 89-90%.
+- **THE PLAYERS ARE NOT GRADED** — the owner's call, "no filter on the
+  players, it needs to be more HD". The inherited treatment darkened the photo
+  34%, pushed contrast and took 62% of the saturation out so the picture
+  became a ground for the type. On black that is a look; on this red it is
+  murk. What stays is the floor and the two end fades, which are not a grade
+  on anybody: without them the plates have nothing to sit on and the photo has
+  a hard edge across the card.
+- **GREEN GOES IN AS LIGHT AND AS THE WINNER'S EDGE**, also the owner's call.
+  The handoff reserves green for National Day and that still holds for the
+  chrome, but the line-up cards carry it as two lamps behind the players
+  (both painters, so the photo card and the cut-out card look like one set)
+  and as a 5px edge on the champion's plate — the one place on the card where
+  green means *this pair won* rather than being spent as decoration.
+  - **A HAIRLINE ACROSS THE PHOTO WINDOW DOES NOTHING**, which is worth
+    recording because it read as correct in the source. The window closes with
+    a vertical fade to the ground at both ends, drawn after everything else,
+    so a green rule at `top` and `top+hh` is painted over by opaque red.
+    Measured: 0% green on both rows. Green has to be light, or structure
+    outside the window.
+  - The score stays ivory: `#087A3F` on the ink plate is about 2.6:1 — fine
+    for a 5px rule, not for 52px type.
 - **The ground check is the share of RED pixels, never the modal colour.** The
   ground is a gradient, so its red is spread over thousands of distinct triples
   while one flat ink name plate is exactly one — the mode is the plate every
@@ -1354,6 +1396,21 @@ were retired the moment it arrived, and the handoff's own four with them.
   - The harness's medallion check tested for `data:image/svg` and reported
     every supplied landmark as carrying no artwork — a check failing for the
     FORMAT rather than for the fault. It accepts any `data:image/` now.
+- **NONE OF THE SUPPLIED FIVE IS NIZWA FORT, and one of them carried the name
+  for a week.** Reported by the owner — "the icon right now is not nizwa
+  fort" — and they are right twice over: the icon labelled Nizwa is a
+  crenellated gate with a star rosette, and Nizwa Fort's defining shape is a
+  massive round drum tower, of which there is no cylindrical form anywhere in
+  the set. The slot is **parked**, `mon-fort-white.png` is unused, and more
+  landmark artwork is coming from the owner. Four landmarks cycle the nine
+  nights until it does.
+- **The two three-arch arcades were also the wrong way round.** The owner's
+  call: the FLARED-cornice one (`mon-gatehouse`) is Al Alam Palace, so the
+  straight-cornice one (`mon-palace`) is Muscat Gate.
+- **The mapping is a GUESS at the subject until the owner confirms it**, and
+  this is the second time guessing has put a building's name on another
+  building. `ops/national-landmarks.py`'s comments say which file it thinks is
+  what; they are not evidence. Render the labelled proof sheet and ask.
 - The per-session MAPPING is still the owner's: the app cycles the list in
   `national-season.json` in order, so re-ordering it changes which night gets
   which.

@@ -25,8 +25,28 @@ const APP = process.env.APP || 'national-index.html';
 // overwrite the Vol.9 cards and the contact sheet with Vol.8's, so the next
 // thing to open them showed black-and-lime cards from a run that was supposed
 // to fail — which is exactly what happened here.
-const OUT = SC + (APP === 'national-index.html' ? '/vol9-cards' : '/vol9-cards-sabotage');
+const OUT = SC + (APP !== 'national-index.html' ? '/vol9-cards-sabotage'
+                 : process.env.CUT ? '/vol9-cards-cutout'
+                 : process.env.PHOTO ? '/vol9-cards-photo' : '/vol9-cards');
 fs.mkdirSync(OUT, { recursive: true });
+
+// PHOTO=<file or directory of jpgs>. With it the cards are drawn over real
+// session photographs, which is how they are actually posted.
+const dirList = (p, re) => {
+  const st = fs.statSync(p);
+  return st.isDirectory()
+    ? fs.readdirSync(p).filter(f => re.test(f)).sort().map(f => path.join(p, f))
+    : [p];
+};
+const CUTS = process.env.CUT ? dirList(process.env.CUT, /\.png$/i) : null;
+const PHOTOS = (() => {
+  const p = process.env.PHOTO;
+  if (!p) return null;
+  const st = fs.statSync(p);
+  return st.isDirectory()
+    ? fs.readdirSync(p).filter(f => /\.(jpe?g|png)$/i.test(f)).sort().map(f => path.join(p, f))
+    : [p];
+})();
 
 const app = fs.readFileSync(APP, 'utf8');
 const state = fs.readFileSync(SC + '/na.json', 'utf8');
@@ -51,6 +71,27 @@ const srv = http.createServer({ maxHeaderSize: 1 << 20 }, (req, res) => {
   }
   const bn = path.basename(u);
   if (/\.(png|webp|jpe?g|svg)$/.test(bn)) {
+    // PHOTO=<file|dir> renders the cards over a real session photo instead of
+    // the no-photo washes. The photo window is the whole middle of the card
+    // and gets a grade, two lamps and a floor — none of which the washes
+    // exercise, so a card checked only without one is half unchecked. Served
+    // locally on purpose: the live store is Cloudinary, and a cross-origin
+    // draw taints the canvas so toDataURL throws and the app silently falls
+    // back to the photo-less card.
+    if (PHOTOS && bn.startsWith('__ph')) {
+      const f = PHOTOS[parseInt(bn.slice(4), 10) % PHOTOS.length];
+      res.writeHead(200, { 'Content-Type': 'image/jpeg' });
+      return res.end(fs.readFileSync(f));
+    }
+    // CUT=<dir> renders the NO-BACKGROUND card — luPaintCut, the other
+    // painter, which stands background-removed players on a floor under a
+    // ghost word. It is a different layout, not the photo card with the
+    // backdrop knocked out, and nothing had ever rendered it in this volume.
+    if (CUTS && bn.startsWith('__cut')) {
+      const f = CUTS[parseInt(bn.slice(5), 10) % CUTS.length];
+      res.writeHead(200, { 'Content-Type': 'image/png' });
+      return res.end(fs.readFileSync(f));
+    }
     for (const d of ['brand/national', 'brand/blackout', 'assets']) {
       const f = path.join(d, bn);
       if (fs.existsSync(f)) {
@@ -81,7 +122,7 @@ await pg.evaluate(() => document.fonts.ready);
 // A night with a bracket in it. Vol.9 has played none, so without this every
 // card renders zero times and every assertion about them passes having seen
 // nothing — the same hole the skin harness's seeded pass closes.
-const cards = await pg.evaluate(async () => {
+const cards = await pg.evaluate(async ({ nPhotos, nCuts }) => {
   const names = ['Muntaser Hasni', 'Hassan Salhi', 'Faisal Al Harthi',
                  'Muatasim Sabri', 'Munther Rahbi', 'Nooh Al Balushi',
                  'Khalid Al Amri', 'Saif Al Hinai'];
@@ -102,13 +143,34 @@ const cards = await pg.evaluate(async () => {
   };
   const st = { players, sessions: [session] };
   const lus = buildLineups(session, st, 412);
+  const logoImg = await luImg('assets/up-logo-national.png');
   const out = [];
-  for (const d of lus) {
-    const url = await drawLineup(d.kind, d, null, null);
+  for (let i = 0; i < lus.length; i++) {
+    const d = lus[i];
+    let url;
+    if (nCuts) {
+      // luPaintCut is not reachable through drawLineup: that path derives a
+      // Cloudinary background-removal URL from the photo, and these are
+      // served locally. The painter is top-level, so call it directly.
+      url = await new Promise(res => {
+        const im = new Image();
+        im.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = LU_W; c.height = LU_H;
+          luPaintCut(c.getContext('2d'), d.kind, d, im, logoImg, null);
+          res(c.toDataURL('image/png'));
+        };
+        im.onerror = () => res(null);
+        im.src = `__cut${i}.png`;
+      });
+    } else {
+      url = await drawLineup(d.kind, d, nPhotos ? `__ph${i}.jpg` : null, null);
+    }
+    if (!url) throw new Error('card ' + d.key + ' did not render');
     out.push({ key: d.key, kind: d.kind, label: d.label, url, caption: d.caption });
   }
   return out;
-});
+}, { nPhotos: PHOTOS ? PHOTOS.length : 0, nCuts: CUTS ? CUTS.length : 0 });
 
 // ── what the bitmap actually is ─────────────────────────────────────────────
 const VOL8 = [[198, 255, 0, 'Blackout lime'], [255, 46, 136, 'Blackout magenta']];
@@ -130,11 +192,19 @@ for (const c of cards) {
     const d = g.getImageData(0, 0, cv.width, cv.height).data;
     const hist = new Map();
     let red = 0, n = 0;
+    // THE GROUND IS WHAT THIS MEASURES, so the photo window is excluded.
+    // luPaint draws the photograph into rows 420..1560 — 59% of the card —
+    // graded and lamp-lit but legitimately not red. Counting it dropped a
+    // perfectly good photo card to 50% and failed it. Outside that window
+    // both kinds of card are the same thing: this volume's ground.
+    const PH_TOP = 420, PH_BOT = 1560;
     // Every 7th pixel: enough to find a colour that is anywhere on the card,
     // fast enough to run on five 1080x1920 bitmaps.
     for (let i = 0; i < d.length; i += 4 * 7) {
       const k = `${d[i]},${d[i + 1]},${d[i + 2]}`;
       hist.set(k, (hist.get(k) || 0) + 1);
+      const y = Math.floor((i / 4) / im.width);
+      if (y >= PH_TOP && y < PH_BOT) continue;
       n++;
       // Anywhere on the ramp from the deep red to the flag red: clearly red,
       // clearly not the ink plates and not the ivory.
@@ -160,7 +230,7 @@ for (const c of cards) {
   // chips on it would have passed. It is the share of pixels that are RED,
   // counted across the whole bitmap.
   if (stats.red < 0.5)
-    bad.push(`only ${(stats.red * 100).toFixed(0)}% of the card is red `
+    bad.push(`only ${(stats.red * 100).toFixed(0)}% of the card's GROUND is red `
            + `(modal colour rgb(${stats.top[0][0]}))`);
   // THE MASAR BAND HAS TO BE ON IT. A card that is merely the right colour is
   // a recolour, not a volume — the lesson the app itself had to learn twice.
@@ -195,7 +265,7 @@ for (const c of cards) {
 
   if (bad.length) failed++;
   console.log(`lineup-${c.key}.png  ${stats.w}x${stats.h}  ${c.label}  `
-    + `red ${(stats.red * 100).toFixed(0)}%`
+    + `ground ${(stats.red * 100).toFixed(0)}% red`
     + (bad.length ? `\n  !! ${bad.join('\n  !! ')}` : '  ok'));
 }
 

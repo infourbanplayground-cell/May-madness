@@ -27,7 +27,6 @@
     "two if that is one too many; nothing but the points moves either way, since",
     "vouchers are per night won regardless."
   ],
-
   "volume": "VOL.9",
   "name": "56 NATIONAL SERIES",
   "nameTitle": "56 National Series",
@@ -37,28 +36,45 @@
   "month": "November",
   "monthUpper": "NOVEMBER",
   "host": "national.urbanpadel.om",
-
   "sessions": 9,
-  "seasonPrizes": [75, 50, 35],
+  "seasonPrizes": [
+    75,
+    50,
+    35
+  ],
   "voucher": 14,
   "entry": 7,
   "finalsCut": false,
-
   "schedule": "Mon & Wed, 5:30 PM",
-  "nights": ["2026-11-02", "2026-11-04", "2026-11-09", "2026-11-11",
-             "2026-11-16", "2026-11-18", "2026-11-23", "2026-11-25",
-             "2026-11-30"],
+  "nights": [
+    "2026-11-02",
+    "2026-11-04",
+    "2026-11-09",
+    "2026-11-11",
+    "2026-11-16",
+    "2026-11-18",
+    "2026-11-23",
+    "2026-11-25",
+    "2026-11-30"
+  ],
   "finalsDate": "2026-11-30",
-  "doubleNights": ["2026-11-18", "2026-11-25", "2026-11-30"],
+  "doubleNights": [
+    "2026-11-18",
+    "2026-11-25",
+    "2026-11-30"
+  ],
   "nationalDay": "2026-11-18",
   "nationalDayLabel": "NATIONAL DAY NIGHT",
   "nationalDayLabelAr": "العيد الوطني",
-
-  "previousVolumes": ["June Fury", "July Heat", "August Attack",
-                      "September Surge", "Blackout Series"],
+  "previousVolumes": [
+    "June Fury",
+    "July Heat",
+    "August Attack",
+    "September Surge",
+    "Blackout Series"
+  ],
   "previousVolume": "Blackout Series",
   "previousHost": "blackout.urbanpadel.om",
-
   "arabic": {
     "_note": [
       "EVERY ARABIC STRING THE APP SETS, IN ONE PLACE — because the face is",
@@ -97,7 +113,6 @@
     "inactive": "#CBBDB6",
     "white": "#FFFFFF"
   },
-
   "_paletteNotes": [
     "Straight from the handoff's token list. The jobs are not interchangeable:",
     "",
@@ -116,7 +131,6 @@
     "no dark-on-red combination that clears 4.5:1, so type on the base is white",
     "or rose and never ink."
   ],
-
   "shape": {
     "arch": "168px 168px 28px 28px",
     "photoArch": "160px 160px 0 0",
@@ -124,7 +138,6 @@
     "sheet": "28px",
     "doubleLine": "0 0 0 4px <bg>, 0 0 0 6px #F7F1E6"
   },
-
   "_shapeNotes": [
     "NO SQUARE BLOCKS. Hero cards are arches, everything else is a pill, icons",
     "sit in circles. This is the whole difference between this volume and",
@@ -133,33 +146,48 @@
     "",
     "There are NO DROP SHADOWS. Depth is the double-line ring only."
   ],
-
   "landmarks": [
-    { "id": "nizwa",  "nameEn": "Nizwa Fort",      "nameAr": "قلعة نزوى",       "asset": "mon-fort" },
-    { "id": "muscat", "nameEn": "Muscat Gate",     "nameAr": "بوابة مسقط",      "asset": "mon-gatehouse" },
-    { "id": "riyam",  "nameEn": "Riyam Burner",    "nameAr": "مبخرة ريام",      "asset": "mon-burner-ph" },
-    { "id": "alam",   "nameEn": "Al Alam Palace",  "nameAr": "قصر العلم",       "asset": "mon-palace" },
-    { "id": "museum", "nameEn": "Oman Across Ages","nameAr": "عمان عبر الزمان", "asset": "mon-sail-ph" }
+    {
+      "id": "alam",
+      "nameEn": "Al Alam Palace",
+      "nameAr": "قصر العلم",
+      "asset": "mon-gatehouse"
+    },
+    {
+      "id": "muscat",
+      "nameEn": "Muscat Gate",
+      "nameAr": "بوابة مسقط",
+      "asset": "mon-palace"
+    },
+    {
+      "id": "riyam",
+      "nameEn": "Riyam Burner",
+      "nameAr": "مبخرة ريام",
+      "asset": "mon-burner-ph"
+    },
+    {
+      "id": "museum",
+      "nameEn": "Oman Across Ages",
+      "nameAr": "عمان عبر الزمان",
+      "asset": "mon-sail-ph"
+    }
   ],
-
   "_landmarkNotes": [
-    "SIX SUBJECTS, FROM THE OWNER'S OWN REFERENCE SHEET, drawn here in",
-    "brand/national/silhouettes/ rather than taken from it — the sheet was a",
-    "watermarked stock comp and a third party's logo, which are reference for",
-    "WHICH landmarks and not artwork. The sheet's seventh subject is the Grand",
-    "Mosque and the handoff's rule is no mosques, so it is not here.",
+    "FOUR, NOT FIVE, AND NIZWA FORT IS NOT AMONG THEM. The owner reported the",
+    "first icon was not Nizwa, and it is not: Nizwa Fort's defining shape is a",
+    "massive round drum tower and there is no cylindrical form in the supplied",
+    "set at all. The icon that carried the name is a crenellated gate with a",
+    "star rosette. mon-fort-white.png is therefore UNUSED until the owner says",
+    "what it is; more landmark artwork is coming.",
     "",
-    "Two of the handoff's own four are still in use (the Riyam burner and, by",
-    "name, Nizwa) and two are retired: mon-alam and mon-tower read as a",
-    "colonnade and a chess rook at 48px, and neither is in the reference.",
+    "The two three-arch arcades were also the wrong way round. The owner's call:",
+    "the FLARED-cornice one (mon-gatehouse) is Al Alam Palace, so the",
+    "straight-cornice one (mon-palace) is Muscat Gate.",
     "",
-    "THE PER-SESSION MAPPING IS STILL THE PRODUCT OWNER'S. The app cycles",
-    "these six in order, deterministically, so a night always wears the same",
-    "landmark; re-order this list to change which night gets which.",
-    "",
-    "RULE FROM THE HANDOFF: no mosques in any landmark artwork."
+    "The app cycles this list in order across the nine nights, so re-ordering it",
+    "changes which night wears which landmark. That mapping is still the",
+    "owner's. No mosques."
   ],
-
   "_serverNotes": [
     "PORT 3011, NOT 3010. The obvious next number after Vol.8's 3009 is taken:",
     "the chisel process that carries the SSH-over-HTTPS tunnel binds 127.0.0.1",
@@ -167,7 +195,6 @@
     "re-bind, and an API that loses its port at a restart fails in the middle of",
     "a night rather than at deploy time."
   ],
-
   "server": {
     "port": 3011,
     "unit": "national-api",
