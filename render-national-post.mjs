@@ -24,6 +24,7 @@
 //   SABOTAGE=nofont   drop the embedded faces
 //   SABOTAGE=noart    blank the artwork
 //   SABOTAGE=long     a landmark name long enough to break the night rows
+//   SABOTAGE=squeeze  shorten the arches, so they cut their own content
 //   ONLY=hero         narrow the run
 import { chromium } from 'playwright';
 import fs from 'fs';
@@ -48,6 +49,16 @@ for (const f of fs.readdirSync(DIR).filter(x => x.endsWith('.html')).sort()) {
     const n = html.length;
     html = html.replace(/url\(data:font\/woff2;base64,[^)]*\)/g, 'url(about:invalid)');
     if (html.length === n) throw new Error('sabotage anchor (nofont) no longer matches');
+  }
+  if (SABOTAGE === 'squeeze') {
+    // Take height away from the arches, which is the fault the clipped check
+    // exists for: a door too short for what is standing in it swallows the
+    // bottom of its own content, and NOTHING runs past any edge — there is no
+    // overflow to see, because overflow:hidden is what the arch does instead.
+    const n = html.length;
+    html = html.replace('</style>',
+      '.arch,.archframe{max-height:360px !important}</style>');
+    if (html.length === n) throw new Error('sabotage anchor (squeeze) no longer matches');
   }
   if (SABOTAGE === 'noart') {
     const n = (html.match(/data:image\//g) || []).length;
@@ -136,10 +147,50 @@ for (const f of fs.readdirSync(DIR).filter(x => x.endsWith('.html')).sort()) {
     for (const e of vis) {
       if (e.childElementCount) continue;
       if (!(e.textContent || '').trim()) continue;
+      // A GHOST IS MEANT TO BE UNDER THE COPY. The volume numeral behind the
+      // arch is a 360px tint at 26% whose entire job is to sit behind the
+      // words — so it collides with every one of them, correctly, and that is
+      // not a layout fault. It carries aria-hidden and data-ghost; the skin
+      // harness excludes the app's own watermark the same way.
+      if (e.closest('[data-ghost]')) continue;
       const rg = document.createRange(); rg.selectNodeContents(e);
       for (const q of rg.getClientRects())
         if (q.width > 1 && q.height > 1) runs.push({ e, q, b: blockOf(e) });
     }
+    // A CONTAINER WITH overflow:hidden SWALLOWS ITS OWN CONTENT SILENTLY.
+    // The clipped check above is horizontal (scrollWidth) and the padding
+    // check is about boxes running past the FRAME — so an arch too short for
+    // what is inside it fails neither, and the hero shipped with the bottom
+    // of its own plate sliced off.
+    //
+    // MEASURED AS TEXT, NOT AS scrollHeight. scrollHeight counts absolutely
+    // positioned decoration: the 360px volume ghost inside the arch put it 5px
+    // over on a card whose copy stopped 44px clear of the bottom, every time,
+    // whatever was removed. What matters is whether a WORD is being cut, so
+    // the test is whether a leaf text run's own box falls outside the
+    // clipping box.
+    for (const e of vis) {
+      const cs = getComputedStyle(e);
+      if (!/hidden|clip/.test(cs.overflowY)) continue;
+      const box = e.getBoundingClientRect();
+      if (box.height < 4) continue;
+      for (const n of e.querySelectorAll('*')) {
+        if (n.childElementCount) continue;
+        if (!(n.textContent || '').trim()) continue;
+        if (n.closest('[data-ghost]')) continue;
+        const rg = document.createRange(); rg.selectNodeContents(n);
+        const q = rg.getBoundingClientRect();
+        if (!q.height) continue;
+        if (q.bottom > box.bottom - 2 || q.top < box.top - 2) {
+          clipped.push(`<${e.className || e.tagName}> cuts `
+            + `"${n.textContent.trim().slice(0, 22)}" `
+            + `(${Math.round(q.top - box.top)}..${Math.round(q.bottom - box.top)} `
+            + `in ${Math.round(box.height)})`);
+          break;
+        }
+      }
+    }
+
     const overlap = [];
     for (let i = 0; i < runs.length; i++) for (let j = i + 1; j < runs.length; j++) {
       const a = runs[i], c = runs[j];

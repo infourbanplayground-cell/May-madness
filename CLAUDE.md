@@ -1133,6 +1133,49 @@ app itself had to be taught twice.
   while one flat ink name plate is exactly one — the mode is the plate every
   time, and a near-black card with a few red chips on it passed. Vol.9's cards
   are 83-85% red; Vol.8's are 0%.
+#### The card painter — `national_cards.py`
+**THE CARDS WERE VOL.8's LAYOUT WEARING THIS VOLUME'S COLOURS.** Everything up
+to this point was done by patching the inherited painter one anchor at a time
+— a lamp here, a plate border there — and that can move a colour but it cannot
+move a shape. The result was a black-card composition (a photo window with two
+dark plates stacked under it) rendered in red, which is the same "recolour,
+not a volume" fault the app itself had to be taught twice.
+`ncPaint` is the owner's own design, built as its own module the way
+`blackout_screens.py` carries Vol.8's screens:
+- the masar trim top and foot, inset and pilled
+- the header row: the series and the night in mono, the Arabic opposite
+- the headline left, two lines of Archivo italic black
+- **THE ARCH** — an Omani door drawn as a double ivory outline over a deeper
+  ground, holding the players, with the volume's 56 as a ghost behind them
+- **the LANDMARK MEDALLION straddling the apex**, named in Arabic at the foot
+- the result on an **ivory plate** with its own masar trim, the score as the
+  hero and the winner's name in ink
+- the club mark and the volume line at the foot
+- `luPaint` and `luPaintCut` stay in the page UNREFERENCED rather than being
+  cut: this file is what the next volume inherits and it should still read as
+  the previous volume wrote it.
+- **GREEN GOES ON EDGES, NEVER IN A LAMP.** Two green lamps on `screen` over a
+  photograph do not read as light in the room — the owner's word for it was a
+  blob, and they were right. It is the medallion's outer ring and the arch's
+  inner hairline now, where it has a shape. One neutral lamp stays high in the
+  arch, which is what stops a cut-out looking pasted on.
+- **`LANDMARK_ART` IS KEYED BY THE PLAIN ASSET NAME.** The `@white` suffix is
+  `national_assets.py`'s own key and does not survive into the page, so asking
+  for it got `undefined` — and a canvas draw of nothing is a silent no-op. The
+  medallion rendered as a ring with an empty disc in it, which looks exactly
+  like a design choice.
+- **The art has to be DECODED before the first paint**, for the same reason:
+  `drawImage` of an unloaded image draws nothing and reports nothing. Every
+  draw entry point awaits `ncPreload`.
+- **The foot has to clear the bottom band.** At 104px from `PLATE_B + 48` the
+  club mark ran to 1828 and the band starts at 1804, so it was drawn straight
+  through the weave — and a decorative strip is invisible to every text check
+  there is.
+- `ops/check-lineup.mjs` reads the band inset and the arch bounds **out of
+  `NC`**, the painter's own geometry object. The first time the painter moved
+  them the hard-coded windows kept looking at the old rows and reported no
+  band at all on a card that plainly had one.
+
 #### The flag, the pattern, and the club mark
 - **The tagline is "One flag. One court."** and ALL FOUR forms are derived from
   `tagline` in the season file. Two of them used to be typed into the build, so
@@ -1294,6 +1337,32 @@ and a sticker plan). Output in `brand/national/posts/`.
     green for the honest reason that the design has room. Narrowing the cell
     with the wrap off is the real risk, and is what the clipped check exists
     for.
+- **THE POSTS AND THE SHARE CARDS ARE ONE SET OR THEY ARE NOTHING.** They
+  shared a palette and nothing else: the cards had a header row with the
+  Arabic opposite and a foot carrying the club mark, the volume and the
+  night's landmark, and the posts had a bare `host · URBAN PLAYGROUND · OMAN`
+  line. `chrome()` is one definition both use, and the bands here are inset
+  and pilled like the cards' rather than the full-bleed stripe this file
+  shipped with.
+  - `.archframe` is the open arch — the same shape the card painter draws, as
+    a real element, with the 56 ghost and the medallion on its apex.
+  - The per-card `footer()` is gone. For a while both were drawn and the old
+    row sat under the new one; the overlap check caught "Win the final" lying
+    across the host line.
+- **AN `overflow:hidden` CONTAINER SWALLOWS ITS OWN CONTENT SILENTLY**, and
+  nothing here could see it. The clipped check is horizontal (`scrollWidth`)
+  and the padding check is about boxes running past the FRAME — so an arch too
+  short for what is inside it fails neither. The hero shipped with the bottom
+  of its own plate sliced off, and two more cards that were reporting *ok* had
+  been cutting copy all along.
+  - **Measured as TEXT, not as `scrollHeight`.** `scrollHeight` counts
+    absolutely positioned decoration: the 360px volume ghost inside the arch
+    put it 5px over on a card whose copy stopped 44px clear of the bottom,
+    every time, whatever was removed. What matters is whether a WORD is being
+    cut, so the test is whether a leaf text run's own box falls outside the
+    clipping box — and it names the words it is cutting.
+  - `SABOTAGE=squeeze` shortens the arches and goes red: `<arch> cuts "ALL
+    NOVEMBER" (354..423 in 360)`.
 - **Still Blackout's and not yet rebuilt:** `ops/signup-post.py` (the WhatsApp
   numbered sheet) and `build-standings-post.py` (mid-season). The announcement
   set above is Vol.9's.

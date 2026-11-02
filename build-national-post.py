@@ -78,44 +78,108 @@ def long_date(d):
 # ── the shell ────────────────────────────────────────────────────────────────
 # One place, so four cards cannot drift apart — the lesson build-standings-post
 # records after keeping its own copy of build-announce-post's shell.
-def shell(w, h, body, pad=72):
+def logo_url():
+    """The club mark, inlined. The foot of every card carries it, and a post
+    that fetched it would render without one in a container with no network."""
+    import base64
+    f = os.path.join(HERE, "brand", "national", "up-logo-national.png")
+    with open(f, "rb") as fh:
+        return "data:image/png;base64," + base64.b64encode(fh.read()).decode()
+
+
+LOGO = logo_url()
+
+
+def chrome(night=None):
+    """The header and footer rows every card carries, from the owner's design.
+
+    THE POSTS AND THE SHARE CARDS ARE ONE SET OR THEY ARE NOTHING. Before
+    this they shared a palette and nothing else: the cards had a header row
+    with the Arabic opposite it and a foot carrying the club mark, the volume
+    and the night's landmark, and the posts had a bare `host · URBAN
+    PLAYGROUND · OMAN` line. Two things posted the same evening that do not
+    look related is the fault worth engineering against, so the chrome is one
+    definition used by both.
+    """
+    lm = landmark_for(night_no(night) - 1) if night else None
+    head_r = CFG["nameAr"]
+    foot_ar = (lm or {}).get("nameAr", "")
+    return (
+        f'<div class="chead"><div class="mono chead-l">{CFG["name"]}</div>'
+        f'<div class="kufi chead-r">{head_r}</div></div>',
+        f'<div class="cfoot"><img class="cmark" src="{LOGO}">'
+        f'<div class="cfoot-r"><div class="mono cvol">{CFG["volume"]} &middot; '
+        f'{CFG["monthUpper"][:3]} {NIGHTS[0][:4]}</div>'
+        + (f'<div class="kufi car">{foot_ar}</div>' if foot_ar else "")
+        + '</div></div>')
+
+
+def shell(w, h, body, pad=72, night=None, head=True):
+    head_html, foot_html = chrome(night)
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 {font_bundle()}
 *{{margin:0;padding:0;box-sizing:border-box}}
 html,body{{width:{w}px;height:{h}px;overflow:hidden;background:{P['bg']};
   font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;
-  color:#FFFFFF}}
+  color:{P['ivory']}}}
 body{{position:relative}}
-/* The ground: the khanjar tile at the app's own 340px and .18, not the
-   handoff's 132 and .14. A post is looked at on a phone the same way the app
-   is, and the two must not drift apart. */
-.tile{{position:absolute;inset:0;opacity:.18;pointer-events:none;
+/* The ground: the khanjar tile at the app's own 340px, not the handoff's 132.
+   A post is looked at on a phone the same way the app is, and the two must
+   not drift apart. */
+.tile{{position:absolute;inset:0;opacity:.15;pointer-events:none;
   background-image:url("{A['khanjar']}");background-size:340px 340px}}
-/* The masar band, top and bottom, as the frame — the volume's rule, and the
-   owner's own artwork. Taller here than in the app (56 against 44) because a
-   post is looked at whole rather than scrolled past. The width keeps the
-   art's 100:56 ratio; a woven band stretched off its aspect looks wrong in a
-   way nothing else does. */
-.band{{position:absolute;left:0;right:0;height:56px;pointer-events:none;
-  background-color:{P['deep']};
+/* THE MASAR BAND IS INSET AND PILLED, the same trim the share cards carry
+   and the same proportions the handoff draws: 24 tall at a 14px side inset
+   with a pill radius, which at this scale is 44 inset 56. Run full-bleed it
+   stops being a trim and becomes a bar of its own — the mistake this file
+   shipped with and CLAUDE.md already records twice elsewhere. */
+.band{{position:absolute;left:56px;right:56px;height:44px;border-radius:22px;
+  pointer-events:none;overflow:hidden;background-color:{P['deep']};
   background-image:url("{A['masar']}");
-  background-size:100px 56px;background-repeat:repeat-x}}
-.band.b{{transform:scaleY(-1)}}
-.band.t{{top:0}} .band.b{{bottom:0}}
-.pad{{position:relative;height:100%;padding:{pad + 24}px {pad}px {pad + 24}px;
+  background-size:79px 44px;background-repeat:repeat-x}}
+.band.t{{top:40px}} .band.b{{bottom:40px;transform:scaleY(-1)}}
+.pad{{position:relative;height:100%;
+  /* The chrome is absolutely positioned, so the content box has to be
+     told about it: the header runs to pad+64 and the footer occupies
+     from pad+22 up to about pad+122 off the foot. */
+  padding:{pad + 76}px {pad}px {pad + 106}px;
   display:flex;flex-direction:column}}
-/* NO DROP SHADOWS. Depth is the double-line ring and nothing else. */
-/* THE ARCH IS A DOME HERE, not the app's 168px. That figure is an arch on a
-   short wide hero and reads as a plain rounded rectangle on a card three
-   times as tall — the shape is supposed to be an Omani door, and the door
-   has to be recognisable at the size it is drawn. Percentages, so it holds
-   whatever the card's proportions are. */
+/* NO DROP SHADOWS. Depth is the double line and nothing else. */
+/* The filled dome, for a card that wants the ivory inversion. */
 .arch{{background:{P['ivory']};color:{P['ink']};
   border-radius:50% 50% 28px 28px / 34% 34% 28px 28px;
   box-shadow:0 0 0 7px {P['bg']},0 0 0 11px {P['ivory']};
   overflow:hidden;position:relative}}
+/* THE OPEN ARCH — the owner's design: a door drawn as a double ivory outline
+   over a deeper ground, holding the subject, with the volume's 56 as a ghost
+   behind it and the night's landmark straddling the apex. The share-card
+   painter draws exactly this shape; here it can be a real element. */
+.archframe{{position:relative;background:{P['deep']};
+  border:5px solid {P['ivory']};
+  border-radius:50% 50% 30px 30px / 38% 38% 30px 30px;
+  overflow:hidden}}
+/* The inner line is GREEN. The green on these surfaces has to have an edge:
+   as light on a photograph it reads as a smear rather than as a lamp. */
+.archframe::after{{content:"";position:absolute;inset:10px;pointer-events:none;
+  border:3px solid {P['green']};
+  border-radius:50% 50% 22px 22px / 38% 38% 22px 22px}}
+.archframe .ghost{{position:absolute;left:0;right:0;bottom:7%;text-align:center;
+  font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
+  font-size:360px;line-height:.8;color:rgba(26,10,12,.26);pointer-events:none}}
+.archwrap{{position:relative;display:flex;flex-direction:column;flex:1;
+  min-height:0}}
+/* The medallion sits ON the apex, half in and half out, which is what makes
+   the arch read as a door rather than as a rounded box. */
+.apex{{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);
+  z-index:3}}
 .sheet{{background:{P['deep']};border-radius:28px;
   border:1px solid rgba(247,241,230,.18)}}
+/* The result plate: ivory, its own masar trim along the top edge. */
+.plate{{position:relative;background:{P['ivory']};color:{P['ink']};
+  border-radius:42px;overflow:hidden;padding:46px 44px 40px}}
+.plate::before{{content:"";position:absolute;top:0;left:0;right:0;height:16px;
+  background-color:{P['deep']};background-image:url("{A['masar']}");
+  background-size:29px 16px;background-repeat:repeat-x}}
 .pill{{border-radius:999px;display:inline-flex;align-items:center;
   justify-content:center}}
 .disp{{font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;
@@ -135,12 +199,25 @@ body{{position:relative}}
 /* The landmark medallion: a disc of the base red with a white silhouette. */
 .med{{border-radius:50%;background-color:{P['bg']};background-repeat:no-repeat;
   background-position:center 54%;background-size:62% auto;
-  box-shadow:0 0 0 3px {P['ivory']},0 0 0 6px {P['flag']};flex:0 0 auto}}
+  box-shadow:0 0 0 5px {P['ivory']},0 0 0 9px {P['green']};flex:0 0 auto}}
 .foot{{margin-top:auto;display:flex;align-items:center;justify-content:space-between;
   gap:20px}}
+/* ── the shared chrome ── */
+.chead{{position:absolute;left:{pad}px;right:{pad}px;top:{pad + 16}px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px}}
+.chead-l{{font-size:25px;letter-spacing:.26em;color:{P['ivory']}}}
+.chead-r{{font-size:30px;color:{P['ivory']}}}
+.cfoot{{position:absolute;left:{pad}px;right:{pad}px;bottom:{pad + 8}px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:24px}}
+.cmark{{height:64px;width:auto;display:block}}
+.cfoot-r{{text-align:right}}
+.cvol{{font-size:26px;letter-spacing:.22em;color:{P['ivory']}}}
+.car{{font-size:26px;color:{P['rose']};margin-top:8px}}
 </style></head><body>
 <div class="tile"></div><div class="band t"></div><div class="band b"></div>
+{head_html if head else ""}
 <div class="pad">{body}</div>
+{foot_html}
 </body></html>"""
 
 
@@ -162,39 +239,48 @@ def flag56(size):
             f'<span class="disp n">56</span></span>')
 
 
-def footer(size=22):
-    return (f'<div class="foot"><div class="mono" style="font-size:{size}px;'
-            f'letter-spacing:.2em;color:{P["rose"]}">{CFG["host"]}</div>'
-            f'<div class="mono" style="font-size:{size}px;letter-spacing:.2em;'
-            f'color:{P["rose"]}">URBAN PLAYGROUND &middot; OMAN</div></div>')
-
+# The per-card footer is GONE: the shared chrome carries the foot now, and
+# for a while both were drawn — the old row sat under the new one and the
+# renderer's overlap check caught "Win the final" lying across the host
+# line. One definition, used by every card and by the share cards.
 
 # ── 1 · HERO ────────────────────────────────────────────────────────────────
 def card_hero(w, h):
+    """The owner's composition: the headline, then the door.
+
+    The old hero was a filled ivory dome with everything stacked inside it,
+    which is a PANEL — the arch's shape was doing no work. This is the design
+    they drew: the name set large on the ground, the open arch below it
+    holding the tagline and the dates, the 56 as a ghost inside it, and the
+    first night's landmark straddling the apex.
+    """
     a, b = [x.strip() for x in TAG.replace("?", ".").split(".") if x.strip()]
+    lm = landmark_for(0)
     body = f"""
-<div class="arch" style="flex:1;display:flex;flex-direction:column;
-     align-items:center;justify-content:center;gap:28px;padding:250px 64px 72px">
-  {flag56(76)}
-  <div style="text-align:center">
-    <div class="mono" style="font-size:24px;letter-spacing:.3em;color:{P['bg']}">
-      URBAN SOCIAL SERIES &middot; {CFG['volume']}</div>
-    <div class="disp" style="font-size:112px;margin-top:18px">56 NATIONAL<br>SERIES</div>
-    <div class="kufi" style="font-size:34px;margin-top:16px;color:{P['muted']}">
-      {AR['series']}</div>
+<div class="disp" style="font-size:100px">56 NATIONAL<br>SERIES</div>
+<div class="kufi" style="font-size:36px;margin-top:20px;color:{P['rose']}">
+  {AR['series']}</div>
+<div class="archwrap" style="margin-top:72px">
+  <div class="apex">{med(lm['asset'], 112)}</div>
+  <div class="archframe" style="flex:1;display:flex;flex-direction:column;
+       align-items:center;justify-content:space-between;gap:30px;
+       padding:136px 60px 44px">
+    <div class="ghost" aria-hidden="true" data-ghost="1">56</div>
+    <div class="disp" style="position:relative;font-size:70px;text-align:center;
+         color:{P['ivory']}">{a.upper()}<br>
+      <span style="color:{P['rose']}">{b.upper()}</span></div>
+    <div class="plate" style="position:relative;width:100%;text-align:center;
+         padding:28px 30px 22px">
+      <div class="mono" style="font-size:22px;letter-spacing:.22em;
+           color:{P['muted']}">{CFG['schedule'].upper().replace(', ', ' &middot; ')}</div>
+      <div class="disp" style="font-size:58px;margin-top:12px;color:{P['ink']}">
+        ALL {CFG['monthUpper']}</div>
+      <div class="mono" style="font-size:24px;letter-spacing:.2em;margin-top:14px;
+           color:{P['flag']}">{CFG['sessions']} NIGHTS &middot; {POOL} OMR</div>
+    </div>
   </div>
-  <div class="disp" style="font-size:62px;color:{P['bg']};text-align:center">
-    {a.upper()}.<br>{b.upper()}.</div>
-  <div style="display:flex;align-items:center;gap:22px">
-    {med('mon-nizwa', 84, 'white')}
-    <div class="mono" style="font-size:26px;letter-spacing:.2em;color:{P['muted']};
-         text-align:left">
-      {CFG['schedule'].upper().replace(', ', ' &middot; ')}<br>ALL {CFG['monthUpper']}</div>
-  </div>
-</div>
-<div style="height:40px"></div>
-{footer()}"""
-    return shell(w, h, body)
+</div>"""
+    return shell(w, h, body, night=NIGHTS[0])
 
 
 # ── 2 · THE NINE NIGHTS ─────────────────────────────────────────────────────
@@ -218,25 +304,23 @@ def card_nights(w, h):
                     f'2X</span>')
         rows.append(f"""
 <div style="display:flex;align-items:center;gap:20px;background:{bg};
-     border-radius:999px;padding:11px 24px 11px 11px">
-  {med(lm['asset'], 68, 'white')}
+     border-radius:999px;padding:9px 22px 9px 9px">
+  {med(lm['asset'], 62, 'white')}
   <div style="flex:1;min-width:0">
     <div class="mono" style="font-size:17px;letter-spacing:.14em;white-space:nowrap;
          overflow:hidden;text-overflow:ellipsis;color:{P['rose'] if not nat else '#FFFFFF'}">
       {short(d)} NOV &middot; {lm['nameEn'].upper()}</div>
-    <div class="disp" style="font-size:33px;margin-top:4px">SESSION {night_no(d)}</div>
+    <div class="disp" style="font-size:31px;margin-top:3px">SESSION {night_no(d)}</div>
   </div>
   {chip}
 </div>""")
     body = f"""
 <div class="mono" style="font-size:24px;letter-spacing:.3em;color:{P['rose']}">
   {CFG['sessions']} NIGHTS &middot; {CFG['monthUpper']}</div>
-<div class="disp" style="font-size:98px;margin-top:8px">THE SEASON</div>
-<div style="display:flex;flex-direction:column;gap:11px;margin-top:26px">
+<div class="disp" style="font-size:90px;margin-top:6px">THE SEASON</div>
+<div style="display:flex;flex-direction:column;gap:9px;margin-top:20px">
   {''.join(rows)}
-</div>
-<div style="height:30px"></div>
-{footer()}"""
+</div>"""
     return shell(w, h, body)
 
 
@@ -252,14 +336,14 @@ def card_format(w, h):
 <div class="mono" style="font-size:24px;letter-spacing:.3em;color:{P['rose']}">
   HOW A NIGHT WORKS</div>
 <div class="disp" style="font-size:104px;margin-top:10px">THE<br>FORMAT</div>
-<div class="arch" style="margin-top:34px;padding:190px 56px 50px;flex:1">
+<div class="arch" style="margin-top:22px;padding:140px 52px 34px;flex:1">
   <div class="mono" style="font-size:22px;letter-spacing:.2em;color:{P['bg']};
        text-align:center">16 TEAMS &middot; 4 GROUPS OF 4</div>
-  <div style="font-size:30px;line-height:1.45;margin-top:22px;text-align:center">
+  <div style="font-size:26px;line-height:1.38;margin-top:14px;text-align:center">
     Group stage, then quarters, semis and a final.<br>
     New partners every night — you are not locked to one player.
   </div>
-  <div style="margin-top:30px">
+  <div style="margin-top:18px">
     {line('Group win', '+3')}
     {line('Tiebreak loss', '+2')}
     {line('Competitive loss', '+1')}
@@ -267,13 +351,11 @@ def card_format(w, h):
     {line('Reach QF / SF / Final', '+1 / +2 / +3')}
     {line('Win the final', '+5')}
   </div>
-  <div style="font-size:25px;margin-top:22px;text-align:center;color:{P['muted']}">
+  <div style="font-size:22px;margin-top:14px;text-align:center;color:{P['muted']}">
     Points follow <b>you</b>, not your team. Series resets to zero;
     your all-time total carries over.
   </div>
-</div>
-<div style="height:30px"></div>
-{footer()}"""
+</div>"""
     return shell(w, h, body)
 
 
@@ -314,8 +396,7 @@ def card_money(w, h):
 <div class="pill" style="margin-top:16px;background:{P['ivory']};color:{P['ink']};
      padding:22px;font-size:29px;font-weight:800;text-align:center">
   {CFG['entry']} OMR per player, per night</div>
-<div style="height:30px"></div>
-{footer()}"""
+<div style="height:30px"></div>"""
     return shell(w, h, body)
 
 
@@ -338,15 +419,15 @@ def card_story(w, h):
     {a.upper()}.<br>{b.upper()}.</div>
 </div>
 
-<div class="arch" style="margin-top:50px;padding:200px 54px 54px;text-align:center">
+<div class="arch" style="margin-top:40px;padding:168px 50px 40px;text-align:center">
   {med('mon-nizwa', 128, 'white')}
   <div class="mono" style="font-size:24px;letter-spacing:.24em;color:{P['bg']};margin-top:24px">
     {CFG['schedule'].upper().replace(', ', ' &middot; ')}</div>
-  <div class="disp" style="font-size:72px;margin-top:12px">ALL {CFG['monthUpper']}</div>
-  <div style="font-size:30px;margin-top:16px;color:{P['muted']}">
+  <div class="disp" style="font-size:64px;margin-top:10px">ALL {CFG['monthUpper']}</div>
+  <div style="font-size:27px;margin-top:12px;color:{P['muted']}">
     {CFG['sessions']} nights &middot; {CFG['entry']} OMR a player</div>
   <div class="pill" style="margin-top:26px;background:{P['green']};color:#FFFFFF;
-       padding:18px 30px;font-size:26px;font-weight:800">
+       padding:15px 26px;font-size:24px;font-weight:800">
     {long_date(nat).upper()} &middot; {CFG['nationalDayLabel']}</div>
 </div>
 
@@ -357,7 +438,6 @@ def card_story(w, h):
 </div>
 
 <div style="height:34px"></div>
-{footer(24)}
 <div style="height:150px"></div>"""
     return shell(w, h, body, pad=76)
 

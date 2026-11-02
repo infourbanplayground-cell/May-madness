@@ -149,15 +149,17 @@ const cards = await pg.evaluate(async ({ nPhotos, nCuts }) => {
     const d = lus[i];
     let url;
     if (nCuts) {
-      // luPaintCut is not reachable through drawLineup: that path derives a
+      // The cut-out path is not reachable through drawLineup: it derives a
       // Cloudinary background-removal URL from the photo, and these are
-      // served locally. The painter is top-level, so call it directly.
+      // served locally. ncPaint is top-level, so call it directly in "cut"
+      // mode — the same entry drawCutCardAt uses.
+      await ncPreload(d);
       url = await new Promise(res => {
         const im = new Image();
         im.onload = () => {
           const c = document.createElement('canvas');
           c.width = LU_W; c.height = LU_H;
-          luPaintCut(c.getContext('2d'), d.kind, d, im, logoImg, null);
+          ncPaint(c.getContext('2d'), d.kind, d, im, logoImg, null, 'cut');
           res(c.toDataURL('image/png'));
         };
         im.onerror = () => res(null);
@@ -172,6 +174,14 @@ const cards = await pg.evaluate(async ({ nPhotos, nCuts }) => {
   return out;
 }, { nPhotos: PHOTOS ? PHOTOS.length : 0, nCuts: CUTS ? CUTS.length : 0 });
 
+// The card's own geometry, so the checks below cannot drift from the painter.
+const GEO2 = await pg.evaluate(() => (typeof NC !== 'undefined')
+  ? { ARCH_TOP: NC.ARCH_TOP, ARCH_BOT: NC.PLATE_B }
+  : { ARCH_TOP: 420, ARCH_BOT: 1560 });
+const GEO = await pg.evaluate(() => (typeof NC !== 'undefined')
+  ? { PAD: NC.PAD, EDGE: 72, H: NC.BAND }
+  : { PAD: 36, EDGE: 18, H: 56 });
+
 // ── what the bitmap actually is ─────────────────────────────────────────────
 const VOL8 = [[198, 255, 0, 'Blackout lime'], [255, 46, 136, 'Blackout magenta']];
 const NEAR = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) < 40;
@@ -182,7 +192,7 @@ for (const c of cards) {
   const file = path.join(OUT, `lineup-${c.key}.png`);
   fs.writeFileSync(file, png);
 
-  const stats = await pg.evaluate(async (url) => {
+  const stats = await pg.evaluate(async ({ url, geo2 }) => {
     const im = new Image();
     await new Promise(r => { im.onload = r; im.src = url; });
     const cv = document.createElement('canvas');
@@ -197,7 +207,7 @@ for (const c of cards) {
     // graded and lamp-lit but legitimately not red. Counting it dropped a
     // perfectly good photo card to 50% and failed it. Outside that window
     // both kinds of card are the same thing: this volume's ground.
-    const PH_TOP = 420, PH_BOT = 1560;
+    const PH_TOP = geo2.ARCH_TOP, PH_BOT = geo2.ARCH_BOT;
     // Every 7th pixel: enough to find a colour that is anywhere on the card,
     // fast enough to run on five 1080x1920 bitmaps.
     for (let i = 0; i < d.length; i += 4 * 7) {
@@ -213,7 +223,7 @@ for (const c of cards) {
     const top = [...hist].sort((a, b) => b[1] - a[1]).slice(0, 12);
     return { w: im.width, h: im.height, red: red / n,
              top: top.map(([k, v]) => [k, v / n]) };
-  }, c.url);
+  }, { url: c.url, geo2: GEO2 });
 
   const bad = [];
   for (const [k, share] of stats.top) {
@@ -242,14 +252,18 @@ for (const c of cards) {
   // to be the same thing; once it was inset the row windows still clipped 20
   // rows of it and passed on a sliver, which would go on passing if the trim
   // drifted another 40px in.
-  const weave = await pg.evaluate(async (url) => {
+  const weave = await pg.evaluate(async ({ url, geo }) => {
     const im = new Image();
     await new Promise(r => { im.onload = r; im.src = url; });
     const cv = document.createElement('canvas');
     cv.width = im.width; cv.height = im.height;
     cv.getContext('2d').drawImage(im, 0, 0);
     const g = cv.getContext('2d');
-    const PAD = 36, EDGE = 18, H = 56;
+    // READ FROM THE PAINTER, not written here. The band's inset and height
+    // are geometry the card owns; the first time the painter moved them the
+    // windows kept looking at the old rows and reported no band at all on a
+    // card that plainly had one.
+    const PAD = geo.PAD, EDGE = geo.EDGE, H = geo.H;
     const green = (y0) => {
       const w = im.width - PAD * 2;
       const d = g.getImageData(PAD, y0, w, H).data;
@@ -259,7 +273,7 @@ for (const c of cards) {
       return n / (w * H);
     };
     return { head: green(EDGE), foot: green(im.height - EDGE - H) };
-  }, c.url);
+  }, { url: c.url, geo: GEO });
   if (weave.head < 0.08) bad.push(`no masar band at the head (${(weave.head * 100).toFixed(1)}% green)`);
   if (weave.foot < 0.08) bad.push(`no masar band at the foot (${(weave.foot * 100).toFixed(1)}% green)`);
 

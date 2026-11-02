@@ -345,6 +345,10 @@ def _double_label():
 # same trim at this scale. Run full-bleed to the bitmap edge it stopped being a
 # trim and became a bar, which is the mistake already recorded for the page
 # band, and it crowded the night label at the foot.
+# The year comes off the schedule, not off the clock: a card built in
+# December must still say the season it is about.
+_season_year = CFG["nights"][0][:4]
+
 BAND_JS = f"""const LU_BAND = {A['masar']!r};
 let LU_BAND_IMG = null;
 // LOADED EAGERLY, not on the way through one painter. The slot used to be
@@ -353,6 +357,18 @@ let LU_BAND_IMG = null;
 // with no masar trim on it, silently, depending only on which card somebody
 // opened first. Caught by rendering the cut-out card for the first time.
 luImg(LU_BAND).then(b => {{ LU_BAND_IMG = LU_BAND_IMG || b; }});
+// The khanjar tile, for the card ground and the arch's interior. Same art
+// the page is laid on, so a card and the app cannot drift apart.
+const LU_TILE = {A['khanjar']!r};
+let LU_TILE_IMG = null;
+luImg(LU_TILE).then(b => {{ LU_TILE_IMG = LU_TILE_IMG || b; }});
+// Read from the season file, never typed on a card.
+const SERIES_NAME = {CFG['name']!r};
+const SERIES_NAME_AR = {CFG['nameAr']!r};
+const VOLUME_LABEL = {CFG['volume']!r};
+const SEASON_MONTH_SHORT = {CFG['monthUpper'][:3]!r};
+const SEASON_YEAR = {_season_year!r};
+
 function luWeave(g, y) {{
   const b = LU_BAND_IMG;
   if (!b) return;
@@ -375,6 +391,13 @@ function luWeave(g, y) {{
 // club mark behind the lower name plate.
 const luTrim = (g) => {{ luWeave(g, 18); luWeave(g, LU_H - 74); }};
 """
+
+# VOL.9'S OWN CARD PAINTER. It is a module rather than another pile of
+# MOTIFS anchors because this is a new COMPOSITION, not a recolour of
+# Vol.8's — and patching a layout one anchor at a time is exactly how the
+# cards ended up as a black-card design wearing red.
+import national_cards  # noqa: E402
+CARDS_JS = national_cards.painter(CFG['palette'])
 
 DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
@@ -474,7 +497,8 @@ MOTIFS = [
      "nights are double. Turn off to override.`"),
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
-    ("function SessionsView({", BAND_JS + DATE_JS + LANDMARK_JS + "\nfunction SessionsView({"),
+    ("function SessionsView({",
+     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
     #     invented here, while the handoff specifies a "56" lockup and the
@@ -571,14 +595,32 @@ MOTIFS = [
     ('const [im, logo] = await Promise.all([luImg(photo), luImg("assets/up-logo-national.png")]);',
      'const [im, logo, band] = await Promise.all([luImg(photo), '
      'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
-     '  LU_BAND_IMG = LU_BAND_IMG || band;'),
+     '  LU_BAND_IMG = LU_BAND_IMG || band;\n'
+     '  await ncPreload(d);'),
     # ...and the cut-out path, which loads neither and would otherwise rely on
     # a photo card having been drawn first.
     ('const [cut, logo] = await Promise.all([luImg(cutUrl), '
      'luImg("assets/up-logo-national.png")]);',
      'const [cut, logo, band] = await Promise.all([luImg(cutUrl), '
      'luImg("assets/up-logo-national.png"), luImg(LU_BAND)]);\n'
-     '  LU_BAND_IMG = LU_BAND_IMG || band;'),
+     '  LU_BAND_IMG = LU_BAND_IMG || band;\n'
+     '  await ncPreload(d);'),
+    # 5f · THE PAINTER BECOMES THIS VOLUME'S OWN. luPaint and luPaintCut are
+    #      the PREVIOUS volume's composition — a photo window with two dark
+    #      plates stacked under it, a card designed for black. No amount of
+    #      recolouring moves a shape, which is why the cards kept reading as
+    #      inherited however many colours were swept. ncPaint lives in
+    #      is the owner's design: the arch, the medallion on its apex, the
+    #      ivory result plate, the score as the hero.
+    #      Both inherited painters stay in the page UNREFERENCED rather than
+    #      being cut, because this file is what the NEXT volume inherits and
+    #      it should still read as the previous volume wrote it.
+    ('    luPaint(c.getContext("2d"), kind, d, img, logo, adj);',
+     '    ncPaint(c.getContext("2d"), kind, d, img, logo, adj, "photo");'),
+    ('    luPaint(g, kind, d, img, logo, adj);',
+     '    ncPaint(g, kind, d, img, logo, adj, "photo");'),
+    ('  luPaintCut(g, kind, d, cut, logo, adj);',
+     '  ncPaint(g, kind, d, cut, logo, adj, "cut");'),
     ('function luPaint(g, kind, d, im, logo, adj) {\n'
      '  adj = adj || LU_ADJ0;\n'
      '  g.fillStyle = "#050505"; g.fillRect(0, 0, LU_W, LU_H);',
