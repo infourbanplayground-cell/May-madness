@@ -317,7 +317,13 @@ const AUDIT = function () {
     if (q0.width < 8 || q0.height < 8) continue;
     // Behind the open sheet, and so legitimately covered.
     if (layer && !layer.contains(b) && !inChrome(b)) continue;
-    if (layer && inChrome(b) && layerZ > 40) continue;
+    // AND THE CHROME TOO, when a full-screen layer is over it. The open
+    // session is `fixed inset-0 z-40` and is MEANT to cover the header and
+    // the nav — reporting all five nav buttons and both header buttons on
+    // every one of its sub-screens is thirty-odd false positives that bury
+    // anything real. The first version compared `layerZ > 40` and the
+    // session screen is exactly 40, so it reported every one of them.
+    if (layer && inChrome(b) && !layer.contains(b)) continue;
     controls.push(b);
   }
   // NO Z-ORDER ARITHMETIC. The first version of this decided whether a sheet
@@ -564,10 +570,25 @@ for (const role of ROLES) {
   else {
     await pg.waitForTimeout(1000);
     await look('SESSION');
+    // ...AND THEN THE SCORING SCREENS, WHICH NOTHING HAD EVER REACHED.
+    // A FINISHED night's row opens its RECAP, not the scorer's view — so the
+    // harness stopped at a sheet with two buttons on it and never saw the
+    // screens with the most controls in the app: the group tables, the teams
+    // list, the bracket and the score pads, which are what the organiser
+    // actually holds the phone for. FULL RESULTS is the way in.
+    const wentIn = await pg.evaluate(() => {
+      const b = [...document.querySelectorAll('button')]
+        .find(x => /FULL RESULTS/i.test(x.textContent || ''));
+      if (!b) return false;
+      b.click();
+      return true;
+    });
+    if (wentIn) { await pg.waitForTimeout(1000); await look('SESSION FULL'); }
+
     // its own sub-screens
     const subs = await pg.evaluate(() => [...new Set([...document.querySelectorAll('button')]
       .map(b => (b.textContent || '').trim())
-      .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE)$/i.test(t)))]);
+      .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE|SCORES)$/i.test(t)))]);
     for (const s of subs) {
       await pg.evaluate((s) => {
         const b = [...document.querySelectorAll('button')]
