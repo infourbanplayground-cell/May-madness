@@ -630,6 +630,41 @@ MOTIFS = [
      '    ncPaint(g, kind, d, img, logo, adj, "photo");'),
     ('  luPaintCut(g, kind, d, cut, logo, adj);',
      '  ncPaint(g, kind, d, cut, logo, adj, "cut");'),
+    # 5e7 · NAME THE SAVE BANNER, so the session overlay can get out from
+    #       under it. The banner is `sticky; top:0; z-index:50` and the open
+    #       session is `fixed inset-0 z-40`, so the banner paints over the
+    #       session's own header — and the BACK ARROW out of a night sits in
+    #       that header. With a failed save showing, the organiser could not
+    #       leave the screen they were stuck on, which is the worst possible
+    #       moment for it. The banner is right to be on top; the overlay just
+    #       has to start below it.
+    ('<div onClick={() => { if (!getToken()) setShowLogin(true); }} style={{ position: "sticky", top: 0, zIndex: 50,',
+     '<div className="na-savebanner" onClick={() => { if (!getToken()) setShowLogin(true); }} '
+     'style={{ position: "sticky", top: 0, zIndex: 50,'),
+    # 5e6 · THE SHARE CHIPS DECLARE THEIR OWN HEIGHT, so no stylesheet can
+    #       raise it. `minHeight:36` is inline on the session's action row —
+    #       LINE-UP, SHARE, PHOTOS, POSTS — and an inline declaration beats a
+    #       rule. 36 is under the 44px floor every mobile guideline sets, on
+    #       the row the organiser taps all evening. Changed where it is
+    #       written rather than shouted down with !important.
+    ('style={{ flex:"0 0 auto", minHeight:36, display:"inline-flex", alignItems:"center", gap:6,',
+     'style={{ flex:"0 0 auto", minHeight:44, display:"inline-flex", alignItems:"center", gap:6,'),
+    # 5e5 · NAME THE TWO LINES IN THE BRAND BAR, so the collapsing header can
+    #       take the second one away without a `:nth-child` guess. The skin
+    #       folds the header once the page moves; the volume's title stays
+    #       because it is what tells you which app you are in, and the Arabic
+    #       sub-line goes, because it is identity rather than navigation and
+    #       it is the difference between a 46px row and a 58px one.
+    ('            <div style={{minWidth:0}}>\n'
+     '              <div style={{fontStyle:"italic",fontVariationSettings:"\'wdth\' 118,\'wght\' 900",\n'
+     '                fontSize:20,lineHeight:1,whiteSpace:"nowrap"}}>56 NATIONAL SERIES</div>\n'
+     '              <div style={{fontFamily:"\'JetBrains Mono\',monospace",fontWeight:700,fontSize:8,',
+     '            <div style={{minWidth:0}}>\n'
+     '              <div className="na-brand-name" '
+     'style={{fontStyle:"italic",fontVariationSettings:"\'wdth\' 118,\'wght\' 900",\n'
+     '                fontSize:20,lineHeight:1,whiteSpace:"nowrap"}}>56 NATIONAL SERIES</div>\n'
+     '              <div className="na-brand-sub" '
+     'style={{fontFamily:"\'JetBrains Mono\',monospace",fontWeight:700,fontSize:8,'),
     # 5e3 · THE RANK LEADER CARD COLLIDED WITH ITSELF.
     #       On a 390px phone the champion's row rendered
     #       "1 SESSIONS · 100% WIN WR5TSST R" — three text runs stacked on
@@ -1073,6 +1108,40 @@ def apply_skin(s, report):
         used.add(k)
         return art[k]
 
+    # A STRAY `*/` SILENTLY EATS THE RULE AFTER IT, and nothing downstream can
+    # see that. Editing a comment here left five lines of prose outside any
+    # comment followed by a second `*/`; the parser threw away the block that
+    # came next, and the tap-target floor it carried simply never applied —
+    # with the stylesheet on screen plainly saying it should. The measurement
+    # disagreeing with the source is the only thing that caught it.
+    # Comments do not nest in CSS, so the test is exact: walking the file, an
+    # opener must never appear while already inside a comment, and a closer
+    # must never appear outside one.
+    depth, i2, line = 0, 0, 1
+    while i2 < len(skin) - 1:
+        two = skin[i2:i2 + 2]
+        if skin[i2] == "\n":
+            line += 1
+        if two == "/*":
+            if depth:
+                raise AssertionError(f"national-skin.css line {line}: a comment "
+                                     f"opens inside a comment — CSS comments do "
+                                     f"not nest, and the rule after the first "
+                                     f"`*/` is being thrown away")
+            depth, i2 = 1, i2 + 2
+            continue
+        if two == "*/":
+            if not depth:
+                raise AssertionError(f"national-skin.css line {line}: a stray "
+                                     f"`*/` outside a comment — everything "
+                                     f"between the previous `*/` and this one "
+                                     f"is being parsed as CSS, and the next "
+                                     f"rule is silently dropped")
+            depth, i2 = 0, i2 + 2
+            continue
+        i2 += 1
+    assert not depth, "national-skin.css ends inside an unclosed comment"
+
     skin, n = re.subn(r"@@A:([a-z0-9@-]+)@@", put, skin)
     assert n, "the skin references no artwork — the handoff's motifs are missing"
     report(f"artwork: {len(used)} asset(s) inlined, {n} reference(s), "
@@ -1087,9 +1156,51 @@ def apply_skin(s, report):
     # harness looking for that banner finds the wrong block: SABOTAGE=noskin
     # deleted an August-era layer, every check stayed green, and a sabotage
     # that silently does nothing is worse than no sabotage at all.
-    s = (s[:i] + '<style id="vol9-skin">\n' + skin + "\n</style>\n" + s[i:])
+    # THE ONE THING THE SKIN CANNOT DO BY ITSELF. The collapsing header needs
+    # to know whether the page has moved, and CSS has no scroll selector that
+    # works here. This is a plain listener rather than a React effect on
+    # purpose: it is chrome, it is the same on every screen, and threading a
+    # piece of presentation state through the app to drive a stylesheet is how
+    # the two get out of step.
+    #   · PASSIVE, and it only writes when the answer CHANGES, so a scroll is
+    #     not a attribute write per frame.
+    #   · 8px of hysteresis, or a header that collapses at exactly 0 flickers
+    #     against its own layout shift — folding it makes the page shorter,
+    #     which can scroll you back to 0, which unfolds it.
+    #   · It also listens in the CAPTURE phase, because the deepest screen in
+    #     this app scrolls inside a `fixed inset-0` pane and never moves the
+    #     window at all; without capture the header stays expanded there.
+    boot = (
+        '<script id="vol9-chrome">(function(){'
+        'var on=false,h=document.documentElement;'
+        'function f(e){'
+        'var y=window.scrollY||0;'
+        'var t=e&&e.target;'
+        'if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;'
+        'var n=on?y>2:y>8;'
+        'if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");'
+        'else h.removeAttribute("data-scrolled");}}'
+        'addEventListener("scroll",f,{passive:true,capture:true});'
+        'addEventListener("resize",f,{passive:true});f();'
+        # ...and the save banner's height, published as a custom property so
+        # the open session can start below it. The banner wraps to two or
+        # three lines depending on the width and on whether it is retrying, so
+        # the number cannot be written down anywhere — it has to be measured.
+        # A MutationObserver rather than a timer: it only costs anything when
+        # React has actually re-rendered, and the banner appearing IS a
+        # re-render.
+        'var q=null;function b(){'
+        'var e=document.querySelector(".na-savebanner");'
+        'var v=e?Math.round(e.getBoundingClientRect().height):0;'
+        'if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}}'
+        'var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}'
+        'new MutationObserver(s).observe(document.documentElement,'
+        '{childList:true,subtree:true});'
+        'addEventListener("resize",s,{passive:true});s();'
+        '})();</script>\n')
+    s = (s[:i] + '<style id="vol9-skin">\n' + skin + "\n</style>\n" + boot + s[i:])
     report(f"skin: {len(skin)} bytes appended as the last style block"
-           ' (id="vol9-skin")')
+           ' (id="vol9-skin"), plus the collapsing-header listener')
     return s
 
 

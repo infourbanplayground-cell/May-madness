@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "fa47ce28ccd1";
+  var V = "c1d0b6c57a12";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -7132,7 +7132,7 @@ function App() {
     <div className="min-h-screen">
       <div className="court-motif" />
       {canScore && (sync === "error" || sync === "offline") && (
-        <div onClick={() => { if (!getToken()) setShowLogin(true); }} style={{ position: "sticky", top: 0, zIndex: 50, background: "#F7F1E6", color: "#1A0A0C", padding: "10px 14px", textAlign: "center", fontWeight: 800, fontSize: 13, letterSpacing: ".3px", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,.5)" }}>
+        <div className="na-savebanner" onClick={() => { if (!getToken()) setShowLogin(true); }} style={{ position: "sticky", top: 0, zIndex: 50, background: "#F7F1E6", color: "#1A0A0C", padding: "10px 14px", textAlign: "center", fontWeight: 800, fontSize: 13, letterSpacing: ".3px", cursor: "pointer", boxShadow: "0 2px 10px rgba(0,0,0,.5)" }}>
           ⚠️ NOT SAVING — your changes are only on this device.{" "}
           {getToken() ? "Reconnecting…" : "Tap here to sign in again"}
           {syncErr ? ` (${syncErr})` : ""}
@@ -7156,9 +7156,9 @@ function App() {
             </span>
             <span className="na-flag" aria-hidden="true"><span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:26,lineHeight:.9,color:"#FFFFFF",WebkitTextStroke:"1.2px #1A0A0C",paintOrder:"stroke fill",textShadow:"1.5px 1.5px 0 #1A0A0C",letterSpacing:"-.02em"}}>56</span></span>
             <div style={{minWidth:0}}>
-              <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
+              <div className="na-brand-name" style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                 fontSize:20,lineHeight:1,whiteSpace:"nowrap"}}>56 NATIONAL SERIES</div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
+              <div className="na-brand-sub" style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
                 letterSpacing:".2em",color:"#F2D0D3",marginTop:3,whiteSpace:"nowrap"}}>
                 <span style={{fontFamily:"'Noto Kufi Arabic',sans-serif",fontWeight:700}}>السلسلة الوطنية</span> &middot; VOL.9</div>
             </div>
@@ -9496,7 +9496,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
             ].filter(a => a.show);
             return ACTS.map(a => (
               <button key={a.key} onClick={a.go}
-                style={{ flex:"0 0 auto", minHeight:36, display:"inline-flex", alignItems:"center", gap:6,
+                style={{ flex:"0 0 auto", minHeight:44, display:"inline-flex", alignItems:"center", gap:6,
                          padding:"8px 12px", cursor:"pointer", whiteSpace:"nowrap",
                          fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",
                          textTransform:"uppercase",
@@ -14338,6 +14338,123 @@ header, .sticky.top-0 {
      across the Arabic line. A ::after is not a text run and not a box in
      flow, so neither the clipped check nor the overlap check could see it. */
   padding-bottom: 20px !important;
+  transition: padding-top .18s ease, padding-bottom .18s ease;
+}
+
+/* ── THE HEADER COLLAPSES ONCE YOU SCROLL ───────────────────────────────
+   Measured: 44 (the band's room) + 58 (the brand row) + 20 + border = 128px,
+   and the floating nav is another 68 with its 14px gap. That is 209px of
+   chrome — 25% of an 844px phone and 31% of a 667px one — gone before a
+   single word of the page. It is also a header that is 128px tall and STILL
+   truncates its own title to "56 NATIONAL S…".
+   The band is the top of the PAGE, not a permanent fixture: the handoff puts
+   it above the header as item one of the screen. So it is drawn in full at
+   rest and folded away the moment the page moves, along with half the
+   padding and a smaller club mark. 128px → 66px, which gives back 62px on
+   every screen in the app.
+   The header stays `sticky` throughout — the brand bar leaving is the exact
+   fault SABOTAGE=unstick exists to catch, and this must not reintroduce it. */
+html[data-scrolled="1"] header,
+html[data-scrolled="1"] .sticky.top-0 {
+  padding-top: 8px !important;
+  padding-bottom: 10px !important;
+}
+html[data-scrolled="1"] header::before,
+html[data-scrolled="1"] .sticky.top-0::before {
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+header::before, .sticky.top-0::before { transition: opacity .18s ease; }
+/* !important, because the rule that pins the club mark's height carries it —
+   see the note above about `height:auto` on a portrait mark. */
+/* MAX-HEIGHT, NOT HEIGHT. The mark carries an inline `height: 44px` and an
+   inherited `header img { height: auto }`, and between them it renders at 40
+   — so a `height` of my own is one more voice in an argument that is already
+   not resolving the way anything says it should. A max-height cannot be
+   argued with: whatever wins, the box is no taller than this. */
+html[data-scrolled="1"] header button[aria-label="Urban Playground"] img {
+  max-height: 30px !important;
+}
+header button[aria-label="Urban Playground"] img {
+  transition: max-height .18s ease, height .18s ease;
+}
+/* The sub-line is identity, not navigation, and it is the difference between
+   a 46px row and a 58px one. The volume's name stays: that is the thing that
+   tells you which app you are looking at. Shrinking it to 15px also stops it
+   truncating, which it does at rest — "56 NATIONAL S…" in a 128px header. */
+/* Once folded, the 44px touch boxes are the tallest thing in the row, so they
+   pull in further. The box stays 44 for the thumb; only the space it claims
+   in the layout shrinks. */
+html[data-scrolled="1"] header button,
+html[data-scrolled="1"] .sticky.top-0 button { margin-block: -11px; }
+/* The flag plaque is the tallest thing left in a folded row, so it folds too
+   — the same proportions at a smaller size, never a different shape. */
+html[data-scrolled="1"] .na-flag:not([data-a]):not([data-b]):not([data-c]) {
+  padding: 2px 6px 2px 10px;
+  font-size: 15px;
+}
+html[data-scrolled="1"] .na-flag span { font-size: 15px !important; }
+/* ...and then it goes, because the row still could not fit its own title.
+   "56 NATIONAL S…" in a folded header is the same fault as in an unfolded
+   one, and the plaque is a 56 sitting two inches from a title that starts
+   with the word 56. The club mark stays — it is the thing that is NOT
+   written anywhere else in the bar. */
+html[data-scrolled="1"] .na-flag { display: none !important; }
+html[data-scrolled="1"] .na-brand-sub { display: none !important; }
+html[data-scrolled="1"] .na-brand-name { font-size: 15px !important; }
+/* 19px at rest, not 20. The row is four pixels short of its own title after
+   the club mark's box grew, and a volume name that ellipsises on every
+   screen is a worse trade than one point of type — the handoff's floor is
+   11px and this is nowhere near it. */
+.na-brand-name { font-size: 19px !important; transition: font-size .18s ease; }
+
+/* ── TAP TARGETS ────────────────────────────────────────────────────────
+   The club mark's button measured 26x40 and the SYNCED pill 83x29, both
+   under the 44px every mobile guideline asks for — and the mark is also the
+   only route into staff sign-in, so the smallest target in the app is the
+   one a scorer has to hit before they can score. The box grows, not the
+   artwork: the brand row is 58px tall at rest, so nothing moves until the
+   header is collapsed, where the row becomes the 44 it should always have
+   been.
+   THE NEGATIVE MARGIN IS THE WHOLE TRICK. A bare `min-height: 44px` grew the
+   brand row from 58px to 68 and made the header TALLER — undoing the point of
+   the rule above it. The club mark already pulls itself in by 4px a side for
+   the same reason, so the buttons do the same: the touch box is 44, the box
+   the row lays out is 32, and the header does not move. */
+header button, .sticky.top-0 button {
+  min-height: 44px;
+  margin-block: -6px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+/* THE CLUB MARK'S TOUCH BOX GROWS SIDEWAYS WITHOUT TAKING THE ROOM, by the
+   same trick the heights use. A plain `min-width: 44px` widened the cell
+   from 26 to 44 and took 18px out of the one cell that was already short —
+   "56 NATIONAL SERIES" needed 179px in 171 and ellipsised on every screen in
+   the app. Padding makes the box 44 wide for the thumb; the matching
+   negative margin hands the 18px straight back to the title. */
+header button[aria-label="Urban Playground"] {
+  padding-inline: 9px; margin-inline: -9px;
+}
+header .flex.items-center.gap-3.min-w-0 { gap: 8px !important; }
+/* ...and the same floor inside a night, which is where the organiser spends
+   the evening. The chip row (GROUPS / TEAMS / KO / LIST / PHOTOS / MVP /
+   POSTS / LINE-UP) drew at 36px and the back arrow out of a session at
+   30x30 — the control you need when you are holding a phone in one hand and
+   a racket in the other. These grow for real, because there is room: they
+   are in the body, not in a bar whose height is the thing being defended. */
+.jh-chipbtn { min-height: 44px; }
+/* Every control inside a full-screen layer — the open session, the recap,
+   the share sheets. Chasing them one class at a time missed four of seven,
+   and these are all actions in a sheet rather than rows in a table, so the
+   floor is safe to apply at the layer. min-width as well, for the icon-only
+   ones: the back arrow drew 30x30 and carries no text to widen it. */
+body .fixed.inset-0 button { min-height: 44px; min-width: 44px; }
+/* ...and the sheets that declare `position: fixed; inset: 0` INLINE rather
+   than through the utility classes — the recap, the share sheets, the
+   pickers. They are the same kind of layer and the class selector cannot
+   see them, which left the recap's MY NIGHT / EVERYONE toggle at 37px. */
+body [style*="position: fixed"][style*="inset: 0"] button {
+  min-height: 44px; min-width: 44px;
 }
 /* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
    up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
@@ -14517,6 +14634,21 @@ body { color: #FFFFFF; }
 [style*="fontSize:10"], [style*="font-size:10px"] { font-size: 11px !important; }
 .text-\[8px\], .text-\[9px\], .text-\[10px\] { font-size: 11px !important; }
 
+/* ── THE OPEN SESSION STARTS BELOW THE SAVE BANNER ──────────────────────
+   The banner is `sticky; top:0; z-index:50`; the open session is
+   `fixed inset-0 z-40`. So the banner paints over the session's own header,
+   and the BACK ARROW out of a night lives in that header — with a failed
+   save showing, the organiser could not leave the screen they were stuck
+   on. That is the worst possible moment for it, and it is the one state the
+   banner exists for.
+   The banner is right to be on top: its whole job is to be impossible to
+   miss. The overlay just has to begin underneath it. The height cannot be
+   written down — the banner wraps to two or three lines depending on the
+   width and on whether it is retrying — so the boot script measures it and
+   publishes it here. With no banner the property is 0px and nothing moves. */
+body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
+
 </style>
+<script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",f,{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>
 </body>
 </html>

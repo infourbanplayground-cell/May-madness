@@ -307,6 +307,16 @@ const AUDIT = function () {
     return false;
   };
 
+  // 4 · AND BIG ENOUGH FOR A THUMB. Reachable is not the same as tappable:
+  //     the club mark measured 26x40 and the SYNCED pill 83x29, both under
+  //     the 44px every mobile guideline asks for — and the mark is the only
+  //     route into staff sign-in, so the smallest target in the app was the
+  //     one a scorer has to hit before they can score anything.
+  //     Measured on the TOUCH box, which is what the finger meets: a control
+  //     may draw smaller than it listens, and several here do exactly that,
+  //     pulling themselves in with a negative margin so the header does not
+  //     grow. Only controls that are actually on screen are judged.
+  const tiny = [];
   const unreachable = [];
   const controls = [];
   for (const b of document.querySelectorAll('button, a[href], input, select, textarea, [role="button"]')) {
@@ -385,8 +395,23 @@ const AUDIT = function () {
     }
   }
 
+  for (const b of controls) {
+    const q = b.getBoundingClientRect();
+    if (q.bottom < 1 || q.top > vh - 1) continue;
+    // Sub-pixel tolerance. A box laid out at 43.996 rounds to 44 in the
+    // report and would otherwise fail against its own printed number.
+    if (q.width > 43.5 && q.height > 43.5) continue;
+    // A control inside a row of them (the nav) is judged on the row's own
+    // slot, not on the glyph: the tappable area is the grid cell.
+    const cell = b.parentElement && b.parentElement.getBoundingClientRect();
+    if (cell && cell.height > 43.5 && cell.width > 43.5 && b.parentElement.childElementCount <= 1) continue;
+    const label = ((b.textContent || '').trim() || b.getAttribute('aria-label')
+                   || String(b.className) || b.tagName).replace(/\s+/g, ' ').slice(0, 30);
+    tiny.push(`"${label}" is ${Math.round(q.width)}x${Math.round(q.height)}`);
+  }
+
   return {
-    vh, sheetOwnsScreen,
+    vh, sheetOwnsScreen, tiny: [...new Set(tiny)],
     safeTop: Math.round(safeTop), safeBottom: Math.round(safeBottom),
     chrome: chrome.map(c => `${c.cls} ${Math.round(c.q.top)}..${Math.round(c.q.bottom)}`),
     panes, nControls: controls.length, unreachable,
@@ -505,6 +530,7 @@ for (const role of ROLES) {
         + `floating nav — <${r.navCovers}> answers at y=${r.navProbeY}, `
         + `${r.navCoverDepth}px down into the content`);
     for (const u of r.unreachable) bad.push(`"${u.label}" ${u.why}`);
+    for (const t of (r.tiny || [])) bad.push(`${t}, under the 44px minimum`);
 
     console.log(`  ${name.padEnd(18)} ${r.nControls} controls  band ${r.safeTop}..${r.safeBottom}`
       + `  doc ${r.docH}  ${bad.length ? bad.length + ' PROBLEM(S)' : 'ok'}`);
