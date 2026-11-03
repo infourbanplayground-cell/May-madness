@@ -1,37 +1,89 @@
-// Can the organiser actually SCROLL and reach the controls?
+// CAN THE ORGANISER REACH EVERY CONTROL, ON THE PHONE THEY ACTUALLY HOLD?
 //
-// Reported on the morning of night one: "cannot scroll and create a session".
-// Every other harness here measures one screen at the top of itself — the skin
-// audit scrolls once to prove the header stays put and nothing else looks at
-// whether the page can scroll at all, or whether a control is reachable once
-// it has. A floating nav, a fixed trim and a sticky header are three things
-// that can each cover the bottom of a list, and none of them is a text run or
-// a box in flow, so none of the existing checks can see them.
+// Reported twice: "cannot scroll and create a session", then "there is a lot
+// of issues with scrolling, buttons are not reachable in some pages". The
+// first version of this harness reported everything fine, and the reason it
+// was wrong is the whole lesson here:
 //
-//   node ops/check-scroll.mjs                 # the live Vol.9 state
-//   APP=<build> node ops/check-scroll.mjs
+//   · IT RAN AT ONE VIEWPORT, 430x932 — the largest phone sold. The chrome on
+//     this app is a FIXED cost: a 128px header and a 68px floating nav, 196px
+//     whatever the screen. On a 932px phone that is 21% of the glass; on a
+//     667px iPhone SE it is 29%, and the layouts that fit on the big one stop
+//     fitting. Every fault found here is invisible at 430x932.
+//   · IT ASKED "is this control covered RIGHT NOW", at one scroll position.
+//     The honest question is whether a control can be BROUGHT INTO VIEW and
+//     tapped at all — so each one is scrolled into the free band between the
+//     chrome and then hit-tested where a thumb would land.
+//   · IT NEVER OPENED A SHEET. Every modal in this app is `maxHeight:<n>vh`
+//     over `overflowY:auto`, and that is exactly the shape that puts an action
+//     button under the fold on a short screen. The five tab screens were
+//     measured and the dozen sheets over them were not.
+//   · IT NEVER CHECKED THE BOTTOM OF A LIST CLEARS THE NAV. The nav is
+//     `fixed bottom-0`, so it is not in flow and nothing about it widens the
+//     document — a list whose last row ends under it scrolls to its end with
+//     the last row permanently half-hidden, and no overflow check sees that.
+//
+//   node ops/check-scroll.mjs
+//   APP=<build> node ops/check-scroll.mjs      # another build
+//   ONLY=SESSIONS node ops/check-scroll.mjs    # one screen
+//   VP=375x667 node ops/check-scroll.mjs       # one size
+//   SABOTAGE=nopad|navcover|shortsheet         # proofs that it can fail
 import { chromium } from 'playwright';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
 
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const OUT = SC + '/vol9-scroll';
+const APP = process.env.APP || 'national-index.html';
+const SAB = process.env.SABOTAGE || '';
+const ONLY = (process.env.ONLY || '').toUpperCase();
+const OUT = SC + (APP !== 'national-index.html' || SAB
+                  ? '/vol9-scroll-sabotage' : '/vol9-scroll');
 fs.mkdirSync(OUT, { recursive: true });
 
-const APP = process.env.APP || 'national-index.html';
 let app = fs.readFileSync(APP, 'utf8');
 
-// THERE IS NO PULL-TO-REFRESH SABOTAGE HERE, and the reason is worth
-// recording. The first version of this harness carried one, written to prove
-// a patch that gated the gesture on the scrolling PANE rather than on
-// `window.scrollY` — on the theory that the open-session screen scrolls inside
-// a `fixed inset-0 overflow-y-auto` overlay, so scrollY is permanently 0 and
-// every downward drag there was being read as a pull. The theory was wrong:
-// `pullBlocked` already returns true whenever a session, a player card, ME or
-// the login sheet is open, so the gesture was never armed on that screen at
-// all. The patch was a no-op and was reverted rather than shipped, and a
-// sabotage for a bug that does not exist is a check that cannot fail.
+// ── sabotages, each reproducing a fault this harness exists to catch ────────
+// EVERY SABOTAGE HERE IS A MARKUP EDIT, NOT A STYLE RULE, and that is the
+// lesson of the first set: all three were written as CSS appended to the skin
+// and all three were silently lost — Tailwind's runtime utilities won, and
+// three checks reported a clean page against a build that was supposed to be
+// broken. A sabotage that does not apply is worse than no sabotage: it is a
+// green tick over an untested assertion. Each one below changes a class or an
+// inline style the app itself wrote, so it cannot be overridden by anything.
+const sab = (what, from, to) => {
+  if (!app.includes(from)) throw new Error(`sabotage anchor gone: ${what} (${from})`);
+  const before = app;
+  app = app.split(from).join(to);
+  if (app === before) throw new Error(`sabotage ${what} changed nothing`);
+};
+if (/nopad/.test(SAB)) {
+  // Take the bottom padding off the scrolling screens, so the last row of
+  // every list ends underneath the floating nav with nowhere left to scroll.
+  sab('nopad', 'max-w-3xl mx-auto px-4 py-4 pb-24', 'max-w-3xl mx-auto px-4 py-4');
+}
+if (/navcover/.test(SAB)) {
+  // Make the floating nav far taller without giving the content any more
+  // room — what any change to the nav does when the clearance is a number
+  // written somewhere else.
+  // THROUGH THE INLINE STYLE, not a class: the skin sets `padding: 5px
+  // !important` on the nav, so a Tailwind padding utility is thrown away and
+  // the first version of this sabotage changed the page by exactly nothing
+  // while reporting a clean run. min-height is not set anywhere, so nothing
+  // can override it.
+  sab('navcover',
+      '<nav className="fixed bottom-0 inset-x-0 z-30 border-t border-stone-800/80 backdrop-blur-xl" style={{ background: "rgba(158,21,32,0.96)" }}>',
+      '<nav className="fixed bottom-0 inset-x-0 z-30 border-t border-stone-800/80 backdrop-blur-xl" style={{ background: "rgba(158,21,32,0.96)", minHeight: 210 }}>');
+}
+if (/shortsheet/.test(SAB)) {
+  // A sheet that does not scroll: the classic way an action button ends up
+  // under the fold on a short phone.
+  app = app.replace(/maxHeight: "94vh", overflowY: "auto"/g,
+                    'maxHeight: "none", overflowY: "visible"');
+  app = app.replace(/maxHeight:"90vh",overflowY:"auto"/g,
+                    'maxHeight:"none",overflowY:"visible"');
+}
+
 const PORT = 8132;
 const ORIGIN = `http://127.0.0.1:${PORT}`;
 const VENDOR = SC + '/vendor';
@@ -39,7 +91,10 @@ const FONTCSS = fs.readFileSync('brand/fonts/fonts.css', 'utf8')
   .replace(/url\(\.\//g, `url(${ORIGIN}/fonts/`);
 const VERSION = fs.existsSync(APP + '.version')
   ? fs.readFileSync(APP + '.version', 'utf8').trim() : '';
-// The LIVE state, so this is the screen the organiser is actually looking at.
+// THE LIVE STATE. Vol.9 has a played night in it now — 16 teams, 24 group
+// matches, a finished bracket — and the long screens only exist when there is
+// something on them. Against an empty season every list is three rows and
+// every check passes having seen nothing.
 const stateFile = fs.existsSync(SC + '/na-live.json') ? '/na-live.json' : '/na.json';
 const state = fs.readFileSync(SC + stateFile, 'utf8');
 const photos = fs.existsSync(SC + '/na-photos.json')
@@ -72,257 +127,468 @@ const srv = http.createServer({ maxHeaderSize: 1 << 20 }, (req, res) => {
   res.end(app);
 }).listen(PORT);
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-// hasTouch, or the page has no touch support: `new Touch()` and TouchEvent
-// go nowhere and the gesture check passes against a handler it never
-// reached — which is how it reported the same result with the bug present
-// and with it fixed.
-const pg = await browser.newPage({ viewport: { width: 430, height: 932 },
-                                   hasTouch: true, isMobile: true });
-await pg.route('**/unpkg.com/**', r => {
-  const url = r.request().url();
-  const f = /babel/.test(url) ? 'babel.js' : /react-dom/.test(url) ? 'react-dom.js' : 'react.js';
-  r.fulfill({ status: 200, contentType: 'application/javascript',
-              body: fs.readFileSync(path.join(VENDOR, f), 'utf8') });
-});
-await pg.route('**/fonts.googleapis.com/**', r =>
-  r.fulfill({ status: 200, contentType: 'text/css', body: FONTCSS }));
+// ── the page-side audit ─────────────────────────────────────────────────────
+// Serialised into the browser once and reused, because it is the substance of
+// this file and having two copies of it is how two checks drift apart.
+const AUDIT = function () {
+  const vh = window.innerHeight, vw = window.innerWidth;
 
-// Signed in as admin before the first paint: the create-session control only
-// exists for an admin, and a run that never signs in reports "no control" for
-// the wrong reason.
-await pg.addInitScript(() => {
-  try {
-    // ADMIN_KEY is "july-heat-admin" — a Vol.3 key carried through four
-    // volumes. Guessing a per-volume name reported "no create control" for
-    // entirely the wrong reason.
-    localStorage.setItem('july-heat-admin', 'admin');
-  } catch (e) {}
-});
-await pg.goto(ORIGIN + '/', { waitUntil: 'load' });
-await pg.waitForSelector('nav.fixed.bottom-0', { timeout: 25000 });
-await pg.evaluate(() => document.fonts.ready);
-await pg.waitForTimeout(600);
+  // What is permanently drawn over the page. A full-screen layer is NOT
+  // chrome — it is a sheet, and the things under it are meant to be covered.
+  const chrome = [];
+  for (const e of document.querySelectorAll('*')) {
+    const cs = getComputedStyle(e);
+    if (cs.position !== 'fixed' && cs.position !== 'sticky') continue;
+    if (cs.visibility === 'hidden' || Number(cs.opacity) < 0.05) continue;
+    if (cs.pointerEvents === 'none') continue;
+    const q = e.getBoundingClientRect();
+    if (q.height <= 0 || q.width <= 0) continue;
+    if (q.height > vh * 0.7) continue;
+    chrome.push({ e, q, cls: String(e.className || e.tagName).slice(0, 34) });
+  }
+  // The free band between anything pinned at the top and anything at the
+  // bottom. This is the only part of the glass a control can be tapped in.
+  let safeTop = 0, safeBottom = vh;
+  for (const c of chrome) {
+    if (c.q.top <= 2 && c.q.bottom < vh * 0.5) safeTop = Math.max(safeTop, c.q.bottom);
+    // THE NAV IS NOT FLUSH WITH THE BOTTOM OF THE GLASS. It floats, with a
+    // gap under it — its box ends 14px short of the viewport. A test for
+    // `bottom >= vh - 4` therefore does not see it at all, which is how the
+    // first run of this check reported a free band reaching the foot of the
+    // screen while the nav sat in the middle of it and the last row of every
+    // list was hidden behind it.
+    if (c.q.top > vh * 0.5 && c.q.bottom > vh - 90) safeBottom = Math.min(safeBottom, c.q.top);
+  }
+  const inChrome = (el) => chrome.some(c => c.e === el || c.e.contains(el));
+
+  // THE TOPMOST FULL-SCREEN LAYER OWNS THE SCREEN. When a sheet is open the
+  // controls behind it are MEANT to be covered, and reporting each of them is
+  // a page of false positives that buries the one real finding. Audit only
+  // what is inside the layer that is actually on top.
+  let layer = null, layerZ = -1;
+  for (const e of document.querySelectorAll('*')) {
+    const cs = getComputedStyle(e);
+    if (cs.position !== 'fixed') continue;
+    const q = e.getBoundingClientRect();
+    if (q.height < vh * 0.5 || q.width < vw * 0.8) continue;
+    if (cs.visibility === 'hidden' || Number(cs.opacity) < 0.05) continue;
+    if (cs.pointerEvents === 'none') continue;
+    const z = Number(cs.zIndex) || 0;
+    if (z >= layerZ) { layerZ = z; layer = e; }
+  }
+
+  // AND IT SITS ABOVE THE CHROME, so the chrome stops bounding anything. The
+  // sheets are z-80 to z-95 and the nav is z-30: an action button at y=622 is
+  // over the nav, not under it, and perfectly tappable. Measuring it against
+  // the page's free band reported every sheet's own footer as unreachable.
+  const chromeZ = Math.max(0, ...chrome.map(c => Number(getComputedStyle(c.e).zIndex) || 0));
+  const sheetOwnsScreen = !!layer && layerZ > chromeZ;
+  if (sheetOwnsScreen) {
+    const lq = layer.getBoundingClientRect();
+    safeTop = Math.max(0, lq.top);
+    safeBottom = Math.min(vh, lq.bottom);
+    // ...except anything the SHEET itself pins inside its own box.
+    for (const c of chrome) {
+      if (!layer.contains(c.e)) continue;
+      if (c.q.top <= safeTop + 2 && c.q.bottom < safeBottom * 0.6)
+        safeTop = Math.max(safeTop, c.q.bottom);
+    }
+  }
+
+  const scrollerOf = (el) => {
+    for (let e = el.parentElement; e; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (/auto|scroll/.test(cs.overflowY) && e.scrollHeight > e.clientHeight + 2) return e;
+    }
+    return null;
+  };
+
+  // 1 · EVERY SCROLLING REGION MUST REACH ITS OWN END. A pane whose content
+  //     is taller than it is and which will not move is a dead screen.
+  const panes = [];
+  for (const e of document.querySelectorAll('*')) {
+    const cs = getComputedStyle(e);
+    if (!/auto|scroll/.test(cs.overflowY)) continue;
+    if (e.scrollHeight <= e.clientHeight + 4) continue;
+    const before = e.scrollTop;
+    e.scrollTop = e.scrollHeight;
+    const got = e.scrollTop;
+    e.scrollTop = before;
+    panes.push({ cls: String(e.className || e.tagName).slice(0, 34),
+                 scrollH: e.scrollHeight, clientH: e.clientHeight,
+                 reached: got >= e.scrollHeight - e.clientHeight - 3 });
+  }
+
+  // 2 · THE CONTENT MUST CLEAR THE FLOATING NAV. The nav is fixed, so it adds
+  //     nothing to the document height — a list whose last row ends beneath it
+  //     scrolls all the way to its end with that row still half-hidden, and no
+  //     overflow or clipping check in this repo can see it.
+  window.scrollTo(0, 999999);
+  for (const e of document.querySelectorAll('*')) {
+    const cs = getComputedStyle(e);
+    if (/auto|scroll/.test(cs.overflowY) && e.scrollHeight > e.clientHeight + 4)
+      e.scrollTop = e.scrollHeight;
+  }
+  const scroller = document.scrollingElement;
+  const atBottom = scroller.scrollTop >= scroller.scrollHeight - vh - 3;
+  let lowest = null, lowestCls = '';
+  for (const e of document.querySelectorAll('div,section,article,li,button,p,h1,h2,h3,span,img,table')) {
+    if (inChrome(e)) continue;
+    const cs = getComputedStyle(e);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) continue;
+    const q = e.getBoundingClientRect();
+    if (q.height < 4 || q.width < 4) continue;
+    if (q.top > vh || q.bottom < 0) continue;
+    // Only things that carry ink of their own: a wrapper's box often ends
+    // exactly at the document's end and says nothing about what is visible.
+    const hasInk = e.childElementCount === 0
+      || cs.backgroundColor !== 'rgba(0, 0, 0, 0)'
+      || cs.borderBottomWidth !== '0px';
+    if (!hasInk) continue;
+    if (!lowest || q.bottom > lowest) { lowest = q.bottom; lowestCls = String(e.className || e.tagName).slice(0, 34); }
+  }
+
+  // ...and whether the NAV is what is painted over that lowest ink. The nav
+  // floats with a gap beneath it, so a list can end in that gap and look
+  // clipped; and a sheet can run to the foot of the glass and be perfectly
+  // clear, because it paints above. Only a hit test tells the two apart.
+  let navCovers = null, navProbeY = 0, navCoverDepth = 0;
+  {
+    const navEl = document.querySelector('nav.fixed.bottom-0');
+    if (navEl) {
+      const nq = navEl.getBoundingClientRect();
+      // elementsFromPoint gives the WHOLE PAINT STACK at a point, which is the
+      // only way to ask "is the nav on top, and is there page content directly
+      // under it". elementFromPoint alone answers the first half and a box
+      // comparison answers neither — a sheet legitimately runs to the foot of
+      // the glass ABOVE the nav, and that is not a fault.
+      for (const fy of [0.18, 0.5, 0.82]) {
+        for (const fx of [0.5, 0.25, 0.75]) {
+          const y = Math.round(nq.top + nq.height * fy);
+          const x = Math.round(vw * fx);
+          if (y < 1 || y > vh - 1) continue;
+          const stack = document.elementsFromPoint(x, y);
+          const iNav = stack.findIndex(e => e === navEl || navEl.contains(e));
+          if (iNav < 0) continue;                       // nav is not on top here
+          for (const e of stack.slice(iNav + 1)) {
+            if (e === document.body || e === document.documentElement) break;
+            if (navEl.contains(e)) continue;
+            if (inChrome(e)) continue;
+            const cs2 = getComputedStyle(e);
+            // Something with ink of its own, not a transparent wrapper.
+            const inked = e.childElementCount === 0
+              || cs2.backgroundColor !== 'rgba(0, 0, 0, 0)'
+              || cs2.backgroundImage !== 'none';
+            if (!inked) continue;
+            navCovers = String(e.className || e.tagName).slice(0, 34);
+            navProbeY = y;
+            navCoverDepth = Math.round(e.getBoundingClientRect().bottom - nq.top);
+            break;
+          }
+          if (navCovers) break;
+        }
+        if (navCovers) break;
+      }
+    }
+  }
+
+  // 3 · EVERY CONTROL MUST BE REACHABLE. Scroll it into the middle of the free
+  //     band, then hit-test where a thumb lands. A control that cannot be put
+  //     in the band at all is the real "button not reachable".
+  // THE THING UNDER THE THUMB ONLY HAS TO ROUTE TO THE SAME CONTROL. An icon
+  // inside a button is what elementFromPoint returns, and a label drawn over
+  // its own input still activates it — reporting those is a page of noise
+  // that buries the one real finding.
+  const same = (b, hit) => {
+    if (hit === b || b.contains(hit) || hit.contains(b)) return true;
+    const c = hit.closest && hit.closest('button, a[href], label, [role="button"]');
+    if (c && (c === b || b.contains(c) || c.contains(b))) return true;
+    if (hit.tagName === 'LABEL' && hit.control === b) return true;
+    return false;
+  };
+
+  const unreachable = [];
+  const controls = [];
+  for (const b of document.querySelectorAll('button, a[href], input, select, textarea, [role="button"]')) {
+    const cs = getComputedStyle(b);
+    if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) continue;
+    if (b.disabled) continue;
+    const q0 = b.getBoundingClientRect();
+    if (q0.width < 8 || q0.height < 8) continue;
+    // Behind the open sheet, and so legitimately covered.
+    if (layer && !layer.contains(b) && !inChrome(b)) continue;
+    if (layer && inChrome(b) && layerZ > 40) continue;
+    controls.push(b);
+  }
+  // NO Z-ORDER ARITHMETIC. The first version of this decided whether a sheet
+  // "owned the screen" by comparing z-indexes and then suppressed the chrome —
+  // and it was wrong, because a stacking context three ancestors up can put a
+  // z-30 nav over a z-80 sheet. The only thing that settles it is the question
+  // the thumb asks: at this point on the glass, which element gets the tap?
+  //
+  // So: scroll it as far into the clear as its own scroller allows, then probe
+  // NINE points across its box. A control is reachable if any of them routes
+  // back to it — which is also the honest standard, since a half-covered
+  // button is still tappable on the half that shows.
+  const probe = (b) => {
+    const q = b.getBoundingClientRect();
+    if (q.width < 1 || q.height < 1) return null;
+    for (const fy of [0.5, 0.25, 0.75]) {
+      for (const fx of [0.5, 0.2, 0.8]) {
+        const x = Math.min(Math.max(q.left + q.width * fx, 1), vw - 1);
+        const y = q.top + q.height * fy;
+        if (y < 1 || y > vh - 1) continue;
+        const hit = document.elementFromPoint(x, y);
+        if (hit && same(b, hit)) return { ok: true };
+      }
+    }
+    const cx = Math.min(Math.max(q.left + q.width / 2, 1), vw - 1);
+    const cy = Math.min(Math.max(q.top + q.height / 2, 1), vh - 1);
+    const hit = document.elementFromPoint(cx, cy);
+    return { ok: false, q, hit };
+  };
+
+  for (const b of controls) {
+    const label = ((b.textContent || '').trim() || b.getAttribute('aria-label')
+                   || b.getAttribute('placeholder') || String(b.className) || b.tagName)
+                  .replace(/\s+/g, ' ').slice(0, 32);
+    let r = probe(b);
+    if (r && r.ok) continue;
+    // Not reachable where it sits. Try bringing it into the clear — the middle
+    // of the free band, then the band's top and bottom edges, through whatever
+    // scrolls it.
+    const sc = scrollerOf(b);
+    for (const want of [(safeTop + safeBottom) / 2, safeTop + 30, safeBottom - 30]) {
+      const q = b.getBoundingClientRect();
+      const delta = (q.top + q.height / 2) - want;
+      if (sc) sc.scrollTop += delta; else window.scrollBy(0, delta);
+      r = probe(b);
+      if (r && r.ok) break;
+    }
+    if (r && r.ok) continue;
+    const q = b.getBoundingClientRect();
+    const where = `its box is y=${Math.round(q.top)}..${Math.round(q.bottom)} of ${vh}`;
+    if (!r || !r.hit) {
+      unreachable.push({ label, why: `cannot be brought onto the screen — ${where}` });
+    } else if (q.bottom < 1 || q.top > vh - 1) {
+      unreachable.push({ label, why: `will not scroll into view — ${where}`,
+                         scroller: sc ? String(sc.className).slice(0, 28) : 'the window' });
+    } else {
+      unreachable.push({ label, why: `is covered everywhere a thumb can land, by `
+        + `<${String(r.hit.className || r.hit.tagName).slice(0, 34)}> — ${where}` });
+    }
+  }
+
+  return {
+    vh, sheetOwnsScreen,
+    safeTop: Math.round(safeTop), safeBottom: Math.round(safeBottom),
+    chrome: chrome.map(c => `${c.cls} ${Math.round(c.q.top)}..${Math.round(c.q.bottom)}`),
+    panes, nControls: controls.length, unreachable,
+    atBottom, lowest: lowest == null ? null : Math.round(lowest), lowestCls,
+    navCovers, navProbeY, navCoverDepth,
+    navTop: Math.round(safeBottom),
+    docH: scroller.scrollHeight,
+  };
+};
+
+const VIEWPORTS = process.env.VP
+  ? [process.env.VP.split('x').map(Number)]
+  : [[360, 640], [375, 667], [390, 844]];
+
+// THE ORGANISER'S SCREEN IS A DIFFERENT SCREEN. A visitor sees five read-only
+// tabs; the person running the night sees + NEW, ANNOUNCE, SIGNUP, the score
+// pads and the admin sheets — which is most of the controls in the app and all
+// of the ones the complaint was about. The role is held in local storage under
+// a Vol.3 key that four volumes have carried; setting it renders the admin UI.
+// It also raises the "not saving" banner, because there is no token behind it
+// — which is a real state the app is designed for, and the banner opens the
+// sign-in sheet over the nav. The sheet is dismissed before the audit, exactly
+// as the organiser would dismiss it.
+const ADMIN_KEY = 'july-heat-admin';
+const ROLES = (process.env.ROLE ? [process.env.ROLE] : ['visitor', 'admin']);
 
 const fail = [];
 const F = m => fail.push(m);
 
-// A MODAL IS MEANT TO COVER THE PAGE. The login sheet opens itself when there
-// is no token, and then every control under it reports as blocked — six false
-// positives that say nothing about the screen. Dismiss whatever is up before
-// looking at what is reachable.
-const closeModals = async () => {
-  await pg.evaluate(() => {
-    for (const m of document.querySelectorAll('.fixed.inset-0.z-50')) {
-      const x = m.querySelector('button');
-      if (x) x.click();
-    }
+for (const [width, height] of VIEWPORTS) {
+for (const role of ROLES) {
+  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  const pg = await browser.newPage({ viewport: { width, height },
+                                     hasTouch: true, isMobile: true });
+  await pg.route('**/unpkg.com/**', r => {
+    const url = r.request().url();
+    const f = /babel/.test(url) ? 'babel.js' : /react-dom/.test(url) ? 'react-dom.js' : 'react.js';
+    r.fulfill({ status: 200, contentType: 'application/javascript',
+                body: fs.readFileSync(path.join(VENDOR, f), 'utf8') });
   });
-  await pg.waitForTimeout(250);
-};
-await closeModals();
+  await pg.route('**/fonts.googleapis.com/**', r =>
+    r.fulfill({ status: 200, contentType: 'text/css', body: FONTCSS }));
+  if (role === 'admin')
+    await pg.addInitScript((k) => { try { localStorage.setItem(k, 'admin'); } catch (e) {} }, ADMIN_KEY);
+  await pg.goto(ORIGIN + '/', { waitUntil: 'load' });
+  await pg.waitForSelector('nav.fixed.bottom-0', { timeout: 25000 });
+  await pg.evaluate(() => document.fonts.ready);
+  await pg.waitForTimeout(700);
 
-for (const tab of ['HOME', 'SESSIONS', 'RANK', 'ME', 'PLAYERS']) {
-  const hit = await pg.evaluate((t) => {
-    const b = [...document.querySelectorAll('nav.fixed.bottom-0 button')]
-      .find(x => (x.textContent || '').toUpperCase().includes(t));
-    if (!b) return false;
-    b.click();
-    return true;
-  }, tab);
-  if (!hit) { F(`no ${tab} tab in the nav`); continue; }
-  await pg.waitForTimeout(500);
-  await closeModals();
-
-  const r = await pg.evaluate(() => {
-    const de = document.documentElement;
-    const body = document.body;
-    // 1 · CAN IT SCROLL AT ALL? An `overflow:hidden` on html or body, or a
-    //     height that pins the document to the viewport, locks a list the
-    //     organiser has to get to the bottom of.
-    const cs = getComputedStyle(body), ds = getComputedStyle(de);
-    const docH = Math.max(de.scrollHeight, body.scrollHeight);
-    const viewH = window.innerHeight;
-    return {
-      docH, viewH,
-      bodyOverflow: cs.overflowY, htmlOverflow: ds.overflowY,
-      bodyPos: cs.position, bodyH: cs.height,
-      needsScroll: docH > viewH + 4,
-    };
-  });
-
-  let scrolled = 0;
-  if (r.needsScroll) {
-    scrolled = await pg.evaluate(async () => {
-      window.scrollTo(0, 99999);
-      await new Promise(x => requestAnimationFrame(x));
-      return window.scrollY;
-    });
-    if (scrolled < 10) {
-      F(`[${tab}] the page cannot scroll: ${r.docH}px of content in a `
-        + `${r.viewH}px window, scrollY stays at ${scrolled} `
-        + `(html overflow ${r.htmlOverflow}, body overflow ${r.bodyOverflow}, `
-        + `body position ${r.bodyPos}, body height ${r.bodyH})`);
+  // Dismiss the sign-in sheet the way the organiser does — its own × — and
+  // check it CAN be dismissed. A sheet that opens itself over the nav and
+  // cannot be closed is a trapped app, which is indistinguishable from
+  // "nothing is reachable".
+  const dismiss = async () => {
+    for (let i = 0; i < 4; i++) {
+      const closed = await pg.evaluate(() => {
+        const ov = [...document.querySelectorAll('*')].find(e => {
+          const cs = getComputedStyle(e);
+          return cs.position === 'fixed'
+            && e.getBoundingClientRect().height > window.innerHeight * 0.5
+            && /sign|pin|unlock/i.test(e.textContent || '');
+        });
+        if (!ov) return 'none';
+        const x = [...ov.querySelectorAll('button')].find(b => {
+          const t = (b.textContent || '').trim();
+          return t === '' || /^[×✕✖x]$/i.test(t) || /close/i.test(b.getAttribute('aria-label') || '');
+        });
+        if (!x) return 'no-close';
+        x.click();
+        return 'clicked';
+      });
+      if (closed === 'none') return true;
+      if (closed === 'no-close') {
+        F(`[${width}px ${role}] the sign-in sheet covers the screen and has no way to close it`);
+        return false;
+      }
+      await pg.waitForTimeout(350);
     }
+    F(`[${width}px ${role}] the sign-in sheet will not close`);
+    return false;
+  };
+  await dismiss();
+
+  console.log(`\n── ${width}x${height} · ${role} ──`);
+
+  const look = async (name) => {
+    if (ONLY && !name.toUpperCase().includes(ONLY)) return null;
+    // THE SIGN-IN SHEET RE-OPENS ITSELF. With a role in local storage and no
+    // token behind it every save fails, the banner fires and the banner opens
+    // the sheet — so it is back over the screen a second after it was closed.
+    // That is the app behaving as designed (CLAUDE.md records why the banner
+    // opens it), but it means the screen underneath is only measurable with
+    // the sheet dismissed, and dismissing it once at start-up is not enough.
+    // Opening a SHEET deliberately is the one case where it must stay.
+    if (!/^SHEET /.test(name)) await dismiss();
+    await pg.evaluate(() => window.scrollTo(0, 0));
+    await pg.waitForTimeout(220);
+    const r = await pg.evaluate(AUDIT);
+    const shot = `${OUT}/${role}-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${width}.png`;
+    await pg.screenshot({ path: shot });
+
+    const bad = [];
+    for (const p of r.panes)
+      if (!p.reached) bad.push(`the pane <${p.cls}> will not scroll to its end `
+        + `(${p.scrollH}px of content in ${p.clientH}px)`);
+    // The last ink on the screen, at the very bottom of the scroll, must clear
+    // the floating nav.
+    // NOT GEOMETRY. A sheet legitimately runs to the foot of the glass and
+    // sits ABOVE the nav, so "its box ends below the nav's top" says nothing —
+    // it reported the announcement sheet, whose Copy button is plainly clear,
+    // on every size. What matters is what is actually painted there, so the
+    // page asks elementFromPoint just under the nav's top edge and reports
+    // only when the NAV is what answers.
+    if (r.navCovers)
+      bad.push(`at the very bottom of the scroll the content is still behind the `
+        + `floating nav — <${r.navCovers}> answers at y=${r.navProbeY}, `
+        + `${r.navCoverDepth}px down into the content`);
+    for (const u of r.unreachable) bad.push(`"${u.label}" ${u.why}`);
+
+    console.log(`  ${name.padEnd(18)} ${r.nControls} controls  band ${r.safeTop}..${r.safeBottom}`
+      + `  doc ${r.docH}  ${bad.length ? bad.length + ' PROBLEM(S)' : 'ok'}`);
+    for (const b of bad) { console.log(`     !! ${b}`); F(`[${width}px ${role} ${name}] ${b}`); }
+    return r;
+  };
+
+  const tab = async (t) => {
+    const ok = await pg.evaluate((t) => {
+      const b = [...document.querySelectorAll('nav.fixed.bottom-0 button')]
+        .find(x => (x.textContent || '').trim().toUpperCase() === t);
+      if (!b) return false;
+      b.click();
+      return true;
+    }, t);
+    if (!ok) F(`[${width}px ${role}] there is no ${t} tab in the nav`);
+    await pg.waitForTimeout(550);
+    return ok;
+  };
+
+  for (const t of ['HOME', 'SESSIONS', 'RANK', 'ME', 'PLAYERS']) {
+    if (await tab(t)) await look(t);
   }
 
-  // 2 · IS EVERY CONTROL REACHABLE? A button can be on the page, scrolled to,
-  //     and still un-tappable because the floating nav or a fixed trim is
-  //     drawn over it. elementFromPoint at the button's own centre is what the
-  //     thumb actually hits.
-  const blocked = await pg.evaluate(() => {
-    const out = [];
-    for (const b of document.querySelectorAll('button, a[href], [role="button"]')) {
-      const q = b.getBoundingClientRect();
-      if (q.width < 8 || q.height < 8) continue;
-      if (q.bottom < 0 || q.top > window.innerHeight) continue;
-      if (getComputedStyle(b).visibility === 'hidden') continue;
-      if (b.closest('nav.fixed.bottom-0')) continue;     // the nav is itself
-      const cx = q.left + q.width / 2, cy = q.top + q.height / 2;
-      const hit = document.elementFromPoint(cx, cy);
-      if (!hit) continue;
-      if (hit === b || b.contains(hit) || hit.contains(b)) continue;
-      const label = (b.textContent || '').trim().slice(0, 30) || b.className;
-      const over = hit.className || hit.tagName;
-      out.push(`"${label}" is covered by <${over}>`);
-    }
-    return [...new Set(out)];
-  });
-  for (const b of blocked) F(`[${tab}] ${b}`);
+  // ── the sheets ────────────────────────────────────────────────────────────
+  // Every one is `maxHeight:<n>vh` over `overflowY:auto`, which is the shape
+  // that hides an action button under the fold on a short phone. None had ever
+  // been opened by a harness.
+  await tab('SESSIONS');
+  for (const label of ['ANNOUNCE', 'SIGNUP', 'FORMAT']) {
+    const opened = await pg.evaluate((l) => {
+      const b = [...document.querySelectorAll('button')]
+        .find(x => (x.textContent || '').trim().toUpperCase() === l);
+      if (!b) return false;
+      b.click();
+      return true;
+    }, label);
+    if (!opened) continue;
+    await pg.waitForTimeout(600);
+    await look('SHEET ' + label);
+    await pg.keyboard.press('Escape').catch(() => {});
+    await pg.evaluate(() => {
+      const ov = [...document.querySelectorAll('*')].find(e => {
+        const cs = getComputedStyle(e);
+        return cs.position === 'fixed' && e.getBoundingClientRect().height > window.innerHeight * 0.5;
+      });
+      if (ov) ov.click();
+    });
+    await pg.waitForTimeout(450);
+  }
 
-  await pg.screenshot({ path: `${OUT}/${tab.toLowerCase()}-bottom.png` });
-  console.log(`  ${tab.padEnd(9)} ${r.docH}px in ${r.viewH}px  `
-    + `scrolled to ${scrolled}  ${blocked.length ? blocked.length + ' blocked' : 'controls ok'}`);
-}
-
-// THE SCREEN INSIDE A SESSION is the long one — 16 teams, four groups, a
-// bracket and a score pad — and it is the one the organiser spends the night
-// on. The tab sweep above never opens it, so every check here had been
-// measuring the five short screens and none of the deep one.
-{
+  // ── the night ─────────────────────────────────────────────────────────────
+  // The screen the organiser spends the whole evening on, and the only long
+  // one that scrolls inside a fixed pane rather than in the window.
+  await tab('SESSIONS');
   const opened = await pg.evaluate(() => {
-    const b = [...document.querySelectorAll('nav.fixed.bottom-0 button')]
-      .find(x => (x.textContent || '').toUpperCase().includes('SESSIONS'));
-    if (b) b.click();
+    const r = document.querySelector('.jh-mock-sess');
+    if (!r) return false;
+    r.click();
     return true;
   });
-  await pg.waitForTimeout(500);
-  const got = await pg.evaluate(() => {
-    const row = document.querySelector('.jh-mock-sess');
-    if (!row) return false;
-    row.click();
-    return true;
-  });
-  if (!got) F('no session row to open on the SESSIONS screen');
+  if (!opened) F(`[${width}px ${role}] there is no session row to open on SESSIONS`);
   else {
-    await pg.waitForTimeout(900);
-    await closeModals();
-    const r = await pg.evaluate(() => {
-      const de = document.documentElement;
-      return { docH: Math.max(de.scrollHeight, document.body.scrollHeight),
-               viewH: window.innerHeight,
-               bodyOverflow: getComputedStyle(document.body).overflowY,
-               htmlOverflow: getComputedStyle(de).overflowY };
-    });
-    let scrolled = 0;
-    if (r.docH > r.viewH + 4) {
-      scrolled = await pg.evaluate(async () => {
-        window.scrollTo(0, 99999);
-        await new Promise(x => requestAnimationFrame(x));
-        return window.scrollY;
-      });
-      if (scrolled < 10)
-        F(`[SESSION] the open session cannot scroll: ${r.docH}px in ${r.viewH}px `
-          + `(html ${r.htmlOverflow}, body ${r.bodyOverflow})`);
+    await pg.waitForTimeout(1000);
+    await look('SESSION');
+    // its own sub-screens
+    const subs = await pg.evaluate(() => [...new Set([...document.querySelectorAll('button')]
+      .map(b => (b.textContent || '').trim())
+      .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE)$/i.test(t)))]);
+    for (const s of subs) {
+      await pg.evaluate((s) => {
+        const b = [...document.querySelectorAll('button')]
+          .find(x => (x.textContent || '').trim().toUpperCase() === s.toUpperCase());
+        if (b) b.click();
+      }, s);
+      await pg.waitForTimeout(600);
+      await look('SESSION/' + s.toUpperCase());
     }
-    // NOT a fault: the open session is a fixed full-screen overlay with its
-    // own scroll, so the DOCUMENT is legitimately one viewport tall. The first
-    // version of this check called that "the screen is too short", which is
-    // the wrong diagnosis for the right smell — what matters is whether the
-    // inner pane scrolls, and whether a drag inside it scrolls or refreshes.
-
-    // THE SCREEN SCROLLS INSIDE A FIXED OVERLAY, not in the window. That is a
-    // legitimate pattern — but it is why `window.scrollY` is permanently 0
-    // here, and the pull-to-refresh gesture arms on exactly that.
-    const pane = await pg.evaluate(() => {
-      const e = [...document.querySelectorAll('.fixed.inset-0')]
-        .find(x => /auto|scroll/.test(getComputedStyle(x).overflowY)
-                   && x.scrollHeight > x.clientHeight + 4);
-      if (!e) return null;
-      e.scrollTop = 99999;
-      const got = e.scrollTop;
-      e.scrollTop = 0;
-      return { scrollH: e.scrollHeight, clientH: e.clientHeight, got };
-    });
-    if (pane) {
-      console.log(`  ${'SESSION'.padEnd(9)} scrolls in a fixed pane: `
-        + `${pane.scrollH}px in ${pane.clientH}px, scrolled to ${pane.got}`);
-      if (pane.got < 10) F('[SESSION] the inner pane will not scroll either');
-
-      // A TOUCH DRAG MUST SCROLL, NOT REFRESH. The gesture is armed when
-      // `window.scrollY === 0`, which on this screen is always — so every
-      // downward drag anywhere in the pane is read as a pull-to-refresh, the
-      // indicator engages, and releasing re-fetches and snaps the list back
-      // to the top. On a phone that is indistinguishable from "cannot scroll".
-      await pg.evaluate(() => {
-        const e = [...document.querySelectorAll('.fixed.inset-0')]
-          .find(x => /auto|scroll/.test(getComputedStyle(x).overflowY));
-        if (e) e.scrollTop = 400;         // part-way down the list
-      });
-      await pg.waitForTimeout(120);
-      const armed = await pg.evaluate(async () => {
-        // THE TOUCH MUST LAND ON WHAT A FINGER WOULD HIT. Dispatching on
-        // document.body makes the walk for a scrolling ancestor find nothing
-        // and fall back to the window — so the first version of this test
-        // armed the gesture for entirely the wrong reason and kept reporting
-        // the bug after it was fixed. elementFromPoint is the real target.
-        const target = document.elementFromPoint(215, 300) || document.body;
-        const t = (type, y) => {
-          const touch = new Touch({ identifier: 1, target,
-                                    clientX: 215, clientY: y });
-          target.dispatchEvent(new TouchEvent(type, {
-            bubbles: true, cancelable: true, touches: type === 'touchend' ? [] : [touch],
-            changedTouches: [touch] }));
-        };
-        // MEASURE THE INDICATOR BEFORE AND AFTER. Its text is in the DOM at
-        // rest, so "is the label present" reports armed on an untouched page
-        // — the detector has to be the CHANGE in how much of it is showing.
-        const strip = () => {
-          const el = [...document.querySelectorAll('*')].find(x =>
-            /^(PULL|RELEASE) TO REFRESH$/.test((x.textContent || '').trim()));
-          if (!el) return { h: 0, missing: true };
-          let e = el, h = 0;
-          for (let i = 0; i < 4 && e; i++, e = e.parentElement)
-            h = Math.max(h, e.getBoundingClientRect().height);
-          return { h, top: el.getBoundingClientRect().top };
-        };
-        const before = strip();
-        t('touchstart', 300);
-        for (let y = 320; y <= 440; y += 20) { t('touchmove', y); }
-        await new Promise(r => setTimeout(r, 150));
-        const after = strip();
-        t('touchend', 440);
-        await new Promise(r => setTimeout(r, 100));
-        return { before, after,
-                 armed: !before.missing && (after.h - before.h) > 8 };
-      });
-      console.log(`  ${''.padEnd(9)} pull strip ${JSON.stringify(armed.before)} `
-        + `-> ${JSON.stringify(armed.after)}`);
-      if (armed.armed)
-        F('[SESSION] a downward drag PART-WAY DOWN the list arms pull-to-refresh '
-          + '— the gesture tests window.scrollY, which is always 0 on a screen '
-          + 'that scrolls inside a fixed pane, so every drag is a refresh');
-    }
-    await pg.screenshot({ path: `${OUT}/session-bottom.png` });
   }
+
+  await browser.close();
+}
 }
 
-await browser.close();
 srv.close();
 
 if (fail.length) {
-  console.error('\n' + fail.map(x => '  !! ' + x).join('\n'));
-  console.error(`\n${fail.length} problem(s) — shots in ${OUT}`);
+  console.error(`\n${fail.length} problem(s):`);
+  for (const f of fail) console.error('  !! ' + f);
+  console.error(`\nshots in ${OUT}`);
   process.exit(1);
 }
-console.log(`\nok — every screen scrolls and every control is reachable`);
+console.log(`\nok — every screen scrolls and every control is reachable  (${OUT})`);

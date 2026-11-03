@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "77c1f24d8a8d";
+  var V = "f78411d9e7e4";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -13908,7 +13908,25 @@ html body::before {
   background-size: 340px 340px !important;
   background-repeat: repeat !important;
 }
-#root, main, nav { position: relative; z-index: 1; }
+/* LIFT THE APP ABOVE THE TILE — ON #root ALONE, AND NOT ON `main`.
+   This rule used to read `#root, main, nav { position: relative; z-index: 1 }`
+   and it TRAPPED EVERY SHEET RENDERED INSIDE <main> UNDERNEATH THE NAV.
+   A z-index on a positioned element creates a STACKING CONTEXT, so the
+   recap sheet's `z-index: 80` stopped meaning "above the nav" and started
+   meaning "80th within main" — and main itself is 1 against the nav's 30.
+   No value the sheet could have given itself would have escaped: the
+   comparison that decides is main (1) against nav (30), three ancestors up.
+   On a 667px phone that put the floating nav squarely over the bottom of
+   every sheet opened from a tab screen — FULL RESULTS on the night recap,
+   "Copy for WhatsApp" on the format sheet — which is the reported
+   "buttons are not reachable in some pages". It is invisible at 430x932,
+   where the sheets are short enough to end above the nav.
+   #root is the common ancestor of the nav AND the sheets, so one context
+   there lifts everything clear of the tile while leaving z-index inside the
+   app meaning what it says. main and nav stay positioned, with no z-index of
+   their own; the nav keeps its Tailwind z-30 and the sheets their z-50..95. */
+#root { position: relative; z-index: 1; }
+main, nav { position: relative; }
 
 /* ── THE MASAR BAND ────────────────────────────────────────────────────
    The woven turban band, and the first thing down the screen. To the

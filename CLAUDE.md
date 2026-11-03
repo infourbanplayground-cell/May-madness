@@ -1303,6 +1303,62 @@ in the repo green. The owner found both by looking at a card.
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
 
+#### Reaching the controls — `ops/check-scroll.mjs`
+**A `z-index` ON `main` TRAPPED EVERY SHEET UNDER THE FLOATING NAV.** Reported
+as "a lot of issues with scrolling, buttons are not reachable in some pages".
+The cause was one rule added here for the khanjar tile:
+`#root, main, nav { position: relative; z-index: 1 }`.
+- A z-index on a positioned element creates a **stacking context**, so the
+  recap sheet's `z-index: 80` stopped meaning "above the nav" and started
+  meaning "80th within `main`" — and `main` is 1 against the nav's 30. **No
+  value the sheet could give itself would have escaped**: the comparison that
+  decides happens three ancestors up. On a 667px phone the nav sat squarely
+  over the bottom of every sheet opened from a tab screen — FULL RESULTS on the
+  night recap, "Copy for WhatsApp" on the format sheet.
+- It is `#root { z-index: 1 }` alone now, with `main, nav { position: relative }`
+  and no z-index. `#root` is the common ancestor of the nav AND the sheets, so
+  one context there lifts everything clear of the tile while leaving z-index
+  inside the app meaning what it says.
+- **It is invisible at 430x932**, where the sheets are short enough to end
+  above the nav — which is the only size the first version of this harness ran.
+
+**The harness this slipped past, and why.** `ops/check-scroll.mjs` reported a
+clean page the morning this was live:
+- **ONE VIEWPORT, 430x932** — the largest phone sold. The chrome is a FIXED
+  cost: a 128px header and a 68px nav, 196px whatever the screen. That is 21%
+  of a 932px phone and 29% of a 667px one, and layouts that fit on the big one
+  stop fitting. It sweeps **360x640, 375x667 and 390x844** now.
+- **IT ASKED "is this covered right now"**, at one scroll position. The honest
+  question is whether a control can be BROUGHT INTO VIEW and tapped, so each is
+  scrolled into the free band and probed at **nine points across its box** —
+  reachable if any of them routes back to it, which is also the real standard,
+  since a half-covered button is tappable on the half that shows.
+- **NO Z-ORDER ARITHMETIC.** A first fix decided whether a sheet "owned the
+  screen" by comparing z-indexes and suppressing the chrome — and was wrong for
+  exactly the reason above. Only `elementFromPoint` settles it.
+- **THE NAV CHECK READS THE PAINT STACK.** `elementsFromPoint` gives the whole
+  stack: the fault is the nav on top with page content under it *at maximum
+  scroll*. A box comparison reported the announcement sheet, whose Copy button
+  is plainly clear, because a sheet legitimately runs to the foot of the glass
+  ABOVE the nav.
+- **THE NAV IS NOT FLUSH WITH THE BOTTOM.** It floats, 14px clear, so a test
+  for `bottom >= vh - 4` does not see it — the first run reported a free band
+  reaching the foot of the screen while the nav sat in the middle of it.
+- **IT NEVER OPENED A SHEET, and never signed in.** Every modal here is
+  `maxHeight:<n>vh` over `overflowY:auto`, the exact shape that puts an action
+  button under the fold; and a visitor sees five read-only tabs while the
+  organiser sees + NEW, ANNOUNCE, SIGNUP and the admin sheets. Both roles now,
+  with the sign-in sheet dismissed before each screen — it re-opens itself
+  whenever a save fails, so dismissing it once at start-up is not enough.
+- `SABOTAGE=nopad|navcover|shortsheet`, `ROLE=`, `VP=`, `ONLY=`, `APP=`.
+  - **ALL THREE SABOTAGES WERE VACUOUS AT FIRST, AND THAT IS THE LESSON.** They
+    were written as CSS appended to the skin, and all three were silently lost:
+    Tailwind's runtime utilities won, and the harness reported a clean page
+    against a build that was meant to be broken. The nav sabotage lost twice —
+    the skin sets `padding: 5px !important` on it, so a padding utility is
+    thrown away. **Every sabotage is a markup or inline-style edit now**, and
+    `sab()` throws if the anchor is missing or the text does not change.
+
 #### Ivory and green on the home screen
 The page was red on red on red — an ivory arch at the top and then four hundred
 pixels of deep-red cards, which reads as ONE colour however many surfaces are
