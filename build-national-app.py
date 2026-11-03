@@ -630,6 +630,62 @@ MOTIFS = [
      '    ncPaint(g, kind, d, img, logo, adj, "photo");'),
     ('  luPaintCut(g, kind, d, cut, logo, adj);',
      '  ncPaint(g, kind, d, cut, logo, adj, "cut");'),
+    # 5e3 · THE RANK LEADER CARD COLLIDED WITH ITSELF.
+    #       On a 390px phone the champion's row rendered
+    #       "1 SESSIONS · 100% WIN WR5TSST R" — three text runs stacked on
+    #       each other — and the name ran under the points.
+    #       The meta row is a flex row holding two `white-space: nowrap`
+    #       spans. A flex item defaults to `min-width: auto`, so a nowrap
+    #       span CANNOT shrink below its content: the row simply overflows.
+    #       Measured in the card's own box: "STREAK" ends at x403 in a 358px
+    #       card, 45px past the edge, lying across "30" and "PTS". The card
+    #       carries `overflow: hidden`, so there was nothing to scroll and
+    #       nothing ran off the PAGE — it just overprinted.
+    #       The HOME screen's version of the same card gets it right, with
+    #       one span and an ellipsis. This one lets the row WRAP instead,
+    #       which keeps both facts at any width rather than truncating the
+    #       streak away on a narrow phone.
+    #       INHERITED from Vol.7 through Vol.8, so blackout.urbanpadel.om has
+    #       it too. Spliced here rather than fixed at source because Vol.8 is
+    #       finished and its file should keep saying what it shipped.
+    # 5e4 · THE SWEEP TURNED AN INK INTO A GROUND, AND THE INITIALS WENT WITH
+    #       IT. A photo-less player gets a tinted disc with their initials,
+    #       and the component picks the ink by LUMINANCE — dark on the light
+    #       tints, light on the dark ones. Vol.8 wrote that dark ink as
+    #       `#050505`, which is also its app background, so the colour sweep
+    #       mapped it to `#B8141F`: right for a ground, and far too light for
+    #       type on a light tint. Measured on the two bright tints, flag red
+    #       is 5.92:1 on ivory and **3.91:1 on rose** — under AA on a third of
+    #       the photo-less avatars in a 340-name roster.
+    #       This volume's ink is `#1A0A0C`: 17.1:1 and 11.3:1 on the same two.
+    #       A sweep entry could not fix this, because the SAME literal is a
+    #       correct ground everywhere else in the file — it is the role that
+    #       changed, not the colour, which is the whole reason this is an
+    #       anchored replacement and not a table row.
+    ('> 140 ? "#050505" : "#F2F2F2", fontSize: size * 0.36,',
+     '> 140 ? "#1A0A0C" : "#F2F2F2", fontSize: size * 0.36,'),
+    ('      color: lum > 140 ? "#050505" : "#F2F2F2", fontFamily: "\'Archivo\',sans-serif",',
+     '      color: lum > 140 ? "#1A0A0C" : "#F2F2F2", fontFamily: "\'Archivo\',sans-serif",'),
+    #       ...AND THE 2X CHIPS, which are the same mistake in three more
+    #       places: Vol.8 set them `background:#FF2E88, color:#050505` — its
+    #       accent with its ink on top — and the sweep turned that ink into
+    #       the base red again, giving flag red on rose at 3.91:1 on the one
+    #       chip in this app whose whole job is to be noticed. str.replace
+    #       takes all three.
+    ('style={{ background:"#FF2E88", color:"#050505", letterSpacing:".08em" }}>2X</div>',
+     'style={{ background:"#F2B8BC", color:"#1A0A0C", letterSpacing:".08em" }}>2X</div>'),
+    #       ANCHORED ON THE VOL.8 LITERAL: MOTIFS runs BEFORE the colour
+    #       sweep, so the span still says #CFCFCF here, not this volume's
+    #       ivory.
+    ('                <div style={{display:"flex",gap:8,marginTop:5}}>\n'
+     '                  <span style={{whiteSpace:"nowrap",fontFamily:"\'Archivo\',sans-serif",fontWeight:800,fontSize:9,\n'
+     '                        letterSpacing:".16em",color:"#CFCFCF"}}>'
+     '{leader.stats.sessionsPlayed} SESSIONS · {en.winRate}% WIN</span>',
+     '                <div style={{display:"flex",gap:8,marginTop:5,flexWrap:"wrap"}}>\n'
+     '                  <span style={{whiteSpace:"nowrap",fontFamily:"\'Archivo\',sans-serif",fontWeight:800,fontSize:9,\n'
+     '                        letterSpacing:".16em",color:"#CFCFCF"}}>'
+     '{leader.stats.sessionsPlayed} {leader.stats.sessionsPlayed === 1 ? "SESSION" : "SESSIONS"}'
+     ' · {en.winRate}% WIN</span>'),
     # 5f2 · AND THE DRAW, THE TABLES AND THE BRACKET, which the first pass
     #       left behind entirely. Reported by the owner from the live night:
     #       "there's overlap in the posts, also needs to be updated to the

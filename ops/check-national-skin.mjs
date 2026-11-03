@@ -157,7 +157,18 @@ const FONTCSS = fs.readFileSync('brand/fonts/fonts.css', 'utf8')
 const VERSION = fs.existsSync(APP + '.version')
   ? fs.readFileSync(APP + '.version', 'utf8').trim() : '';
 
-const state = fs.readFileSync(SC + '/na.json', 'utf8');
+// THE LIVE STATE WHEN THERE IS ONE, and that is not a convenience.
+// This ran against `na.json` — a season with no nights in it — so the RANK
+// screen's leader card, the standings rows, the form bars and the "you in
+// context" block rendered ZERO TIMES and every assertion about them passed
+// having seen nothing. The leader card was overprinting itself the whole
+// while: two `white-space: nowrap` spans in a flex row, which cannot shrink
+// below their content, so "W5 STREAK" ran 45px past a 358px card and landed
+// across the points. On a phone it read "1 SESSIONS · 100% WIN WR5TSST R".
+// The same lesson the medallion check already records, on a second harness:
+// a screen with no data on it is not a screen that has been checked.
+const stateFile = fs.existsSync(SC + '/na-live.json') ? '/na-live.json' : '/na.json';
+const state = fs.readFileSync(SC + stateFile, 'utf8');
 // Whether there is anything for a medallion to sit on. With no nights created
 // the sessions screen is an empty-state card, and asserting medallions there
 // would fail for the right reason — so the check is gated on real data rather
@@ -816,8 +827,13 @@ if (!ONLY) {
   const badU2 = uniq(a.bad, x => x.text + x.px);
   if (badU2.length) {
     F(`${badU2.length} text run(s) under contrast`);
+    // THE SAME DETAIL THE TAB PASS PRINTS. This reporter gave only the text
+    // and the size, so a failing "2X" could be any of five chips on the
+    // screen and the only way to tell was to guess — which cost two wrong
+    // guesses. The ink, the ground and the path are what identify it.
     for (const b of badU2.slice(0, 6))
-      console.log(`    !! ${b.ratio}:1 (needs ${b.need}) ${b.px}px "${b.text}"`);
+      console.log(`    !! ${b.ratio}:1 (needs ${b.need}) ${b.px}px/${b.wt} ${b.fg} on ${b.bg}`
+        + `\n         "${b.text}"  in ${b.where}`);
   }
 }
 

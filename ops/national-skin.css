@@ -410,8 +410,18 @@ button, input, select, textarea { border-radius: 999px !important; }
    at weight 400 is not large text — the allowance starts at 24px, or 18.66px
    at 700). The base red is 5.83:1 on ivory and reads as the same colour at a
    glance; --flag keeps its job on the red ground, where it is the loud one. */
-.sg-hero [style*="242, 184, 188"], .sg-hero [style*="#F2B8BC"],
-.sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
+/* LED BY `body`, AND THAT PREFIX IS LATE-ADDED LOAD-BEARING. The global rose
+   rule at the foot of this file carries a `:not([style*="background"])` guard
+   (see it for why), and adding that second attribute selector took it from
+   (0,1,0) to (0,2,0) — exactly level with a plain `.sg-hero [style*=…]`. On a
+   tie the later rule wins, and the global one is written after this, so the
+   hero's own figures were quietly repainted --rose-txt on ivory: **1.23:1**,
+   a blank space where the PLAYERS count should be. `body` makes this (0,2,1)
+   and puts it back in front.
+   The fifth time in this skin that specificity rather than order decided, and
+   the first where tightening one rule silently broke another. */
+body .sg-hero [style*="242, 184, 188"], body .sg-hero [style*="#F2B8BC"],
+body .sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
 /* THE TAGLINE IS TWO BEATS AND HAS TO LOOK LIKE TWO. The hero sets its second
    half in what was Vol.8's lead colour, which the sweep turned to ivory —
    ivory type on an ivory card. `.sg-hero *` then painted it ink, so the line
@@ -470,7 +480,9 @@ button, input, select, textarea { border-radius: 999px !important; }
 /* Anything that was the lead accent inside it becomes the base red, the same
    rule the hero uses — ivory type on an ivory plate is nothing. */
 .na-ivory [style*="247, 241, 230"], .na-ivory [style*="#F7F1E6"],
-.na-ivory [style*="242, 184, 188"], .na-ivory [style*="#F2B8BC"] {
+/* `body` for the same reason the hero's rule carries it. */
+body .na-ivory [style*="242, 184, 188"], body .na-ivory [style*="#F2B8BC"],
+body .na-ivory [style*="rgb(242,184,188)"] {
   color: var(--bg) !important;
 }
 /* ...and the hairline rings the countdown cells draw have to come back as
@@ -646,8 +658,27 @@ body { color: #FFFFFF; }
 .text-stone-300, .text-stone-400, .text-stone-500, .text-stone-600,
 .text-neutral-300, .text-neutral-400, .text-neutral-500,
 .text-gray-300, .text-gray-400, .text-gray-500 { color: var(--rose-txt) !important; }
-[style*="#F2B8BC"], [style*="242, 184, 188"], [style*="242,184,188"],
-[style*="#CBBDB6"], [style*="203, 189, 182"], [style*="203,189,182"] {
+/* ...AND IT MUST MATCH THE COLOUR AS *INK*, NOT ANYWHERE IN THE ATTRIBUTE.
+   `[style*="242, 184, 188"]` cannot tell `color: rgb(242,184,188)` from
+   `background: rgb(242,184,188)` — it only sees the number somewhere in the
+   style attribute. The avatar fallback paints a tinted disc and picks its own
+   contrasting ink by luminance; this rule beat that inline choice with
+   !important and set the initials to --rose-txt on a rose disc: **1.19:1**,
+   no letter at all, on roughly a third of the photo-less avatars in a
+   340-name roster.
+   A blunt `:not([style*="background"])` guard fixed that and broke two more
+   things, which is why it is not that: it also excluded every element that
+   legitimately needs the upgrade AND happens to set a background — the
+   session row's 2X pill, rose on a red fill at 4.16:1 — and it took the rule
+   from (0,1,0) to (0,2,0), tying the scoped ivory overrides and beating them
+   on source order, which blanked the hero's own figures at 1.23:1.
+   The discriminator is the serialised declaration itself. The CSSOM
+   normalises inline colours to `rgb(...)`, so ink is `color: rgb(…)` and the
+   avatar's shorthand fill is `background: rgb(…)`, which does not contain
+   `color:`. `background-color:` does, and is excluded by name.
+   The scoped overrides carry `body` so they stay ahead of this at (0,2,1). */
+[style*="color: rgb(242, 184, 188)"]:not([style*="background-color: rgb(242, 184, 188)"]),
+[style*="color: rgb(203, 189, 182)"]:not([style*="background-color: rgb(203, 189, 182)"]) {
   color: var(--rose-txt) !important;
 }
 
