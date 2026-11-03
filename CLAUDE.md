@@ -1303,6 +1303,87 @@ in the repo green. The owner found both by looking at a card.
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
 
+#### The chrome, the home screen and the roster
+**THE CHROME WAS A QUARTER OF THE PHONE.** Measured: a 128px header (44 of
+room for the masar band + a 58px brand row + 20 + border) and a 68px floating
+nav with a 14px gap — **209px, 25% of an 844px phone and 31% of a 667px one**,
+before a word of the page. And a 128px header that still truncated its own
+title to "56 NATIONAL S…".
+- **The header folds once the page moves.** The band is the top of the SCREEN,
+  not a permanent fixture — the handoff puts it above the header as item one —
+  so it goes on scroll with half the padding, a smaller club mark, the Arabic
+  sub-line and the flag plaque. **128px → 61px; chrome 209 → 143 (25% → 17%).**
+  The title stops truncating when folded, because the plaque is a "56" sitting
+  two inches from a title that starts with the word 56.
+- The header stays `sticky` throughout. A brand bar that leaves is the exact
+  fault `SABOTAGE=unstick` exists for, and this must not reintroduce it.
+- It is driven by a plain listener appended beside the skin, not a React
+  effect: it is chrome, it is the same on every screen, and threading
+  presentation state through the app to drive a stylesheet is how the two get
+  out of step. **Capture phase**, because the deepest screen scrolls inside a
+  `fixed inset-0` pane and never moves the window; **8px of hysteresis**, or
+  folding the header makes the page shorter, which scrolls you back to 0,
+  which unfolds it.
+
+**EVERY CONTROL IS AT LEAST 44px.** The club mark was 26x40 and SYNCED 83x29 —
+and the mark is the only route into staff sign-in, so the smallest target in
+the app was the one a scorer must hit before they can score. Inside a night
+the chip row drew at 36 and the back arrow at 30x30.
+- **The box grows; the layout does not.** A bare `min-height` grew the brand
+  row from 58 to 68 and made the header TALLER; a bare `min-width` took 18px
+  off the title and ellipsised it on every screen. The header buttons and the
+  mark pull themselves back with a matching negative margin — 44 for the
+  thumb, 26 for the row.
+- Chased one class at a time it missed four of seven. The floor is applied at
+  the LAYER (`.fixed.inset-0` and the sheets that declare `position:fixed;
+  inset:0` **inline**, which the class selector cannot see).
+- `minHeight:36` was **inline** on the share chips, so no stylesheet could
+  raise it; changed where it is written rather than shouted down.
+
+**A STRAY `*/` SILENTLY ATE A RULE.** Editing a comment in the skin left five
+lines of prose outside any comment followed by a second `*/`. CSS comments do
+not nest, so the parser threw away the block that followed and the tap-target
+floor never applied — with the stylesheet plainly saying it should. The only
+thing that caught it was the measurement disagreeing with the source.
+`build-national-app.py` walks the skin and refuses to build on a stray or
+nested marker; proved by appending one.
+
+**THE OPEN SESSION STARTS BELOW THE SAVE BANNER.** The banner is `sticky
+z-50`, the session `fixed inset-0 z-40`, so the banner painted over the
+session's own header — and the BACK ARROW out of a night lives there. With a
+failed save showing, the organiser could not leave the screen they were stuck
+on, which is the worst possible moment for it. The banner is right to be on
+top; the overlay begins underneath. Its height cannot be written down (it
+wraps to two or three lines depending on width and on whether it is retrying),
+so the boot script measures it and publishes `--na-banner`.
+
+**HOME IS A POSTER UNTIL A NIGHT IS PLAYED AND A DASHBOARD AFTER IT.** The
+season announcement was the first 900px of a 2,019px screen and identical on
+the morning of night one and the night of the finals — with the live table,
+your own standing and the next night all underneath it.
+- It is a **reorder, not a rewrite**: those blocks already existed and were
+  good, they were just below. The column becomes a flex column and the poster
+  takes an `order` once `sessions` is non-empty, ending the page as a sign-off
+  instead of opening it as an advertisement for something you are in the
+  middle of. **Before the first night it stays where it is, because then it IS
+  the news** — checked both ways.
+- `space-y-4` puts its gap on `> * + *` by DOM order, which in a reordered
+  flex column lands in the wrong place, so the margins go and a real `gap`
+  replaces them.
+
+**THE ROSTER IS 340 NAMES AND 55 SCREENS; 32 HAVE PLAYED.** 46,284px of
+two-up photo cards. The carried roster is the right thing to HOLD — it is
+everyone who ever signed up and the all-time ladder depends on it — and the
+wrong thing to OPEN ON, because the question on the night is who is playing.
+- Two chips, `PLAYING 32` / `ALL 340`, with the counts on them: "PLAYING"
+  with no number is a filter you have to try before you understand it.
+  **4,914px instead of 46,284 — 5.8 screens instead of 55.**
+- **Search always looks at everyone.** A filter that hides the name you are
+  typing is worse than no filter, and the walk-in you are checking for is
+  exactly the person who has not played yet.
+- The chips do not render before the first night: 0 on one side and 340 on
+  the other is just a way to show an empty screen.
+
 #### Reaching the controls — `ops/check-scroll.mjs`
 **A `z-index` ON `main` TRAPPED EVERY SHEET UNDER THE FLOATING NAV.** Reported
 as "a lot of issues with scrolling, buttons are not reachable in some pages".

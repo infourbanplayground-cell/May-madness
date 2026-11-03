@@ -630,6 +630,92 @@ MOTIFS = [
      '    ncPaint(g, kind, d, img, logo, adj, "photo");'),
     ('  luPaintCut(g, kind, d, cut, logo, adj);',
      '  ncPaint(g, kind, d, cut, logo, adj, "cut");'),
+    # 5f0 · THE ROSTER IS 340 NAMES AND 55 SCREENS, AND 32 OF THEM HAVE
+    #       PLAYED. Measured: 46,284px of two-up photo cards. The carried
+    #       roster is the right thing to hold — it is everybody who has ever
+    #       signed up, and the all-time ladder depends on it — but it is the
+    #       wrong thing to OPEN ON once a season is running, because the
+    #       question on the night is "who is playing", not "who exists".
+    #       So: a two-chip filter. PLAYING defaults once the season has
+    #       started and shows the people with a result in it; ALL is one tap
+    #       away and is what you get before the first ball, when "played" is
+    #       nobody. SEARCH ALWAYS LOOKS AT EVERYONE — a filter that hides the
+    #       name you are typing is worse than no filter, and the walk-in you
+    #       are checking for is exactly the person who has not played yet.
+    ('function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {\n'
+     '  const [q, setQ] = React.useState("");',
+     'function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {\n'
+     '  const [q, setQ] = React.useState("");\n'
+     '  const [who, setWho] = React.useState("playing");'),
+    ('    .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()));\n'
+     '  return (\n'
+     '    <div>',
+     '    .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()))\n'
+     '    // The filter steps aside the moment somebody types.\n'
+     '    .filter(e => !!q || who === "all" || !started || e.totalPts > 0);\n'
+     '  const playingCount = ranked.filter(e => e.totalPts > 0).length;\n'
+     '  return (\n'
+     '    <div>'),
+    #       ...and the control itself, under the search box. It says the
+    #       counts, because "PLAYING" with no number beside it is a filter you
+    #       have to try in order to understand. It renders only once the
+    #       season has started: before that, everyone is in the same state and
+    #       a filter with 0 on one side and 340 on the other is just a way to
+    #       show an empty screen.
+    ('          fontFamily: "\'Archivo\',sans-serif", outline: "none" }} />\n'
+     '      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>',
+     '          fontFamily: "\'Archivo\',sans-serif", outline: "none" }} />\n'
+     '      {started && !q && (\n'
+     '        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>\n'
+     '          {[["playing", "PLAYING", playingCount],\n'
+     '            ["all", "ALL", ranked.length]].map(([k, label, n]) => (\n'
+     '            <button key={k} onClick={() => setWho(k)}\n'
+     '              style={{ flex: "0 0 auto", minHeight: 44, padding: "0 16px", cursor: "pointer",\n'
+     '                display: "inline-flex", alignItems: "center", gap: 7,\n'
+     '                borderRadius: 999,\n'
+     '                background: who === k ? "#F7F1E6" : "transparent",\n'
+     '                border: "1px solid " + (who === k ? "#F7F1E6" : "rgba(242,208,211,.35)"),\n'
+     '                color: who === k ? "#1A0A0C" : "#F2D0D3",\n'
+     '                fontFamily: "\'JetBrains Mono\',monospace", fontWeight: 700,\n'
+     '                fontSize: 11, letterSpacing: ".18em" }}>\n'
+     '              {label}<span style={{ opacity: .72 }}>{n}</span>\n'
+     '            </button>\n'
+     '          ))}\n'
+     '        </div>\n'
+     '      )}\n'
+     '      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>'),
+    # 5e9 · "1 NIGHTS". The same fault as the leader card's "1 SESSIONS",
+    #       on the block that is now the top of the home screen — so it is
+    #       the first sentence a returning player reads, on the row of the
+    #       person leading the series.
+    ('{e.stats.sessionsPlayed} NIGHTS · {en.winRate}% WIN',
+     '{e.stats.sessionsPlayed} {e.stats.sessionsPlayed === 1 ? "NIGHT" : "NIGHTS"}'
+     ' · {en.winRate}% WIN'),
+    # 5e8 · THE HOME SCREEN IS A POSTER UNTIL A NIGHT HAS BEEN PLAYED, AND A
+    #       DASHBOARD AFTER IT. The whole first screen is the season
+    #       announcement — landmark, tagline, prize pool, player count — and
+    #       it is identical on the morning of night one and on the night of
+    #       the finals. Everything a returning player actually opens the app
+    #       for (did I play, what did I score, where am I now, when is the
+    #       next one) is below the fold behind it; measured, the poster is
+    #       the first 900px of a 2,019px screen.
+    #       It is a REORDER, not a rewrite: those blocks already exist and are
+    #       good, they are just underneath. The column becomes a flex column
+    #       and the poster takes an `order` once there is a season to report
+    #       on, so it ends the page as a sign-off rather than opening it as an
+    #       advertisement for something you are already in the middle of.
+    #       Before the first night it stays exactly where it is, because then
+    #       it IS the news.
+    ('<div className="space-y-4" style={{animation:"sgSlide 200ms var(--ease-out) both"}}>\n'
+     '\n'
+     '      {/* ── HERO ── */}\n'
+     '      <div className="sg-hero" style={{position:"relative",marginTop:16,padding:"26px 18px",',
+     '<div className="space-y-4 na-home" '
+     'data-played={(state.sessions || []).length ? "1" : "0"} '
+     'style={{animation:"sgSlide 200ms var(--ease-out) both"}}>\n'
+     '\n'
+     '      {/* ── HERO ── */}\n'
+     '      <div className="sg-hero na-hero" style={{position:"relative",marginTop:16,padding:"26px 18px",'),
     # 5e7 · NAME THE SAVE BANNER, so the session overlay can get out from
     #       under it. The banner is `sticky; top:0; z-index:50` and the open
     #       session is `fixed inset-0 z-40`, so the banner paints over the

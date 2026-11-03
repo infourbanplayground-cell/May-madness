@@ -876,3 +876,21 @@ body { color: #FFFFFF; }
    width and on whether it is retrying — so the boot script measures it and
    publishes it here. With no banner the property is 0px and nothing moves. */
 body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
+
+/* ── HOME IS A DASHBOARD ONCE THERE IS A SEASON TO REPORT ON ────────────
+   The season poster is the right thing to open on when nothing has been
+   played: it IS the news. The moment a night exists it stops being news and
+   starts being an advertisement for something you are already in the middle
+   of — measured, it was the first 900px of a 2,019px screen, with the live
+   table, your own standing and the next night all underneath it.
+   So the column becomes a flex column and the poster takes an order. Nothing
+   is moved in the markup and nothing is hidden; the blocks that were already
+   there simply come first.
+   `space-y-4` puts its gap on `> * + *` by DOM order, which in a reordered
+   flex column lands in the wrong place — so the margins go and a real `gap`
+   replaces them. */
+.na-home[data-played="1"] {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.na-home[data-played="1"] > * { margin-top: 0 !important; }
+.na-home[data-played="1"] > .na-hero { order: 50; }

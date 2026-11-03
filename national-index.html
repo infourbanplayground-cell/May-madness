@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "c1d0b6c57a12";
+  var V = "a05ec8bcc50f";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -6840,6 +6840,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
 // gets: who is playing, how they are doing, tap through to their card.
 function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   const [q, setQ] = React.useState("");
+  const [who, setWho] = React.useState("playing");
   // Before the season starts nobody has series points, so ordering by them puts
   // 314 people in an arbitrary order and shows every one of them a zero. Until
   // the first match is played the roster ranks on all-time instead, which is
@@ -6852,7 +6853,10 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
       const form = recentForm(e.player.id, state.sessions || []);
       return { ...e, rank: i + 1, form, streak: currentStreak(form) };
     })
-    .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()));
+    .filter(e => !q || (e.player.name || "").toLowerCase().includes(q.toLowerCase()))
+    // The filter steps aside the moment somebody types.
+    .filter(e => !!q || who === "all" || !started || e.totalPts > 0);
+  const playingCount = ranked.filter(e => e.totalPts > 0).length;
   return (
     <div>
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
@@ -6868,6 +6872,24 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
         style={{ width: "100%", marginTop: 16, padding: "14px 16px", background: "rgba(158,21,32,.96)",
           border: "1px solid rgba(242,208,211,.2)", color: "#FFFFFF", fontSize: 15,
           fontFamily: "'Archivo',sans-serif", outline: "none" }} />
+      {started && !q && (
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          {[["playing", "PLAYING", playingCount],
+            ["all", "ALL", ranked.length]].map(([k, label, n]) => (
+            <button key={k} onClick={() => setWho(k)}
+              style={{ flex: "0 0 auto", minHeight: 44, padding: "0 16px", cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 7,
+                borderRadius: 28,
+                background: who === k ? "#F7F1E6" : "transparent",
+                border: "1px solid " + (who === k ? "#F7F1E6" : "rgba(242,208,211,.35)"),
+                color: who === k ? "#1A0A0C" : "#F2D0D3",
+                fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+                fontSize: 11, letterSpacing: ".18em" }}>
+              {label}<span style={{ opacity: .72 }}>{n}</span>
+            </button>
+          ))}
+        </div>
+      )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
         {rows.map(e => (
           <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)}
@@ -7363,10 +7385,10 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
   const donePct = liveFx.total ? Math.round(liveFx.played / liveFx.total * 100) : 0;
 
   return (
-    <div className="space-y-4" style={{animation:"sgSlide 200ms var(--ease-out) both"}}>
+    <div className="space-y-4 na-home" data-played={(state.sessions || []).length ? "1" : "0"} style={{animation:"sgSlide 200ms var(--ease-out) both"}}>
 
       {/* ── HERO ── */}
-      <div className="sg-hero" style={{position:"relative",marginTop:16,padding:"26px 18px",
+      <div className="sg-hero na-hero" style={{position:"relative",marginTop:16,padding:"26px 18px",
            background:"rgba(184,20,31,.9)",border:"1px solid rgba(247,241,230,.28)",overflow:"hidden"}}>
         <div style={{position:"absolute",right:-16,top:-40,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:170,lineHeight:1,
@@ -7489,7 +7511,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                      whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.player.name}</div>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".18em",
                      color:"#F7F1E6",marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                  {e.stats.sessionsPlayed} NIGHTS · {en.winRate}% WIN{en.streak >= 2 ? ` · W${en.streak}` : ""}</div>
+                  {e.stats.sessionsPlayed} {e.stats.sessionsPlayed === 1 ? "NIGHT" : "NIGHTS"} · {en.winRate}% WIN{en.streak >= 2 ? ` · W${en.streak}` : ""}</div>
               </div>
               <div style={{flex:"0 0 auto",textAlign:"right"}}>
                 <div className="sg-top-pts" style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
@@ -14647,6 +14669,24 @@ body { color: #FFFFFF; }
    width and on whether it is retrying — so the boot script measures it and
    publishes it here. With no banner the property is 0px and nothing moves. */
 body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
+
+/* ── HOME IS A DASHBOARD ONCE THERE IS A SEASON TO REPORT ON ────────────
+   The season poster is the right thing to open on when nothing has been
+   played: it IS the news. The moment a night exists it stops being news and
+   starts being an advertisement for something you are already in the middle
+   of — measured, it was the first 900px of a 2,019px screen, with the live
+   table, your own standing and the next night all underneath it.
+   So the column becomes a flex column and the poster takes an order. Nothing
+   is moved in the markup and nothing is hidden; the blocks that were already
+   there simply come first.
+   `space-y-4` puts its gap on `> * + *` by DOM order, which in a reordered
+   flex column lands in the wrong place — so the margins go and a real `gap`
+   replaces them. */
+.na-home[data-played="1"] {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.na-home[data-played="1"] > * { margin-top: 0 !important; }
+.na-home[data-played="1"] > .na-hero { order: 50; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",f,{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>
