@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "07ed17cc9933";
+  var V = "87ae5105d5fb";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -8905,9 +8905,27 @@ function naNightPulse(session) {
   };
   const ms = session.groupMatches || [];
   const played = ms.filter(m => m.winner).length;
-  // The fixture list is what the draw owes, not what has been entered: a
-  // night with nothing scored must still report how many matches it is.
-  const total = ms.length;
+  // THE DENOMINATOR IS WHAT THE DRAW OWES, NOT WHAT HAS BEEN ENTERED, and
+  // the first version of this said exactly that in a comment and then wrote
+  // `ms.length`, which is the opposite. The app only writes a match RECORD
+  // when a score is locked, so played always equalled total: the bar sat at
+  // 100% from the first result and the stage read GROUPS DONE all night.
+  // Caught live on 4 Nov with 6 of 12 played — the screen was telling the
+  // organiser "Every group match is in. The knockout has not been drawn
+  // yet", which is an invitation to seed a bracket off half a group stage.
+  // Each group of n owes n*(n-1)/2.
+  const total = (() => {
+    const sizes = {};
+    (session.teams || []).forEach(t => {
+      const g = t.group; if (!g) return;
+      sizes[g] = (sizes[g] || 0) + 1;
+    });
+    const owed = Object.values(sizes)
+      .reduce((a, n) => a + (n * (n - 1)) / 2, 0);
+    // Fall back to the records if the teams are not grouped yet, which is
+    // the only case where owed is 0 and something has still been played.
+    return owed || ms.length;
+  })();
   const live = ms.filter(m => !m.winner && m.score
     && (m.score.t1 !== null || m.score.t2 !== null));
   const next = ms.filter(m => !m.winner && !(m.score
