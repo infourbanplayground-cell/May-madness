@@ -1302,6 +1302,67 @@ in the repo green. The owner found both by looking at a card.
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
 
+#### The night — `national_screens.py`
+**THE NIGHT TOLD YOU THE DRAW AND NEVER THE STATE.** It is the screen somebody
+holds for three hours beside a court, and it was the one part of the app
+nothing here had ever looked at. A module, not more MOTIFS anchors, for the
+reason `national_cards.py` is one: these are new compositions, and a layout
+patched an anchor at a time is how the cards became a black-card design in red.
+Every figure is the app's own engine — `calcGroupStandings`,
+`qualifyingTeamIds`, `calcPlayerNights` — never re-derived here. A screen that
+can disagree with the scoring is worse than no screen.
+- **TEAMS NOW CARRIES THE TABLE.** It was a list of pairs: no position, no
+  wins, no points, no mark on who is through. The one screen named after the
+  teams was the one that could not say how they were doing, while the table
+  lived behind a different chip and showed one group at a time. It reads from
+  the same functions the bracket seeds from, so it cannot promise a place the
+  knockout will not honour, and nothing is marked as qualifying before a ball
+  is hit — the same rule the wall already works under.
+- **THE PAIR IS STACKED, AND THAT IS ARITHMETIC, NOT TASTE.** A doubles name
+  beside W, GD and PTS gets **112px at 360 and 142 at 390**; measured on the
+  real roster, "Muntaser & Mohammed" wants **190**, and four of the sixteen
+  pairs overflow even at 390. No column width closes a 78px gap — shaving the
+  numbers only changes whose name gets cut. One name per line fits every pair
+  at every size, and two overlapping faces already say it is a pair.
+- **THE QUALIFYING MARK IS A BAR, NOT A BORDER.** A `border-left` on a row
+  carrying the sheet radius is bent by it, so the mark drew as a green
+  crescent down the side of the pill — the hairline-bracket fault one layer
+  in. The skin's rule for that cannot reach it either: the row has a
+  background, and a surface with one drawn edge is a card. It had to stop
+  being an edge.
+- **TONIGHT'S POINTS is the fifth destination.** The app has known what every
+  player earned on a given night since Vol.8 (`calcPlayerNights`, with its own
+  guard against disagreeing with the series table) and no screen showed it.
+  Ties share a position and the next one skips. **It says what it is not
+  counting:** the streak bonus is a fact about a run of nights, so it is not
+  in `nightTotal` and is not implied — the same discipline as never
+  multiplying out what a 2X night is worth.
+- **A fifth column is 63px at 360**, where the icon and its gap cost 19 of
+  them and GROUPS overflowed by a pixel. The room came out of the gap and the
+  tracking, not the 12px label, which is already at the handoff's floor.
+  Measured at 360/375/390/430 rather than reasoned about.
+- **THE PULSE says what is happening now** — stage, matches played, a bar, and
+  ON COURT / NEXT read off the fixtures exactly as the wall reads them. It
+  sits above the tab content, because what is on court is true of the night
+  and not of whichever screen you are on. The fixture gets its own full-width
+  line: on one row with the badge and the score it had ~200px and cut the
+  opponent, which is the half somebody by the court is reading it for.
+- **`MID=1` on `ops/shots-session.mjs` rewinds the night**, because the live
+  state is a FINISHED session — ON COURT, NEXT, a part-full bar and the "not
+  drawn yet" line all render **zero times** against it, and every look passes
+  having seen none of them. Same hole the medallion check records.
+- **The night header said `11/2/2026`**, which is two faults: ambiguous
+  outside the US, and built by `new Date(<plain date>).toLocaleDateString()`,
+  the exact construction this repo has a standing rule against on a UTC+4
+  server. `naNightWhen` reads the parts out of the string.
+- **THE SIGNUP LIST'S FIELDS WERE 22px TALL** — half the tap floor, on the one
+  screen whose entire job is typing. Unseen because nothing had ever opened
+  it: `check-scroll`'s sub-screen sweep matched a fixed list of labels and
+  LIST was not among them. Found the moment it was added, which is the
+  argument for a sweep being a sweep.
+- Review with `node ops/shots-session.mjs` (`MID=1`, `ROLE=admin`, `VP=`,
+  `FULL=1`); `ops/shots-national.mjs` is the same tool for the five tabs.
+
 #### The chrome, the home screen and the roster
 **THE CHROME WAS A QUARTER OF THE PHONE.** Measured: a 128px header (44 of
 room for the masar band + a 58px brand row + 20 + border) and a 68px floating

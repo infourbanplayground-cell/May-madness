@@ -761,6 +761,19 @@ body .fixed.inset-0 button { min-height: 44px; min-width: 44px; }
 body [style*="position: fixed"][style*="inset: 0"] button {
   min-height: 44px; min-width: 44px;
 }
+/* AND THE FIELDS, NOT JUST THE BUTTONS. The signup list is sixteen text
+   inputs that the organiser types names into on a phone, and they drew 22 and
+   23px tall — half the floor, on the screen whose entire job is typing. It
+   went unseen because nothing had ever opened that screen: the harness's
+   sub-screen sweep matched a fixed list of labels and LIST was not in it, so
+   the one screen made of fields was the one screen never measured. Found the
+   moment the list was added to that sweep, which is the argument for the
+   sweep being a sweep. */
+body .fixed.inset-0 input, body .fixed.inset-0 select, body .fixed.inset-0 textarea,
+body [style*="position: fixed"][style*="inset: 0"] input,
+body [style*="position: fixed"][style*="inset: 0"] select {
+  min-height: 44px;
+}
 /* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
    up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
    which is 28px wide — fine. An earlier line here read

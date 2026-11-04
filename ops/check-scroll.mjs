@@ -614,7 +614,7 @@ for (const role of ROLES) {
     // its own sub-screens
     const subs = await pg.evaluate(() => [...new Set([...document.querySelectorAll('button')]
       .map(b => (b.textContent || '').trim())
-      .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE|SCORES)$/i.test(t)))]);
+      .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE|SCORES|POINTS|LIST)$/i.test(t)))]);
     for (const s of subs) {
       await pg.evaluate((s) => {
         const b = [...document.querySelectorAll('button')]

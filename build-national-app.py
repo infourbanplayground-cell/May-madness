@@ -407,6 +407,17 @@ CARDS_JS = national_cards.painter(CFG['palette'])
 import national_group_cards  # noqa: E402
 GROUP_CARDS_JS = national_group_cards.painter(CFG['palette'])
 
+# ...and the NIGHT'S OWN SCREENS. The screen somebody holds for three hours
+# beside a court told you the DRAW and never the STATE: the teams screen was a
+# list of pairs with no table on it, there was no leaderboard for the night at
+# all, and nothing anywhere said what was on court. A module for the same
+# reason the card painters are — these are new compositions, and a layout
+# patched one anchor at a time is how the cards ended up as a black-card
+# design wearing red.
+import national_screens  # noqa: E402
+SCREENS_JS = national_screens.screens(CFG['palette'])
+GROUP_TABLE_BLOCK = national_screens.group_table_block(CFG['palette'])
+
 DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
     "// and the admin hint cannot drift from DOUBLE_NIGHTS.\n"
@@ -484,6 +495,65 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # 5g1 · THE TEAMS SCREEN WAS A LIST OF PAIRS AND NOTHING ELSE. No
+    #       position, no wins, no points, no mark on who is through — the one
+    #       screen named after the teams was the one that could not tell you
+    #       how they were doing, while the table lived behind a different chip
+    #       and showed one group at a time. The standings come from
+    #       `calcGroupStandings` and `qualifyingTeamIds`, which are what the
+    #       bracket itself seeds from, so this screen cannot promise a place
+    #       the knockout will not honour.
+    (national_screens.TEAM_ROWS_OLD, GROUP_TABLE_BLOCK),
+    # 5g2 · THERE WAS NO LEADERBOARD FOR THE NIGHT. The app has known what
+    #       every player earned on a given night since Vol.8 —
+    #       `calcPlayerNights`, with its own guard against disagreeing with
+    #       the series table — and no screen showed it. A fifth destination,
+    #       so the chip row keeps its one job (where in the night am I) rather
+    #       than the leaderboard being buried in the row of occasional
+    #       actions, which is where the exports live.
+    ('gridTemplateColumns:"repeat(4,minmax(0,1fr))"',
+     'gridTemplateColumns:"repeat(5,minmax(0,1fr))"'),
+    # ...and a fifth column is 63px at 360, where the icon and its gap were
+    # costing 19 of them: GROUPS overflowed its cell by a pixel. Measured at
+    # 360, 375, 390 and 430 rather than reasoned about, because "it looks like
+    # it fits" is how the one bar on every screen came to say "56 NATIONAL
+    # SERI...". The label keeps its size — 12px uppercase is already at the
+    # handoff's floor — so the room comes out of the gap and the tracking.
+    ('justifyContent:"center", gap:6,\n'
+     '                         padding:"8px 2px", border:"none", cursor:"pointer",\n'
+     '                         fontFamily:"\'Archivo\',sans-serif", fontWeight:800, fontSize:12, '
+     'letterSpacing:".08em",',
+     'justifyContent:"center", gap:4,\n'
+     '                         padding:"8px 1px", border:"none", cursor:"pointer",\n'
+     '                         fontFamily:"\'Archivo\',sans-serif", fontWeight:800, fontSize:12, '
+     'letterSpacing:".04em",'),
+    ('{ id:"signups", label:"List",   Ic:CIc.clipboard,',
+     '{ id:"points",  label:"Points", Ic:I.trophy },\n'
+     '              { id:"signups", label:"List",   Ic:CIc.clipboard,'),
+    # 5g4 · THE NIGHT'S OWN HEADER SAID "11/2/2026", which is two faults in
+    #       one line. It is ambiguous — the club is in Oman and that reads as
+    #       11 February to everybody who looks at it — and it is built by
+    #       `new Date(<plain date>).toLocaleDateString()`, which is the exact
+    #       construction this repo has a standing rule against: the string
+    #       parses as UTC midnight and the server runs at UTC+4, so the date
+    #       shown can be the day before the one stored.
+    #       `fmtNightDate` already exists, already reads the parts out of the
+    #       string rather than through a Date, and is what every other screen
+    #       in the app uses. The weekday is derived with the UTC getters for
+    #       the same reason.
+    ('{session.date ? new Date(session.date).toLocaleDateString() : "No date"}',
+     '{session.date ? naNightWhen(session.date) : "No date"}'),
+    # 5g3 · ...and the screens themselves. The pulse goes ABOVE the tab
+    #       content rather than inside one of them, because what is on court
+    #       is true of the night and not of whichever screen you happen to be
+    #       looking at.
+    ('<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
+     '        {tab === "teams" && <TeamsTab',
+     '<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
+     '        <NaNightPulse session={session} state={state} />\n'
+     '        {tab === "points" && <NaNightPoints session={session} state={state}\n'
+     '          sessions={state.sessions || []} onPick={null} />}\n'
+     '        {tab === "teams" && <TeamsTab'),
     # 5f1 · THE COUNTDOWN PANEL READ AS ONE SENTENCE: "30 NOV 75".
     #       Two unrelated facts — which night the season ends on, and what
     #       the season pays — in one `space-between` row with NO GAP, in the
@@ -537,7 +607,7 @@ MOTIFS = [
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
     ("function SessionsView({",
-     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + GROUP_CARDS_JS
+     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + GROUP_CARDS_JS + SCREENS_JS
      + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
