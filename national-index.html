@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "181b20e38542";
+  var V = "07ed17cc9933";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -7502,8 +7502,8 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             return <div key={e.player.id} onClick={() => setTab("leaderboard")} className="sg-top" data-lead={lead ? "1" : "0"}
               style={{cursor:"pointer",display:"flex",alignItems:"center",gap:12,padding:"13px 14px",
                       background:lead ? "rgba(16,23,31,.96)" : "rgba(158,21,32,.94)",
-                      backgroundImage:`linear-gradient(180deg,${bar},rgba(242,208,211,.05))`,
-                      backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                      backgroundImage:`linear-gradient(180deg,${bar},${bar})`,
+                      backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
               <div style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
                    background:lead ? "rgba(247,241,230,.14)" : "rgba(255,255,255,.04)",
                    border:`1px solid ${lead ? "rgba(247,241,230,.5)" : "rgba(242,208,211,.35)"}`,
@@ -7544,7 +7544,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             <div key={sp.key} onClick={() => setTab("leaderboard")} className="sg-card"
                  style={{cursor:"pointer",padding:14,
                    backgroundImage:`linear-gradient(180deg,${sp.colour},rgba(242,208,211,.05))`,
-                   backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                   backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
               <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,
                    letterSpacing:".2em",color:sp.colour}}>{sp.label}</div>
               <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
@@ -7605,7 +7605,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           The canvas invented values here ("Knockout win +5, Session champion
           +8"). These are the app's real ones. */}
       <div className="sg-card" style={{marginTop:20,padding:16,
-           backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))",backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+           backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))",backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
         <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".32em",color:"#F2B8BC"}}>HOW POINTS ARE EARNED</div>
         <div style={{display:"grid",gridTemplateColumns:"1fr auto",marginTop:12}}>
           {LADDER.map(([label, pts, colour]) => <React.Fragment key={label}>
@@ -8935,6 +8935,22 @@ function NaNightPulse({ session, state }) {
     const t = (session.teams || []).find(x => x.id === tid);
     return t ? first(t.p1Id) + " & " + first(t.p2Id) : "?";
   };
+  // THE CHAMPIONS, read off the bracket's own final and nowhere else. A
+  // final with no winner is not a result, it is a fixture, so this stays
+  // null and the plate does not render — the same rule the bracket share
+  // card works under.
+  const champ = (() => {
+    const f = (session.bracket || {}).final;
+    if (!f || !f.winner) return null;
+    const id = f.winner === "team1" ? f.team1Id : f.team2Id;
+    const t = (session.teams || []).find(x => x.id === id);
+    if (!t) return null;
+    const sc = f.score
+      ? (f.winner === "team1" ? f.score.t1 + "–" + f.score.t2
+                              : f.score.t2 + "–" + f.score.t1)
+      : null;
+    return { name: first(t.p1Id) + " & " + first(t.p2Id), score: sc };
+  })();
   if (!p.total && !p.koDrawn) return null;
   const pct = p.total ? Math.round((p.played / p.total) * 100) : 0;
   const stage = p.groupsDone
@@ -9004,6 +9020,38 @@ function NaNightPulse({ session, state }) {
           </div>
         )}
       </div>
+      {/* THE NIGHT'S PAYOFF, AND THE ONE IVORY SURFACE ON THE SCREEN.
+          Once the final is won, who won it is the single most interesting
+          fact about the night — and the app made you open the bracket and
+          read a row to find it, on a screen that was otherwise red on red
+          on red. It is the same ivory result plate with its own masar trim
+          that the line-up card ends on, so the app and the card tell the
+          story the same way round. The champion's name is INK on ivory, the
+          inversion this volume uses for a hero, and the plate carries the
+          green edge that means "these two won" everywhere else. */}
+      {champ && (
+        <div className="na-ivory" style={{ marginTop: 14, padding: "14px 16px 18px",
+          borderLeft: "0" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 12,
+            flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+              fontSize: 9, letterSpacing: ".26em" }}>CHAMPIONS</span>
+            {champ.score && (
+              <span style={{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace",
+                fontWeight: 700, fontSize: 12 }}>
+                {champ.score}
+              </span>
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
+            <span aria-hidden="true" style={{ flex: "0 0 5px", alignSelf: "stretch",
+              minHeight: 30, background: "#087A3F" }} />
+            <span style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+              fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 24,
+              lineHeight: 1.1 }}>{champ.name}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -9188,7 +9236,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
                style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:14,transform:"none",
                        background:s.completed ? "rgba(158,21,32,.94)" : "rgba(16,23,31,.96)",
                        backgroundImage:`linear-gradient(180deg,${liveNow ? "#F7F1E6" : "#F2D0D3"},rgba(242,208,211,.05))`,
-                       backgroundSize:"3px 100%",backgroundRepeat:"no-repeat",border:"none"}}>
+                       backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",border:"none"}}>
             <div className="na-medallion" data-live={liveNow ? "1" : "0"}
                  title={landmarkFor(idx).nameEn}
                  style={{flex:"0 0 auto",width:48,height:48,
@@ -9614,9 +9662,9 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
         <div className="space-y-1.5">
           {slots.map((val, i) => (
             <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background: val.trim() ? "var(--cream)" : "rgba(255,247,232,.35)", border: val.trim() ? "3px solid var(--ink)" : "2px dashed rgba(158,21,32,.25)", boxShadow: val.trim() ? "none" : "none", padding:"6px 10px" }}>
-              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:16, color: val.trim() ? "var(--ink)" : "rgba(158,21,32,.3)", width:22, flexShrink:0 }}>{i + 1}-</span>
+              <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:16, color: val.trim() ? "var(--ink)" : "#F2D0D3", width:22, flexShrink:0 }}>{i + 1}-</span>
               {isAdmin
-                ? <input value={val} onChange={e => setSlot(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:700, color:"#FFFFFF", minWidth:0 }} />
+                ? <input value={val} onChange={e => setSlot(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "#F2D0D3", minWidth:0 }} />
                 : <span style={{ flex:1, fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(158,21,32,.25)" }}>{val.trim() || "—"}</span>
               }
               {isAdmin && val.trim() && <button onClick={() => clearSlot(i)} style={{ color:"#F2D0D3", fontSize:13, background:"none", border:"none", cursor:"pointer", padding:2 }}>✕</button>}
@@ -10035,7 +10083,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
           )}
 
           {!session.mvpVotingOpen && session.mvpId && mvpPlayer && (
-            <div style={{ background:"rgba(16,23,31,.96)", backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))", backgroundSize:"3px 100%", backgroundRepeat:"no-repeat", border:"1px solid rgba(242,184,188,.4)", boxShadow:"0 0 40px rgba(242,184,188,.10)", padding: "24px 18px 24px 22px", textAlign: "center" }}>
+            <div style={{ background:"rgba(16,23,31,.96)", backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))", backgroundSize:"5px 100%", backgroundRepeat:"no-repeat", border:"1px solid rgba(242,184,188,.4)", boxShadow:"0 0 40px rgba(242,184,188,.10)", padding: "24px 18px 24px 22px", textAlign: "center" }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}><CIc.crown size={40} /></div>
               <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 2, color:"#FFFFFF", textTransform: "uppercase" }}>MVP of the Night</div>
               <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 40, color:"#FFFFFF", marginTop: 4 }}>{mvpPlayer.name}</div>
@@ -10409,7 +10457,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
       {/* ── STANDINGS ── */}
       <div style={{marginTop:14,padding:16,background:"rgba(158,21,32,.94)",
            backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
-           backgroundSize:"3px 100%",backgroundRepeat:"no-repeat",position:"relative",overflow:"hidden"}}>
+           backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:96,lineHeight:1,
              color:"rgba(255,255,255,.035)",pointerEvents:"none"}}>{g}</div>
@@ -10488,11 +10536,11 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
               const t2 = (session.teams || []).find(t => t.id === m.team2Id);
               const done = !!m.winner;
               const w1 = m.winner === "team1", w2 = m.winner === "team2";
-              const bar = done ? "#F7F1E6" : "#F2D0D3";
+              const bar = done ? "#087A3F" : "#F2D0D3";
               return <div key={m.id} onClick={() => isAdmin && setEdit({ ...m, group: g })}
                 style={{cursor:isAdmin ? "pointer" : "default",padding:14,background:"rgba(158,21,32,.94)",
-                        backgroundImage:`linear-gradient(180deg,${bar},rgba(242,208,211,.05))`,
-                        backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                        backgroundImage:`linear-gradient(180deg,${bar},${bar})`,
+                        backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:"#F7F1E6"}}>MATCH {mi + 1}</div>
                   <div style={{marginLeft:"auto",fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
@@ -10500,18 +10548,18 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",gap:10,marginTop:10}}>
                   <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,textAlign:"right",
-                       color:w1 ? "#F7F1E6" : "#FFFFFF",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t1)}</div>
+                       color:done ? (w1 ? "#FFFFFF" : "#F2D0D3") : "#FFFFFF",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t1)}</div>
                   <div style={{flex:"0 0 auto",display:"flex",alignItems:"center",gap:7,padding:"5px 11px",
-                       background:done ? "rgba(247,241,230,.08)" : "rgba(255,255,255,.03)",
-                       border:`1px solid ${done ? "rgba(247,241,230,.35)" : "rgba(242,208,211,.3)"}`}}>
+                       background:done ? "rgba(26,10,12,.55)" : "rgba(255,255,255,.03)",
+                       border:`${done ? "2px" : "1px"} solid ${done ? "#087A3F" : "rgba(242,208,211,.3)"}`}}>
                     <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
-                          fontSize:25,lineHeight:1,color:w1 ? "#F7F1E6" : "#F7F1E6"}}>{m.score ? m.score.t1 : "–"}</span>
+                          fontSize:25,lineHeight:1,color:done ? (w1 ? "#FFFFFF" : "#F2D0D3") : "#F7F1E6"}}>{m.score ? m.score.t1 : "–"}</span>
                     <span style={{fontSize:13,color:"#F7F1E6"}}>/</span>
                     <span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
-                          fontSize:25,lineHeight:1,color:w2 ? "#F7F1E6" : "#F7F1E6"}}>{m.score ? m.score.t2 : "–"}</span>
+                          fontSize:25,lineHeight:1,color:done ? (w2 ? "#FFFFFF" : "#F2D0D3") : "#F7F1E6"}}>{m.score ? m.score.t2 : "–"}</span>
                   </div>
                   <div style={{minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:14,
-                       color:w2 ? "#F7F1E6" : "#FFFFFF",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t2)}</div>
+                       color:done ? (w2 ? "#FFFFFF" : "#F2D0D3") : "#FFFFFF",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl(t2)}</div>
                 </div>
                 {!m.score && m.lossType && <div style={{marginTop:9,fontFamily:"'Archivo',sans-serif",fontWeight:800,
                      fontSize:10,letterSpacing:".14em",color:"#F7F1E6"}}>
@@ -11351,7 +11399,7 @@ function SeedBadge({ seed }) {
   const cfg = n === 1
     ? { bg: "rgba(247,241,230,.9)",   color: "#B8141F" }
     : n === 2
-    ? { bg: "rgba(242,184,188,.16)", color: "#F2B8BC" }
+    ? { bg: "rgba(247,241,230,.20)", color: "#FFFFFF" }
     : { bg: "rgba(255,255,255,.10)", color: "#F2D0D3" };
   return <span className="inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold font-mono shrink-0" style={{ background: cfg.bg, color: cfg.color, border: "1px solid rgba(255,255,255,.14)", borderRadius: 28 }}>{seed}</span>;
 }
@@ -11695,7 +11743,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
           return <div onClick={() => setOpenPlayerId(leader.player.id)} className="sg-top" data-lead="1"
             style={{cursor:"pointer",position:"relative",marginTop:12,padding:"16px 14px",
                     background:"rgba(16,23,31,.96)",backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
-                    backgroundSize:"3px 100%",backgroundRepeat:"no-repeat",overflow:"hidden"}}>
+                    backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",overflow:"hidden"}}>
             <div style={{position:"relative",display:"flex",alignItems:"center",gap:12}}>
               <div style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
                    background:"rgba(247,241,230,.14)",border:"1px solid rgba(247,241,230,.5)",
@@ -11735,7 +11783,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
           const e = list[mi], en = enrich(e), mv = moveOf(e, mi);
           const near = indexed.slice(Math.max(0, mi - 2), mi + 3);
           return <div style={{marginTop:14,padding:"13px 14px",background:"rgba(16,23,31,.96)",
-               backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))",backgroundSize:"3px 100%",
+               backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))",backgroundSize:"5px 100%",
                backgroundRepeat:"no-repeat",border:"1px solid rgba(242,184,188,.4)"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
@@ -11886,7 +11934,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
             {STATS.map(([label, value, colour]) => (
               <div key={label} style={{padding:11,background:"rgba(158,21,32,.94)",
                    backgroundImage:`linear-gradient(180deg,${colour},rgba(242,208,211,.05))`,
-                   backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+                   backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".2em",color:"#F7F1E6"}}>{label}</div>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
                      fontSize:24,lineHeight:1,color:colour,marginTop:5}}>{value}</div>
@@ -11897,7 +11945,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           {/* form */}
           {last8.length > 0 && <div style={{marginTop:14,padding:14,background:"rgba(158,21,32,.94)",
                backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
-               backgroundSize:"3px 100%",backgroundRepeat:"no-repeat"}}>
+               backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
             <div style={{display:"flex",alignItems:"baseline",gap:8}}>
               <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".3em",color:"#F7F1E6"}}>
                 FORM · LAST {last8.length}</div>
@@ -15043,6 +15091,25 @@ body { color: #FFFFFF; }
 .text-stone-300, .text-stone-400, .text-stone-500, .text-stone-600,
 .text-neutral-300, .text-neutral-400, .text-neutral-500,
 .text-gray-300, .text-gray-400, .text-gray-500 { color: var(--rose-txt) !important; }
+
+/* THE COOL UTILITIES RESOLVE TO THE FLAG RED, WHICH IS 1.31:1 ON THE PAGE.
+   A hex sweep cannot see a Tailwind class, and the one above only catches the
+   greys — so the accent utilities inherited from three volumes were never
+   looked at. Measured, all thirteen of them: eleven already land on ivory or
+   white (5.92 and 6.65), and three do not. `text-cyan-300` (Surge's lead),
+   `text-blue-400` and `text-blue-300` all compute to `rgb(215,32,46)` — the
+   FLAG red — which on the base red is 1.31:1 and on a card 1.60:1. That is
+   not dim, it is gone: "#1 seed: amjad & Wathab." on the knockout screen, the
+   one actionable line in that paragraph, invisible in 29 places.
+   Flag red belongs to the plaque and the masar band, where it sits against
+   white and green. It is not a text colour on this ground, and the handoff
+   has no dark-on-red pair, so these take the lead the way every other accent
+   here did.
+   NONE OF THIS WAS CAUGHT because the contrast audit sweeps the five main
+   tabs and the knockout screen lives inside the night. */
+.text-cyan-300, .text-cyan-400, .text-blue-300, .text-blue-400 {
+  color: var(--ivory) !important;
+}
 /* ...AND IT MUST MATCH THE COLOUR AS *INK*, NOT ANYWHERE IN THE ATTRIBUTE.
    `[style*="242, 184, 188"]` cannot tell `color: rgb(242,184,188)` from
    `background: rgb(242,184,188)` — it only sees the number somewhere in the

@@ -530,6 +530,83 @@ MOTIFS = [
     ('{ id:"signups", label:"List",   Ic:CIc.clipboard,',
      '{ id:"points",  label:"Points", Ic:I.trophy },\n'
      '              { id:"signups", label:"List",   Ic:CIc.clipboard,'),
+    # 5g8 · THE RUNNER-UP SEED BADGE IS 4.3:1, just under AA, and it is the
+    #       only run left on the knockout screen. The winner's badge is dark
+    #       type on a near-solid ivory disc; the runner-up's was a 16% accent
+    #       wash with the accent as type, which composites to rose on a faint
+    #       rose and lands at 4.3. It keeps the tier distinction by INVERTING
+    #       instead of dimming — light type on a tinted ground against the
+    #       winner's dark-on-light — which reads as a different tier rather
+    #       than as the same badge turned down.
+    ('{ bg: "rgba(255,46,136,.16)", color: "#FF2E88" }',
+     '{ bg: "rgba(247,241,230,.20)", color: "#FFFFFF" }'),
+    # 5g7 · THE SIGN-UP LIST WAS UNREADABLE IN BOTH OF ITS STATES, and the
+    #       worse half is a Vol.8 bug we inherited: the row sits on a CREAM
+    #       plate once a name is in it, and the organiser's input draws
+    #       `#F2F2F2` — white on cream, about 1.07:1. The same fault, to the
+    #       hex, as the "not saving" banner this volume already had to fix.
+    #       Sixteen fields, on the one screen whose entire job is typing, and
+    #       the person typing is the only person who sees them.
+    #       The empty slot's number is the other half: 30% ink over a 35%
+    #       cream wash reads as a blank box with nothing in it, so the sheet
+    #       that is meant to be a numbered list of sixteen places shows no
+    #       numbers. AND THE TWO STATES NEED OPPOSITE INKS, which only
+    #       compositing shows: the FILLED row sits on an opaque cream plate,
+    #       so it is ink; the EMPTY row's plate is a 35% cream wash, which
+    #       over the red composites to a muted RED, not to a light ground —
+    #       a dark number there is invisible at any alpha. Light on the
+    #       empty one, ink on the filled one.
+    #       Neither was caught because the contrast audit sweeps the five main
+    #       tabs and this screen lives inside the night — and the live state
+    #       has every slot empty, so the filled case renders zero times.
+    ('placeholder="Name + Partner" style={{ flex:1, background:"transparent", '
+     'border:"none", outline:"none", fontSize:14, fontWeight:700, color:"#F2F2F2", minWidth:0 }}',
+     'placeholder="Name + Partner" style={{ flex:1, background:"transparent", '
+     'border:"none", outline:"none", fontSize:14, fontWeight:700, '
+     'color: val.trim() ? "var(--ink)" : "#F2D0D3", minWidth:0 }}'),
+    ('color: val.trim() ? "var(--ink)" : "rgba(10,10,10,.3)", width:22, flexShrink:0 }}>{i + 1}-',
+     'color: val.trim() ? "var(--ink)" : "#F2D0D3", width:22, flexShrink:0 }}>{i + 1}-'),
+    # 5g6 · THE WINNER MARK EXISTED AND THE COLOUR SWEEP ERASED IT. Vol.8
+    #       drew the winning name and score in `#C6FF00` against the loser's
+    #       `#F2F2F2` — lime was doing double duty, as the brand's lead AND
+    #       as "this one won". The sweep maps lime to IVORY (the new lead) and
+    #       #F2F2F2 to white, so the two sides of every result landed a
+    #       hair apart and six rows of a group read as six pairs of names with
+    #       some digits between them. A sweep moves a colour; it cannot move a
+    #       meaning, which is the third time that has been true in this skin.
+    #       GREEN TAKES IT, in the meaning green already has here: the
+    #       winner's edge on the champion's plate and down a qualifying row.
+    #       It is an EDGE AND A FILL, never type — `#087A3F` on the deep red
+    #       is about 1.2:1, so a green name would be the invisible seed line
+    #       all over again. The winner is carried by the bar, the pill and by
+    #       the LOSER stepping back to the muted rose, which is the same
+    #       figure/ground move the cards use.
+    ('const bar = done ? "#C6FF00" : "#6E6E6E";',
+     'const bar = done ? "#087A3F" : "#6E6E6E";'),
+    ('color:w1 ? "#C6FF00" : "#F2F2F2"',
+     'color:done ? (w1 ? "#FFFFFF" : "#F2D0D3") : "#F2F2F2"'),
+    ('color:w2 ? "#C6FF00" : "#F2F2F2"',
+     'color:done ? (w2 ? "#FFFFFF" : "#F2D0D3") : "#F2F2F2"'),
+    ('color:w1 ? "#C6FF00" : "#CFCFCF"',
+     'color:done ? (w1 ? "#FFFFFF" : "#F2D0D3") : "#CFCFCF"'),
+    ('color:w2 ? "#C6FF00" : "#CFCFCF"',
+     'color:done ? (w2 ? "#FFFFFF" : "#F2D0D3") : "#CFCFCF"'),
+    # AND IT IS AN EDGE, NOT A FILL — the volume's own rule, which I broke on
+    # the first pass. Green at 30% over the base red does not read as green,
+    # it composites to BROWN: the score pill came out looking like dirt with
+    # a green hairline round it. The pill keeps an ink ground and takes a 2px
+    # green edge instead, which is what green means on the champion's plate
+    # and down a qualifying row.
+    ('background:done ? "rgba(198,255,0,.08)" : "rgba(255,255,255,.03)"',
+     'background:done ? "rgba(26,10,12,.55)" : "rgba(255,255,255,.03)"'),
+    ('border:`1px solid ${done ? "rgba(198,255,0,.35)" : "rgba(110,110,110,.3)"}`',
+     'border:`${done ? "2px" : "1px"} solid ${done ? "#087A3F" : "rgba(110,110,110,.3)"}`'),
+    # The row's left bar was a 3px gradient fading to nothing, so the mark
+    # that is meant to say "this one is decided" was a sliver. Solid, and the
+    # same green.
+    ('backgroundSize:"3px 100%"', 'backgroundSize:"5px 100%"'),
+    ('backgroundImage:`linear-gradient(180deg,${bar},rgba(110,110,110,.05))`',
+     'backgroundImage:`linear-gradient(180deg,${bar},${bar})`'),
     # 5g5 · ONLY THE DESTINATIONS ARE PINNED. The sticky block held two rows —
     #       where in the night you are, and four occasional actions (PHOTOS,
     #       POSTS, LINE-UP, SHARE) — and stuck both to the top for the whole

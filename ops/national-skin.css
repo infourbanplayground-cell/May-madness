@@ -911,6 +911,25 @@ body { color: #FFFFFF; }
 .text-stone-300, .text-stone-400, .text-stone-500, .text-stone-600,
 .text-neutral-300, .text-neutral-400, .text-neutral-500,
 .text-gray-300, .text-gray-400, .text-gray-500 { color: var(--rose-txt) !important; }
+
+/* THE COOL UTILITIES RESOLVE TO THE FLAG RED, WHICH IS 1.31:1 ON THE PAGE.
+   A hex sweep cannot see a Tailwind class, and the one above only catches the
+   greys — so the accent utilities inherited from three volumes were never
+   looked at. Measured, all thirteen of them: eleven already land on ivory or
+   white (5.92 and 6.65), and three do not. `text-cyan-300` (Surge's lead),
+   `text-blue-400` and `text-blue-300` all compute to `rgb(215,32,46)` — the
+   FLAG red — which on the base red is 1.31:1 and on a card 1.60:1. That is
+   not dim, it is gone: "#1 seed: amjad & Wathab." on the knockout screen, the
+   one actionable line in that paragraph, invisible in 29 places.
+   Flag red belongs to the plaque and the masar band, where it sits against
+   white and green. It is not a text colour on this ground, and the handoff
+   has no dark-on-red pair, so these take the lead the way every other accent
+   here did.
+   NONE OF THIS WAS CAUGHT because the contrast audit sweeps the five main
+   tabs and the knockout screen lives inside the night. */
+.text-cyan-300, .text-cyan-400, .text-blue-300, .text-blue-400 {
+  color: var(--ivory) !important;
+}
 /* ...AND IT MUST MATCH THE COLOUR AS *INK*, NOT ANYWHERE IN THE ATTRIBUTE.
    `[style*="242, 184, 188"]` cannot tell `color: rgb(242,184,188)` from
    `background: rgb(242,184,188)` — it only sees the number somewhere in the

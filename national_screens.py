@@ -102,6 +102,22 @@ function NaNightPulse({{ session, state }}) {{
     const t = (session.teams || []).find(x => x.id === tid);
     return t ? first(t.p1Id) + " & " + first(t.p2Id) : "?";
   }};
+  // THE CHAMPIONS, read off the bracket's own final and nowhere else. A
+  // final with no winner is not a result, it is a fixture, so this stays
+  // null and the plate does not render — the same rule the bracket share
+  // card works under.
+  const champ = (() => {{
+    const f = (session.bracket || {{}}).final;
+    if (!f || !f.winner) return null;
+    const id = f.winner === "team1" ? f.team1Id : f.team2Id;
+    const t = (session.teams || []).find(x => x.id === id);
+    if (!t) return null;
+    const sc = f.score
+      ? (f.winner === "team1" ? f.score.t1 + "\u2013" + f.score.t2
+                              : f.score.t2 + "\u2013" + f.score.t1)
+      : null;
+    return {{ name: first(t.p1Id) + " & " + first(t.p2Id), score: sc }};
+  }})();
   if (!p.total && !p.koDrawn) return null;
   const pct = p.total ? Math.round((p.played / p.total) * 100) : 0;
   const stage = p.groupsDone
@@ -171,6 +187,38 @@ function NaNightPulse({{ session, state }}) {{
           </div>
         )}}
       </div>
+      {{/* THE NIGHT'S PAYOFF, AND THE ONE IVORY SURFACE ON THE SCREEN.
+          Once the final is won, who won it is the single most interesting
+          fact about the night — and the app made you open the bracket and
+          read a row to find it, on a screen that was otherwise red on red
+          on red. It is the same ivory result plate with its own masar trim
+          that the line-up card ends on, so the app and the card tell the
+          story the same way round. The champion's name is INK on ivory, the
+          inversion this volume uses for a hero, and the plate carries the
+          green edge that means "these two won" everywhere else. */}}
+      {{champ && (
+        <div className="na-ivory" style={{{{ marginTop: 14, padding: "14px 16px 18px",
+          borderLeft: "0" }}}}>
+          <div style={{{{ display: "flex", alignItems: "baseline", gap: 12,
+            flexWrap: "wrap" }}}}>
+            <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700,
+              fontSize: 9, letterSpacing: ".26em" }}}}>CHAMPIONS</span>
+            {{champ.score && (
+              <span style={{{{ marginLeft: "auto", fontFamily: "'JetBrains Mono',monospace",
+                fontWeight: 700, fontSize: 12 }}}}>
+                {{champ.score}}
+              </span>
+            )}}
+          </div>
+          <div style={{{{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}}}>
+            <span aria-hidden="true" style={{{{ flex: "0 0 5px", alignSelf: "stretch",
+              minHeight: 30, background: "{green}" }}}} />
+            <span style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+              fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 24,
+              lineHeight: 1.1 }}}}>{{champ.name}}</span>
+          </div>
+        </div>
+      )}}
     </div>
   );
 }}
