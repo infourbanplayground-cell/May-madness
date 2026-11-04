@@ -43,6 +43,41 @@ SUPPLIED = {
     "4.png": "mon-burner",     # the incense burner
     "5.png": "mon-sail",       # the sail-form museum
     "6.png": "mon-palace",     # three arches with a flagstaff
+    # SECOND BATCH, 4 Nov 2026, named by the owner — and NOT guessed at, which
+    # matters because the first reading of the opera house here was "Al Alam
+    # Palace" and would have been the third building in this volume to carry
+    # another building's name.
+    "9.png": "mon-mirani",     # Al Mirani, the fort on the cliff over the water
+    "11.png": "mon-burj",      # a generic watchtower; the owner's call, NOT a
+                               # named landmark, so it is a motif and never
+                               # takes a caption
+    "12.png": "mon-sahwa",     # Burj Al Sahwa
+}
+
+# SUPPLIED AND NOT USABLE, which is a different thing from missing, and the
+# reason each one is parked is worth keeping:
+#   8.png   the ROYAL OPERA HOUSE, and the file is a stock preview carrying a
+#           tiled "Megapixl" watermark across the facade. The ramp in
+#           silhouette() would drop a faint mark, but this one sits over the
+#           drawing at full strength and would convert as part of the
+#           building. Same standing rule as the earlier VectorStock comps:
+#           reference for WHICH landmark, never the artwork.
+#   10.png  NIZWA FORT, and it is the fort's own LOGO — the round drum tower
+#           inside a roundel with قلعة نزوى and NIZWA FORT set under it. It is
+#           a third-party brand mark with a wordmark in it, not a silhouette,
+#           and the Nizwa slot stays parked until there is a drawing of the
+#           building. Worth saying: it is the first picture in this repo that
+#           actually shows the drum tower the fort is known for.
+
+# A CROP, WHERE THE PICTURE IS OF A SCENE AND THE SILHOUETTE IS OF A BUILDING.
+# Al Mirani was supplied sitting on its headland: the rock is two thirds of
+# the image and far darker than the fort, so the converter — which maps
+# DARKNESS to ink — turned the whole thing into a solid lump with a few
+# battlements on top. At 48px on a phone that is a rock, not a fort, and a
+# silhouette has exactly one job. Box is (left, top, right, bottom) on the
+# source; everything below the walls is the headland and goes.
+CROPS = {
+    "9.png": (520, 95, 1125, 258),
 }
 
 PAPER = 238      # at or above this, fully transparent
@@ -53,8 +88,10 @@ INK_AT = 96      # at or below this, fully opaque
 FILL = 0.88
 
 
-def silhouette(path, ink=(255, 255, 255)):
+def silhouette(path, ink=(255, 255, 255), crop=None):
     im = Image.open(path).convert("RGBA")
+    if crop:
+        im = im.crop(crop)
     w, h = im.size
     src = im.load()
     out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
@@ -103,7 +140,7 @@ def main():
         p = os.path.join(args.src, f)
         if not os.path.exists(p):
             raise SystemExit(f"missing {p} — the owner's files are not in this session")
-        sq = trim_and_pad(silhouette(p))
+        sq = trim_and_pad(silhouette(p, crop=CROPS.get(f)))
         dest = os.path.join(OUT, f"{name}-white.png")
         sq.save(dest)
         # A SILHOUETTE MUST ACTUALLY HAVE INK IN IT. A ramp set wrong gives a

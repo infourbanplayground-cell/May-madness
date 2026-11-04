@@ -72,6 +72,14 @@ LANDMARK_PNG = {
     "mon-burner-ph": "mon-burner-white.png",
     "mon-sail-ph":   "mon-sail-white.png",
     "mon-palace":    "mon-palace-white.png",
+    # Second batch, 4 Nov 2026, named by the owner rather than guessed at.
+    "mon-mirani":    "mon-mirani-white.png",
+    "mon-sahwa":     "mon-sahwa-white.png",
+    # NOT A NAMED LANDMARK. The owner's call: a generic watchtower, so it is
+    # a motif and must never be given a caption — a nameless tower with a
+    # building's name under it is the fault this volume has already committed
+    # twice.
+    "mon-burj":      "mon-burj-white.png",
 }
 
 # What a landmark is drawn in, by role. The handoff's medallion is a red disc
