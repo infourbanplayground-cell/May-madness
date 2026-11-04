@@ -48,16 +48,34 @@ code=$(curl -s -o /tmp/na-page.html -w '%{http_code}' "https://$HOST/")
 scode=$(curl -s -o /tmp/na-state.json -w '%{http_code}' "https://$HOST/state")
 echo "page $code   state $scode"
 
-if [ "$code" = 200 ]; then
-  if cmp -s national-index.html /tmp/na-page.html; then echo "page  byte-identical to build $BID"
-  else echo "!! PAGE DIFFERS from the local build — a cache or a stray deploy"; fi
-fi
+# THE CHECK THAT MATTERS IS SERVED-AGAINST-SERVED, not served against this
+# working copy. The first version compared the live page with
+# national-index.html and treated the local file as the reference — so the
+# moment a fix was built locally and deliberately NOT deployed, the watch
+# screamed "PAGE DIFFERS" and "visitors reload forever" about a server that
+# was perfectly healthy. That happened at 20:46 on 4 Nov and is the second
+# time this script cried wolf in one night.
+# What actually breaks a visitor is the SERVED page carrying a different
+# build id from the SERVED version.txt: the update check compares those two
+# and reloads on a mismatch, for ever. Local drift is just undeployed work.
 served=$(curl -s "https://$HOST/version.txt" | tr -d '[:space:]')
-[ "$served" = "$BID" ] && echo "version $served  ok" \
-  || echo "!! version.txt says '$served', the page is '$BID' — visitors reload forever"
+if [ "$code" = 200 ]; then
+  if grep -q "\"$served\"" /tmp/na-page.html; then
+    echo "serving  $served  (page and version.txt agree)"
+  else
+    echo "!! THE SERVED PAGE IS NOT STAMPED '$served' — every visitor reloads, for ever"
+  fi
+fi
+if [ "$served" != "$BID" ]; then
+  if cmp -s national-index.html /tmp/na-page.html; then
+    echo "!! served '$served' but the local build says '$BID' and the bytes match — stale .version"
+  else
+    echo "note     local build $BID is ahead of the server — undeployed work, not a fault"
+  fi
+fi
 
 python3 - "$MARK" <<'PY'
-import json, os, sys
+import json, os, sys, time
 mark = sys.argv[1]
 try:
     d = json.load(open('/tmp/na-state.json'))
@@ -101,19 +119,23 @@ if prev:
     if ds or dv:
         print(f"moved: +{ds} scored match(es), version {prev.get('ver')} -> {ver}")
     else:
-        # Alarming only once there is something that SHOULD be saving. A
-        # night still checking people in is quiet by nature, and the first
-        # pass of this watch called a perfectly healthy set-up a silent
-        # save failure.
-        if live and live_scored > 0:
+        # ...AND ONLY IF ENOUGH TIME HAS PASSED. The marker is rewritten
+        # every run, so two passes a minute apart always report no change —
+        # which is how this warned about a silent save failure at 20:47
+        # having been run at 20:46. Nothing moving for under twenty minutes
+        # is not evidence of anything; a court takes longer than that.
+        gap = time.time() - prev.get('at', 0)
+        if live and live_scored > 0 and gap >= 20 * 60:
             warn = ("  <-- a night with results in it and nothing moving is"
                     " what a silent save failure looks like")
+        elif live and gap < 20 * 60:
+            warn = f"  (only {int(gap/60)} min since the last pass — too soon to mean anything)"
         elif live:
             warn = "  (nothing played yet — fine if they are still checking in)"
         else:
             warn = ""
         print("NO CHANGE since the last pass" + warn)
-json.dump({'ver': ver, 'scored': scored}, open(mark, 'w'))
+json.dump({'ver': ver, 'scored': scored, 'at': time.time()}, open(mark, 'w'))
 PY
 
 ssh -o ConnectTimeout=8 urbanpadel '
