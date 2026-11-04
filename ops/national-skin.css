@@ -368,6 +368,28 @@ button, input, select, textarea { border-radius: 999px !important; }
    dot's label — and those do want the pill. */
 .rounded, .rounded-sm, .rounded-md, .rounded-lg { border-radius: 999px !important; }
 
+/* A RADIUS BELONGS TO A SURFACE, NEVER TO A RULE — and this is the same
+   lesson as the ellipse above, one case further down. The inherited sweep
+   carries `:not(.rounded-full):not(…):not(…){border-radius:28px !important}`
+   at specificity (0,3,0), which reaches EVERY element in the document,
+   including a bare div whose only drawn edge is a one-pixel `border-top`.
+   A 28px radius on a hairline does not round a box, it CURLS THE LINE: each
+   divider rendered as two little brackets swooping up at the ends and meeting
+   in a peak in the middle, which reads as a rendering fault rather than as a
+   design. Measured on the shipped build: 14 of them in HOW POINTS ARE EARNED,
+   4 under the SESSIONS table and 81 across RANK — three per row of the main
+   table in the app.
+   A rule has no corners to round, so it keeps none. The guard is the inline
+   `background`, because an element that paints a surface AND draws a top edge
+   is a card and does want the sheet radius; one that paints nothing is a line.
+   (0,4,0), so it beats the universal rule rather than racing it on order.) */
+[style*="border-top:"]:not([style*="background"]):not([style*="border-radius"]),
+[style*="border-bottom:"]:not([style*="background"]):not([style*="border-radius"]),
+[style*="border-left:"]:not([style*="background"]):not([style*="border-radius"]),
+[style*="border-right:"]:not([style*="background"]):not([style*="border-radius"]) {
+  border-radius: 0 !important;
+}
+
 /* ── 4 · THE SURFACES ──────────────────────────────────────────────────
    THE CARDS ARE .sg-card AND .sg-hero — September Surge class names, three
    volumes old and still carrying the chrome. The first re-skin targeted
@@ -527,21 +549,57 @@ body nav.fixed.bottom-0.inset-x-0 {
   box-shadow: none !important;
   backdrop-filter: none !important;
 }
+/* THE TABS ARE NOT PILLS, AND PILLING THEM DREW FOUR CRESCENTS ACROSS THE
+   CHROME ON EVERY SCREEN. An inherited layer separates the tabs with a
+   one-pixel `border-right`, and an inherited layer ALSO carried
+   `nav.fixed .grid > button { border-radius: 0 }` — it already knew. This
+   skin's `999px` shouted that down, and a 999px radius on a 71x58 box clamps
+   to an ellipse whose right-hand arc is the only edge drawn: a 58px-tall
+   crescent between every pair of tabs, four of them, in the one piece of
+   furniture that is on the screen the whole time. The separator is a line,
+   so the button that carries it has square corners.
+   AND THEN THE SEPARATOR GOES, because it belongs to a different nav. It is
+   a July-Heat-era "HUD console segment": the bar was full-bleed and split
+   into five cells, and a cell wants an edge. Vol.9's nav is a floating ink
+   PILL, 12px clear of each side and 14px off the bottom, and five full-height
+   rules inside a stadium read as a segmented control — a thing you drag —
+   rather than as five places to go. Five evenly spaced items and a white mark
+   on the one you are on is the whole design; the lines were only ever holding
+   a shape this volume does not have. */
 body nav.fixed.bottom-0.inset-x-0 button,
 body nav.fixed.bottom-0.inset-x-0 a {
   color: var(--inactive) !important;
   background: transparent !important;
-  border-radius: 999px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   box-shadow: none !important;
 }
-/* The app marks the current tab a few different ways; catch all of them
-   rather than guessing which one survived three volumes. */
+/* ALL FIVE TABS RENDERED IDENTICALLY, ON EVERY SCREEN IN THE APP, AND THAT
+   IS THIS SKIN'S DOING. The app marks the tab you are on perfectly well — it
+   writes `color: rgb(247,241,230)` and `background: rgba(247,241,230,.07)`
+   INLINE on that one button and a rose colour on the other four — and the
+   rule above paints every button `var(--inactive)` on a transparent ground
+   with `!important`, which beats an inline declaration that has no priority
+   of its own. So the marker was being painted out four lines after the app
+   drew it, and the nav said nothing about where you were.
+   The four guesses it was caught by (`[aria-current]`, `.active`,
+   `[data-active]`, `.text-white`) match NOTHING in this build. Guessing how a
+   three-volume-old component marks itself is how the marker went missing; the
+   selector is now the thing the app actually writes.
+   Measured before: all five `rgb(203,189,182)`, no fill, no pseudo-element.
+   A FILL, NOT A COLOUR SHIFT. Ivory-on-ink against rose-on-ink is a tonal
+   step you have to hunt for on a lit phone beside a court; a filled stadium
+   is the one tab you can find without looking for it. 999px is right here and
+   is not the ellipse the tabs were warned about above: that was a 999px on a
+   box with only its RIGHT EDGE drawn, and this is a filled 71x58, which
+   clamps to a 29px stadium. */
+body nav.fixed.bottom-0.inset-x-0 button[style*="rgb(247, 241, 230)"],
+body nav.fixed.bottom-0.inset-x-0 a[style*="rgb(247, 241, 230)"],
 body nav.fixed.bottom-0.inset-x-0 [aria-current],
-body nav.fixed.bottom-0.inset-x-0 .active,
-body nav.fixed.bottom-0.inset-x-0 [data-active="true"],
-body nav.fixed.bottom-0.inset-x-0 [class*="text-white"] {
-  background: #FFFFFF !important;
-  color: var(--bg) !important;
+body nav.fixed.bottom-0.inset-x-0 [data-active="true"] {
+  color: #FFFFFF !important;
+  background: rgba(247, 241, 230, .14) !important;
+  border-radius: 999px !important;
 }
 
 /* ── 7 · THE HEADER, AND TYPE ON RED ───────────────────────────────────

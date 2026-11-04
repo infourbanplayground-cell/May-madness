@@ -484,6 +484,37 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # 5f1 · THE COUNTDOWN PANEL READ AS ONE SENTENCE: "30 NOV 75".
+    #       Two unrelated facts — which night the season ends on, and what
+    #       the season pays — in one `space-between` row with NO GAP, in the
+    #       same face at the same weight. At 390px the two halves exactly
+    #       fill the width and abut, so the date runs straight into the
+    #       first prize and the eye reads a four-figure date. On the ivory
+    #       panel both also flip to the same base red, which is what takes
+    #       away the last thing telling them apart.
+    #       A gap, a wrap (they do not both fit on a small phone, and
+    #       cramming them is how they touched in the first place) and a
+    #       LABEL on the money: three bare numbers with a currency after
+    #       them is not a thing anybody can read cold. The label is markup
+    #       rather than a `::before`, because it is information.
+    ('<div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>\n'
+     '        <div style={{ fontFamily: "\'JetBrains Mono\',monospace", fontWeight: 700, fontSize: 9,\n'
+     '          letterSpacing: ".26em", color: "#FF2E88" }}>\n'
+     '          {done ? "FINALS NIGHT · TONIGHT" : "FINALS NIGHT · " + fmtNightDate(finals.date)}\n'
+     '        </div>\n'
+     '        <div style={{ fontFamily: "\'JetBrains Mono\',monospace", fontWeight: 700, fontSize: 12,\n'
+     '          color: "#C6FF00" }}>{SEASON_PRIZES.join(" · ")} OMR</div>',
+     '<div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline",\n'
+     '                    gap: 16, flexWrap: "wrap" }}>\n'
+     '        <div style={{ fontFamily: "\'JetBrains Mono\',monospace", fontWeight: 700, fontSize: 9,\n'
+     '          letterSpacing: ".26em", color: "#FF2E88" }}>\n'
+     '          {done ? "FINALS NIGHT · TONIGHT" : "FINALS NIGHT · " + fmtNightDate(finals.date)}\n'
+     '        </div>\n'
+     '        <div style={{ fontFamily: "\'JetBrains Mono\',monospace", fontWeight: 700, fontSize: 12,\n'
+     '          color: "#C6FF00" }}>\n'
+     '          <span style={{ fontSize: 9, letterSpacing: ".26em", opacity: .72,\n'
+     '            marginRight: 7 }}>SEASON PRIZES</span>\n'
+     '          {SEASON_PRIZES.join(" · ")} OMR</div>'),
     # -1a · THE "HOW IT WORKS" SHEET CARRIED VOL.8'S DOUBLE NIGHTS. The
     #        FORMAT button on the SESSIONS screen writes a WhatsApp explainer,
     #        and its 2X line was the literal "Sessions 7 & 8" — wrong for

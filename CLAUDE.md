@@ -846,8 +846,7 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - **DOUBLE NIGHTS ARE A LIST, NOT A THRESHOLD.** Vol.8's `doubleFromSession`
   cannot say "National Day is double but the night after is not".
   `doubleNights` holds the dates; the engine already honours a per-session
-  flag. Currently 18, 25 and 30 Nov — **the three are an assumption and need
-  the owner's confirmation.**
+  flag. **18, 25 and 30 Nov — CONFIRMED by the owner, 4 Nov 2026.**
 - API: `/opt/national-api/api.js` — systemd: `national-api` — port **3011**,
   not 3010: the chisel tunnel binds 127.0.0.1:3010 on the VPS and can re-bind.
   Tables **`na_*`**. Stand it up with `ops/create-national.sh` (idempotent).
@@ -1690,8 +1689,9 @@ were retired the moment it arrived, and the handoff's own four with them.
   the owner supplied directly. The handoff's **no mosques** rule stands.
 
 - **Still placeholder / unconfirmed:** the landmark artwork itself (placeholder
-  vectors, to be replaced with commissioned work in the same slots), the
-  landmark-per-session mapping, and the three double nights.
+  vectors, to be replaced with commissioned work in the same slots) and the
+  landmark-per-session mapping. The three double nights are **confirmed**
+  (18, 25 and 30 Nov, owner, 4 Nov 2026).
 
 ### Blackout Series (Vol.8 — LIVE APP)
 - URL: https://blackout.urbanpadel.om — October 2026, nine nights
