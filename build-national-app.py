@@ -530,6 +530,36 @@ MOTIFS = [
     ('{ id:"signups", label:"List",   Ic:CIc.clipboard,',
      '{ id:"points",  label:"Points", Ic:I.trophy },\n'
      '              { id:"signups", label:"List",   Ic:CIc.clipboard,'),
+    # 5g5 · ONLY THE DESTINATIONS ARE PINNED. The sticky block held two rows —
+    #       where in the night you are, and four occasional actions (PHOTOS,
+    #       POSTS, LINE-UP, SHARE) — and stuck both to the top for the whole
+    #       evening. Measured on the open night: 63px of header, 119px of
+    #       chips and an 82px floating nav is **264px of a 667px phone gone
+    #       before a word of the table**, 40% permanently, on the screen
+    #       somebody holds for three hours.
+    #       The destination row earns it; the actions are tapped once a night
+    #       and were costing 55px of every screen. They scroll away with the
+    #       page now and come back at the top, which is where you go looking
+    #       for them anyway.
+    #       IT HAS TO BE MARKUP. A sticky child can never escape its parent's
+    #       box, so unsticking the wrapper and sticking the first row inside
+    #       it made the row scroll clean off the top (measured: pinned at
+    #       -231px). The wrapper closes after row one instead, and the action
+    #       row takes its own side padding since it is no longer inside it.
+    ('        </div>\n'
+     '        {/* the occasional actions, one quiet row, scrolls if it must */}\n'
+     '        <div className="max-w-3xl mx-auto" style={{ display:"flex", gap:8, marginTop:8,\n'
+     '             overflowX:"auto", scrollbarWidth:"none" }}>\n',
+     '        </div>\n'
+     '      </div>\n'
+     '        {/* the occasional actions. NOT pinned: tapped once a night, and\n'
+     '            55px of every screen is the wrong price for that. */}\n'
+     '        <div className="max-w-3xl mx-auto" style={{ display:"flex", gap:8, marginTop:10,\n'
+     '             overflowX:"auto", scrollbarWidth:"none", padding:"0 16px" }}>\n'),
+    ('          })()}\n        </div>\n      </div>\n'
+     '      <div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n',
+     '          })()}\n        </div>\n'
+     '      <div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'),
     # 5g4 · THE NIGHT'S OWN HEADER SAID "11/2/2026", which is two faults in
     #       one line. It is ambiguous — the club is in Oman and that reads as
     #       11 February to everybody who looks at it — and it is built by
@@ -1367,7 +1397,7 @@ def apply_skin(s, report):
         'var n=on?y>2:y>8;'
         'if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");'
         'else h.removeAttribute("data-scrolled");}}'
-        'addEventListener("scroll",f,{passive:true,capture:true});'
+        'addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});'
         'addEventListener("resize",f,{passive:true});f();'
         # ...and the save banner's height, published as a custom property so
         # the open session can start below it. The banner wraps to two or
@@ -1376,10 +1406,13 @@ def apply_skin(s, report):
         # A MutationObserver rather than a timer: it only costs anything when
         # React has actually re-rendered, and the banner appearing IS a
         # re-render.
-        'var q=null;function b(){'
+        'var q=null,q2=null;function b(){'
         'var e=document.querySelector(".na-savebanner");'
         'var v=e?Math.round(e.getBoundingClientRect().height):0;'
-        'if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}}'
+        'if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}'
+        'var p=document.querySelector(".fixed.inset-0 .sticky.top-0");'
+        'var v2=p?Math.round(p.getBoundingClientRect().height):0;'
+        'if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}'
         'var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}'
         'new MutationObserver(s).observe(document.documentElement,'
         '{childList:true,subtree:true});'

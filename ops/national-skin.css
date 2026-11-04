@@ -774,6 +774,53 @@ body [style*="position: fixed"][style*="inset: 0"] input,
 body [style*="position: fixed"][style*="inset: 0"] select {
   min-height: 44px;
 }
+
+/* ── THE OPEN NIGHT'S CHROME ───────────────────────────────────────────
+   THE PAGE SCROLLED VISIBLY THROUGH THE HEADER. The night's bar is
+   `rgba(158,21,32,.95)` under a `backdrop-blur-xl` — which is Vol.8's
+   chrome, and this skin correctly takes the blur off everything. A blurred
+   translucent bar is a material; an UNBLURRED one is just see-through, and
+   5% of a table scrolling past is perfectly legible: GROUP STAGE and
+   18 / 24 MATCHES read straight through "Session 1" in the screenshot. The
+   chip block under it is 3% and does the same thing more quietly.
+   Opaque, both, and the blur stays off. This is the general rule and not a
+   one-off: if the blur goes, the alpha has to go with it.
+   ────────────────────────────────────────────────────────────────────── */
+body .fixed.inset-0 .sticky.top-0 { background: var(--deep) !important; }
+body .fixed.inset-0 .sticky[class*="top-["] { background: var(--bg) !important; }
+
+/* ...AND THE CHIP BLOCK WAS PINNED TO A NUMBER THAT WAS NEVER RIGHT.
+   `sticky top-[57px]` against a header that is 109px open and 63px folded:
+   it rides 52px INTO the header until the fold fires, and then sits 5px
+   inside its bottom edge, which is the masar strip landing on the chips.
+   Equal z-index and later in the DOM, so the chips paint over the header
+   rather than the other way round — a title with a tab bar through it.
+   The header's height is a function of the fold, the width and the night's
+   own title, so it cannot be written down. `--na-sesshead` is measured and
+   published by the same boot script that measures the save banner, for the
+   same reason. The fallback is the folded height, which is the state the
+   bar is in for all but the first few pixels of a scroll. */
+body .fixed.inset-0 .sticky[class*="top-["] {
+  top: var(--na-sesshead, 63px) !important;
+}
+
+/* ONLY THE DESTINATIONS ARE PINNED. The block holds two rows — where in the
+   night you are, and four occasional actions (PHOTOS, POSTS, LINE-UP,
+   SHARE) — and both were stuck to the top for the whole evening. Measured on
+   the open night: 63px of header plus 119px of chips, and a floating nav
+   that costs another 82, is **264px of a 667px phone gone before a word of
+   the table** — 40%, permanently, on the screen somebody holds for three
+   hours. The destination row earns its place because it is how you move
+   around the night; the actions are tapped once and are worth 55px of every
+   screen all night. They scroll away with the page now and come back at the
+   top, which is where you go looking for them anyway.
+   A STICKY CHILD CANNOT ESCAPE ITS PARENT'S BOX, so the obvious CSS version
+   of this — unstick the wrapper, stick the row inside it — made the row
+   scroll clean off the top (measured: pinned at -231px). The wrapper closes
+   after the destination row in the markup instead; see 5g5 in the builder.
+   What is left here is the wrapper's bottom padding, which belonged to a row
+   that is no longer inside it. */
+body .fixed.inset-0 .sticky[class*="top-["] { padding-bottom: 8px !important; }
 /* THE CLUB MARK IS PORTRAIT, AND `height:auto` IS WHAT BROKE THE HEADER.
    up-logo-tight.png is 324x505 and the JSX sets it `height:44; width:auto`,
    which is 28px wide — fine. An earlier line here read
