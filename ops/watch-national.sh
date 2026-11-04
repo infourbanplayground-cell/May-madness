@@ -23,6 +23,27 @@ BID=$(cat national-index.html.version 2>/dev/null || echo '?')
 
 echo "=== $(TZ=Asia/Muscat date '+%a %d %b %H:%M') Muscat ==="
 
+# THE TUNNEL DIES ON ITS OWN, so each pass brings it back rather than
+# assuming it. The chisel client is capped at two hours of background time in
+# this session, which is shorter than a match night — holding one open across
+# the evening guarantees that the pass which matters most is the one that
+# cannot reach the box. Reopening costs about ten seconds and is idempotent:
+# if the tunnel is already up this is a no-op. Only the SSH half of the report
+# needs it; the page, the state and the version checks go over HTTPS and are
+# unaffected either way.
+if ! ssh -o ConnectTimeout=5 urbanpadel 'true' 2>/dev/null; then
+  echo "tunnel down — reopening"
+  nohup /tmp/chisel client --keepalive 25s \
+    --auth mouther:ca4ac97f11f618067ca6564606a226d8 \
+    https://sshws.urbanpadel.om 2200:127.0.0.1:22 >/tmp/chisel-watch.log 2>&1 &
+  for i in $(seq 1 10); do
+    ssh -o ConnectTimeout=5 urbanpadel 'true' 2>/dev/null && break
+    sleep 4
+  done
+  ssh -o ConnectTimeout=5 urbanpadel 'true' 2>/dev/null \
+    && echo "tunnel back" || echo "!! tunnel would not come back — SSH checks skipped"
+fi
+
 code=$(curl -s -o /tmp/na-page.html -w '%{http_code}' "https://$HOST/")
 scode=$(curl -s -o /tmp/na-state.json -w '%{http_code}' "https://$HOST/state")
 echo "page $code   state $scode"
@@ -46,6 +67,7 @@ st = d.get('state', d)
 ver = d.get('version')
 ss = st.get('sessions') or []
 scored = 0
+live_scored = 0
 live = []
 for s in ss:
     gm = s.get('groupMatches') or []
@@ -55,7 +77,18 @@ for s in ss:
     k = sum(1 for m in ko if m and m.get('winner'))
     scored += g + k
     if not s.get('completed'):
-        live.append(f"{s.get('name')} {s.get('date')}  group {g}/{len(gm)}  ko {k}/{len(ko)}")
+        live_scored += g + k
+        # THE DENOMINATOR HAS TO BE DERIVED, NOT COUNTED. The app builds the
+        # round robin client-side and only writes a match RECORD when a score
+        # is locked, so `len(groupMatches)` is 0 all through check-in and the
+        # first pass of this watch read "group 0/0" on a night that was
+        # perfectly healthy. Each group of n owes n*(n-1)/2 fixtures.
+        from collections import Counter
+        sizes = Counter(t.get('group') for t in (s.get('teams') or []))
+        owed = sum(n * (n - 1) // 2 for n in sizes.values())
+        live.append(f"{s.get('name')} {s.get('date')}  "
+                    f"teams {len(s.get('teams') or [])}  "
+                    f"group {g}/{owed}  ko {k}/{len(ko) if ko else '-'}")
 print(f"sessions {len(ss)}   scored matches {scored}   state version {ver}")
 for l in live: print('  IN PLAY  ' + l)
 prev = {}
@@ -68,8 +101,18 @@ if prev:
     if ds or dv:
         print(f"moved: +{ds} scored match(es), version {prev.get('ver')} -> {ver}")
     else:
-        print("NO CHANGE since the last pass"
-              + ("  <-- a night in play that is not saving looks exactly like this" if live else ""))
+        # Alarming only once there is something that SHOULD be saving. A
+        # night still checking people in is quiet by nature, and the first
+        # pass of this watch called a perfectly healthy set-up a silent
+        # save failure.
+        if live and live_scored > 0:
+            warn = ("  <-- a night with results in it and nothing moving is"
+                    " what a silent save failure looks like")
+        elif live:
+            warn = "  (nothing played yet — fine if they are still checking in)"
+        else:
+            warn = ""
+        print("NO CHANGE since the last pass" + warn)
 json.dump({'ver': ver, 'scored': scored}, open(mark, 'w'))
 PY
 
