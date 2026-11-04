@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "8d66c679cf42";
+  var V = "74aaea0807a0";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -14028,14 +14028,30 @@ header > *, .sticky.top-0 > * { position: relative; z-index: 2; }
    header's bottom edge and the foot of every ivory arch, where a flat
    hairline was doing the job of a motif. 12px and the red cut, which is what
    the handoff uses for a strip inside a card. */
+/* A FULL-BLEED STRIP ACROSS A ROUNDED PLATE HANGS OFF BOTH ENDS, and that is
+   what the header's trim was doing: the brand bar is a 28px bubble, the strip
+   is square and runs `left:0; right:0`, so at 6px above the foot it stood
+   about 10px proud of the curve on each side — the bubble's outline ran
+   behind it and came back out the other side. Reported as the band and the
+   bubble overlapping, which is exactly what it is.
+   THE PLATE CLIPS ITS OWN TRIM. `.na-ivory` has carried this the whole time
+   and its band sits perfectly inside its corners; the header was the one
+   surface drawing a trim it did not clip. That is the fix rather than
+   insetting the strip, because an inset is a number that has to be re-derived
+   every time a corner moves (at 28px it is 14, at the hero's 168px arch it
+   would be 123), while clipping is right whatever the radius becomes.
+   The aspect goes back to the art's own too: the repeat unit is 100x56, which
+   is exactly 25:14, and 20x11 is 1.8% wide of it. A woven band stretched off
+   its aspect is the one place a pattern looks obviously wrong. */
+header, .sticky.top-0 { overflow: hidden; }
 header::after, .sticky.top-0::after,
 .sg-hero::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 11px;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 14px;
   pointer-events: none;
   background-color: var(--deep);
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=");
-  background-size: 20px 11px;
+  background-size: 25px 14px;
   background-repeat: repeat-x;
 }
 /* ONLY THE HERO. The header already establishes a positioning context —
@@ -14309,10 +14325,12 @@ body .na-ivory [style*="rgb(242,184,188)"] {
 .na-ivory [style*="border"] { border-color: rgba(26,10,12,.18) !important; }
 .na-ivory::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 11px;
+  position: absolute; left: 0; right: 0; bottom: 0; height: 14px;
   background-color: var(--deep);
   background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=");
-  background-size: 20px 11px; background-repeat: repeat-x;
+  /* 25 x 14 is the art's own repeat unit (100x56) reduced, so the weave is
+     drawn at its true aspect. 20 x 11 was 1.8% wide of it. */
+  background-size: 25px 14px; background-repeat: repeat-x;
 }
 
 .sg-card {

@@ -111,9 +111,20 @@ if (SABOTAGE === 'strip') {
   // header's own children carried enough spacing of their own, so the sabotage
   // passed and proved nothing. Growing the strip reaches the text whatever the
   // padding is, and is the same fault: a decorative box lying on type.
-  const a = '  background-size: 20px 11px;';
+  // AND IT HAS TO GROW THE HEADER'S STRIP, NOT WHICHEVER ONE MATCHES. It was
+  // anchored on a bare `background-size`, which three ::after rules in this
+  // skin share — so once the header's band moved to the art's true aspect the
+  // anchor still matched, on the IVORY PANEL, and the run went red for a
+  // strip on the home screen that this sabotage was never about. A sabotage
+  // that fires on a different element than it names is a check nobody is
+  // testing, which is the third time that has happened here.
+  const a = 'header::after, .sticky.top-0::after,';
   if (!app.includes(a)) throw new Error('sabotage anchor (strip) no longer matches');
-  app = app.replace(a, '  background-size: 20px 11px; height: 46px;');
+  const i = app.indexOf(a);
+  const j = app.indexOf('}', i);
+  const before = app;
+  app = app.slice(0, j) + '  height: 46px;\n' + app.slice(j);
+  if (app === before) throw new Error('sabotage (strip) changed nothing');
 }
 if (SABOTAGE === 'ghost') {
   // THE BAND SET AND NOT ON THE SCREEN. This is what `body::after` was really
