@@ -37,13 +37,31 @@ F = json.loads(subprocess.check_output(
 # toISOString() — the server runs UTC and Oman is UTC+4, which has silently
 # moved a date back a day in this repo before.
 y, m, d = (int(x) for x in S["date"].split("-"))
-DT = datetime.date(y, m, d)
+_ANCHOR = datetime.date(y, m, d)
+_TODAY = datetime.date.today()
+# THE DATE ROLLS ITSELF. `date` is the NEXT night, and on a weekly cadence
+# that is a fact about the calendar, not something anybody should have to
+# remember to retype — it went twelve days stale and the WhatsApp link
+# preview was still advertising Sat 24 Oct in November.
+# Rolling in CADENCE-SIZED STEPS FROM THE STORED ANCHOR rather than asking
+# "when is the next Saturday" keeps the weekday without parsing
+# `cadenceLine`, which is English prose and the wrong thing to compute from.
+# A date still in the future is left exactly as it is, so pinning a one-off
+# (a week skipped, a night moved) still works: set it and it is respected
+# until it passes.
+DT = _ANCHOR
+if S.get("cadence") == "weekly":
+    while DT < _TODAY:
+        DT += datetime.timedelta(days=7)
+NIGHT_ISO = DT.isoformat()
+if DT != _ANCHOR:
+    print(f"  date rolled forward: {_ANCHOR} -> {NIGHT_ISO} "
+          f"({(DT - _ANCHOR).days // 7} week(s) of {S.get('cadence')} cadence)")
 DAY = DT.strftime("%A").upper()
 # Announced the night before, so the date block says TOMORROW while that is
 # true — it is the most persuasive word available and it expires by itself.
 # Computed from the real clock, not hardcoded, so a rebuild on the day says
 # TONIGHT and a rebuild after it says the date.
-_TODAY = datetime.date.today()
 WHEN = ("TONIGHT" if DT == _TODAY
         else "TOMORROW" if DT == _TODAY + datetime.timedelta(days=1)
         else f'{DT.day} {DT.strftime("%b").upper()}')
@@ -700,7 +718,7 @@ if len(OG_DESC) > 150:
 NEXT_START = "const UP_NEXT = {"
 NEXT_END = "// ═══ END UPRISING NEXT NIGHT"
 NEXT = ("const UP_NEXT = {\n"
-        f'  date: "{S["date"]}",\n'
+        f'  date: "{NIGHT_ISO}",\n'
         f'  dateLabel: "{DATE_SHORT.title()}",\n'
         f'  entry: "{S["entry"]} {CUR}",\n'
         f'  cap: {S["cap"]},\n'
