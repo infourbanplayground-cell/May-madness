@@ -14,9 +14,11 @@ test -f landing/index.html || { echo "no landing/index.html"; exit 1; }
 echo "==> assets"
 scp -q brand/blackout/blackout-stack.png brand/blackout/blackout-stack.webp \
        brand/blackout/blackout-lockup.png brand/blackout/blackout-lockup.webp \
+       brand/landing/hero-court.jpg brand/landing/hero-court.webp \
        urbanpadel:/tmp/
 ssh urbanpadel "cp /tmp/blackout-stack.png /tmp/blackout-stack.webp \
-                   /tmp/blackout-lockup.png /tmp/blackout-lockup.webp $WEB/assets/"
+                   /tmp/blackout-lockup.png /tmp/blackout-lockup.webp \
+                   /tmp/hero-court.jpg /tmp/hero-court.webp $WEB/assets/"
 
 echo "==> page"
 scp -q landing/index.html urbanpadel:/tmp/landing.html
@@ -32,14 +34,15 @@ for u in "/" "/assets/blackout-stack.webp?v=$V" "/assets/blackout-stack.png?v=$V
 done
 # Byte-for-byte, not just 200: Cloudflare happily serves a cached copy of the
 # art from before it was fixed, which looks identical to a successful deploy.
-for f in blackout-stack.webp blackout-stack.png; do
-  L=$(sha256sum "brand/blackout/$f" | cut -c1-16)
+for f in blackout-stack.webp blackout-stack.png hero-court.webp hero-court.jpg; do
+  case "$f" in hero-*) D=brand/landing;; *) D=brand/blackout;; esac
+  L=$(sha256sum "$D/$f" | cut -c1-16)
   R=$(curl -s "https://urbanpadel.om/assets/$f?v=$V" | sha256sum | cut -c1-16)
   printf "    %-34s %s\n" "$f served" "$([ "$L" = "$R" ] && echo "matches local" || echo "STALE ($R vs $L)")"
 done
 
 BODY=$(curl -s "https://urbanpadel.om/?v=$V")
-for need in "blackout.urbanpadel.om" "LIGHTS" "blackout-stack.webp" "SEPTEMBER SURGE" "Hamed Amri"; do
+for need in "blackout.urbanpadel.om" "LIGHTS" "blackout-stack.webp" "SEPTEMBER SURGE" "Hamed Amri" "hero-court.webp"; do
   printf "    %-34s %s\n" "contains '$need'" "$(grep -qF "$need" <<<"$BODY" && echo yes || echo "NO")"
 done
 grep -qF "surge-lockup" <<<"$BODY" && echo "    !! the old Surge lockup is still in the live block" || \

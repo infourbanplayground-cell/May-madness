@@ -112,7 +112,39 @@
   }
 
   /* ── HERO ── */
-  .hero { text-align:center; margin-bottom:40px; }
+  .hero { text-align:center; margin-bottom:40px; position:relative; }
+  /* THE COURT BEHIND THE MARK. The hero was the club mark floating on an
+     empty black field — correct, and saying nothing about what the club is.
+     The backdrop is an empty floodlit court at night, graded down hard and
+     faded on all four edges to the page base (#0A0C12), so it has no visible
+     edge and needs no alpha: it is a JPEG/WebP that ends in exactly the
+     colour of the page it sits on.
+     NEAR-MONOCHROME ON PURPOSE. `--live` rotates with the volume — lime for
+     Blackout, red for the National Series — and a backdrop with a colour cast
+     of its own would fight whichever accent is running. Desaturated, it
+     survives every rollover.
+     It is wider than the 820px column and sits behind everything in the
+     hero, so the mark reads as standing in a lit room rather than on a card. */
+  .hero::before {
+    content:""; position:absolute; z-index:0; pointer-events:none;
+    left:50%; transform:translateX(-50%);
+    /* Clear of the topbar: at -56 it ran up under that row and swallowed its
+       bottom rule. The hero's own top margin is all the bleed it needs. */
+    /* HEIGHT COMES FROM THE HERO, NOT FROM THE PHOTOGRAPH. Driven by
+       `aspect-ratio` the backdrop was 663px tall on a 1180px desktop and ran
+       straight down over the sub-line, NOW PLAYING and the volume card. Top
+       and bottom pin it to the hero's own box with a little bleed, and
+       `cover` crops the court to whatever band that leaves. */
+    top:-6px; bottom:-48px; width:min(1180px, 128vw);
+    /* A BACKDROP, NOT A PICTURE. At full strength it was a photograph with a
+       logo on it and the two competed; the mark has to stay the subject. */
+    opacity:.58;
+    background:url(/assets/hero-court.jpg) center/cover no-repeat;
+    background-image:image-set(url(/assets/hero-court.webp) type("image/webp"),
+                               url(/assets/hero-court.jpg)  type("image/jpeg"));
+  }
+  /* ...and the mark and the sub line sit on top of it. */
+  .hero > * { position:relative; z-index:1; }
   /* The mark carries the name on its own, it already reads URBAN
      PLAYGROUND, so there is no wordmark beside it to compete with. Sized by
      width, not height: the source is 940x788 and width is what has to fit the
