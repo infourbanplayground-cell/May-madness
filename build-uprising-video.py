@@ -114,7 +114,8 @@ def main():
 
     if DT < today:
         sys.exit(f"uprising-social.json still says {S['date']}, which has passed — "
-                 "roll `date` forward to the next Saturday before building")
+                 f"roll `date` forward to the next {DAYS[DT.weekday()].title()} "
+                 "before building")
 
     # The kicker over the title is the urgent word when there is one, and the
     # day otherwise. Printing both gave "17 OCT · SATURDAY 17 OCTOBER" on the

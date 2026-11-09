@@ -17,6 +17,7 @@
 # nothing.
 #
 #   bash ops/roll-uprising-date.sh          # build, and deploy if it changed
+#                                           # (run the morning AFTER the night)
 #   DRY=1 bash ops/roll-uprising-date.sh    # build and report, never deploy
 set -uo pipefail
 cd "$(dirname "$0")/.."
@@ -24,14 +25,23 @@ DRY=${DRY:-}
 
 echo "=== UPRISING date roll · $(TZ=Asia/Muscat date '+%a %d %b %H:%M') Muscat ==="
 
-# NEVER REPUBLISH INTO A NIGHT. UPRISING is played on Saturday evenings and
-# the app being redeployed is the one the scorer is holding. This is meant to
-# run on a Sunday; if it is ever fired on a Saturday afternoon or evening it
-# stops rather than taking the chance.
-dow=$(TZ=Asia/Muscat date '+%u')   # 6 = Saturday
+# NEVER REPUBLISH INTO A NIGHT. UPRISING is played on FRIDAY evenings — it
+# was Saturday until 9 Nov 2026 — and the app being redeployed is the one the
+# scorer is holding. This is meant to run on a Saturday; if it is ever fired
+# on a Friday afternoon or evening it stops rather than taking the chance.
+#
+# The night of the week is read from `date` in uprising-social.json, not
+# written down here: the whole point of that field being the anchor is that
+# the weekday lives in one place. A guard that hard-codes the day is a second
+# place, and it is the one nobody remembers when the night moves.
+night_dow=$(python3 -c "
+import datetime,json
+s=json.load(open('uprising-social.json'))
+print(datetime.date(*(int(x) for x in s['date'].split('-'))).isoweekday())")
+dow=$(TZ=Asia/Muscat date '+%u')
 hour=$(TZ=Asia/Muscat date '+%-H')
-if [ "$dow" = 6 ] && [ "$hour" -ge 14 ]; then
-  echo "!! it is Saturday afternoon in Muscat — a night may be in play. Not deploying."
+if [ "$dow" = "$night_dow" ] && [ "$hour" -ge 14 ]; then
+  echo "!! it is $(TZ=Asia/Muscat date '+%A') afternoon in Muscat, which is a night — not deploying."
   exit 0
 fi
 

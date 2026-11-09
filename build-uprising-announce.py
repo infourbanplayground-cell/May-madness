@@ -44,7 +44,7 @@ _TODAY = datetime.date.today()
 # remember to retype — it went twelve days stale and the WhatsApp link
 # preview was still advertising Sat 24 Oct in November.
 # Rolling in CADENCE-SIZED STEPS FROM THE STORED ANCHOR rather than asking
-# "when is the next Saturday" keeps the weekday without parsing
+# "when is the next <weekday>" keeps the weekday without parsing
 # `cadenceLine`, which is English prose and the wrong thing to compute from.
 # A date still in the future is left exactly as it is, so pinning a one-off
 # (a week skipped, a night moved) still works: set it and it is respected
@@ -99,7 +99,9 @@ FIRST = bool(S.get("firstNight"))
 # posts people actually read. Derived from cadenceLine, which is the one
 # place the rhythm lives.
 CADENCE = S["cadenceLine"]                     # "Every Saturday"
-CADENCE_LOW = CADENCE[0].lower() + CADENCE[1:]  # "every Saturday"
+CADENCE_LOW = CADENCE[0].lower() + CADENCE[1:]  # "every Friday"
+# Only the FIRST letter is folded. A blanket .lower() reads "every friday",
+# which lowercases a proper noun — it did, in the writer's notes below.
 NEXT_ONE = {"weekly": "next week", "monthly": "next month"}.get(S.get("cadence"), "next time")
 RHYTHM = {"weekly": "weekly", "monthly": "monthly"}.get(S.get("cadence"), S.get("cadence", ""))
 # One prize, or two. With SECOND off, the prize cards carry a single CHAMPION
@@ -955,7 +957,7 @@ WHAT NOT TO PROMISE
 · Not a second prize, a runner-up prize or a free entry. There is ONE prize
   this night and the cards say so. If one is added later, set secondPrize in
   uprising-social.json and re-render rather than promising it in a message.'''}
-· Not a finals night, a season table or a league. This is one night, {CADENCE_LOW.lower()}.
+· Not a finals night, a season table or a league. This is one night, {CADENCE_LOW}.
 · Not "{S['championPrize']} {CUR}" on its own — it is a {KIND or "prize"}, and every line above
   says so. Somebody turning up expecting cash and being handed a {KIND or "prize"} was
   misled by our own poster.
