@@ -1305,9 +1305,16 @@ in the repo green. The owner found both by looking at a card.
 - **The club mark is re-inked per volume — `ops/national-logo.py`.** The
   shipped one is white with an ORANGE ball (#F56530), a Blackout-era accent
   belonging to no colour here, and it is the first thing on every screen.
-  - Vol.9's cut is **white with a GREEN ball**, and that is a legibility result
-    rather than a decorative one: on the red ground a red ball is red-on-red
-    inside a thin ivory ring and the dots turn to mud.
+  - **The SHIPPED cut is `g-white-mono`: pure white, no ball accent** — the
+    owner's call, and `brand/national/up-logo-national.png` is a byte copy of
+    it (verified: the only opaque ink in the file is white). The note here
+    said "white with a GREEN ball" for a week, which is `b-white-green`, a
+    variation that exists and is not the one on every screen.
+  - Green on the ball was the first proposal, and it was a legibility argument
+    rather than a decorative one: on the red ground a RED ball is red-on-red
+    inside a thin ivory ring and the dots turn to mud. One white ink answers
+    that too, and spends no green — which the handoff reserves for National
+    Day. `b-white-green` is still rendered if the call is ever revisited.
   - It classifies each pixel and re-inks it keeping its own luminance and
     alpha, because a flood fill on antialiased art leaves an orange fringe
     around every recoloured shape — the thing "it looks fine at 100%" hides.
