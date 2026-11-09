@@ -722,7 +722,8 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     "CHAMPION", which the kicker above the name already says, and the first
     card went out saying it twice.
 - **urbanpadel.om carries an UPRISING panel**, between NOW PLAYING and THE
-  CLUB, under the heading ONE SATURDAY A MONTH. It is NOT a volume and must not
+  CLUB, under a heading spliced from `cadenceLine` (EVERY FRIDAY). It is NOT a
+  volume and must not
   read as a second NOW PLAYING: its own accent (`--volt` #00F5C8) against the
   running series' lime, and the wordmark is set as TYPE because there is no
   UPRISING lockup asset.
@@ -785,11 +786,26 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   case and the second prize is the STRONGEST FINISH (second half minus first),
   which is the champion only 7% of the time. Flip `firstNight` in
   `uprising-social.json` to false after the first night.
-- **UPRISING runs EVERY SATURDAY**, not monthly as the first announcement
-  said. `cadence` / `cadenceLine` in the JSON are the only place the rhythm is
-  written, and `date` is always the NEXT night — roll it forward by seven
-  after each one and every card, caption, the link preview and the landing
-  panel re-render.
+- **UPRISING runs EVERY FRIDAY** — Saturday until 9 Nov 2026, and monthly
+  before that. `cadence` / `cadenceLine` in the JSON are the only place the
+  rhythm is written, and `date` is always the NEXT night — the ANCHOR, which
+  `build-uprising-announce.py` rolls forward in cadence-sized steps, so every
+  card, caption, the link preview and the landing panel re-render without
+  anybody retyping anything.
+  - **THE WEEKDAY IS NEVER TYPED ON A SURFACE — it comes from `date`.** Every
+    day name is `strftime` on that date, which is why moving the night of the
+    week is two fields: the anchor becomes a date that IS the new weekday, and
+    `cadenceLine` becomes the new prose. A Saturday anchor rolls to Saturdays
+    for ever, whatever `cadenceLine` claims, because the builder deliberately
+    does not parse English to decide the calendar.
+  - **The one place the weekday WAS written down twice was the roll script's
+    own guard**, which refused to publish on a Saturday afternoon on the
+    grounds that a night might be in play. It read `dow = 6`. That is exactly
+    the second copy this design exists to avoid, and it is the one nobody
+    would have remembered when the night moved: it would have gone on
+    protecting Saturdays and happily redeployed into a Friday night. It reads
+    the night's own weekday out of `uprising-social.json` now.
+  - The routine fires **Saturday 08:43 Muscat**, the morning after a night.
   - The cadence was TYPED in two more places: the landing panel's heading
     (`ONE SATURDAY A MONTH`) and three captions saying "monthly" / "next
     month". Going weekly made all of them silently wrong on the surfaces
