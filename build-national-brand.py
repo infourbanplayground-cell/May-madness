@@ -37,6 +37,12 @@ HANDOFF = os.path.join(OUT, "handoff", "assets")
 # w, h, what
 PIECES = {
     "national-lockup": (3100, 840),    # the header wordmark, Vol.8's slot
+    # THE FRONT DOOR WANTS THE STACKED ONE. urbanpadel.om's hero is at most
+    # 430px wide, and a 3.69:1 lockup stands 117px there — it reads as an
+    # afterthought in the one place it is the hero. Stacked at 16:9 it stands
+    # 242, the same slot and the same proportion Blackout's stack uses
+    # (2200x1240), so the rollover is a file swap and not a layout change.
+    "national-stack":  (2200, 1240),   # the club's front door
     "national-mark":   (1024, 1024),   # the "56" on its own
     "national-og":     (1200, 630),    # link preview
     "national-icon":   (512, 512),     # favicon
@@ -105,6 +111,17 @@ def lockup(w, h):
 </div></body></html>"""
 
 
+def stack(w, h):
+    """The same parts as the lockup, stacked: the 56 over the name."""
+    return head(w, h) + f"""
+<div class="wrap" style="flex-direction:column;gap:{int(h*0.06)}px">
+  <span class="mark" style="font-size:{int(h*0.46)}px;{shadow(h)}">56</span>
+  <span class="name" style="font-size:{int(h*0.165)}px">National Series</span>
+  <span class="sub" style="font-size:{int(h*0.046)}px;letter-spacing:.24em">
+    Urban Social Series &middot; {CFG['volume']}</span>
+</div></body></html>"""
+
+
 def mark(w, h):
     return head(w, h) + f"""
 <div class="wrap">
@@ -129,7 +146,8 @@ def icon(w, h):
 </div></body></html>"""
 
 
-BUILDERS = {"national-lockup": lockup, "national-mark": mark,
+BUILDERS = {"national-lockup": lockup, "national-stack": stack,
+            "national-mark": mark,
             "national-og": og, "national-icon": icon}
 
 

@@ -42,11 +42,27 @@
     --plate:   rgba(16,20,32,.90);
     --orange:  #F56530;   /* house accent */
     --orange-d:#C74A1E;
-    --live:    #C6FF00;   /* the running volume's accent, Blackout Lime */
+    /* THE RUNNING VOLUME'S ACCENT. Vol.9 is the 56 National Series, and
+       this is the FLAG red #D7202E, not the series' base red #B8141F.
+       The base is designed to be a GROUND — a whole screen of it in the
+       app — and on this near-black page it reads as a muddy brown that
+       barely separates from the floor. The flag red is the same family,
+       brighter, and is what the volume uses when it needs to be seen
+       against something dark. */
+    --live:    #D7202E;   /* the running volume's accent, National flag red */
+    /* ...AND A LIGHTER ONE FOR TYPE, which is the same lesson the app
+       already learned about rose: an accent that is right as a fill, a rule
+       or a glow is not automatically right as a letterform. Measured on this
+       page, the flag red is 3.65:1 behind the tagline's second beat at
+       21px/400 — the large-text allowance starts at 24px (or 18.66 at 700),
+       so it needs 4.5 and does not have it. Lime never raised this because
+       lime on near-black is about 15:1; red is intrinsically darker and the
+       rollover is where it surfaces. --live keeps the fills and the glows. */
+    --live-txt:#F2545F;   /* the accent where it has to be READ */
     --volt:    #00F5C8;   /* UPRISING — a monthly night, not a volume */
     /* NOTE for the next volume: --live covers everything except three rgba()
        glows that need the colour as components, not as a token. Search for
-       rgba(198,255,0 and move those too, or the panel glows in the OLD
+       rgba(215,32,46 and move those too, or the panel glows in the OLD
        volume's colour around the new one's lockup. */
     --ice:     #3DE1FF;
     --chalk:   #F4F6FA;
@@ -194,7 +210,7 @@
   }
   .live .glow {
     position:absolute; inset:0; pointer-events:none;
-    background:radial-gradient(ellipse 60% 55% at 50% 34%, rgba(198,255,0,.14), transparent 70%);
+    background:radial-gradient(ellipse 60% 55% at 50% 34%, rgba(215,32,46,.14), transparent 70%);
   }
   .live .head {
     position:relative; display:flex; align-items:center; justify-content:space-between;
@@ -223,19 +239,19 @@
   .live .lockup-wrap { position:relative; display:block; }
   .live img.lockup {
     width:94%; max-width:430px; display:block; margin:0 auto;
-    filter:drop-shadow(0 10px 34px rgba(198,255,0,.34));
+    filter:drop-shadow(0 10px 34px rgba(215,32,46,.34));
   }
   .live .tagline {
     position:relative; font-family:'Teko',sans-serif; font-weight:600;
     font-size:clamp(21px,4.9vw,28px); letter-spacing:.1em; margin-top:12px;
   }
-  .live .tagline b { color:var(--live); font-weight:400; }
+  .live .tagline b { color:var(--live-txt); font-weight:400; }
   .cta {
     position:relative; display:inline-block; margin-top:20px;
     font-family:'Teko',sans-serif; font-weight:600; font-size:26px; letter-spacing:.12em;
     color:var(--court); background:var(--live);
     padding:13px 30px 11px;
-    box-shadow:0 0 26px rgba(198,255,0,.40);
+    box-shadow:0 0 26px rgba(215,32,46,.40);
   }
 
   /* ── UPRISING (the monthly one-nighter, not a volume) ──────────
@@ -435,7 +451,7 @@
   /* Hover is gated, on a touch device an ungated :hover leaves cards stuck
      in the lifted state after a tap. */
   @media (hover:hover) {
-    .live:hover { transform:translateY(-3px); box-shadow:0 26px 60px rgba(0,0,0,.65), 0 0 0 1px rgba(198,255,0,.32); }
+    .live:hover { transform:translateY(-3px); box-shadow:0 26px 60px rgba(0,0,0,.65), 0 0 0 1px rgba(215,32,46,.32); }
     .svc:not(.soon):hover { transform:translateY(-3px); box-shadow:0 22px 50px rgba(0,0,0,.6), 0 0 0 1px rgba(245,101,48,.35); }
     .arch-row:hover { background:rgba(6,7,11,.85); border-color:rgba(245,101,48,.3); transform:translateX(3px); }
     .arch-row:hover .arch-cta { color:var(--orange); }
@@ -473,10 +489,10 @@
   <!-- ── NOW PLAYING ─────────────────────────────────────────── -->
   <div class="sec"><span>NOW PLAYING</span><div class="line"></div></div>
 
-  <a href="https://blackout.urbanpadel.om" class="live tick">
+  <a href="https://national.urbanpadel.om" class="live tick">
     <div class="glow"></div>
     <div class="head">
-      <span class="kick"><i></i>VOL. 8 · OCTOBER 2026</span>
+      <span class="kick"><i></i>VOL. 9 &middot; NOV 2026</span>
       <span class="stamp">LIVE</span>
     </div>
     <!-- WebP first: the lockup is the heaviest paint on this page and the
@@ -484,10 +500,10 @@
          than being dropped, because a broken image here is the front
          door's hero. -->
     <picture class="lockup-wrap">
-      <source type="image/webp" srcset="/assets/blackout-stack.webp">
-      <img class="lockup" src="/assets/blackout-stack.png" alt="Blackout Series">
+      <source type="image/webp" srcset="/assets/national-stack.webp">
+      <img class="lockup" src="/assets/national-stack.png" alt="56 National Series">
     </picture>
-    <div class="tagline">LIGHTS <b>OUT.</b></div>
+    <div class="tagline">ONE FLAG. <b>ONE COURT.</b></div>
     <span class="cta">ENTER →</span>
   </a>
 
@@ -502,7 +518,7 @@
   <a href="https://americano.urbanpadel.om" class="up tick">
     <div class="glow"></div>
     <div class="head">
-      <span class="kick"><i></i><!--UP:WHEN-->SAT 7 NOV<!--/UP:WHEN--></span>
+      <span class="kick"><i></i><!--UP:WHEN-->SAT 14 NOV<!--/UP:WHEN--></span>
       <span class="stamp">NEW</span>
     </div>
     <div class="upmark">UPRISING</div>
@@ -562,6 +578,11 @@
   <div class="sec q"><span>THE ARCHIVE</span><div class="line"></div></div>
 
   <div class="archive tick">
+    <a class="arch-row" href="https://blackout.urbanpadel.om">
+      <span class="arch-vol">V.8</span>
+      <span class="arch-name">BLACKOUT SERIES<small>October 2026 &middot; 9 sessions &middot; Champion <em>Muntaser Hasni</em></small></span>
+      <span class="arch-cta">FINAL TABLE &rarr;</span>
+    </a>
     <a class="arch-row" href="https://surge.urbanpadel.om">
       <span class="arch-vol">V.7</span>
       <span class="arch-name">SEPTEMBER SURGE<small>September 2026 · 8 sessions · Champion <em>Hamed Amri</em></small></span>

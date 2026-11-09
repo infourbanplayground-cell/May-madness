@@ -24,6 +24,9 @@ import path from 'path';
 const DIR = path.resolve('brand/national');
 const PIECES = {
   'national-lockup': [3100, 840],
+  // The club's front door. Same 16:9 slot Blackout's stack uses, so
+  // rolling a volume over on urbanpadel.om is a file swap.
+  'national-stack': [2200, 1240],
   'national-mark': [1024, 1024],
   'national-og': [1200, 630],
   'national-icon': [512, 512],
