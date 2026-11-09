@@ -350,4 +350,41 @@ if (process.env.ALIVE) {
   }
 }
 
+
+// THE KNOCKOUT LADDER, 1..9. In playoff mode nine teams are still alive after
+// the groups — three winners, three runners-up, three thirds — and the bracket
+// has eight slots, so seeds 8 and 9 play a qualifier for the last one.
+//
+// The order is STRICT TIER FIRST, then record inside the tier: every group
+// winner outranks every runner-up and every runner-up outranks every third,
+// whatever their records. Inside a tier it is wins > game difference > games
+// won (compareThirds), measured on the NORMALISED standings.
+if (process.env.SEEDS) {
+  const gc = Number(process.argv[3] || 3);
+  const { session, groups } = buildNight(N, gc, 56, null, MODE);
+  const stand = groups.map(g => E.calcGroupStandingsNormalized(session, g));
+  const tier = (rank) => stand
+    .map((s, i) => s[rank]?.team?.id
+      ? { seed: groups[i] + (rank + 1), group: groups[i], id: s[rank].team.id,
+          wins: s[rank].wins, gd: s[rank].gd || 0, gf: s[rank].gf || 0 }
+      : null)
+    .filter(Boolean).sort(E.compareThirds);
+  const t1 = tier(0), t2 = tier(1), t3 = tier(2);
+  const ladder = [...t1, ...t2, ...t3];
+  console.log(`--- the knockout ladder (thirds=${MODE}) ---`);
+  ladder.forEach((t, i) => {
+    const role = i < t1.length ? 'group winner'
+      : i < t1.length + t2.length ? 'runner-up'
+      : i === t1.length + t2.length ? 'best third — DIRECT slot' : 'third — plays the qualifier';
+    console.log(`  ${String(i + 1).padStart(2)}  ${t.seed}   W${t.wins}  GD${t.gd >= 0 ? '+' : ''}${t.gd}`
+      + `  GF${t.gf}   ${role}`);
+  });
+  const slots = [...t1, ...t2, t3[0], { seed: 'Q', id: 'PLAYOFF_TBD' }];
+  console.log(`  bracket slots 1..8 = ${slots.map(s => s.seed).join(' ')}`
+    + `   (Q = winner of ${t3[1].seed} v ${t3[2].seed})`);
+  const pairs = JSON.parse(/const SEED_PAIRS = (\[\[.*?\]\]);/.exec(src)[1]);
+  console.log(`  SEED_PAIRS from the app: ${JSON.stringify(pairs)}`
+    + `  →  ${pairs.map(([x, y]) => `${x + 1}v${y + 1}`).join('  ')}`);
+}
+
 process.exit(bad ? 1 : 0);
