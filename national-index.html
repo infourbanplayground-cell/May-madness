@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "8dd0e92fc4b0";
+  var V = "7d046ed1b9c0";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -2250,7 +2250,7 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
 
   if (!meId || !played.some(e => e.player.id === meId)) {
     return (
-      <button onClick={onOpenPicker}
+      <button onClick={onOpenPicker} className="na-plate"
         style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
                 background:"rgba(158,21,32,.92)",border:"1px solid rgba(247,241,230,.35)",borderRadius: 28,
                 padding:"16px 16px 14px",cursor:"pointer",textAlign:"left"}}>
@@ -6896,7 +6896,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
       )}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
         {rows.map(e => (
-          <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)}
+          <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)} className="na-ptile"
             style={{ textAlign: "left", padding: 12, cursor: "pointer", color: "inherit",
               background: e.player.id === meId ? "rgba(242,184,188,.07)" : "rgba(158,21,32,.94)",
               border: "1px solid " + (e.player.id === meId ? "rgba(242,184,188,.4)"
@@ -6916,7 +6916,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
             </div>
             {/* A roster of 314 names needs faces. The photo slot keeps its
                 height whether or not there is one, so the grid stays even. */}
-            <div style={{ width: "100%", height: 120, marginTop: 8, background: "#9E1520",
+            <div className="na-pslot" style={{ width: "100%", height: 120, marginTop: 8, background: "#9E1520",
               border: "1px solid rgba(255,255,255,.05)", overflow: "hidden",
               display: "flex", alignItems: "center", justifyContent: "center" }}>
               {e.player.photoUrl
@@ -7478,7 +7478,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
       </>}
 
       {/* ── WHO ARE YOU — only until it is answered ── */}
-      {!meId && <div onClick={onOpenPicker} className="sg-card"
+      {!meId && <div onClick={onOpenPicker} className="sg-card na-plate"
            style={{cursor:"pointer",padding:"13px 14px",display:"flex",alignItems:"center",gap:10}}>
         <div style={{flex:1,minWidth:0}}>
           <div className="sg-kicker" style={{marginBottom:3}}>Your standing</div>
@@ -7504,7 +7504,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
                       background:lead ? "rgba(16,23,31,.96)" : "rgba(158,21,32,.94)",
                       backgroundImage:`linear-gradient(180deg,${bar},${bar})`,
                       backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
-              <div style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
+              <div className="na-rankdisc" style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
                    background:lead ? "rgba(247,241,230,.14)" : "rgba(255,255,255,.04)",
                    border:`1px solid ${lead ? "rgba(247,241,230,.5)" : "rgba(242,208,211,.35)"}`,
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
@@ -9200,7 +9200,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
     <div className="space-y-4" style={{animation:"sgSlide 200ms var(--ease-out) both"}}>
       <div className="flex items-end justify-between flex-wrap gap-x-3 gap-y-2" style={{paddingTop:18}}>
         <div>
-          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} nights &middot; Vol.9</ScreenEyebrow>
+          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} night{(state.sessions.length || SESSIONS_TOTAL) === 1 ? "" : "s"} &middot; Vol.9</ScreenEyebrow>
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                fontSize:44,lineHeight:.9,color:"#FFFFFF",marginTop:6}}>SESSIONS</div>
         </div>
@@ -9273,6 +9273,22 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
                  letterSpacing:".18em",color:pc}}>{pill}</div>
           </div>
         );})}
+        {(() => {
+          const have = new Set((state.sessions || []).map(s => s.date).filter(Boolean));
+          const n = new Date();
+          const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+          const up = (typeof SEASON_NIGHTS === "undefined" ? [] : SEASON_NIGHTS)
+            .filter(d => !have.has(d) && d >= today);
+          return up.map((d, k) => (
+            <div key={"up" + d} className="na-upcoming" data-next={k === 0 ? "1" : "0"}>
+              <div className="na-upcoming-when">{naNightWhen(d)}</div>
+              <div className="na-upcoming-what">
+                {k === 0 ? (d === today ? "TONIGHT" : "NEXT NIGHT") : "SCHEDULED"}
+              </div>
+              {DOUBLE_NIGHTS.indexOf(d) >= 0 && <div className="na-upcoming-2x">2X</div>}
+            </div>
+          ));
+        })()}
       </div>
 
       <RecapSheet session={recapSession} state={state} leaderboard={leaderboard} meId={meId}
@@ -11763,7 +11779,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                     background:"rgba(16,23,31,.96)",backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
                     backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",overflow:"hidden"}}>
             <div style={{position:"relative",display:"flex",alignItems:"center",gap:12}}>
-              <div style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
+              <div className="na-rankdisc" style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
                    background:"rgba(247,241,230,.14)",border:"1px solid rgba(247,241,230,.5)",
                    boxShadow:"0 0 26px rgba(247,241,230,.22)",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
                    fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:22,color:"#F7F1E6"}}>1</div>
@@ -11804,7 +11820,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
                backgroundImage:"linear-gradient(180deg,#F2B8BC,rgba(242,184,188,.06))",backgroundSize:"5px 100%",
                backgroundRepeat:"no-repeat",border:"1px solid rgba(242,184,188,.4)"}}>
             <div style={{display:"flex",alignItems:"center",gap:12}}>
-              <div style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
+              <div className="na-rankdisc" style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
                    background:"rgba(242,184,188,.12)",border:"1px solid rgba(242,184,188,.5)",
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
                    fontSize:18,color:"#F2B8BC"}}>{mi + 1}</div>
@@ -15542,6 +15558,175 @@ body .na-rank [data-move="down"] { color: var(--flag) !important; }
 .jh-mock-sess[data-state="FINAL"] .na-medallion:not([data-a]):not([data-b]):not([data-c]) {
   box-shadow: 0 0 0 2px var(--ivory), 0 0 0 5px var(--green);
 }
+
+/* ── 17 · ONE LANGUAGE ACROSS THE WHOLE APP ────────────────────────────
+   SESSIONS and RANK became ivory-plate screens; HOME and PLAYERS stayed red
+   on red, so the app was speaking two visual languages and the join showed.
+   Measured: home 73.0% red / 18.1% ivory, players 86.1% / 2.4%.
+
+   The rule is the one the other screens already follow, and it is the
+   handoff's own: RED IS THE GROUND AND THE CHROME, IVORY IS ANY PLATE YOU
+   READ. Nothing new is invented here; it is the same plate applied to the
+   blocks that were missed.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* NEXT UP / LAST SESSION, and the YOUR STANDING button. */
+.sg-card-cyan, .na-plate {
+  background-color: var(--ivory) !important;
+  border-color: rgba(26,10,12,.18) !important;
+}
+.sg-card-cyan, .sg-card-cyan *:not(.na-av),
+.na-plate, .na-plate *:not(.na-av) { color: var(--ink) !important; }
+/* The accents inside them — dates, OPEN ▶, the kicker — take the base red,
+   7.23:1, the same as every other accent on ivory in this skin. Excluding
+   anything carrying the colour as a BACKGROUND and any movement mark, for
+   the two reasons sections 14 and 15 record. */
+.sg-card-cyan [style*="247, 241, 230"]:not([style*="background"]):not([data-move]),
+.sg-card-cyan [style*="#F7F1E6"]:not([style*="background"]):not([data-move]),
+.na-plate [style*="247, 241, 230"]:not([style*="background"]):not([data-move]),
+.na-plate [style*="#F7F1E6"]:not([style*="background"]):not([data-move]) {
+  color: var(--bg) !important;
+}
+
+/* ── THE PODIUM IS ONE SURFACE ─────────────────────────────────────────
+   It drew the leader on an ink card and 2nd and 3rd on red — three
+   treatments for three consecutive rows of the same list, which reads as
+   three unrelated things rather than as a ranking. One surface, and the
+   leader is marked the way this volume marks a winner everywhere else: the
+   green edge, not a different card.                                      */
+.sg-top { background-color: var(--ivory) !important; }
+.sg-top, .sg-top *:not(.na-av) { color: var(--ink) !important; }
+.sg-top[data-lead="1"] {
+  background-image: linear-gradient(180deg, var(--green), rgba(8,122,63,.35)) !important;
+  background-size: 7px 100% !important;
+}
+.sg-top[data-lead="0"] {
+  background-image: linear-gradient(180deg, rgba(26,10,12,.30), rgba(26,10,12,.06)) !important;
+  background-size: 7px 100% !important;
+}
+/* The points and the rank numeral are the figures on the row; base red keeps
+   them the loudest thing on an ivory plate without reaching for green. */
+.sg-top .sg-top-pts { color: var(--bg) !important; }
+.sg-top > div:first-child {
+  background: rgba(158,21,32,.10) !important;
+  border-color: rgba(158,21,32,.45) !important;
+  color: var(--bg) !important;
+}
+/* The "3 NIGHTS · 84% WIN" sub-line is secondary, and muted ink is the tone
+   this skin defines for that ON IVORY. */
+.sg-top [style*="207, 207, 207"]:not([style*="background"]),
+.sg-top [style*="#CFCFCF"]:not([style*="background"]) { color: var(--muted-ink) !important; }
+
+/* ── THE ROSTER TILES ──────────────────────────────────────────────────
+   325 deep-red tiles on a red ground: the frames fought the photographs and
+   the names sat at the bottom of the contrast range. On ivory the face is
+   the only colour in the tile, which is the point of a roster.           */
+.na-ptile { background: var(--ivory) !important; border-color: rgba(26,10,12,.16) !important; }
+.na-ptile, .na-ptile *:not(.na-av) { color: var(--ink) !important; }
+/* Only the "3 nights" tone. The rose one was in here too and it also
+   matched the photo slot's INITIALS at (0,3,0), beating the rule that
+   relights them at (0,2,1) — so they stayed muted ink on a red window,
+   1.24:1, through two attempts to fix them somewhere else. */
+.na-ptile [style*="242, 208, 211"]:not([style*="background"]) { color: var(--muted-ink) !important; }
+/* YOUR OWN TILE keeps a tint so it is still findable in 163 rows of two. */
+.na-ptile[style*="242, 184, 188"] { background: rgba(158,21,32,.10) !important; }
+
+/* ── 18 · TEXTURE ON THE IVORY PLATES — TRIED AND WITHDRAWN ───────────
+   Every RED surface in this app carries the khanjar or the masar weave and
+   the ivory plates carry nothing, so as they multiplied the app started
+   reading as cream panels on a red site rather than as one designed thing.
+   That diagnosis still stands and the fix is still worth making.
+
+   What was tried: the khanjar as a `background-image` on each plate at 340px
+   with `background-blend-mode: multiply`. It went in GREEN AND AT FULL
+   STRENGTH — a emblem lying across every roster tile, 5.7% of the screen —
+   because the asset is not a neutral ink and multiply over a pale ground
+   does not mute it. It also cost nothing to the red screens and everything
+   to the ivory ones, which is the opposite of what a watermark should do.
+
+   Doing it properly needs its own LAYER — a pseudo-element carrying the art
+   at a low opacity with the ink forced neutral, ordered behind the plate's
+   content — because opacity cannot be applied to a background-image alone
+   and `.na-ivory::after` is already spoken for by the masar trim. That is a
+   real change and it is not worth guessing at; it is left undone and said
+   so rather than shipped at 6% green.
+   ────────────────────────────────────────────────────────────────────── */
+
+
+/* ── 19 · THE NIGHTS THAT HAVE NOT HAPPENED YET ───────────────────────
+   Quiet rows, deliberately: they are not sessions, nothing has been played
+   on them and there is nothing to open. An outline on the red ground, so
+   they read as the calendar continuing past the ivory plates rather than as
+   more cards. The next one is the only one that gets any weight.
+   ────────────────────────────────────────────────────────────────────── */
+.na-upcoming {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px;
+  border: 1px dashed rgba(247,241,230,.34);
+  border-radius: 28px;
+  margin-top: 8px;
+}
+.na-upcoming[data-next="1"] {
+  border-style: solid;
+  border-color: var(--ivory);
+  background: rgba(247,241,230,.08);
+}
+.na-upcoming-when {
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 11px;
+  letter-spacing: .2em; color: var(--ivory);
+}
+.na-upcoming-what {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 9px;
+  letter-spacing: .18em; color: var(--rose-txt);
+}
+.na-upcoming[data-next="1"] .na-upcoming-what { color: var(--ivory); }
+/* National Day keeps its green here too — it is the one night of the nine
+   that is an occasion, and that is true before it is played as well as
+   after. White on the flag's green is 4.83:1. */
+.na-upcoming-2x:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 auto; padding: 3px 9px; border-radius: 999px !important;
+  background: var(--green); color: #FFFFFF;
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 9px;
+  letter-spacing: .16em;
+}
+
+/* THE CHAMPIONS LINE MAY WRAP. It shares its row with the state pill, so
+   "Champions · Hassan & Munther Rahbi" was ellipsised to "Hassan & Munt…" —
+   the one fact on a finished night's card that anybody is reading it for.
+   Wrapping costs a line of card height; cutting a name costs the name. */
+.jh-mock-sess .na-note { white-space: normal !important; overflow: visible !important; }
+
+/* ── ISLANDS INSIDE AN IVORY PLATE ────────────────────────────────────
+   A plate goes ivory and every descendant goes ink — right for the type
+   lying on the ivory, WRONG for the small objects that carry their own
+   background: the session's progress disc, the podium's rank disc, the
+   roster's photo slot when there is no photo. Ink on their own dark ground
+   is what the harness measured at 2.89:1, 2.99:1 and 1.24:1.
+
+   ONLY THE TEXT IS TOUCHED. The first attempt also set their BACKGROUNDS to
+   the base red, which took the whole podium row red with them and turned
+   five more runs including the points figure into red-on-red at 1:1. The
+   discs already have a ground; they only ever needed their type back.
+   `body` on each, because the blanket ink rule is (0,2,0).              */
+/* THE RANK DISC GETS A GROUND OF ITS OWN rather than a tint of whatever is
+   behind it. As a 14% wash its contrast depended on the card under it, and
+   the two cards that use it resolve differently — ink on it read 2.99:1 on
+   one and base red on it 1.04:1 on the other. Solid base red with ivory type
+   is 7.23:1 wherever the disc is drawn. */
+body .na-rankdisc:not([data-a]):not([data-b]) {
+  background: var(--bg) !important;
+  border-color: var(--bg) !important;
+  box-shadow: none !important;
+}
+/* `.sg-top .na-rankdisc` and not `.na-rankdisc` alone: the global rule that
+   remaps the volume's lead accent is (0,2,0) via its attribute selectors,
+   and `body .na-rankdisc` is only (0,1,1) — so the numeral stayed base red
+   ON a base red disc, 1:1. */
+body .sg-top .na-rankdisc, body .sg-top .na-rankdisc * { color: var(--ivory) !important; }
+body .sg-card-cyan [style*="conic-gradient"] > div,
+body .sg-card-cyan [style*="conic-gradient"] > div * { color: var(--ivory) !important; }
+body .na-ptile .na-pslot, body .na-ptile .na-pslot * { color: var(--ivory) !important; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

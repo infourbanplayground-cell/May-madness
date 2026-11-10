@@ -495,6 +495,104 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # THE RANK TAB HAS ITS OWN `.sg-top` — the leader card at the head of the
+    # table — with the rank disc one level deeper than the home podium's. The
+    # home one was marked and this one was not, so it was the single run left
+    # failing contrast: ink on its own pale tint, 2.99:1.
+    ('''              <div style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
+                   background:"rgba(198,255,0,.14)",border:"1px solid rgba(198,255,0,.5)",''',
+     '''              <div className="na-rankdisc" style={{flex:"0 0 auto",width:48,height:48,display:"grid",placeItems:"center",
+                   background:"rgba(198,255,0,.14)",border:"1px solid rgba(198,255,0,.5)",'''),
+
+    # TWO MARKERS FOR THE ISLANDS INSIDE AN IVORY PLATE — the podium's rank
+    # disc and the roster's photo slot. Both were reached at first through
+    # `[style*="..."]` hooks and neither matched: React does not serialise an
+    # inline declaration the way it is written, which this skin has a scar
+    # from already. Two classes, and the rules stop guessing.
+    ('''              <div style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",''',
+     '''              <div className="na-rankdisc" style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",'''),
+    ('''            <div style={{ width: "100%", height: 120, marginTop: 8, background: "#111",''',
+     '''            <div className="na-pslot" style={{ width: "100%", height: 120, marginTop: 8, background: "#111",'''),
+
+    # ── 5k · THE SESSIONS TAB COULD NOT ANSWER "WHEN IS THE NEXT ONE?" ────
+    # It lists sessions, and a session only exists once the organiser has
+    # created it — so on a day off, which is exactly when somebody opens this
+    # tab, the page showed three finished nights and nothing ahead.
+    #
+    # SEASON_NIGHTS WAS ALREADY THERE — the SEASON table has injected it from
+    # the config all along ("so a session can be created on the right night
+    # without anybody typing a date twice") and nothing had ever read it. A
+    # second injection was added here before checking, and because `plain()`
+    # replaces every occurrence and only checks presence, the result was two
+    # `const SEASON_NIGHTS` declarations: a SyntaxError that blanked the
+    # ENTIRE page rather than breaking one screen. Look for the constant
+    # before adding it.
+
+    # The upcoming rows, after the real sessions. A date is "upcoming" when no
+    # session carries it and it has not passed — and TODAY IS BUILT FROM LOCAL
+    # PARTS, never an ISO slice of a UTC clock, because this server is UTC+4
+    # and would call tonight "yesterday".
+    ('''        );})}
+      </div>
+
+      <RecapSheet session={recapSession}''',
+     '''        );})}
+        {(() => {
+          const have = new Set((state.sessions || []).map(s => s.date).filter(Boolean));
+          const n = new Date();
+          const today = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`;
+          const up = (typeof SEASON_NIGHTS === "undefined" ? [] : SEASON_NIGHTS)
+            .filter(d => !have.has(d) && d >= today);
+          return up.map((d, k) => (
+            <div key={"up" + d} className="na-upcoming" data-next={k === 0 ? "1" : "0"}>
+              <div className="na-upcoming-when">{naNightWhen(d)}</div>
+              <div className="na-upcoming-what">
+                {k === 0 ? (d === today ? "TONIGHT" : "NEXT NIGHT") : "SCHEDULED"}
+              </div>
+              {DOUBLE_NIGHTS.indexOf(d) >= 0 && <div className="na-upcoming-2x">2X</div>}
+            </div>
+          ));
+        })()}
+      </div>
+
+      <RecapSheet session={recapSession}'''),
+
+    # THE THIRD "WHICH ONE ARE YOU?". There are three of them — a modal, a
+    # signed-in standing card, and this one on HOME — and marking the first
+    # left the home block red while everything around it went ivory. It is a
+    # plain `.sg-card`, and `.sg-card` is the surface class the whole app
+    # shares, so it is marked here rather than by turning every card in the
+    # app ivory from one selector nobody has looked at.
+    ('''      {!meId && <div onClick={onOpenPicker} className="sg-card"''',
+     '''      {!meId && <div onClick={onOpenPicker} className="sg-card na-plate"'''),
+
+    # ── 5j · THE REST OF THE APP JOINS THE RULE ────────────────────────────
+    # SESSIONS and RANK are ivory-plate screens; HOME and PLAYERS were still
+    # red on red, so the app was speaking two visual languages. Markers only;
+    # the colours are in the skin.
+
+    # "1 NIGHTS · VOL.9". The eyebrow pluralises nothing, so the sessions tab
+    # has read that since the morning after the first night.
+    ('''          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} nights &middot; Vol.9</ScreenEyebrow>''',
+     '''          <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} night{(state.sessions.length || SESSIONS_TOTAL) === 1 ? "" : "s"} &middot; Vol.9</ScreenEyebrow>'''),
+
+    # "YOUR STANDING" is a bare button with inline styles and no class, so
+    # the skin has nothing to aim at.
+    ('''      <button onClick={onOpenPicker}
+        style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+                background:"rgba(14,14,14,.92)",border:"1px solid rgba(198,255,0,.35)",borderRadius: 0,''',
+     '''      <button onClick={onOpenPicker} className="na-plate"
+        style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
+                background:"rgba(14,14,14,.92)",border:"1px solid rgba(198,255,0,.35)",borderRadius: 0,'''),
+
+    # The roster tile, same problem: 325 of them and nothing to select.
+    ('''          <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)}
+            style={{ textAlign: "left", padding: 12, cursor: "pointer", color: "inherit",
+              background: e.player.id === meId ? "rgba(255,46,136,.07)" : "rgba(14,14,14,.94)",''',
+     '''          <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)} className="na-ptile"
+            style={{ textAlign: "left", padding: 12, cursor: "pointer", color: "inherit",
+              background: e.player.id === meId ? "rgba(255,46,136,.07)" : "rgba(14,14,14,.94)",'''),
+
     # THE AVATAR'S FALLBACK INITIALS GET THEIR OWN MARKER, and the reason is
     # specificity arithmetic rather than tidiness. The ivory plates paint
     # every descendant ink, and the initials have to be exempt because the
