@@ -495,6 +495,35 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # The rank row's own movement mark — a DIFFERENT component from the
+    # standings plate's Delta, and it was drawing both directions in colours
+    # that both swept to red, so ▲ and ▼ were the same colour. On the ivory
+    # plate they can mean what they say.
+    ('''          {mv && <span style={{fontSize:9,color:mv.up ? "#C6FF00" : "#FF2E88"}}>{mv.up ? "▲" : "▼"}</span>}''',
+     '''          {mv && <span data-move={mv.up ? "up" : "down"} style={{fontSize:9,color:mv.up ? "#C6FF00" : "#FF2E88"}}>{mv.up ? "▲" : "▼"}</span>}'''),
+
+    # THE POINTS BAR UNDER EACH NAME WENT INVISIBLE the moment the plate went
+    # ivory: it is a lime gradient in Vol.8 and the sweep turns lime into this
+    # volume's ivory, which on an ivory plate is nothing at all. It is the
+    # only thing on the row that shows the SHAPE of the table — how far ahead
+    # the top is — so it is named and re-inked rather than left to vanish.
+    ('''          <div style={{height:4,marginTop:5,width:`${Math.max(4, Math.round(ptsOf(e) / topPts * 100))}%`,
+               background:"linear-gradient(90deg,rgba(198,255,0,.7),rgba(198,255,0,.12))"}} />''',
+     '''          <div className="na-ptsbar" style={{height:4,marginTop:5,width:`${Math.max(4, Math.round(ptsOf(e) / topPts * 100))}%`,
+               background:"linear-gradient(90deg,rgba(198,255,0,.7),rgba(198,255,0,.12))"}} />'''),
+
+    # ── 5i · RANKINGS WAS THE REDDEST SCREEN IN THE APP, at 90.2% red / 2.6%
+    # ivory / 0.2% green once SESSIONS had been fixed. It is also 5,586px
+    # tall — fifty rows sitting STRAIGHT ON THE PAGE GROUND with nothing but
+    # hairlines between them, so it is both the biggest surface in the app and
+    # the one carrying the least structure. Same answer as the standings plate
+    # on SESSIONS: a dense table of names and numbers belongs on ivory, where
+    # ink is 17.1:1 instead of light type on a red wash.
+    ('''        <div style={{marginTop:18,display:"grid",gridTemplateColumns:"34px 1fr 56px 74px",
+             fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#CFCFCF"}}>''',
+     '''        <div className="na-rank na-ivory" style={{marginTop:18,display:"grid",gridTemplateColumns:"34px 1fr 56px 74px",
+             fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".2em",color:"#CFCFCF"}}>'''),
+
     # ── 5h · SESSIONS IS THE SCREEN PLAYERS OPEN ON A DAY OFF, AND IT WAS
     # 92% RED. Measured on the real state at 390x844: 92.0% red, 0.9% ivory,
     # 0.4% green, against the home screen's 74.0 / 1.4 / 3.6. Home got the

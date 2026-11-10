@@ -514,13 +514,28 @@ body .sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
   overflow: hidden;
   padding-bottom: 24px !important;
 }
-.na-ivory, .na-ivory * { color: var(--ink) !important; }
+/* THE AVATAR'S FALLBACK INITIALS ARE EXEMPT, and that is not a detail: the
+   component already picks its text colour from the LUMINANCE of the tinted
+   disc behind it, so a bright tint gets near-black and a dark one gets white.
+   Painting every descendant ink threw that away and put ink initials on the
+   dark discs — measured at 1.69:1, 2.36:1 and 3.91:1 across eleven runs on
+   the rankings plate, caught by the harness and by nothing else.
+   NO SINGLE COLOUR FIXES IT: ink is 17.1:1 on the ivory tint and about 1.2:1
+   on the near-black one; white is the other way round. So the exemption lets
+   the element's own inline colour win rather than imposing a replacement. */
+.na-ivory, .na-ivory *:not(.items-center.justify-center.shrink-0.font-bold) { color: var(--ink) !important; }
 /* Anything that was the lead accent inside it becomes the base red, the same
    rule the hero uses — ivory type on an ivory plate is nothing. */
-.na-ivory [style*="247, 241, 230"], .na-ivory [style*="#F7F1E6"],
+/* `:not([style*="background"])` because this rule is about type that WAS the
+   lead accent. An element carrying the colour as a BACKGROUND — the avatar's
+   tinted disc — is not that, and recolouring its text to the base red put the
+   initials at 3.91:1 on their own ivory disc. */
+.na-ivory [style*="247, 241, 230"]:not([style*="background"]),
+.na-ivory [style*="#F7F1E6"]:not([style*="background"]),
 /* `body` for the same reason the hero's rule carries it. */
-body .na-ivory [style*="242, 184, 188"], body .na-ivory [style*="#F2B8BC"],
-body .na-ivory [style*="rgb(242,184,188)"] {
+body .na-ivory [style*="242, 184, 188"]:not([style*="background"]),
+body .na-ivory [style*="#F2B8BC"]:not([style*="background"]),
+body .na-ivory [style*="rgb(242,184,188)"]:not([style*="background"]) {
   color: var(--bg) !important;
 }
 /* ...and the hairline rings the countdown cells draw have to come back as
@@ -1091,8 +1106,8 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 /* `.na-ivory *` paints everything inside it ink, which is right for a
    countdown and wrong for a TABLE — a table with no accent is a wall of
    identical rows. These put the hierarchy back, and only inside `.na-table`. */
-.na-table [style*="247, 241, 230"],
-.na-table [style*="#F7F1E6"] { color: var(--bg) !important; }
+.na-table [style*="247, 241, 230"]:not([style*="background"]),
+.na-table [style*="#F7F1E6"]:not([style*="background"]) { color: var(--bg) !important; }
 
 /* THE LEADER'S NUMERAL. Base red on ivory is 7.23:1 — the hero's own rule for
    an accent on this ground, and the same one the flag red is held off for. */
@@ -1203,4 +1218,50 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 .na-table > div:nth-of-type(2)::before {
   content: ""; position: absolute; left: -10px; top: 5px; bottom: 5px;
   width: 4px; border-radius: 999px; background: var(--green);
+}
+
+/* ── 15 · THE RANKINGS PLATE ───────────────────────────────────────────
+   Once SESSIONS was fixed, RANK was the reddest screen in the app — 90.2%
+   red, 2.6% ivory, 0.2% green — and it is 5,586px tall, so it is the single
+   biggest surface anybody scrolls. Fifty rows were drawn straight onto the
+   page ground with hairline separators and no plate at all.
+
+   Same remedy and the same reason as the standings table: a long list of
+   names and numbers is a reading task, and ink on ivory is 17.1:1 where
+   light type on a red wash is a gradient of nearly-the-same.
+   ────────────────────────────────────────────────────────────────────── */
+.na-rank:not([data-a]):not([data-b]):not([data-c]) {
+  /* The grid has no padding of its own — the rows would touch the plate's
+     own radius, which is what makes a plate look like a crop. */
+  padding: 14px 14px 24px !important;
+  margin-top: 18px !important;
+}
+/* The column headers are a Surge-era grey; on ivory they are a smudge. */
+.na-rank [style*="207, 207, 207"], .na-rank [style*="#CFCFCF"] { color: var(--muted-ink) !important; }
+/* Anything that was the lead accent inside the plate becomes the base red,
+   the same rule the hero and the standings plate both use. */
+.na-rank [style*="247, 241, 230"]:not([style*="background"]),
+.na-rank [style*="#F7F1E6"]:not([style*="background"]) { color: var(--bg) !important; }
+/* The row separators come back as ink hairlines or they vanish. */
+.na-rank [style*="border-top"] { border-top-color: rgba(26,10,12,.14) !important; }
+/* Movement, the same two meanings the standings plate gives it. */
+.na-rank [data-move="up"] { color: var(--green) !important; }
+.na-rank [data-move="down"] { color: var(--flag) !important; }
+
+/* THE PLATE MUST NOT STEAL THE NAME'S WIDTH. Padding the grid took 28px out
+   of the 1fr column that holds the player's name, and four of the top ten
+   started truncating — "Munther Rah…", "Muntaser Ha…". The plate pulls
+   itself out to the page gutter with a matching negative margin instead, so
+   it is wider than the column it holds rather than narrower. Measured at
+   360/390/430: every name that fitted before fits now. */
+.na-rank:not([data-a]):not([data-b]):not([data-c]) {
+  margin-left: -14px !important;
+  margin-right: -14px !important;
+}
+/* The points bar is the only thing on a row that shows how far ahead the top
+   of the table is. It is drawn as a lime gradient in the volume this app is
+   built from, and the sweep turns lime into ivory — which on an ivory plate
+   is nothing. Re-inked to the base red, which is 7.23:1 here. */
+.na-rank .na-ptsbar {
+  background: linear-gradient(90deg, rgba(158,21,32,.85), rgba(158,21,32,.14)) !important;
 }
