@@ -523,15 +523,20 @@ body .sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
    NO SINGLE COLOUR FIXES IT: ink is 17.1:1 on the ivory tint and about 1.2:1
    on the near-black one; white is the other way round. So the exemption lets
    the element's own inline colour win rather than imposing a replacement. */
-.na-ivory, .na-ivory *:not(.items-center.justify-center.shrink-0.font-bold) { color: var(--ink) !important; }
+.na-ivory, .na-ivory *:not(.na-av) { color: var(--ink) !important; }
 /* Anything that was the lead accent inside it becomes the base red, the same
    rule the hero uses — ivory type on an ivory plate is nothing. */
 /* `:not([style*="background"])` because this rule is about type that WAS the
    lead accent. An element carrying the colour as a BACKGROUND — the avatar's
    tinted disc — is not that, and recolouring its text to the base red put the
    initials at 3.91:1 on their own ivory disc. */
-.na-ivory [style*="247, 241, 230"]:not([style*="background"]),
-.na-ivory [style*="#F7F1E6"]:not([style*="background"]),
+/* `:not([data-move])` here TOO, because a plate carries both `na-table` and
+   `na-ivory` and this copy is (0,3,0) against the movement rule's (0,2,1) —
+   so excluding the arrows from the `.na-table` copy alone changed nothing
+   and the arrows stayed red through two attempts. Found by asking the
+   browser which rule won rather than by reasoning about it again. */
+.na-ivory [style*="247, 241, 230"]:not([style*="background"]):not([data-move]),
+.na-ivory [style*="#F7F1E6"]:not([style*="background"]):not([data-move]),
 /* `body` for the same reason the hero's rule carries it. */
 body .na-ivory [style*="242, 184, 188"]:not([style*="background"]),
 body .na-ivory [style*="#F2B8BC"]:not([style*="background"]),
@@ -1106,8 +1111,12 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 /* `.na-ivory *` paints everything inside it ink, which is right for a
    countdown and wrong for a TABLE — a table with no accent is a wall of
    identical rows. These put the hierarchy back, and only inside `.na-table`. */
-.na-table [style*="247, 241, 230"]:not([style*="background"]),
-.na-table [style*="#F7F1E6"]:not([style*="background"]) { color: var(--bg) !important; }
+/* `:not([data-move])` as well: the UP arrow's inline colour is the volume's
+   lead accent, so this rule matched it at (0,3,0) and repainted it base red —
+   which made ▲ and ▼ the same colour again, by a different route than the
+   specificity bug above. A movement mark is not the lead accent. */
+.na-table [style*="247, 241, 230"]:not([style*="background"]):not([data-move]),
+.na-table [style*="#F7F1E6"]:not([style*="background"]):not([data-move]) { color: var(--bg) !important; }
 
 /* THE LEADER'S NUMERAL. Base red on ivory is 7.23:1 — the hero's own rule for
    an accent on this ground, and the same one the flag red is held off for. */
@@ -1116,8 +1125,14 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 /* THE MOVEMENT ARROWS, which are the one place on this table where a colour
    carries information rather than decoration. Keyed on `data-move`, written
    by the build, because the two spans are otherwise identical. */
-.na-table [data-move="up"] { color: var(--green) !important; }
-.na-table [data-move="down"] { color: var(--flag) !important; }
+/* `body` on both, and that is not noise. The avatar exemption above turned
+   `.na-ivory *` into `.na-ivory *:not(.items-center.justify-center
+   .shrink-0.font-bold)` — which raised it from (0,1,0) to (0,3,0) and let it
+   beat these at (0,2,0), so the arrows silently went ink on BOTH plates. The
+   fifth time specificity rather than source order has decided in this skin,
+   and the first time a FIX caused it. */
+body .na-table [data-move="up"] { color: var(--green) !important; }
+body .na-table [data-move="down"] { color: var(--flag) !important; }
 
 /* The dash for "no movement" is a Surge-era grey on what is now a warm ivory;
    it reads as a smudge. The muted ink is the tone this skin already defines
@@ -1240,13 +1255,13 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 .na-rank [style*="207, 207, 207"], .na-rank [style*="#CFCFCF"] { color: var(--muted-ink) !important; }
 /* Anything that was the lead accent inside the plate becomes the base red,
    the same rule the hero and the standings plate both use. */
-.na-rank [style*="247, 241, 230"]:not([style*="background"]),
-.na-rank [style*="#F7F1E6"]:not([style*="background"]) { color: var(--bg) !important; }
+.na-rank [style*="247, 241, 230"]:not([style*="background"]):not([data-move]),
+.na-rank [style*="#F7F1E6"]:not([style*="background"]):not([data-move]) { color: var(--bg) !important; }
 /* The row separators come back as ink hairlines or they vanish. */
 .na-rank [style*="border-top"] { border-top-color: rgba(26,10,12,.14) !important; }
 /* Movement, the same two meanings the standings plate gives it. */
-.na-rank [data-move="up"] { color: var(--green) !important; }
-.na-rank [data-move="down"] { color: var(--flag) !important; }
+body .na-rank [data-move="up"] { color: var(--green) !important; }
+body .na-rank [data-move="down"] { color: var(--flag) !important; }
 
 /* THE PLATE MUST NOT STEAL THE NAME'S WIDTH. Padding the grid took 28px out
    of the 1fr column that holds the player's name, and four of the top ten
@@ -1264,4 +1279,68 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
    is nothing. Re-inked to the base red, which is 7.23:1 here. */
 .na-rank .na-ptsbar {
   background: linear-gradient(90deg, rgba(158,21,32,.85), rgba(158,21,32,.14)) !important;
+}
+
+/* ── 16 · THE SESSION CARDS GO IVORY TOO ───────────────────────────────
+   Asked for a third time, and the earlier judgement was wrong. The cards
+   were kept red on the argument that three ivory blocks in a column would
+   swap one flat screen for another — but with the standings plate above them
+   already ivory, a red card UNDER an ivory plate is the odd one out, and the
+   screen still measured 63.7% red.
+
+   The rule the app has converged on is the handoff's own: RED IS THE GROUND
+   AND THE CHROME, IVORY IS ANY PLATE YOU READ. A session row is a thing you
+   read — a date, a landmark, a name, who won — so it belongs on ivory with
+   the rest of them.
+
+   AND IT IS WHAT FINALLY GIVES GREEN A JOB HERE. On red the champions line
+   had to be ivory, because green would have been 1.50:1. On the ivory card
+   it is 4.83:1 and it can say what green says everywhere else in this
+   volume: this pair won.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* background-COLOR, not the shorthand: the 7px winner's edge is a
+   background-IMAGE on the same element, and `background:` would erase it. */
+.jh-mock-sess { background-color: var(--ivory) !important; }
+.jh-mock-sess, .jh-mock-sess *:not(.na-av) { color: var(--ink) !important; }
+
+/* THE CHAMPIONS LINE IN GREEN, and only where there are champions — a
+   "Group stage in progress" in winner's green would be a lie about the
+   state of the night. */
+.jh-mock-sess[data-state="FINAL"] .na-note { color: var(--green) !important; }
+
+/* The date-and-landmark eyebrow is the quiet line on the card. */
+.jh-mock-sess .na-note ~ *, .jh-mock-sess > div > div:first-child {
+  color: var(--muted-ink) !important;
+}
+
+/* THE PILL HAS TO STOP BEING IVORY, or it vanishes into the card it sits on.
+   Each state takes the ink it already means: a finished night is a quiet ink
+   outline, a live one is the flag red that --flag exists for, National Day
+   keeps its green. */
+.na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: transparent !important;
+  border: 1px solid rgba(26,10,12,.45) !important;
+  color: var(--ink) !important;
+  border-radius: 999px !important;
+}
+.jh-mock-sess[data-state="LIVE"] .na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--flag) !important;
+  border-color: var(--flag) !important;
+  color: #FFFFFF !important;
+}
+.jh-mock-sess[data-state="2X"] .na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #FFFFFF !important;
+}
+
+/* The medallion keeps its RED disc — red on ivory is 7.23:1 and it is the
+   one spot of the volume's own colour left on the row — with the green
+   winner's ring on a finished night. */
+.jh-mock-sess .na-medallion:not([data-a]):not([data-b]):not([data-c]) {
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 4px rgba(26,10,12,.25);
+}
+.jh-mock-sess[data-state="FINAL"] .na-medallion:not([data-a]):not([data-b]):not([data-c]) {
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 5px var(--green);
 }

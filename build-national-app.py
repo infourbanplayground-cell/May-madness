@@ -495,6 +495,28 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # THE AVATAR'S FALLBACK INITIALS GET THEIR OWN MARKER, and the reason is
+    # specificity arithmetic rather than tidiness. The ivory plates paint
+    # every descendant ink, and the initials have to be exempt because the
+    # component picks their colour from the luminance of the tinted disc
+    # behind them. Written as :not(.items-center.justify-center.shrink-0
+    # .font-bold) that exemption cost (0,5,0) — `:not()` takes the
+    # specificity of its argument — which then beat the [data-move] rules at
+    # (0,2,1) and turned every movement arrow on both plates ink. One class
+    # makes the same exemption cost (0,1,0).
+    ('''    <div className={`flex items-center justify-center shrink-0 font-bold ${className}`}''',
+     '''    <div className={`na-av flex items-center justify-center shrink-0 font-bold ${className}`}'''),
+
+    # The session card's one-line status — "Champions · Faisal & Said",
+    # "Group stage in progress". On an ivory card the champions line can be
+    # GREEN (4.83:1), which is the first place on this screen where green is
+    # type rather than an edge, and it says the same thing green says
+    # everywhere else in this volume: this pair won.
+    ('''              <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".14em",
+                   color:noteColour,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{note}</div>''',
+     '''              <div className="na-note" style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".14em",
+                   color:noteColour,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{note}</div>'''),
+
     # The rank row's own movement mark — a DIFFERENT component from the
     # standings plate's Delta, and it was drawing both directions in colours
     # that both swept to red, so ▲ and ▼ were the same colour. On the ivory
