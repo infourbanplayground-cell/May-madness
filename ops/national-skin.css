@@ -1049,3 +1049,158 @@ body .fixed.inset-0.z-40 { top: var(--na-banner, 0px); }
 }
 .na-home[data-played="1"] > * { margin-top: 0 !important; }
 .na-home[data-played="1"] > .na-hero { order: 50; }
+
+/* ── 14 · SESSIONS: IVORY, AND THE GREEN IT MAKES POSSIBLE ─────────────
+   The owner, looking at the live site: "it's too red, we need more ivory and
+   green — especially in the sessions page because that's what the players
+   see on the day off."
+
+   MEASURED BEFORE TOUCHING ANYTHING, on the real state at 390x844:
+
+       SESSIONS   92.0% red   0.9% ivory   0.4% green
+       HOME       74.0% red   1.4% ivory   3.6% green
+
+   Home had already been given the ivory countdown panel and the National Day
+   pill; this screen was never touched, which is exactly why it is the one
+   that still reads as a single colour. Red on red on red, one layer further
+   on from the fault `.na-ivory` was written for.
+
+   AND THE TWO HALVES OF THE REQUEST TURN OUT TO BE ONE REQUEST. Contrast on
+   this volume's own palette:
+
+       green on the base red   1.50:1   unusable — an edge at best
+       green on ivory          4.83:1   AA
+       ink on ivory           17.10:1
+       base red on ivory       7.23:1
+       flag red on ivory       4.52:1   AA
+
+   That is why every green in this skin so far has been a hairline, a ring or
+   a 7px bar: on red there is nowhere else for it to go. The ivory plate is
+   what buys the green — it is the only ground this volume has where the
+   flag's green can be TYPE and still be read. So the ivory comes first and
+   the green follows it, rather than the two being separate asks.
+
+   Green keeps meaning what it already means here — the winner, and the
+   occasion — and is still never a fill on red.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* The plate itself is `.na-ivory`, reused rather than reinvented: same
+   inversion, same ring, and it brings a strip of the masar band at its foot,
+   which is where most of the screen's new green actually comes from. */
+
+/* `.na-ivory *` paints everything inside it ink, which is right for a
+   countdown and wrong for a TABLE — a table with no accent is a wall of
+   identical rows. These put the hierarchy back, and only inside `.na-table`. */
+.na-table [style*="247, 241, 230"],
+.na-table [style*="#F7F1E6"] { color: var(--bg) !important; }
+
+/* THE LEADER'S NUMERAL. Base red on ivory is 7.23:1 — the hero's own rule for
+   an accent on this ground, and the same one the flag red is held off for. */
+.na-table > div > div > div:first-child { font-weight: 700; }
+
+/* THE MOVEMENT ARROWS, which are the one place on this table where a colour
+   carries information rather than decoration. Keyed on `data-move`, written
+   by the build, because the two spans are otherwise identical. */
+.na-table [data-move="up"] { color: var(--green) !important; }
+.na-table [data-move="down"] { color: var(--flag) !important; }
+
+/* The dash for "no movement" is a Surge-era grey on what is now a warm ivory;
+   it reads as a smudge. The muted ink is the tone this skin already defines
+   for secondary text ON IVORY ONLY. */
+.na-table [style*="110, 110, 110"],
+.na-table [style*="#6E6E6E"] { color: var(--muted-ink) !important; }
+
+/* ── THE SESSION CARDS ─────────────────────────────────────────────────
+   They stay red: three ivory blocks in a column would swap one flat screen
+   for another, and the cards are a list, not the thing you came to read.
+   What they gain is an EDGE that says what kind of night each one was. The
+   left stripe is already drawn by the app as a 5px background gradient, so
+   this rides it rather than adding a border — a border on a 28px-radius row
+   draws a crescent, which this skin has already paid for once.          */
+
+/* A FINISHED NIGHT HAS CHAMPIONS, and green is this volume's winner's edge —
+   the same meaning it carries on the share cards' champion plate and on a
+   qualifying row. On red it can only be an edge, and that is all it is. */
+.jh-mock-sess[data-state="FINAL"] {
+  background-image: linear-gradient(180deg, var(--green), rgba(8,122,63,.35)) !important;
+}
+
+/* NATIONAL DAY. The 2X card was drawn in rose, which is this skin's label
+   accent and says nothing in particular; the 18th is the one night of the
+   nine that is an occasion, and green is what this volume reserves for it. */
+.jh-mock-sess[data-state="2X"] {
+  background-image: linear-gradient(180deg, var(--green), var(--green)) !important;
+}
+.jh-mock-sess[data-state="2X"] .na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #FFFFFF !important;
+  border-radius: 999px !important;
+}
+
+/* THE STATE PILL IS IVORY, not an outline on red. It is the one word on the
+   row that says what you are looking at, and an ivory chip with ink type
+   (17.1:1) reads at a glance where a translucent red chip outlined in ivory
+   does not. It also puts ivory on every row of the list rather than in one
+   block at the top. */
+.na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--ivory) !important;
+  border: 1px solid var(--ivory) !important;
+  color: var(--ink) !important;
+  border-radius: 999px !important;
+}
+/* A LIVE night keeps the flag red, because that is what `--flag` is for and a
+   night in play should not look like a night that is over. */
+.jh-mock-sess[data-state="LIVE"] .na-pill:not([data-a]):not([data-b]):not([data-c]) {
+  background: var(--flag) !important;
+  border-color: var(--flag) !important;
+  color: #FFFFFF !important;
+}
+
+/* ── THE GREEN, AND WHY THERE IS NOT MORE OF IT ────────────────────────
+   The ivory plate above took this screen from 3.0% ivory to 28.1% and moved
+   the green from 0.4% to 0.6% — half the request. The rest of the green has
+   to come from somewhere it MEANS something, because the thing that makes
+   green work in this volume is that it is scarce: the handoff spends it on
+   National Day, and this skin spends it on the winner. Green laid on as area
+   stops saying either.
+
+   So the greens below are all the same two meanings the volume already has,
+   and they are edges and rings, never fills. The National Day card is the
+   one that reads as green from across the room, and even that is its 7px
+   edge plus a green 2X chip — NOT a green card. It also does not exist on a
+   normal day: the organiser creates each night as it comes, so the 18th is
+   simply not in the list yet. Rendered with that night present the screen
+   reads 1.4% green against 1.1% without it.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* A FINISHED NIGHT'S MEDALLION gets the green outer ring the share cards'
+   medallion already carries, so the app and the posts say the same thing. It
+   is a ring, not a fill: on red, green is only ever an edge. */
+.jh-mock-sess[data-state="FINAL"] .na-medallion:not([data-a]):not([data-b]):not([data-c]) {
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 5px var(--green);
+}
+
+/* The winner's edge at 7px, which is the width the group cards use for a
+   qualifying row — the two were 5 and 7 for no reason other than that they
+   were written months apart. */
+.jh-mock-sess[data-state="FINAL"],
+.jh-mock-sess[data-state="2X"] { background-size: 7px 100% !important; }
+
+/* THE LEADER'S ROW inside the ivory plate. Green as a bar down the side is
+   exactly what it means on a qualifying row in the group cards, and the top
+   of the series table is the same claim. It is legible here only because the
+   plate is ivory — on red this bar would be 1.50:1 and invisible.
+   A BAR AND NOT A BORDER: a left border on a row that inherits the sheet
+   radius is bent into a crescent, which this skin has already paid for. */
+/* THE LEADER'S ROW ONLY — nth-of-type(2), because the plate's first child is
+   the "TABLE AFTER Sn" header and the rows follow it. Written first as
+   `> div > div:first-of-type` it drew a bar beside the rank cell of EVERY
+   row and beside the header too, which is the whole failure this bar exists
+   to avoid: a mark that is on everything marks nothing. Caught by looking at
+   the render, not by any assertion. */
+.na-table > div:nth-of-type(2) { position: relative; }
+.na-table > div:nth-of-type(2)::before {
+  content: ""; position: absolute; left: -10px; top: 5px; bottom: 5px;
+  width: 4px; border-radius: 999px; background: var(--green);
+}

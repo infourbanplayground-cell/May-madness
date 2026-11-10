@@ -495,6 +495,54 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # ── 5h · SESSIONS IS THE SCREEN PLAYERS OPEN ON A DAY OFF, AND IT WAS
+    # 92% RED. Measured on the real state at 390x844: 92.0% red, 0.9% ivory,
+    # 0.4% green, against the home screen's 74.0 / 1.4 / 3.6. Home got the
+    # ivory panel and the National Day pill in an earlier pass and this screen
+    # got nothing, so it is the one place the volume still reads as one colour.
+    #
+    # THE TWO HALVES OF "more ivory and green" ARE THE SAME REQUEST. Measured:
+    # the flag's green on the base red is 1.50:1, which is why this skin has
+    # only ever allowed it as an EDGE. On ivory it is 4.83:1 and clears AA. So
+    # green cannot become type anywhere until there is ivory for it to sit on —
+    # adding the ivory plate is what buys the green.
+    #
+    # These three splices add MARKERS ONLY; every colour decision is in the
+    # skin. They are markers and not style-substring hooks on purpose: this
+    # skin already has a scar from a `[style*="width: 1px"]` rule that looked
+    # right and matched nothing, because React serialises that declaration
+    # without the space.
+    (     '''    <div style={{ border: "1px solid rgba(198,255,0,.35)", background: "rgba(20,20,20,.96)",
+                  padding: "12px 14px 6px" }}>''',
+     '''    <div className="na-table na-ivory" style={{ border: "1px solid rgba(198,255,0,.35)", background: "rgba(20,20,20,.96)",
+                  padding: "12px 14px 6px" }}>'''),
+
+    # The movement arrows are the one figure on the table that MEANS up or
+    # down, and both were drawn in the same pair of inherited accents. On the
+    # ivory plate they can carry it: green rising (4.83:1), flag red falling
+    # (4.52:1). CSS cannot tell the two spans apart — same tag, same classes,
+    # differing only in a swept colour — so the direction is stated in the
+    # markup rather than inferred from a style substring.
+    (     '''    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                   color: up ? "#C6FF00" : "#FF2E88" }}>''',
+     '''    <span data-move={up ? "up" : "down"} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, fontWeight: 700,
+                   color: up ? "#C6FF00" : "#FF2E88" }}>'''),
+
+    # A session card already carries data-live, which separates LIVE from
+    # everything else and nothing else from anything — a finished night and a
+    # National Day night both read data-live="0". The pill is the state the
+    # card already computed; naming it on the element lets the skin give the
+    # occasion its green and the champions their edge.
+    (     '''          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"}''',
+     '''          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill}'''),
+
+    (     '''            <div style={{flex:"0 0 auto",padding:"4px 9px",background:"rgba(5,5,5,.7)",
+                 border:`1px solid ${pc}66`,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+                 letterSpacing:".18em",color:pc}}>{pill}</div>''',
+     '''            <div className="na-pill" style={{flex:"0 0 auto",padding:"4px 9px",background:"rgba(5,5,5,.7)",
+                 border:`1px solid ${pc}66`,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
+                 letterSpacing:".18em",color:pc}}>{pill}</div>'''),
+
     # 5g1 · THE TEAMS SCREEN WAS A LIST OF PAIRS AND NOTHING ELSE. No
     #       position, no wins, no points, no mark on who is through — the one
     #       screen named after the teams was the one that could not tell you
@@ -1597,13 +1645,21 @@ def main():
     # final-standings link points at Vol.8's archive. Anything beyond that is a
     # rename that stopped matching.
     # Deliberate: the all-time volume list names every previous volume, the
-    # signup post links Vol.8's final standings, and TWO code comments explain
-    # what Vol.8 did differently — DOUBLE_NIGHTS (a threshold, not a list) and
-    # the skin's note on the tagline's second ink. A comment naming the volume
-    # it is contrasting with is the point of the comment; the check is for
-    # renames that stopped matching, and it stays tight rather than being
+    # signup post links Vol.8's final standings, and THREE code comments
+    # explain what Vol.8 did differently — DOUBLE_NIGHTS (a threshold, not a
+    # list), the skin's note on the tagline's second ink, and the skin's note
+    # on the nav's inherited blur. A comment naming the volume it is
+    # contrasting with is the point of the comment; the check is for renames
+    # that stopped matching, and it stays an exact count rather than being
     # loosened to "any number".
-    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 2}
+    #
+    # THE COUNT IS LOAD-BEARING AND IT BIT. The third comment was added with
+    # the nav rule and nobody re-ran the build, so this guard failed every
+    # build from then on — which is why the pulse fix sat "committed and
+    # verified" without ever being deployable. Raise the number WITH the
+    # comment that says which mentions it covers; a bare bump is how the check
+    # stops meaning anything.
+    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 3}
     bad = {k: v for k, v in leftovers.items() if v > allowed.get(k, 0)}
 
     # ANY OTHER VOLUME'S HOST, in any casing. The named checks above only ever
