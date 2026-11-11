@@ -51,6 +51,19 @@ WHEN = ("TODAY" if DT == TODAY
         else "TOMORROW" if DT == TODAY + datetime.timedelta(days=1)
         else DT.strftime("%A").upper())
 DATE_STR = f'{DT.strftime("%a")} {DT.day} {DT.strftime("%b")}'
+# THE START TIME, derived from `start` in the JSON and never typed here.
+# The rendered CARDS still carry no clock — "a poster reshot because the time
+# moved is worse than one that never claimed it" — and that rule is about the
+# COST of being wrong, not about secrecy. A WhatsApp list is text: if the time
+# moves, the organiser sends four lines again. So the list says it and the
+# cards still do not.
+def _clock(hhmm):
+    h, mi = (int(x) for x in hhmm.split(":"))
+    ampm = "AM" if h < 12 else "PM"
+    h12 = h % 12 or 12
+    return f"{h12}:{mi:02d} {ampm}" if mi else f"{h12} {ampm}"
+
+START = _clock(S["start"])
 CUR = S["currency"]
 CAP = min(S["cap"], F["players"])
 CHAMP = f"{S['championPrize']} {CUR} {S.get('championPrizeKind', '')}".strip()
@@ -70,7 +83,8 @@ def main():
     # og: tags and a 1200x630 card, so the preview under this post is the
     # format. Hence the link sits above the list, where the preview renders,
     # rather than at the bottom as a footnote.
-    L.append(f"🗓️ {DATE_STR}  ·  📍 Urban Playground")
+    L.append(f"🗓️ {DATE_STR}  ·  🕠 {START}")
+    L.append("📍 Urban Playground")
     L.append(f"💸 {S['entry']} {CUR}  ·  🏆 {CHAMP}")
     L.append(f"🪜 {F['courts']} courts  ·  {F['matches']} matches each")
     L.append("🤝 *Come alone* — no partner needed")
