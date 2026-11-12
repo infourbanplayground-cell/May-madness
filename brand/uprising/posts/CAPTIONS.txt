@@ -7,7 +7,7 @@ rather than editing this by hand.
 WHATSAPP 1 — the announcement (paste with post-1-hero.png)
 ====================================================================
 
-🏆 *UPRISING* — the padel night where you climb for your place. *Friday 13 November.*
+🏆 *UPRISING* — the padel night where you climb for your place. *Tomorrow, Friday 13 November.*
 
 Come on your own. No partner needed. You will play with a different
 partner almost every round.
@@ -42,7 +42,7 @@ americano.urbanpadel.om
 WHATSAPP 2 — the short one (for busy groups, or a forward)
 ====================================================================
 
-🏆 *UPRISING* — Fri 13 Nov.
+🏆 *UPRISING* — tomorrow, Fri 13 Nov.
 
 4 courts, one ladder. Win and you climb a court, lose and you drop
 one. Up to 11 matches, a new partner almost every round, come on your
@@ -74,7 +74,7 @@ This is the ONE message that carries a clock time. The posters deliberately
 do not, because the start moves until the court is confirmed — so check
 `start` in uprising-social.json is still right before you send this.
 
-⏰ *UPRISING starts at 18:00 sharp.*
+⏰ *UPRISING starts at 17:30 sharp.*
 
 Round one is the *shuffle* — it sets the court everyone starts on.
 
@@ -82,7 +82,7 @@ Nobody can start it until all 16 of us are on court, so one person
 late holds up the whole room. And once it is running you cannot be slotted
 in — there is no late entry.
 
-Be there by 17:45, racket in hand for 18:00. 🔺
+Be there by 17:15, racket in hand for 17:30. 🔺
 
 ====================================================================
 WHATSAPP 4 — the answer to "what even is it?"
@@ -107,18 +107,21 @@ INSTAGRAM — carousel caption (5 cards, hero first)
 
 Come alone. Leave with eleven.
 
-UPRISING is a weekly padel social, and the next one is Friday 13 November.
+UPRISING is a weekly padel social, and the next one is tomorrow — Friday 13 November, 5:30 PM.
 
-Every match is first to 11 — straight rallies, no games, no sets. Win it and
-you climb a court. Lose and you drop one.
+AMERICANO STYLE — you come on your own, you get a different partner almost
+every round, and you score for yourself. Then one twist: the courts are a
+LADDER. Win your match and you move up a court. Lose it and you move down.
+
+Every match is first to 11 — straight rallies, no games, no sets.
 
 Here is the bit worth reading twice: the 11 decides the match and nothing else.
 What you bank is what the court pays — 8 for a win on Court 1, 2 on Court 4.
 So there is nothing to gain from camping at the bottom beating people you
 should beat.
 
-Up to 11 matches. A different partner almost every round. You do not need
-to bring anyone.
+Up to 11 matches in about 120 minutes. Nothing to organise, nobody
+to find — turn up on your own and you are in.
 
 7 OMR · up to 16 places
 Champion takes a 15 OMR voucher. Last round counts double.

@@ -98,6 +98,16 @@ FIRST = bool(S.get("firstNight"))
 # The series went weekly and every one of them was silently wrong, on the
 # posts people actually read. Derived from cadenceLine, which is the one
 # place the rhythm lives.
+# The CAPTION may carry the clock; the CARDS still may not. The rule against
+# printing a time is about the cost of being wrong — a rendered poster reshot
+# because the time moved is worse than one that never claimed it — and a
+# caption is text you can edit after posting.
+def _clock12(hhmm):
+    h, mi = (int(x) for x in hhmm.split(":"))
+    return f"{h % 12 or 12}:{mi:02d} {'AM' if h < 12 else 'PM'}" if mi \
+        else f"{h % 12 or 12} {'AM' if h < 12 else 'PM'}"
+
+START_12 = _clock12(S["start"])
 CADENCE = S["cadenceLine"]                     # "Every Saturday"
 CADENCE_LOW = CADENCE[0].lower() + CADENCE[1:]  # "every Friday"
 # Only the FIRST letter is folded. A blanket .lower() reads "every friday",
@@ -888,18 +898,21 @@ INSTAGRAM — carousel caption (5 cards, hero first)
 
 {S['promise']}
 
-{S['name']} is a {'new ' if FIRST else ''}{RHYTHM} padel social{', and the first one is' if FIRST else ', and the next one is'} {f'{WHEN.lower()} — ' if URGENT else ''}{DATE_LONG}.
+{S['name']} is a {'new ' if FIRST else ''}{RHYTHM} padel social{', and the first one is' if FIRST else ', and the next one is'} {f'{WHEN.lower()} — ' if URGENT else ''}{DATE_LONG}, {START_12}.
 
-Every match is first to {F['target']} — straight rallies, no games, no sets. Win it and
-you climb a court. Lose and you drop one.
+AMERICANO STYLE — you come on your own, you get a different partner almost
+every round, and you score for yourself. Then one twist: the courts are a
+LADDER. Win your match and you move up a court. Lose it and you move down.
+
+Every match is first to {F['target']} — straight rallies, no games, no sets.
 
 Here is the bit worth reading twice: the {F['target']} decides the match and nothing else.
 What you bank is what the court pays — {F['win']['1']} for a win on Court 1, {F['win'][str(F['courts'])]} on Court {F['courts']}.
 So there is nothing to gain from camping at the bottom beating people you
 should beat.
 
-Up to {F['matches']} matches. A different partner almost every round. You do not need
-to bring anyone.
+Up to {F['matches']} matches in about {F['minutes']} minutes. Nothing to organise, nobody
+to find — turn up on your own and you are in.
 
 {S['entry']} {CUR} · up to {S['cap']} places
 Champion takes a {CHAMP_FULL}.{f' {"Strongest finisher" if FIRST else "Biggest climb above your own average"} plays {NEXT_ONE} free.' if SECOND else (" Last round counts double." if DBL else " Highest total at the end takes it.")}
