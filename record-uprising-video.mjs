@@ -19,22 +19,30 @@ const SP = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae3
 // actually licensed for it — a bed of ours underneath only gets in the way,
 // and nothing in this repo can supply real music.
 const SHORT = !!process.env.SHORT;
-const SRC = path.join(SP, SHORT ? 'uprising-short.html' : 'uprising.html');
-const FRAMES = path.join(SP, SHORT ? '_upsframes' : '_upframes');
-const SILENT = path.join(SP, 'video', SHORT ? 'uprising-tonight.mp4' : 'uprising-silent.mp4');
+// The 8-second hook is a third cut and rides the same silent path the
+// 15-second one does, for the reason written above it: a short is posted with
+// a track chosen in Instagram, and a bed of ours underneath only gets in the
+// way.
+const HOOK = !!process.env.HOOK;
+const BRIEF = SHORT || HOOK;
+const SRC = path.join(SP, HOOK ? 'uprising-hook.html' : SHORT ? 'uprising-short.html' : 'uprising.html');
+const FRAMES = path.join(SP, HOOK ? '_uphframes' : SHORT ? '_upsframes' : '_upframes');
+const SILENT = path.join(SP, 'video', HOOK ? 'uprising-hook.mp4' : SHORT ? 'uprising-tonight.mp4' : 'uprising-silent.mp4');
 const FINAL = path.join(SP, 'video', 'uprising-night.mp4');
-const WAV = SHORT ? '/nonexistent' : path.join(SP, 'video', 'uprising.wav');
+const WAV = BRIEF ? '/nonexistent' : path.join(SP, 'video', 'uprising.wav');
 const FFMPEG = '/usr/bin/ffmpeg';
 const FPS = 30, W = 1080, H = 1920;
 
-if (!fs.existsSync(SRC)) { console.error(`no page — run: ${SHORT ? 'SHORT=1 ' : ''}python3 build-uprising-video.py`); process.exit(1); }
+if (!fs.existsSync(SRC)) { console.error(`no page — run: ${HOOK ? 'HOOK=1 ' : SHORT ? 'SHORT=1 ' : ''}python3 build-uprising-video.py`); process.exit(1); }
 if (!fs.existsSync(FFMPEG)) { console.error('need the apt ffmpeg (H.264); the bundled one is VP8-only'); process.exit(1); }
 
 fs.rmSync(FRAMES, { recursive: true, force: true });
 fs.mkdirSync(FRAMES, { recursive: true });
 
 const browser = await chromium.launch({
-  executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+  // /opt/pw-browsers/chromium-1194 is gone; the symlink is what every other
+  // harness here uses, and PW_CHROMIUM overrides it.
+  executablePath: process.env.PW_CHROMIUM || '/opt/pw-browsers/chromium',
 });
 const pg = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
 const errs = [];
@@ -234,7 +242,7 @@ if (fs.existsSync(WAV)) {
     '-movflags', '+faststart', FINAL], { stdio: ['ignore', 'ignore', 'inherit'] });
   out = FINAL;
 } else {
-  if (!SHORT) console.log('  (no audio bed yet — run python3 build-uprising-audio.py, then re-run)');
+  if (!BRIEF) console.log('  (no audio bed yet — run python3 build-uprising-audio.py, then re-run)');
 }
 
 const mb = (fs.statSync(out).size / 1024 / 1024).toFixed(1);

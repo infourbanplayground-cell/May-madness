@@ -34,6 +34,7 @@ SP = "/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/
 VID = os.path.join(SP, "video")
 OUT = os.path.join(SP, "uprising.html")
 OUT_SHORT = os.path.join(SP, "uprising-short.html")
+OUT_HOOK = os.path.join(SP, "uprising-hook.html")
 
 W, H = 1080, 1920
 # UPRISING's own palette, not Blackout's. Volt against near-black, with the
@@ -65,6 +66,29 @@ SHORT = dict(
     hero=[9.42, 11.82],
 )
 
+# THE 8-SECOND HOOK. Three scenes: the name, the one idea, the ask. Asked for
+# by the owner, and the right length for a feed reel somebody is scrolling past
+# — the 15-second cut is already "a hook, not a rulebook" and this is the same
+# argument one step further. Everything that explains the night is in the
+# caption and behind the link.
+HOOK = dict(
+    order=[1, 2, 8],
+    scenes=[0.00, 2.80, 5.40],
+    dur=8.20,
+    beats=[0.14, 1.05, 2.82, 4.10, 5.42, 6.70],
+    hero=[5.42],
+)
+
+# ONE FORM OF THE CLOCK ACROSS EVERY ASSET. The film printed 17:30 while the
+# sign-up list and the Instagram caption printed 5:30 PM — the same time said
+# two ways, which is the class of drift this repo engineers against even when
+# neither version is wrong.
+def clock12(hhmm):
+    h, mi = (int(x) for x in hhmm.split(":"))
+    return f"{h % 12 or 12}:{mi:02d} {'AM' if h < 12 else 'PM'}" if mi \
+        else f"{h % 12 or 12} {'AM' if h < 12 else 'PM'}"
+
+
 DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
 MONS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
@@ -77,16 +101,15 @@ def b64(p):
 
 
 def inline_fonts():
-    css = open(os.path.join(VID, "fonts", "fonts.css")).read()
-    seen = {}
-
-    def sub(m):
-        n = m.group(1)
-        if n not in seen:
-            seen[n] = b64(os.path.join(VID, "fonts", n))
-        return "url(data:font/woff2;base64,%s) format('woff2')" % seen[n]
-
-    css = re.sub(r"url\(([0-9a-f]+\.woff2)\)\s*format\('woff2'\)", sub, css)
+    # FROM THE REPO, NOT A SCRATCHPAD. This read its bundle out of
+    # $SP/video/fonts, which is whatever the last session happened to leave
+    # behind — so the film could not be built in a fresh container at all, the
+    # same fault CLAUDE.md already records for the Vol.7 certificate builders.
+    # ops/font_bundle.py inlines brand/fonts as data URLs, which is the fix
+    # those were given.
+    sys.path.insert(0, os.path.join(HERE, "ops"))
+    from font_bundle import bundle
+    css = bundle()
     assert ".woff2)" not in css, "a font file was left as an external reference"
     return css
 
@@ -123,7 +146,8 @@ def main():
     urgent = when or f"{DAYS[DT.weekday()]} {DT.day} {MONS[DT.month - 1]}"
     datestamp = f"{DAYS[DT.weekday()][:3]} {DT.day} {MONS[DT.month - 1]}"
 
-    cut = SHORT if os.environ.get("SHORT") else FULL
+    cut = (HOOK if os.environ.get("HOOK")
+           else SHORT if os.environ.get("SHORT") else FULL)
     order, scenes = list(cut["order"]), list(cut["scenes"])
 
     # Scene 5 exists only when the night actually ends on a double round. With
@@ -169,9 +193,10 @@ def main():
         topwin=F["win"]["1"], botwin=F["win"][str(F["courts"])],
         entry=S["entry"], cur=S["currency"],
         prize=S["championPrize"], kind=S["championPrizeKind"].upper(),
-        start=S["start"], doors=S["doors"], host=S["host"].upper(),
+        start=clock12(S["start"]), doors=clock12(S["doors"]), host=S["host"].upper(),
     )
-    out = OUT_SHORT if os.environ.get("SHORT") else OUT
+    out = (OUT_HOOK if os.environ.get("HOOK")
+           else OUT_SHORT if os.environ.get("SHORT") else OUT)
     with open(out, "w") as f:
         f.write(html)
 
@@ -201,7 +226,7 @@ Win and you go up. Courts higher up are worth more.{dbl}
 {F['rounds']} rounds, {F['matches']:g} matches each, about {runtime.lower()}.
 
 Champion takes a *{S['championPrize']} {S['currency']} {S['championPrizeKind']}*.
-{S['entry']} {S['currency']} to play · doors {S['doors']} · first serve {S['start']}
+{S['entry']} {S['currency']} to play · doors {clock12(S["doors"])} · first serve {clock12(S["start"])}
 {S['host']}
 
 
@@ -216,7 +241,7 @@ a win is worth — {F['win']['1']} points on Court 1 against {F['win'][str(F['co
 {F['rounds']} rounds, {F['matches']:g} matches each, about {runtime.lower()}.
 
 Champion takes a {S['championPrize']} {S['currency']} {S['championPrizeKind']}.
-{S['entry']} {S['currency']} · {S['doors']} doors · {S['start']} first serve · {S['host']}
+{S['entry']} {S['currency']} · doors {clock12(S["doors"])} · {clock12(S["start"])} first serve · {S['host']}
 
 #urbanplayground #padel #muscat #oman #uprising
 """)
