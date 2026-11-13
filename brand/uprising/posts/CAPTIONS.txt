@@ -7,7 +7,7 @@ rather than editing this by hand.
 WHATSAPP 1 — the announcement (paste with post-1-hero.png)
 ====================================================================
 
-🏆 *UPRISING* — the padel night where you climb for your place. *Tomorrow, Friday 13 November.*
+🏆 *UPRISING* — the padel night where you climb for your place. *Tonight, Friday 13 November.*
 
 Come on your own. No partner needed. You will play with a different
 partner almost every round.
@@ -42,7 +42,7 @@ americano.urbanpadel.om
 WHATSAPP 2 — the short one (for busy groups, or a forward)
 ====================================================================
 
-🏆 *UPRISING* — tomorrow, Fri 13 Nov.
+🏆 *UPRISING* — tonight, Fri 13 Nov.
 
 4 courts, one ladder. Win and you climb a court, lose and you drop
 one. Up to 11 matches, a new partner almost every round, come on your
@@ -74,15 +74,19 @@ This is the ONE message that carries a clock time. The posters deliberately
 do not, because the start moves until the court is confirmed — so check
 `start` in uprising-social.json is still right before you send this.
 
-⏰ *UPRISING starts at 17:30 sharp.*
+⏰ *UPRISING starts at 5:30 PM sharp.*
 
-Round one is the *shuffle* — it sets the court everyone starts on.
+Round one is the *shuffle* — it sets the court everyone starts on, so
+nothing can be dealt until every court is full. One person late holds up
+all four courts, not just their own.
 
-Nobody can start it until all 16 of us are on court, so one person
-late holds up the whole room. And once it is running you cannot be slotted
-in — there is no late entry.
+And once it is running you *cannot be slotted in*. There is no late entry
+in this format — the ladder is already built.
 
-Be there by 17:15, racket in hand for 17:30. 🔺
+We finish about 7:30 PM. Every minute we start late is a minute that
+comes off the end.
+
+Be there by 5:15 PM, racket in hand for 5:30 PM. 🔺
 
 ====================================================================
 WHATSAPP 4 — the answer to "what even is it?"
@@ -107,7 +111,7 @@ INSTAGRAM — carousel caption (5 cards, hero first)
 
 Come alone. Leave with eleven.
 
-UPRISING is a weekly padel social, and the next one is tomorrow — Friday 13 November, 5:30 PM.
+UPRISING is a weekly padel social, and the next one is tonight — Friday 13 November, 5:30 PM.
 
 AMERICANO STYLE — you come on your own, you get a different partner almost
 every round, and you score for yourself. Then one twist: the courts are a

@@ -108,6 +108,13 @@ def _clock12(hhmm):
         else f"{h % 12 or 12} {'AM' if h < 12 else 'PM'}"
 
 START_12 = _clock12(S["start"])
+DOORS_12 = _clock12(S["doors"])
+# THE FINISH, derived from the engine's own pace rather than guessed: the
+# night's planned rounds at the night's target. "Finish on time" is half the
+# ask and the post could not answer it before.
+_h, _mi = (int(x) for x in S["start"].split(":"))
+_end = _h * 60 + _mi + int(round(F["minutes"]))
+FINISH_12 = _clock12(f"{(_end // 60) % 24:02d}:{_end % 60:02d}")
 CADENCE = S["cadenceLine"]                     # "Every Saturday"
 CADENCE_LOW = CADENCE[0].lower() + CADENCE[1:]  # "every Friday"
 # Only the FIRST letter is folded. A blanket .lower() reads "every friday",
@@ -865,15 +872,19 @@ This is the ONE message that carries a clock time. The posters deliberately
 do not, because the start moves until the court is confirmed — so check
 `start` in uprising-social.json is still right before you send this.
 
-⏰ *{S['name']} starts at {S['start']} sharp.*
+⏰ *{S['name']} starts at {START_12} sharp.*
 
-Round one is the *shuffle* — it sets the court everyone starts on.
+Round one is the *shuffle* — it sets the court everyone starts on, so
+nothing can be dealt until every court is full. One person late holds up
+all four courts, not just their own.
 
-Nobody can start it until all {S['cap']} of us are on court, so one person
-late holds up the whole room. And once it is running you cannot be slotted
-in — there is no late entry.
+And once it is running you *cannot be slotted in*. There is no late entry
+in this format — the ladder is already built.
 
-Be there by {S['doors']}, racket in hand for {S['start']}. 🔺
+We finish about {FINISH_12}. Every minute we start late is a minute that
+comes off the end.
+
+Be there by {DOORS_12}, racket in hand for {START_12}. 🔺
 
 {HR}
 WHATSAPP 4 — the answer to "what even is it?"
