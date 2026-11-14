@@ -96,8 +96,20 @@ for (const [w, h] of VPS) {
   const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
 
+  // A ROLE ALONE IS NOT ENOUGH ANY MORE, and that is the 17 Oct fix working:
+  // liveToken() clears the role unless a token with a future exp sits beside
+  // it, so the UI can never claim a permission the server will not honour.
+  // The token is `role.exp.sig` with exp in plain seconds and the app only
+  // reads the exp locally, so a stub is enough to SEE the scorer's screens.
+  // It is not enough to save anything, which is the point.
   if (ROLE === 'admin')
-    await pg.addInitScript(() => { try { localStorage.setItem('am-role', 'admin'); } catch {} });
+    await pg.addInitScript(() => {
+      try {
+        const exp = Math.floor(Date.now() / 1000) + 86400;
+        localStorage.setItem('am-token', `admin.${exp}.shots`);
+        localStorage.setItem('am-role', 'admin');
+      } catch {}
+    });
 
   await pg.goto(ORIGIN + '/', { waitUntil: 'load' });
   await pg.waitForSelector('nav.bottom', { timeout: 25000 }).catch(() => {});

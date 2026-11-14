@@ -354,7 +354,15 @@
     font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;font-weight:700;
     letter-spacing:.14em;width:62px;flex:0 0 auto;color:var(--muted);
   }
-  .rung .who{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* IT WRAPS, AND THAT IS ARITHMETIC RATHER THAN TASTE. Measured on the
+     13 Nov night at 360/375/390/430: the column has 226-296px and the four
+     names need 291-305 on three of the four rungs, so they were ellipsised on
+     the one strip a scorer reads to see who is on court. First names alone do
+     not close it either - "Zorro · Dareen · abdulrahman · Mohammed" wants
+     325px, worse than some of the full-name rows - so no column width and no
+     shorter form fits every rung. Two lines do. It costs about 15px a rung on
+     a board that is already 1,987px. */
+  .rung .who{flex:1;min-width:0;font-size:13px;white-space:normal;line-height:1.3;}
   .rung.top{border-color:var(--neon);background:rgba(var(--volt-rgb),.09);box-shadow:var(--glow);}
   .rung.top .cn{color:var(--volt);}
 
@@ -2549,9 +2557,14 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
   const pts = t.pointsPerMatch || 32;
   const scored = round.courts.filter(m => m.score1 != null).length;
   const sitOutNames = (round.sitOuts || []).map(id => (byId[id] && byId[id].name) || "?").join(", ");
-  const canFinish = canEdit
+  // EVERY MATCH IN AND EVERY ROUND BUILT — the night is over whether or not
+  // anybody has pressed Finish. Separated from canFinish, which also requires
+  // a signed-in scorer: the night being over is a fact about the night, and a
+  // visitor looking at it should not be told it is Live.
+  const nightOver = t.rounds.length > 0
     && t.rounds.every(r => r.courts.every(m => m.score1 != null && m.score2 != null))
     && (!isUp || t.rounds.length === upRoundsTotal(t));
+  const canFinish = canEdit && nightOver;
   const nameOf = id => (byId[id] && byId[id].name) || "?";
   // Whether the round ON SCREEN pays double, which is not the same question as
   // whether the night has a double final — scroll back to round 3 and the
@@ -2579,7 +2592,7 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
   return (
     <div className="screen">
       <div>
-        <Eyebrow>Live</Eyebrow>
+        <Eyebrow>{nightOver ? "Complete" : "Live"}</Eyebrow>
         <div className="display">
           {isShuffle ? <Fragment>The <em>Shuffle</em></Fragment>
                      : <Fragment>Round <em>{round.roundNum}</em></Fragment>}
@@ -2594,6 +2607,32 @@ function Board({ t, byId, canEdit, roundIdx, setRoundIdx, drafts, setDrafts, edi
           {isUp && upDoubleFinal(t) && round.roundNum === upRoundsTotal(t)
             && <b style={{ color: "var(--warn)" }}> · DOUBLE POINTS</b>}
         </div>
+
+        {/* THE NIGHT IS OVER AND NOBODY HAS SAID SO. Finish session has always
+            existed, at the FOOT of a board that runs to 1,987px, with nothing
+            at the top to say it is time to press it — so the 13 Nov night sat
+            at status "active" with all 48 matches in, the board opened on it
+            labelled Live showing round one, and it never reached History,
+            which lists only completed nights. The button was never the
+            problem; knowing the night had ended was.
+
+            It is shown to a scorer only. A visitor needs the eyebrow to stop
+            lying and nothing else — there is no action for them here. */}
+        {nightOver && canEdit && (
+          <div style={{ marginTop: 16, padding: "14px 16px", display: "flex",
+                        alignItems: "center", gap: 12, flexWrap: "wrap",
+                        border: "1px solid var(--neon)",
+                        background: "rgba(var(--volt-rgb),.09)",
+                        boxShadow: "var(--glow)" }}>
+            <div style={{ flex: "1 1 190px", minWidth: 0 }}>
+              <div className="label" style={{ color: "var(--volt)" }}>Every match is in</div>
+              <div className="note" style={{ marginTop: 4 }}>
+                Finish the session to lock the table and put this night in History.
+              </div>
+            </div>
+            <button className="btn" style={{ flex: "0 0 auto" }} onClick={onFinish}>Finish session 🏆</button>
+          </div>
+        )}
         {isUp && (
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
             <div className="label" style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
