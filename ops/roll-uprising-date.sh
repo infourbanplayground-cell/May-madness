@@ -45,21 +45,47 @@ if [ "$dow" = "$night_dow" ] && [ "$hour" -ge 14 ]; then
   exit 0
 fi
 
-before=$(md5sum americano-index.html landing/index.html 2>/dev/null | md5sum)
-
 python3 build-uprising-announce.py || { echo "!! announce build failed"; exit 1; }
 PW_CHROMIUM=/opt/pw-browsers/chromium node ops/render-uprising-announce.mjs >/dev/null \
   || { echo "!! card render failed"; exit 1; }
 # Pillow lives on python3.13 in this container, not the default python3.
 python3.13 ops/make-og-jpeg.py || { echo "!! og jpeg failed"; exit 1; }
 
-after=$(md5sum americano-index.html landing/index.html 2>/dev/null | md5sum)
-if [ "$before" = "$after" ]; then
-  echo "nothing changed — the stored date is still the next night. Not deploying."
+# COMPARE AGAINST WHAT IS SERVED, NOT AGAINST THE WORKING TREE.
+#
+# This used to md5 americano-index.html and landing/index.html before and
+# after the build and skip the deploy when they matched. That asks "did the
+# build change the files on disk", which is a different question from "is the
+# live site stale" — and the two come apart the moment a deploy fails. Once
+# the rolled pages are sitting on disk undeployed, every later run rebuilds
+# the same bytes, sees no change and announces "nothing changed", so THE
+# SCRIPT CAN NEVER RECOVER FROM A FAILED PUBLISH. It just keeps saying it is
+# fine.
+#
+# That is exactly how 14 Nov 2026 went: the Saturday routine fired, reported
+# SUCCEEDED, and left the link preview advertising the night that had already
+# been played. The same mistake is already on the record for the Vol.9 watch
+# script, which compared the live page against a local working copy.
+#
+# The honest comparison is the deployed page against the built one. The
+# og:image tag carries the image's own content hash and the description
+# carries the date, so those two lines change whenever anything worth
+# deploying has changed.
+live_tags=$(curl -s -A "WhatsApp/2.23" https://americano.urbanpadel.om/ 2>/dev/null)
+live_sig=$(printf '%s' "$live_tags" | grep -o 'og:\(image\|description\)" content="[^"]*' | md5sum)
+want_sig=$(grep -o 'og:\(image\|description\)" content="[^"]*' americano-index.html | md5sum)
+live_when=$(curl -s https://urbanpadel.om/ 2>/dev/null | grep -o '<!--UP:WHEN-->[^<]*')
+want_when=$(grep -o '<!--UP:WHEN-->[^<]*' landing/index.html)
+
+if [ -n "$live_tags" ] && [ "$live_sig" = "$want_sig" ] && [ "$live_when" = "$want_when" ]; then
+  echo "the live pages already say what this build says. Not deploying."
   exit 0
 fi
+if [ -z "$live_tags" ]; then
+  echo "!! could not read the live page to compare — publishing anyway"
+fi
 
-echo "the pages changed; publishing"
+echo "the live pages differ from this build; publishing"
 [ -n "$DRY" ] && { echo "DRY=1 — stopping before the deploy"; exit 0; }
 
 # The tunnel dies on its own; bring it back rather than assuming it.
