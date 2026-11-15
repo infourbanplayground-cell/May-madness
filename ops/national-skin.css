@@ -1600,3 +1600,21 @@ body .na-seedpanel [class*="text-stone-"][class*="text-stone-"][class*="text-sto
 .na-ko > .na-kochamp { order: 30; }
 .na-ko .na-kochamp2 { display: none !important; }
 body .na-ko .na-bkscroll.na-bkscroll.na-bkscroll.na-bkscroll { border-radius: 0 !important; }
+/* The bracket is the stack on a phone and the tree from 640px up. */
+.na-bkwide { display: none; }
+@media (min-width: 640px) { .na-bkphone { display: none; } .na-bkwide { display: block; } }
+body .na-ko .na-bktie.na-bktie.na-bktie { border-radius: 20px !important; }
+
+/* ── 22 · THE GROUP TABLE, ON THE PLATE ─────────────────────────────────
+   Same rule as every other table in a night: ivory is the plate you read,
+   green is who is through — a bar down the row and the points in green,
+   which is legible as type here (4.83:1) where it never is on red. */
+body .na-gtable.na-gtable.na-gtable {
+  background: var(--ivory) !important; background-image: none !important;
+}
+body .na-gtable [style*="border-top"] { border-top-color: rgba(26,10,12,.12) !important; }
+body .na-gtable .na-gghost.na-gghost.na-gghost.na-gghost { color: rgba(26,10,12,.05) !important; }
+body .na-gtable .na-gq.na-gq.na-gq[data-q="1"] { box-shadow: inset 4px 0 0 var(--green) !important; }
+body .na-gtable .na-gq.na-gq.na-gq[data-q="0"] { box-shadow: none !important; }
+body .na-gtable .na-gpts.na-gpts.na-gpts.na-gpts[data-q="1"] { color: var(--green) !important; }
+body .na-gtable .na-gqline.na-gqline { background: linear-gradient(90deg, var(--green), transparent) !important; }

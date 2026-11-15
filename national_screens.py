@@ -357,6 +357,86 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
     </div>
   );
 }}
+
+// ── THE BRACKET, ON A PHONE ──────────────────────────────────────────────────
+// The tree is 592px wide: three columns of ~170px and the connectors between
+// them. On a 390px phone that is one and a half screens SIDEWAYS, and the
+// column that is off the glass is the final — the only match on the screen
+// everybody came to read. Shrinking it to fit leaves ~110px a name, which is
+// "Muntaser & M...", and the share card records the same arithmetic.
+//
+// So on a phone the rounds stack and read DOWN: quarter-finals, semi-finals,
+// final, each a little narrower than the one before so the page visibly
+// funnels, and the champions plate lands where a bracket ends. It reads the
+// same bracket object the tree does and re-derives nothing.
+function NaBracketStack({{ b, lbl, canScore, setEdit }}) {{
+  const qf = b.qf || [];
+  const sfCount = Math.max(1, Math.ceil(Math.max(1, qf.length) / 2));
+  const sf = b.sf && b.sf.length ? b.sf
+    : Array.from({{ length: sfCount }}, (_, i) => ({{ id: "sfp" + i, team1Id: null, team2Id: null, winner: null }}));
+  const fin = b.final || {{ id: "fp", team1Id: null, team2Id: null, winner: null }};
+  const nameOf = (id) => id && !String(id).includes("TBD") ? lbl(id) : "—";
+
+  const Tie = ({{ m, round, label, big }}) => {{
+    const real = !!(m && (m.team1Id || m.team2Id));
+    return (
+      <div className="na-bktie" data-final={{big ? "1" : "0"}}
+        onClick={{() => real && canScore && setEdit({{ ...m, round }})}}
+        style={{{{ padding: big ? "14px 16px 15px" : "10px 14px 11px",
+          background: "rgba(26,10,12,.22)", cursor: real && canScore ? "pointer" : "default",
+          border: big ? "2px solid {ivory}" : "1px solid rgba(247,241,230,.22)" }}}}>
+        <div style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".22em", color: "{rose_txt}" }}}}>{{label}}</div>
+        {{["team1", "team2"].map((k, ki) => {{
+          const w = !!(m && m.winner === k);
+          const state = w ? "1" : (m && m.winner ? "0" : "");
+          return (
+            <div key={{k}} style={{{{ display: "flex", alignItems: "center", gap: 10,
+              marginTop: ki ? 6 : 7, paddingTop: ki ? 6 : 0,
+              borderTop: ki ? "1px solid rgba(247,241,230,.14)" : "none" }}}}>
+              {{/* green is the winner's edge here as everywhere else */}}
+              <span aria-hidden="true" style={{{{ flex: "0 0 4px", alignSelf: "stretch", minHeight: 18,
+                borderRadius: 2, background: w ? "{green}" : "transparent" }}}} />
+              <div className="na-bkname" data-won={{state}} style={{{{ flex: "1 1 auto", minWidth: 0,
+                fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: big ? 17 : 14.5,
+                lineHeight: 1.25, color: "{ivory}" }}}}>{{nameOf(m && m[k + "Id"])}}</div>
+              <div className="na-bkname" data-won={{state}} style={{{{ flex: "0 0 auto",
+                fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: big ? 17 : 14.5,
+                color: "{ivory}" }}}}>{{m && m.score ? m.score[k === "team1" ? "t1" : "t2"] : "–"}}</div>
+            </div>
+          );
+        }})}}
+      </div>
+    );
+  }};
+  const Round = ({{ title, worth, inset, children }}) => (
+    <div style={{{{ margin: "0 " + inset + "px", marginTop: inset ? 18 : 0 }}}}>
+      <div style={{{{ display: "flex", alignItems: "baseline", justifyContent: "space-between",
+        gap: 10, padding: "0 4px 8px" }}}}>
+        <span style={{{{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 11,
+          letterSpacing: ".26em", color: "{ivory}" }}}}>{{title}}</span>
+        <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".12em", color: "{rose_txt}" }}}}>{{worth}}</span>
+      </div>
+      <div style={{{{ display: "grid", gap: 8 }}}}>{{children}}</div>
+    </div>
+  );
+  return (
+    <div>
+      <Round title="QUARTER-FINALS" worth="+1 TO REACH" inset={{0}}>
+        {{qf.map((m, i) => <Tie key={{m.id}} m={{m}} round="qf" label={{"QF" + (i + 1)}} />)}}
+      </Round>
+      <Round title="SEMI-FINALS" worth="+2 TO REACH" inset={{12}}>
+        {{sf.map((m, i) => <Tie key={{m.id}} m={{m}} round="sf" label={{"SF" + (i + 1)}} />)}}
+      </Round>
+      <Round title="FINAL" worth="+3 TO REACH · +5 TO WIN" inset={{24}}>
+        <Tie m={{fin}} round="final" label="FINAL" big />
+      </Round>
+      {{canScore && <div style={{{{ marginTop: 12, fontSize: 12, color: "{rose_txt}", textAlign: "center" }}}}>
+        Tap a match to score it.</div>}}
+    </div>
+  );
+}}
 """
 
 

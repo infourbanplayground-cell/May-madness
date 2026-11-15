@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "0f2db9298114";
+  var V = "37190f9562fb";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -9199,6 +9199,86 @@ function NaNightPoints({ session, state, sessions, onPick }) {
   );
 }
 
+// ── THE BRACKET, ON A PHONE ──────────────────────────────────────────────────
+// The tree is 592px wide: three columns of ~170px and the connectors between
+// them. On a 390px phone that is one and a half screens SIDEWAYS, and the
+// column that is off the glass is the final — the only match on the screen
+// everybody came to read. Shrinking it to fit leaves ~110px a name, which is
+// "Muntaser & M...", and the share card records the same arithmetic.
+//
+// So on a phone the rounds stack and read DOWN: quarter-finals, semi-finals,
+// final, each a little narrower than the one before so the page visibly
+// funnels, and the champions plate lands where a bracket ends. It reads the
+// same bracket object the tree does and re-derives nothing.
+function NaBracketStack({ b, lbl, canScore, setEdit }) {
+  const qf = b.qf || [];
+  const sfCount = Math.max(1, Math.ceil(Math.max(1, qf.length) / 2));
+  const sf = b.sf && b.sf.length ? b.sf
+    : Array.from({ length: sfCount }, (_, i) => ({ id: "sfp" + i, team1Id: null, team2Id: null, winner: null }));
+  const fin = b.final || { id: "fp", team1Id: null, team2Id: null, winner: null };
+  const nameOf = (id) => id && !String(id).includes("TBD") ? lbl(id) : "—";
+
+  const Tie = ({ m, round, label, big }) => {
+    const real = !!(m && (m.team1Id || m.team2Id));
+    return (
+      <div className="na-bktie" data-final={big ? "1" : "0"}
+        onClick={() => real && canScore && setEdit({ ...m, round })}
+        style={{ padding: big ? "14px 16px 15px" : "10px 14px 11px",
+          background: "rgba(26,10,12,.22)", cursor: real && canScore ? "pointer" : "default",
+          border: big ? "2px solid #F7F1E6" : "1px solid rgba(247,241,230,.22)" }}>
+        <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
+          letterSpacing: ".22em", color: "#F2D0D3" }}>{label}</div>
+        {["team1", "team2"].map((k, ki) => {
+          const w = !!(m && m.winner === k);
+          const state = w ? "1" : (m && m.winner ? "0" : "");
+          return (
+            <div key={k} style={{ display: "flex", alignItems: "center", gap: 10,
+              marginTop: ki ? 6 : 7, paddingTop: ki ? 6 : 0,
+              borderTop: ki ? "1px solid rgba(247,241,230,.14)" : "none" }}>
+              {/* green is the winner's edge here as everywhere else */}
+              <span aria-hidden="true" style={{ flex: "0 0 4px", alignSelf: "stretch", minHeight: 18,
+                borderRadius: 28, background: w ? "#087A3F" : "transparent" }} />
+              <div className="na-bkname" data-won={state} style={{ flex: "1 1 auto", minWidth: 0,
+                fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: big ? 17 : 14.5,
+                lineHeight: 1.25, color: "#F7F1E6" }}>{nameOf(m && m[k + "Id"])}</div>
+              <div className="na-bkname" data-won={state} style={{ flex: "0 0 auto",
+                fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: big ? 17 : 14.5,
+                color: "#F7F1E6" }}>{m && m.score ? m.score[k === "team1" ? "t1" : "t2"] : "–"}</div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  const Round = ({ title, worth, inset, children }) => (
+    <div style={{ margin: "0 " + inset + "px", marginTop: inset ? 18 : 0 }}>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between",
+        gap: 10, padding: "0 4px 8px" }}>
+        <span style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 11,
+          letterSpacing: ".26em", color: "#F7F1E6" }}>{title}</span>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".12em", color: "#F2D0D3" }}>{worth}</span>
+      </div>
+      <div style={{ display: "grid", gap: 8 }}>{children}</div>
+    </div>
+  );
+  return (
+    <div>
+      <Round title="QUARTER-FINALS" worth="+1 TO REACH" inset={0}>
+        {qf.map((m, i) => <Tie key={m.id} m={m} round="qf" label={"QF" + (i + 1)} />)}
+      </Round>
+      <Round title="SEMI-FINALS" worth="+2 TO REACH" inset={12}>
+        {sf.map((m, i) => <Tie key={m.id} m={m} round="sf" label={"SF" + (i + 1)} />)}
+      </Round>
+      <Round title="FINAL" worth="+3 TO REACH · +5 TO WIN" inset={24}>
+        <Tie m={fin} round="final" label="FINAL" big />
+      </Round>
+      {canScore && <div style={{ marginTop: 12, fontSize: 12, color: "#F2D0D3", textAlign: "center" }}>
+        Tap a match to score it.</div>}
+    </div>
+  );
+}
+
 function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab, meId }) {
   // A finished night's row used to open the live session screen, which is the
   // scorer's view of a night nobody is scoring any more. It opens the recap
@@ -10501,10 +10581,10 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
       </div>
 
       {/* ── STANDINGS ── */}
-      <div style={{marginTop:14,padding:16,background:"rgba(158,21,32,.94)",
+      <div className="na-plate na-gtable" style={{marginTop:14,padding:16,background:"rgba(158,21,32,.94)",
            backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
            backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",position:"relative",overflow:"hidden"}}>
-        <div style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+        <div className="na-gghost" aria-hidden="true" style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:96,lineHeight:1,
              color:"rgba(255,255,255,.035)",pointerEvents:"none"}}>{g}</div>
         <div style={{position:"relative",display:"flex",alignItems:"center",gap:10}}>
@@ -10532,7 +10612,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
                 const [i1, i2] = inits(r.team);
                 const cell = { borderTop:"1px solid rgba(242,208,211,.16)", padding:"10px 0" };
                 return <React.Fragment key={r.team.id}>
-                  <div style={{...cell, display:"flex",alignItems:"center",gap:8,paddingLeft:10,
+                  <div className="na-gq" data-q={q ? "1" : "0"} style={{...cell, display:"flex",alignItems:"center",gap:8,paddingLeft:10,
                        boxShadow:q ? "inset 3px 0 0 var(--surge-cyan)" : "none"}}>
                     <div style={{display:"flex",flex:"0 0 auto",gap:2}}>
                       {[i1, i2].map((c, n2) => <div key={n2} style={{width:23,height:23,display:"grid",placeItems:"center",
@@ -10555,7 +10635,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
                   <div style={{...cell, display:"grid",placeItems:"center",fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:"#F7F1E6"}}>{r.gd > 0 ? "+" : ""}{r.gd}</div>
                   <div style={{...cell, display:"flex",alignItems:"center",justifyContent:"flex-end",
                        fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 112,'wght' 900",
-                       fontSize:20,color:q ? "#F7F1E6" : "#FFFFFF"}}>{r.pts}</div>
+                       fontSize:20,color:q ? "#F7F1E6" : "#FFFFFF"}} className="na-gpts" data-q={q ? "1" : "0"}>{r.pts}</div>
                 </React.Fragment>;
               })}
             </div>}
@@ -10563,7 +10643,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
         <div style={{position:"relative",display:"flex",alignItems:"center",gap:8,marginTop:12,paddingTop:12,
              borderTop:"1px solid rgba(242,208,211,.16)"}}>
           <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:"#F7F1E6"}}>{qLabel} &#9654;</div>
-          <div style={{flex:1,height:2,background:"linear-gradient(90deg,rgba(247,241,230,.5),transparent)"}} />
+          <div className="na-gqline" style={{flex:1,height:2,background:"linear-gradient(90deg,rgba(247,241,230,.5),transparent)"}} />
         </div>
       </div>
 
@@ -11296,7 +11376,8 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
             </div>
       )}
       {b.qf.length === 4
-        ? <BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} />
+        ? <><div className="na-bkphone"><NaBracketStack b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} /></div>
+            <div className="na-bkwide"><BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} /></div></>
         : <>
             {b.qf?.length > 0 && <Card className="p-3">
               <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title">QUARTERFINALS</h3><Pill color="orange">+1 · W+3 TB+2 L+1</Pill></div>
@@ -11434,8 +11515,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
 
       <div style={{marginTop:12,padding:"13px 14px",background:"rgba(247,241,230,.06)",borderLeft:"3px solid #F7F1E6",
            fontSize:12.5,lineHeight:1.5,color:"#F7F1E6"}}>
-        Group winners cross over against runners-up from another group, so a group-stage rematch is avoided
-        wherever the seeding allows. Swipe sideways to follow it through{canScore ? "; tap a match to score it" : ""}.
+        Swipe sideways to follow it through{canScore ? "; tap a match to score it" : ""}.
         Reaching the quarter-final is worth +1, the semi +2, the final +3, and winning it +5 more.
       </div>
     </div>
@@ -15832,6 +15912,24 @@ body .na-seedpanel [class*="text-stone-"][class*="text-stone-"][class*="text-sto
 .na-ko > .na-kochamp { order: 30; }
 .na-ko .na-kochamp2 { display: none !important; }
 body .na-ko .na-bkscroll.na-bkscroll.na-bkscroll.na-bkscroll { border-radius: 0 !important; }
+/* The bracket is the stack on a phone and the tree from 640px up. */
+.na-bkwide { display: none; }
+@media (min-width: 640px) { .na-bkphone { display: none; } .na-bkwide { display: block; } }
+body .na-ko .na-bktie.na-bktie.na-bktie { border-radius: 20px !important; }
+
+/* ── 22 · THE GROUP TABLE, ON THE PLATE ─────────────────────────────────
+   Same rule as every other table in a night: ivory is the plate you read,
+   green is who is through — a bar down the row and the points in green,
+   which is legible as type here (4.83:1) where it never is on red. */
+body .na-gtable.na-gtable.na-gtable {
+  background: var(--ivory) !important; background-image: none !important;
+}
+body .na-gtable [style*="border-top"] { border-top-color: rgba(26,10,12,.12) !important; }
+body .na-gtable .na-gghost.na-gghost.na-gghost.na-gghost { color: rgba(26,10,12,.05) !important; }
+body .na-gtable .na-gq.na-gq.na-gq[data-q="1"] { box-shadow: inset 4px 0 0 var(--green) !important; }
+body .na-gtable .na-gq.na-gq.na-gq[data-q="0"] { box-shadow: none !important; }
+body .na-gtable .na-gpts.na-gpts.na-gpts.na-gpts[data-q="1"] { color: var(--green) !important; }
+body .na-gtable .na-gqline.na-gqline { background: linear-gradient(90deg, var(--green), transparent) !important; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

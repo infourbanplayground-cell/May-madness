@@ -608,6 +608,50 @@ MOTIFS = [
                          fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",''',
      '''                         padding:"8px 9px", cursor:"pointer", whiteSpace:"nowrap",
                          fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".08em",'''),
+    # 8 · ON A PHONE THE BRACKET STACKS (national_screens.NaBracketStack).
+    # Both are rendered and the skin shows one: the tree from 640px up.
+    ('''        ? <BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} />''',
+     '''        ? <><div className="na-bkphone"><NaBracketStack b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} /></div>
+            <div className="na-bkwide"><BracketTreeView b={b} lbl={lbl} canScore={canScore} setEdit={setEdit} /></div></>'''),
+    # ...and the tree's own note promised a rematch "is avoided wherever the
+    # seeding allows", which is the merit draw's caveat. By letter it cannot
+    # happen and on three groups it is the swap's business; the note keeps
+    # the half that is always true.
+    ('''        Group winners cross over against runners-up from another group, so a group-stage rematch is avoided
+        wherever the seeding allows. Swipe sideways''',
+     '''        Swipe sideways'''),
+    # 9 · THE GROUP TABLE WAS THE LAST RED-ON-RED TABLE IN A NIGHT. Teams,
+    # Points and the qualifier list all read from ivory; this one was deep
+    # red on red with the qualifying mark an ivory hairline. Marked here,
+    # inked in the skin (section 22).
+    ('''      <div style={{marginTop:14,padding:16,background:"rgba(10,10,10,.94)",
+           backgroundImage:"linear-gradient(180deg,#C6FF00,rgba(198,255,0,.06))",''',
+     '''      <div className="na-plate na-gtable" style={{marginTop:14,padding:16,background:"rgba(10,10,10,.94)",
+           backgroundImage:"linear-gradient(180deg,#C6FF00,rgba(198,255,0,.06))",'''),
+    ('''        <div style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:96,lineHeight:1,
+             color:"rgba(242,242,242,.035)",pointerEvents:"none"}}>{g}</div>''',
+     '''        <div className="na-gghost" aria-hidden="true" style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
+             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:96,lineHeight:1,
+             color:"rgba(242,242,242,.035)",pointerEvents:"none"}}>{g}</div>'''),
+    ('''                  <div style={{...cell, display:"flex",alignItems:"center",gap:8,paddingLeft:10,
+                       boxShadow:q ? "inset 3px 0 0 var(--surge-cyan)" : "none"}}>''',
+     '''                  <div className="na-gq" data-q={q ? "1" : "0"} style={{...cell, display:"flex",alignItems:"center",gap:8,paddingLeft:10,
+                       boxShadow:q ? "inset 3px 0 0 var(--surge-cyan)" : "none"}}>'''),
+    ('''                       fontSize:20,color:q ? "#C6FF00" : "#F2F2F2"}}>{r.pts}</div>
+                </React.Fragment>;''',
+     '''                       fontSize:20,color:q ? "#C6FF00" : "#F2F2F2"}} className="na-gpts" data-q={q ? "1" : "0"}>{r.pts}</div>
+                </React.Fragment>;'''),
+    ('''          <div style={{flex:1,height:2,background:"linear-gradient(90deg,rgba(198,255,0,.5),transparent)"}} />
+        </div>
+      </div>
+
+      {/* ── MATCHES ── */}''',
+     '''          <div className="na-gqline" style={{flex:1,height:2,background:"linear-gradient(90deg,rgba(198,255,0,.5),transparent)"}} />
+        </div>
+      </div>
+
+      {/* ── MATCHES ── */}'''),
     # 4 · THE BRACKET COMES FIRST. The screen is called KO and opened on a
     # paragraph about seeding, with the bracket a screen and a half down. The
     # panel is an explanation of the bracket, so it goes under it — by
