@@ -520,14 +520,109 @@ MOTIFS = [
     # (7–8)", which is best2. On a playoff night seed 7 is the best third and
     # seed 8 is whoever wins the qualifier between the other two.
     ('''            Seeded by group finish — winners (1–3), runners-up (4–6), then the 2 best thirds (7–8); ranked by wins, then game difference.''',
-     '''            Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
+     '''            {byLetter
+              ? "Top two of each group go through. The draw crosses by letter — A1 v D2, B1 v C2, C1 v B2, D1 v A2 — so no quarter-final repeats a group match."
+              : <>Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
               ? "then the best third (7) and the winner of the thirds qualifier (8)"
-              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.'''),
+              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.</>}'''),
+    # (5m) and "top seed plays the lowest (1 v 8)" is not true by letter.
+    ('''            {top && <> Top seed plays the lowest (1 v 8). <span className="text-cyan-300 font-bold">#1 seed: {lbl(top.id)}.</span></>}''',
+     '''            {top && !byLetter && <> Top seed plays the lowest (1 v 8). <b>#1 seed: {lbl(top.id)}.</b></>}'''),
 
     # 3 · and it labelled EVERY third-placed team "Best 3rd" — three best
     # thirds in one list. The two with no seed are the ones in the qualifier.
     ('''                {r.pending ? "To be played" : why(r.rank)}</span>''',
      '''                {r.pending ? "To be played" : (r.rank === 3 && !r.seed ? "3rd · in the qualifier" : why(r.rank))}</span>'''),
+
+    # ── 5m · THE KNOCKOUT SCREEN ──────────────────────────────────────────
+    # 1 · ON A FOUR-GROUP NIGHT THE PANEL DESCRIBED A DRAW NOBODY PLAYS.
+    # It numbered the eight 1..8 off the quarter-final slots and explained
+    # "winners (1-3), runners-up (4-6), then the 2 best thirds (7-8)... top
+    # seed plays the lowest (1 v 8)". That is the three-group rule. Four
+    # groups cross BY LETTER (A1 v D2, B1 v C2, C1 v B2, D1 v A2) since
+    # 26 Oct, there are no thirds in it at all, and the "seed" a slot number
+    # implies is not a ranking of anything: Session 1's list read 1 A1,
+    # 2 D1, 3 C1, 4 B1. So on four groups it carries no merit numbers and
+    # says what the draw actually is.
+    ('''        if (std8) (b.qf || []).forEach((m, idx) => {''',
+     '''        const byLetter = std8 && getSessionGroups(session).length === 4;
+        if (std8 && !byLetter) (b.qf || []).forEach((m, idx) => {'''),
+    # by letter the list reads down the groups: A1 A2 B1 B2 ...
+    ('''        rows.sort((a, c) => (a.seed || 99) - (c.seed || 99) || a.rank - c.rank || a.g.localeCompare(c.g));''',
+     '''        if (byLetter) rows.sort((a, c) => String(a.g).localeCompare(String(c.g)) || a.rank - c.rank);
+        else rows.sort((a, c) => (a.seed || 99) - (c.seed || 99) || a.rank - c.rank || String(a.g).localeCompare(String(c.g)));'''),
+    # 2 · THE #1 SEED'S NUMBER WAS IVORY ON IVORY. Vol.8 drew the badge
+    # `background: lime, color: #F2F2F2` for seed 1 — near-white on lime, a
+    # Vol.8 fault — and the sweep made it ivory on ivory: a blank disc at the
+    # head of the list. The badge is a class now and the skin owns both inks.
+    ('''                ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#C6FF00" : "#0A0A0A",''',
+     '''                ? <span className="na-seedno font-mono text-xs font-bold flex items-center justify-center shrink-0" data-top={r.seed === 1 ? "1" : "0"} style={{ width: 22, height: 22, background: r.seed === 1 ? "#C6FF00" : "#0A0A0A",'''),
+    ('''                : <span style={{ width: 22 }} className="shrink-0" />}
+              {r.pending''',
+     '''                : (byLetter ? null : <span style={{ width: 22 }} className="shrink-0" />)}
+              {r.pending'''),
+    # 3 · THE NAMES WERE CUT TO MAKE ROOM FOR THE LABEL. "GROUP WINNER" in
+    # tracked mono caps took 110px of a 310px row, so "amjad & Wathab" came
+    # out as "amjad & Wat...". The label is the less important half: the A1
+    # badge beside the name already says group and place.
+    ('''        const why = (rk) => rk === 1 ? "Group winner" : rk === 2 ? "Runner-up" : rk === 3 ? "Best 3rd" : `${ord(rk)} place`;''',
+     '''        const why = (rk) => rk === 1 ? "Won group" : rk === 2 ? "2nd" : rk === 3 ? "Best 3rd" : `${ord(rk)}`;'''),
+    ('''              <span className="flex-1 text-xs truncate font-semibold" style={{ color: r.pending ? "#CFCFCF" : "#F2F2F2" }}>''',
+     '''              <span className="flex-1 text-xs font-semibold" style={{ minWidth: 0, lineHeight: 1.25, color: r.pending ? "#CFCFCF" : "#F2F2F2" }}>'''),
+    # 5 · THE BRACKET DID NOT SAY WHO WON. Vol.8 lit the winner lime and
+    # left the loser white; the sweep sent both to ivory, so every tie was
+    # two identical names and the only way to read a result was to compare
+    # the two digits. Marked at source, inked in the skin.
+    ('''          <div style={{flex:"1 1 auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,
+               fontSize:big ? 14 : 13,color:won(m, k) ? live : "#F2F2F2",''',
+     '''          <div className="na-bkname" data-won={won(m, k) ? "1" : (m && m.winner ? "0" : "")} style={{flex:"1 1 auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,
+               fontSize:big ? 14 : 13,color:won(m, k) ? live : "#F2F2F2",'''),
+    ('''          <div style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
+               color:won(m, k) ? live : "#CFCFCF"}}>''',
+     '''          <div className="na-bkname" data-won={won(m, k) ? "1" : (m && m.winner ? "0" : "")} style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
+               color:won(m, k) ? live : "#CFCFCF"}}>'''),
+    # ...and its first heading lost its Q: an italic cap at left:0 of a
+    # scroll container is clipped by it.
+    # (the clip is the 28px sheet radius landing on the tree's scroll
+    # container — a box with no surface, whose corner then eats the Q)
+    ('''      <div style={{overflowX:"auto",overscrollBehaviorX:"contain",paddingBottom:4}}>
+        <div style={{position:"relative",width:W,height:H}}>''',
+     '''      <div className="na-bkscroll" style={{overflowX:"auto",overscrollBehaviorX:"contain",paddingBottom:4}}>
+        <div style={{position:"relative",width:W,height:H}}>'''),
+    ('''  const label = (txt, l, colour) => <div style={{position:"absolute",left:l,top:0,''',
+     '''  const label = (txt, l, colour) => <div className="na-bklabel" style={{position:"absolute",left:l,top:0,'''),
+    # 6 · THE CHAMPION BLOCK WAS FLAG RED ON BASE RED — the night's result,
+    # on the least visible surface in the app. It is the ivory result plate
+    # the night's first screen uses.
+    ('''      {champId && <div style={{ background:"var(--blue)", border:"1px solid rgba(242,242,242,.10)", boxShadow:"none", padding:"20px", textAlign:"center", marginBottom:16 }}>''',
+     '''      {champId && <div className="na-ivory na-kochamp" style={{ padding:"20px", textAlign:"center" }}>'''),
+    # ...and it was said TWICE: this block above the bracket and a one-line
+    # row under it. One, where a bracket ends — after the final.
+    ('''      {champId && <div style={{marginTop:12,display:"flex",alignItems:"center",gap:8,padding:"11px 13px",''',
+     '''      {champId && <div className="na-kochamp2" style={{marginTop:12,display:"flex",alignItems:"center",gap:8,padding:"11px 13px",'''),
+    # 7 · THE NIGHT'S ACTION ROW RAN OFF THE EDGE. Four chips need 398px
+    # at 12px of side padding and .14em tracking, and a 390px phone has 358
+    # — so SHARE, the one a player came for after a night, was cut in half
+    # with nothing to say the row scrolls. Tighter chips: four fit at 360.
+    ('''                         padding:"8px 12px", cursor:"pointer", whiteSpace:"nowrap",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",''',
+     '''                         padding:"8px 9px", cursor:"pointer", whiteSpace:"nowrap",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".08em",'''),
+    # 4 · THE BRACKET COMES FIRST. The screen is called KO and opened on a
+    # paragraph about seeding, with the bracket a screen and a half down. The
+    # panel is an explanation of the bracket, so it goes under it — by
+    # `order`, the way the home screen was turned from poster to dashboard —
+    # and it sits on the ivory plate every other table here reads from.
+    ('''    <div className="space-y-4">
+      <QualifyControl />''',
+     '''    <div className="space-y-4 na-ko">
+      <QualifyControl />'''),
+    ('''        return <Card className="p-3">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="jh-round-title" style={{ fontSize: 18 }}>SEEDING · WHO QUALIFIED</h3>''',
+     '''        return <Card className="p-3 na-plate na-seedpanel">
+          <div className="flex items-center justify-between mb-1">
+            <h3 className="jh-round-title" style={{ fontSize: 18 }}>{byLetter ? "WHO QUALIFIED" : "SEEDING · WHO QUALIFIED"}</h3>'''),
 
     # THE RANK TAB HAS ITS OWN `.sg-top` — the leader card at the head of the
     # table — with the rank disc one level deeper than the home podium's. The
@@ -888,7 +983,7 @@ MOTIFS = [
     ('<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
      '        {tab === "teams" && <TeamsTab',
      '<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
-     '        <NaNightPulse session={session} state={state} />\n'
+     '        <NaNightPulse session={session} state={state} brief={tab !== "teams"} />\n'
      '        {tab === "points" && <NaNightPoints session={session} state={state}\n'
      '          sessions={state.sessions || []} onPick={null} />}\n'
      '        {tab === "teams" && <TeamsTab'),

@@ -8,6 +8,7 @@
 //   node ops/shots-session.mjs
 //   APP=<file>   which build       ROLE=admin   the organiser's view
 //   VP=390x844   one viewport      FULL=1       whole-page shots
+//   SCROLL=600   shoot that far down the pane
 //
 // It writes a contact sheet beside the shots, for the same reason the other
 // one does: a screen is judged against its siblings.
@@ -112,10 +113,13 @@ for (const [w, h] of VPS) {
   await pg.waitForTimeout(700);
 
   const shoot = async (label) => {
-    await pg.evaluate(() => {
+    await pg.evaluate((SCROLL) => {
       const p = document.querySelector('.fixed.inset-0');
-      if (p) p.scrollTop = 0; else window.scrollTo(0, 0);
-    });
+      // SCROLL=<px> looks further down a pane: fullPage cannot, because the
+      // night is a fixed pane and a full-page shot is the page BEHIND it.
+      const y = +SCROLL || 0;
+      if (p) p.scrollTop = y; else window.scrollTo(0, y);
+    }, process.env.SCROLL || 0);
     await pg.waitForTimeout(250);
     const name = `${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${w}x${h}${ROLE ? '-' + ROLE : ''}.png`;
     const file = path.join(OUT, name);

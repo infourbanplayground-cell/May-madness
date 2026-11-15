@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "65c851027f0f";
+  var V = "0f2db9298114";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -8951,7 +8951,7 @@ function naNightPulse(session) {
 // THE STRIP AT THE TOP OF THE NIGHT. One line of state and then whatever is
 // on court, which is the only thing on this screen that changes while you are
 // looking at it.
-function NaNightPulse({ session, state }) {
+function NaNightPulse({ session, state, brief }) {
   const p = naNightPulse(session);
   const first = (id) => {
     const pl = (state.players || []).find(x => x.id === id);
@@ -9055,7 +9055,11 @@ function NaNightPulse({ session, state }) {
           story the same way round. The champion's name is INK on ivory, the
           inversion this volume uses for a hero, and the plate carries the
           green edge that means "these two won" everywhere else. */}
-      {champ && (
+      {/* ...and it is said ONCE, on the night's first screen. Repeated
+          above every tab it was 110px of the same sentence five times, and
+          with the header, the tabs and the share row it left a third of
+          the phone for the screen somebody had actually asked for. */}
+      {champ && !brief && (
         <div className="na-ivory" style={{ marginTop: 14, padding: "14px 16px 18px",
           borderLeft: "0" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12,
@@ -9862,8 +9866,8 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
             return ACTS.map(a => (
               <button key={a.key} onClick={a.go}
                 style={{ flex:"0 0 auto", minHeight:44, display:"inline-flex", alignItems:"center", gap:6,
-                         padding:"8px 12px", cursor:"pointer", whiteSpace:"nowrap",
-                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".14em",
+                         padding:"8px 9px", cursor:"pointer", whiteSpace:"nowrap",
+                         fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:10, letterSpacing:".08em",
                          textTransform:"uppercase",
                          background:a.on ? "rgba(247,241,230,.10)" : "rgba(255,255,255,.04)",
                          border:`1px solid ${a.on ? "rgba(247,241,230,.45)" : a.warm ? "rgba(242,184,188,.4)" : "transparent"}`,
@@ -9876,7 +9880,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           })()}
         </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
-        <NaNightPulse session={session} state={state} />
+        <NaNightPulse session={session} state={state} brief={tab !== "teams"} />
         {tab === "points" && <NaNightPoints session={session} state={state}
           sessions={state.sessions || []} onPick={null} />}
         {tab === "teams" && <TeamsTab session={session} state={state} updateSession={updateSession} update={update} isAdmin={isAdmin} leaderboard={leaderboard || []} />}
@@ -11159,7 +11163,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
   const champId = b.final?.winner ? (b.final.winner === "team1" ? b.final.team1Id : b.final.team2Id) : null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 na-ko">
       <QualifyControl />
       <KoPhotoStrip session={session} updateSession={updateSession} canUpload={canUploadPhotos} />
       {(() => {
@@ -11179,7 +11183,8 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
         const seedByTeam = {};
         const slotSeeds = { 1: [1, 8], 2: [4, 5], 3: [3, 6], 4: [2, 7] };
         const std8 = (b.qf || []).length === 4 && !(b.r16 && b.r16.length);
-        if (std8) (b.qf || []).forEach((m, idx) => { const pr = slotSeeds[idx + 1]; if (pr) { if (m.team1Id) seedByTeam[m.team1Id] = pr[0]; if (m.team2Id) seedByTeam[m.team2Id] = pr[1]; } });
+        const byLetter = std8 && getSessionGroups(session).length === 4;
+        if (std8 && !byLetter) (b.qf || []).forEach((m, idx) => { const pr = slotSeeds[idx + 1]; if (pr) { if (m.team1Id) seedByTeam[m.team1Id] = pr[0]; if (m.team2Id) seedByTeam[m.team2Id] = pr[1]; } });
         const seen = new Set(); const rows = [];
         const collect = (m) => { if (!m) return; ["team1Id", "team2Id"].forEach(tk => {
           const id = m[tk];
@@ -11199,29 +11204,32 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
         (b.qf || []).forEach(collect); (b.r16 || []).forEach(collect); collect(b.thirdsPlayoff);
         if (!rows.length) return null;
         const ord = (n) => n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`;
-        const why = (rk) => rk === 1 ? "Group winner" : rk === 2 ? "Runner-up" : rk === 3 ? "Best 3rd" : `${ord(rk)} place`;
-        rows.sort((a, c) => (a.seed || 99) - (c.seed || 99) || a.rank - c.rank || a.g.localeCompare(c.g));
+        const why = (rk) => rk === 1 ? "Won group" : rk === 2 ? "2nd" : rk === 3 ? "Best 3rd" : `${ord(rk)}`;
+        if (byLetter) rows.sort((a, c) => String(a.g).localeCompare(String(c.g)) || a.rank - c.rank);
+        else rows.sort((a, c) => (a.seed || 99) - (c.seed || 99) || a.rank - c.rank || String(a.g).localeCompare(String(c.g)));
         const top = rows.find(r => r.seed === 1);
-        return <Card className="p-3">
+        return <Card className="p-3 na-plate na-seedpanel">
           <div className="flex items-center justify-between mb-1">
-            <h3 className="jh-round-title" style={{ fontSize: 18 }}>SEEDING · WHO QUALIFIED</h3>
+            <h3 className="jh-round-title" style={{ fontSize: 18 }}>{byLetter ? "WHO QUALIFIED" : "SEEDING · WHO QUALIFIED"}</h3>
             <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">{rows.length} teams</span>
           </div>
           <div className="text-[10px] text-stone-500 mb-2 leading-snug">
-            Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
+            {byLetter
+              ? "Top two of each group go through. The draw crosses by letter — A1 v D2, B1 v C2, C1 v B2, D1 v A2 — so no quarter-final repeats a group match."
+              : <>Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
               ? "then the best third (7) and the winner of the thirds qualifier (8)"
-              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.
-            {top && <> Top seed plays the lowest (1 v 8). <span className="text-cyan-300 font-bold">#1 seed: {lbl(top.id)}.</span></>}
+              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.</>}
+            {top && !byLetter && <> Top seed plays the lowest (1 v 8). <b>#1 seed: {lbl(top.id)}.</b></>}
           </div>
           <div className="space-y-1">{rows.map(r => (
             <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(247,241,230,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #9E1520" : "2px solid transparent" }}>
               {r.seed
-                ? <span className="font-mono text-xs font-bold flex items-center justify-center shrink-0" style={{ width: 22, height: 22, background: r.seed === 1 ? "#F7F1E6" : "#9E1520", color: "#FFFFFF", border: "1px solid rgba(255,255,255,.14)" }}>{r.seed}</span>
-                : <span style={{ width: 22 }} className="shrink-0" />}
+                ? <span className="na-seedno font-mono text-xs font-bold flex items-center justify-center shrink-0" data-top={r.seed === 1 ? "1" : "0"} style={{ width: 22, height: 22, background: r.seed === 1 ? "#F7F1E6" : "#9E1520", color: "#FFFFFF", border: "1px solid rgba(255,255,255,.14)" }}>{r.seed}</span>
+                : (byLetter ? null : <span style={{ width: 22 }} className="shrink-0" />)}
               {r.pending
                 ? <span className="shrink-0" style={{ minWidth: 30, textAlign: "center", padding: "2px 5px", border: "1px dashed rgba(242,184,188,.5)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 700, color: "#F2B8BC" }}>?</span>
                 : <SeedBadge seed={r.g + r.rank} />}
-              <span className="flex-1 text-xs truncate font-semibold" style={{ color: r.pending ? "#F7F1E6" : "#FFFFFF" }}>
+              <span className="flex-1 text-xs font-semibold" style={{ minWidth: 0, lineHeight: 1.25, color: r.pending ? "#F7F1E6" : "#FFFFFF" }}>
                 {r.pending ? "Winner of the 3rds playoff" : lbl(r.id)}</span>
               <span className="text-[10px] font-mono uppercase tracking-wide" style={{ color: r.pending ? "#F2B8BC" : "#F7F1E6" }}>
                 {r.pending ? "To be played" : (r.rank === 3 && !r.seed ? "3rd · in the qualifier" : why(r.rank))}</span>
@@ -11229,7 +11237,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
           ))}</div>
         </Card>;
       })()}
-      {champId && <div style={{ background:"var(--blue)", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", padding:"20px", textAlign:"center", marginBottom:16 }}>
+      {champId && <div className="na-ivory na-kochamp" style={{ padding:"20px", textAlign:"center" }}>
         <I.crown size={32} style={{ color:"#FFFFFF", margin:"0 auto 8px" }} />
         <div style={{ fontWeight:900, fontSize:"11px", letterSpacing:".22em", textTransform:"uppercase", color:"#FFFFFF", marginBottom:4 }}>Champion</div>
         <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"36px", letterSpacing:"1.5px", color:"#FFFFFF" }}>{lbl(champId)}</div>
@@ -11368,10 +11376,10 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
         <div key={k} style={{display:"flex",alignItems:"center",gap:8,marginTop:ki ? (big ? 5 : 4) : (big ? 8 : 6),
              paddingTop:ki ? (big ? 5 : 4) : 0,
              borderTop:ki ? "1px solid rgba(242,208,211,.18)" : "none"}}>
-          <div style={{flex:"1 1 auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,
+          <div className="na-bkname" data-won={won(m, k) ? "1" : (m && m.winner ? "0" : "")} style={{flex:"1 1 auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,
                fontSize:big ? 14 : 13,color:won(m, k) ? live : "#FFFFFF",
                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nameOf(m && m[k + "Id"])}</div>
-          <div style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
+          <div className="na-bkname" data-won={won(m, k) ? "1" : (m && m.winner ? "0" : "")} style={{flex:"0 0 auto",fontFamily:"'JetBrains Mono',monospace",fontSize:13,
                color:won(m, k) ? live : "#F7F1E6"}}>{m && m.score ? m.score[k === "team1" ? "t1" : "t2"] : "–"}</div>
         </div>
       ))}
@@ -11380,12 +11388,12 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
 
   const champId = b.final && b.final.winner
     ? (b.final.winner === "team1" ? b.final.team1Id : b.final.team2Id) : null;
-  const label = (txt, l, colour) => <div style={{position:"absolute",left:l,top:0,
+  const label = (txt, l, colour) => <div className="na-bklabel" style={{position:"absolute",left:l,top:0,
     fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".28em",color:colour}}>{txt}</div>;
 
   return (
     <div>
-      <div style={{overflowX:"auto",overscrollBehaviorX:"contain",paddingBottom:4}}>
+      <div className="na-bkscroll" style={{overflowX:"auto",overscrollBehaviorX:"contain",paddingBottom:4}}>
         <div style={{position:"relative",width:W,height:H}}>
           {label("QUARTER-FINALS", 0, "#F7F1E6")}
           {label("SEMI-FINALS", X3, "#F7F1E6")}
@@ -11416,7 +11424,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
         </div>
       </div>
 
-      {champId && <div style={{marginTop:12,display:"flex",alignItems:"center",gap:8,padding:"11px 13px",
+      {champId && <div className="na-kochamp2" style={{marginTop:12,display:"flex",alignItems:"center",gap:8,padding:"11px 13px",
            background:"rgba(242,184,188,.08)",borderLeft:"3px solid #F2B8BC"}}>
         <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,letterSpacing:".26em",color:"#F2B8BC"}}>CHAMPION</div>
         <div style={{marginLeft:"auto",minWidth:0,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
@@ -15790,6 +15798,40 @@ body .na-nightpts .na-np-sub.na-np-sub.na-np-sub.na-np-sub.na-np-sub { color: va
 /* "Session champion" in the winner's green — 4.83:1 on ivory, and the same
    thing green means on the session card and the champion's plate. */
 body .na-nightpts .na-np-sub.na-np-sub.na-np-sub.na-np-sub.na-np-sub[data-champ="1"] { color: var(--green) !important; font-weight: 700; }
+
+/* ── 21 · THE KNOCKOUT SCREEN ───────────────────────────────────────────
+   The bracket first, the explanation of it underneath. `space-y-4` hangs its
+   gap on `> * + *` by DOM order, which lands in the wrong place once a child
+   is reordered, so the margins go and a real gap replaces them — the same
+   move the home screen made. */
+.na-ko { display: flex; flex-direction: column; gap: 16px; }
+.na-ko > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+.na-ko > .na-seedpanel { order: 40; }
+/* The seed number: base red on the plate, and the top seed is the one green
+   disc — green means "this one is ahead" everywhere else on an ivory plate. */
+body .na-seedpanel .na-seedno.na-seedno.na-seedno {
+  background: var(--bg) !important; color: var(--ivory) !important;
+  border: 0 !important; border-radius: 999px !important;
+}
+body .na-seedpanel .na-seedno.na-seedno.na-seedno[data-top="1"] {
+  background: var(--green) !important; color: #fff !important;
+}
+/* Who won a tie. The winner is ivory at full weight; the loser steps back to
+   the muted rose. Not green: on this red green is 1.5:1 and only works as an
+   edge, and a row this small has no room for one. */
+body .na-ko .na-bkname.na-bkname.na-bkname[data-won="1"] { color: var(--ivory) !important; font-weight: 900 !important; }
+body .na-ko .na-bkname.na-bkname.na-bkname[data-won="0"] { color: var(--rose-txt) !important; font-weight: 500 !important; opacity: .72; }
+/* The panel's own small print is `text-stone-*`, which this skin sends to
+   rose for the red ground — on the plate that is rose on ivory, and the
+   paragraph that explains the draw was the one thing on it nobody could read. */
+body .na-seedpanel [class*="text-stone-"][class*="text-stone-"][class*="text-stone-"] {
+  color: var(--muted-ink) !important; letter-spacing: 0 !important;
+  text-transform: none !important; font-size: 12.5px !important; line-height: 1.45 !important;
+  font-family: inherit !important;
+}
+.na-ko > .na-kochamp { order: 30; }
+.na-ko .na-kochamp2 { display: none !important; }
+body .na-ko .na-bkscroll.na-bkscroll.na-bkscroll.na-bkscroll { border-radius: 0 !important; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

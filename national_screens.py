@@ -110,7 +110,7 @@ function naNightPulse(session) {{
 // THE STRIP AT THE TOP OF THE NIGHT. One line of state and then whatever is
 // on court, which is the only thing on this screen that changes while you are
 // looking at it.
-function NaNightPulse({{ session, state }}) {{
+function NaNightPulse({{ session, state, brief }}) {{
   const p = naNightPulse(session);
   const first = (id) => {{
     const pl = (state.players || []).find(x => x.id === id);
@@ -214,7 +214,11 @@ function NaNightPulse({{ session, state }}) {{
           story the same way round. The champion's name is INK on ivory, the
           inversion this volume uses for a hero, and the plate carries the
           green edge that means "these two won" everywhere else. */}}
-      {{champ && (
+      {{/* ...and it is said ONCE, on the night's first screen. Repeated
+          above every tab it was 110px of the same sentence five times, and
+          with the header, the tabs and the share row it left a third of
+          the phone for the screen somebody had actually asked for. */}}
+      {{champ && !brief && (
         <div className="na-ivory" style={{{{ marginTop: 14, padding: "14px 16px 18px",
           borderLeft: "0" }}}}>
           <div style={{{{ display: "flex", alignItems: "baseline", gap: 12,

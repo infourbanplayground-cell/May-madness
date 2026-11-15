@@ -1566,3 +1566,37 @@ body .na-nightpts .na-np-sub.na-np-sub.na-np-sub.na-np-sub.na-np-sub { color: va
 /* "Session champion" in the winner's green — 4.83:1 on ivory, and the same
    thing green means on the session card and the champion's plate. */
 body .na-nightpts .na-np-sub.na-np-sub.na-np-sub.na-np-sub.na-np-sub[data-champ="1"] { color: var(--green) !important; font-weight: 700; }
+
+/* ── 21 · THE KNOCKOUT SCREEN ───────────────────────────────────────────
+   The bracket first, the explanation of it underneath. `space-y-4` hangs its
+   gap on `> * + *` by DOM order, which lands in the wrong place once a child
+   is reordered, so the margins go and a real gap replaces them — the same
+   move the home screen made. */
+.na-ko { display: flex; flex-direction: column; gap: 16px; }
+.na-ko > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+.na-ko > .na-seedpanel { order: 40; }
+/* The seed number: base red on the plate, and the top seed is the one green
+   disc — green means "this one is ahead" everywhere else on an ivory plate. */
+body .na-seedpanel .na-seedno.na-seedno.na-seedno {
+  background: var(--bg) !important; color: var(--ivory) !important;
+  border: 0 !important; border-radius: 999px !important;
+}
+body .na-seedpanel .na-seedno.na-seedno.na-seedno[data-top="1"] {
+  background: var(--green) !important; color: #fff !important;
+}
+/* Who won a tie. The winner is ivory at full weight; the loser steps back to
+   the muted rose. Not green: on this red green is 1.5:1 and only works as an
+   edge, and a row this small has no room for one. */
+body .na-ko .na-bkname.na-bkname.na-bkname[data-won="1"] { color: var(--ivory) !important; font-weight: 900 !important; }
+body .na-ko .na-bkname.na-bkname.na-bkname[data-won="0"] { color: var(--rose-txt) !important; font-weight: 500 !important; opacity: .72; }
+/* The panel's own small print is `text-stone-*`, which this skin sends to
+   rose for the red ground — on the plate that is rose on ivory, and the
+   paragraph that explains the draw was the one thing on it nobody could read. */
+body .na-seedpanel [class*="text-stone-"][class*="text-stone-"][class*="text-stone-"] {
+  color: var(--muted-ink) !important; letter-spacing: 0 !important;
+  text-transform: none !important; font-size: 12.5px !important; line-height: 1.45 !important;
+  font-family: inherit !important;
+}
+.na-ko > .na-kochamp { order: 30; }
+.na-ko .na-kochamp2 { display: none !important; }
+body .na-ko .na-bkscroll.na-bkscroll.na-bkscroll.na-bkscroll { border-radius: 0 !important; }
