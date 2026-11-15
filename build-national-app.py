@@ -495,6 +495,40 @@ Drop your name + partner below to lock your spot 👇
 
 
 MOTIFS = [
+    # ── 5l · THE THIRDS, WHEN THE NIGHT IS RUN ON A PLAYOFF ───────────────
+    # Three screens described the best2 rule whatever mode the session was in.
+    # Found by simulating the 9 Nov night (13 teams, 3 groups, playoff) and
+    # parked for a week behind the colour work.
+    #
+    # 1 · qualifyingTeamIds had no playoff branch. For three groups it marked
+    # the top two of each plus the TWO best thirds — so on a playoff night the
+    # third-best third was shown as out while it still had a qualifier to
+    # play: 8 teams marked, 9 alive. Before the qualifier all three thirds are
+    # alive; after it, the best third and whoever won.
+    ('''    thirds.sort(compareThirds).slice(0, 2).forEach(t => ids.add(t.id));''',
+     '''    const sortedThirds = thirds.sort(compareThirds);
+    if (session && session.thirdPlaceMode === "playoff") {
+      const po = session.bracket && session.bracket.thirdsPlayoff;
+      if (po && po.winner) {
+        if (sortedThirds[0]) ids.add(sortedThirds[0].id);
+        const w = po.winner === "team1" ? po.team1Id : po.team2Id;
+        if (w) ids.add(w);
+      } else sortedThirds.slice(0, 3).forEach(t => ids.add(t.id));
+    } else sortedThirds.slice(0, 2).forEach(t => ids.add(t.id));'''),
+
+    # 2 · the seeding panel's own explainer said "then the 2 best thirds
+    # (7–8)", which is best2. On a playoff night seed 7 is the best third and
+    # seed 8 is whoever wins the qualifier between the other two.
+    ('''            Seeded by group finish — winners (1–3), runners-up (4–6), then the 2 best thirds (7–8); ranked by wins, then game difference.''',
+     '''            Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
+              ? "then the best third (7) and the winner of the thirds qualifier (8)"
+              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.'''),
+
+    # 3 · and it labelled EVERY third-placed team "Best 3rd" — three best
+    # thirds in one list. The two with no seed are the ones in the qualifier.
+    ('''                {r.pending ? "To be played" : why(r.rank)}</span>''',
+     '''                {r.pending ? "To be played" : (r.rank === 3 && !r.seed ? "3rd · in the qualifier" : why(r.rank))}</span>'''),
+
     # THE RANK TAB HAS ITS OWN `.sg-top` — the leader card at the head of the
     # table — with the rank disc one level deeper than the home podium's. The
     # home one was marked and this one was not, so it was the single run left

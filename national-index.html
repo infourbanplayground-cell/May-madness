@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "7d046ed1b9c0";
+  var V = "d0c42ead3b1f";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1251,7 +1251,15 @@ function qualifyingTeamIds(session) {
     // the two best thirds, ranked exactly the way the bracket ranks them
     const thirds = stand.map(rows => rows[2]).filter(r => r && r.team && r.team.id)
       .map(r => ({ id: r.team.id, pts: r.pts, wins: r.wins, gd: r.gd || 0, gf: r.gf || 0 }));
-    thirds.sort(compareThirds).slice(0, 2).forEach(t => ids.add(t.id));
+    const sortedThirds = thirds.sort(compareThirds);
+    if (session && session.thirdPlaceMode === "playoff") {
+      const po = session.bracket && session.bracket.thirdsPlayoff;
+      if (po && po.winner) {
+        if (sortedThirds[0]) ids.add(sortedThirds[0].id);
+        const w = po.winner === "team1" ? po.team1Id : po.team2Id;
+        if (w) ids.add(w);
+      } else sortedThirds.slice(0, 3).forEach(t => ids.add(t.id));
+    } else sortedThirds.slice(0, 2).forEach(t => ids.add(t.id));
     return ids;
   }
   stand.forEach(rows => take(rows, getQualifyCount(session)));
@@ -11200,7 +11208,9 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
             <span className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">{rows.length} teams</span>
           </div>
           <div className="text-[10px] text-stone-500 mb-2 leading-snug">
-            Seeded by group finish — winners (1–3), runners-up (4–6), then the 2 best thirds (7–8); ranked by wins, then game difference.
+            Seeded by group finish — winners (1–3), runners-up (4–6), {thirdPlaceMode === "playoff"
+              ? "then the best third (7) and the winner of the thirds qualifier (8)"
+              : "then the 2 best thirds (7–8)"}; ranked by wins, then game difference.
             {top && <> Top seed plays the lowest (1 v 8). <span className="text-cyan-300 font-bold">#1 seed: {lbl(top.id)}.</span></>}
           </div>
           <div className="space-y-1">{rows.map(r => (
@@ -11214,7 +11224,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
               <span className="flex-1 text-xs truncate font-semibold" style={{ color: r.pending ? "#F7F1E6" : "#FFFFFF" }}>
                 {r.pending ? "Winner of the 3rds playoff" : lbl(r.id)}</span>
               <span className="text-[10px] font-mono uppercase tracking-wide" style={{ color: r.pending ? "#F2B8BC" : "#F7F1E6" }}>
-                {r.pending ? "To be played" : why(r.rank)}</span>
+                {r.pending ? "To be played" : (r.rank === 3 && !r.seed ? "3rd · in the qualifier" : why(r.rank))}</span>
             </div>
           ))}</div>
         </Card>;

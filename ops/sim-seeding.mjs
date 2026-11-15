@@ -188,7 +188,12 @@ function check(nTeams, groupCount, seed = 56, mode = 'best2') {
   const dropped = groups.filter((g, i) => sizes[i] - 1 > G);
 
   const qual = E.qualifyingTeamIds(session);
-  if (qual.size !== 8) fails.push(`${qual.size} qualifiers, not 8`);
+  // NINE are alive on a three-group PLAYOFF night until the qualifier is
+  // played: three winners, three runners-up and all three thirds. Eight was
+  // asserted here for every mode, which is the best2 rule — the same
+  // assumption the app's own table was making.
+  const alive = (groupCount === 3 && mode === 'playoff') ? 9 : 8;
+  if (qual.size !== alive) fails.push(`${qual.size} qualifiers, not ${alive}`);
 
   const seeded = seedQF(session, groups);
   const qf = seeded && seeded.qf;
