@@ -73,6 +73,15 @@
   }
   *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
   html { -webkit-text-size-adjust:100%; }
+  /* THE PAGE SCROLLED SIDEWAYS ON EVERY PHONE. The hero backdrop is
+     `min(1180px, 128vw)` wide so the court bleeds past the 820px column on a
+     desktop — and on a 390px phone 128vw is 499px, which made the document
+     445px wide and gave the one page every visitor sees first 55px of
+     horizontal scroll. Live from 9 Nov to 15 Nov; found by the first tool
+     that ever opened this page at a phone's width. `clip`, not `hidden`:
+     hidden makes the body a scroll container and breaks the fixed WhatsApp
+     button's and the sticky rows' frame of reference. */
+  html, body { overflow-x:clip; }
   body {
     min-height:100vh;
     font-family:'Archivo', system-ui, sans-serif;
@@ -251,6 +260,9 @@
     font-family:'Teko',sans-serif; font-weight:600; font-size:26px; letter-spacing:.12em;
     color:var(--court); background:var(--live);
     padding:13px 30px 11px;
+    /* "HOW IT WORKS →" broke before its arrow and stood the arrow on a line
+       of its own, which reads as a second, smaller button. */
+    white-space:nowrap; font-size:clamp(20px,6.2vw,26px);
     box-shadow:0 0 26px rgba(215,32,46,.40);
   }
 
@@ -435,6 +447,17 @@
   /* ── RESPONSIVE: 430px is the real device ── */
   @media (max-width:640px) {
     .svcs { grid-template-columns:1fr; }
+    /* TWO CARDS THAT SAY "NOT YET" WERE A FULL SCREEN OF THE PHONE — 46px
+       icon, 45px headline, a paragraph and a badge, twice, between the two
+       things on this page somebody can actually do and the archive. Held
+       back, a card is a row: icon, name, badge. It gets its full height back
+       the day `soon` comes off, which is still the whole launch. */
+    .svc.soon { flex-direction:row; align-items:center; gap:14px; padding:14px 16px; }
+    .svc.soon .ico { width:28px; height:28px; margin:0; flex:0 0 auto; }
+    .svc.soon h2 { font-size:22px; flex:1 1 auto; min-width:0; white-space:nowrap; }
+    .svc.soon p { display:none; }
+    .svc.soon .badge { margin:0; flex:0 0 auto; }
+    .svcs { gap:10px; }
   }
   @media (max-width:520px) {
     .topbar { flex-wrap:wrap; justify-content:center; text-align:center; row-gap:10px; }
