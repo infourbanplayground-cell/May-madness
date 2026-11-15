@@ -344,6 +344,17 @@
   .courtgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;}
   .score{font-size:38px;font-weight:700;line-height:1;letter-spacing:-.02em;}
   .teamside{display:flex;flex-direction:column;gap:7px;min-width:0;overflow:hidden;}
+  /* THE MATCH CARD CUT EVERY NAME TO FIVE LETTERS — "Munth…", "Oumai…",
+     "abdulra…" — on the one card that exists to say who is playing whom.
+     Each side had about 66px for a name: a 34px initials disc, a gap, and a
+     38px score in the middle taking the rest. The disc is the name's own
+     initials, so beside the name it says nothing the name does not; on a
+     phone it goes and the name gets its 42px back, and the name wraps to a
+     second line rather than being cut. A long name costs a line of height.
+     A cut name costs knowing who you are playing. */
+  .teamside .truncate{white-space:normal;overflow:visible;text-overflow:clip;
+    line-height:1.15;overflow-wrap:anywhere;}
+  @media (max-width:520px){ .teamside .ava{display:none;} }
 
   /* ── ladder (UPRISING) ──────────────────────── */
   .rung{
@@ -673,7 +684,15 @@ const UP = {
   // single shuffle that is eleven rounds that score.
   ROUNDS: 12,
   FIELD: 16,
-  TARGET: 16,            // a match is first to 16 points
+  // FIRST TO 11, and this is now the ONLY place that says so. It read 16 —
+  // the two-hour budget the format was first sized at — long after every
+  // night had been played to 11, while the app's setup form had `uppoints:
+  // 11` typed into it and ops/uprising-facts.mjs had `target = 11` typed
+  // into it. Three places stating one number, and the one the rules live in
+  // was the one that was wrong: it was only ever reached when an organiser
+  // CLEARED the points field, at which point the night ran to 16 against
+  // posters that said 11.
+  TARGET: 11,
   FINAL_MULT: 2,         // the last round is worth double
 
   // Points are worth more higher up the ladder. Ranking on raw match points
@@ -3003,6 +3022,19 @@ function Standings({ t, byId, onPodium, onReceipt }) {
       {table.length > 0 && (
         <div><button className="btn gold" onClick={onPodium}>Podium 👑</button></div>
       )}
+      {/* SAID ONCE, ABOVE THE LIST. "tap for rounds" was appended to the
+          sub-line of every row — sixteen times on a full night — and at 390px
+          it pushed each one onto a second line, so the table was a third
+          taller than its content and the instruction was the loudest thing on
+          it. The column the margin sits in is named here too: "+22" under a
+          points total with nothing to say what it is reads as a second score. */}
+      {(isUp && onReceipt || !byAvg) && (
+        <div className="label" style={{ display: "flex", justifyContent: "space-between",
+                                        letterSpacing: ".12em", marginBottom: -6 }}>
+          <span>{isUp && onReceipt ? "Tap a player for their rounds" : ""}</span>
+          <span>{byAvg ? "" : "Points · margin"}</span>
+        </div>
+      )}
       <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
         {table.map((s, i) => (
           <div className="row" key={s.id}
@@ -3015,7 +3047,7 @@ function Standings({ t, byId, onPodium, onReceipt }) {
             <span style={{ flex: 1, minWidth: 0 }}>
               <span className="truncate" style={{ display: "block", fontWeight: 800 }}>{s.name}</span>
               <span className="label" style={{ letterSpacing: ".12em" }}>
-                {s.played} played · {s.wins} won{isUp && onReceipt ? " · tap for rounds" : ""}
+                {s.played} played · {s.wins} won
               </span>
             </span>
             <span style={{ textAlign: "right" }}>
@@ -3037,17 +3069,33 @@ function Standings({ t, byId, onPodium, onReceipt }) {
 // ── players ─────────────────────────────────────────────────────
 function Players({ people, tournaments, query, setQuery, onOpenStats }) {
   const q = query.toLowerCase();
-  const cards = people.filter(p => p.name.toLowerCase().includes(q))
-    .sort((a, b) => a.name.localeCompare(b.name))
+  // THE ROSTER IS 314 NAMES AND WAS 21.7 SCREENS — 18,285px at 390 wide, one
+  // row each, no way to narrow it. It is the right thing to HOLD (it is the
+  // shared club roster, synced from the series) and the wrong thing to OPEN
+  // ON, because the people anybody is looking for are the ones who have
+  // played. Same fault the series app had at 55 screens, same answer.
+  const [show, setShow] = useState("played");
+  // An ABANDONED night is not part of anybody's record. It was being counted,
+  // which is why test entries read "1 matches · 11 pts" off a night that was
+  // thrown away.
+  const counted = tournaments.filter(tt => tt.status !== "abandoned");
+  const all = people
     .map(p => {
       let played = 0, pointsTotal = 0;
-      tournaments.forEach(tt => (tt.rounds || []).forEach(r => (r.courts || []).forEach(m => {
+      counted.forEach(tt => (tt.rounds || []).forEach(r => (r.courts || []).forEach(m => {
         if (m.score1 == null) return;
         if (m.team1.includes(p.id)) { played++; pointsTotal += Number(m.score1); }
         else if (m.team2.includes(p.id)) { played++; pointsTotal += Number(m.score2); }
       })));
-      return { ...p, sub: played ? `${played} matches · ${pointsTotal} pts` : "No matches yet" };
-    });
+      return { ...p, played, sub: played ? `${plural(played, "match")} · ${pointsTotal} pts` : "No matches yet" };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const playedN = all.filter(p => p.played > 0).length;
+  // SEARCH ALWAYS LOOKS AT EVERYONE. A filter that hides the name being typed
+  // is worse than no filter, and the walk-in somebody is checking for is
+  // exactly the person who has not played yet.
+  const cards = q ? all.filter(p => p.name.toLowerCase().includes(q))
+              : (show === "played" && playedN > 0) ? all.filter(p => p.played > 0) : all;
   return (
     <div className="screen">
       <div>
@@ -3055,6 +3103,17 @@ function Players({ people, tournaments, query, setQuery, onOpenStats }) {
         <div className="display">The <em>Roster</em></div>
       </div>
       <input className="field" placeholder="Search players…" value={query} onChange={e => setQuery(e.target.value)} />
+      {/* Counts on the chips: "PLAYED" with no number is a filter you have to
+          try before you understand it. Hidden until somebody has played —
+          0 on one side and 314 on the other is just a way to show nothing. */}
+      {playedN > 0 && !q && (
+        <div style={{ display: "flex", gap: 8 }}>
+          {[["played", "Played", playedN], ["all", "Everyone", all.length]].map(([id, label, n]) => (
+            <button key={id} className={"chip" + (show === id ? " on" : "")} onClick={() => setShow(id)}
+              style={{ minHeight: 44 }}>{label} <span style={{ opacity: .7 }}>{n}</span></button>
+          ))}
+        </div>
+      )}
       <div className="hair" style={{ display: "flex", flexDirection: "column" }}>
         {cards.map(p => (
           <button key={p.id} className="row" onClick={() => onOpenStats(p.id)}
@@ -3457,7 +3516,7 @@ function App() {
   const [loginErr, setLoginErr] = useState(false);
   const [sel, setSel] = useState({});
   const [cfg, setCfg] = useState({ name: "", points: 32, rounds: 7, courts: 2,
-                                   upcourts: UP_NEXT.courts || UP.COURTS, uppoints: 11, uprounds: "",
+                                   upcourts: UP_NEXT.courts || UP.COURTS, uppoints: UP.TARGET, uprounds: "",
                                    upshuffle: true, upfinish: 0, format: "americano" });
   const [roundIdx, setRoundIdx] = useState(0);
   const [receipt, setReceipt] = useState(null);

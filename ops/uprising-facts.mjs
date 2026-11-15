@@ -13,7 +13,10 @@ const E = require(join(root, 'uprising-engine.js'));
 
 const S = require(join(root, 'uprising-social.json'));
 
-const target = 11, budget = 150, shuffle = true;
+// READ, NOT TYPED. This was `target = 11` while the engine said 16 — so the
+// one file whose whole job is to stop a post advertising a figure the app
+// contradicts was asserting the figure itself.
+const target = E.UP.TARGET, budget = 150, shuffle = true;
 const players = S.cap || 16;
 // The court count is the club's, not the format's — see _courts in the JSON.
 // The override is for ONE night and expires on its own: it counts only while

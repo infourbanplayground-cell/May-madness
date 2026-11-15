@@ -30,8 +30,10 @@ function playRound(night, pick = () => true) {
   const r = upBuildRound(night);
   r.courts.forEach(m => {
     const aWins = pick(m, night);
-    m.score1 = aWins ? UP.TARGET : 11;
-    m.score2 = aWins ? 11 : UP.TARGET;
+    // The loser's score follows the constant too. It was a literal 11, which
+    // was a loss at first-to-16 and is a DRAW at first-to-11.
+    m.score1 = aWins ? UP.TARGET : UP.TARGET - 5;
+    m.score2 = aWins ? UP.TARGET - 5 : UP.TARGET;
   });
   night.rounds.push(r);
   return r;

@@ -18,7 +18,15 @@ const UP = {
   // single shuffle that is eleven rounds that score.
   ROUNDS: 12,
   FIELD: 16,
-  TARGET: 16,            // a match is first to 16 points
+  // FIRST TO 11, and this is now the ONLY place that says so. It read 16 —
+  // the two-hour budget the format was first sized at — long after every
+  // night had been played to 11, while the app's setup form had `uppoints:
+  // 11` typed into it and ops/uprising-facts.mjs had `target = 11` typed
+  // into it. Three places stating one number, and the one the rules live in
+  // was the one that was wrong: it was only ever reached when an organiser
+  // CLEARED the points field, at which point the night ran to 16 against
+  // posters that said 11.
+  TARGET: 11,
   FINAL_MULT: 2,         // the last round is worth double
 
   // Points are worth more higher up the ladder. Ranking on raw match points
