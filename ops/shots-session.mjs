@@ -157,7 +157,7 @@ for (const [w, h] of VPS) {
 
   const subs = await pg.evaluate(() => [...new Set([...document.querySelectorAll('button')]
     .map(b => (b.textContent || '').trim())
-    .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|TABLE|SCORES|POINTS|LIST)$/i.test(t)))]);
+    .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|KO|TABLE|SCORES|POINTS|LIST)$/i.test(t)))]);
   console.log('  sub-screens: ' + subs.join(', '));
   for (const s of subs) {
     await pg.evaluate((s) => {
