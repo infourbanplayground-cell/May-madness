@@ -309,7 +309,7 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
           until it is looked at.
         </div>
       )}}
-      <div className="sg-card" style={{{{ padding: "6px 14px 10px" }}}}>
+      <div className="sg-card na-plate na-nightpts" style={{{{ padding: "6px 14px 10px" }}}}>
         <div style={{{{ display: "flex", alignItems: "center", gap: 10,
           padding: "10px 0 8px", fontFamily: "'JetBrains Mono',monospace",
           fontWeight: 700, fontSize: 9, letterSpacing: ".2em", color: "{rose_txt}" }}}}>
@@ -332,11 +332,11 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
                 color: pos <= 3 ? "{ivory}" : "{rose_txt}" }}}}>{{pos}}</span>
               <Avatar player={{r.player}} size={{30}} />
               <span style={{{{ flex: 1, minWidth: 0 }}}}>
-                <span style={{{{ display: "block", fontSize: 14, color: "{ivory}",
+                <span className="na-np-name" style={{{{ display: "block", fontSize: 14, color: "{ivory}",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}}}>
                   {{r.player.name}}
                 </span>
-                <span style={{{{ display: "block", marginTop: 2, fontSize: 11,
+                <span className="na-np-sub" data-champ={{champ ? "1" : "0"}} style={{{{ display: "block", marginTop: 2, fontSize: 11,
                   color: champ ? "{ivory}" : "{rose_txt}",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}}}>
                   {{r.n.outcome}}{{r.n.x2 ? " \\u00B7 2X" : ""}}
@@ -407,7 +407,7 @@ def group_table_block(pal):
         '                // whole night view down, which is the entire session screen.\n'
         '                const qual = anyPlayed && through.has(t.id);\n'
         '                return <button key={t.id} onClick={() => isAdmin && setEdit(t)}\n'
-        '                  className="w-full flex items-center p-2 text-left"\n'
+        '                  className="na-trow w-full flex items-center p-2 text-left"\n'
         '                  style={{ minHeight:44, background:"rgba(247,241,230,.05)",\n'
         '                           gap:6, paddingLeft:6 }}>\n'
         '                  {/* A BAR, NOT A BORDER. A `border-left` on a row that\n'
@@ -443,11 +443,11 @@ def group_table_block(pal):
         '                        and the two overlapping faces beside them already say it\n'
         '                        is a pair, so the ampersand is not carrying anything. */}\n'
         '                    {anyPlayed ? <>\n'
-        '                      <div className="truncate" style={{ fontSize:13, lineHeight:1.25,\n'
+        '                      <div className="truncate na-tname" style={{ fontSize:13, lineHeight:1.25,\n'
         f'                        color:"{ivory}" }}}}>{{(p1?.name || "?").split(" ")[0]}}</div>\n'
-        '                      <div className="truncate" style={{ fontSize:13, lineHeight:1.25,\n'
+        '                      <div className="truncate na-tname" style={{ fontSize:13, lineHeight:1.25,\n'
         f'                        color:"{ivory}" }}}}>{{(p2?.name || "?").split(" ")[0]}}</div>\n'
-        '                    </> : <div className="text-sm text-stone-100 truncate">\n'
+        '                    </> : <div className="text-sm text-stone-100 truncate na-tname">\n'
         '                      {(p1?.name || "?") + " & " + (p2?.name || "?")}</div>}\n'
         '                  </div>\n'
         '                  {anyPlayed && <>\n'

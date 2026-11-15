@@ -167,6 +167,31 @@ for (const [w, h] of VPS) {
     }, s);
     await pg.waitForTimeout(700);
     await shoot(s.toUpperCase());
+    // WHY=<css selector> — the night's own version of the skin harness's WHY.
+    // No harness opens a night, so a rule that loses in here loses unseen;
+    // this prints the computed colour of the first match on each sub-screen
+    // and every stylesheet rule that sets `color` on it, in cascade order.
+    if (process.env.WHY) {
+      const why = await pg.evaluate((sel) => {
+        const el = document.querySelector(sel);
+        if (!el) return null;
+        const rules = [];
+        for (const sh of document.styleSheets) {
+          let rs; try { rs = sh.cssRules; } catch { continue; }
+          for (const r of rs) {
+            if (!r.selectorText || !r.style || !r.style.color) continue;
+            try { if (el.matches(r.selectorText)) rules.push(
+              r.selectorText.slice(0, 110) + ' { color: ' + r.style.color
+              + (r.style.getPropertyPriority('color') ? ' !important' : '') + ' }'); } catch {}
+          }
+        }
+        const cs = getComputedStyle(el);
+        return { text: (el.textContent || '').trim().slice(0, 30), computed: cs.color,
+                 fill: cs.webkitTextFillColor, size: cs.fontSize,
+                 inline: (el.getAttribute('style') || '').slice(0, 90), rules };
+      }, process.env.WHY);
+      if (why) console.log(`  WHY ${s}: ` + JSON.stringify(why, null, 1));
+    }
   }
   if (errs.length) console.log('  page errors: ' + errs.slice(0, 3).join(' | '));
   await pg.close();
