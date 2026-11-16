@@ -21,13 +21,16 @@ import fs from 'fs';
 import path from 'path';
 
 const SP = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const SRC = path.join(SP, 'national.html');
+// PAGE= / NAME= record another Vol.9 film through the same checks. The page
+// has to keep the roles this file measures: #s3med, #s4n, #s5b .fitspan.
+const NAME = process.env.NAME || 'national-opening';
+const SRC = path.join(SP, process.env.PAGE || 'national.html');
 const FRAMES = path.join(SP, '_nationalframes');
 const VID = path.join(SP, 'video');
-const SILENT = path.join(VID, 'national-opening-silent.mp4');
-const FINAL = path.join(VID, 'national-opening.mp4');
-const WAV = path.join(VID, 'national.wav');
-const SHEET = path.join(SP, 'vol9-cards', 'OPENING-FILM.png');
+const SILENT = path.join(VID, NAME + '-silent.mp4');
+const FINAL = path.join(VID, NAME + '.mp4');
+const WAV = path.join(VID, process.env.WAV || 'national.wav');
+const SHEET = path.join(SP, 'vol9-cards', (process.env.NAME ? NAME.toUpperCase() : 'OPENING-FILM') + '.png');
 const FFMPEG = '/usr/bin/ffmpeg';
 const FPS = 30, W = 1080, H = 1920;
 const CONTACT = !!process.env.CONTACT;

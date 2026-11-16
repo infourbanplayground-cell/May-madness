@@ -41,6 +41,15 @@ SCENES = [0.00, 3.60, 7.60, 11.40, 14.80]
 BEATS = [0.00, 1.80, 3.60, 5.60, 7.60, 9.40, 11.40, 13.10, 14.80, 16.40]
 HERO = {0.00, 7.60, 14.80}
 
+# CUT=<json> — another film on the same bed. build-national-double-video.py
+# writes its own scene and beat table to a file and this reads it, so the two
+# media still share ONE table rather than a second copy typed here.
+if os.environ.get("CUT"):
+    import json as _json
+    _c = _json.load(open(os.environ["CUT"]))
+    DUR, SCENES, BEATS = _c["dur"], _c["scenes"], _c["beats"]
+    HERO = set(_c["hero"]); OUT = _c["wav"]; N = int(SR * DUR)
+
 BPM = 100.0
 SPB = 60.0 / BPM
 
