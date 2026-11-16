@@ -1618,3 +1618,27 @@ body .na-gtable .na-gq.na-gq.na-gq[data-q="1"] { box-shadow: inset 4px 0 0 var(-
 body .na-gtable .na-gq.na-gq.na-gq[data-q="0"] { box-shadow: none !important; }
 body .na-gtable .na-gpts.na-gpts.na-gpts.na-gpts[data-q="1"] { color: var(--green) !important; }
 body .na-gtable .na-gqline.na-gqline { background: linear-gradient(90deg, var(--green), transparent) !important; }
+
+/* ── 23 · WATCH YOUR POINTS ─────────────────────────────────────────────
+   The link out to the club's highlights page. An ivory plate, because it is
+   something you read and tap, with the play disc in the base red. */
+a.na-hl:not([data-a]):not([data-b]):not([data-c]) {
+  display: flex; align-items: center; gap: 14px; min-height: 64px;
+  margin-top: 14px; padding: 12px 18px 12px 12px;
+  background: var(--ivory); border-radius: 999px; text-decoration: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ivory);
+}
+a.na-hl:active { transform: scale(.985); }
+.na-hl .na-hl-play:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 999px; background: var(--bg); color: var(--ivory) !important; padding-left: 2px;
+}
+body .na-hl .na-hl-title.na-hl-title.na-hl-title {
+  display: block; font-family: 'Archivo', sans-serif; font-style: italic; text-transform: uppercase;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 19px; line-height: 1.1;
+  color: var(--ink) !important;
+}
+body .na-hl .na-hl-sub.na-hl-sub.na-hl-sub {
+  display: block; margin-top: 3px; font-size: 12px; line-height: 1.3; color: var(--muted-ink) !important;
+}
+body .na-hl .na-hl-go.na-hl-go.na-hl-go { flex: 0 0 auto; font-size: 20px; font-weight: 700; color: var(--bg) !important; }

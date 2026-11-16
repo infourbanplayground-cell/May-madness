@@ -1162,6 +1162,22 @@ MOTIFS = [
         <div className="na-natday-2x">2X</div>
       </div>
 
+      {/* ── YOUR POINTS, ON VIDEO ── the courts record every rally and
+          SaveMyPlay cuts the highlights; this is the club's own page there.
+          The address lives in national-season.json (highlightsUrl), not
+          here. It leaves the app, so it opens in a new tab and says so
+          with the arrow — a scorer mid-night must not lose the page. */}
+      <a className="na-hl" href="''' + CFG["highlightsUrl"] + '''" target="_blank" rel="noopener noreferrer">
+        <span className="na-hl-play" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        </span>
+        <span style={{flex:"1 1 auto",minWidth:0}}>
+          <span className="na-hl-title">Watch your points</span>
+          <span className="na-hl-sub">Match highlights from the courts &middot; SaveMyPlay</span>
+        </span>
+        <span className="na-hl-go" aria-hidden="true">&#8599;</span>
+      </a>
+
       {/* ── NEXT UP ── */}'''),
     # 5d · THE SHARE CARDS GET THE MOTIFS TOO. They are drawn on a CANVAS,
     #      so the skin cannot reach them and ops/check-national-skin.mjs

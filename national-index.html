@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "37190f9562fb";
+  var V = "a25fd6f97ac7";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -7450,6 +7450,22 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
         </div>
         <div className="na-natday-2x">2X</div>
       </div>
+
+      {/* ── YOUR POINTS, ON VIDEO ── the courts record every rally and
+          SaveMyPlay cuts the highlights; this is the club's own page there.
+          The address lives in national-season.json (highlightsUrl), not
+          here. It leaves the app, so it opens in a new tab and says so
+          with the arrow — a scorer mid-night must not lose the page. */}
+      <a className="na-hl" href="https://savemyplay.com/facility/192-UZgnrJWB-urban-playground-muscat/highlights" target="_blank" rel="noopener noreferrer">
+        <span className="na-hl-play" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        </span>
+        <span style={{flex:"1 1 auto",minWidth:0}}>
+          <span className="na-hl-title">Watch your points</span>
+          <span className="na-hl-sub">Match highlights from the courts &middot; SaveMyPlay</span>
+        </span>
+        <span className="na-hl-go" aria-hidden="true">&#8599;</span>
+      </a>
 
       {/* ── NEXT UP ── */}
       {live && <>
@@ -15930,6 +15946,30 @@ body .na-gtable .na-gq.na-gq.na-gq[data-q="1"] { box-shadow: inset 4px 0 0 var(-
 body .na-gtable .na-gq.na-gq.na-gq[data-q="0"] { box-shadow: none !important; }
 body .na-gtable .na-gpts.na-gpts.na-gpts.na-gpts[data-q="1"] { color: var(--green) !important; }
 body .na-gtable .na-gqline.na-gqline { background: linear-gradient(90deg, var(--green), transparent) !important; }
+
+/* ── 23 · WATCH YOUR POINTS ─────────────────────────────────────────────
+   The link out to the club's highlights page. An ivory plate, because it is
+   something you read and tap, with the play disc in the base red. */
+a.na-hl:not([data-a]):not([data-b]):not([data-c]) {
+  display: flex; align-items: center; gap: 14px; min-height: 64px;
+  margin-top: 14px; padding: 12px 18px 12px 12px;
+  background: var(--ivory); border-radius: 999px; text-decoration: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ivory);
+}
+a.na-hl:active { transform: scale(.985); }
+.na-hl .na-hl-play:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 44px; width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 999px; background: var(--bg); color: var(--ivory) !important; padding-left: 2px;
+}
+body .na-hl .na-hl-title.na-hl-title.na-hl-title {
+  display: block; font-family: 'Archivo', sans-serif; font-style: italic; text-transform: uppercase;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 19px; line-height: 1.1;
+  color: var(--ink) !important;
+}
+body .na-hl .na-hl-sub.na-hl-sub.na-hl-sub {
+  display: block; margin-top: 3px; font-size: 12px; line-height: 1.3; color: var(--muted-ink) !important;
+}
+body .na-hl .na-hl-go.na-hl-go.na-hl-go { flex: 0 0 auto; font-size: 20px; font-weight: 700; color: var(--bg) !important; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

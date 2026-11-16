@@ -201,5 +201,6 @@
     "appDir": "/opt/national-api",
     "webRoot": "/var/www/national.urbanpadel.om/public",
     "tablePrefix": "na_"
-  }
+  },
+  "highlightsUrl": "https://savemyplay.com/facility/192-UZgnrJWB-urban-playground-muscat/highlights"
 }
