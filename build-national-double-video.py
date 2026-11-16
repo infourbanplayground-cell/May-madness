@@ -23,6 +23,7 @@ biggest night actually recorded and lets the reader do the arithmetic.
   node ops/national-standings.mjs $SP/na.json $SP/na-standings.json
   python3 build-national-double-video.py            # AS_OF=2026-11-17 to pin the day
   CUT=$SP/national-double.cut.json python3.13 build-national-audio.py
+  # SHORT=1 on the build for the 7-second cut (national-double-7s.*)
   PAGE=national-double.html NAME=national-double WAV=national-double.wav \\
       node record-national-video.mjs                # CONTACT=1 for a strip
 """
@@ -57,6 +58,21 @@ DUR = 14.40
 SCENES = [0.00, 2.40, 5.40, 8.40, 11.40]
 BEATS = [0.00, 1.20, 2.40, 3.90, 5.40, 6.90, 8.40, 9.90, 11.40, 12.90]
 HERO = [0.00, 2.40, 11.40]
+# SHORT=1 — THE 7-SECOND CUT. The same five scenes on the same beat grid,
+# not a different film: a reel that opens on a table nobody has time to read
+# is worse than no table, so the scenes keep their order and the table and the
+# ask keep the extra beat. Every entrance is written against the long cut's
+# scene lengths (BASE) and the seek scales time by BASE/actual, so nothing in
+# the short cut is still arriving when its scene ends.
+BASE = [2.40, 3.00, 3.00, 3.00, 3.00]
+SHORT = bool(os.environ.get("SHORT"))
+if SHORT:
+    DUR = 7.20
+    SCENES = [0.00, 1.20, 2.40, 4.20, 5.40]
+    BEATS = [0.00, 0.60, 1.20, 1.80, 2.40, 3.00, 3.60, 4.20, 4.80, 5.40, 6.00, 6.60]
+    HERO = [0.00, 1.20, 5.40]
+    OUT = os.path.join(SP, "national-double-7s.html")
+    CUT = os.path.join(SP, "national-double-7s.cut.json")
 FULLDAY = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
 ORD = {1: "1ST", 2: "2ND", 3: "3RD", 4: "4TH"}
 ROSE = "#F2D0D3"
@@ -287,7 +303,7 @@ body{{position:relative}}
 
     js = """
 <script>
-const DUR = %(dur)s, SCENES = %(scenes)s, BEATS = %(beats)s, HERO = %(hero)s, GAP = %(gap)s;
+const DUR = %(dur)s, SCENES = %(scenes)s, BEATS = %(beats)s, HERO = %(hero)s, GAP = %(gap)s, BASE = %(base)s;
 window.__dur = DUR; window.__scenes = SCENES;
 const E = id => document.getElementById(id);
 const clamp = (x,a,b) => x < a ? a : x > b ? b : x;
@@ -348,7 +364,11 @@ function sceneAt(t) { let i = 0; for (let k = 0; k < SCENES.length; k++) if (t >
 
 window.__seek = function (t) {
   t = clamp(t, 0, DUR);
-  const i = sceneAt(t), t0 = SCENES[i], e = energy(t), S = t - t0;
+  const i = sceneAt(t), t0 = SCENES[i], e = energy(t);
+  const len = ((i + 1 < SCENES.length) ? SCENES[i + 1] : DUR) - t0;
+  // scene-local time on the LONG cut's clock; a little faster still, so a
+  // short scene holds its settled frame for most of its length
+  const S = (t - t0) * Math.max(1, BASE[i] / len * (len < BASE[i] ? 1.25 : 1));
   document.querySelectorAll('.scene').forEach((el, k) => { el.style.display = (k === i) ? 'block' : 'none'; });
   E('tile').style.opacity = (0.18 + 0.10 * e).toFixed(3);
   E('tile').style.backgroundSize = (340 + 26 * e).toFixed(1) + 'px ' + (340 + 26 * e).toFixed(1) + 'px';
@@ -403,7 +423,7 @@ document.fonts.ready.then(() => { fitAll(); window.__seek(0); window.__ready = t
 window.__seek(0);
 </script>
 """ % {"dur": DUR, "scenes": json.dumps(SCENES), "beats": json.dumps(BEATS),
-       "hero": json.dumps(HERO), "gap": gap}
+       "hero": json.dumps(HERO), "gap": gap, "base": json.dumps(BASE)}
 
     html = ("<!doctype html><html><head><meta charset='utf-8'>\n<style>"
             + style + "</style></head><body>\n" + body + js + "\n</body></html>")
@@ -411,7 +431,7 @@ window.__seek(0);
     open(OUT, "w", encoding="utf-8").write(html)
     # ONE TABLE, TWO MEDIA: the bed reads this rather than a second copy.
     json.dump({"dur": DUR, "scenes": SCENES, "beats": BEATS, "hero": HERO,
-               "wav": os.path.join(SP, "video", "national-double.wav")}, open(CUT, "w"))
+               "wav": os.path.join(SP, "video", "national-double-7s.wav" if SHORT else "national-double.wav")}, open(CUT, "w"))
 
     # ── captions, from the same figures ─────────────────────────────────────
     x = d(night)
@@ -452,7 +472,8 @@ The table after {WORDS[ST['played']].lower()} nights:
 #urbanplayground #padel #oman #56nationalseries #العيد_الوطني #عمان
 """
     os.makedirs(os.path.dirname(CAPS), exist_ok=True)
-    open(CAPS, "w", encoding="utf-8").write(cap)
+    if not SHORT:      # one caption file; the short cut posts with the same words
+        open(CAPS, "w", encoding="utf-8").write(cap)
 
     print(f"built {OUT}  {len(html)/1024:.0f}KB  {DUR}s")
     print(f"  night {n_night} is {longish(night)}, {away} day(s) from {today} (Muscat) -> \"{when}\"")
