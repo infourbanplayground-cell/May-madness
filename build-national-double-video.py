@@ -308,23 +308,59 @@ window.__dur = DUR; window.__scenes = SCENES;
 const E = id => document.getElementById(id);
 const clamp = (x,a,b) => x < a ? a : x > b ? b : x;
 const ease  = u => 1 - Math.pow(1 - clamp(u,0,1), 3);
-function enter(el, u, rise, wide) {
-  const e = ease(u);
-  el.style.opacity = clamp(u * 1.6, 0, 1);
-  el.style.transform = 'translateY(' + ((1 - e) * (rise === undefined ? 34 : rise)).toFixed(2) + 'px)';
+// ── MOTION ──────────────────────────────────────────────────────────────
+// THE FIRST CUT MOVED LIKE A TEMPLATE, and the owner said so. Three things
+// were wrong with it and none of them was the content:
+//   1 · THE GROUND PULSED. The khanjar tile grew and brightened on every
+//       beat, so the one thing in the frame that is meant to be a wall was
+//       the busiest thing in it. A ground does not move. Neither does the
+//       trim, and nothing here scales on the beat any more.
+//   2 · EVERYTHING ARRIVED THE SAME WAY — fade up 34px, cubic — so five
+//       scenes read as one move repeated twenty-five times.
+//   3 · NOTHING LEFT. Scenes hard-cut with their content at rest, which is
+//       a slideshow.
+// So: display type is REVEALED from behind its own baseline (a mask, the way
+// a title sequence sets a line), surfaces OPEN (the pill wipes, the plates
+// rise like a door), small type simply fades, each scene clears out before
+// the next one lands, and the easing is an expo-out that arrives fast and
+// settles long. One flourish a scene, played once, never on the beat.
+const expo = u => { u = clamp(u, 0, 1); return u >= 1 ? 1 : 1 - Math.pow(2, -10 * u); };
+const back = u => { u = clamp(u, 0, 1); const c = 1.15, v = u - 1; return 1 + (c + 1) * v * v * v + c * v * v; };
+// A line rising from behind its baseline. The element is shifted down by d
+// and the bottom d px of it is clipped, so the window it shows through stays
+// where the line will finally sit. Negative side insets, or the italic's
+// overhang is sliced.
+function reveal(el, u, wide) {
+  const e = expo(u), h = el.offsetHeight || 1, d = (1 - e) * h;
+  el.style.opacity = u <= 0 ? 0 : 1;
+  el.style.transform = 'translateY(' + d.toFixed(2) + 'px)';
+  el.style.clipPath = u >= 1 ? 'none' : 'inset(-30px -60px ' + d.toFixed(2) + 'px -60px)';
   if (wide) {
-    const s = el.querySelector('.fitspan') || el;
-    s.style.fontVariationSettings = "'wdth' " + (84 + 41 * e).toFixed(1) + ",'wght' 900";
+    const sp = el.querySelector('.fitspan') || el;
+    sp.style.fontVariationSettings = "'wdth' " + (104 + 21 * e).toFixed(1) + ",'wght' 900";
   }
 }
-// clamped where it is made: the window opens 20ms early, so (1-u)^3 can pass one
-function energy(t) {
-  let e = 0;
-  for (const b of BEATS) {
-    const u = (t - (b - 0.02)) / 0.30;
-    if (u >= 0 && u <= 1) e = Math.max(e, Math.pow(1 - clamp(u,0,1), 3) * (HERO.includes(b) ? 1 : 0.55));
-  }
-  return clamp(e, 0, 1);
+function fade(el, u) {
+  const e = expo(u);
+  el.style.opacity = clamp(u * 2.2, 0, 1);
+  el.style.transform = 'translateY(' + ((1 - e) * 10).toFixed(2) + 'px)';
+}
+// A surface opening. `side` is the edge it grows FROM. The other three insets
+// are negative so the double-line ring, which is a box-shadow outside the
+// border box, is not clipped off once the surface is open.
+function open(el, u, side) {
+  const e = expo(u), r = ((1 - e) * 100).toFixed(2) + '%%';
+  el.style.opacity = u <= 0 ? 0 : 1;
+  el.style.clipPath = u >= 1 ? 'none'
+    : side === 'left'   ? 'inset(-20px ' + r + ' -20px -20px round 999px)'
+    : side === 'top'    ? 'inset(-20px -20px ' + r + ' -20px)'
+    :                     'inset(' + r + ' -20px -20px -20px)';
+}
+function pop(el, u, spin) {
+  const e = back(u);
+  el.style.opacity = clamp(u * 3, 0, 1);
+  el.style.transform = 'scale(' + (0.6 + 0.4 * e).toFixed(4) + ')'
+    + (spin ? ' rotate(' + ((1 - expo(u)) * spin).toFixed(2) + 'deg)' : '');
 }
 // Every scene visible while it measures: a hidden box measures 0 and the loop
 // would run every headline in it to the floor.
@@ -364,59 +400,70 @@ function sceneAt(t) { let i = 0; for (let k = 0; k < SCENES.length; k++) if (t >
 
 window.__seek = function (t) {
   t = clamp(t, 0, DUR);
-  const i = sceneAt(t), t0 = SCENES[i], e = energy(t);
-  const len = ((i + 1 < SCENES.length) ? SCENES[i + 1] : DUR) - t0;
+  const i = sceneAt(t), t0 = SCENES[i];
+  const last = i + 1 >= SCENES.length;
+  const t1 = last ? DUR : SCENES[i + 1], len = t1 - t0;
   // scene-local time on the LONG cut's clock; a little faster still, so a
   // short scene holds its settled frame for most of its length
   const S = (t - t0) * Math.max(1, BASE[i] / len * (len < BASE[i] ? 1.25 : 1));
-  document.querySelectorAll('.scene').forEach((el, k) => { el.style.display = (k === i) ? 'block' : 'none'; });
-  E('tile').style.opacity = (0.18 + 0.10 * e).toFixed(3);
-  E('tile').style.backgroundSize = (340 + 26 * e).toFixed(1) + 'px ' + (340 + 26 * e).toFixed(1) + 'px';
-  for (const b of document.querySelectorAll('.band')) b.style.opacity = (0.82 + 0.18 * e).toFixed(3);
+
+  // EACH SCENE CLEARS OUT before the next lands: four frames, up and away.
+  // And while it is on screen it drifts in by one percent — the only
+  // continuous motion in the film, linear, and too slow to read as a move.
+  const x = last ? 1 : clamp((t1 - t) / 0.14, 0, 1);
+  document.querySelectorAll('.scene').forEach((el, k) => {
+    el.style.display = (k === i) ? 'block' : 'none';
+    if (k !== i) return;
+    el.style.opacity = (x * x).toFixed(3);
+    el.style.transformOrigin = '50%% 50%%';
+    el.style.transform = 'translateY(' + (-(1 - x) * 26).toFixed(2) + 'px) scale('
+      + (1 + 0.010 * (t - t0) / len).toFixed(5) + ')';
+  });
 
   if (i === 0) {
-    enter(E('s1a'), S / 0.55, 26);
-    enter(E('s1k'), (S - 0.14) / 0.50, 16);
-    enter(E('s1b'), (S - 0.20) / 0.65, 40, true);
-    enter(E('s1c'), (S - 0.48) / 0.55, 24);
-    enter(E('s1d'), (S - 0.70) / 0.55, 18);
-    E('s1a').style.transform += ' scale(' + (1 + 0.035 * e).toFixed(4) + ')';
+    pop(E('s1a'), S / 0.50);
+    fade(E('s1k'), (S - 0.12) / 0.45);
+    reveal(E('s1b'), (S - 0.16) / 0.70, true);
+    reveal(E('s1c'), (S - 0.38) / 0.60);
+    fade(E('s1d'), (S - 0.62) / 0.50);
   } else if (i === 1) {
-    enter(E('s2a'), S / 0.45, 16);
-    enter(E('s2pill'), (S - 0.10) / 0.60, 34);
-    enter(E('s2b'), (S - 0.55) / 0.60, 40, true);
-    enter(E('s2c'), (S - 0.80) / 0.60, 40, true);
-    enter(E('s2d'), (S - 1.30) / 0.55, 18);
-    E('s2x').style.transform = 'scale(' + (1 + 0.10 * e).toFixed(4) + ')';
+    fade(E('s2a'), S / 0.40);
+    open(E('s2pill'), (S - 0.06) / 0.60, 'left');
+    pop(E('s2x'), (S - 0.42) / 0.55, -140);
+    reveal(E('s2b'), (S - 0.50) / 0.65, true);
+    reveal(E('s2c'), (S - 0.64) / 0.65, true);
+    fade(E('s2d'), (S - 1.15) / 0.50);
   } else if (i === 2) {
-    enter(E('s3med'), S / 0.55, 20);
-    E('s3med').style.transform += ' scale(' + (1 + 0.05 * e).toFixed(4) + ')';
-    enter(E('s3a'), (S - 0.12) / 0.50, 16);
-    enter(E('s3rows'), (S - 0.20) / 0.60, 30);
-    // rows land in turn and their points count up to the engine's totals
+    pop(E('s3med'), S / 0.50);
+    fade(E('s3a'), (S - 0.10) / 0.40);
+    open(E('s3rows'), (S - 0.14) / 0.60, 'top');
+    // the rows come in from the left one after another, and each total
+    // counts up to the engine's figure and is DONE well before the cut
     document.querySelectorAll('#s3rows .tr').forEach((el, k) => {
-      const uu = (S - 0.40 - k * 0.16) / 0.50;
-      el.style.opacity = clamp(uu * 1.7, 0, 1);
+      const uu = (S - 0.26 - k * 0.09) / 0.50, ee = expo(uu);
+      el.style.opacity = clamp(uu * 2.4, 0, 1);
+      el.style.transform = 'translateX(' + (-(1 - ee) * 46).toFixed(2) + 'px)';
       const pt = el.querySelector('.pt');
-      pt.textContent = Math.round(+pt.dataset.pts * ease((S - 0.45 - k * 0.16) / 0.85));
+      pt.textContent = Math.round(+pt.dataset.pts * expo((S - 0.30 - k * 0.09) / 0.62));
     });
-    enter(E('s3c'), (S - 1.45) / 0.50, 16);
-    enter(E('s3d'), (S - 1.60) / 0.50, 16);
+    fade(E('s3c'), (S - 1.00) / 0.45);
+    fade(E('s3d'), (S - 1.10) / 0.45);
   } else if (i === 3) {
-    enter(E('s4a'), S / 0.45, 16);
-    enter(E('s4arch'), (S - 0.12) / 0.65, 38);
-    E('s4n').textContent = Math.round(GAP * ease((S - 0.20) / 0.80));
-    enter(E('s4b'), (S - 1.10) / 0.55, 26);
-    enter(E('s4c'), (S - 1.30) / 0.60, 34, true);
-    enter(E('s4d'), (S - 1.70) / 0.55, 18);
+    fade(E('s4a'), S / 0.40);
+    open(E('s4arch'), (S - 0.08) / 0.65, 'bottom');
+    E('s4n').textContent = Math.round(GAP * expo((S - 0.20) / 0.55));
+    reveal(E('s4b'), (S - 0.90) / 0.60);
+    reveal(E('s4c'), (S - 1.04) / 0.65, true);
+    fade(E('s4d'), (S - 1.45) / 0.50);
   } else {
-    enter(E('s5a'), S / 0.45, 16);
-    enter(E('s5b'), (S - 0.10) / 0.65, 40, true);
-    enter(E('s5c'), (S - 0.36) / 0.55, 26);
-    enter(E('s5arch'), (S - 0.60) / 0.70, 40);
-    enter(E('s5d'), (S - 1.05) / 0.55, 22);
-    enter(E('s5e'), (S - 1.25) / 0.55, 18);
-    E('s5arch').style.transform += ' scale(' + (1 + 0.02 * e).toFixed(4) + ')';
+    fade(E('s5a'), S / 0.40);
+    reveal(E('s5b'), (S - 0.08) / 0.70, true);
+    reveal(E('s5c'), (S - 0.30) / 0.60);
+    open(E('s5arch'), (S - 0.48) / 0.65, 'bottom');
+    fade(E('s5t1'), (S - 0.72) / 0.45);
+    fade(E('s5t2'), (S - 0.86) / 0.45);
+    reveal(E('s5d'), (S - 1.00) / 0.60);
+    fade(E('s5e'), (S - 1.25) / 0.50);
   }
 };
 document.fonts.ready.then(() => { fitAll(); window.__seek(0); window.__ready = true; });
