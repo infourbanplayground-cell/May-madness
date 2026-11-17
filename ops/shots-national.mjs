@@ -96,6 +96,30 @@ const VPS = process.env.VP
 
 const SCREENS = ['home', 'sessions', 'rank', 'me', 'players'];
 
+
+// SAVEMYPLAY, SERVED LOCALLY. Chromium here does not trust the agent proxy's
+// CA, so the clip API and its CDN both fail and the clips render zero times —
+// passing every look having shown nothing. The API answer and the thumbnails
+// are fixtures in <scratch>/smp. In a night, last night's clips are moved onto
+// the date of the night being shot, so its CLIPS tab has something in it.
+const SMP = path.join(SC, 'smp');
+async function routeClips(pg, toDate) {
+  if (!fs.existsSync(path.join(SMP, 'clips.json'))) return;
+  const raw = JSON.parse(fs.readFileSync(path.join(SMP, 'clips.json'), 'utf8'));
+  if (toDate) {
+    const muscat = s => new Date((s + 4 * 3600) * 1000).toISOString().slice(0, 10);
+    const shift = (Date.parse(toDate) - Date.parse('2026-11-16')) / 1000;
+    raw.clips.forEach(c => { if (muscat(c.start_time) === '2026-11-16') { c.start_time += shift; c.end_time += shift; } });
+  }
+  await pg.route('**/api.savemyplay.com/**', r => r.fulfill({ status: 200, contentType: 'application/json',
+    headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(raw) }));
+  await pg.route('**/smpw.b-cdn.net/**', r => {
+    const f = path.join(SMP, 'cdn', path.basename(new URL(r.request().url()).pathname));
+    if (fs.existsSync(f)) return r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(f) });
+    return r.fulfill({ status: 404, body: '' });
+  });
+}
+
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const shots = [];
 
@@ -116,6 +140,7 @@ for (const [w, h] of VPS) {
     await pg.addInitScript(() => {
       try { localStorage.setItem('na-role', 'admin'); } catch {}
     });
+  await routeClips(pg, null);
 
   await pg.goto(ORIGIN + '/', { waitUntil: 'load' });
   await pg.waitForSelector('nav.fixed.bottom-0', { timeout: 25000 });

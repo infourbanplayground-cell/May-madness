@@ -486,7 +486,17 @@ const AUDIT = () => {
   // 4 · Nothing past the viewport, and no sideways scroll. A 3100px lockup in a
   // 430px header did exactly this.
   const W = document.documentElement.clientWidth;
-  const past = visible.filter(e => e.getBoundingClientRect().right > W + 1)
+  // ...except INSIDE a sideways scroller, which is meant to run past the edge
+  // and is how the home screen's clip strip works. Only a scroller whose own
+  // box stays on the screen counts: the scroller itself is still checked.
+  const inScroller = e => {
+    for (let p = e.parentElement; p && p !== document.body; p = p.parentElement) {
+      const o = getComputedStyle(p).overflowX;
+      if ((o === 'auto' || o === 'scroll') && p.getBoundingClientRect().right <= W + 1) return true;
+    }
+    return false;
+  };
+  const past = visible.filter(e => e.getBoundingClientRect().right > W + 1 && !inScroller(e))
     .map(e => (e.className || e.tagName).toString().slice(0, 40) + ' -> '
       + Math.round(e.getBoundingClientRect().right));
 

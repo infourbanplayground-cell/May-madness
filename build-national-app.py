@@ -425,6 +425,11 @@ DATE_JS = (
     + f"const NATIONAL_DAY_DATE = {CFG['nationalDay']!r};\n"
     + "const NATIONAL_DAY_TITLE = " + json.dumps(CFG['nationalDayLabel']) + ";\n"
     + "const NATIONAL_DAY_TITLE_AR = " + json.dumps(CFG['nationalDayLabelAr'], ensure_ascii=False) + ";\n"
+    # the clip list's address is derived from the one URL in the config
+    + "const NA_HIGHLIGHTS_URL = " + json.dumps(CFG['highlightsUrl']) + ";\n"
+    + "const NA_CLIPS_API = " + json.dumps("https://api.savemyplay.com/v1/facilities/slug/"
+        + re.search(r"/facility/([^/]+)/highlights", CFG['highlightsUrl']).group(1)
+        + "/highlights?view=all&limit=60") + ";\n"
     + f"const NATIONAL_DAY_LABEL_SHORT = {_short_date(CFG['nationalDay'])!r};\n"
 )
 
@@ -661,6 +666,19 @@ MOTIFS = [
     # so a night created without the 2X ticked still dresses for its date.
     ('''    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg">''',
      '''    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg" data-double={(session.doublePoints || DOUBLE_NIGHTS.includes(session.date)) ? "1" : "0"}>'''),
+    # 11 · THE NIGHT'S CLIPS (national_screens.NaClips): a tab of its own,
+    # reached from the action row beside PHOTOS, with the night's count on it.
+    ('''  const [tab, setTab] = useState("teams");''',
+     '''  const [tab, setTab] = useState("teams");
+  const naClipSt = useNaClips(false);
+  const naNightClipCount = naClipsForNight(naClipSt.clips, session.date).length;'''),
+    ('''              { key:"photos", label:"Photos", Ic:CIc.camera, on:tab === "photos",''',
+     '''              { key:"clips", label:"Clips", Ic:NaPlayIc, on:tab === "clips",
+                count:naNightClipCount > 0 ? naNightClipCount : null, go:() => setTab("clips"), show:true },
+              { key:"photos", label:"Photos", Ic:CIc.camera, on:tab === "photos",'''),
+    ('''        {tab === "photos" && <div className="space-y-4">''',
+     '''        {tab === "clips" && <NaClips session={session} />}
+        {tab === "photos" && <div className="space-y-4">'''),
     # 4 · THE BRACKET COMES FIRST. The screen is called KO and opened on a
     # paragraph about seeding, with the bracket a screen and a half down. The
     # panel is an explanation of the bracket, so it goes under it — by
@@ -1187,6 +1205,7 @@ MOTIFS = [
         </span>
         <span className="na-hl-go" aria-hidden="true">&#8599;</span>
       </a>
+      <NaHomeClips />
 
       {/* ── NEXT UP ── */}'''),
     # 5d · THE SHARE CARDS GET THE MOTIFS TOO. They are drawn on a CANVAS,

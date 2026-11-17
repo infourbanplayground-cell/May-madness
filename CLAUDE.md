@@ -1325,6 +1325,28 @@ in the repo green. The owner found both by looking at a card.
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
 
+#### The clips — SaveMyPlay, played in the app
+- The courts are on **SaveMyPlay**: a player presses the button after a point
+  and a 25-second clip, watermarked with the club's mark, lands on the club's
+  page. `highlightsUrl` in `national-season.json` is that page; the app derives
+  the JSON API from it (`api.savemyplay.com/v1/facilities/slug/<slug>/highlights?view=all`,
+  public, `Access-Control-Allow-Origin: *`) and the browser reads it directly.
+  **No video is copied to our server** — the files play from SaveMyPlay's CDN
+  and every clip links back to its own page there.
+- A clip is placed on a NIGHT by when it was cut, in Muscat time; anything
+  before 04:00 belongs to the night before. Inside a night it is the CLIPS
+  chip (with the count) beside PHOTOS, polling every 60s while the night is
+  open; on HOME the latest night's clips sit under the link for a week.
+- Chromium here cannot reach their API (the proxy CA), so `shots-session.mjs`
+  and `shots-national.mjs` serve `<scratch>/smp/clips.json` and the
+  thumbnails in `<scratch>/smp/cdn/` — and move 16 Nov's clips onto the date
+  of the night being shot, or the tab renders empty and passes having shown
+  nothing.
+- **The double nights wear green inside the night** (skin section 24): the
+  pane carries `data-double` and the ground tokens are re-pointed, with an
+  ivory DOUBLE POINTS banner. `DOUBLE=1` on `shots-session.mjs` dresses the
+  shot night as one; `REDS=1` lists anything still red inside it.
+
 #### The night — `national_screens.py`
 **THE NIGHT TOLD YOU THE DRAW AND NEVER THE STATE.** It is the screen somebody
 holds for three hours beside a court, and it was the one part of the app

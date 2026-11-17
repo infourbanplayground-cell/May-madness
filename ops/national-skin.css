@@ -1726,3 +1726,11 @@ body .jh-mock-sess.jh-mock-sess[data-state="LIVE"] {
 /* the group match cards carry their edge as a gradient over a red base */
 .fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(8, 122, 63)"],
 .fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(242, 2"] { background-color: var(--deep) !important; }
+
+/* ── 25 · THE CLIPS ─────────────────────────────────────────────────────
+   A thumbnail is a picture, not a surface: 18px, not the 28px sheet radius,
+   which on a 16:9 frame eats the corners of the court. The play disc is a
+   circle, like every icon here. */
+body .na-clip.na-clip:not([data-a]):not([data-b]) { border-radius: 18px !important; }
+body .na-clip .na-clip-play.na-clip-play:not([data-a]) { border-radius: 999px !important; }
+body .na-clipvid.na-clipvid:not([data-a]) { border-radius: 18px !important; }

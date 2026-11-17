@@ -101,6 +101,30 @@ const VPS = process.env.VP
   ? [process.env.VP.split('x').map(Number)]
   : [[390, 844], [375, 667]];
 
+
+// SAVEMYPLAY, SERVED LOCALLY. Chromium here does not trust the agent proxy's
+// CA, so the clip API and its CDN both fail and the clips render zero times —
+// passing every look having shown nothing. The API answer and the thumbnails
+// are fixtures in <scratch>/smp. In a night, last night's clips are moved onto
+// the date of the night being shot, so its CLIPS tab has something in it.
+const SMP = path.join(SC, 'smp');
+async function routeClips(pg, toDate) {
+  if (!fs.existsSync(path.join(SMP, 'clips.json'))) return;
+  const raw = JSON.parse(fs.readFileSync(path.join(SMP, 'clips.json'), 'utf8'));
+  if (toDate) {
+    const muscat = s => new Date((s + 4 * 3600) * 1000).toISOString().slice(0, 10);
+    const shift = (Date.parse(toDate) - Date.parse('2026-11-16')) / 1000;
+    raw.clips.forEach(c => { if (muscat(c.start_time) === '2026-11-16') { c.start_time += shift; c.end_time += shift; } });
+  }
+  await pg.route('**/api.savemyplay.com/**', r => r.fulfill({ status: 200, contentType: 'application/json',
+    headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(raw) }));
+  await pg.route('**/smpw.b-cdn.net/**', r => {
+    const f = path.join(SMP, 'cdn', path.basename(new URL(r.request().url()).pathname));
+    if (fs.existsSync(f)) return r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(f) });
+    return r.fulfill({ status: 404, body: '' });
+  });
+}
+
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const shots = [];
 
@@ -119,6 +143,7 @@ for (const [w, h] of VPS) {
 
   const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
+  await routeClips(pg, JSON.parse(state).state.sessions[0].date);
   await pg.goto(ORIGIN + '/', { waitUntil: 'load' });
   await pg.waitForSelector('nav.fixed.bottom-0', { timeout: 25000 });
   await pg.evaluate(() => document.fonts.ready);
@@ -172,17 +197,33 @@ for (const [w, h] of VPS) {
   if (wentIn) { await pg.waitForTimeout(1000); await shoot('NIGHT'); }
 
   const subs = await pg.evaluate(() => [...new Set([...document.querySelectorAll('button')]
-    .map(b => (b.textContent || '').trim())
-    .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|KO|TABLE|SCORES|POINTS|LIST)$/i.test(t)))]);
+    // a chip carries its count in the same button ("Clips22"), so the label
+    // is read with any trailing number taken off
+    .map(b => (b.textContent || '').trim().replace(/\d+$/, ''))
+    .filter(t => /^(GROUPS|TEAMS|BRACKET|RECAP|PHOTOS|MVP|KNOCKOUT|KO|TABLE|SCORES|POINTS|LIST|CLIPS)$/i.test(t)))]);
   console.log('  sub-screens: ' + subs.join(', '));
   for (const s of subs) {
     await pg.evaluate((s) => {
       const b = [...document.querySelectorAll('button')]
-        .find(x => (x.textContent || '').trim().toUpperCase() === s.toUpperCase());
+        .find(x => (x.textContent || '').trim().replace(/\d+$/, '').toUpperCase() === s.toUpperCase());
       if (b) b.click();
     }, s);
     await pg.waitForTimeout(700);
     await shoot(s.toUpperCase());
+    // the clip PLAYER is a sheet, so the tab alone never shows it
+    if (/^clips$/i.test(s)) {
+      const hit = await pg.evaluate(() => { const c = document.querySelector('.na-clip[aria-label]'); if (!c) return false; c.click(); return true; });
+      if (hit) {
+        await pg.waitForTimeout(700);
+        const file = path.join(OUT, `clip-sheet-${w}x${h}.png`);
+        await pg.screenshot({ path: file });
+        shots.push({ file, label: `CLIP SHEET  ${w}x${h}`, note: 'the player' });
+        console.log('  CLIP SHEET');
+        await pg.keyboard.press('Escape').catch(() => {});
+        await pg.evaluate(() => { const x = [...document.querySelectorAll('.fixed.inset-0.z-50 button')][0]; if (x) x.click(); });
+        await pg.waitForTimeout(300);
+      }
+    }
     // REDS=1 — on a double night the pane is green, and anything still drawn
     // in the volume's red is a surface the token re-point did not reach: an
     // inline hex the sweep wrote, or a rule with a literal in it. This lists

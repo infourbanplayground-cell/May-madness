@@ -36,6 +36,7 @@ def screens(pal):
     ivory = pal['ivory']
     red = pal['bg']
     green = pal['green']
+    ink = pal['ink']
     # --rose-txt. The skin's own muted copy colour: 4.72:1 on the base red,
     # where `rose` itself is 3.64:1 and under AA for a sentence. Same reason
     # the skin keeps rose for dots, rules and fills and never for prose.
@@ -354,6 +355,182 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
           );
         }})}}
       </div>
+    </div>
+  );
+}}
+
+// ── THE CLIPS FROM THE COURTS ────────────────────────────────────────────────
+// The courts are wired to SaveMyPlay: a player presses the button after a
+// point and the last 25 seconds are cut, watermarked with the club's mark and
+// published on the club's page there. Their API is public and answers any
+// origin (Access-Control-Allow-Origin: *), so the app reads the list straight
+// from the browser and plays the files from their CDN — no copy of anybody's
+// video is held on our server, and every clip links back to its own page.
+//
+// A clip is placed on a NIGHT by when it was cut, in Muscat time. The night
+// runs from the afternoon into the small hours, so 00:40 belongs to the night
+// before. The epoch is shifted by four hours and read with the UTC getters —
+// the same construction naNightWhen uses, and never toISOString, which is
+// the UTC date and a day out for anything after 20:00 here.
+let naClipCache = {{ at: 0, clips: null, err: false }};
+let naClipWait = null;
+function naLoadClips(force) {{
+  if (!force && naClipCache.clips && Date.now() - naClipCache.at < 60000) return Promise.resolve(naClipCache);
+  if (naClipWait) return naClipWait;
+  naClipWait = fetch(NA_CLIPS_API, {{ cache: "no-store" }})
+    .then(r => {{ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }})
+    .then(d => {{
+      const clips = (d.clips || []).filter(c => c && c.video && c.thumb && c.start_time);
+      naClipCache = {{ at: Date.now(), clips, err: false }};
+    }})
+    .catch(() => {{ naClipCache = {{ ...naClipCache, err: true }}; }})
+    .then(() => {{ naClipWait = null; return naClipCache; }});
+  return naClipWait;
+}}
+function useNaClips(poll) {{
+  const [st, setSt] = React.useState(naClipCache);
+  React.useEffect(() => {{
+    let live = true;
+    const go = (f) => naLoadClips(f).then(c => {{ if (live) setSt({{ ...c }}); }});
+    go(false);
+    // inside a night that is being played, a clip pressed on court should
+    // turn up without anybody reloading
+    const t = poll ? setInterval(() => go(true), 60000) : null;
+    return () => {{ live = false; if (t) clearInterval(t); }};
+  }}, [poll]);
+  return st;
+}}
+const naMuscat = (sec) => {{
+  const d = new Date((sec + 4 * 3600) * 1000);
+  return {{ y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes() }};
+}};
+const naIsoOf = (x) => x.y + "-" + String(x.m + 1).padStart(2, "0") + "-" + String(x.d).padStart(2, "0");
+function naClipNight(c) {{
+  const x = naMuscat(c.start_time);
+  return x.h < 4 ? naIsoOf(naMuscat(c.start_time - 86400)) : naIsoOf(x);
+}}
+function naClipsForNight(clips, date) {{
+  return (clips || []).filter(c => naClipNight(c) === date).sort((a, b) => a.start_time - b.start_time);
+}}
+function naClipWhen(c) {{
+  const x = naMuscat(c.start_time);
+  const h12 = x.h % 12 === 0 ? 12 : x.h % 12;
+  return h12 + ":" + String(x.mi).padStart(2, "0") + (x.h < 12 ? " AM" : " PM");
+}}
+const naClipCourt = (c) => (c.court && c.court.name) || "Court";
+const naClipPage = (c) => c.rel_url ? "https://savemyplay.com" + c.rel_url : NA_HIGHLIGHTS_URL;
+
+const NaPlayIc = ({{ size = 13, style }}) => (
+  <svg width={{size}} height={{size}} viewBox="0 0 24 24" style={{style}} aria-hidden="true">
+    <path d="M8 5v14l11-7z" fill="currentColor" />
+  </svg>
+);
+
+// One thumbnail. The poster is the club's own watermarked frame; the court
+// and the time sit on a scrim at the foot, because two clips from the same
+// rally on different courts are otherwise the same picture.
+function NaClipThumb({{ c, onPick, wide }}) {{
+  return (
+    <button className="na-clip" onClick={{() => onPick(c)}}
+      style={{{{ position: "relative", display: "block", width: wide ? 210 : "100%", flex: wide ? "0 0 210px" : undefined,
+        aspectRatio: "16 / 9", padding: 0, border: 0, cursor: "pointer", overflow: "hidden",
+        backgroundColor: "{ink}", backgroundImage: "url(" + c.thumb + ")", backgroundSize: "cover",
+        backgroundPosition: "center" }}}}
+      aria-label={{"Play the " + naClipWhen(c) + " clip from " + naClipCourt(c)}}>
+      <span className="na-clip-play" style={{{{ position: "absolute", top: "50%", left: "50%", width: 42, height: 42,
+        margin: "-21px 0 0 -21px", display: "grid", placeItems: "center", paddingLeft: 2,
+        background: "rgba(247,241,230,.92)", color: "{red}" }}}}><NaPlayIc size={{18}} /></span>
+      <span style={{{{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "18px 10px 7px",
+        display: "flex", justifyContent: "space-between", gap: 8,
+        background: "linear-gradient(180deg, rgba(26,10,12,0), rgba(26,10,12,.82))",
+        fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10, letterSpacing: ".1em",
+        color: "{ivory}", textTransform: "uppercase" }}}}>
+        <span>{{naClipCourt(c)}}</span><span>{{naClipWhen(c)}}</span>
+      </span>
+    </button>
+  );
+}}
+
+// The player. A sheet over the night with the clip, where it was cut, the
+// next and the previous, and the clip's own page on SaveMyPlay — which is
+// where it can be downloaded or shared, and which gets the credit.
+function NaClipSheet({{ list, at, onAt, onClose }}) {{
+  const c = list[at];
+  if (!c) return null;
+  return (
+    <Modal open={{true}} onClose={{onClose}} title="CLIP">
+      <video key={{c.id}} src={{c.video}} poster={{c.poster || c.thumb}} controls playsInline autoPlay
+        preload="metadata" className="na-clipvid"
+        style={{{{ display: "block", width: "100%", maxHeight: "58vh", background: "#000" }}}} />
+      <div style={{{{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginTop: 12 }}}}>
+        <span style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic", textTransform: "uppercase",
+          fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 20, color: "{ivory}" }}}}>
+          {{naClipCourt(c)}} &middot; {{naClipWhen(c)}}</span>
+        <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          color: "{rose_txt}" }}}}>{{at + 1}} / {{list.length}}</span>
+      </div>
+      <div style={{{{ display: "flex", gap: 8, marginTop: 12 }}}}>
+        <Btn variant="secondary" className="flex-1" disabled={{at === 0}} onClick={{() => onAt(at - 1)}}>&larr; Earlier</Btn>
+        <Btn variant="secondary" className="flex-1" disabled={{at === list.length - 1}} onClick={{() => onAt(at + 1)}}>Later &rarr;</Btn>
+      </div>
+      <a href={{naClipPage(c)}} target="_blank" rel="noopener noreferrer"
+        style={{{{ display: "block", marginTop: 12, textAlign: "center", fontSize: 13, color: "{rose_txt}" }}}}>
+        Download or share it on SaveMyPlay &#8599;</a>
+    </Modal>
+  );
+}}
+
+// THE NIGHT'S CLIPS — its own tab inside a night.
+function NaClips({{ session }}) {{
+  const st = useNaClips(!session.completed);
+  const list = naClipsForNight(st.clips, session.date);
+  const [at, setAt] = React.useState(null);
+  const note = (t) => <div style={{{{ fontSize: 13, lineHeight: 1.5, color: "{rose_txt}" }}}}>{{t}}</div>;
+  return (
+    <div className="space-y-3">
+      <div className="na-cliphead" style={{{{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}}}>
+        <span style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic", textTransform: "uppercase",
+          fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 24, color: "{ivory}" }}}}>From the courts</span>
+        {{list.length > 0 && <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
+          letterSpacing: ".14em", color: "{rose_txt}" }}}}>{{list.length}} CLIP{{list.length === 1 ? "" : "S"}}</span>}}
+      </div>
+      {{note("Press the SaveMyPlay button on court after a point and the last 25 seconds land here a few minutes later.")}}
+      {{st.clips === null && !st.err && <div className="grid grid-cols-2 gap-2">{{[0, 1, 2, 3].map(k =>
+        <div key={{k}} className="na-clip" style={{{{ aspectRatio: "16 / 9", background: "rgba(247,241,230,.10)" }}}} />)}}</div>}}
+      {{st.err && !st.clips && note("The clips could not be loaded just now.")}}
+      {{st.clips && list.length === 0 && note("No clips from this night yet.")}}
+      {{list.length > 0 && <div className="grid grid-cols-2 gap-2">
+        {{list.map((c, k) => <NaClipThumb key={{c.id}} c={{c}} onPick={{() => setAt(k)}} />)}}
+      </div>}}
+      <a href={{NA_HIGHLIGHTS_URL}} target="_blank" rel="noopener noreferrer"
+        style={{{{ display: "inline-block", marginTop: 4, fontSize: 13, color: "{ivory}", textDecoration: "underline" }}}}>
+        Every clip from the club on SaveMyPlay &#8599;</a>
+      {{at !== null && <NaClipSheet list={{list}} at={{at}} onAt={{setAt}} onClose={{() => setAt(null)}} />}}
+    </div>
+  );
+}}
+
+// ...and on HOME, the latest night's clips under the link, while they are
+// fresh. A week old they stop being news and only the link stays.
+function NaHomeClips() {{
+  const st = useNaClips(false);
+  const [at, setAt] = React.useState(null);
+  if (!st.clips || !st.clips.length) return null;
+  const newest = [...st.clips].sort((a, b) => b.start_time - a.start_time)[0];
+  if (Date.now() / 1000 - newest.start_time > 7 * 86400) return null;
+  const night = naClipNight(newest);
+  const list = naClipsForNight(st.clips, night).reverse();
+  return (
+    <div className="na-homeclips" style={{{{ marginTop: 10 }}}}>
+      <div style={{{{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "0 4px 8px" }}}}>
+        <span className="sg-kicker">Latest clips &middot; {{naNightWhen(night)}}</span>
+        <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
+          letterSpacing: ".14em", color: "{rose_txt}" }}}}>{{list.length}}</span>
+      </div>
+      <div style={{{{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", paddingBottom: 2 }}}}>
+        {{list.slice(0, 12).map((c, k) => <NaClipThumb key={{c.id}} c={{c}} wide onPick={{() => setAt(k)}} />)}}
+      </div>
+      {{at !== null && <NaClipSheet list={{list.slice(0, 12)}} at={{at}} onAt={{setAt}} onClose={{() => setAt(null)}} />}}
     </div>
   );
 }}
