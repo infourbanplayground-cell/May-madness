@@ -9,6 +9,7 @@
 //   APP=<file>   which build       ROLE=admin   the organiser's view
 //   VP=390x844   one viewport      FULL=1       whole-page shots
 //   SCROLL=600   shoot that far down the pane
+//   DOUBLE=1     the night is a double night (National Day skin)
 //
 // It writes a contact sheet beside the shots, for the same reason the other
 // one does: a screen is judged against its siblings.
@@ -56,6 +57,17 @@ if (process.env.MID) {
   live.score = { t1: 4, t2: 3 };          // opened on the pad, not yet locked
   s.bracket = { qf: [], sf: [], final: null };
   s.completed = false;
+  state = JSON.stringify(st);
+}
+
+// DOUBLE=1 — the night the shots open becomes a DOUBLE night on National Day,
+// which the live state has none of until the 18th is played. The double-night
+// skin renders zero times without it.
+if (process.env.DOUBLE) {
+  const st = JSON.parse(state);
+  const s = (st.state.sessions || [])[0];
+  if (!s) throw new Error('DOUBLE: no session to mark');
+  s.doublePoints = true; s.date = '2026-11-18'; s.name = 'Session 6';
   state = JSON.stringify(st);
 }
 
@@ -171,6 +183,33 @@ for (const [w, h] of VPS) {
     }, s);
     await pg.waitForTimeout(700);
     await shoot(s.toUpperCase());
+    // REDS=1 — on a double night the pane is green, and anything still drawn
+    // in the volume's red is a surface the token re-point did not reach: an
+    // inline hex the sweep wrote, or a rule with a literal in it. This lists
+    // them, with where the colour comes from, instead of hunting by eye.
+    if (process.env.REDS) {
+      const reds = await pg.evaluate(() => {
+        const pane = document.querySelector('.fixed.inset-0[data-double]');
+        if (!pane) return [];
+        const seen = new Map();
+        for (const el of pane.querySelectorAll('*')) {
+          const cs = getComputedStyle(el);
+          for (const [prop, v] of [['bg', cs.backgroundColor], ['border', cs.borderTopColor], ['img', cs.backgroundImage]]) {
+            const m = /rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?/.exec(v);
+            if (!m) continue;
+            const [r, g, b, al] = [+m[1], +m[2], +m[3], m[4] === undefined ? 1 : +m[4]];
+            if (!(r > 110 && g < 60 && b < 70 && al > 0.2)) continue;
+            if (prop === 'border' && parseFloat(cs.borderTopWidth) === 0) continue;
+            const r2 = el.getBoundingClientRect(); if (!r2.width || !r2.height) continue;
+            const key = prop + ' ' + el.tagName.toLowerCase() + '.' + String(el.className).split(' ').slice(0, 3).join('.')
+              + ' | ' + (el.getAttribute('style') || '').slice(0, 70);
+            seen.set(key, (seen.get(key) || 0) + 1);
+          }
+        }
+        return [...seen].map(([k, n]) => n + 'x ' + k);
+      });
+      if (reds.length) console.log(`  REDS ${s}:\n    ` + reds.join('\n    '));
+    }
     // WHY=<css selector> — the night's own version of the skin harness's WHY.
     // No harness opens a night, so a rule that loses in here loses unseen;
     // this prints the computed colour of the first match on each sub-screen

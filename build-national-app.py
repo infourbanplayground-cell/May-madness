@@ -422,6 +422,9 @@ DATE_JS = (
     "// The schedule's own words for the double nights, so the WhatsApp copy\n"
     "// and the admin hint cannot drift from DOUBLE_NIGHTS.\n"
     + f"const NATIONAL_DAY_LABEL = {_long_date(CFG['nationalDay'])!r};\n"
+    + f"const NATIONAL_DAY_DATE = {CFG['nationalDay']!r};\n"
+    + "const NATIONAL_DAY_TITLE = " + json.dumps(CFG['nationalDayLabel']) + ";\n"
+    + "const NATIONAL_DAY_TITLE_AR = " + json.dumps(CFG['nationalDayLabelAr'], ensure_ascii=False) + ";\n"
     + f"const NATIONAL_DAY_LABEL_SHORT = {_short_date(CFG['nationalDay'])!r};\n"
 )
 
@@ -652,6 +655,12 @@ MOTIFS = [
       </div>
 
       {/* ── MATCHES ── */}'''),
+    # 10 · A DOUBLE NIGHT WEARS ITS OWN SKIN. The night pane says whether it
+    # is one, and the skin (section 24) re-points the ground to the flag's
+    # green inside it. Keyed on the session's own flag OR the season's list,
+    # so a night created without the 2X ticked still dresses for its date.
+    ('''    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg">''',
+     '''    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg" data-double={(session.doublePoints || DOUBLE_NIGHTS.includes(session.date)) ? "1" : "0"}>'''),
     # 4 · THE BRACKET COMES FIRST. The screen is called KO and opened on a
     # paragraph about seeding, with the bracket a screen and a half down. The
     # panel is an explanation of the bracket, so it goes under it — by
@@ -856,7 +865,7 @@ MOTIFS = [
     # card already computed; naming it on the element lets the skin give the
     # occasion its green and the champions their edge.
     (     '''          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"}''',
-     '''          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill}'''),
+     '''          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill} data-double={(s.doublePoints || DOUBLE_NIGHTS.includes(s.date)) ? "1" : "0"}'''),
 
     (     '''            <div style={{flex:"0 0 auto",padding:"4px 9px",background:"rgba(5,5,5,.7)",
                  border:`1px solid ${pc}66`,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
@@ -1027,6 +1036,7 @@ MOTIFS = [
     ('<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
      '        {tab === "teams" && <TeamsTab',
      '<div className="max-w-3xl mx-auto px-4 py-4 pb-24">\n'
+     '        <NaDoubleBanner session={session} />\n'
      '        <NaNightPulse session={session} state={state} brief={tab !== "teams"} />\n'
      '        {tab === "points" && <NaNightPoints session={session} state={state}\n'
      '          sessions={state.sessions || []} onPick={null} />}\n'

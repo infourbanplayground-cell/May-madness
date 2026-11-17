@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "a25fd6f97ac7";
+  var V = "df2cd2d41ba4";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -8121,6 +8121,9 @@ const luTrim = (g) => { luWeave(g, 18); luWeave(g, LU_H - 74); };
 // The schedule's own words for the double nights, so the WhatsApp copy
 // and the admin hint cannot drift from DOUBLE_NIGHTS.
 const NATIONAL_DAY_LABEL = 'Wed 18 Nov';
+const NATIONAL_DAY_DATE = '2026-11-18';
+const NATIONAL_DAY_TITLE = "NATIONAL DAY NIGHT";
+const NATIONAL_DAY_TITLE_AR = "العيد الوطني";
 const NATIONAL_DAY_LABEL_SHORT = 'Wed 18 Nov';
 const LANDMARK_ART = {
   'mon-gatehouse': 'data:image/png;base64,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',
@@ -9215,6 +9218,28 @@ function NaNightPoints({ session, state, sessions, onPick }) {
   );
 }
 
+// ── THE DOUBLE NIGHT'S OWN BANNER ────────────────────────────────────────────
+// A double night is dressed in the flag's green (skin section 24), and a
+// colour on its own does not say WHY. One ivory line at the head of the
+// night says it: what the night is, in both languages when it is National
+// Day, and the 2X in the flag's red — on this ground the three inks on
+// screen are the flag's three.
+function NaDoubleBanner({ session }) {
+  const on = session && (session.doublePoints || DOUBLE_NIGHTS.includes(session.date));
+  if (!on) return null;
+  const nat = session.date === NATIONAL_DAY_DATE;
+  return (
+    <div className="na-dblbanner">
+      <span style={{ flex: "1 1 auto", minWidth: 0 }}>
+        <span className="na-dbl-k">{nat ? NATIONAL_DAY_TITLE : "DOUBLE NIGHT"}</span>
+        <span className="na-dbl-t">Double points</span>
+        {nat && <span className="na-dbl-ar">{NATIONAL_DAY_TITLE_AR}</span>}
+      </span>
+      <span className="na-dbl-x" aria-hidden="true">2X</span>
+    </div>
+  );
+}
+
 // ── THE BRACKET, ON A PHONE ──────────────────────────────────────────────────
 // The tree is 592px wide: three columns of ~170px and the connectors between
 // them. On a 390px phone that is one and a half screens SIDEWAYS, and the
@@ -9357,7 +9382,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
           const pill = s.completed ? "FINAL" : liveNow ? "LIVE" : s.doublePoints ? "2X" : "SOON";
           const pc = pill === "LIVE" ? "#F7F1E6" : pill === "2X" ? "#F2B8BC" : "#F7F1E6";
           return (
-          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill}
+          <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill} data-double={(s.doublePoints || DOUBLE_NIGHTS.includes(s.date)) ? "1" : "0"}
                onClick={() => s.completed ? setRecapSession(s) : setOpenSessionId(s.id)}
                style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:14,transform:"none",
                        background:s.completed ? "rgba(158,21,32,.94)" : "rgba(16,23,31,.96)",
@@ -9883,7 +9908,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
     });
   }, [canScore, finalWinner, session.autoClosed]);
   return (
-    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg">
+    <div className="fixed inset-0 z-40 overflow-y-auto screen-bg" data-double={(session.doublePoints || DOUBLE_NIGHTS.includes(session.date)) ? "1" : "0"}>
       <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 flex items-center justify-between gap-3" style={{ background: "rgba(158,21,32,0.96)" }}>
         <button onClick={onClose} className="text-stone-300 hover:text-orange-500 p-1"><I.back size={22} /></button>
         <div className="flex-1 min-w-0 text-center">
@@ -9976,6 +10001,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           })()}
         </div>
       <div className="max-w-3xl mx-auto px-4 py-4 pb-24">
+        <NaDoubleBanner session={session} />
         <NaNightPulse session={session} state={state} brief={tab !== "teams"} />
         {tab === "points" && <NaNightPoints session={session} state={state}
           sessions={state.sessions || []} onPick={null} />}
@@ -15970,6 +15996,90 @@ body .na-hl .na-hl-sub.na-hl-sub.na-hl-sub {
   display: block; margin-top: 3px; font-size: 12px; line-height: 1.3; color: var(--muted-ink) !important;
 }
 body .na-hl .na-hl-go.na-hl-go.na-hl-go { flex: 0 0 auto; font-size: 20px; font-weight: 700; color: var(--bg) !important; }
+
+/* ── 24 · THE DOUBLE NIGHT ──────────────────────────────────────────────
+   Three nights of the nine count double and one of them is National Day.
+   The handoff reserves green for exactly that, so on those nights — and
+   only inside the night itself — the ground IS the flag's green. Nothing
+   else in the app changes: the tabs, the table and every other night stay
+   red, which is what lets this one read as an occasion.
+   It is done by re-pointing the tokens on the pane, so every rule above
+   that says var(--bg) or var(--deep) follows without being rewritten. */
+.fixed.inset-0[data-double="1"] {
+  --bg: #087A3F; --deep: #066434; --surface: #066434; --paper: #087A3F;
+  --panel: rgba(6,100,52,.82); --plate: rgba(6,100,52,.94);
+  --surge-base: #087A3F; --surge-void: #066434; --ember: #044A26; --blue-deep: #066434;
+  --rose: #BFE3CD; --rose-txt: #DDF1E4; --muted: #BFE3CD; --tick: #BFE3CD; --blue-soft: #BFE3CD;
+  --inactive: #BFE3CD;
+  background-color: #087A3F !important;
+}
+/* The surfaces the re-point cannot reach: inline hexes the colour sweep
+   wrote. Found with REDS=1 on ops/shots-session.mjs, not by eye. */
+/* BACKGROUND declarations only, and never a plate. The first version matched
+   the bare triple, which is also how the selected tab and the ON COURT badge
+   write their red TYPE — so both had their ivory fill swapped for the ground
+   and vanished — and it out-ranked the group table's ivory plate. */
+.fixed.inset-0[data-double="1"] [style*="background: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background: rgba(158, 21, 32"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="rgb(158, 21, 32) 0%"]:not(.na-plate):not(.na-ivory) { background-color: var(--deep) !important; }
+.fixed.inset-0[data-double="1"] [style*="background: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *) { background-color: var(--bg) !important; }
+/* red TYPE on an ivory chip is the flag's red on this ground, not the green
+   the token now points at */
+.fixed.inset-0[data-double="1"] [style*="color: rgb(184, 20, 31)"] { color: #B8141F !important; }
+.fixed.inset-0[data-double="1"] [style*="border: 1px solid rgb(158"],
+.fixed.inset-0[data-double="1"] [style*="border: 1px dashed"] { border-color: rgba(247,241,230,.28) !important; }
+/* GREEN ON GREEN. Everywhere else green is the winner's edge on a red
+   ground; here the ground is green, so off the ivory plates that edge is
+   ivory. On the plates it stays green, where it still reads. */
+.fixed.inset-0[data-double="1"] [style*="background: rgb(8, 122, 63)"]:not(.na-ivory *):not(.na-plate *):not(.na-trow *),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(8, 122, 63)"]:not(.na-ivory *):not(.na-plate *):not(.na-trow *) {
+  background: var(--ivory) !important;
+}
+/* the header's 2X chip: the flag's red, which on this ground is the accent */
+.fixed.inset-0[data-double="1"] .sticky.top-0 .font-display.shrink-0 {
+  background: #D7202E !important; color: #fff !important; border-radius: 999px !important;
+}
+/* THE BANNER */
+.na-dblbanner:not([data-a]):not([data-b]):not([data-c]) {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  padding: 12px 12px 12px 22px; background: var(--ivory); border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ivory);
+}
+body .na-dblbanner .na-dbl-k.na-dbl-k.na-dbl-k { display: block; font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 10px; letter-spacing: .2em; color: #087A3F !important; }
+body .na-dblbanner .na-dbl-t.na-dbl-t.na-dbl-t { display: inline-block; margin-top: 2px;
+  font-family: 'Archivo', sans-serif; font-style: italic; text-transform: uppercase;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 22px; line-height: 1.1; color: var(--ink) !important; }
+body .na-dblbanner .na-dbl-ar.na-dbl-ar.na-dbl-ar { display: inline-block; margin-inline-start: 10px;
+  font-family: 'Noto Kufi Arabic', sans-serif; font-weight: 700; font-size: 15px; color: #6B5A52 !important; }
+.na-dblbanner .na-dbl-x:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 52px; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 999px;
+  background: #D7202E; color: #fff !important; font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 20px;
+}
+/* ...and on the SESSIONS list a double night's card wears a green ring, so
+   it can be told from the other eight before it is opened. */
+.jh-mock-sess[data-double="1"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 5px var(--green) !important; }
+.fixed.inset-0[data-double="1"] .font-display.shrink-0.rounded.rounded.rounded {
+  background: #D7202E !important; color: #fff !important; border-radius: 999px !important;
+}
+.fixed.inset-0[data-double="1"] [style*="background: rgba(255, 24"] { border-color: rgba(247,241,230,.22) !important; }
+
+/* A NIGHT IN PLAY WAS UNREADABLE ON THE SESSIONS LIST — found while shooting
+   the double night, and it has nothing to do with it. The card's ink rule
+   applied and its ivory ground did not, so the one row everybody is looking
+   for during a night was ink on red: the date line near-invisible, the name
+   2:1. Every state sits on the ivory plate. */
+body .jh-mock-sess.jh-mock-sess.jh-mock-sess.jh-mock-sess { background-color: var(--ivory) !important; }
+body .jh-mock-sess.jh-mock-sess[data-state="LIVE"] {
+  background-image: linear-gradient(180deg, var(--flag), var(--flag)) !important;
+  background-size: 7px 100% !important; background-repeat: no-repeat !important;
+}
+/* the group match cards carry their edge as a gradient over a red base */
+.fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(8, 122, 63)"],
+.fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(242, 2"] { background-color: var(--deep) !important; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

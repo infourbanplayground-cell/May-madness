@@ -358,6 +358,28 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
   );
 }}
 
+// ── THE DOUBLE NIGHT'S OWN BANNER ────────────────────────────────────────────
+// A double night is dressed in the flag's green (skin section 24), and a
+// colour on its own does not say WHY. One ivory line at the head of the
+// night says it: what the night is, in both languages when it is National
+// Day, and the 2X in the flag's red — on this ground the three inks on
+// screen are the flag's three.
+function NaDoubleBanner({{ session }}) {{
+  const on = session && (session.doublePoints || DOUBLE_NIGHTS.includes(session.date));
+  if (!on) return null;
+  const nat = session.date === NATIONAL_DAY_DATE;
+  return (
+    <div className="na-dblbanner">
+      <span style={{{{ flex: "1 1 auto", minWidth: 0 }}}}>
+        <span className="na-dbl-k">{{nat ? NATIONAL_DAY_TITLE : "DOUBLE NIGHT"}}</span>
+        <span className="na-dbl-t">Double points</span>
+        {{nat && <span className="na-dbl-ar">{{NATIONAL_DAY_TITLE_AR}}</span>}}
+      </span>
+      <span className="na-dbl-x" aria-hidden="true">2X</span>
+    </div>
+  );
+}}
+
 // ── THE BRACKET, ON A PHONE ──────────────────────────────────────────────────
 // The tree is 592px wide: three columns of ~170px and the connectors between
 // them. On a 390px phone that is one and a half screens SIDEWAYS, and the

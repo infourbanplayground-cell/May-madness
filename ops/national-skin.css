@@ -1642,3 +1642,87 @@ body .na-hl .na-hl-sub.na-hl-sub.na-hl-sub {
   display: block; margin-top: 3px; font-size: 12px; line-height: 1.3; color: var(--muted-ink) !important;
 }
 body .na-hl .na-hl-go.na-hl-go.na-hl-go { flex: 0 0 auto; font-size: 20px; font-weight: 700; color: var(--bg) !important; }
+
+/* ── 24 · THE DOUBLE NIGHT ──────────────────────────────────────────────
+   Three nights of the nine count double and one of them is National Day.
+   The handoff reserves green for exactly that, so on those nights — and
+   only inside the night itself — the ground IS the flag's green. Nothing
+   else in the app changes: the tabs, the table and every other night stay
+   red, which is what lets this one read as an occasion.
+   It is done by re-pointing the tokens on the pane, so every rule above
+   that says var(--bg) or var(--deep) follows without being rewritten. */
+.fixed.inset-0[data-double="1"] {
+  --bg: #087A3F; --deep: #066434; --surface: #066434; --paper: #087A3F;
+  --panel: rgba(6,100,52,.82); --plate: rgba(6,100,52,.94);
+  --surge-base: #087A3F; --surge-void: #066434; --ember: #044A26; --blue-deep: #066434;
+  --rose: #BFE3CD; --rose-txt: #DDF1E4; --muted: #BFE3CD; --tick: #BFE3CD; --blue-soft: #BFE3CD;
+  --inactive: #BFE3CD;
+  background-color: #087A3F !important;
+}
+/* The surfaces the re-point cannot reach: inline hexes the colour sweep
+   wrote. Found with REDS=1 on ops/shots-session.mjs, not by eye. */
+/* BACKGROUND declarations only, and never a plate. The first version matched
+   the bare triple, which is also how the selected tab and the ON COURT badge
+   write their red TYPE — so both had their ivory fill swapped for the ground
+   and vanished — and it out-ranked the group table's ivory plate. */
+.fixed.inset-0[data-double="1"] [style*="background: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background: rgba(158, 21, 32"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="rgb(158, 21, 32) 0%"]:not(.na-plate):not(.na-ivory) { background-color: var(--deep) !important; }
+.fixed.inset-0[data-double="1"] [style*="background: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *) { background-color: var(--bg) !important; }
+/* red TYPE on an ivory chip is the flag's red on this ground, not the green
+   the token now points at */
+.fixed.inset-0[data-double="1"] [style*="color: rgb(184, 20, 31)"] { color: #B8141F !important; }
+.fixed.inset-0[data-double="1"] [style*="border: 1px solid rgb(158"],
+.fixed.inset-0[data-double="1"] [style*="border: 1px dashed"] { border-color: rgba(247,241,230,.28) !important; }
+/* GREEN ON GREEN. Everywhere else green is the winner's edge on a red
+   ground; here the ground is green, so off the ivory plates that edge is
+   ivory. On the plates it stays green, where it still reads. */
+.fixed.inset-0[data-double="1"] [style*="background: rgb(8, 122, 63)"]:not(.na-ivory *):not(.na-plate *):not(.na-trow *),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(8, 122, 63)"]:not(.na-ivory *):not(.na-plate *):not(.na-trow *) {
+  background: var(--ivory) !important;
+}
+/* the header's 2X chip: the flag's red, which on this ground is the accent */
+.fixed.inset-0[data-double="1"] .sticky.top-0 .font-display.shrink-0 {
+  background: #D7202E !important; color: #fff !important; border-radius: 999px !important;
+}
+/* THE BANNER */
+.na-dblbanner:not([data-a]):not([data-b]):not([data-c]) {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 14px;
+  padding: 12px 12px 12px 22px; background: var(--ivory); border-radius: 999px;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--ivory);
+}
+body .na-dblbanner .na-dbl-k.na-dbl-k.na-dbl-k { display: block; font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 10px; letter-spacing: .2em; color: #087A3F !important; }
+body .na-dblbanner .na-dbl-t.na-dbl-t.na-dbl-t { display: inline-block; margin-top: 2px;
+  font-family: 'Archivo', sans-serif; font-style: italic; text-transform: uppercase;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 22px; line-height: 1.1; color: var(--ink) !important; }
+body .na-dblbanner .na-dbl-ar.na-dbl-ar.na-dbl-ar { display: inline-block; margin-inline-start: 10px;
+  font-family: 'Noto Kufi Arabic', sans-serif; font-weight: 700; font-size: 15px; color: #6B5A52 !important; }
+.na-dblbanner .na-dbl-x:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 0 0 52px; width: 52px; height: 52px; display: grid; place-items: center; border-radius: 999px;
+  background: #D7202E; color: #fff !important; font-family: 'Archivo', sans-serif; font-style: italic;
+  font-variation-settings: 'wdth' 118, 'wght' 900; font-size: 20px;
+}
+/* ...and on the SESSIONS list a double night's card wears a green ring, so
+   it can be told from the other eight before it is opened. */
+.jh-mock-sess[data-double="1"] { box-shadow: 0 0 0 2px var(--bg), 0 0 0 5px var(--green) !important; }
+.fixed.inset-0[data-double="1"] .font-display.shrink-0.rounded.rounded.rounded {
+  background: #D7202E !important; color: #fff !important; border-radius: 999px !important;
+}
+.fixed.inset-0[data-double="1"] [style*="background: rgba(255, 24"] { border-color: rgba(247,241,230,.22) !important; }
+
+/* A NIGHT IN PLAY WAS UNREADABLE ON THE SESSIONS LIST — found while shooting
+   the double night, and it has nothing to do with it. The card's ink rule
+   applied and its ivory ground did not, so the one row everybody is looking
+   for during a night was ink on red: the date line near-invisible, the name
+   2:1. Every state sits on the ivory plate. */
+body .jh-mock-sess.jh-mock-sess.jh-mock-sess.jh-mock-sess { background-color: var(--ivory) !important; }
+body .jh-mock-sess.jh-mock-sess[data-state="LIVE"] {
+  background-image: linear-gradient(180deg, var(--flag), var(--flag)) !important;
+  background-size: 7px 100% !important; background-repeat: no-repeat !important;
+}
+/* the group match cards carry their edge as a gradient over a red base */
+.fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(8, 122, 63)"],
+.fixed.inset-0[data-double="1"] [style*="background: linear-gradient(rgb(242, 2"] { background-color: var(--deep) !important; }
