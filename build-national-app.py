@@ -425,6 +425,10 @@ DATE_JS = (
     + f"const NATIONAL_DAY_DATE = {CFG['nationalDay']!r};\n"
     + "const NATIONAL_DAY_TITLE = " + json.dumps(CFG['nationalDayLabel']) + ";\n"
     + "const NATIONAL_DAY_TITLE_AR = " + json.dumps(CFG['nationalDayLabelAr'], ensure_ascii=False) + ";\n"
+    # the history file's own hash, so a rebuilt history is a new URL (the
+    # og-card lesson: Cloudflare will serve the old one otherwise)
+    + "const NA_HISTORY_V = " + json.dumps(hashlib.sha256(open(os.path.join(HERE, "brand", "national", "history.json"), "rb").read()).hexdigest()[:10]) + ";\n"
+    + "const NA_VOLUME_NAME = " + json.dumps(CFG["nameTitle"]) + ";\n"
     # the clip list's address is derived from the one URL in the config
     + "const NA_HIGHLIGHTS_URL = " + json.dumps(CFG['highlightsUrl']) + ";\n"
     + "const NA_CLIPS_API = " + json.dumps("https://api.savemyplay.com/v1/facilities/slug/"
@@ -679,6 +683,25 @@ MOTIFS = [
     ('''        {tab === "photos" && <div className="space-y-4">''',
      '''        {tab === "clips" && <NaClips session={session} />}
         {tab === "photos" && <div className="space-y-4">'''),
+    # 12 · ALL-TIME ON THE PLAYER CARD (national_screens.NaAllTime). The two
+    # Vol.8 boxes it replaces could only see this season, and only once you
+    # had picked who you are; the plate sees every match since June for
+    # anybody, and keeps "you v them" when you have picked.
+    ('''      {meId && meId !== player.id &&
+        <H2HCard meId={meId} player={player} sessions={sessions} />}
+      {meId && meId !== player.id &&
+        <ChemistryCard meId={meId} player={player} sessions={sessions} players={players} />}''',
+     '''      <NaAllTime player={player} state={state} meId={meId} onCompare={(id) => setVs(id)} />
+      {vs && <NaVsSheet state={state} a0={vs} onClose={() => setVs(null)} />}'''),
+    ('''  const [receipt, setReceipt] = React.useState(null);
+  const players = state.players || [];''',
+     '''  const [receipt, setReceipt] = React.useState(null);
+  const [vs, setVs] = React.useState(null);
+  const players = state.players || [];'''),
+    # the card used to return nothing for a player with no nights THIS season,
+    # which hid the all-time plate from exactly the people it is most about
+    ('''  if (data.nights.length === 0 && !h2h) return null;
+''', ''),
     # 4 · THE BRACKET COMES FIRST. The screen is called KO and opened on a
     # paragraph about seeding, with the bracket a screen and a half down. The
     # panel is an explanation of the bracket, so it goes under it — by
@@ -1618,6 +1641,32 @@ MOTIFS = [
      ''' &middot; {landmarkFor(idx).nameEn.toUpperCase()}</div>'''),
 ]
 
+# A SECOND PASS, because these anchor on text the table above WRITES.
+# plain() checks every anchor against the page as it was BEFORE the pass, so
+# an anchor on written text fails the check — and an edit made early in the
+# list that changes another entry's anchor makes that entry silently do
+# nothing (RosterView lost its `who` state that way and the PLAYERS screen
+# went blank). Edits to text another entry rewrites belong here.
+LATE_MOTIFS = [
+    # 13 · THE RACE on RANK, above the leader (national_screens.NaRace)
+    ('''        {/* ── LEADER ── */}''',
+     '''        {!lifetime && <NaRace state={state} leaderboard={leaderboard} setOpenPlayerId={setOpenPlayerId} />}
+
+        {/* ── LEADER ── */}'''),
+    # 12b · the PLAYERS screen opens HEAD TO HEAD for any two players
+    ('''  const [who, setWho] = React.useState("playing");''',
+     '''  const [who, setWho] = React.useState("playing");
+  const [vsOpen, setVsOpen] = React.useState(false);'''),
+    ('      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>',
+     '      <button className="na-vsentry" onClick={() => setVsOpen(true)}>\n'
+     '        <span className="na-vsentry-k">HEAD TO HEAD</span>\n'
+     '        <span className="na-vsentry-t">Any two players, every match since June</span>\n'
+     '        <span aria-hidden="true" className="na-vsentry-go">&rarr;</span>\n'
+     '      </button>\n'
+     '      {vsOpen && <NaVsSheet state={state} onClose={() => setVsOpen(false)} />}\n'
+     '      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>'),
+]
+
 SHEET = str(int(float(CFG["shape"]["sheet"].rstrip("px"))))
 
 ASSETS = [
@@ -2062,6 +2111,7 @@ def main():
     # BEFORE the colour sweep, like every other markup rule here: the motifs
     # carry Vol.8 literals in the text they match.
     s = plain(s, MOTIFS, report, "motifs")
+    s = plain(s, LATE_MOTIFS, report, "late motifs")
     s = set_announcement(s, report)
     s = double_by_date(s, report)
     s = sweep(s, COLOURS, report, "colours")

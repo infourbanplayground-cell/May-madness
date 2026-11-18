@@ -88,8 +88,8 @@ const srv = http.createServer({ maxHeaderSize: 1 << 20 }, (req, res) => {
   const b = path.basename(u);
   for (const d of ['brand/national', 'assets']) {
     const f = path.join(d, b);
-    if (/\.(png|webp|jpe?g|svg)$/.test(b) && fs.existsSync(f)) {
-      res.writeHead(200, { 'Content-Type': 'image/' + b.split('.').pop() });
+    if (/\.(png|webp|jpe?g|svg|json)$/.test(b) && fs.existsSync(f)) {
+      res.writeHead(200, { 'Content-Type': b.endsWith('.json') ? 'application/json' : 'image/' + b.split('.').pop() });
       return res.end(fs.readFileSync(f));
     }
   }

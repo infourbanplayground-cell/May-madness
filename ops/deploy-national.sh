@@ -29,6 +29,7 @@ scp -q "$PAGE.version" urbanpadel:/tmp/na.version
 scp -q brand/national/national-lockup.png brand/national/national-lockup.webp \
        brand/national/national-og.png brand/national/national-icon.png \
        brand/national/national-mark.png brand/national/up-logo-national.png \
+       brand/national/history.json \
        urbanpadel:/tmp/
 
 ssh urbanpadel "set -e
@@ -36,7 +37,7 @@ ssh urbanpadel "set -e
   cp /tmp/na.html    $WEB/index.html
   cp /tmp/na.version $WEB/version.txt
   for f in national-lockup.png national-lockup.webp national-og.png \
-           national-icon.png national-mark.png up-logo-national.png; do
+           national-icon.png national-mark.png up-logo-national.png history.json; do
     cp /tmp/\$f $WEB/assets/\$f
   done
   echo '    page    ' \$(stat -c%s $WEB/index.html) bytes

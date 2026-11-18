@@ -359,6 +359,267 @@ function NaNightPoints({{ session, state, sessions, onPick }}) {{
   );
 }}
 
+// ── THE RACE ─────────────────────────────────────────────────────────────────
+// What the season prizes look like with the nights that are left: who holds
+// each paid place and how far behind the next person is. Gaps only — it does
+// not say what a doubled night is worth, because 2X skips the streak bonus and
+// a figure that is nearly right is how a screen ends up contradicting the
+// table (the rule every film and post here works under).
+function NaRace({{ state, leaderboard, setOpenPlayerId }}) {{
+  const done = new Set((state.sessions || []).filter(s => s.completed).map(s => s.date));
+  const left = SEASON_NIGHTS.filter(d => !done.has(d));
+  const rows = [...(leaderboard || [])].filter(e => e.totalPts > 0).sort((a, b) => b.totalPts - a.totalPts);
+  if (!left.length || rows.length < SEASON_PRIZES.length + 1) return null;
+  const dbl = left.filter(d => DOUBLE_NIGHTS.includes(d)).length;
+  const first = e => (e.player.name || "").split(" ")[0];
+  const ord = ["1ST", "2ND", "3RD", "4TH", "5TH"];
+  return (
+    <div className="na-plate na-race" style={{{{ marginTop: 14, padding: "16px 18px 14px" }}}}>
+      <div style={{{{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}}}>
+        <span style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
+          fontSize: 24, textTransform: "uppercase" }}}}>The race</span>
+        <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10, letterSpacing: ".16em", color: "{red}" }}}}>
+          {{left.length}} NIGHT{{left.length === 1 ? "" : "S"}} LEFT{{dbl ? " · " + dbl + " DOUBLE" : ""}}</span>
+      </div>
+      {{SEASON_PRIZES.map((omr, k) => {{
+        const e = rows[k], next = rows[k + 1], gap = e.totalPts - next.totalPts;
+        return (
+          <button key={{k}} className="na-raceline" onClick={{() => setOpenPlayerId && setOpenPlayerId(e.player.id)}}
+            style={{{{ display: "grid", gridTemplateColumns: "56px 1fr auto", gap: 10, alignItems: "center", width: "100%",
+              padding: "11px 0", borderTop: "1px solid rgba(26,10,12,.12)", marginTop: k ? 0 : 10, textAlign: "left",
+              background: "none", border: 0, borderTopStyle: "solid", cursor: "pointer" }}}}>
+            <span>
+              <span style={{{{ display: "block", fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11 }}}}>{{ord[k]}}</span>
+              <span style={{{{ display: "block", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "#6B5A52" }}}}>{{omr}} OMR</span>
+            </span>
+            <span style={{{{ minWidth: 0 }}}}>
+              <span style={{{{ display: "block", fontWeight: 800, fontSize: 15 }}}}>{{e.player.name}}</span>
+              <span style={{{{ display: "block", fontSize: 12, color: "#6B5A52", marginTop: 1 }}}}>
+                {{gap === 0 ? "level with " + first(next) : first(next) + " is " + gap + " behind"}}</span>
+            </span>
+            <span className="na-racepts" data-tight={{gap <= 5 ? "1" : "0"}} style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
+              fontSize: 24 }}}}>{{e.totalPts}}</span>
+          </button>
+        );
+      }})}}
+      <div style={{{{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}}}>
+        {{left.map(d => {{
+          const x = naNightWhen(d), two = DOUBLE_NIGHTS.includes(d);
+          return <span key={{d}} className="na-racechip" data-two={{two ? "1" : "0"}}>{{x}}{{two ? " · 2X" : ""}}</span>;
+        }})}}
+      </div>
+    </div>
+  );
+}}
+
+// ── ALL-TIME: EVERY MATCH SINCE JUNE ─────────────────────────────────────────
+// The finished volumes' matches come from history.json (ops/build-history.py,
+// shipped beside the page); this volume's come from the live state. One row
+// per decided match: [vol, date, night, round, a1, a2, b1, b2, winner, sa, sb].
+let naHistDoc = null, naHistWait = null;
+function naLoadHistory() {{
+  if (naHistDoc) return Promise.resolve(naHistDoc);
+  if (!naHistWait) naHistWait = fetch("/assets/history.json?v=" + NA_HISTORY_V)
+    .then(r => {{ if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }})
+    .then(d => (naHistDoc = d))
+    .catch(() => {{ naHistWait = null; return null; }});
+  return naHistWait;
+}}
+function useNaHistory() {{
+  const [d, setD] = React.useState(naHistDoc);
+  React.useEffect(() => {{ let on = true; naLoadHistory().then(x => {{ if (on) setD(x); }}); return () => {{ on = false; }}; }}, []);
+  return d;
+}}
+function naLiveMatches(sessions, vi) {{
+  const out = [];
+  (sessions || []).forEach((s, i) => {{
+    const tm = {{}};
+    (s.teams || []).forEach(t => {{ tm[t.id] = [t.p1Id, t.p2Id]; }});
+    const b = s.bracket || {{}};
+    const ms = (s.groupMatches || []).map(m => ["G", m])
+      .concat((b.r16 || []).map(m => ["R16", m]), (b.qf || []).map(m => ["QF", m]), (b.sf || []).map(m => ["SF", m]),
+              b.thirdsPlayoff ? [["Q3", b.thirdsPlayoff]] : [], b.final ? [["F", b.final]] : []);
+    ms.forEach(([r, m]) => {{
+      if (!m || (m.winner !== "team1" && m.winner !== "team2")) return;
+      const a = tm[m.team1Id], c = tm[m.team2Id];
+      if (!a || !c || !a[0] || !a[1] || !c[0] || !c[1]) return;
+      const sc = m.score || {{}};
+      out.push([vi, s.date || "", i + 1, r, a[0], a[1], c[0], c[1], m.winner === "team1" ? 1 : 2, sc.t1, sc.t2]);
+    }});
+  }});
+  return out;
+}}
+function naAllMatches(doc, sessions) {{
+  if (!doc) return null;
+  return doc.m.concat(naLiveMatches(sessions, doc.vols.length));
+}}
+const naVolName = (doc, vi) => vi < doc.vols.length ? doc.vols[vi] : NA_VOLUME_NAME;
+// which side a player is on in a row: 1, 2 or 0
+const naSide = (m, id) => (m[4] === id || m[5] === id) ? 1 : (m[6] === id || m[7] === id) ? 2 : 0;
+function naCareer(all, pid) {{
+  const r = {{ w: 0, l: 0, nights: new Set(), vols: new Set(), part: {{}}, opp: {{}} }};
+  for (const m of all) {{
+    const sd = naSide(m, pid); if (!sd) continue;
+    const won = m[8] === sd;
+    won ? r.w++ : r.l++;
+    r.nights.add(m[0] + ":" + m[2]); r.vols.add(m[0]);
+    const mate = sd === 1 ? (m[4] === pid ? m[5] : m[4]) : (m[6] === pid ? m[7] : m[6]);
+    const them = sd === 1 ? [m[6], m[7]] : [m[4], m[5]];
+    const p = r.part[mate] || (r.part[mate] = {{ w: 0, l: 0 }}); won ? p.w++ : p.l++;
+    them.forEach(o => {{ const q = r.opp[o] || (r.opp[o] = {{ w: 0, l: 0 }}); won ? q.w++ : q.l++; }});
+  }}
+  const n = r.w + r.l;
+  // A best partner needs a real sample: four matches together, then the best
+  // record, then the most wins. Same floor for the rival, whose record is
+  // read from THIS player's side, so the toughest is the lowest win share.
+  const pick = (o, better) => Object.entries(o).filter(([, v]) => v.w + v.l >= 4)
+    .sort((x, y) => better(x[1], y[1]))[0] || null;
+  const pct = v => v.w / (v.w + v.l);
+  return {{ n, w: r.w, l: r.l, pct: n ? Math.round(r.w / n * 100) : 0, nights: r.nights.size, vols: r.vols.size,
+    partner: pick(r.part, (a, b) => pct(b) - pct(a) || b.w - a.w),
+    rival: pick(r.opp, (a, b) => pct(a) - pct(b) || (b.w + b.l) - (a.w + a.l)) }};
+}}
+function naVs(all, a, b) {{
+  const vs = [], tog = [];
+  for (const m of all) {{
+    const sa = naSide(m, a), sb = naSide(m, b);
+    if (!sa || !sb) continue;
+    (sa === sb ? tog : vs).push({{ m, aWon: m[8] === sa }});
+  }}
+  const cnt = arr => ({{ w: arr.filter(x => x.aWon).length, l: arr.filter(x => !x.aWon).length }});
+  let ga = 0, gb = 0;
+  vs.forEach(({{ m }}) => {{ if (typeof m[9] === "number" && typeof m[10] === "number") {{
+    const sa = naSide(m, a); ga += sa === 1 ? m[9] : m[10]; gb += sa === 1 ? m[10] : m[9]; }} }});
+  return {{ vs, tog, rec: cnt(vs), togRec: cnt(tog), ga, gb }};
+}}
+const NA_ROUND = {{ G: "Group", R16: "Round of 16", QF: "Quarter-final", SF: "Semi-final", Q3: "Thirds qualifier", F: "Final" }};
+function naNameFor(state, doc, id) {{
+  const p = (state.players || []).find(x => x.id === id);
+  return (p && p.name) || (doc && doc.names[id]) || "?";
+}}
+
+const naK = {{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10, letterSpacing: ".2em" }};
+const naBig = {{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900" }};
+
+// THE PLAYER CARD'S ALL-TIME PLATE. It replaces two Vol.8 boxes that could
+// only see this season and only when you had picked who you are.
+function NaAllTime({{ player, state, meId, onCompare }}) {{
+  const doc = useNaHistory();
+  const all = React.useMemo(() => naAllMatches(doc, state.sessions), [doc, state.sessions]);
+  const c = React.useMemo(() => all && naCareer(all, player.id), [all, player.id]);
+  const me = React.useMemo(() => (all && meId && meId !== player.id) ? naVs(all, meId, player.id) : null, [all, meId, player.id]);
+  if (!doc || !c || !c.n) return null;
+  const nm = id => naNameFor(state, doc, id);
+  const first = id => nm(id).split(" ")[0];
+  const Row = ({{ k, v, sub }}) => (
+    <div style={{{{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12,
+      padding: "11px 0", borderTop: "1px solid rgba(26,10,12,.12)" }}}}>
+      <span style={{{{ ...naK, fontSize: 9, color: "#6B5A52" }}}}>{{k}}</span>
+      <span style={{{{ textAlign: "right", minWidth: 0 }}}}>
+        <span style={{{{ fontWeight: 800, fontSize: 15 }}}}>{{v}}</span>
+        {{sub && <span style={{{{ display: "block", fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#6B5A52", marginTop: 2 }}}}>{{sub}}</span>}}
+      </span>
+    </div>
+  );
+  return (
+    <div className="na-plate na-alltime" style={{{{ marginTop: 20, padding: "16px 18px 14px" }}}}>
+      <div style={{{{ ...naK, color: "{red}" }}}}>ALL-TIME &middot; SINCE JUNE</div>
+      <div style={{{{ display: "flex", alignItems: "baseline", gap: 14, marginTop: 8 }}}}>
+        <span style={{{{ ...naBig, fontSize: 44, lineHeight: .95 }}}}>{{c.w}}&ndash;{{c.l}}</span>
+        <span style={{{{ ...naK, fontSize: 11, color: "{green}" }}}}>{{c.pct}}% WON</span>
+      </div>
+      <div style={{{{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#6B5A52", marginTop: 6 }}}}>
+        {{c.n}} matches &middot; {{c.nights}} nights &middot; {{c.vols}} volume{{c.vols === 1 ? "" : "s"}}</div>
+      <div style={{{{ height: 6, borderRadius: 3, overflow: "hidden", display: "flex", marginTop: 10, background: "rgba(26,10,12,.12)" }}}}>
+        <div style={{{{ width: c.pct + "%", background: "{green}" }}}} /></div>
+      <div style={{{{ marginTop: 10 }}}}>
+        {{c.partner && <Row k="BEST PARTNER" v={{nm(c.partner[0])}} sub={{c.partner[1].w + "–" + c.partner[1].l + " together"}} />}}
+        {{c.rival && <Row k="TOUGHEST RIVAL" v={{nm(c.rival[0])}} sub={{c.rival[1].w + "–" + c.rival[1].l + " against"}} />}}
+        {{me && (me.rec.w + me.rec.l) > 0 && <Row k={{"YOU v " + first(player.id).toUpperCase()}} v={{me.rec.w + "–" + me.rec.l}}
+          sub={{me.rec.w > me.rec.l ? "you lead" : me.rec.w < me.rec.l ? first(player.id) + " leads" : "level"}} />}}
+        {{me && (me.togRec.w + me.togRec.l) > 0 && <Row k="AS PARTNERS" v={{me.togRec.w + "–" + me.togRec.l}} />}}
+      </div>
+      <button className="na-vsbtn" onClick={{() => onCompare(player.id)}}>Compare with someone &rarr;</button>
+    </div>
+  );
+}}
+
+// HEAD TO HEAD — any two players, every meeting since June. The question the
+// owner asked by hand on 16 Nov, as a screen.
+function NaVsSheet({{ state, a0, b0, onClose }}) {{
+  const doc = useNaHistory();
+  const [a, setA] = React.useState(a0 || null);
+  const [b, setB] = React.useState(b0 || null);
+  const [more, setMore] = React.useState(false);
+  const all = React.useMemo(() => naAllMatches(doc, state.sessions), [doc, state.sessions]);
+  // pickable = anybody who has played a match in any volume, by current name
+  const pool = React.useMemo(() => {{
+    if (!all) return [];
+    const ids = new Set(); all.forEach(m => {{ ids.add(m[4]); ids.add(m[5]); ids.add(m[6]); ids.add(m[7]); }});
+    return [...ids].map(id => ({{ id, name: naNameFor(state, doc, id) }})).sort((x, y) => x.name.localeCompare(y.name));
+  }}, [all, state.players]);
+  const r = React.useMemo(() => (all && a && b) ? naVs(all, a, b) : null, [all, a, b]);
+  const nm = id => naNameFor(state, doc, id);
+  const first = id => nm(id).split(" ")[0];
+  const team = (m, sd) => sd === 1 ? first(m[4]) + " & " + first(m[5]) : first(m[6]) + " & " + first(m[7]);
+  const list = r ? [...r.vs].reverse() : [];
+  return (
+    <Modal open={{true}} onClose={{onClose}} title="HEAD TO HEAD">
+      <div className="na-vs">
+        <div style={{{{ display: "grid", gridTemplateColumns: "1fr auto 1fr", gap: 8, alignItems: "center" }}}}>
+          <PlayerPicker players={{pool}} value={{a}} onChange={{setA}} exclude={{b ? [b] : []}} placeholder="Player" />
+          <span style={{{{ ...naK, color: "{rose_txt}" }}}}>V</span>
+          <PlayerPicker players={{pool}} value={{b}} onChange={{setB}} exclude={{a ? [a] : []}} placeholder="Player" />
+        </div>
+        {{!doc && <div style={{{{ marginTop: 16, fontSize: 13, color: "{rose_txt}" }}}}>Loading every match since June&hellip;</div>}}
+        {{r && (
+          <div className="na-plate" style={{{{ marginTop: 16, padding: "16px 18px" }}}}>
+            {{(r.rec.w + r.rec.l) === 0
+              ? <div style={{{{ fontSize: 14 }}}}>{{first(a)}} and {{first(b)}} have never played each other.</div>
+              : <>
+                <div style={{{{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 }}}}>
+                  <span style={{{{ fontWeight: 800, fontSize: 14 }}}}>{{first(a)}}</span>
+                  <span style={{{{ ...naBig, fontSize: 52, lineHeight: .95 }}}}>{{r.rec.w}}&ndash;{{r.rec.l}}</span>
+                  <span style={{{{ fontWeight: 800, fontSize: 14 }}}}>{{first(b)}}</span>
+                </div>
+                <div style={{{{ height: 8, borderRadius: 4, overflow: "hidden", display: "flex", marginTop: 10 }}}}>
+                  <div style={{{{ flex: r.rec.w, background: "{green}" }}}} /><div style={{{{ flex: r.rec.l, background: "{red}" }}}} /></div>
+                <div style={{{{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#6B5A52", marginTop: 8, textAlign: "center" }}}}>
+                  {{r.rec.w + r.rec.l}} meetings &middot; games {{r.ga}}&ndash;{{r.gb}}</div>
+              </>}}
+            {{(r.togRec.w + r.togRec.l) > 0 && <div style={{{{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(26,10,12,.12)",
+              display: "flex", justifyContent: "space-between" }}}}>
+              <span style={{{{ ...naK, fontSize: 9, color: "#6B5A52" }}}}>AS PARTNERS</span>
+              <span style={{{{ fontWeight: 800 }}}}>{{r.togRec.w}}&ndash;{{r.togRec.l}}</span></div>}}
+          </div>
+        )}}
+        {{list.length > 0 && <div style={{{{ marginTop: 14 }}}}>
+          <div style={{{{ ...naK, fontSize: 9, color: "{rose_txt}", marginBottom: 6 }}}}>EVERY MEETING &middot; NEWEST FIRST</div>
+          {{(more ? list : list.slice(0, 8)).map(({{ m, aWon }}, k) => {{
+            const sa = naSide(m, a);
+            const sc = typeof m[9] === "number" ? (sa === 1 ? m[9] + "–" + m[10] : m[10] + "–" + m[9]) : "";
+            return (
+              <div key={{k}} className="na-meet" style={{{{ display: "flex", gap: 10, alignItems: "center", padding: "10px 0",
+                borderTop: "1px solid rgba(247,241,230,.14)" }}}}>
+                <span aria-hidden="true" style={{{{ flex: "0 0 4px", alignSelf: "stretch", borderRadius: 2,
+                  background: aWon ? "{green}" : "rgba(247,241,230,.25)" }}}} />
+                <span style={{{{ flex: 1, minWidth: 0 }}}}>
+                  <span style={{{{ display: "block", ...naK, fontSize: 9, letterSpacing: ".14em", color: "{rose_txt}" }}}}>
+                    {{naVolName(doc, m[0]).toUpperCase()}} &middot; NIGHT {{m[2]}} &middot; {{NA_ROUND[m[3]] ? NA_ROUND[m[3]].toUpperCase() : m[3]}}</span>
+                  <span style={{{{ display: "block", fontSize: 13, color: "{ivory}", marginTop: 3, lineHeight: 1.35 }}}}>
+                    {{team(m, sa)}} <span style={{{{ color: "{rose_txt}" }}}}>v</span> {{team(m, sa === 1 ? 2 : 1)}}</span>
+                </span>
+                <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 14, color: "{ivory}" }}}}>{{sc}}</span>
+              </div>
+            );
+          }})}}
+          {{!more && list.length > 8 && <button className="na-vsmore" onClick={{() => setMore(true)}}>All {{list.length}} meetings</button>}}
+        </div>}}
+      </div>
+    </Modal>
+  );
+}}
+
 // ── THE CLIPS FROM THE COURTS ────────────────────────────────────────────────
 // The courts are wired to SaveMyPlay: a player presses the button after a
 // point and the last 25 seconds are cut, watermarked with the club's mark and

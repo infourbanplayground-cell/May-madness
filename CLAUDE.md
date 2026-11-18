@@ -1341,6 +1341,29 @@ in the repo green. The owner found both by looking at a card.
   `MOTION=1` on `shots-national.mjs` lists what animates on each tab, and
   `ops/record-motion.mjs` records a before/after video of the real app.
 
+#### All-time, head to head, and the race
+- **`brand/national/history.json` is every decided match from June Fury to
+  Blackout** (1,287), written by `ops/build-history.py` and shipped by
+  `deploy-national.sh` into `/assets/`. The app adds this volume's matches from
+  its live state, so the file only needs rebuilding when a volume FINISHES.
+  The page carries the file's hash (`NA_HISTORY_V`) so a rebuilt one is a new
+  URL. Players are one id across volumes, which is what makes this possible.
+- The **player card's ALL-TIME plate** (record since June, best partner,
+  toughest rival — four matches minimum — and you-v-them) replaced Vol.8's two
+  season-only boxes. **HEAD TO HEAD** compares any two players, every meeting
+  newest first; it opens from the card and from the PLAYERS screen. Checked
+  against the owner's hand-worked Muatasim v Muntaser: 3–7, games 37–51, 11–1
+  as partners.
+- **THE RACE** on RANK: who holds each paid place, the gap to the next, and
+  the nights left with the doubles marked. Gaps only — never what a 2X night is
+  worth.
+- **`LATE_MOTIFS` is a second pass.** `plain()` checks every anchor against the
+  page BEFORE the pass, so an edit to text another entry writes must go there —
+  an early edit that changed RosterView's first line made the later entry that
+  adds its `who` state silently do nothing, and PLAYERS went blank.
+- `node ops/shots-player.mjs [app] "Name A" "Name B"` shoots the card and the
+  head to head.
+
 #### The clips — SaveMyPlay, played in the app
 - The courts are on **SaveMyPlay**: a player presses the button after a point
   and a 25-second clip, watermarked with the club's mark, lands on the club's
