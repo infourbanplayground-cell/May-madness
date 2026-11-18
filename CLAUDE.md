@@ -1364,6 +1364,27 @@ in the repo green. The owner found both by looking at a card.
 - `node ops/shots-player.mjs [app] "Name A" "Name B"` shoots the card and the
   head to head.
 
+#### The player card — `national_player.py`
+- **`NaPlayerDetail` replaces Vol.8's `PlayerDetail`** (left in the page
+  unreferenced). The inherited card was **4,966px** at 390 wide — an empty
+  200px photo box, the name twice, PREVIOUS SERIES listing volumes worth 0,
+  four tiles repeating "where the points came from", and the all-time plate
+  and Compare at the very bottom. It is **2,358px** now, in the order people
+  ask: arch photo + rank/points/won/nights + form dots, then **HEAD TO HEAD**
+  as the primary action (opens with this player picked, and you on the other
+  side if you are signed in as a player), the all-time plate, this season, and
+  rivals / badges / earlier volumes FOLDED rather than deleted.
+- On PLAYERS, HEAD TO HEAD is a pill under the title — a screen action, like
+  FORMAT on SESSIONS — instead of a full-width card between the chips and the
+  roster that read as one more tile.
+- **EVERY SHEET WAS NAVY.** A Blackout-era layer sets
+  `.fixed.inset-0.z-50 > div { background:#141826 !important }`; skin section
+  30 puts sheets on `--deep`. Found by probing the computed colour, not by any
+  harness — they check contrast and inherited Vol.8 colours, and #141826 is
+  neither.
+- `node ops/shots-player.mjs` now shoots `card-full.png` (the whole card, by
+  growing the viewport to the sheet's scroll height) and `vs-open.png`.
+
 #### The clips — SaveMyPlay, played in the app
 - The courts are on **SaveMyPlay**: a player presses the button after a point
   and a 25-second clip, watermarked with the club's mark, lands on the club's

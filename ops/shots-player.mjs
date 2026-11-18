@@ -84,11 +84,27 @@ await pg.evaluate(name => {
 }, A);
 await pg.waitForTimeout(1200);
 // the plate sits low on the card: bring it into view
-const at = await pg.evaluate(() => { const e = document.querySelector('.na-alltime'); if (!e) return false; e.scrollIntoView({ block: 'center' }); return true; });
+const at = await pg.evaluate(() => { const e = document.querySelector('.na-alltime'); return !!e; });
 console.log('  all-time plate ' + (at ? 'found' : 'MISSING'));
 await shot('card-alltime');
+// The whole card, top to bottom: the card scrolls inside its own overlay, so
+// a fullPage shot of the window sees one screen of it. Grow the viewport to
+// the overlay's scroll height instead, shoot, and put it back.
+{
+  const h = await pg.evaluate(() => {
+    const sc = [...document.querySelectorAll('*')].filter(e => {
+      const s = getComputedStyle(e); return /(auto|scroll)/.test(s.overflowY) && e.scrollHeight > e.clientHeight + 40;
+    }).sort((a, b) => b.scrollHeight - a.scrollHeight)[0];
+    if (!sc) return 0; sc.scrollTop = 0; return sc.scrollHeight + (innerHeight - sc.clientHeight);
+  });
+  if (h) {
+    await pg.setViewportSize({ width: 390, height: Math.min(h, 7000) });
+    await shot('card-full');
+    await pg.setViewportSize({ width: 390, height: 844 });
+  }
+}
 // head to head from the card, second player picked through the picker
-await pg.evaluate(() => document.querySelector('.na-vsbtn')?.click());
+await pg.evaluate(() => (document.querySelector('.na-pdh2h') || document.querySelector('.na-vsbtn'))?.click());
 await pg.waitForTimeout(800);
 const pick = async (which, name) => {
   await pg.evaluate(w => [...document.querySelectorAll('.na-vs .relative > button')][w]?.click(), which);
@@ -97,7 +113,9 @@ const pick = async (which, name) => {
   await pg.waitForTimeout(300);
   await pg.evaluate(n => [...document.querySelectorAll('.na-vs .absolute button')].find(x => x.textContent.trim() === n)?.click(), name);
 };
+await shot('vs-open');
 await pick(1, B);
+await pg.evaluate(() => { const m = [...document.querySelectorAll('.fixed.inset-0.z-50 > div')].pop(); if (m) m.scrollTop = 0; });
 await shot('vs-top');
 await pg.evaluate(() => { const l = document.querySelector('.na-meet'); if (l) l.scrollIntoView({ block: 'start' }); });
 await shot('vs-meetings');

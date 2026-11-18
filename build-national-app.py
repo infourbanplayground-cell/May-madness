@@ -416,6 +416,8 @@ GROUP_CARDS_JS = national_group_cards.painter(CFG['palette'])
 # design wearing red.
 import national_screens  # noqa: E402
 SCREENS_JS = national_screens.screens(CFG['palette'])
+import national_player  # noqa: E402
+SCREENS_JS += national_player.JS
 GROUP_TABLE_BLOCK = national_screens.group_table_block(CFG['palette'])
 
 DATE_JS = (
@@ -1652,8 +1654,14 @@ LATE_MOTIFS = [
     # `arabic` block, which the Kufi subset is cut to (the build guard checks).
     ('''fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS</div>''',
      '''fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS<span className="na-ar-title">''' + CFG["arabic"]["me"] + '''</span></div>'''),
-    ('''fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>''',
-     '''fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS<span className="na-ar-title">''' + CFG["arabic"]["players"] + '''</span></div>'''),
+    # PLAYERS: the title row carries HEAD TO HEAD as a screen action, the
+    # way SESSIONS carries FORMAT. It used to be a full-width card wedged
+    # between the filter chips and the roster, which read as one more tile.
+    ('''      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>''',
+     '''      <div className="na-titlerow"><div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS<span className="na-ar-title">''' + CFG["arabic"]["players"] + '''</span></div>
+      <button className="jh-chipbtn na-h2hpill" onClick={() => setVsOpen(true)}>HEAD TO HEAD</button></div>'''),
     ('''fontSize:44,lineHeight:.9,color:"#F2F2F2",marginTop:6}}>SESSIONS</div>''',
      '''fontSize:44,lineHeight:.9,color:"#F2F2F2",marginTop:6}}>SESSIONS<span className="na-ar-title">''' + CFG["arabic"]["sessions"] + '''</span></div>'''),
     ('''fontSize:50,lineHeight:.88,color:"#F2F2F2",marginTop:8}}>RANKINGS</div>''',
@@ -1663,16 +1671,14 @@ LATE_MOTIFS = [
      '''        {!lifetime && <NaRace state={state} leaderboard={leaderboard} setOpenPlayerId={setOpenPlayerId} />}
 
         {/* ── LEADER ── */}'''),
+    # 12c · THE PLAYER CARD is Vol.9's own (national_player.NaPlayerDetail).
+    # PlayerDetail stays in the page unreferenced, as luPaint does.
+    ('{openPlayerId && <PlayerDetail meId', '{openPlayerId && <NaPlayerDetail meId'),
     # 12b · the PLAYERS screen opens HEAD TO HEAD for any two players
     ('''  const [who, setWho] = React.useState("playing");''',
      '''  const [who, setWho] = React.useState("playing");
   const [vsOpen, setVsOpen] = React.useState(false);'''),
     ('      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>',
-     '      <button className="na-vsentry" onClick={() => setVsOpen(true)}>\n'
-     '        <span className="na-vsentry-k">HEAD TO HEAD</span>\n'
-     '        <span className="na-vsentry-t">Any two players, every match since June</span>\n'
-     '        <span aria-hidden="true" className="na-vsentry-go">&rarr;</span>\n'
-     '      </button>\n'
      '      {vsOpen && <NaVsSheet state={state} onClose={() => setVsOpen(false)} />}\n'
      '      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>'),
 ]

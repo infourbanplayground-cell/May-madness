@@ -539,7 +539,7 @@ function NaAllTime({{ player, state, meId, onCompare }}) {{
           sub={{me.rec.w > me.rec.l ? "you lead" : me.rec.w < me.rec.l ? first(player.id) + " leads" : "level"}} />}}
         {{me && (me.togRec.w + me.togRec.l) > 0 && <Row k="AS PARTNERS" v={{me.togRec.w + "–" + me.togRec.l}} />}}
       </div>
-      <button className="na-vsbtn" onClick={{() => onCompare(player.id)}}>Compare with someone &rarr;</button>
+      {{onCompare && <button className="na-vsbtn" onClick={{() => onCompare(player.id)}}>Compare with someone &rarr;</button>}}
     </div>
   );
 }}

@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "756f54d39ccd";
+  var V = "87bdda9f23b8";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -6877,8 +6877,9 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
         THE ROSTER &middot; {leaderboard.length} PLAYERS
         {!started && <span style={{ color: "#F2D0D3" }}> &middot; BY ALL-TIME</span>}
       </div>
-      <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
+      <div className="na-titlerow"><div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
                     fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS<span className="na-ar-title">اللاعبون</span></div>
+      <button className="jh-chipbtn na-h2hpill" onClick={() => setVsOpen(true)}>HEAD TO HEAD</button></div>
       <input value={q} onChange={e => setQ(e.target.value)} placeholder="Find a player&hellip;"
         style={{ width: "100%", marginTop: 16, padding: "14px 16px", background: "rgba(82,11,18,.96)",
           border: "1px solid rgba(242,208,211,.2)", color: "#FFFFFF", fontSize: 15,
@@ -6901,11 +6902,6 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
           ))}
         </div>
       )}
-      <button className="na-vsentry" onClick={() => setVsOpen(true)}>
-        <span className="na-vsentry-k">HEAD TO HEAD</span>
-        <span className="na-vsentry-t">Any two players, every match since June</span>
-        <span aria-hidden="true" className="na-vsentry-go">&rarr;</span>
-      </button>
       {vsOpen && <NaVsSheet state={state} onClose={() => setVsOpen(false)} />}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
         {rows.map(e => (
@@ -7265,7 +7261,7 @@ function App() {
       </nav>
 
       {currentSession && <SessionDetail session={currentSession} state={state} isAdmin={isAdmin} canScore={canScore} canUploadPhotos={canUploadPhotos} sync={sync} syncErr={syncErr} onClose={() => setOpenSessionId(null)} updateSession={(fn) => updateSession(currentSession.id, fn)} update={update} deleteSession={() => { update(s => ({ ...s, sessions: s.sessions.filter(ss => ss.id !== currentSession.id) })); setOpenSessionId(null); }} leaderboard={leaderboard} />}
-      {openPlayerId && <PlayerDetail meId={meId} playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
+      {openPlayerId && <NaPlayerDetail meId={meId} playerId={openPlayerId} state={state} leaderboard={leaderboard} canScore={canScore} sync={sync} syncErr={syncErr} update={update} onClose={() => setOpenPlayerId(null)} />}
       {showLogin && <LoginModal onClose={() => setShowLogin(false)} onLogin={handleLogin} />}
       {showMe && <MePicker leaderboard={leaderboard} meId={meId} onPick={pickMe} onClear={clearMe} onClose={() => setShowMe(false)} />}
     </div>
@@ -9408,7 +9404,7 @@ function NaAllTime({ player, state, meId, onCompare }) {
           sub={me.rec.w > me.rec.l ? "you lead" : me.rec.w < me.rec.l ? first(player.id) + " leads" : "level"} />}
         {me && (me.togRec.w + me.togRec.l) > 0 && <Row k="AS PARTNERS" v={me.togRec.w + "–" + me.togRec.l} />}
       </div>
-      <button className="na-vsbtn" onClick={() => onCompare(player.id)}>Compare with someone &rarr;</button>
+      {onCompare && <button className="na-vsbtn" onClick={() => onCompare(player.id)}>Compare with someone &rarr;</button>}
     </div>
   );
 }
@@ -9848,6 +9844,159 @@ function NaBracketStack({ b, lbl, canScore, setEdit }) {
         Tap a match to score it.</div>}
     </div>
   );
+}
+
+// ══ VOL.9 · THE PLAYER CARD (national_player.py) ══════════════════════════
+function NaFold({ title, count, children }) {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <div className="na-fold" data-open={open ? "1" : "0"}>
+      <button className="na-foldhead" onClick={() => setOpen(o => !o)} aria-expanded={open}>
+        <span className="na-foldt">{title}</span>
+        {count != null && <span className="na-foldn">{count}</span>}
+        <span className="na-foldc" aria-hidden="true">{open ? "−" : "+"}</span>
+      </button>
+      {open && <div className="na-foldbody">{children}</div>}
+    </div>
+  );
+}
+
+function NaPlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, update, onClose, meId }) {
+  const player = state.players.find(p => p.id === playerId);
+  const entry = leaderboard.find(l => l.player.id === playerId);
+  const [uploading, setUploading] = React.useState(false);
+  const [receipt, setReceipt] = React.useState(null);
+  const [vs, setVs] = React.useState(false);
+  const players = state.players || [];
+  const sessions = state.sessions || [];
+  const nameOf = React.useCallback((s, teamId, pidDirect) => {
+    if (pidDirect) return (players.find(p => p.id === pidDirect) || {}).name || "?";
+    const t = (s.teams || []).find(x => x.id === teamId);
+    if (!t) return "?";
+    const n = id => ((players.find(p => p.id === id) || {}).name || "?").split(" ")[0];
+    return n(t.p1Id) + " & " + n(t.p2Id);
+  }, [players]);
+  const ranks = React.useMemo(() => rankByNight(players, sessions), [players, sessions]);
+  if (!player || !entry) return null;
+
+  const rank = leaderboard.findIndex(l => l.player.id === playerId) + 1;
+  const st = entry.stats;
+  const form = recentForm(playerId, sessions);
+  const dec = st.groupPlayed + st.qfReached + st.sfReached + st.finalsReached;
+  const wins = st.groupWins + st.qfWins + st.sfWins + st.finalsWon;
+  const winRate = dec ? Math.round(wins / dec * 100) : 0;
+  const streak = currentStreak(form);
+  const data = calcPlayerNights(player.id, sessions, nameOf);
+  const best = Math.max(1, ...data.nights.map(n => n.nightTotal));
+  const rivals = calcRivals(playerId, sessions);
+  const badges = getMilestones(entry);
+  const locked = Array.from(getLockedPartners(playerId, sessions))
+    .map(id => (players.find(p => p.id === id) || {}).name).filter(Boolean);
+  const prevPts = player.prevSeriesPts || {};
+  const prev = (state.prevSeriesNames || []).map(n => [n, Number(prevPts[n]) || 0]).filter(([, v]) => v > 0);
+  if (player.prevSeriesPoints > 0) prev.push(["Earlier", player.prevSeriesPoints]);
+  const prevSum = prev.reduce((a, [, v]) => a + v, 0);
+  const initials = (player.name || "?").split(" ").map(x => x[0]).join("").slice(0, 2).toUpperCase();
+  const other = meId && meId !== player.id ? meId : null;
+  const stage = [["Group", st.groupWins, st.groupPlayed], ["QF", st.qfWins, st.qfReached],
+                 ["SF", st.sfWins, st.sfReached], ["Final", st.finalsWon, st.finalsReached]]
+    .filter(([, , p]) => p > 0);
+
+  const upload = async (e) => {
+    const f = e.target.files?.[0]; if (!f) return;
+    setUploading(true);
+    try {
+      const branded = await buildBrandAvatar(f);
+      if (branded) {
+        update(s => ({ ...s, players: s.players.map(p => p.id === playerId ? { ...p, photoUrl: branded } : p) }));
+      } else {
+        const b64 = await resizeToBase64(f);
+        update(s => ({ ...s, players: s.players.map(p => p.id === playerId ? { ...p, photoUrl: b64 } : p) }));
+        await uploadPhotoToServer(playerId, b64);
+      }
+    } catch {}
+    setUploading(false);
+  };
+
+  return <Modal open={true} onClose={onClose} title={player.name.toUpperCase()}>
+    <div className="na-pd">
+      {canScore && <div className="flex justify-end -mt-1 mb-2"><SyncIndicator status={sync} errMsg={syncErr} /></div>}
+
+      <div className="na-pdhero">
+        <div className="na-pdphoto">
+          {player.photoUrl ? <img src={player.photoUrl} alt={player.name} /> : <span>{initials}</span>}
+          {canScore && <label className="na-pdcam" title="Change photo">
+            {uploading ? "…" : <I.camera size={15} />}
+            <input type="file" accept="image/*" className="hidden" onChange={upload} />
+          </label>}
+        </div>
+        <div className="na-pdid">
+          <div className="na-pdchips">
+            <span className="na-pdchip">RANK {rank}</span>
+            {streak > 0 && <span className="na-pdchip" data-hot={streak >= 3 ? "1" : "0"}>W{streak}</span>}
+          </div>
+          <div className="na-pdstats">
+            <div><b>{entry.totalPts}</b><i>POINTS</i></div>
+            <div><b>{winRate}%</b><i>WON</i></div>
+            <div><b>{st.sessionsPlayed}</b><i>NIGHT{st.sessionsPlayed === 1 ? "" : "S"}</i></div>
+          </div>
+          {form.length > 0 && <div className="na-pdform" aria-label={"Form, most recent last: " + form.join(" ")}>
+            {form.map((r, i) => <span key={i} data-w={r === "W" ? "1" : "0"}>{r}</span>)}
+          </div>}
+        </div>
+      </div>
+
+      <div className="na-pdacts">
+        <button className="na-pdh2h" onClick={() => setVs(true)}>
+          <span>HEAD TO HEAD</span>
+          <small>{other ? "You v " + player.name.split(" ")[0] : "Pick anyone to compare"}</small>
+        </button>
+        <button className="na-pdcopy" onClick={() => {
+          navigator.clipboard?.writeText(generatePlayerCard(entry, state));
+          alert("Player card copied — paste it in WhatsApp.");
+        }}>Copy card</button>
+      </div>
+
+      <NaAllTime player={player} state={state} meId={meId} onCompare={null} />
+
+      {data.nights.length > 0 && <div className="na-pdsec">
+        <div className="na-pdk">THIS SEASON</div>
+        <StackedBar seg={data.seg} total={data.total} />
+        <SegLegend seg={data.seg} />
+        <div className="na-pdnights">
+          {data.nights.slice(-5).map(n => (
+            <button key={n.id} onClick={() => setReceipt(n)}>
+              <i>S{n.no}</i><b>+{n.nightTotal}</b>
+              <span><span style={{ width: Math.round(n.nightTotal / best * 100) + "%" }} /></span>
+            </button>
+          ))}
+        </div>
+        {stage.length > 0 && <div className="na-pdstage">
+          {stage.map(([k, w, p]) => <span key={k}>{k} <b>{w}&ndash;{p - w}</b></span>)}
+        </div>}
+      </div>}
+
+      <div className="na-pdfolds">
+        {rivals.length > 0 && <NaFold title="Rivals this season" count={rivals.length}>
+          {rivals.map(r => {
+            const opp = players.find(p => p.id === r.id); if (!opp) return null;
+            return <div key={r.id} className="na-pdrow"><span>{opp.name}</span><b>{r.wins}&ndash;{r.losses}</b></div>;
+          })}
+        </NaFold>}
+        {badges.length > 0 && <NaFold title="Badges" count={badges.length}>
+          <div className="na-pdbadges">{badges.map(m => <span key={m.id} title={m.desc}>{m.icon} {m.label}</span>)}</div>
+        </NaFold>}
+        {prev.length > 0 && <NaFold title="Earlier volumes" count={prevSum + " pts"}>
+          {prev.map(([n, v]) => <div key={n} className="na-pdrow"><span>{n}</span><b>{v}</b></div>)}
+        </NaFold>}
+        {locked.length > 0 && <div className="na-pdlock">Can&rsquo;t partner again &middot; {locked.join(", ")}</div>}
+      </div>
+    </div>
+    {vs && <NaVsSheet state={state} a0={player.id} b0={other || undefined} onClose={() => setVs(false)} />}
+    <ReceiptSheet night={receipt} player={player}
+      rankAfter={receipt ? (ranks[receipt.idx] || {})[player.id] : null}
+      onClose={() => setReceipt(null)} />
+  </Modal>;
 }
 
 function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, setTab, meId }) {
@@ -16708,6 +16857,96 @@ body .na-ptile .na-pslot img { border-radius: 0 !important; }
 body .sg-kicker { display: flex !important; align-items: center; gap: 12px; }
 body .sg-kicker::after { content: ""; flex: 1; min-width: 40px; height: 12px; border-radius: 6px;
   background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=") repeat-x; background-size: auto 12px; opacity: .9; }
+
+/* ── 30 · THE SHEETS ARE OXBLOOD, AND THE PLAYER CARD ───────────────────
+   EVERY SHEET IN THE APP WAS NAVY. A Blackout-era layer carries
+   `.fixed.inset-0.z-50 > div { background:#141826 !important }` and its
+   sticky title bar the same, so the player card, head to head, format and
+   every admin sheet opened on a blue-black that belongs to no volume since
+   September — found 18 Nov 2026 looking at a profile the owner called
+   congested. (0,3,1) beats it here; the double night re-points tokens on the
+   pane, not on sheets, so this does not touch it. */
+html body .fixed.inset-0.z-50 > div:not([data-x]),
+html body .fixed.inset-0.z-50 > div:not([data-x]) > div[style*="sticky"] { background: var(--deep) !important; }
+
+/* PLAYERS: HEAD TO HEAD is a screen action on the title row, like FORMAT. */
+.na-titlerow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+/* at 360 the title and the pill do not fit one row; SESSIONS wraps its FORMAT the same way */
+.na-titlerow > button.na-h2hpill { flex: 0 0 auto; margin-top: 6px; max-width: 100%; }
+
+/* the card — national_player.py */
+.na-pd { display: flex; flex-direction: column; gap: 18px; }
+.na-pdhero { display: flex; gap: 16px; align-items: stretch; }
+body .na-pd .na-pdphoto.na-pdphoto.na-pdphoto {
+  position: relative; flex: 0 0 104px; height: 128px; overflow: hidden; display: grid; place-items: center;
+  border-radius: 50% 50% 14px 14px / 42% 42% 14px 14px !important; background: var(--bg);
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 4px var(--green); margin: 4px; }
+.na-pdphoto img { width: 100%; height: 100%; object-fit: cover; object-position: center 25%; border-radius: 0 !important; }
+.na-pdphoto > span { font-family: 'Archivo', sans-serif; font-style: italic; font-variation-settings: 'wdth' 125, 'wght' 900;
+  font-size: 36px; color: var(--rose-txt); }
+body .na-pd label.na-pdcam.na-pdcam { position: absolute; right: 4px; bottom: 4px; width: 44px; height: 44px; display: grid;
+  place-items: center; border-radius: 999px !important; background: var(--ivory); color: var(--ink) !important; cursor: pointer; }
+.na-pdid { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
+.na-pdchips { display: flex; gap: 6px; }
+body .na-pd .na-pdchip.na-pdchip { padding: 4px 10px; border-radius: 999px !important; border: 1px solid rgba(247,241,230,.4);
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: .16em; color: var(--ivory) !important; }
+body .na-pd .na-pdchip[data-hot="1"] { background: var(--ivory); color: var(--ink) !important; border-color: var(--ivory); }
+.na-pdstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.na-pdstats b { display: block; font-family: 'Archivo', sans-serif; font-style: italic; font-variation-settings: 'wdth' 112, 'wght' 900;
+  font-size: 26px; line-height: 1; color: var(--ivory); }
+.na-pdstats i { display: block; margin-top: 5px; font-style: normal; font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  font-size: 9px; letter-spacing: .16em; color: var(--rose-txt); }
+.na-pdform { display: flex; gap: 5px; }
+body .na-pd .na-pdform > span.na-x, body .na-pd .na-pdform > span:not([data-x]) {
+  width: 22px; height: 22px; border-radius: 999px !important; display: grid; place-items: center;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10px;
+  border: 1px solid rgba(242,208,211,.4); color: var(--rose-txt) !important; }
+body .na-pd .na-pdform > span[data-w="1"] { background: var(--ivory); border-color: var(--ivory); color: var(--ink) !important; }
+
+.na-pdacts { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+body .na-pd button.na-pdh2h.na-pdh2h { min-height: 56px; border-radius: 999px !important; background: var(--ivory); border: 0;
+  cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 18px; }
+.na-pdh2h > span { font-family: 'Archivo', sans-serif; font-style: italic; font-variation-settings: 'wdth' 118, 'wght' 900;
+  font-size: 17px; letter-spacing: .02em; color: var(--ink) !important; }
+.na-pdh2h > small { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em; color: var(--muted-ink) !important; }
+body .na-pd button.na-pdcopy.na-pdcopy { min-height: 56px; padding: 0 18px; border-radius: 999px !important; cursor: pointer;
+  background: transparent; border: 1.5px solid rgba(247,241,230,.5); color: var(--ivory) !important;
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 13px; }
+body .na-pd .na-alltime { margin-top: 0 !important; }
+
+.na-pdk { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 10px; letter-spacing: .26em; color: var(--rose-txt);
+  display: flex; align-items: center; gap: 12px; }
+.na-pdk::after { content: ""; flex: 1; height: 1px; background: rgba(242,208,211,.25); }
+.na-pdnights { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
+body .na-pd .na-pdnights > button { padding: 9px 4px 8px; border-radius: 16px !important; cursor: pointer; text-align: center;
+  background: rgba(247,241,230,.06); border: 1px solid rgba(247,241,230,.2); min-height: 44px; }
+.na-pdnights i { display: block; font-style: normal; font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 9px; color: var(--rose-txt); }
+.na-pdnights b { display: block; font-family: 'JetBrains Mono', monospace; font-size: 16px; color: var(--ivory); margin-top: 2px; }
+.na-pdnights button > span { display: block; height: 3px; margin: 6px 6px 0; background: rgba(242,208,211,.25); border-radius: 2px !important; overflow: hidden; }
+.na-pdnights button > span > span { display: block; height: 100%; background: var(--ivory); }
+.na-pdstage { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; font-size: 12px; color: var(--rose-txt); }
+.na-pdstage b { font-family: 'JetBrains Mono', monospace; color: var(--ivory); margin-left: 3px; }
+
+.na-pdfolds { display: flex; flex-direction: column; }
+.na-fold { border-top: 1px solid rgba(242,208,211,.2); }
+.na-fold:last-of-type { border-bottom: 1px solid rgba(242,208,211,.2); }
+body .na-pd button.na-foldhead.na-foldhead { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px;
+  background: none; border: 0; border-radius: 0 !important; cursor: pointer; padding: 0 2px; text-align: left; }
+.na-foldt { flex: 1; font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 14px; color: var(--ivory); }
+.na-foldn { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--rose-txt); }
+.na-foldc { width: 24px; text-align: center; font-size: 18px; color: var(--ivory); }
+.na-foldbody { padding: 0 2px 14px; }
+.na-pdrow { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 13px; color: var(--ivory); }
+.na-pdrow b { font-family: 'JetBrains Mono', monospace; }
+.na-pdbadges { display: flex; flex-wrap: wrap; gap: 6px; }
+body .na-pd .na-pdbadges > span { padding: 6px 12px; border-radius: 999px !important; border: 1px solid rgba(247,241,230,.3);
+  font-size: 12px; font-weight: 600; color: var(--ivory) !important; }
+.na-pdlock { margin-top: 14px; font-size: 12px; color: var(--rose-txt); }
+/* The folds are rules, not surfaces: the inherited (0,3,0) universal radius
+   bent their hairlines into a bracket at each end. */
+body .na-pd .na-fold.na-fold.na-fold:not([data-x]) { border-radius: 0 !important; }
+/* head to head's two pickers were the one square surface left on the sheet */
+body .na-vs .relative > button.w-full:not([data-x]) { border-radius: 18px !important; min-height: 56px; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>
