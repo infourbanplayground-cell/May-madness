@@ -106,7 +106,8 @@ const motifs = await pg.evaluate(() => {
   return {
     khanjar: real(document.getElementById('tile')),
     masar: [...document.querySelectorAll('.band')].every(real),
-    medallion: real(document.getElementById('s3med')),
+    // every medallion the film draws, wherever it sits — the recap carries two
+    medallion: (m => m.length > 0 && m.every(real))([...new Set(document.querySelectorAll('#s3med, .med'))]),
     flag: !!document.querySelector('.flag'),
   };
 });
@@ -334,8 +335,25 @@ if (underband.length) { console.error('copy under the trim:\n  ' + underband.joi
 const pool = await pg.evaluate((scenes) => {
   const t1 = scenes[4];
   window.__seek(t1 - 0.05);
-  return document.getElementById('s4n').textContent.trim();
+  const el = document.getElementById('s4n');
+  return el ? el.textContent.trim() : 'n/a';
 }, pre.scenes);
+// EVERY COUNT-UP MUST LAND ON ITS FIGURE before its scene cuts: the recap's
+// +60 and the table's totals count up exactly as the pool does, and the same
+// one-short drift would put a total on screen the app does not show.
+const short = await pg.evaluate((scenes) => {
+  const out = [];
+  for (const el of document.querySelectorAll('[data-pts], [data-n]')) {
+    const sc = el.closest('.scene'); if (!sc) continue;
+    const k = [...document.querySelectorAll('.scene')].indexOf(sc);
+    const end = k + 1 < scenes.length ? scenes[k + 1] : window.__dur;
+    window.__seek(end - 0.20);
+    const want = el.dataset.pts || el.dataset.n, got = el.textContent.replace(/[^0-9]/g, '');
+    if (got !== want) out.push(`${el.id || el.className} shows ${got}, the figure is ${want}`);
+  }
+  return out;
+}, pre.scenes);
+if (short.length) { console.error('count-up short:\n  ' + short.join('\n  ')); process.exit(1); }
 
 if (CONTACT) {
   // A strip of one frame per scene. Everything above is structure; a film is
