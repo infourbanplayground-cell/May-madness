@@ -19,6 +19,13 @@
       "skillPath": "skills/brandkit/SKILL.md",
       "computedHash": "c89a5763a53a705a6fb3a3af83796b10d2aa05faf7b8b8fe1db0589c454ba80e"
     },
+    "choreograph": {
+      "source": "emilkowalski/skills",
+      "commit": "64eb3deb9a5fbfa041faf783e0bc3fd635872e9c",
+      "sourceType": "github",
+      "skillPath": "skills/choreograph/SKILL.md",
+      "computedHash": "a33a7cf57eacff502f833778eed62244fb5a890bb25124dacde73bcf8716218c"
+    },
     "design-taste-frontend": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
