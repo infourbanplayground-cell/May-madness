@@ -111,8 +111,23 @@
     "rose": "#F2B8BC",
     "green": "#087A3F",
     "inactive": "#CBBDB6",
-    "white": "#FFFFFF"
+    "white": "#FFFFFF",
+    "appBg": "#6B0F17",
+    "appDeep": "#520B12",
+    "appEmber": "#3E080D"
   },
+  "_appGroundNotes": [
+    "THE APP SITS ON OXBLOOD; THE CARDS, POSTS AND FILMS STAY ON THE RED.",
+    "The owner's call, 18 Nov 2026: the site read as too red. Three mock-ups",
+    "were shown (the red, oxblood, a warm near-black) and oxblood was chosen.",
+    "bg/deep above remain the volume's red and are what the share cards, the",
+    "posts and the films are drawn on: a card posted to a story is the",
+    "volume's poster and keeps its colour. The APP ground is appBg/appDeep,",
+    "applied as the last step of build-national-app.py, outside the canvas",
+    "painters. Bright red (flag) is now the accent: the band, live badges.",
+    "Ivory on #6B0F17 is 11.1:1 (it was 5.8:1 on the red), so nothing that",
+    "passed contrast before can fail now."
+  ],
   "_paletteNotes": [
     "Straight from the handoff's token list. The jobs are not interchangeable:",
     "",

@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "e963f921f96c";
+  var V = "b591f51df3f7";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -55,7 +55,7 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-<meta name="theme-color" content="#9E1520" />
+<meta name="theme-color" content="#520B12" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -94,14 +94,14 @@
 
 <style>
   :root {
-    --ink: #9E1520;
-    --ink2: #B8141F;
+    --ink: #520B12;
+    --ink2: #6B0F17;
     --orange: #F7F1E6;
     --orange-br: #F7F1E6;
     --red: #F7F1E6;
     --ember: #1a0006;
     --blue: #F2B8BC;
-    --blue-deep: #9E1520;
+    --blue-deep: #520B12;
     --blue-soft: #F2B8BC;
     --gold: #F2B8BC;
     --cream: #FFFFFF;
@@ -125,7 +125,7 @@
       radial-gradient(ellipse 90% 55% at 12% 6%, rgba(242,184,188,.09), transparent),
       radial-gradient(ellipse 80% 55% at 88% 10%, rgba(247,241,230,.18), transparent),
       radial-gradient(ellipse 60% 50% at 50% 94%, rgba(247,241,230,.10), transparent),
-      linear-gradient(180deg, #B8141F 0%, #9E1520 60%, #050609 100%);
+      linear-gradient(180deg, #6B0F17 0%, #520B12 60%, #050609 100%);
     background-attachment: fixed;
   }
   body::after {
@@ -160,16 +160,16 @@
   input, textarea, select { -webkit-user-select: text; user-select: text; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: #0E0E0E; }
-  ::-webkit-scrollbar-thumb { background: #9E1520; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb { background: #520B12; border-radius: 3px; }
   .court-motif { position: fixed; inset: 0; pointer-events: none; z-index: 0; background-image: var(--court); background-repeat: no-repeat; background-position: center 16%; background-size: 90% auto; opacity: .045; }
   .screen-bg { background:
       radial-gradient(ellipse 90% 55% at 12% 6%, rgba(242,184,188,.09), transparent),
       radial-gradient(ellipse 80% 55% at 88% 10%, rgba(247,241,230,.18), transparent),
-      linear-gradient(180deg, #B8141F 0%, #9E1520 60%, #050609 100%); }
+      linear-gradient(180deg, #6B0F17 0%, #520B12 60%, #050609 100%); }
   .splash { position: fixed; inset: 0; display: flex; flex-direction: column; gap: 22px; align-items: center; justify-content: center; z-index: 999;
     background:
       radial-gradient(ellipse 70% 45% at 50% 40%, rgba(247,241,230,.16), transparent 60%),
-      linear-gradient(180deg, #B8141F, #9E1520 60%, #050609); }
+      linear-gradient(180deg, #6B0F17, #520B12 60%, #050609); }
   .splash .splash-logo-wrap { display: flex; align-items: center; justify-content: center; animation: splashPop 1.6s ease-in-out infinite; }
   .splash .splash-logo { width: 260px; max-width: 70vw; display: block; filter: drop-shadow(0 0 14px rgba(247,241,230,.5)) drop-shadow(0 0 34px rgba(247,241,230,.3)); }
   .splash .splash-chip { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; letter-spacing: 5px; color: #FFFFFF; background: rgba(247,241,230,.12); border: 1.5px solid rgba(247,241,230,.8); box-shadow: 0 0 14px rgba(247,241,230,.55), inset 0 0 10px rgba(247,241,230,.2); padding: 8px 18px 7px; text-shadow: 0 0 8px rgba(247,241,230,.6); }
@@ -213,13 +213,13 @@
   .bg-stone-900\/50,
   .bg-stone-900\/40 {
     background: rgba(255,247,232,.96) !important;
-    border-color: #9E1520 !important;
-    color: #9E1520 !important;
+    border-color: #520B12 !important;
+    color: #520B12 !important;
   }
   .bg-stone-900\/60 .text-stone-100,
   .bg-stone-900\/60 .text-stone-200,
   .bg-stone-900\/50 .text-stone-100 {
-    color: #9E1520 !important;
+    color: #520B12 !important;
   }
   .bg-stone-900\/60 .text-stone-400,
   .bg-stone-900\/60 .text-stone-500,
@@ -304,7 +304,7 @@ nav.fixed button[style*="color:var(--orange-br)"]{
 
 /* ── HEADER ── */
 header.sticky{
-  background:rgba(158,21,32,.95) !important;
+  background:rgba(82,11,18,.95) !important;
   border-bottom:4px solid rgba(242,184,188,.2) !important;
   backdrop-filter:blur(18px) !important;
 }
@@ -315,7 +315,7 @@ header.sticky{
 .bg-stone-900/40,
 .bg-stone-900/30,
 [class*="bg-stone-9"]{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -342,7 +342,7 @@ header.sticky{
 /* ── LEADERBOARD ROWS ── */
 .rounded-xl[style*="background: var(--surface)"],
 .rounded-xl[style*="background:var(--surface)"]{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -386,7 +386,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
 
 /* secondary btn */
 .bg-stone-800/80{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -406,7 +406,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
 
 /* ── MODALS ── */
 .bg-stone-950{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -419,7 +419,7 @@ button[style*="background:linear-gradient(135deg, var(--orange)"]{
 /* ── INPUTS ── */
 .bg-stone-900.border.border-stone-700.rounded-lg,
 input.bg-stone-900,textarea.bg-stone-900,select.bg-stone-900{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   color:#FFFFFF !important;
@@ -428,7 +428,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--red) !important;outli
 
 /* ── SUB-TABS (Teams / Groups / Knockouts) ── */
 .sticky.top-[57px]{
-  background:rgba(158,21,32,.95) !important;
+  background:rgba(82,11,18,.95) !important;
   border-bottom:3px solid rgba(255,224,61,.25) !important;
 }
 button[style*="background: linear-gradient(135deg, var(--orange)"]{
@@ -441,13 +441,13 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 
 /* ── SESSION DETAIL HEADER ── */
 .sticky.top-0.z-10.backdrop-blur-xl{
-  background:rgba(158,21,32,.95) !important;
+  background:rgba(82,11,18,.95) !important;
   border-bottom-color:rgba(255,224,61,.2) !important;
 }
 
 /* ── BRACKET TREE (keep dark bg for readability) ── */
 [style*="background: var(--surface)"]{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -508,7 +508,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar-track{background:#0E0E0E;}
-::-webkit-scrollbar-thumb{background:#9E1520;}
+::-webkit-scrollbar-thumb{background:#520B12;}
 
 /* ── SYNC INDICATOR GLOW ── */
 .w-2.h-2.rounded-full{border-radius:50% !important;}
@@ -558,7 +558,7 @@ body::before{
 .jh-hero{
   position:relative;overflow:hidden;
   padding:0;
-  background:#9E1520;
+  background:#520B12;
   border-bottom:5px solid var(--orange);
 }
 .jh-hero .rays{
@@ -608,7 +608,7 @@ body::before{
 
 /* info chips */
 .jh-chips{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
-.jh-chip{display:flex;align-items:center;gap:10px;background:rgba(158,21,32,.85);
+.jh-chip{display:flex;align-items:center;gap:10px;background:rgba(82,11,18,.85);
   border:1px solid rgba(255,255,255,.10);box-shadow:none;padding:12px 14px;}
 .jh-chip:nth-child(2){transform: none;}
 .jh-chip:nth-child(3){transform: none;}
@@ -639,7 +639,7 @@ body::before{
 .jh-strip .c b{color:var(--orange);}
 
 /* session row (srow style) */
-.jh-srow{display:flex;align-items:center;gap:14px;background:rgba(158,21,32,.85);
+.jh-srow{display:flex;align-items:center;gap:14px;background:rgba(82,11,18,.85);
   border:1px solid rgba(255,255,255,.10);box-shadow:none;padding:14px 18px;
   cursor:pointer;transition:transform .1s;}
 .jh-srow:hover{transform:translate(-2px,-2px);}
@@ -648,7 +648,7 @@ body::before{
   width:56px;height:56px;flex:0 0 auto;display:grid;place-items:center;padding-top:5px;}
 .jh-srow.done .sx{background:var(--blue);}
 .jh-srow.active .sx{background:var(--red);}
-.jh-srow.upcoming .sx{background:rgba(158,21,32,.12);color:#F2D0D3;}
+.jh-srow.upcoming .sx{background:rgba(82,11,18,.12);color:#F2D0D3;}
 .jh-srow .sd small{display:block;font-size:10px;font-weight:900;letter-spacing:.16em;
   text-transform:uppercase;color:var(--red);}
 .jh-srow .sd b{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:26px;letter-spacing:1px;
@@ -663,7 +663,7 @@ body::before{
 .jh-pill.fin{background:var(--orange);color:var(--cream);}
 
 /* leaderboard rows */
-.jh-lbrow{background:rgba(158,21,32,.85);border:1px solid rgba(255,255,255,.10);
+.jh-lbrow{background:rgba(82,11,18,.85);border:1px solid rgba(255,255,255,.10);
   box-shadow:none;padding:12px 14px;
   display:flex;align-items:center;gap:12px;cursor:pointer;
   transition:transform .1s;}
@@ -705,8 +705,8 @@ body::before{
    neon panel. Nothing from the comic theme survives this.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --yellow:#F2B8BC; --paper:#9E1520;
-  --panel:rgba(158,21,32,.82); --panel-2:rgba(30,36,50,.9);
+  --yellow:#F2B8BC; --paper:#520B12;
+  --panel:rgba(82,11,18,.82); --panel-2:rgba(30,36,50,.9);
   --hair:rgba(255,255,255,.12); --neon:rgba(247,241,230,.55);
   --glow:0 0 30px rgba(247,241,230,.32);
 }
@@ -773,9 +773,9 @@ body::after{opacity:.28 !important;}
 .jh-pool-note .teams{background:rgba(247,241,230,.12) !important;border:1px solid var(--neon) !important;
   box-shadow:var(--glow) !important;color:var(--cream) !important;}
 /* hero + strip */
-.jh-hero{background:#B8141F !important;border-bottom:1px solid var(--neon) !important;}
+.jh-hero{background:#6B0F17 !important;border-bottom:1px solid var(--neon) !important;}
 .jh-hero .halftone{display:none !important;}
-.jh-strip{background:#B8141F !important;border:1px solid var(--neon) !important;
+.jh-strip{background:#6B0F17 !important;border:1px solid var(--neon) !important;
   box-shadow:var(--glow) !important;color:var(--cream) !important;}
 .jh-strip .b{color:var(--red) !important;}
 .jh-strip .c b{color:var(--red) !important;}
@@ -1355,11 +1355,11 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
   // cap in resizeToBase64 is the avatar path, not this one), so the frame is
   // sized in units of min(w,h)/1080 and holds at full resolution.
   const s = Math.min(w, h) / 1080;
-  const ink = "#9E1520", ice = "#F2B8BC", chalk = "#FFFFFF", red = "#F7F1E6";
+  const ink = "#520B12", ice = "#F2B8BC", chalk = "#FFFFFF", red = "#F7F1E6";
   const pad = 26 * s;
 
   // ── court black base + faint tactical grid ──
-  ctx.fillStyle = "#B8141F";
+  ctx.fillStyle = "#6B0F17";
   ctx.fillRect(0, 0, w, h);
   ctx.save();
   ctx.strokeStyle = "rgba(247,241,230,.07)";
@@ -1385,7 +1385,7 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
 
   // edge falloff so the photo sits into the plate rather than on top of it
   const g = ctx.createLinearGradient(0, pad + ih - 120 * s, 0, pad + ih);
-  g.addColorStop(0, "rgba(184,20,31,0)"); g.addColorStop(1, "rgba(184,20,31,.78)");
+  g.addColorStop(0, "rgba(107,15,23,0)"); g.addColorStop(1, "rgba(107,15,23,.78)");
   ctx.fillStyle = g; ctx.fillRect(pad, pad + ih - 120 * s, iw, 120 * s);
   ctx.restore();
 
@@ -1399,7 +1399,7 @@ function drawAttackPhotoFrame(ctx, img, w, h, wm) {
 
   // ── bottom plate: emblem, series, URL ──
   const by = h - pad - barH;
-  ctx.fillStyle = "rgba(184,20,31,.96)";
+  ctx.fillStyle = "rgba(107,15,23,.96)";
   ctx.fillRect(pad, by, iw, barH);
   ctx.fillStyle = red;
   ctx.fillRect(pad, by, iw, 3 * s);
@@ -2220,7 +2220,7 @@ function Pill({ children, color = "orange" }) {
 function Btn({ children, onClick, variant = "primary", size = "md", className = "", disabled, type = "button" }) {
   const styles = {
     primary: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
-    secondary: { background:"rgba(158,21,32,.85)", color:"#FFFFFF", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
+    secondary: { background:"rgba(82,11,18,.85)", color:"#FFFFFF", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
     ghost: { background:"transparent", color:"var(--blue)", border:"3px solid var(--blue)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"16px", paddingRight:"16px" },
     danger: { background:"var(--red)", color:"var(--cream)", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"18px", letterSpacing:"1.5px", paddingTop:"8px", paddingBottom:"4px", paddingLeft:"14px", paddingRight:"14px" },
     gold: { background:"rgba(242,184,188,.14)", color:"#FFFFFF", border:"1px solid rgba(255,255,255,.10)", boxShadow:"none", borderRadius: 28, fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:"20px", letterSpacing:"2px", paddingTop:"10px", paddingBottom:"6px", paddingLeft:"20px", paddingRight:"20px" },
@@ -2229,7 +2229,7 @@ function Btn({ children, onClick, variant = "primary", size = "md", className = 
 }
 
 function Card({ children, className = "", onClick }) {
-  return <div onClick={onClick} className={className} style={{background:"rgba(158,21,32,.85)",border:"1px solid rgba(255,255,255,.10)",boxShadow:"none",borderRadius: 28,color:"#FFFFFF",cursor:onClick?"pointer":"default",transition:onClick?"transform .1s":undefined}} onMouseEnter={onClick?e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow="none";}:undefined} onMouseLeave={onClick?e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="none";}:undefined}>{children}</div>;
+  return <div onClick={onClick} className={className} style={{background:"rgba(82,11,18,.85)",border:"1px solid rgba(255,255,255,.10)",boxShadow:"none",borderRadius: 28,color:"#FFFFFF",cursor:onClick?"pointer":"default",transition:onClick?"transform .1s":undefined}} onMouseEnter={onClick?e=>{e.currentTarget.style.transform="translate(-2px,-2px)";e.currentTarget.style.boxShadow="none";}:undefined} onMouseLeave={onClick?e=>{e.currentTarget.style.transform="";e.currentTarget.style.boxShadow="none";}:undefined}>{children}</div>;
 }
 
 function Input({ value, onChange, placeholder, className = "", type = "text", autoFocus }) {
@@ -2260,7 +2260,7 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
     return (
       <button onClick={onOpenPicker} className="na-plate"
         style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,
-                background:"rgba(158,21,32,.92)",border:"1px solid rgba(247,241,230,.35)",borderRadius: 28,
+                background:"rgba(82,11,18,.92)",border:"1px solid rgba(247,241,230,.35)",borderRadius: 28,
                 padding:"16px 16px 14px",cursor:"pointer",textAlign:"left"}}>
         <span>
           <span style={{display:"block",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
@@ -2284,14 +2284,14 @@ function YourStanding({ leaderboard, state, meId, onOpenPicker, setTab }) {
   const was   = prevRank ? prevRank[meId] : null;
   const delta = (was && was !== rank) ? was - rank : 0;
 
-  const box = { flex:1, background:"rgba(158,21,32,.55)", border:"1px solid rgba(255,255,255,.08)",
+  const box = { flex:1, background:"rgba(82,11,18,.55)", border:"1px solid rgba(255,255,255,.08)",
                 padding:"10px 8px 9px", textAlign:"center" };
   const num = { fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:26, lineHeight:1, color:"#FFFFFF" };
   const cap = { display:"block", marginTop:5, fontFamily:"'JetBrains Mono',monospace", fontWeight:700,
                 fontSize:9, letterSpacing:".14em", color:"#F2D0D3" };
 
   return (
-    <div style={{background:"rgba(158,21,32,.92)",border:"1px solid rgba(247,241,230,.35)",
+    <div style={{background:"rgba(82,11,18,.92)",border:"1px solid rgba(247,241,230,.35)",
                  borderRadius: 28,padding:"14px 14px 13px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
         <span style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:10,
@@ -2340,7 +2340,7 @@ function MePicker({ leaderboard, meId, onPick, onClear, onClose }) {
         Saved on this phone only. No account, and it never unlocks scoring.
       </div>
       <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search your name"
-        style={{width:"100%",background:"rgba(158,21,32,.9)",border:"1px solid rgba(255,255,255,.14)",
+        style={{width:"100%",background:"rgba(82,11,18,.9)",border:"1px solid rgba(255,255,255,.14)",
                 color:"#FFFFFF",padding:"12px 14px",fontFamily:"'Archivo',sans-serif",fontSize:15,
                 outline:"none",borderRadius: 28,marginBottom:12}} />
       <div style={{maxHeight:"46vh",overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
@@ -2349,7 +2349,7 @@ function MePicker({ leaderboard, meId, onPick, onClear, onClose }) {
           return (
             <button key={e.player.id} onClick={() => onPick(e.player.id)}
               style={{width:"100%",display:"flex",alignItems:"center",gap:12,textAlign:"left",
-                      background: mine ? "rgba(247,241,230,.12)" : "rgba(158,21,32,.6)",
+                      background: mine ? "rgba(247,241,230,.12)" : "rgba(82,11,18,.6)",
                       border:"1px solid " + (mine ? "rgba(247,241,230,.5)" : "rgba(255,255,255,.08)"),
                       borderRadius: 28,padding:"11px 12px",marginBottom:6,cursor:"pointer"}}>
               <span style={{flex:"0 0 auto",width:34,textAlign:"right",fontFamily:"'JetBrains Mono',monospace",
@@ -2383,9 +2383,9 @@ function MePicker({ leaderboard, meId, onPick, onClear, onClose }) {
 function Modal({ open, onClose, title, children }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose} style={{background:"rgba(158,21,32,.85)"}}>
-      <div onClick={e => e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:520,background:"rgba(158,21,32,.85)",border:"1px solid rgba(255,255,255,.10)",boxShadow:"none",borderRadius: 28,maxHeight:"90vh",overflowY:"auto"}}>
-        <div style={{position:"sticky",top:0,background:"rgba(158,21,32,.85)",borderBottom:"1px solid rgba(255,255,255,.10)",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10}}>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose} style={{background:"rgba(82,11,18,.85)"}}>
+      <div onClick={e => e.stopPropagation()} style={{position:"relative",width:"100%",maxWidth:520,background:"rgba(82,11,18,.85)",border:"1px solid rgba(255,255,255,.10)",boxShadow:"none",borderRadius: 28,maxHeight:"90vh",overflowY:"auto"}}>
+        <div style={{position:"sticky",top:0,background:"rgba(82,11,18,.85)",borderBottom:"1px solid rgba(255,255,255,.10)",padding:"14px 20px",display:"flex",alignItems:"center",justifyContent:"space-between",zIndex:10}}>
           <h2 style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:"28px",letterSpacing:"2px",color:"#FFFFFF"}}>{title}</h2>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",color:"#FFFFFF",padding:4}}><I.x size={22} /></button>
         </div>
@@ -2438,7 +2438,7 @@ function Avatar({ player, size = 40, className = "", ring = null }) {
   }
   // Deterministic tinted initials background instead of flat black, so avatars
   // without photos still read as distinct people.
-  const palette = ["#F7F1E6", "#F2B8BC", "#9E1520", "#F7F1E6", "#3A3A3A", "#F2B8BC"];
+  const palette = ["#F7F1E6", "#F2B8BC", "#520B12", "#F7F1E6", "#3A3A3A", "#F2B8BC"];
   const tint = palette[Math.abs((player.id || player.name || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   return (
     <div className={`na-av flex items-center justify-center shrink-0 font-bold ${className}`}
@@ -2466,7 +2466,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
   const top = leaderboard.filter(e => e.stats.groupPlayed > 0 || e.stats.qfReached > 0);
   const rankColors = ["#FFC24B", "#c0c0c0", "#cd7f32"];
   return (
-    <div className="min-h-screen" style={{ background: "none, #9E1520" }}>
+    <div className="min-h-screen" style={{ background: "none, #520B12" }}>
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/national-lockup.png" alt="56 National Series" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
@@ -2478,7 +2478,7 @@ function PublicLeaderboardPage({ state, leaderboard }) {
               {top.map((e, i) => {
                 const badges = getMilestones(e).slice(0, 3);
                 return (
-                  <div key={e.player.id} style={{ background:"rgba(158,21,32,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: `5px 5px 0 ${i < 3 ? rankColors[i] : "rgba(158,21,32,.35)"}`, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
+                  <div key={e.player.id} style={{ background:"rgba(82,11,18,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: `5px 5px 0 ${i < 3 ? rankColors[i] : "rgba(82,11,18,.35)"}`, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12 }}>
                     <div style={{ width: 40, height: 40, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: i < 3 ? rankColors[i] : "#e5e0d8", border: "1px solid rgba(255,255,255,.14)", fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 15, color:"#FFFFFF" }}>
                       {i + 1}
                     </div>
@@ -2507,7 +2507,7 @@ function PublicPhotosPage({ state }) {
   const sessions = [...(state.sessions || [])].reverse().filter(s => (s.photos || []).length > 0);
   const totalPhotos = sessions.reduce((a, s) => a + (s.photos || []).length, 0);
   return (
-    <div className="min-h-screen" style={{ background: "none, #9E1520" }}>
+    <div className="min-h-screen" style={{ background: "none, #520B12" }}>
       <div className="max-w-2xl mx-auto px-4 py-6 pb-16">
         <div className="text-center mb-6">
           <img src="assets/national-lockup.png" alt="56 National Series" style={{ width: 240, maxWidth: "66%", margin: "0 auto 8px", display: "block", filter: "drop-shadow(2px 5px 5px rgba(19,19,19,.28))" }} />
@@ -2596,12 +2596,12 @@ function CountUp({ to, prefix = "", suffix = "" }) {
 function ScorePanel({ label, initials, val, setVal, won, lost, max = 7 }) {
   return (
     <div style={{ padding: 12, marginBottom: 10,
-      background: won ? "rgba(247,241,230,.08)" : "rgba(158,21,32,.94)",
+      background: won ? "rgba(247,241,230,.08)" : "rgba(82,11,18,.94)",
       border: "1px solid " + (won ? "rgba(247,241,230,.5)" : "rgba(255,255,255,.07)") }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
           justifyContent: "center", background: won ? "#F7F1E6" : "#1A0A0C",
-          color: won ? "#B8141F" : "#F2D0D3", fontFamily: "'JetBrains Mono',monospace",
+          color: won ? "#6B0F17" : "#F2D0D3", fontFamily: "'JetBrains Mono',monospace",
           fontWeight: 700, fontSize: 14 }}>{initials}</div>
         <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
           color: lost ? "#F2D0D3" : "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden",
@@ -2618,8 +2618,8 @@ function ScorePanel({ label, initials, val, setVal, won, lost, max = 7 }) {
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
               transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
               ...(val === n
-                ? { background: "#F7F1E6", color: "#B8141F", borderColor: "#F7F1E6" }
-                : { background: "#9E1520", color: "#F7F1E6", borderColor: "rgba(242,208,211,.3)" }) }}>
+                ? { background: "#F7F1E6", color: "#6B0F17", borderColor: "#F7F1E6" }
+                : { background: "#520B12", color: "#F7F1E6", borderColor: "rgba(242,208,211,.3)" }) }}>
             {n}
           </button>
         ))}
@@ -2688,7 +2688,7 @@ function LockButton({ why, onLock }) {
         fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
         letterSpacing: ".2em", border: "none",
         ...(why ? { background: "#1A0A0C", color: "#F2D0D3" }
-                : { background: "#F7F1E6", color: "#B8141F",
+                : { background: "#F7F1E6", color: "#6B0F17",
                     boxShadow: "0 0 30px rgba(247,241,230,.32)" }) }}>
       {why || "LOCK RESULT ▶"}
     </button>
@@ -2752,7 +2752,7 @@ function PlayerExtras({ player, state, leaderboard, meId }) {
           {data.nights.slice(-5).map(n => (
             <button key={n.id} onClick={() => setReceipt(n)}
               style={{ padding: "10px 4px", cursor: "pointer", color: "inherit", textAlign: "center",
-                background: "rgba(158,21,32,.94)", border: "1px solid rgba(247,241,230,.25)" }}>
+                background: "rgba(82,11,18,.94)", border: "1px solid rgba(247,241,230,.25)" }}>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 9,
                 color: "#F2D0D3" }}>S{n.no}</div>
               <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 17,
@@ -2790,7 +2790,7 @@ function Skeleton() {
     <div style={{ padding: "4px 0" }}>
       {H.map((h, i) => (
         <div key={i} style={{ height: h, marginBottom: 12, position: "relative",
-          overflow: "hidden", background: "rgba(158,21,32,.96)",
+          overflow: "hidden", background: "rgba(82,11,18,.96)",
           border: "1px solid rgba(255,255,255,.05)" }}>
           <div style={{ position: "absolute", inset: 0, animation: "bo-shimmer 1.1s linear infinite",
             background: "linear-gradient(90deg, transparent, rgba(247,241,230,.07), transparent)" }} />
@@ -2931,7 +2931,7 @@ function FinalsCountdown({ state, leaderboard, meId, setTab }) {
           display: "flex", alignItems: "center", gap: 10, cursor: "pointer", color: "inherit",
           background: "transparent", border: "1px solid rgba(242,208,211,.25)", textAlign: "left" }}>
           <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 15,
-            padding: "3px 8px", color: "#B8141F",
+            padding: "3px 8px", color: "#6B0F17",
             background: inPrizes ? "#F7F1E6" : "#F2B8BC" }}>#{myRank}</span>
           <span style={{ flex: 1, fontSize: 12, color: "#F2D0D3", lineHeight: 1.35 }}>
             {inPrizes
@@ -3011,16 +3011,16 @@ function PrizeSheet({ open, state, leaderboard, onClose }) {
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
-      background: "rgba(184,20,31,.88)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.88)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "90vh", overflowY: "auto", borderTop: "3px solid #F7F1E6", padding: 16 }}>
-        <div style={{ background: "#F7F1E6", color: "#B8141F", padding: 18 }}>
+        <div style={{ background: "#F7F1E6", color: "#6B0F17", padding: 18 }}>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
             letterSpacing: ".26em" }}>PLAYING FOR</div>
           <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
             fontSize: 60, lineHeight: 1 }}>{pool} OMR</div>
-          <div style={{ height: 8, background: "rgba(184,20,31,.2)", marginTop: 14 }}>
-            <div style={{ height: "100%", background: "#B8141F",
+          <div style={{ height: 8, background: "rgba(107,15,23,.2)", marginTop: 14 }}>
+            <div style={{ height: "100%", background: "#6B0F17",
                           width: Math.round(paid / pool * 100) + "%" }} />
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8,
@@ -3180,8 +3180,8 @@ function RecapSheet({ session, state, leaderboard, meId, onClose, onOpenSession 
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
-      background: "rgba(184,20,31,.88)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.88)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "90vh", overflowY: "auto", borderTop: "3px solid #F7F1E6", padding: 16 }}>
         <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
           letterSpacing: ".26em", color: "#F2D0D3" }}>
@@ -3291,7 +3291,7 @@ function SessionsTable({ state, meId, onOpen }) {
   const { rows } = rankAt(state, Math.max(played, (state.sessions || []).length - 1));
   if (!rows.length) {
     return (
-      <div style={{ border: "1px solid rgba(242,208,211,.3)", background: "rgba(158,21,32,.94)",
+      <div style={{ border: "1px solid rgba(242,208,211,.3)", background: "rgba(82,11,18,.94)",
                     padding: 16, textAlign: "center", color: "#F2D0D3", fontSize: 12 }}>
         The table opens after the first night is played.
       </div>
@@ -3327,7 +3327,7 @@ function SessionsTable({ state, meId, onOpen }) {
   };
 
   return (
-    <div className="na-table na-ivory" style={{ border: "1px solid rgba(247,241,230,.35)", background: "rgba(158,21,32,.96)",
+    <div className="na-table na-ivory" style={{ border: "1px solid rgba(247,241,230,.35)", background: "rgba(82,11,18,.96)",
                   padding: "12px 14px 6px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center",
                     marginBottom: 4 }}>
@@ -3388,7 +3388,7 @@ function KoPhotoStrip({ session, updateSession, canUpload }) {
   if (!canUpload && photos.length === 0) return null;
 
   return (
-    <div style={{ border: "1px solid rgba(242,208,211,.3)", background: "rgba(158,21,32,.94)",
+    <div style={{ border: "1px solid rgba(242,208,211,.3)", background: "rgba(82,11,18,.94)",
                   padding: 12 }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
@@ -3525,7 +3525,7 @@ function RecapToggle({ tab, setTab }) {
   const B = ({ id, label }) => (
     <button onClick={() => setTab(id)} style={{ padding: "11px 4px", cursor: "pointer",
       background: tab === id ? "#F7F1E6" : "transparent",
-      color: tab === id ? "#B8141F" : "#F2D0D3", border: "none",
+      color: tab === id ? "#6B0F17" : "#F2D0D3", border: "none",
       fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 10,
       letterSpacing: ".24em", textTransform: "uppercase" }}>{label}</button>
   );
@@ -3633,7 +3633,7 @@ function RecapMine({ session, state, meId, idx, onShare }) {
         <button onClick={() => onShare({ head, games, ptsNow, ptsWas, rankNow,
                                          total: (state.players || []).length })}
           style={{ width: "100%", marginTop: 16, padding: 14, background: "#F7F1E6",
-                   color: "#B8141F", border: "none", cursor: "pointer",
+                   color: "#6B0F17", border: "none", cursor: "pointer",
                    fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
                    letterSpacing: ".2em" }}>SHARE STORY</button>
       )}
@@ -3688,7 +3688,7 @@ function RecapEveryone({ session, state, meId, idx, nameOf, teamName, champTid, 
   };
 
   const Tile = ({ k, v, c }) => (
-    <div style={{ background: "rgba(158,21,32,.94)", padding: 10, flex: 1, minWidth: 0 }}>
+    <div style={{ background: "rgba(82,11,18,.94)", padding: 10, flex: 1, minWidth: 0 }}>
       <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 8,
                     letterSpacing: ".2em", color: "#F2D0D3" }}>{k}</div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 112,'wght' 900",
@@ -3764,7 +3764,7 @@ function RecapEveryone({ session, state, meId, idx, nameOf, teamName, champTid, 
 
       {onShare && (
         <button onClick={() => onShare(sum)} style={{ width: "100%", marginTop: 16, padding: 14,
-          background: "#F7F1E6", color: "#B8141F", border: "none", cursor: "pointer",
+          background: "#F7F1E6", color: "#6B0F17", border: "none", cursor: "pointer",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".2em" }}>SHARE NIGHT RECAP</button>
       )}
@@ -3778,7 +3778,7 @@ function drawRecapStory(d) {
   const c = document.createElement("canvas");
   c.width = 1080; c.height = 1920;
   const g = c.getContext("2d");
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, 1080, 1920);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, 1080, 1920);
   let rg = g.createRadialGradient(1080, 300, 0, 1080, 300, 1000);
   rg.addColorStop(0, "rgba(242,184,188,.22)"); rg.addColorStop(1, "rgba(242,184,188,0)");
   g.fillStyle = rg; g.fillRect(0, 0, 1080, 1920);
@@ -3836,16 +3836,16 @@ function RecapStorySheet({ open, onClose }) {
   };
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 95,
-      background: "rgba(184,20,31,.92)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.92)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #F7F1E6", padding: 16 }}>
         <div style={{ display: "flex", justifyContent: "center", margin: "6px 0 14px" }}>
           {url ? <img src={url} alt="" style={{ width: 260, height: 462, display: "block",
                         border: "1px solid rgba(242,208,211,.3)" }} />
-               : <div style={{ width: 260, height: 462, background: "#9E1520" }} />}
+               : <div style={{ width: 260, height: 462, background: "#520B12" }} />}
         </div>
         <button onClick={save} style={{ width: "100%", padding: 16, background: "#F7F1E6",
-          color: "#B8141F", border: "none", cursor: "pointer",
+          color: "#6B0F17", border: "none", cursor: "pointer",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           letterSpacing: ".2em" }}>SHARE / SAVE</button>
         {flash && <div style={{ textAlign: "center", color: "#F7F1E6", marginTop: 10,
@@ -3903,7 +3903,7 @@ function drawStory(kind, d) {
   c.width = ST_W; c.height = ST_H;
   const g = c.getContext("2d");
 
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, ST_W, ST_H);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, ST_W, ST_H);
   // the brand's corner washes
   let rg = g.createRadialGradient(ST_W, ST_H * 0.18, 0, ST_W, ST_H * 0.18, ST_W * 0.9);
   rg.addColorStop(0, "rgba(242,184,188,.20)"); rg.addColorStop(1, "rgba(242,184,188,0)");
@@ -3920,7 +3920,7 @@ function drawStory(kind, d) {
   // the mark, drawn rather than loaded so the card never waits on an image
   const mx = 86, my = 150, ms = 96;
   g.fillStyle = "#F7F1E6"; g.fillRect(mx, my, ms, ms);
-  g.fillStyle = "#B8141F";
+  g.fillStyle = "#6B0F17";
   [[0.47, 0.03], [0.59, 0.06], [0.73, 0.09], [0.89, 0.11]].forEach(([t, h]) =>
     g.fillRect(mx, my + ms * t, ms, ms * h));
   g.fillStyle = "#F2B8BC"; g.fillRect(mx + ms * 0.75, my + ms * 0.12, ms * 0.13, ms * 0.13);
@@ -3951,7 +3951,7 @@ function drawStory(kind, d) {
       y += 92;
     });
     g.fillStyle = "#F7F1E6"; g.fillRect(L, ST_H - 300, W, 116);
-    stMono(g, `SERIES #${d.rank}  ·  ${d.series} PTS`, L + 36, ST_H - 224, 36, "#B8141F", 4);
+    stMono(g, `SERIES #${d.rank}  ·  ${d.series} PTS`, L + 36, ST_H - 224, 36, "#6B0F17", 4);
   }
 
   if (kind === "champs") {
@@ -3995,7 +3995,7 @@ function drawStory(kind, d) {
     g.fillStyle = d.got ? "#F7F1E6" : "transparent"; g.fillRect(bx, 880, bs, bs);
     if (!d.got) { g.strokeStyle = "#F2D0D3"; g.lineWidth = 4; g.strokeRect(bx, 880, bs, bs); }
     g.font = '700 128px "JetBrains Mono", monospace';
-    g.fillStyle = d.got ? "#B8141F" : "#F2D0D3";
+    g.fillStyle = d.got ? "#6B0F17" : "#F2D0D3";
     g.fillText(d.code, bx + (bs - g.measureText(d.code).width) / 2, 1055);
     g.textAlign = "center";
     stDisp(g, (d.name || "").toUpperCase(), ST_W / 2, 1300, 86, "#FFFFFF", W);
@@ -4048,14 +4048,14 @@ function ShareSheet({ open, data, onClose }) {
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 90,
-      background: "rgba(184,20,31,.9)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.9)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #F2B8BC", padding: 16 }}>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6 }}>
           {ST_TABS.map(([k, label]) => (
             <button key={k} onClick={() => setKind(k)} style={{ padding: "10px 4px", cursor: "pointer",
               background: kind === k ? "#F7F1E6" : "transparent",
-              color: kind === k ? "#B8141F" : "#F2D0D3",
+              color: kind === k ? "#6B0F17" : "#F2D0D3",
               border: "1px solid " + (kind === k ? "#F7F1E6" : "rgba(242,208,211,.3)"),
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
               letterSpacing: ".12em" }}>{label}</button>
@@ -4065,13 +4065,13 @@ function ShareSheet({ open, data, onClose }) {
           {url
             ? <img src={url} alt="" style={{ width: 270, height: 480, display: "block",
                                              border: "1px solid rgba(242,208,211,.3)" }} />
-            : <div style={{ width: 270, height: 480, background: "#9E1520" }} />}
+            : <div style={{ width: 270, height: 480, background: "#520B12" }} />}
         </div>
         <div style={{ fontSize: 11, color: "#F2D0D3", textAlign: "center", marginBottom: 12 }}>
           Preview is the actual 1080&times;1920 file, shown small.
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <button onClick={save} style={{ padding: "16px", background: "#F7F1E6", color: "#B8141F",
+          <button onClick={save} style={{ padding: "16px", background: "#F7F1E6", color: "#6B0F17",
             border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 11, letterSpacing: ".2em" }}>SAVE IMAGE</button>
           <button onClick={copy} style={{ padding: "16px", background: "transparent", color: "#F2B8BC",
@@ -4115,7 +4115,7 @@ function luCover(g, im, x, y, w, h) {
 
 function luPaint(g, kind, d, im, logo, adj) {
   adj = adj || LU_ADJ0;
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, LU_W, LU_H);
 
   // ── the photo, and the grade that makes any photo look like this volume ──
   if (im) {
@@ -4143,7 +4143,7 @@ function luPaint(g, kind, d, im, logo, adj) {
       g.fillStyle = "#1a1a1a"; g.globalAlpha = 0.85 * gr;
       g.fillRect(0, top, LU_W, hh);
       g.globalCompositeOperation = "source-over";
-      g.fillStyle = "#B8141F"; g.globalAlpha = 0.22 * gr;
+      g.fillStyle = "#6B0F17"; g.globalAlpha = 0.22 * gr;
       g.fillRect(0, top, LU_W, hh);
       g.globalAlpha = 1;
     }
@@ -4178,16 +4178,16 @@ function luPaint(g, kind, d, im, logo, adj) {
     // Darken the bottom of the window so the lamps do not light the ground
     // the plates stand on. Without it the lime glow runs under the names.
     const fg = g.createLinearGradient(0, top + hh * 0.52, 0, top + hh);
-    fg.addColorStop(0, "rgba(184,20,31,0)");
-    fg.addColorStop(1, `rgba(184,20,31,${(0.55 * gr).toFixed(3)})`);
+    fg.addColorStop(0, "rgba(107,15,23,0)");
+    fg.addColorStop(1, `rgba(107,15,23,${(0.55 * gr).toFixed(3)})`);
     g.fillStyle = fg; g.fillRect(0, top, LU_W, hh);
     g.restore();
     // fade the photo into the ground at both ends, so it has no visible edge
     let vg = g.createLinearGradient(0, top, 0, top + hh);
-    vg.addColorStop(0, "#B8141F");
-    vg.addColorStop(0.18, "rgba(184,20,31,0)");
-    vg.addColorStop(0.62, "rgba(184,20,31,0)");
-    vg.addColorStop(1, "#B8141F");
+    vg.addColorStop(0, "#6B0F17");
+    vg.addColorStop(0.18, "rgba(107,15,23,0)");
+    vg.addColorStop(0.62, "rgba(107,15,23,0)");
+    vg.addColorStop(1, "#6B0F17");
     g.fillStyle = vg; g.fillRect(0, top, LU_W, hh);
   } else {
     // No photo: the corner washes the rest of the brand uses, so the card is
@@ -4434,7 +4434,7 @@ function LineupNames({ item, session, state, updateSession }) {
   }
   return (
     <div style={{ marginTop: 8, padding: 12, border: "1px solid rgba(247,241,230,.3)",
-                  background: "rgba(158,21,32,.94)" }}>
+                  background: "rgba(82,11,18,.94)" }}>
       {rows.map(([k, label]) => {
         const teamId = item[k];
         const def = teamDefaultLabel(session, state || { players: [] }, teamId);
@@ -4444,7 +4444,7 @@ function LineupNames({ item, session, state, updateSession }) {
               letterSpacing: ".2em", color: "#F2D0D3", marginBottom: 5 }}>{label}</div>
             <input value={over[teamId] || ""} placeholder={def}
               onChange={e => set(teamId, e.target.value)}
-              style={{ width: "100%", padding: "10px 12px", background: "#B8141F",
+              style={{ width: "100%", padding: "10px 12px", background: "#6B0F17",
                 color: "#FFFFFF", border: "1px solid rgba(242,208,211,.5)", borderRadius: 28,
                 fontFamily: "'Archivo',sans-serif", fontWeight: 800, fontSize: 15 }} />
           </div>
@@ -4456,7 +4456,7 @@ function LineupNames({ item, session, state, updateSession }) {
             border: "1px solid rgba(242,208,211,.4)", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 10, letterSpacing: ".14em" }}>RESET</button>
         <button onClick={() => setOpen(false)}
-          style={{ padding: 10, background: "#F7F1E6", color: "#B8141F", cursor: "pointer",
+          style={{ padding: 10, background: "#F7F1E6", color: "#6B0F17", cursor: "pointer",
             border: "none", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 10, letterSpacing: ".14em" }}>DONE</button>
       </div>
@@ -4568,15 +4568,15 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 90,
-      background: "rgba(184,20,31,.9)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.9)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #F7F1E6", padding: 16 }}>
         <div style={{ display: "grid",
                       gridTemplateColumns: `repeat(${Math.min(items.length, 4)},1fr)`, gap: 6 }}>
           {items.map((it, k) => (
             <button key={it.key} onClick={() => setI(k)} style={{ padding: "10px 4px", cursor: "pointer",
               background: i === k ? "#F7F1E6" : "transparent",
-              color: i === k ? "#B8141F" : "#F2D0D3",
+              color: i === k ? "#6B0F17" : "#F2D0D3",
               border: "1px solid " + (i === k ? "#F7F1E6" : "rgba(242,208,211,.3)"),
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
               letterSpacing: ".12em" }}>{it.label}</button>
@@ -4627,7 +4627,7 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
           <button onClick={() => { setCutFail(false); setCut(v => !v); }}
             style={{ width: "100%", marginTop: 6, padding: "11px", cursor: "pointer",
               background: cut ? "#F7F1E6" : "transparent",
-              color: cut ? "#B8141F" : "#F7F1E6",
+              color: cut ? "#6B0F17" : "#F7F1E6",
               border: "1px solid " + (cut ? "#F7F1E6" : "rgba(247,241,230,.45)"),
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
               letterSpacing: ".14em" }}>
@@ -4650,7 +4650,7 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
                          cursor: hasPhoto ? (dragging ? "grabbing" : "grab") : "default",
                          touchAction: hasPhoto ? "none" : "auto",
                          userSelect: "none", WebkitUserSelect: "none" }} />
-            : <div style={{ width: 270, height: 480, background: "#9E1520" }} />}
+            : <div style={{ width: 270, height: 480, background: "#520B12" }} />}
         </div>
         <div style={{ fontSize: 11, color: "#F2D0D3", textAlign: "center", marginBottom: 2 }}>
           {hasPhoto
@@ -4663,7 +4663,7 @@ function LineupSheet({ open, items, photos, onClose, session, updateSession, can
         )}
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
-          <button onClick={save} style={{ padding: "16px", background: "#F7F1E6", color: "#B8141F",
+          <button onClick={save} style={{ padding: "16px", background: "#F7F1E6", color: "#6B0F17",
             border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 11, letterSpacing: ".14em" }}>SHARE / SAVE</button>
           <button onClick={copy} style={{ padding: "16px", background: "transparent", color: "#F7F1E6",
@@ -4850,7 +4850,7 @@ function luPaintCut(g, kind, d, cut, logo, adj) {
   const L = 80, R = LU_W - 80, W = R - L;
   g.textBaseline = "alphabetic";
 
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, LU_W, LU_H);
   luStreaks(g, d.seed || d.key || "blackout");
 
   // the two lamps
@@ -5011,7 +5011,7 @@ function avFaceUrl(url, size = AV_SIZE) {
 // The volume's ground for a cut-out portrait: near-black with the two lamps
 // behind the head, the same light the line-up cards use, scaled to a square.
 function avGround(g, S) {
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, S, S);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, S, S);
   const lamp = (cx, cy, rad, rgb, a) => {
     const r2 = g.createRadialGradient(cx, cy, 0, cx, cy, rad);
     r2.addColorStop(0, `rgba(${rgb},${a})`);
@@ -5110,7 +5110,7 @@ function gcGroup(g, d, x, y, w, h) {
   g.fillStyle = "#F7F1E6";
   g.fillRect(x, y, HEAD - 10, HEAD - 10);
   g.font = "italic 900 34px Archivo, sans-serif";
-  g.fillStyle = "#B8141F";
+  g.fillStyle = "#6B0F17";
   {
     const t = d.letter;
     g.fillText(t, x + (HEAD - 10 - g.measureText(t).width) / 2, y + HEAD - 10 - 16);
@@ -5177,7 +5177,7 @@ function gcGroup(g, d, x, y, w, h) {
 
 // ── the painter ───────────────────────────────────────────────────────────
 function gcPaint(g, kind, d, logo, faces) {
-  g.fillStyle = "#B8141F"; g.fillRect(0, 0, LU_W, LU_H);
+  g.fillStyle = "#6B0F17"; g.fillRect(0, 0, LU_W, LU_H);
 
   // the volume's two washes, same corners as every other card in the set
   let rg = g.createRadialGradient(LU_W, LU_H * 0.1, 0, LU_W, LU_H * 0.1, LU_W);
@@ -5196,7 +5196,7 @@ function gcPaint(g, kind, d, logo, faces) {
   // ── header ──
   const ms = 64, my = 104;
   g.fillStyle = "#F7F1E6"; g.fillRect(L, my, ms, ms);
-  g.fillStyle = "#B8141F";
+  g.fillStyle = "#6B0F17";
   [[0.47, 0.03], [0.59, 0.06], [0.73, 0.09], [0.89, 0.11]].forEach(([t, h]) =>
     g.fillRect(L, my + ms * t, ms, ms * h));
   g.fillStyle = "#F2B8BC"; g.fillRect(L + ms * 0.75, my + ms * 0.12, ms * 0.13, ms * 0.13);
@@ -5632,14 +5632,14 @@ function GroupCardSheet({ open, items, onClose }) {
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 95,
-      background: "rgba(184,20,31,.92)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.92)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "94vh", overflowY: "auto", borderTop: "3px solid #F7F1E6", padding: 16 }}>
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${items.length},1fr)`, gap: 6 }}>
           {items.map((x, i) => (
             <button key={x.key} onClick={() => setK(i)} style={{ padding: "11px 4px", cursor: "pointer",
               background: i === k ? "#F7F1E6" : "transparent",
-              color: i === k ? "#B8141F" : "#F2D0D3",
+              color: i === k ? "#6B0F17" : "#F2D0D3",
               border: "1px solid " + (i === k ? "#F7F1E6" : "rgba(242,208,211,.3)"),
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
               letterSpacing: ".12em" }}>{x.label}</button>
@@ -5649,13 +5649,13 @@ function GroupCardSheet({ open, items, onClose }) {
           {url
             ? <img src={url} alt="" style={{ width: 270, height: 480, display: "block",
                                              border: "1px solid rgba(242,208,211,.3)" }} />
-            : <div style={{ width: 270, height: 480, background: "#9E1520" }} />}
+            : <div style={{ width: 270, height: 480, background: "#520B12" }} />}
         </div>
         <div style={{ fontSize: 11, color: "#F2D0D3", textAlign: "center", marginBottom: 12 }}>
           Preview is the actual 1080&times;1920 file, shown small.
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <button onClick={save} style={{ ...btn, background: "#F7F1E6", color: "#B8141F",
+          <button onClick={save} style={{ ...btn, background: "#F7F1E6", color: "#6B0F17",
             border: "none" }}>SHARE / SAVE</button>
           <button onClick={copy} style={{ ...btn, background: "transparent", color: "#F2B8BC",
             border: "1px solid rgba(242,184,188,.5)" }}>COPY CAPTION</button>
@@ -5806,7 +5806,7 @@ function RivalAlert({ state, leaderboard, meId, setTab }) {
     <button onClick={() => setTab("leaderboard")}
       style={{ display: "block", width: "100%", textAlign: "left", cursor: "pointer", color: "inherit",
         marginTop: 14, padding: "14px 16px", border: "1px solid rgba(242,184,188,.4)",
-        background: "linear-gradient(90deg,#F2B8BC 0 3px,rgba(158,21,32,.96) 3px)" }}>
+        background: "linear-gradient(90deg,#F2B8BC 0 3px,rgba(82,11,18,.96) 3px)" }}>
       <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
         letterSpacing: ".3em", color: "#F2B8BC" }}>{r.passed ? "RIVAL" : "THE CHASE"}</div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 118,'wght' 900",
@@ -5874,7 +5874,7 @@ function RecapReadyCard({ state, leaderboard, meId, onOpen }) {
   );
 
   return (
-    <div style={{ marginTop: 14, padding: "16px 14px", background: "rgba(158,21,32,.96)",
+    <div style={{ marginTop: 14, padding: "16px 14px", background: "rgba(82,11,18,.96)",
       border: "1px solid rgba(247,241,230,.4)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ fontFamily: "'Archivo',sans-serif", fontWeight: 900, fontSize: 9,
@@ -5919,7 +5919,7 @@ function RankPin({ state, leaderboard, meId, setOpenPlayerId }) {
   const verb = r.ahead ? "TO CATCH" : "TO HOLD";
 
   return (
-    <div style={{ marginTop: 12, border: "1px solid rgba(247,241,230,.45)", background: "rgba(158,21,32,.96)" }}>
+    <div style={{ marginTop: 12, border: "1px solid rgba(247,241,230,.45)", background: "rgba(82,11,18,.96)" }}>
       <div onClick={() => setOpenPlayerId && setOpenPlayerId(meId)}
         style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: 11, padding: "13px 14px" }}>
         <div style={{ flex: "0 0 auto", width: 38, height: 38, display: "grid", placeItems: "center",
@@ -6098,7 +6098,7 @@ function RankPath({ meId, state }) {
         <path d={d} fill="none" stroke="#F7F1E6" strokeWidth="2" />
         {pts.map((p, k) => (
           <circle key={k} cx={x(k)} cy={y(p.r)} r={k === peakK || k === lastK ? 4 : 2.5}
-            fill={k === lastK && dropped ? "#F2B8BC" : k === peakK ? "#F7F1E6" : "#B8141F"}
+            fill={k === lastK && dropped ? "#F2B8BC" : k === peakK ? "#F7F1E6" : "#6B0F17"}
             stroke={k === lastK && dropped ? "#F2B8BC" : "#F7F1E6"} strokeWidth="2" />
         ))}
       </svg>
@@ -6124,7 +6124,7 @@ function TopPartners({ meId, state, setOpenPlayerId }) {
         {table.slice(0, 3).map(t => (
           <button key={t.id} onClick={() => setOpenPlayerId && setOpenPlayerId(t.id)}
             style={{ display: "block", width: "100%", textAlign: "left", cursor: "pointer",
-              color: "inherit", background: "rgba(158,21,32,.94)", border: "none",
+              color: "inherit", background: "rgba(82,11,18,.94)", border: "none",
               borderTop: "1px solid rgba(242,208,211,.16)", padding: "10px 0" }}>
             <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
               <span style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 14,
@@ -6180,7 +6180,7 @@ function wallSession(state) {
 function WallFace({ player, side, dim }) {
   const [err, setErr] = useState(false);
   const base = { width: side, height: side, flex: "0 0 auto", borderRadius: 28,
-                 border: `${wu(0.1)} solid #B8141F`, opacity: dim ? 0.5 : 1 };
+                 border: `${wu(0.1)} solid #6B0F17`, opacity: dim ? 0.5 : 1 };
   if (player && player.photoUrl && !err) {
     return <img src={player.photoUrl} alt="" onError={() => setErr(true)}
       style={{ ...base, objectFit: "cover",
@@ -6188,7 +6188,7 @@ function WallFace({ player, side, dim }) {
   }
   const nm = (player && player.name) || "?";
   const key = (player && (player.id || player.name)) || "?";
-  const palette = ["#F7F1E6", "#F2B8BC", "#9E1520", "#F7F1E6", "#3A3A3A", "#F2B8BC"];
+  const palette = ["#F7F1E6", "#F2B8BC", "#520B12", "#F7F1E6", "#3A3A3A", "#F2B8BC"];
   const tint = palette[Math.abs(key.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % palette.length];
   const lum = parseInt(tint.slice(1, 3), 16) * 0.299 + parseInt(tint.slice(3, 5), 16) * 0.587
             + parseInt(tint.slice(5, 7), 16) * 0.114;
@@ -6201,7 +6201,7 @@ function WallFace({ player, side, dim }) {
 
 function WallPanel({ children, accent }) {
   return <div style={{ display: "flex", flexDirection: "column", minHeight: 0, padding: wu(1.1),
-      background: "rgba(158,21,32,.94)",
+      background: "rgba(82,11,18,.94)",
       backgroundImage: `linear-gradient(180deg,${accent || "#F7F1E6"},rgba(247,241,230,.05))`,
       backgroundSize: `${wu(0.22)} 100%`, backgroundRepeat: "no-repeat",
       border: "1px solid rgba(242,208,211,.22)", position: "relative", overflow: "hidden" }}>
@@ -6335,7 +6335,7 @@ function WallTeams({ session, state, g, seedOf }) {
                   fontWeight: 700,
                   background: seed && seed <= 4 ? "#F7F1E6" : "rgba(255,255,255,.06)",
                   border: "1px solid rgba(255,255,255,.14)",
-                  color: seed && seed <= 4 ? "#B8141F" : "#F2D0D3" }}>{seed ? `S${seed}` : "–"}</span>
+                  color: seed && seed <= 4 ? "#6B0F17" : "#F2D0D3" }}>{seed ? `S${seed}` : "–"}</span>
               <div style={{ display: "flex", flex: "0 0 auto", gap: wu(0.15) }}>
                 <WallFace player={pl(t.p1Id)} side={wu(3.1)} />
                 <WallFace player={pl(t.p2Id)} side={wu(3.1)} />
@@ -6419,7 +6419,7 @@ function WallPage({ state, refreshNow, lastSync }) {
   const hhmm = (d) => d ? `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}` : "--:--";
 
   return <div className="wall" style={{ "--wu": "min(1vh, 1.78vw)", position: "fixed", inset: 0,
-      background: "#B8141F", color: "#FFFFFF", display: "flex", flexDirection: "column",
+      background: "#6B0F17", color: "#FFFFFF", display: "flex", flexDirection: "column",
       padding: wu(1.4), gap: wu(1), overflow: "hidden" }}>
     {/* ── HEAD ── */}
     <div style={{ flex: "0 0 auto", display: "flex", alignItems: "flex-end", gap: wu(1.2),
@@ -6453,7 +6453,7 @@ function WallPage({ state, refreshNow, lastSync }) {
       </div>
       {session && session.doublePoints && (
         <div style={{ flex: "0 0 auto", padding: `${wu(0.4)} ${wu(0.9)}`, background: "#F2B8BC",
-            color: "#B8141F", fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            color: "#6B0F17", fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
             fontVariationSettings: "'wdth' 125,'wght' 900", fontSize: wu(2), lineHeight: 1 }}>2X</div>
       )}
     </div>
@@ -6540,10 +6540,10 @@ function ReceiptSheet({ night, player, rankAfter, onClose }) {
                       BONUS: "#F7F1E6", DROPPED: "#F2D0D3" };
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 80,
-      background: "rgba(184,20,31,.86)", display: "flex", alignItems: "flex-end" }}>
-      <div onClick={e => e.stopPropagation()} style={{ background: "#9E1520", width: "100%",
+      background: "rgba(107,15,23,.86)", display: "flex", alignItems: "flex-end" }}>
+      <div onClick={e => e.stopPropagation()} style={{ background: "#520B12", width: "100%",
         maxHeight: "88vh", overflowY: "auto", borderTop: "3px solid #F7F1E6" }}>
-        <div style={{ position: "sticky", top: 0, background: "#B8141F", padding: "16px 16px 12px",
+        <div style={{ position: "sticky", top: 0, background: "#6B0F17", padding: "16px 16px 12px",
                       borderBottom: "1px solid rgba(242,208,211,.16)" }}>
           <div style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
                         letterSpacing: ".28em", color: "#F2D0D3" }}>
@@ -6591,7 +6591,7 @@ function ReceiptSheet({ night, player, rankAfter, onClose }) {
               </span>
             </div>
           )}
-          <div style={{ background: "#F7F1E6", color: "#B8141F", padding: "14px 16px",
+          <div style={{ background: "#F7F1E6", color: "#6B0F17", padding: "14px 16px",
                         display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
                            letterSpacing: ".24em" }}>NIGHT TOTAL</span>
@@ -6638,7 +6638,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
           Pick your name once and this screen shows every point you have, and where it came from.
         </div>
         <button onClick={onOpenPicker} style={{ marginTop: 22, padding: "14px 28px",
-          background: "#F7F1E6", color: "#B8141F", border: "none", cursor: "pointer",
+          background: "#F7F1E6", color: "#6B0F17", border: "none", cursor: "pointer",
           fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 12,
           letterSpacing: ".24em" }}>PICK YOUR NAME &#9654;</button>
       </div>
@@ -6709,7 +6709,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
                     fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS</div>
 
       {/* summary */}
-      <div style={{ border: "1px solid rgba(247,241,230,.35)", background: "rgba(158,21,32,.94)",
+      <div style={{ border: "1px solid rgba(247,241,230,.35)", background: "rgba(82,11,18,.94)",
                     padding: 18, marginTop: 18 }}>
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div>
@@ -6793,7 +6793,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
             <div style={{ width: 44, height: 44, flexShrink: 0,
               background: b.got ? "#F7F1E6" : "transparent",
               border: b.got ? "none" : "1px solid rgba(242,208,211,.4)",
-              color: b.got ? "#B8141F" : "#F2D0D3",
+              color: b.got ? "#6B0F17" : "#F2D0D3",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 15 }}>{b.code}</div>
             <div style={{ minWidth: 0 }}>
@@ -6821,7 +6821,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12 }}>
         <button onClick={() => setShare({ kind: "night" })} disabled={!data.nights.length}
           style={{ padding: "14px 6px", background: data.nights.length ? "#F7F1E6" : "transparent",
-            color: data.nights.length ? "#B8141F" : "#F2D0D3",
+            color: data.nights.length ? "#6B0F17" : "#F2D0D3",
             border: data.nights.length ? "none" : "1px solid rgba(242,208,211,.3)",
             cursor: data.nights.length ? "pointer" : "default",
             fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 10,
@@ -6881,7 +6881,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
                     fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>
       <input value={q} onChange={e => setQ(e.target.value)} placeholder="Find a player&hellip;"
-        style={{ width: "100%", marginTop: 16, padding: "14px 16px", background: "rgba(158,21,32,.96)",
+        style={{ width: "100%", marginTop: 16, padding: "14px 16px", background: "rgba(82,11,18,.96)",
           border: "1px solid rgba(242,208,211,.2)", color: "#FFFFFF", fontSize: 15,
           fontFamily: "'Archivo',sans-serif", outline: "none" }} />
       {started && !q && (
@@ -6906,7 +6906,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
         {rows.map(e => (
           <button key={e.player.id} onClick={() => setOpenPlayerId(e.player.id)} className="na-ptile"
             style={{ textAlign: "left", padding: 12, cursor: "pointer", color: "inherit",
-              background: e.player.id === meId ? "rgba(242,184,188,.07)" : "rgba(158,21,32,.94)",
+              background: e.player.id === meId ? "rgba(242,184,188,.07)" : "rgba(82,11,18,.94)",
               border: "1px solid " + (e.player.id === meId ? "rgba(242,184,188,.4)"
                                                           : "rgba(255,255,255,.07)") }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -6924,7 +6924,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
             </div>
             {/* A roster of 314 names needs faces. The photo slot keeps its
                 height whether or not there is one, so the grid stays even. */}
-            <div className="na-pslot" style={{ width: "100%", height: 120, marginTop: 8, background: "#9E1520",
+            <div className="na-pslot" style={{ width: "100%", height: 120, marginTop: 8, background: "#520B12",
               border: "1px solid rgba(255,255,255,.05)", overflow: "hidden",
               display: "flex", alignItems: "center", justifyContent: "center" }}>
               {e.player.photoUrl
@@ -7029,7 +7029,7 @@ function App() {
     // this paints the browser/OS chrome around the app. It was pinned to cyan
     // regardless of theme — wrong in both modes, and cyan is the support
     // colour here, not the brand one.
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#FFFFFF" : "#9E1520");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#FFFFFF" : "#520B12");
   }, [theme]);
 
   // Secret sign-in: tap brand logo 5× within 2.5s
@@ -7172,7 +7172,7 @@ function App() {
           {syncErr ? ` (${syncErr})` : ""}
         </div>
       )}
-      <header className="sticky top-0 z-30 backdrop-blur-xl border-b border-stone-800/80" style={{ background: "rgba(158,21,32,0.92)" }}>
+      <header className="sticky top-0 z-30 backdrop-blur-xl border-b border-stone-800/80" style={{ background: "rgba(82,11,18,0.92)" }}>
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button onClick={secretTap} className="shrink-0" aria-label="Urban Playground" style={{lineHeight:0}}>
@@ -7182,10 +7182,10 @@ function App() {
                 the app and the only mark on screen was the club's. */}
             
             <span style={{display:"none"}}>
-              <span style={{position:"absolute",left:0,right:0,top:14,height:1,background:"#B8141F"}} />
-              <span style={{position:"absolute",left:0,right:0,top:18,height:2,background:"#B8141F"}} />
-              <span style={{position:"absolute",left:0,right:0,top:22,height:3,background:"#B8141F"}} />
-              <span style={{position:"absolute",left:0,right:0,top:27,height:3,background:"#B8141F"}} />
+              <span style={{position:"absolute",left:0,right:0,top:14,height:1,background:"#6B0F17"}} />
+              <span style={{position:"absolute",left:0,right:0,top:18,height:2,background:"#6B0F17"}} />
+              <span style={{position:"absolute",left:0,right:0,top:22,height:3,background:"#6B0F17"}} />
+              <span style={{position:"absolute",left:0,right:0,top:27,height:3,background:"#6B0F17"}} />
               <span style={{position:"absolute",right:4,top:4,width:4,height:4,background:"#F2B8BC"}} />
             </span>
             <span className="na-flag" aria-hidden="true"><span style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:26,lineHeight:.9,color:"#FFFFFF",WebkitTextStroke:"1.2px #1A0A0C",paintOrder:"stroke fill",textShadow:"1.5px 1.5px 0 #1A0A0C",letterSpacing:"-.02em"}}>56</span></span>
@@ -7234,7 +7234,7 @@ function App() {
         </>}
       </main>
 
-      <nav className="fixed bottom-0 inset-x-0 z-30 border-t border-stone-800/80 backdrop-blur-xl" style={{ background: "rgba(158,21,32,0.96)" }}>
+      <nav className="fixed bottom-0 inset-x-0 z-30 border-t border-stone-800/80 backdrop-blur-xl" style={{ background: "rgba(82,11,18,0.96)" }}>
         <div className="max-w-3xl mx-auto grid px-2 py-1.5"
              style={{ gridTemplateColumns: `repeat(${navTabs.length}, minmax(0, 1fr))` }}>
           {navTabs.map(t => {
@@ -7401,7 +7401,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
 
       {/* ── HERO ── */}
       <div className="sg-hero na-hero" style={{position:"relative",marginTop:16,padding:"26px 18px",
-           background:"rgba(184,20,31,.9)",border:"1px solid rgba(247,241,230,.28)",overflow:"hidden"}}>
+           background:"rgba(107,15,23,.9)",border:"1px solid rgba(247,241,230,.28)",overflow:"hidden"}}>
         <div style={{position:"absolute",right:-16,top:-40,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
              fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:170,lineHeight:1,
              color:"rgba(26,10,12,.055)",pointerEvents:"none"}} className="vol-mark" aria-hidden="true">09</div>
@@ -7484,7 +7484,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
           <div style={{display:"flex",alignItems:"center",gap:14,marginTop:12}}>
             <div style={{flex:"0 0 auto",width:56,height:56,borderRadius:"50%",display:"grid",placeItems:"center",
                  background:`conic-gradient(#F7F1E6 ${donePct}%, rgba(242,208,211,.22) 0)`}}>
-              <div style={{width:44,height:44,borderRadius:"50%",background:"#B8141F",display:"grid",placeItems:"center",
+              <div style={{width:44,height:44,borderRadius:"50%",background:"#6B0F17",display:"grid",placeItems:"center",
                    fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                    fontSize:16,color:"#F7F1E6"}}>{(live.name||"").replace(/[^0-9]/g,"") || "·"}</div>
             </div>
@@ -7526,7 +7526,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             const bar = lead ? "#F7F1E6" : "#F2D0D3";
             return <div key={e.player.id} onClick={() => setTab("leaderboard")} className="sg-top" data-lead={lead ? "1" : "0"}
               style={{cursor:"pointer",display:"flex",alignItems:"center",gap:12,padding:"13px 14px",
-                      background:lead ? "rgba(16,23,31,.96)" : "rgba(158,21,32,.94)",
+                      background:lead ? "rgba(16,23,31,.96)" : "rgba(82,11,18,.94)",
                       backgroundImage:`linear-gradient(180deg,${bar},${bar})`,
                       backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
               <div className="na-rankdisc" style={{flex:"0 0 auto",width:42,height:42,display:"grid",placeItems:"center",
@@ -7591,7 +7591,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
             if (done.length) setRecap(done[done.length - 1]);
           }}
           style={{textAlign:"left",padding:14,cursor:"pointer",color:"inherit",
-            background:"rgba(158,21,32,.94)",border:"1px solid rgba(247,241,230,.3)"}}>
+            background:"rgba(82,11,18,.94)",border:"1px solid rgba(247,241,230,.3)"}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
             letterSpacing:".2em",color:"#F7F1E6"}}>LAST NIGHT</div>
           <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
@@ -7603,7 +7603,7 @@ function DashboardView({ state, leaderboard, setTab, setOpenSessionId, isAdmin, 
         </button>
         <button onClick={() => setShowPrizes(true)}
           style={{textAlign:"left",padding:14,cursor:"pointer",color:"inherit",
-            background:"rgba(158,21,32,.94)",border:"1px solid rgba(242,184,188,.35)"}}>
+            background:"rgba(82,11,18,.94)",border:"1px solid rgba(242,184,188,.35)"}}>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:8,
             letterSpacing:".2em",color:"#F2B8BC"}}>PRIZE TRACKER</div>
           <div style={{fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
@@ -8109,7 +8109,7 @@ function luWeave(g, y) {
   g.beginPath();
   if (g.roundRect) g.roundRect(x0, y, bw, h, h / 2); else g.rect(x0, y, bw, h);
   g.clip();
-  g.fillStyle = "#9E1520"; g.fillRect(x0, y, bw, h);
+  g.fillStyle = "#520B12"; g.fillRect(x0, y, bw, h);
   for (let x = x0; x < x0 + bw; x += w) g.drawImage(b, x, y, w, h);
   g.restore();
 }
@@ -8143,7 +8143,7 @@ function nextNightIndex(st) {
   const i = ss.findIndex(s => !s.completed);
   return i < 0 ? Math.max(0, ss.length - 1) : i;
 }
-
+/*NA-CANVAS{*/
 // ── Vol.9 share cards ─────────────────────────────────────────────────────
 // Geometry, once. Every figure below is a card coordinate at 1080x1920.
 const NC = {
@@ -8904,7 +8904,7 @@ function ngPaint(g, kind, d, logo, faces) {
     }
   }
 }
-
+/*}NA-CANVAS*/
 // ── THE NIGHT'S OWN SCREENS (Vol.9) ──────────────────────────────────────────
 
 // MON 2 NOV, NOT 11/2/2026. The night header built its date with
@@ -9021,7 +9021,7 @@ function NaNightPulse({ session, state, brief }) {
           fontSize: 9, letterSpacing: ".18em", padding: "3px 8px", borderRadius: 28,
           whiteSpace: "nowrap", flex: "0 0 auto",
           background: kind === "live" ? "#F7F1E6" : "rgba(247,241,230,.14)",
-          color: kind === "live" ? "#B8141F" : "#F2D0D3" }}>
+          color: kind === "live" ? "#6B0F17" : "#F2D0D3" }}>
           {kind === "live" ? "ON COURT" : "NEXT"}
         </span>
         <span style={{ flex: 1 }} />
@@ -9170,7 +9170,7 @@ function NaNightPoints({ session, state, sessions, onPick }) {
         </div>
       </div>
       {disagree && (
-        <div style={{ padding: "10px 14px", background: "#F7F1E6", color: "#B8141F",
+        <div style={{ padding: "10px 14px", background: "#F7F1E6", color: "#6B0F17",
           fontSize: 12, fontWeight: 700 }}>
           A receipt disagrees with the series table. Do not trust this screen
           until it is looked at.
@@ -9301,7 +9301,7 @@ function NaClipThumb({ c, onPick, wide }) {
       aria-label={"Play the " + naClipWhen(c) + " clip from " + naClipCourt(c)}>
       <span className="na-clip-play" style={{ position: "absolute", top: "50%", left: "50%", width: 42, height: 42,
         margin: "-21px 0 0 -21px", display: "grid", placeItems: "center", paddingLeft: 2,
-        background: "rgba(247,241,230,.92)", color: "#B8141F" }}><NaPlayIc size={18} /></span>
+        background: "rgba(247,241,230,.92)", color: "#6B0F17" }}><NaPlayIc size={18} /></span>
       <span style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "18px 10px 7px",
         display: "flex", justifyContent: "space-between", gap: 8,
         background: "linear-gradient(180deg, rgba(26,10,12,0), rgba(26,10,12,.82))",
@@ -9564,7 +9564,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
           <div key={s.id} className="jh-mock-sess" data-live={liveNow ? "1" : "0"} data-state={pill} data-double={(s.doublePoints || DOUBLE_NIGHTS.includes(s.date)) ? "1" : "0"}
                onClick={() => s.completed ? setRecapSession(s) : setOpenSessionId(s.id)}
                style={{cursor:"pointer",display:"flex",alignItems:"center",gap:14,padding:14,transform:"none",
-                       background:s.completed ? "rgba(158,21,32,.94)" : "rgba(16,23,31,.96)",
+                       background:s.completed ? "rgba(82,11,18,.94)" : "rgba(16,23,31,.96)",
                        backgroundImage:`linear-gradient(180deg,${liveNow ? "#F7F1E6" : "#F2D0D3"},rgba(242,208,211,.05))`,
                        backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",border:"none"}}>
             <div className="na-medallion" data-live={liveNow ? "1" : "0"}
@@ -9580,7 +9580,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
               <div className="na-note" style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".14em",
                    color:noteColour,marginTop:4,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{note}</div>
             </div>
-            <div className="na-pill" style={{flex:"0 0 auto",padding:"4px 9px",background:"rgba(184,20,31,.7)",
+            <div className="na-pill" style={{flex:"0 0 auto",padding:"4px 9px",background:"rgba(107,15,23,.7)",
                  border:`1px solid ${pc}66`,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:9,
                  letterSpacing:".18em",color:pc}}>{pill}</div>
           </div>
@@ -9722,13 +9722,13 @@ function CreateSessionModal({ onClose, onCreate, count }) {
 const CIc = {
   crown: ({ size = 26, style }) => (
     <svg width={size} height={size * 0.85} viewBox="0 0 24 20" style={style}>
-      <path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#F7F1E6" stroke="#9E1520" strokeWidth="1.8" strokeLinejoin="round"/>
-      <rect x="4.8" y="15.8" width="14.4" height="2.6" fill="#F2B8BC" stroke="#9E1520" strokeWidth="1.5"/>
+      <path d="M2.5 5.5 L7 9.5 L12 2 L17 9.5 L21.5 5.5 L19.5 14.5 H4.5 Z" fill="#F7F1E6" stroke="#520B12" strokeWidth="1.8" strokeLinejoin="round"/>
+      <rect x="4.8" y="15.8" width="14.4" height="2.6" fill="#F2B8BC" stroke="#520B12" strokeWidth="1.5"/>
     </svg>
   ),
   flame: ({ size = 14, style }) => (
     <svg width={size} height={size * 1.25} viewBox="0 0 20 25" style={style}>
-      <path d="M10 1.5C6.5 7 4 8.5 5.2 14c.8 3.6 3.4 6.5 4.8 8 1.4-1.5 4-4.4 4.8-8C16 8.5 13.5 7 10 1.5Z" fill="#F7F1E6" stroke="#9E1520" strokeWidth="1.6" strokeLinejoin="round"/>
+      <path d="M10 1.5C6.5 7 4 8.5 5.2 14c.8 3.6 3.4 6.5 4.8 8 1.4-1.5 4-4.4 4.8-8C16 8.5 13.5 7 10 1.5Z" fill="#F7F1E6" stroke="#520B12" strokeWidth="1.6" strokeLinejoin="round"/>
       <path d="M10 9c-1.6 3-2.2 4.5-1.4 7.2.5 1.7 1 2.8 1.4 3.5.4-.7.9-1.8 1.4-3.5.8-2.7.2-4.2-1.4-7.2Z" fill="#F2B8BC"/>
     </svg>
   ),
@@ -9978,7 +9978,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
   return (
     <div className="space-y-4">
       {/* Counter bar */}
-      <div style={{ background:"rgba(158,21,32,.85)", border:"1px solid rgba(255,255,255,.10)", boxShadow: isFull ? "none" : "none", padding:"14px 18px" }}>
+      <div style={{ background:"rgba(82,11,18,.85)", border:"1px solid rgba(255,255,255,.10)", boxShadow: isFull ? "none" : "none", padding:"14px 18px" }}>
         <div className="flex items-center justify-between mb-3">
           <div>
             <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:46, lineHeight:1, color: isFull ? "#F2B8BC" : "var(--ink)", WebkitTextStroke:"0" }}>
@@ -9997,7 +9997,7 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
             <button onClick={onRemind} style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:15, color:"#FFFFFF", background:"rgba(247,241,230,.12)", border:"1px solid rgba(247,241,230,.4)", boxShadow:"none", padding:"2px 10px", cursor:"pointer" }}>Copy list</button>
           </div>
         </div>
-        <div style={{ height:7, background:"rgba(158,21,32,.12)", border:"1px solid rgba(255,255,255,.14)" }}>
+        <div style={{ height:7, background:"rgba(82,11,18,.12)", border:"1px solid rgba(255,255,255,.14)" }}>
           <div style={{ height:"100%", width:`${(filledSlots/MAX_TEAMS)*100}%`, background: isFull ? "#F2B8BC" : "linear-gradient(90deg, var(--orange), var(--red))", transition:"width .3s" }} />
         </div>
       </div>
@@ -10007,11 +10007,11 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
         <div className="text-xs text-stone-500 uppercase tracking-widest font-bold mb-2">✅ Team Slots</div>
         <div className="space-y-1.5">
           {slots.map((val, i) => (
-            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background: val.trim() ? "var(--cream)" : "rgba(255,247,232,.35)", border: val.trim() ? "3px solid var(--ink)" : "2px dashed rgba(158,21,32,.25)", boxShadow: val.trim() ? "none" : "none", padding:"6px 10px" }}>
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background: val.trim() ? "var(--cream)" : "rgba(255,247,232,.35)", border: val.trim() ? "3px solid var(--ink)" : "2px dashed rgba(82,11,18,.25)", boxShadow: val.trim() ? "none" : "none", padding:"6px 10px" }}>
               <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:16, color: val.trim() ? "var(--ink)" : "#F2D0D3", width:22, flexShrink:0 }}>{i + 1}-</span>
               {isAdmin
                 ? <input value={val} onChange={e => setSlot(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "#F2D0D3", minWidth:0 }} />
-                : <span style={{ flex:1, fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(158,21,32,.25)" }}>{val.trim() || "—"}</span>
+                : <span style={{ flex:1, fontSize:14, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(82,11,18,.25)" }}>{val.trim() || "—"}</span>
               }
               {isAdmin && val.trim() && <button onClick={() => clearSlot(i)} style={{ color:"#F2D0D3", fontSize:13, background:"none", border:"none", cursor:"pointer", padding:2 }}>✕</button>}
             </div>
@@ -10024,11 +10024,11 @@ function SignupsTab({ session, state, updateSession, isAdmin, onRemind }) {
         <div className="text-xs text-stone-500 uppercase tracking-widest font-bold mb-2">⏳ Waitlist</div>
         <div className="space-y-1.5">
           {waitlist.map((val, i) => (
-            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(255,247,232,.25)", border:"2px dashed rgba(158,21,32,.2)", padding:"6px 10px", opacity: val.trim() ? 1 : 0.6 }}>
+            <div key={i} style={{ display:"flex", alignItems:"center", gap:8, background:"rgba(255,247,232,.25)", border:"2px dashed rgba(82,11,18,.2)", padding:"6px 10px", opacity: val.trim() ? 1 : 0.6 }}>
               <span style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize:14, color:"#F2D0D3", width:22, flexShrink:0 }}>{i + 1}-</span>
               {isAdmin
                 ? <input value={val} onChange={e => setWl(i, e.target.value)} placeholder="Name + Partner" style={{ flex:1, background:"transparent", border:"none", outline:"none", fontSize:13, fontWeight:700, color:"#FFFFFF", minWidth:0 }} />
-                : <span style={{ flex:1, fontSize:13, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(158,21,32,.25)" }}>{val.trim() || "—"}</span>
+                : <span style={{ flex:1, fontSize:13, fontWeight:700, color: val.trim() ? "var(--ink)" : "rgba(82,11,18,.25)" }}>{val.trim() || "—"}</span>
               }
               {isAdmin && val.trim() && <button onClick={() => clearWl(i)} style={{ color:"#F2D0D3", fontSize:13, background:"none", border:"none", cursor:"pointer", padding:2 }}>✕</button>}
             </div>
@@ -10090,7 +10090,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
   }, [canScore, finalWinner, session.autoClosed]);
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto screen-bg" data-double={(session.doublePoints || DOUBLE_NIGHTS.includes(session.date)) ? "1" : "0"}>
-      <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 flex items-center justify-between gap-3" style={{ background: "rgba(158,21,32,0.96)" }}>
+      <div className="sticky top-0 z-10 backdrop-blur-xl border-b border-stone-800/80 px-4 py-3 flex items-center justify-between gap-3" style={{ background: "rgba(82,11,18,0.96)" }}>
         <button onClick={onClose} className="text-stone-300 hover:text-orange-500 p-1"><I.back size={22} /></button>
         <div className="flex-1 min-w-0 text-center">
           <div className="flex items-center justify-center gap-2">
@@ -10107,7 +10107,7 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
           {isAdmin ? <button onClick={() => setShowEdit(true)} className="text-stone-400 hover:text-orange-500 p-1"><I.dots size={20} /></button> : <div className="w-7" />}
         </div>
       </div>
-      <div className="sticky top-[57px] z-10" style={{ background:"rgba(184,20,31,.97)",
+      <div className="sticky top-[57px] z-10" style={{ background:"rgba(107,15,23,.97)",
            borderBottom:"1px solid rgba(247,241,230,.22)", backdropFilter:"blur(18px)", padding:"8px 16px 10px" }}>
         {/* four destinations, equal weight, never scrolling off */}
         <div className="max-w-3xl mx-auto" style={{ display:"grid", gridTemplateColumns:"repeat(5,minmax(0,1fr))",
@@ -10130,12 +10130,12 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
                          fontFamily:"'Archivo',sans-serif", fontWeight:800, fontSize:12, letterSpacing:".04em",
                          textTransform:"uppercase", whiteSpace:"nowrap",
                          background:on ? "#F7F1E6" : "transparent",
-                         color:on ? "#B8141F" : (t.warm && !on ? "#F2B8BC" : "#F7F1E6"),
+                         color:on ? "#6B0F17" : (t.warm && !on ? "#F2B8BC" : "#F7F1E6"),
                          boxShadow:on ? "0 0 24px rgba(247,241,230,.35)" : "none" }}>
                 <t.Ic size={13} /> {t.label}
                 {t.count && <span style={{ fontSize:10, fontWeight:800, letterSpacing:".04em", padding:"1px 5px",
-                     background:on ? "rgba(184,20,31,.22)" : "rgba(247,241,230,.16)",
-                     color:on ? "#B8141F" : "#F7F1E6" }}>{t.count}</span>}
+                     background:on ? "rgba(107,15,23,.22)" : "rgba(247,241,230,.16)",
+                     color:on ? "#6B0F17" : "#F7F1E6" }}>{t.count}</span>}
               </button>;
             });
           })()}
@@ -10380,7 +10380,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
           <div className="aa-kicker">MVP vote</div>
 
           {!session.mvpVotingOpen && !session.mvpId && (
-            <div style={{ background:"rgba(158,21,32,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center" }}>
+            <div style={{ background:"rgba(82,11,18,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center" }}>
               <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 22, color:"#FFFFFF", marginBottom: 10 }}>VOTING HASN'T STARTED</div>
               {canScore
                 ? <>
@@ -10393,7 +10393,7 @@ function MvpVoteTab({ session, state, updateSession, isAdmin, canScore }) {
           )}
 
           {session.mvpVotingOpen && (
-            <div style={{ background:"rgba(158,21,32,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center", position: "relative" }}>
+            <div style={{ background:"rgba(82,11,18,.85)", border: "1px solid rgba(255,255,255,.10)", boxShadow: "none", padding: "22px 18px", textAlign: "center", position: "relative" }}>
               {justVoted ? (
                 <div style={{ padding: "20px 0" }}>
                   <div style={{ fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900", fontSize: 30, color: "#3FA33C" }}>Vote locked</div>
@@ -10602,7 +10602,7 @@ function TeamsTab({ session, state, updateSession, update, isAdmin, leaderboard 
                     : (seed
                       ? <span className="text-[9px] font-bold px-1.5 py-0.5 font-mono shrink-0 text-center"
                           style={{ background: seed <= 4 ? "#F7F1E6" : "rgba(255,255,255,.08)",
-                            color: seed <= 4 ? "#B8141F" : "#F2D0D3",
+                            color: seed <= 4 ? "#6B0F17" : "#F2D0D3",
                             border:"1px solid rgba(255,255,255,.14)", borderRadius: 28, minWidth:28 }}>S{seed}</span>
                       : <span className="shrink-0" style={{ width:18 }} aria-hidden="true" />)}
                   <span className="flex items-center shrink-0" style={{ marginRight:2 }}>
@@ -10796,7 +10796,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
           const fx = groupFixtures(session, x);
           return <div key={x} onClick={() => setPick(x)}
             style={{cursor:"pointer",minHeight:52,padding:"9px 4px",textAlign:"center",
-                    background:on ? "rgba(247,241,230,.12)" : "rgba(158,21,32,.94)",
+                    background:on ? "rgba(247,241,230,.12)" : "rgba(82,11,18,.94)",
                     border:`1px solid ${on ? "rgba(247,241,230,.55)" : "rgba(242,208,211,.3)"}`}}>
             <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 118,'wght' 900",
                  fontSize:21,lineHeight:1,color:on ? "#F7F1E6" : "#F7F1E6"}}>{x}</div>
@@ -10807,7 +10807,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
       </div>
 
       {/* ── STANDINGS ── */}
-      <div className="na-plate na-gtable" style={{marginTop:14,padding:16,background:"rgba(158,21,32,.94)",
+      <div className="na-plate na-gtable" style={{marginTop:14,padding:16,background:"rgba(82,11,18,.94)",
            backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
            backgroundSize:"5px 100%",backgroundRepeat:"no-repeat",position:"relative",overflow:"hidden"}}>
         <div className="na-gghost" aria-hidden="true" style={{position:"absolute",right:8,bottom:-26,fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
@@ -10890,7 +10890,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
               const w1 = m.winner === "team1", w2 = m.winner === "team2";
               const bar = done ? "#087A3F" : "#F2D0D3";
               return <div key={m.id} onClick={() => isAdmin && setEdit({ ...m, group: g })}
-                style={{cursor:isAdmin ? "pointer" : "default",padding:14,background:"rgba(158,21,32,.94)",
+                style={{cursor:isAdmin ? "pointer" : "default",padding:14,background:"rgba(82,11,18,.94)",
                         backgroundImage:`linear-gradient(180deg,${bar},${bar})`,
                         backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
                 <div style={{display:"flex",alignItems:"center",gap:8}}>
@@ -10938,7 +10938,7 @@ function GroupsTab({ session, state, updateSession, isAdmin }) {
               <div key={pr.a.id + pr.b.id}
                 onClick={() => { if (!isAdmin) return; if (pr.match) setEdit({ ...pr.match, group: g }); else setAdd(g); }}
                 style={{cursor:isAdmin ? "pointer" : "default",display:"flex",alignItems:"center",gap:10,
-                        padding:"11px 12px",background:"rgba(158,21,32,.9)",
+                        padding:"11px 12px",background:"rgba(82,11,18,.9)",
                         borderLeft:`2px solid ${pr.match ? "#F7F1E6" : "rgba(242,208,211,.5)"}`}}>
                 <div style={{flex:1,minWidth:0,fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:13,
                      color:"#FFFFFF",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
@@ -11017,12 +11017,12 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
     const lost = derived && !won;
     return (
       <div style={{ padding: 12, marginBottom: 10,
-        background: won ? "rgba(247,241,230,.08)" : "rgba(158,21,32,.94)",
+        background: won ? "rgba(247,241,230,.08)" : "rgba(82,11,18,.94)",
         border: "1px solid " + (won ? "rgba(247,241,230,.5)" : "rgba(255,255,255,.07)") }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 38, height: 38, flexShrink: 0, display: "flex", alignItems: "center",
             justifyContent: "center", background: won ? "#F7F1E6" : "#1A0A0C",
-            color: won ? "#B8141F" : "#F2D0D3", fontFamily: "'JetBrains Mono',monospace",
+            color: won ? "#6B0F17" : "#F2D0D3", fontFamily: "'JetBrains Mono',monospace",
             fontWeight: 700, fontSize: 14 }}>{inits(t)}</div>
           <div style={{ flex: 1, minWidth: 0, fontWeight: 800, fontSize: 15,
             color: lost ? "#F2D0D3" : "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden",
@@ -11039,8 +11039,8 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
                 fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 26,
                 transition: "transform 170ms cubic-bezier(.2,.7,.3,1)",
                 ...(val === n
-                  ? { background: "#F7F1E6", color: "#B8141F", borderColor: "#F7F1E6" }
-                  : { background: "#9E1520", color: "#F7F1E6", borderColor: "rgba(242,208,211,.3)" }) }}>
+                  ? { background: "#F7F1E6", color: "#6B0F17", borderColor: "#F7F1E6" }
+                  : { background: "#520B12", color: "#F7F1E6", borderColor: "rgba(242,208,211,.3)" }) }}>
               {n}
             </button>
           ))}
@@ -11059,7 +11059,7 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
         {[[t1, setT1, t2], [t2, setT2, t1]].map(([val, set, other], i) => (
           <select key={i} value={val} onChange={e => set(e.target.value)}
-            style={{ width: "100%", padding: "11px 10px", background: "#9E1520", color: "#FFFFFF",
+            style={{ width: "100%", padding: "11px 10px", background: "#520B12", color: "#FFFFFF",
               border: "1px solid rgba(242,208,211,.3)", fontSize: 13, outline: "none" }}>
             <option value="">Team {i + 1}</option>
             {teams.filter(t => t.id !== other && !hasPlayed(t.id, other)).map(t =>
@@ -11092,7 +11092,7 @@ function MatchEditorModal({ session, state, group, match, onClose, onSave, onDel
             letterSpacing: ".2em", border: "none",
             ...(why
               ? { background: "#1A0A0C", color: "#F2D0D3" }
-              : { background: "#F7F1E6", color: "#B8141F",
+              : { background: "#F7F1E6", color: "#6B0F17",
                   boxShadow: "0 0 30px rgba(247,241,230,.32)" }) }}>
           {why || "LOCK RESULT ▶"}
         </button>
@@ -11433,7 +11433,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="text-[10px] text-stone-500 uppercase tracking-wider font-semibold">Last 3rd-place spot</div>
             <div className="flex gap-1.5">
-              {[["best2", "Best 2 thirds"], ["playoff", "3rds playoff"]].map(([m, label]) => <button key={m} type="button" onClick={() => changeThirdMode(m)} className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 active:scale-95" style={m === thirdPlaceMode ? { background: "#F7F1E6", color: "#FFFFFF", borderColor: "rgba(247,241,230,.5)" } : { background: "transparent", color: "#F7F1E6", borderColor: "#9E1520" }}>{label}</button>)}
+              {[["best2", "Best 2 thirds"], ["playoff", "3rds playoff"]].map(([m, label]) => <button key={m} type="button" onClick={() => changeThirdMode(m)} className="px-3 py-1.5 rounded-lg text-xs font-bold border-2 active:scale-95" style={m === thirdPlaceMode ? { background: "#F7F1E6", color: "#FFFFFF", borderColor: "rgba(247,241,230,.5)" } : { background: "transparent", color: "#F7F1E6", borderColor: "#520B12" }}>{label}</button>)}
             </div>
           </div>
         </div>
@@ -11444,7 +11444,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
             <div className="text-[11px] text-stone-600 mt-0.5">{numGroups * currentQC} teams{numGroups * currentQC >= 4 ? " ▶ quarterfinals" : ""} · changing re-seeds</div>
           </div>
           <div className="flex gap-1.5">
-            {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#F7F1E6", color: "#FFFFFF", borderColor: "rgba(247,241,230,.5)" } : { background: "transparent", color: "#F7F1E6", borderColor: "#9E1520" }}>Top {q}</button>)}
+            {qcOptions.map(q => <button key={q} type="button" onClick={() => changeQualify(q)} className="px-3.5 py-1.5 rounded-lg text-sm font-bold border-2 active:scale-95" style={q === currentQC ? { background: "#F7F1E6", color: "#FFFFFF", borderColor: "rgba(247,241,230,.5)" } : { background: "transparent", color: "#F7F1E6", borderColor: "#520B12" }}>Top {q}</button>)}
           </div>
         </div>
       )}
@@ -11528,9 +11528,9 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
             {top && !byLetter && <> Top seed plays the lowest (1 v 8). <b>#1 seed: {lbl(top.id)}.</b></>}
           </div>
           <div className="space-y-1">{rows.map(r => (
-            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(247,241,230,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #9E1520" : "2px solid transparent" }}>
+            <div key={r.id} className="flex items-center gap-2 px-2 py-1.5 rounded-md" style={{ background: r.seed === 1 ? "rgba(247,241,230,.13)" : "rgba(19,19,19,.06)", border: r.seed === 1 ? "2px solid #520B12" : "2px solid transparent" }}>
               {r.seed
-                ? <span className="na-seedno font-mono text-xs font-bold flex items-center justify-center shrink-0" data-top={r.seed === 1 ? "1" : "0"} style={{ width: 22, height: 22, background: r.seed === 1 ? "#F7F1E6" : "#9E1520", color: "#FFFFFF", border: "1px solid rgba(255,255,255,.14)" }}>{r.seed}</span>
+                ? <span className="na-seedno font-mono text-xs font-bold flex items-center justify-center shrink-0" data-top={r.seed === 1 ? "1" : "0"} style={{ width: 22, height: 22, background: r.seed === 1 ? "#F7F1E6" : "#520B12", color: "#FFFFFF", border: "1px solid rgba(255,255,255,.14)" }}>{r.seed}</span>
                 : (byLetter ? null : <span style={{ width: 22 }} className="shrink-0" />)}
               {r.pending
                 ? <span className="shrink-0" style={{ minWidth: 30, textAlign: "center", padding: "2px 5px", border: "1px dashed rgba(242,184,188,.5)", fontFamily: "'JetBrains Mono',monospace", fontSize: 10, fontWeight: 700, color: "#F2B8BC" }}>?</span>
@@ -11615,7 +11615,7 @@ function BracketTab({ session, state, updateSession, isAdmin, canScore, canUploa
               <div className="space-y-1.5">{b.sf.map(m => <BracketRow key={m.id} match={m} lbl={lbl} onClick={() => canScore && setEdit({ ...m, round: "sf" })} />)}</div>
             </Card>}
             {b.final && <Card className="p-3" style={{ borderColor: "rgba(251, 191, 36, 0.3)" }}>
-              <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title" style={{textShadow:"none",display:"inline-flex",alignItems:"center",gap:6}}><svg width="18" height="18" viewBox="0 0 24 24" fill="#F2B8BC" stroke="#9E1520" strokeWidth="1.8"><path d="M7 3h10v6a5 5 0 01-10 0z"/><path d="M7 5H4a3 3 0 003 5M17 5h3a3 3 0 01-3 5M12 14v4M8 21h8M9 18h6" fill="none"/></svg> FINAL</h3><Pill color="amber">+3 reach · +5 win · W+3 TB+2 L+1</Pill></div>
+              <div className="flex items-center justify-between mb-2"><h3 className="jh-round-title" style={{textShadow:"none",display:"inline-flex",alignItems:"center",gap:6}}><svg width="18" height="18" viewBox="0 0 24 24" fill="#F2B8BC" stroke="#520B12" strokeWidth="1.8"><path d="M7 3h10v6a5 5 0 01-10 0z"/><path d="M7 5H4a3 3 0 003 5M17 5h3a3 3 0 01-3 5M12 14v4M8 21h8M9 18h6" fill="none"/></svg> FINAL</h3><Pill color="amber">+3 reach · +5 win · W+3 TB+2 L+1</Pill></div>
               <BracketRow match={b.final} lbl={lbl} onClick={() => canScore && setEdit({ ...b.final, round: "final" })} big />
             </Card>}
           </>
@@ -11673,7 +11673,7 @@ function BracketTreeView({ b, lbl, canScore, setEdit }) {
     const real = !!(m && (m.team1Id || m.team2Id));
     return <div onClick={() => real && canScore && setEdit({ ...m, round })}
       style={{position:"absolute",left:l,top:t,width:w,padding:big ? 12 : "9px 10px",
-              background:big ? "rgba(16,23,31,.96)" : "rgba(158,21,32,.94)",
+              background:big ? "rgba(16,23,31,.96)" : "rgba(82,11,18,.94)",
               cursor:real && canScore ? "pointer" : "default",
               border:`1px solid ${done ? (big ? "rgba(242,184,188,.5)" : "rgba(247,241,230,.45)") : "rgba(242,208,211,.3)"}`,
               borderLeft:`3px solid ${accent}`}}>
@@ -11755,7 +11755,7 @@ function SeedBadge({ seed }) {
   // group winner red, runner-up cyan, third and below steel — the same
   // ladder the leaderboard medals use, instead of green/gold/purple/blue
   const cfg = n === 1
-    ? { bg: "rgba(247,241,230,.9)",   color: "#B8141F" }
+    ? { bg: "rgba(247,241,230,.9)",   color: "#6B0F17" }
     : n === 2
     ? { bg: "rgba(247,241,230,.20)", color: "#FFFFFF" }
     : { bg: "rgba(255,255,255,.10)", color: "#F2D0D3" };
@@ -12068,7 +12068,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
           const on = sort === id;
           return <div key={id} onClick={() => setSort(id)}
             style={{cursor:"pointer",minHeight:40,display:"grid",placeItems:"center",
-                    background:on ? "rgba(247,241,230,.12)" : "rgba(158,21,32,.94)",
+                    background:on ? "rgba(247,241,230,.12)" : "rgba(82,11,18,.94)",
                     border:`1px solid ${on ? "rgba(247,241,230,.55)" : "rgba(242,208,211,.3)"}`,
                     fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:10,letterSpacing:".16em",
                     textTransform:"uppercase",color:on ? "#F7F1E6" : "#F7F1E6"}}>{label}</div>;
@@ -12269,7 +12269,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
                   {(player.name || "?").split(" ").map(x => x[0]).join("").slice(0, 2).toUpperCase()}</div>}
             {canScore && <label style={{position:"absolute",right:10,bottom:10,width:36,height:36,
                  display:"grid",placeItems:"center",background:"rgba(247,241,230,.9)",cursor:"pointer"}}>
-              {uploading ? <span style={{fontSize:9,color:"#B8141F"}}>…</span> : <I.camera size={15} style={{color:"#B8141F"}} />}
+              {uploading ? <span style={{fontSize:9,color:"#6B0F17"}}>…</span> : <I.camera size={15} style={{color:"#6B0F17"}} />}
               <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
             </label>}
           </div>
@@ -12290,7 +12290,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           {/* three tiles */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
             {STATS.map(([label, value, colour]) => (
-              <div key={label} style={{padding:11,background:"rgba(158,21,32,.94)",
+              <div key={label} style={{padding:11,background:"rgba(82,11,18,.94)",
                    backgroundImage:`linear-gradient(180deg,${colour},rgba(242,208,211,.05))`,
                    backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
                 <div style={{fontFamily:"'Archivo',sans-serif",fontWeight:800,fontSize:8,letterSpacing:".2em",color:"#F7F1E6"}}>{label}</div>
@@ -12301,7 +12301,7 @@ function PlayerDetail({ playerId, state, leaderboard, canScore, sync, syncErr, u
           </div>
 
           {/* form */}
-          {last8.length > 0 && <div style={{marginTop:14,padding:14,background:"rgba(158,21,32,.94)",
+          {last8.length > 0 && <div style={{marginTop:14,padding:14,background:"rgba(82,11,18,.94)",
                backgroundImage:"linear-gradient(180deg,#F7F1E6,rgba(247,241,230,.06))",
                backgroundSize:"5px 100%",backgroundRepeat:"no-repeat"}}>
             <div style={{display:"flex",alignItems:"baseline",gap:8}}>
@@ -12577,7 +12577,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 /* ── ALL cards / surfaces ▶ dark neon panels ── */
 .bg-stone-900\/60,.bg-stone-900\/50,.bg-stone-900\/40,.bg-stone-900\/30,
 .bg-stone-950,[class*="bg-stone-9"]:not(nav):not(header):not(.sticky){
-  background: rgba(158,21,32,.85) !important;
+  background: rgba(82,11,18,.85) !important;
   color: #FFFFFF !important;
   border-color: rgba(255,255,255,.12) !important;
 }
@@ -12605,7 +12605,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 .rounded-lg[style*="rgba(251,191,36"]{background:rgba(242,184,188,.08) !important;border:1px solid rgba(242,184,188,.45) !important;box-shadow:none !important;}
 .rounded-lg[style*="rgba(249,115,22"]{background:rgba(247,241,230,.08) !important;border:1px solid rgba(255,255,255,.10) !important;box-shadow:none !important;}
 .rounded-lg[style*="transparent"]{background:rgba(255,255,255,.03) !important;border:1px solid rgba(255,255,255,.1) !important;}
-[style*="rgba(28,25,23"]{background:rgba(158,21,32,.85) !important;border:1px solid rgba(255,255,255,.12) !important;}
+[style*="rgba(28,25,23"]{background:rgba(82,11,18,.85) !important;border:1px solid rgba(255,255,255,.12) !important;}
 .rounded-lg[style*="rgba"] .text-stone-300{color:#FFFFFF !important;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:16px !important;letter-spacing:1px !important;}
 .rounded-lg[style*="rgba"] .font-mono{font-family:'JetBrains Mono',monospace !important;font-size:22px !important;font-weight:700 !important;}
 
@@ -12615,8 +12615,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 [style*="rgba(249,115,22,0.25)"] *{color:#F7F1E6 !important;}
 
 /* ── modals ── */
-.bg-stone-950{background:#9E1520 !important;}
-.bg-stone-950\/95{background:rgba(184,20,31,.97) !important;}
+.bg-stone-950{background:#520B12 !important;}
+.bg-stone-950\/95{background:rgba(107,15,23,.97) !important;}
 
 /* ── inputs ── */
 select,textarea,input{background:rgba(255,255,255,.05) !important;border:1px solid rgba(255,255,255,.16) !important;color:#FFFFFF !important;}
@@ -12624,13 +12624,13 @@ select:focus,textarea:focus,input:focus{border-color:rgba(247,241,230,.7) !impor
 ::placeholder{color:#F2D0D3 !important;}
 
 /* ── bottom nav ── */
-nav.fixed{background:rgba(184,20,31,.96) !important;border-top:1px solid rgba(255,255,255,.10) !important;box-shadow:0 -6px 20px -10px rgba(247,241,230,.6) !important;}
+nav.fixed{background:rgba(107,15,23,.96) !important;border-top:1px solid rgba(255,255,255,.10) !important;box-shadow:0 -6px 20px -10px rgba(247,241,230,.6) !important;}
 nav.fixed *{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;letter-spacing:2px !important;}
 nav.fixed button,nav.fixed a{color:rgba(255,255,255,.5) !important;background:transparent !important;}
 
 /* ── header / sticky sub-nav ── */
-header.sticky{background:rgba(184,20,31,.96) !important;border-bottom:1px solid rgba(255,255,255,.10) !important;}
-.sticky.top-\[57px\]{background:rgba(184,20,31,.97) !important;border-bottom:1px solid rgba(247,241,230,.35) !important;}
+header.sticky{background:rgba(107,15,23,.96) !important;border-bottom:1px solid rgba(255,255,255,.10) !important;}
+.sticky.top-\[57px\]{background:rgba(107,15,23,.97) !important;border-bottom:1px solid rgba(247,241,230,.35) !important;}
 
 /* ── display type ── */
 h1,h2,h3,.font-display,[class*="font-display"]{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;letter-spacing:.04em !important;}
@@ -12657,14 +12657,14 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 .border-dashed *{color:#F2D0D3 !important;}
 
 /* ── bracket tree cards ── */
-[style*="background: rgba(20,18,16"]{background:rgba(158,21,32,.85) !important;border:1px solid rgba(255,255,255,.12) !important;}
+[style*="background: rgba(20,18,16"]{background:rgba(82,11,18,.85) !important;border:1px solid rgba(255,255,255,.12) !important;}
 [style*="background: rgba(242,184,188,0.06)"]{background:rgba(242,184,188,.08) !important;border:1px solid rgba(242,184,188,.45) !important;}
 </style>
 
 <script>
 // Runtime comic forcer — patches inline styles React applies
 (function(){
-  const INK = '#9E1520', CREAM = '#FFFFFF', YELLOW = '#F2B8BC', RED = '#F7F1E6', ORANGE = '#F7F1E6', BLUE = '#F7F1E6';
+  const INK = '#520B12', CREAM = '#FFFFFF', YELLOW = '#F2B8BC', RED = '#F7F1E6', ORANGE = '#F7F1E6', BLUE = '#F7F1E6';
   
   // Patch elements with known inline style patterns
   function patch(el){
@@ -12721,7 +12721,7 @@ button[style*="background: linear-gradient(135deg, var(--orange)"]{
 /* ═══════════════════════════════════════════════
    COMIC BOOK PAGE THEME — paper, panels, gutters
    ═══════════════════════════════════════════════ */
-:root{ --paper:#9E1520; --comic-red:#F7F1E6; --page-ink:#9E1520; }
+:root{ --paper:#520B12; --comic-red:#F7F1E6; --page-ink:#520B12; }
 
 /* the page: aged paper + subtle print dots */
 html:not(.light) body{
@@ -12742,11 +12742,11 @@ html:not(.light) .text-stone-500, html:not(.light) .text-stone-600 { color:#F2D0
 
 /* sticky bars (header + session sub-nav) ▶ black, matching the hero */
 html:not(.light) header.sticky,
-html:not(.light) [style*="rgba(158,21,32"]{
+html:not(.light) [style*="rgba(82,11,18"]{
   background:
     none, transparent 4deg 11deg),
     radial-gradient(circle at 50% 44%, rgba(247,241,230,.22), transparent 62%),
-    #9E1520 !important;
+    #520B12 !important;
   border-color:#FFFFFF !important;
   backdrop-filter:none !important;
 }
@@ -12755,7 +12755,7 @@ html:not(.light) header.sticky button, html:not(.light) header.sticky svg { colo
 
 /* bottom nav ▶ comic strip cells */
 html:not(.light) nav.fixed{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border-top:1px solid rgba(255,255,255,.10) !important;
   box-shadow:0 -3px 0 rgba(19,19,19,.25) !important;
 }
@@ -12768,11 +12768,11 @@ html:not(.light) .jh-hero{
   background:
     none, transparent 4deg 11deg),
     radial-gradient(circle at 50% 44%, rgba(247,241,230,.28), transparent 62%),
-    #9E1520 !important;
+    #520B12 !important;
 }
 
 /* splash ▶ paper */
-html:not(.light) .splash{ background:rgba(158,21,32,.85) !important; }
+html:not(.light) .splash{ background:rgba(82,11,18,.85) !important; }
 html:not(.light) .screen-bg{
   background:
     none,
@@ -12798,7 +12798,7 @@ html:not(.light) .screen-bg{
 
 /* kicker ▶ white speech bubble */
 .jh-sec-kicker{
-  background:rgba(158,21,32,.85) !important; color:#FFFFFF !important;
+  background:rgba(82,11,18,.85) !important; color:#FFFFFF !important;
   border:1px solid rgba(255,255,255,.14) !important;
   border-radius:18px !important;
   box-shadow:none !important;
@@ -12808,7 +12808,7 @@ html:not(.light) .screen-bg{
 /* surface containers ▶ comic panels */
 html:not(.light) .rounded-xl[style*="background: var(--surface)"],
 html:not(.light) .rounded-xl[style*="background:var(--surface)"]{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.14) !important;
   border-radius:0 !important;
   box-shadow:none !important;
@@ -12855,7 +12855,7 @@ html:not(.light) .jh-pool-note .big{ color:#FFFFFF; }
 .jh-mast{display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.14);background:var(--blue);background-image:radial-gradient(rgba(0,0,0,.06) 20%,transparent 22%);background-size:7px 7px;box-shadow:none;padding:8px 14px;transform: none;}
 .jh-mast-issue{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:15px;letter-spacing:1px;background:var(--page-ink);color:var(--cream);padding:4px 10px 2px;transform: none;}
 .jh-mast-name{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:24px;letter-spacing:2px;color:#FFFFFF;}
-.jh-mast-price{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:13px;letter-spacing:1px;color:#FFFFFF;border:1px solid rgba(255,255,255,.14);border-radius:50%;width:46px;height:46px;display:grid;place-items:center;background:rgba(158,21,32,.85);transform: none;text-align:center;line-height:.9;}
+.jh-mast-price{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:13px;letter-spacing:1px;color:#FFFFFF;border:1px solid rgba(255,255,255,.14);border-radius:50%;width:46px;height:46px;display:grid;place-items:center;background:rgba(82,11,18,.85);transform: none;text-align:center;line-height:.9;}
 .jh-mock-caption{display:inline-block;background:var(--blue);border:1px solid rgba(255,255,255,.14);box-shadow:none;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:17px;letter-spacing:1.5px;color:#FFFFFF;padding:6px 16px 4px;transform: none;}
 .jh-mock-caption b{color:var(--comic-red);}
 .jh-panel{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:none;}
@@ -12865,17 +12865,17 @@ html:not(.light) .jh-pool-note .big{ color:#FFFFFF; }
 .jh-fill-yellow{background:none;}
 .jh-dots::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(rgba(0,0,0,.22) 22%,transparent 24%);background-size:9px 9px;mix-blend-mode:multiply;opacity:.5;}
 .jh-burst2{position:relative;z-index:3;display:inline-block;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:30px;letter-spacing:2px;color:var(--blue);-webkit-text-stroke: 0;text-shadow:none;background:var(--comic-red);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:8px 18px 4px;transform: none;margin:0 0 12px;}
-.jh-mock-row{display:flex;align-items:center;gap:10px;position:relative;z-index:2;background:rgba(158,21,32,.85);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:9px 12px;margin-bottom:10px;cursor:pointer;transition:transform .1s;}
+.jh-mock-row{display:flex;align-items:center;gap:10px;position:relative;z-index:2;background:rgba(82,11,18,.85);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:9px 12px;margin-bottom:10px;cursor:pointer;transition:transform .1s;}
 .jh-mock-row:hover{transform:translate(-2px,-2px) !important;}
 .jh-mock-rank{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:19px;border:1px solid rgba(255,255,255,.14);color:#FFFFFF;}
 .jh-crown{position:absolute;right:-6px;top:-12px;z-index:3;font-size:26px;transform: none;filter:drop-shadow(0 0 10px rgba(247,241,230,.5));}
 .jh-mock-chip{position:relative;z-index:2;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:15px;letter-spacing:2px;background:var(--page-ink);color:var(--cream);border:none;padding:6px 14px 4px;cursor:pointer;}
 .jh-bubble-wrap{position:relative;margin:2px 4px 8px;transform: none;}
-.jh-bubble{position:relative;background:rgba(158,21,32,.85);border:1px solid rgba(255,255,255,.14);border-radius:26px;padding:14px 18px 12px;box-shadow:none;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:21px;letter-spacing:1.5px;color:#FFFFFF;text-align:center;line-height:1.1;}
+.jh-bubble{position:relative;background:rgba(82,11,18,.85);border:1px solid rgba(255,255,255,.14);border-radius:26px;padding:14px 18px 12px;box-shadow:none;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:21px;letter-spacing:1.5px;color:#FFFFFF;text-align:center;line-height:1.1;}
 .jh-bubble b{color:#EC1E8C;}
 .jh-bubble::after{content:'';position:absolute;bottom:-20px;left:54px;border:14px solid transparent;border-top:1px solid rgba(255,255,255,.10);transform: none;}
 .jh-bubble::before{content:'';position:absolute;bottom:-11px;left:60px;z-index:1;border:10px solid transparent;border-top:16px solid #fff;transform: none;}
-.jh-mock-sess{position:relative;z-index:2;background:rgba(158,21,32,.85);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:14px;transform: none;cursor:pointer;}
+.jh-mock-sess{position:relative;z-index:2;background:rgba(82,11,18,.85);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:14px;transform: none;cursor:pointer;}
 .jh-pow{position:absolute;top:8px;right:8px;z-index:4;display:inline-flex;align-items:center;justify-content:center;padding:5px 12px;background:rgba(247,241,230,.15);border:1px solid rgba(247,241,230,.7);border-radius:2px;clip-path:none;box-shadow:0 0 12px rgba(247,241,230,.4);}
 .jh-mock-btn{display:inline-block;margin-top:12px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:20px;letter-spacing:2px;color:var(--cream);background:var(--comic-red);border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:6px 18px 3px;transform: none;}
 .jh-star{flex:0 0 auto;width:104px;height:104px;display:grid;place-items:center;text-align:center;background:var(--blue);border:1px solid rgba(255,255,255,.14);clip-path:polygon(50% 0,61% 18%,82% 9%,79% 32%,100% 38%,84% 53%,98% 72%,73% 70%,72% 95%,53% 79%,33% 96%,32% 70%,7% 71%,22% 53%,4% 39%,25% 33%,21% 9%,42% 18%);transform: none;filter:drop-shadow(0 0 10px rgba(247,241,230,.5));}
@@ -12889,7 +12889,7 @@ html:not(.light) nav.fixed{
 html:not(.light) nav.fixed .grid{ gap:0 !important; padding:0 !important; max-width:100% !important; }
 html:not(.light) nav.fixed .grid > button,
 html:not(.light) nav.fixed .grid > a{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border-right:1px solid rgba(255,255,255,.10) !important;
   border-radius:0 !important;
   color:#F2D0D3 !important;
@@ -12906,7 +12906,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 }
 
 /* comic chip buttons */
-.jh-chipbtn{display:inline-flex;align-items:center;gap:5px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:15px;letter-spacing:1.5px;background:rgba(158,21,32,.85);color:#FFFFFF;border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:6px 12px 4px;cursor:pointer;}
+.jh-chipbtn{display:inline-flex;align-items:center;gap:5px;font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:15px;letter-spacing:1.5px;background:rgba(82,11,18,.85);color:#FFFFFF;border:1px solid rgba(255,255,255,.14);box-shadow:none;padding:6px 12px 4px;cursor:pointer;}
 .jh-chipbtn.red{background:#F7F1E6;color:#FFFFFF;text-shadow:none;}
 .jh-chipbtn:active{transform:translate(2px,2px);box-shadow:none;}
 
@@ -12921,7 +12921,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
    ═══════════════════════════════════════════════════════════ */
 .jh-panel,.jh-fill-red,.jh-fill-blue,.jh-fill-green,.jh-fill-yellow,
 .jh-mock-row,.jh-mock-sess,.jh-comic-page,.jh-bubble{
-  background:rgba(158,21,32,.85) !important;
+  background:rgba(82,11,18,.85) !important;
   border:1px solid rgba(255,255,255,.12) !important;
   border-radius:2px !important;
   box-shadow:none !important;
@@ -12940,7 +12940,7 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 .jh-panel [style*="color:#FFFFFF"],.jh-panel [style*="color:#FFFFFF"],
 .jh-mock-row [style*="color:#FFFFFF"],.jh-mock-sess [style*="color:#FFFFFF"],
 .jh-panel [style*="rgba(19,19,19"],.jh-mock-row [style*="rgba(19,19,19"],
-.jh-mock-sess [style*="rgba(19,19,19"],.jh-panel [style*="rgba(158,21,32"]{
+.jh-mock-sess [style*="rgba(19,19,19"],.jh-panel [style*="rgba(82,11,18"]{
   color:#FFFFFF !important;
 }
 .jh-mock-row,.jh-mock-sess{background:rgba(30,36,50,.9) !important;}
@@ -12987,13 +12987,13 @@ html:not(.light) nav.fixed .grid > button[style*="color:var(--orange-br)"]{
 /* masthead remnants */
 .jh-mast{display:none !important;}
 /* hero */
-.jh-hero{background:#B8141F !important;}
+.jh-hero{background:#6B0F17 !important;}
 .jh-logo-img{filter:drop-shadow(0 0 16px rgba(247,241,230,.5)) drop-shadow(0 0 40px rgba(247,241,230,.28)) !important;
   animation:none !important;}
 
 
 /* bottom nav ▶ dark neon bar */
-nav.fixed{background:rgba(184,20,31,.96) !important;border-top:1px solid rgba(255,255,255,.10) !important;
+nav.fixed{background:rgba(107,15,23,.96) !important;border-top:1px solid rgba(255,255,255,.10) !important;
   box-shadow:0 -6px 20px -8px rgba(247,241,230,.5) !important;backdrop-filter:blur(8px);}
 nav.fixed button,nav.fixed a{background:transparent !important;color:rgba(255,255,255,.55) !important;}
 nav.fixed button[aria-current="true"],nav.fixed button.active,
@@ -13069,7 +13069,7 @@ nav.fixed button[style*="var(--orange-br)"],nav.fixed button[style*="#F7F1E6"]{
 }
 /* the ONE bold thing: hero keeps a faint red bloom, no hard outline */
 .jh-hero{
-  background:radial-gradient(ellipse 80% 55% at 50% 18%,rgba(247,241,230,.14),transparent 62%),rgba(158,21,32,.96) !important;
+  background:radial-gradient(ellipse 80% 55% at 50% 18%,rgba(247,241,230,.14),transparent 62%),rgba(82,11,18,.96) !important;
   border:1px solid rgba(247,241,230,.28) !important;
 }
 /* accent bars instead of outlines: leader / active / qualified */
@@ -13256,7 +13256,7 @@ nav.fixed.bottom-0{
 html:not(.light) nav.fixed.bottom-0{
   /* fully opaque: with backdrop-blur gone, any translucency lets the
      hero type ghost through the bar */
-  background-color:#B8141F !important;
+  background-color:#6B0F17 !important;
   border-top:1px solid rgba(247,241,230,.35) !important;
   /* corner ticks, drawn as backgrounds so no pseudo-element clash */
   background-image:
@@ -13402,7 +13402,7 @@ main > div{ animation:aaViewIn 190ms var(--ease-out); }
    the container drags the panel's opacity down with it, and you see
    the page straight through the sheet while it rises. */
 .fixed.inset-0.z-50::before{
-  content:'';position:absolute;inset:0;background:rgba(184,20,31,.92);
+  content:'';position:absolute;inset:0;background:rgba(107,15,23,.92);
   animation:aaFadeIn 180ms ease both;
 }
 /* on phones this stack is bottom-anchored, so it travels its own
@@ -13414,7 +13414,7 @@ main > div{ animation:aaViewIn 190ms var(--ease-out); }
 }
 
 /* ── E2 · fixes the slow-motion pass surfaced ─────────────── */
-/* The panel ships at rgba(158,21,32,.85). Standing still that reads
+/* The panel ships at rgba(82,11,18,.85). Standing still that reads
    as depth; mid-rise you see the rankings list straight through it
    and the eye reads two objects instead of one panel moving. Opaque
    while it travels, and a heavier scrim behind it. */
@@ -13565,7 +13565,7 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
   pointer-events:none;padding:0 16px;
 }
 .aa-toast{
-  max-width:min(92vw,430px);background:#B8141F;color:#FFFFFF;
+  max-width:min(92vw,430px);background:#6B0F17;color:#FFFFFF;
   box-shadow:inset 3px 0 0 #F7F1E6, 0 10px 34px rgba(0,0,0,.62), 0 0 0 1px rgba(247,241,230,.28);
   padding:13px 16px 12px;font-family:'Archivo',sans-serif;font-weight:600;
   font-size:14px;line-height:1.45;letter-spacing:.01em;white-space:pre-line;
@@ -13589,7 +13589,7 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
 .aa-wall{ gap:10px !important; }
 .aa-wall > div{
   position:relative;
-  background:#B8141F;
+  background:#6B0F17;
   /* corner ticks: cyan opens, red closes — same grammar as the cards */
   background-image:
     linear-gradient(#F2B8BC,#F2B8BC), linear-gradient(#F2B8BC,#F2B8BC),
@@ -13638,7 +13638,7 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
    original selector and wins on source order.
    ═══════════════════════════════════════════════════════════════ */
 .jh-sec-title{ color:#FFFFFF !important; }
-.jh-flag.blue{ background:rgba(158,21,32,.92) !important; color:#F2D0D3 !important;
+.jh-flag.blue{ background:rgba(82,11,18,.92) !important; color:#F2D0D3 !important;
                border:1px solid rgba(255,255,255,.14) !important; }
 
 </style>
@@ -13668,8 +13668,8 @@ html:not(.light) .space-y-1 > button[class*="bg-stone-9"]:hover{
   /* palette */
   --surge-cyan:#F7F1E6;
   --surge-amber:#F2B8BC;
-  --surge-base:#9E1520;
-  --surge-void:#B8141F;
+  --surge-base:#520B12;
+  --surge-void:#6B0F17;
   --surge-white:#FFFFFF;
   --surge-steel:#F2D0D3;      /* labels, inactive, letterspaced kickers */
   --surge-steel-text:#F2D0D3; /* prose-length secondary text — 4.5:1 on base */
@@ -13778,7 +13778,7 @@ body::after{ opacity:.18 !important; }
 /* the hero is the one full-bleed surface. Gradient now sweeps
    left-to-right rather than blooming from the top. */
 .jh-hero{
-  background-color:rgba(184,20,31,.96) !important;
+  background-color:rgba(107,15,23,.96) !important;
   background-image:
     linear-gradient(90deg,rgba(247,241,230,.20),rgba(247,241,230,.04) 55%,transparent),
     linear-gradient(180deg,var(--surge-cyan),rgba(247,241,230,.06)) !important;
@@ -14004,7 +14004,7 @@ nav.fixed.bottom-0{ background-image:none !important; }
    ────────────────────────────────────────────────────────────────────── */
 
 :root{
-  --sg-plate-1:rgba(158,21,32,.94);
+  --sg-plate-1:rgba(82,11,18,.94);
   --sg-plate-2:rgba(16,23,31,.96);
   --sg-text-2:#F7F1E6;            /* secondary prose — 4.5:1 on the base */
   --sg-hit:44px;
@@ -14143,7 +14143,7 @@ html body::before{
   border:none !important; box-shadow:none !important; display:block !important;
 }
 .sg-card{
-  background:rgba(158,21,32,.94);
+  background:rgba(82,11,18,.94);
   border:none;
 }
 .sg-card-cyan{
@@ -14392,13 +14392,13 @@ html body::before{
    Surge value that happens to still be spelled as a variable.
    ────────────────────────────────────────────────────────────────────── */
 :root {
-  --ink: #9E1520;
-  --ink2: #B8141F;
+  --ink: #520B12;
+  --ink2: #6B0F17;
   --orange: #F7F1E6;      /* historical name; it is the lead colour */
   --orange-br: #F7F1E6;
   --red: #F7F1E6;
   --blue: #F2B8BC;        /* historical name; it is the accent */
-  --blue-deep: #9E1520;
+  --blue-deep: #520B12;
   --blue-soft: #F2B8BC;
   --gold: #F2B8BC;
   --cream: #FFFFFF;
@@ -14406,8 +14406,8 @@ html body::before{
   --muted2: #F2D0D3;
   --line: rgba(242,208,211,.16);
   --line-2: rgba(255,255,255,.07);
-  --surface: rgba(158,21,32,.94);
-  --surface-2: rgba(158,21,32,.96);
+  --surface: rgba(82,11,18,.94);
+  --surface-2: rgba(82,11,18,.96);
   --hairline: rgba(242,208,211,.16);
 
   /* National is a square brand. Anything still reading a radius token gets
@@ -14446,7 +14446,7 @@ body {
     radial-gradient(circle at 100% 18%, rgba(242,184,188,.16), transparent 42%),
     radial-gradient(circle at 0% 92%, rgba(247,241,230,.08), transparent 40%),
     repeating-linear-gradient(0deg, rgba(247,241,230,.045) 0 1px, transparent 1px 5px),
-    #B8141F !important;
+    #6B0F17 !important;
   background-attachment: fixed !important;
 }
 /* The court-line motif is a Surge/Attack idea and is retired here. */
@@ -14487,7 +14487,7 @@ body::before, body::after { background-image: none !important; }
    badly on a colour this bright. */
 [style*="background:#F7F1E6"], [style*="background: #F7F1E6"],
 [style*="backgroundColor:#F7F1E6"], .bg-lime, .btn-primary {
-  color: #B8141F !important;
+  color: #6B0F17 !important;
 }
 
 /* ── 7 · REDUCED MOTION ───────────────────────────────────────────────
@@ -14509,7 +14509,7 @@ body::before, body::after { background-image: none !important; }
 .bo-ring{position:absolute;width:160px;height:160px;border:3px solid #F7F1E6;border-radius:50%;
   opacity:0;animation:bo-ring 1.6s cubic-bezier(.2,.7,.3,1) forwards}
 @keyframes bo-ring{0%{transform:scale(.3);opacity:.8}100%{transform:scale(4.2);opacity:0}}
-.bo-pop{position:relative;padding:18px 26px;background:#F7F1E6;color:#B8141F;
+.bo-pop{position:relative;padding:18px 26px;background:#F7F1E6;color:#6B0F17;
   font-family:'Archivo',sans-serif;font-style:italic;
   font-variation-settings:'wdth' 118,'wght' 900;font-size:30px;line-height:1;
   animation:bo-pop 1.6s cubic-bezier(.34,1.56,.64,1) forwards;text-align:center}
@@ -14563,8 +14563,8 @@ body::before, body::after { background-image: none !important; }
    re-skinning.
    ────────────────────────────────────────────────────────────────────── */
 :root {
-  --bg: #B8141F;          /* the red base */
-  --deep: #9E1520;        /* rows, bands, anything ON the base */
+  --bg: #6B0F17;          /* the red base */
+  --deep: #520B12;        /* rows, bands, anything ON the base */
   --flag: #D7202E;        /* live, accents */
   --ivory: #F7F1E6;       /* hero cards, and bright type on red */
   --ink: #1A0A0C;         /* text on ivory, CTAs, the tab bar */
@@ -14575,12 +14575,12 @@ body::before, body::after { background-image: none !important; }
   --inactive: #CBBDB6;
 
   /* Historical names, re-pointed. */
-  --ink2: #9E1520;
+  --ink2: #520B12;
   --orange: #F7F1E6;
   --orange-br: #FFFFFF;
   --red: #F7F1E6;
   --blue: #D7202E;
-  --blue-deep: #9E1520;
+  --blue-deep: #520B12;
   --blue-soft: #F2B8BC;
   --gold: #D7202E;
   --cream: #FFFFFF;
@@ -14588,8 +14588,8 @@ body::before, body::after { background-image: none !important; }
   --muted2: #CBBDB6;
   --line: rgba(247,241,230,.18);
   --line-2: rgba(247,241,230,.12);
-  --surface: #9E1520;
-  --surface-2: #9E1520;
+  --surface: #520B12;
+  --surface-2: #520B12;
   --hairline: rgba(247,241,230,.18);
 
   /* The ones the sweep could not reach, because they are defined as another
@@ -14597,21 +14597,21 @@ body::before, body::after { background-image: none !important; }
      they quietly kept pointing at a Vol.6/7 value. `--plate` was
      rgba(7,12,17,.94), a blue-black, which is a September Surge colour two
      volumes old still being used as a sheet background. */
-  --paper: #B8141F;
-  --panel: rgba(158,21,32,.82);
-  --plate: rgba(158,21,32,.94);
+  --paper: #6B0F17;
+  --panel: rgba(82,11,18,.82);
+  --plate: rgba(82,11,18,.94);
   --plate-2: rgba(247,241,230,.05);
-  --sg-plate-1: rgba(158,21,32,.94);
-  --sg-plate-2: rgba(158,21,32,.96);
+  --sg-plate-1: rgba(82,11,18,.94);
+  --sg-plate-2: rgba(82,11,18,.96);
   --sg-text-2: #F7F1E6;
-  --ember: #7C0F18;
+  --ember: #3E080D;
   --hair: rgba(247,241,230,.22);
   --neon: rgba(247,241,230,.5);
   --ice: #F7F1E6;
   --tick: #F2B8BC;
   --yellow: #F7F1E6;
-  --surge-base: #B8141F;
-  --surge-void: #9E1520;
+  --surge-base: #6B0F17;
+  --surge-void: #520B12;
   /* NO GLOWS. Depth here is the double-line ring; a 90px bloom on a red ground
      is a smudge, and this token is read by a dozen components. */
   --glow: none;
@@ -14815,7 +14815,7 @@ body > #root::after, #root::after {
   content: "";
   position: fixed; left: 0; right: 0; bottom: 0; height: 102px;
   z-index: 2; pointer-events: none;
-  background: linear-gradient(180deg, rgba(184,20,31,0) 0%, var(--bg) 55%);
+  background: linear-gradient(180deg, rgba(107,15,23,0) 0%, var(--bg) 55%);
 }
 
 /* ── THE FLAG PLAQUE, BEHIND THE "56" ─────────────────────────────────
@@ -15013,7 +15013,7 @@ body .sg-hero [style*="rgb(242,184,188)"] { color: var(--bg) !important; }
 /* Anything that was a tint of the lead is now an ivory tint ON ivory, which
    is nothing. Give those blocks the base red at a low alpha instead. */
 .sg-hero [style*="247, 241, 230, 0.0"], .sg-hero [style*="247, 241, 230, 0.1"] {
-  background: rgba(184,20,31,.07) !important;
+  background: rgba(107,15,23,.07) !important;
 }
 
 /* THE VOLUME WATERMARK IS THE ONE THING IN THE HERO THAT MUST NOT GO INK.
@@ -15335,7 +15335,7 @@ body [style*="position: fixed"][style*="inset: 0"] select {
 
 /* ── THE OPEN NIGHT'S CHROME ───────────────────────────────────────────
    THE PAGE SCROLLED VISIBLY THROUGH THE HEADER. The night's bar is
-   `rgba(158,21,32,.95)` under a `backdrop-blur-xl` — which is Vol.8's
+   `rgba(82,11,18,.95)` under a `backdrop-blur-xl` — which is Vol.8's
    chrome, and this skin correctly takes the blur off everything. A blurred
    translucent bar is a material; an UNBLURRED one is just see-through, and
    5% of a table scrolling past is perfectly legible: GROUP STAGE and
@@ -15459,7 +15459,7 @@ body { color: #FFFFFF; }
    as "labels on red", and as a label beside something it is fine — but the app
    uses its muted tone for whole sentences ("Standings appear after the first
    match", "Pick your name once and this screen is yours"), and rose on the
-   base is 3.64:1. Measured on #B8141F: ivory 5.83:1, --rose-txt 4.72:1,
+   base is 3.64:1. Measured on #6B0F17: ivory 5.83:1, --rose-txt 4.72:1,
    inactive 4.40:1, rose 3.64:1. So copy is ivory or --rose-txt, and rose keeps
    the jobs that are not type — dots, rules, fills.
    The sweep re-points the literals it can see in the stylesheets; this catches
@@ -15816,7 +15816,7 @@ body .na-rank [data-move="down"] { color: var(--flag) !important; }
    built from, and the sweep turns lime into ivory — which on an ivory plate
    is nothing. Re-inked to the base red, which is 7.23:1 here. */
 .na-rank .na-ptsbar {
-  background: linear-gradient(90deg, rgba(158,21,32,.85), rgba(158,21,32,.14)) !important;
+  background: linear-gradient(90deg, rgba(82,11,18,.85), rgba(82,11,18,.14)) !important;
 }
 
 /* ── 16 · THE SESSION CARDS GO IVORY TOO ───────────────────────────────
@@ -15932,8 +15932,8 @@ body .na-rank [data-move="down"] { color: var(--flag) !important; }
    them the loudest thing on an ivory plate without reaching for green. */
 .sg-top .sg-top-pts { color: var(--bg) !important; }
 .sg-top > div:first-child {
-  background: rgba(158,21,32,.10) !important;
-  border-color: rgba(158,21,32,.45) !important;
+  background: rgba(82,11,18,.10) !important;
+  border-color: rgba(82,11,18,.45) !important;
   color: var(--bg) !important;
 }
 /* The "3 NIGHTS · 84% WIN" sub-line is secondary, and muted ink is the tone
@@ -15953,7 +15953,7 @@ body .na-rank [data-move="down"] { color: var(--flag) !important; }
    1.24:1, through two attempts to fix them somewhere else. */
 .na-ptile [style*="242, 208, 211"]:not([style*="background"]) { color: var(--muted-ink) !important; }
 /* YOUR OWN TILE keeps a tint so it is still findable in 163 rows of two. */
-.na-ptile[style*="242, 184, 188"] { background: rgba(158,21,32,.10) !important; }
+.na-ptile[style*="242, 184, 188"] { background: rgba(82,11,18,.10) !important; }
 
 /* ── 18 · TEXTURE ON THE IVORY PLATES — TRIED AND WITHDRAWN ───────────
    Every RED surface in this app carries the khanjar or the masar weave and
@@ -16203,15 +16203,15 @@ body .na-hl .na-hl-go.na-hl-go.na-hl-go { flex: 0 0 auto; font-size: 20px; font-
    the bare triple, which is also how the selected tab and the ON COURT badge
    write their red TYPE — so both had their ivory fill swapped for the ground
    and vanished — and it out-ranked the group table's ivory plate. */
-.fixed.inset-0[data-double="1"] [style*="background: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
-.fixed.inset-0[data-double="1"] [style*="background: rgba(158, 21, 32"]:not(.na-plate):not(.na-ivory),
-.fixed.inset-0[data-double="1"] [style*="background-color: rgb(158, 21, 32)"]:not(.na-plate):not(.na-ivory),
-.fixed.inset-0[data-double="1"] [style*="rgb(158, 21, 32) 0%"]:not(.na-plate):not(.na-ivory) { background-color: var(--deep) !important; }
-.fixed.inset-0[data-double="1"] [style*="background: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *),
-.fixed.inset-0[data-double="1"] [style*="background-color: rgb(184, 20, 31)"]:not(.na-ivory *):not(.na-plate *) { background-color: var(--bg) !important; }
+.fixed.inset-0[data-double="1"] [style*="background: rgb(82, 11, 18)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background: rgba(82, 11, 18"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(82, 11, 18)"]:not(.na-plate):not(.na-ivory),
+.fixed.inset-0[data-double="1"] [style*="rgb(82, 11, 18) 0%"]:not(.na-plate):not(.na-ivory) { background-color: var(--deep) !important; }
+.fixed.inset-0[data-double="1"] [style*="background: rgb(107, 15, 23)"]:not(.na-ivory *):not(.na-plate *),
+.fixed.inset-0[data-double="1"] [style*="background-color: rgb(107, 15, 23)"]:not(.na-ivory *):not(.na-plate *) { background-color: var(--bg) !important; }
 /* red TYPE on an ivory chip is the flag's red on this ground, not the green
    the token now points at */
-.fixed.inset-0[data-double="1"] [style*="color: rgb(184, 20, 31)"] { color: #B8141F !important; }
+.fixed.inset-0[data-double="1"] [style*="color: rgb(107, 15, 23)"] { color: #6B0F17 !important; }
 .fixed.inset-0[data-double="1"] [style*="border: 1px solid rgb(158"],
 .fixed.inset-0[data-double="1"] [style*="border: 1px dashed"] { border-color: rgba(247,241,230,.28) !important; }
 /* GREEN ON GREEN. Everywhere else green is the winner's edge on a red

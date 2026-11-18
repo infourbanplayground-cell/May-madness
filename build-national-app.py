@@ -1112,7 +1112,7 @@ MOTIFS = [
     # 0 · The landmark table and its lookup, in front of the first screen that
     #     uses it.
     ("function SessionsView({",
-     BAND_JS + DATE_JS + LANDMARK_JS + CARDS_JS + GROUP_CARDS_JS + SCREENS_JS
+     BAND_JS + DATE_JS + LANDMARK_JS + "/*NA-CANVAS{*/" + CARDS_JS + GROUP_CARDS_JS + "/*}NA-CANVAS*/" + SCREENS_JS
      + "\nfunction SessionsView({"),
     # 1 · THE HEADER CARRIES THE VOLUME'S OWN MARK. It used to carry a 30px
     #     sunrise drawn out of four absolutely-positioned spans — a stand-in
@@ -1798,6 +1798,35 @@ def set_announcement(s, report):
     return s2
 
 
+def app_ground(s, report):
+    """The APP sits on oxblood (national-season.json _appGroundNotes).
+
+    The volume's red is swept into the page as hex and as rgb triples by every
+    step above — the skin's tokens, inline styles, the screens module — so
+    the ground is moved here, last, by value. The canvas painters between the
+    NA-CANVAS markers are left alone: the share cards stay the volume's red.
+    """
+    P = CFG["palette"]
+    def rgb(h):
+        h = h.lstrip("#"); return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+    pairs = [(P["bg"], P["appBg"]), (P["deep"], P["appDeep"]), ("#7C0F18", P["appEmber"])]
+    head, sep, rest = s.partition("/*NA-CANVAS{*/")
+    canvas, sep2, tail = rest.partition("/*}NA-CANVAS*/")
+    assert sep and sep2, "the NA-CANVAS markers are missing; the cards would be recoloured"
+    n = 0
+    def move(t):
+        nonlocal n
+        for old, new in pairs:
+            t, k = re.subn(re.escape(old), new, t, flags=re.I); n += k
+            for j in (", ", ","):
+                o, w = j.join(map(str, rgb(old))), j.join(map(str, rgb(new)))
+                n += t.count(o); t = t.replace(o, w)
+        return t
+    s = move(head) + sep + canvas + sep2 + move(tail)
+    report(f"app ground: {n} red values moved to oxblood, canvas painters untouched")
+    return s
+
+
 def apply_skin(s, report):
     skin = open(os.path.join(HERE, "ops", "national-skin.css")).read()
     # THE SKIN NAMES THE HANDOFF'S ARTWORK, IT DOES NOT DRAW IT. `@@A:name@@`
@@ -2039,6 +2068,7 @@ def main():
     s = sweep(s, RGBS, report, "rgb triples")
     s = round_inline(s, report)
     s = apply_skin(s, report)
+    s = app_ground(s, report)
 
     # A build id the page carries and version.txt must match: the self-healing
     # update check compares the two, and a mismatch makes every visitor reload

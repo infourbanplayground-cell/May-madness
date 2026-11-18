@@ -37,6 +37,10 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+const APP_BG = (() => {
+  const h = JSON.parse(fs.readFileSync('national-season.json', 'utf8')).palette.appBg.slice(1);
+  return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`;
+})();
 
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
 const OUT = SC + '/vol9-skin';
@@ -715,7 +719,8 @@ for (const screen of SCREENS) {
     F(`${m.medallionTotal - m.medallions} landmark medallion(s) carry no artwork`);
   if (screen === 'sessions' && SESSIONS && !m.medallionTotal)
     F('the sessions screen has no landmark medallions');
-  if (a.pageBg !== 'rgb(184, 20, 31)') F(`the page ground is ${a.pageBg}, not the National red`);
+  // The APP ground is appBg (oxblood since 18 Nov 2026); the cards keep the red.
+  if (a.pageBg !== APP_BG) F(`the page ground is ${a.pageBg}, not the app ground ${APP_BG}`);
   if (a.scrollX) F('the page scrolls sideways');
   if (!n.nav || parseFloat(n.nav.radius) < 100 || n.nav.left < 4)
     F(`the tab bar is not a floating pill: ${JSON.stringify(n.nav)}`);

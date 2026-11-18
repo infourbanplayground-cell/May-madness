@@ -1325,6 +1325,22 @@ in the repo green. The owner found both by looking at a card.
     would look exactly like a successful run.
   - Pillow is on **python3.13** here, not the default python3.
 
+#### The ground is oxblood, and the app is still by default
+- **The APP sits on oxblood (`appBg` #6B0F17 / `appDeep` #520B12); the share
+  cards, posts and films stay on the volume's red.** The owner's call on 18 Nov
+  2026 ("a bit too red"), picked from three mock-ups. `app_ground()` is the LAST
+  build step and moves the red by value everywhere outside the
+  `/*NA-CANVAS{*/ … /*}NA-CANVAS*/` markers around the card painters. Bright
+  red (`flag`) is the accent now. `check-national-skin.mjs` asserts the page
+  ground against `appBg`, and `check-cards` still asserts the cards' red.
+- **Browsing moves nothing** (skin section 26). Five volumes of inherited
+  keyframes ran on every visit — including `sgStreaks` drifting the khanjar
+  tile on a 22s loop, the fault the owner rejected in the double-night film.
+  Motion is kept for news, once per device (`vol9-motion` in the builder): the
+  champions plate opening, and the table's movers sliding by their own delta.
+  `MOTION=1` on `shots-national.mjs` lists what animates on each tab, and
+  `ops/record-motion.mjs` records a before/after video of the real app.
+
 #### The clips — SaveMyPlay, played in the app
 - The courts are on **SaveMyPlay**: a player presses the button after a point
   and a 25-second clip, watermarked with the club's mark, lands on the club's
