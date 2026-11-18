@@ -51,6 +51,13 @@
       "skillPath": "skills/find-animation-opportunities/SKILL.md",
       "computedHash": "e62e151525e9269ab118aeeff57cc121aa2923091ff75a85c523a35a01fad20c"
     },
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/frontend-design/SKILL.md",
+      "computedHash": "83485963700bcf11d5bf78118facb301676b69d918fee2e45a95e7f1a2840f6c"
+    },
     "full-output-enforcement": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
