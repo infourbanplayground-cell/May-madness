@@ -1734,3 +1734,29 @@ body .jh-mock-sess.jh-mock-sess[data-state="LIVE"] {
 body .na-clip.na-clip:not([data-a]):not([data-b]) { border-radius: 18px !important; }
 body .na-clip .na-clip-play.na-clip-play:not([data-a]) { border-radius: 999px !important; }
 body .na-clipvid.na-clipvid:not([data-a]) { border-radius: 18px !important; }
+
+/* ── 26 · MOTION: STILL BY DEFAULT ──────────────────────────────────────
+   The page defined 36 keyframes inherited from five volumes and ran these on
+   every visit, measured with MOTION=1 on ops/shots-national.mjs:
+     · sgStreaks, 22s, for ever — on body::before, which is where THIS volume
+       put the khanjar tile, so the ground drifted diagonally on every screen.
+       The owner rejected exactly that in the double-night film: the motif
+       does not move.
+     · sgSheen, 6s, for ever, across the leader's card on RANK.
+     · surgeViewIn on every tab switch, aaRowIn / sgRowIn on every list.
+   Screens people open a dozen times a night should just BE there. Motion is
+   kept for the moments that carry news (vol9-motion, in the builder). */
+html body::before { animation: none !important; }
+html body .sg-top[data-lead="1"]::after { animation: none !important; display: none !important; }
+html body main > div,
+html body main .sg-top, html body main .jh-panel, html body main .jh-mock-sess,
+html body .jh-lbrow, html body .jh-srow, html body .jh-mock-sess, html body .jh-rank-in {
+  animation: none !important;
+}
+/* A press is answered: a slight give, back in 90ms. Only on buttons without
+   an inline transform — tilted rows carry theirs inline and would flatten. */
+html body button:not([style*="transform"]):not(:disabled) { transition: transform 90ms cubic-bezier(.16,1,.3,1); }
+html body button:not([style*="transform"]):not(:disabled):active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) {
+  html body button:active { transform: none !important; }
+}

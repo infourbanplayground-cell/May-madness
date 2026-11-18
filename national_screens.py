@@ -220,7 +220,7 @@ function NaNightPulse({{ session, state, brief }}) {{
           with the header, the tabs and the share row it left a third of
           the phone for the screen somebody had actually asked for. */}}
       {{champ && !brief && (
-        <div className="na-ivory" style={{{{ marginTop: 14, padding: "14px 16px 18px",
+        <div className="na-ivory na-champplate" data-key={{session.id}} style={{{{ marginTop: 14, padding: "14px 16px 18px",
           borderLeft: "0" }}}}>
           <div style={{{{ display: "flex", alignItems: "baseline", gap: 12,
             flexWrap: "wrap" }}}}>
@@ -234,9 +234,9 @@ function NaNightPulse({{ session, state, brief }}) {{
             )}}
           </div>
           <div style={{{{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}}}>
-            <span aria-hidden="true" style={{{{ flex: "0 0 5px", alignSelf: "stretch",
+            <span className="na-champedge" aria-hidden="true" style={{{{ flex: "0 0 5px", alignSelf: "stretch",
               minHeight: 30, background: "{green}" }}}} />
-            <span style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            <span className="na-champname" style={{{{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
               fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 24,
               lineHeight: 1.1 }}}}>{{champ.name}}</span>
           </div>

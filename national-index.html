@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "4b5679caa4dc";
+  var V = "e963f921f96c";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -9082,7 +9082,7 @@ function NaNightPulse({ session, state, brief }) {
           with the header, the tabs and the share row it left a third of
           the phone for the screen somebody had actually asked for. */}
       {champ && !brief && (
-        <div className="na-ivory" style={{ marginTop: 14, padding: "14px 16px 18px",
+        <div className="na-ivory na-champplate" data-key={session.id} style={{ marginTop: 14, padding: "14px 16px 18px",
           borderLeft: "0" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12,
             flexWrap: "wrap" }}>
@@ -9096,9 +9096,9 @@ function NaNightPulse({ session, state, brief }) {
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8 }}>
-            <span aria-hidden="true" style={{ flex: "0 0 5px", alignSelf: "stretch",
+            <span className="na-champedge" aria-hidden="true" style={{ flex: "0 0 5px", alignSelf: "stretch",
               minHeight: 30, background: "#087A3F" }} />
-            <span style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
+            <span className="na-champname" style={{ fontFamily: "'Archivo',sans-serif", fontStyle: "italic",
               fontVariationSettings: "'wdth' 118,'wght' 900", fontSize: 24,
               lineHeight: 1.1 }}>{champ.name}</span>
           </div>
@@ -16273,7 +16273,69 @@ body .na-clip.na-clip:not([data-a]):not([data-b]) { border-radius: 18px !importa
 body .na-clip .na-clip-play.na-clip-play:not([data-a]) { border-radius: 999px !important; }
 body .na-clipvid.na-clipvid:not([data-a]) { border-radius: 18px !important; }
 
+/* ── 26 · MOTION: STILL BY DEFAULT ──────────────────────────────────────
+   The page defined 36 keyframes inherited from five volumes and ran these on
+   every visit, measured with MOTION=1 on ops/shots-national.mjs:
+     · sgStreaks, 22s, for ever — on body::before, which is where THIS volume
+       put the khanjar tile, so the ground drifted diagonally on every screen.
+       The owner rejected exactly that in the double-night film: the motif
+       does not move.
+     · sgSheen, 6s, for ever, across the leader's card on RANK.
+     · surgeViewIn on every tab switch, aaRowIn / sgRowIn on every list.
+   Screens people open a dozen times a night should just BE there. Motion is
+   kept for the moments that carry news (vol9-motion, in the builder). */
+html body::before { animation: none !important; }
+html body .sg-top[data-lead="1"]::after { animation: none !important; display: none !important; }
+html body main > div,
+html body main .sg-top, html body main .jh-panel, html body main .jh-mock-sess,
+html body .jh-lbrow, html body .jh-srow, html body .jh-mock-sess, html body .jh-rank-in {
+  animation: none !important;
+}
+/* A press is answered: a slight give, back in 90ms. Only on buttons without
+   an inline transform — tilted rows carry theirs inline and would flatten. */
+html body button:not([style*="transform"]):not(:disabled) { transition: transform 90ms cubic-bezier(.16,1,.3,1); }
+html body button:not([style*="transform"]):not(:disabled):active { transform: scale(.97); }
+@media (prefers-reduced-motion: reduce) {
+  html body button:active { transform: none !important; }
+}
+
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>
+<script id="vol9-motion">(function(){
+var E='cubic-bezier(.16,1,.3,1)';
+var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function seen(k){try{if(localStorage.getItem(k))return true;localStorage.setItem(k,'1');}catch(e){}return false;}
+function champ(p){
+  if(p.dataset.m)return;p.dataset.m='1';
+  if(seen('na-m-champ:'+p.dataset.key)||still)return;
+  p.animate([{clipPath:'inset(100% -24px -24px -24px)'},{clipPath:'inset(-24px -24px -24px -24px)'}],{duration:560,easing:E});
+  var ed=p.querySelector('.na-champedge');
+  if(ed){ed.style.transformOrigin='50% 100%';ed.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:420,delay:260,easing:E,fill:'backwards'});}
+  var n=p.querySelector('.na-champname');
+  if(n){var h=n.offsetHeight||30;n.animate([{transform:'translateY('+h+'px)',clipPath:'inset(-30px -60px '+h+'px -60px)'},{transform:'none',clipPath:'inset(-30px -60px 0px -60px)'}],{duration:640,delay:320,easing:E,fill:'backwards'});}
+}
+// the ROW, not the cell: a row's parent holds several rows AND the row itself
+// holds several cells — the cell around the arrow passes the first test alone.
+function rowOf(a){var r=a;for(var i=0;i<5&&r.parentElement;i++){var p=r.parentElement,k=0;for(var c=p.firstElementChild;c;c=c.nextElementSibling)if(c.tagName===r.tagName)k++;if(k>=3&&r!==a&&r.childElementCount>=3)return r;r=p;}return null;}
+function moves(t){
+  var arrows=t.querySelectorAll('[data-move]');if(!arrows.length)return;
+  var sig=[].map.call(arrows,function(a){return a.textContent;}).join('|')+'|'+(t.textContent||'').slice(0,40);
+  if(t.dataset.m===sig)return;t.dataset.m=sig;
+  if(seen('na-m-move:'+sig)||still)return;
+  [].forEach.call(arrows,function(a){
+    var d=parseInt((a.textContent.match(/\d+/)||[0])[0],10);if(!d)return;
+    var row=rowOf(a);if(!row)return;
+    var y=(a.getAttribute('data-move')==='up'?1:-1)*d*row.offsetHeight;
+    row.animate([{transform:'translateY('+y+'px)'},{transform:'none'}],{duration:620,delay:180,easing:E,fill:'backwards'});
+    a.animate([{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'none'}],{duration:360,delay:620,easing:E,fill:'backwards'});
+  });
+}
+function scan(){
+  [].forEach.call(document.querySelectorAll('.na-champplate[data-key]'),champ);
+  [].forEach.call(document.querySelectorAll('.na-table, .na-rank'),moves);
+}
+var r=0;new MutationObserver(function(){if(r)return;r=requestAnimationFrame(function(){r=0;scan();});})
+  .observe(document.documentElement,{childList:true,subtree:true});
+})();</script>
 </body>
 </html>

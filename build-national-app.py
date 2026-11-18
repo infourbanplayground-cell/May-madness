@@ -1910,10 +1910,62 @@ def apply_skin(s, report):
         '{childList:true,subtree:true});'
         'addEventListener("resize",s,{passive:true});s();'
         '})();</script>\n')
-    s = (s[:i] + '<style id="vol9-skin">\n' + skin + "\n</style>\n" + boot + s[i:])
+    s = (s[:i] + '<style id="vol9-skin">\n' + skin + "\n</style>\n" + boot + MOTION_JS + s[i:])
     report(f"skin: {len(skin)} bytes appended as the last style block"
            ' (id="vol9-skin"), plus the collapsing-header listener')
     return s
+
+
+# ── THE MOTION MOMENTS ──────────────────────────────────────────────────────
+# Browsing moves nothing (skin section 26). Motion is kept for the moments that
+# carry news, and each plays ONCE per device for the thing it is about —
+# replayed every time a tab is opened, a moment stops being news and becomes
+# the app making you wait (choreograph: no stagger on high-frequency UI).
+#   · CHAMPIONS: the plate opens upward, the green edge draws, the names rise
+#     from behind their own baseline. Once per night.
+#   · THE TABLE MOVED: after a night, a row that changed place slides from its
+#     old position to its new one — by its own delta, so the motion IS the
+#     information. Once per table state.
+# Plain Web Animations, no library: two moments do not justify a dependency on
+# a page that must load beside a court on a phone signal. Reduced motion skips
+# both and only records them as seen.
+MOTION_JS = """<script id="vol9-motion">(function(){
+var E='cubic-bezier(.16,1,.3,1)';
+var still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function seen(k){try{if(localStorage.getItem(k))return true;localStorage.setItem(k,'1');}catch(e){}return false;}
+function champ(p){
+  if(p.dataset.m)return;p.dataset.m='1';
+  if(seen('na-m-champ:'+p.dataset.key)||still)return;
+  p.animate([{clipPath:'inset(100% -24px -24px -24px)'},{clipPath:'inset(-24px -24px -24px -24px)'}],{duration:560,easing:E});
+  var ed=p.querySelector('.na-champedge');
+  if(ed){ed.style.transformOrigin='50% 100%';ed.animate([{transform:'scaleY(0)'},{transform:'scaleY(1)'}],{duration:420,delay:260,easing:E,fill:'backwards'});}
+  var n=p.querySelector('.na-champname');
+  if(n){var h=n.offsetHeight||30;n.animate([{transform:'translateY('+h+'px)',clipPath:'inset(-30px -60px '+h+'px -60px)'},{transform:'none',clipPath:'inset(-30px -60px 0px -60px)'}],{duration:640,delay:320,easing:E,fill:'backwards'});}
+}
+// the ROW, not the cell: a row's parent holds several rows AND the row itself
+// holds several cells — the cell around the arrow passes the first test alone.
+function rowOf(a){var r=a;for(var i=0;i<5&&r.parentElement;i++){var p=r.parentElement,k=0;for(var c=p.firstElementChild;c;c=c.nextElementSibling)if(c.tagName===r.tagName)k++;if(k>=3&&r!==a&&r.childElementCount>=3)return r;r=p;}return null;}
+function moves(t){
+  var arrows=t.querySelectorAll('[data-move]');if(!arrows.length)return;
+  var sig=[].map.call(arrows,function(a){return a.textContent;}).join('|')+'|'+(t.textContent||'').slice(0,40);
+  if(t.dataset.m===sig)return;t.dataset.m=sig;
+  if(seen('na-m-move:'+sig)||still)return;
+  [].forEach.call(arrows,function(a){
+    var d=parseInt((a.textContent.match(/\\d+/)||[0])[0],10);if(!d)return;
+    var row=rowOf(a);if(!row)return;
+    var y=(a.getAttribute('data-move')==='up'?1:-1)*d*row.offsetHeight;
+    row.animate([{transform:'translateY('+y+'px)'},{transform:'none'}],{duration:620,delay:180,easing:E,fill:'backwards'});
+    a.animate([{opacity:0,transform:'scale(.4)'},{opacity:1,transform:'none'}],{duration:360,delay:620,easing:E,fill:'backwards'});
+  });
+}
+function scan(){
+  [].forEach.call(document.querySelectorAll('.na-champplate[data-key]'),champ);
+  [].forEach.call(document.querySelectorAll('.na-table, .na-rank'),moves);
+}
+var r=0;new MutationObserver(function(){if(r)return;r=requestAnimationFrame(function(){r=0;scan();});})
+  .observe(document.documentElement,{childList:true,subtree:true});
+})();</script>
+"""
 
 
 def plain(s, table, report, label, required=True):
