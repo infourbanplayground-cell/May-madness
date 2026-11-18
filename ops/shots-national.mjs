@@ -158,6 +158,24 @@ for (const [w, h] of VPS) {
         if (!b) return false; b.click(); return true;
       }, screen);
       if (!ok) { console.log(`  no ${screen} tab`); continue; }
+      // MOTION=1 — what moves when this screen opens, read off the browser
+      // rather than the stylesheet: 36 keyframes are DEFINED in the page,
+      // inherited from five volumes, and only the running ones matter.
+      if (process.env.MOTION) {
+        await pg.waitForTimeout(60);
+        const m = await pg.evaluate(() => {
+          const by = {};
+          for (const a of document.getAnimations()) {
+            const t = a.effect && a.effect.getTiming ? a.effect.getTiming() : {};
+            const el = a.effect && a.effect.target;
+            const k = (a.animationName || a.transitionProperty || 'js') + (t.iterations === Infinity ? ' (loop)' : '')
+              + ' ' + Math.round(+t.duration || 0) + 'ms';
+            by[k] = (by[k] || 0) + 1;
+          }
+          return by;
+        });
+        console.log(`  MOTION ${screen}: ` + (Object.entries(m).map(([k, n]) => n + 'x ' + k).join(', ') || 'none'));
+      }
       await pg.waitForTimeout(800);
       await pg.evaluate(() => document.fonts.ready);
     }
