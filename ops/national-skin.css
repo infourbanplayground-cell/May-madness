@@ -1787,3 +1787,12 @@ body .na-vsentry .na-vsentry-go.na-vsentry-go.na-vsentry-go { font-weight: 800; 
 body .na-race .na-raceline.na-raceline { border-top: 1px solid rgba(26,10,12,.12) !important; border-radius: 0 !important; min-height: 44px; }
 /* a place under threat (5 points or fewer ahead of the next) reads in the red */
 body .na-race .na-racepts.na-racepts.na-racepts[data-tight="1"] { color: var(--flag) !important; }
+
+/* ── 28 · SHARE AND DOWNLOAD A CLIP ─────────────────────────────────────── */
+button.na-clipbtn:not([data-a]):not([data-b]):not([data-c]) {
+  flex: 1; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border-radius: 999px; border: 1.5px solid var(--ivory); background: transparent; cursor: pointer;
+  font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 14px; color: var(--ivory) !important;
+}
+button.na-clipbtn[data-main="1"]:not([data-a]):not([data-b]):not([data-c]) { background: var(--ivory); color: var(--ink) !important; }
+button.na-clipbtn:disabled { opacity: .7; cursor: progress; }

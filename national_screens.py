@@ -712,6 +712,88 @@ function NaClipThumb({{ c, onPick, wide }}) {{
   );
 }}
 
+// ── SHARE AND DOWNLOAD ───────────────────────────────────────────────────────
+// SaveMyPlay's CDN answers any origin, so the clip FILE can be fetched into the
+// page — which is what makes a real download (a cross-origin <a download> is
+// ignored by every browser) and a real share of the video itself, not a link
+// to it, to WhatsApp or an Instagram story.
+//   · The file is ~20MB, so the fetch reports progress and is kept once per
+//     clip: the second tap is instant.
+//   · SHARING NEEDS A FRESH TAP. A browser only opens the share sheet inside
+//     the gesture that asked for it, and a 20MB fetch outlives that gesture —
+//     share after awaiting it and the browser refuses. So the first tap
+//     fetches, the button turns into "Share video", and that tap shares.
+//   · Where a browser cannot share files (desktop, mostly) Share sends the
+//     clip's own page instead, and where it cannot share at all it copies it.
+const naClipBlobs = {{}};
+function naClipName(c) {{
+  const x = naMuscat(c.start_time);
+  return ("urban-playground-" + naClipCourt(c) + "-" + naIsoOf(x) + "-" + naClipWhen(c))
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+$/, "") + ".mp4";
+}}
+async function naClipFetch(c, onPct) {{
+  if (naClipBlobs[c.id]) return naClipBlobs[c.id];
+  const r = await fetch(c.video);
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const total = +r.headers.get("content-length") || 0;
+  const rd = r.body && r.body.getReader ? r.body.getReader() : null;
+  let blob;
+  if (rd && total) {{
+    const parts = []; let got = 0;
+    for (;;) {{ const {{ done, value }} = await rd.read(); if (done) break; parts.push(value); got += value.length; onPct && onPct(Math.round(got / total * 100)); }}
+    blob = new Blob(parts, {{ type: "video/mp4" }});
+  }} else blob = await r.blob();
+  return (naClipBlobs[c.id] = blob);
+}}
+function NaClipActions({{ c }}) {{
+  const [st, setSt] = React.useState({{ k: "idle" }});
+  React.useEffect(() => {{ setSt(naClipBlobs[c.id] ? {{ k: "ready" }} : {{ k: "idle" }}); }}, [c.id]);
+  const file = () => new File([naClipBlobs[c.id]], naClipName(c), {{ type: "video/mp4" }});
+  const canFiles = () => {{ try {{ return !!(navigator.canShare && navigator.canShare({{ files: [new File([""], "x.mp4", {{ type: "video/mp4" }})] }})); }} catch (e) {{ return false; }} }};
+  const page = naClipPage(c);
+  const download = async () => {{
+    try {{
+      setSt({{ k: "dl", pct: 0 }});
+      const b = await naClipFetch(c, pct => setSt({{ k: "dl", pct }}));
+      const u = URL.createObjectURL(b), a = document.createElement("a");
+      a.href = u; a.download = naClipName(c); document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 60000);
+      setSt({{ k: "ready", msg: "Saved" }});
+    }} catch (e) {{ setSt({{ k: "err" }}); }}
+  }};
+  const share = async () => {{
+    try {{
+      if (canFiles()) {{
+        if (!naClipBlobs[c.id]) {{                       // first tap: fetch, then ask for the second
+          setSt({{ k: "sh", pct: 0 }});
+          await naClipFetch(c, pct => setSt({{ k: "sh", pct }}));
+          return setSt({{ k: "ready", msg: "Ready" }});
+        }}
+        await navigator.share({{ files: [file()], title: "Urban Playground · " + naClipCourt(c) }});
+        return setSt({{ k: "ready", msg: "Shared" }});
+      }}
+      if (navigator.share) {{ await navigator.share({{ title: "Urban Playground · " + naClipCourt(c), url: page }}); return setSt({{ k: "ready", msg: "Shared" }}); }}
+      await navigator.clipboard.writeText(page); setSt({{ k: "ready", msg: "Link copied" }});
+    }} catch (e) {{ if (e && e.name === "AbortError") return setSt({{ k: naClipBlobs[c.id] ? "ready" : "idle" }}); setSt({{ k: "err" }}); }}
+  }};
+  const busy = st.k === "dl" || st.k === "sh";
+  const shareLabel = st.k === "sh" ? "Preparing " + st.pct + "%" : (canFiles() && naClipBlobs[c.id]) ? "Share video" : "Share";
+  return (
+    <div className="na-clipacts">
+      <div style={{{{ display: "flex", gap: 8, marginTop: 12 }}}}>
+        <button className="na-clipbtn" data-main="1" disabled={{busy}} onClick={{share}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18 16a3 3 0 0 0-2.4 1.2l-6.7-3.4a3 3 0 0 0 0-1.6l6.7-3.4A3 3 0 1 0 15 7l-6.7 3.4a3 3 0 1 0 0 3.2L15 17a3 3 0 1 0 3-1z"/></svg>
+          {{shareLabel}}</button>
+        <button className="na-clipbtn" disabled={{busy}} onClick={{download}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 3v10.2l3.6-3.6 1.4 1.4-6 6-6-6 1.4-1.4 3.6 3.6V3h2zM5 19h14v2H5z"/></svg>
+          {{st.k === "dl" ? "Downloading " + st.pct + "%" : "Download"}}</button>
+      </div>
+      <div style={{{{ marginTop: 8, minHeight: 18, textAlign: "center", fontSize: 12, color: "{rose_txt}" }}}}>
+        {{st.k === "err" ? "That did not work — the clip's own page is below." : st.msg || ""}}</div>
+    </div>
+  );
+}}
+
 // The player. A sheet over the night with the clip, where it was cut, the
 // next and the previous, and the clip's own page on SaveMyPlay — which is
 // where it can be downloaded or shared, and which gets the credit.
@@ -730,13 +812,14 @@ function NaClipSheet({{ list, at, onAt, onClose }}) {{
         <span style={{{{ fontFamily: "'JetBrains Mono',monospace", fontWeight: 700, fontSize: 11,
           color: "{rose_txt}" }}}}>{{at + 1}} / {{list.length}}</span>
       </div>
+      <NaClipActions c={{c}} />
       <div style={{{{ display: "flex", gap: 8, marginTop: 12 }}}}>
         <Btn variant="secondary" className="flex-1" disabled={{at === 0}} onClick={{() => onAt(at - 1)}}>&larr; Earlier</Btn>
         <Btn variant="secondary" className="flex-1" disabled={{at === list.length - 1}} onClick={{() => onAt(at + 1)}}>Later &rarr;</Btn>
       </div>
       <a href={{naClipPage(c)}} target="_blank" rel="noopener noreferrer"
-        style={{{{ display: "block", marginTop: 12, textAlign: "center", fontSize: 13, color: "{rose_txt}" }}}}>
-        Download or share it on SaveMyPlay &#8599;</a>
+        style={{{{ display: "block", marginTop: 4, textAlign: "center", fontSize: 12, color: "{rose_txt}" }}}}>
+        Open on SaveMyPlay &#8599;</a>
     </Modal>
   );
 }}

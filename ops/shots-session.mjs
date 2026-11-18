@@ -121,6 +121,10 @@ async function routeClips(pg, toDate) {
   await pg.route('**/smpw.b-cdn.net/**', r => {
     const f = path.join(SMP, 'cdn', path.basename(new URL(r.request().url()).pathname));
     if (fs.existsSync(f)) return r.fulfill({ status: 200, contentType: 'image/jpeg', body: fs.readFileSync(f) });
+    // a clip's VIDEO: any mp4 we have stands in, so Download can be exercised
+    const mp4 = path.join(SC, 'video', 'national-double-7s-TOMORROW.mp4');
+    if (f.endsWith('.mp4') && fs.existsSync(mp4)) return r.fulfill({ status: 200, contentType: 'video/mp4',
+      headers: { 'access-control-allow-origin': '*' }, body: fs.readFileSync(mp4) });
     return r.fulfill({ status: 404, body: '' });
   });
 }
@@ -129,7 +133,7 @@ const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromi
 const shots = [];
 
 for (const [w, h] of VPS) {
-  const pg = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 2 });
+  const pg = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 2, acceptDownloads: true });
   await pg.route('**/unpkg.com/**', r => {
     const url = r.request().url();
     const f = /babel/.test(url) ? 'babel.js' : /react-dom/.test(url) ? 'react-dom.js' : 'react.js';
@@ -219,6 +223,14 @@ for (const [w, h] of VPS) {
         await pg.screenshot({ path: file });
         shots.push({ file, label: `CLIP SHEET  ${w}x${h}`, note: 'the player' });
         console.log('  CLIP SHEET');
+        // DOWNLOAD must hand the browser a real file, named for the clip
+        const dl = pg.waitForEvent('download', { timeout: 20000 }).catch(() => null);
+        await pg.evaluate(() => [...document.querySelectorAll('.na-clipbtn')].find(b => /Download/.test(b.textContent))?.click());
+        const d = await dl;
+        if (!d) console.log('  !! DOWNLOAD produced no file');
+        else { const p2 = await d.path(); console.log(`  DOWNLOAD ${d.suggestedFilename()}  ${fs.statSync(p2).size} bytes`); }
+        await pg.waitForTimeout(400);
+        await pg.screenshot({ path: path.join(OUT, `clip-sheet-after-${w}x${h}.png`) });
         await pg.keyboard.press('Escape').catch(() => {});
         await pg.evaluate(() => { const x = [...document.querySelectorAll('.fixed.inset-0.z-50 button')][0]; if (x) x.click(); });
         await pg.waitForTimeout(300);
