@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "d26318dc8dc5";
+  var V = "756f54d39ccd";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -6704,7 +6704,7 @@ function MeView({ state, leaderboard, meId, onOpenPicker, setTab, setOpenPlayerI
         </div>
       </div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
-                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS</div>
+                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS<span className="na-ar-title">صفحتي</span></div>
 
       {/* summary */}
       <div style={{ border: "1px solid rgba(247,241,230,.35)", background: "rgba(82,11,18,.94)",
@@ -6878,7 +6878,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
         {!started && <span style={{ color: "#F2D0D3" }}> &middot; BY ALL-TIME</span>}
       </div>
       <div style={{ fontStyle: "italic", fontVariationSettings: "'wdth' 125,'wght' 900",
-                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>
+                    fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS<span className="na-ar-title">اللاعبون</span></div>
       <input value={q} onChange={e => setQ(e.target.value)} placeholder="Find a player&hellip;"
         style={{ width: "100%", marginTop: 16, padding: "14px 16px", background: "rgba(82,11,18,.96)",
           border: "1px solid rgba(242,208,211,.2)", color: "#FFFFFF", fontSize: 15,
@@ -9865,7 +9865,7 @@ function SessionsView({ state, update, setOpenSessionId, isAdmin, leaderboard, s
         <div>
           <ScreenEyebrow>{state.sessions.length || SESSIONS_TOTAL} night{(state.sessions.length || SESSIONS_TOTAL) === 1 ? "" : "s"} &middot; Vol.9</ScreenEyebrow>
           <div style={{fontFamily:"'Archivo',sans-serif",fontStyle:"italic",fontVariationSettings:"'wdth' 125,'wght' 900",
-               fontSize:44,lineHeight:.9,color:"#FFFFFF",marginTop:6}}>SESSIONS</div>
+               fontSize:44,lineHeight:.9,color:"#FFFFFF",marginTop:6}}>SESSIONS<span className="na-ar-title">الجلسات</span></div>
         </div>
         <div className="flex gap-2 flex-wrap">
           {isAdmin && <button className="jh-chipbtn" onClick={() => setShowAnnounce(true)}><CIc.megaphone size={12} /> ANNOUNCE</button>}
@@ -12410,7 +12410,7 @@ function LeaderboardView({ leaderboard, state, setOpenPlayerId, meId, onOpenPick
              display:"flex",alignItems:"center",gap:8}}>
           <BoMark size={14} />Series standings · {active.length} players</div>
         <div style={{position:"relative",fontFamily:"'Archivo',sans-serif",fontStyle:"italic",
-             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:50,lineHeight:.88,color:"#FFFFFF",marginTop:8}}>RANKINGS</div>
+             fontVariationSettings:"'wdth' 125,'wght' 900",fontSize:50,lineHeight:.88,color:"#FFFFFF",marginTop:8}}>RANKINGS<span className="na-ar-title">الترتيب</span></div>
         <div style={{position:"relative",height:3,marginTop:12,background:"linear-gradient(90deg,#F7F1E6,rgba(247,241,230,0))"}} />
       </div>
 
@@ -16687,6 +16687,27 @@ button.na-clipbtn:not([data-a]):not([data-b]):not([data-c]) {
 }
 button.na-clipbtn[data-main="1"]:not([data-a]):not([data-b]):not([data-c]) { background: var(--ivory); color: var(--ink) !important; }
 button.na-clipbtn:disabled { opacity: .7; cursor: progress; }
+
+/* ── 29 · THE OMANI TOUCHES ─────────────────────────────────────────────
+   Three, all from art and shapes the volume already owns (the owner's
+   pick, 18 Nov 2026, from a mock-up): nothing new is drawn.
+   1 · each screen title carries its Arabic under the English, in Kufi. */
+.na-ar-title { display: block; margin-top: 8px; font-family: 'Noto Kufi Arabic', sans-serif; font-style: normal;
+  font-weight: 700; font-size: 20px; line-height: 1.2; letter-spacing: 0; color: var(--rose-txt);
+  font-variation-settings: normal; }
+/* 2 · the roster photos stand in an Omani door arch — the handoff's own
+   photoArch. PERCENTAGES, not 999px: a radius larger than the box is scaled
+   down with all the others until they fit, and 999px on a 150px slot came
+   out as a 7px curve. */
+body .na-ptile .na-pslot.na-pslot.na-pslot {
+  border-radius: 50% 50% 14px 14px / 42% 42% 14px 14px !important; overflow: hidden !important;
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 4px var(--green) !important; }
+body .na-ptile .na-pslot img { border-radius: 0 !important; }
+/* 3 · section headings carry a strip of the masar weave, the way the
+   header does, so the long screens read as one woven thing. */
+body .sg-kicker { display: flex !important; align-items: center; gap: 12px; }
+body .sg-kicker::after { content: ""; flex: 1; min-width: 40px; height: 12px; border-radius: 6px;
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAAA4CAIAAACEzMqPAAAEcElEQVR4nO2bz2/bZBzGv69/xY7dpUmTRaiZmrGihrIUQSc6tpUC0gTSGBIV2qT1uAPTzpy48V/ApZyqauWXxNQDAqaxrhMVhWkdKgEiqo4yrVubNG0SJ3YTc7AZjWM7fslUO9L7OUR28vrNkyff9/H72gn6NTkEBHcwfylVAAAEoNk/ugEBQBsH7sXlgfsOs6ZWvdbQMVBeC+gkiFkYELMwYGaHQ0YeA2Bs6Bls2rB7fm8D9537DQTM7IvdXqvoGMgwxABNxpJea+gYSGVhQMzCgJiFATELgxZmiRQ9JIgiRe+PGpd4pcrJrCjDpnlRpOg0L0YZtp230QDmU9KH53pvpqQ2p5weqrKeOiAEh1khzjZIWVfVFVXW8D/rWoSdHu1ZORjQd/seKhfmNw9tKLj9eK7KwiwWoRQflKyKvFivZSpl1bU0mUOzw+FrR7uaXxpb3jm7uBWs1l125QdVZrNEik7xAodsh6ei1TMVuVSvtdT0Y7/4+fHwtkADAFfT3rhdeP2X7WtHD3z9QkihEQBIlfo7C/mXfy+27MonqhrMijJsPyeg5kuXjWgaZBV5Y1e1a7DezU6d6sk+ZVT486vlc7dy4aLxSfISPXMicqcvqO/2PVQm5jYSOdve/KPKMMsyDpyxDAuVRrPDoe/SoRoFABDbVs/P5wfX5ObDlxPClZPhRwdYAKA0bWy5+NZiXlAauvObKjQZSzrEwfVeNhOhU7naq39bfGOmsLjTF/z0RDgnMfBvhZ9eKjD2I2OXhm+GQo/rv0uujf+QH8mW9Fd9qApdiR+xi4OP0/xHaUHfvnRXfu9upbmNHhb3gmh6NLKcMBqbKtwZU/0/vV59/6sHDiHllaqJuU10cXzk8lIluGtxKnnl3e4dzoiKLkW78dlWc5sSgyafC0wNCFUGwLHCndlb/zOf3HcIKa9U0XWN0tq7MKkhrUJTuiYACJXdTgXM/ew5lmqV5Z6oqlEIzcSPpPgga/U9uil4VdMylfIfIWpqtOfPuPWJxhnLYShRtN9UTcxtoslYkkNUihcsl1rXe9nfIvSATZSW6rVMRVY0w/uFZ8QvRiI7AgVPIuB9qOq/qUM/J2AttTZ21axiPknLHLp6LHxjUKojBE9i6uArVQ2T0jjLHmZdTf9WVHldtZ3+rUXYqdHo6kFO321zUuofVebljkNY6OhxUHSxsLg1IH35UrjEG/X/5u3Ca00Li/GF/HEXyx2fqLJYSDuEhSkOWlIOUFePdX8/aL1kfXtxS3C9kPaDKttLNM1hYRkHbrgXDUyfiqzGjPpPPqpemMslNv/PJRpvVTndCnscFi3jwA03n5W+TYdOLxVOZlqPOwc8VNXivqFE0f0BPlutuImDfcMrVeQmKwbk7g4GxCwMiFkYELMwQPwHY15r6BhIZWHAnPlpC4D8Dt4VzJmfC15r6BjIMMSAmIUBMQsDJsEFyO/gXYGAOcQGvFbRMZBhiAExCwNiFgbkn6wYkH+yYkCGIQZILtz3WkPHQCoLg38A+Jaspk0xVK8AAAAASUVORK5CYII=") repeat-x; background-size: auto 12px; opacity: .9; }
 
 </style>
 <script id="vol9-chrome">(function(){var on=false,h=document.documentElement;function f(e){var y=window.scrollY||0;var t=e&&e.target;if(t&&t!==document&&t.scrollTop!==undefined&&t.scrollTop>y)y=t.scrollTop;var n=on?y>2:y>8;if(n!==on){on=n;if(n)h.setAttribute("data-scrolled","1");else h.removeAttribute("data-scrolled");}}addEventListener("scroll",function(e){f(e);s();},{passive:true,capture:true});addEventListener("resize",f,{passive:true});f();var q=null,q2=null;function b(){var e=document.querySelector(".na-savebanner");var v=e?Math.round(e.getBoundingClientRect().height):0;if(v!==q){q=v;h.style.setProperty("--na-banner",v+"px");}var p=document.querySelector(".fixed.inset-0 .sticky.top-0");var v2=p?Math.round(p.getBoundingClientRect().height):0;if(v2!==q2){q2=v2;h.style.setProperty("--na-sesshead",v2+"px");}}var r=0;function s(){if(r)return;r=requestAnimationFrame(function(){r=0;b();});}new MutationObserver(s).observe(document.documentElement,{childList:true,subtree:true});addEventListener("resize",s,{passive:true});s();})();</script>

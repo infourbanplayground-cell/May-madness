@@ -1796,3 +1796,24 @@ button.na-clipbtn:not([data-a]):not([data-b]):not([data-c]) {
 }
 button.na-clipbtn[data-main="1"]:not([data-a]):not([data-b]):not([data-c]) { background: var(--ivory); color: var(--ink) !important; }
 button.na-clipbtn:disabled { opacity: .7; cursor: progress; }
+
+/* ── 29 · THE OMANI TOUCHES ─────────────────────────────────────────────
+   Three, all from art and shapes the volume already owns (the owner's
+   pick, 18 Nov 2026, from a mock-up): nothing new is drawn.
+   1 · each screen title carries its Arabic under the English, in Kufi. */
+.na-ar-title { display: block; margin-top: 8px; font-family: 'Noto Kufi Arabic', sans-serif; font-style: normal;
+  font-weight: 700; font-size: 20px; line-height: 1.2; letter-spacing: 0; color: var(--rose-txt);
+  font-variation-settings: normal; }
+/* 2 · the roster photos stand in an Omani door arch — the handoff's own
+   photoArch. PERCENTAGES, not 999px: a radius larger than the box is scaled
+   down with all the others until they fit, and 999px on a 150px slot came
+   out as a 7px curve. */
+body .na-ptile .na-pslot.na-pslot.na-pslot {
+  border-radius: 50% 50% 14px 14px / 42% 42% 14px 14px !important; overflow: hidden !important;
+  box-shadow: 0 0 0 2px var(--ivory), 0 0 0 4px var(--green) !important; }
+body .na-ptile .na-pslot img { border-radius: 0 !important; }
+/* 3 · section headings carry a strip of the masar weave, the way the
+   header does, so the long screens read as one woven thing. */
+body .sg-kicker { display: flex !important; align-items: center; gap: 12px; }
+body .sg-kicker::after { content: ""; flex: 1; min-width: 40px; height: 12px; border-radius: 6px;
+  background: url("@@A:masar@@") repeat-x; background-size: auto 12px; opacity: .9; }

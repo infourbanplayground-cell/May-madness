@@ -1648,6 +1648,16 @@ MOTIFS = [
 # nothing (RosterView lost its `who` state that way and the PLAYERS screen
 # went blank). Edits to text another entry rewrites belong here.
 LATE_MOTIFS = [
+    # 14 · THE SCREEN TITLES CARRY THEIR ARABIC, from the season file's own
+    # `arabic` block, which the Kufi subset is cut to (the build guard checks).
+    ('''fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS</div>''',
+     '''fontSize: 46, lineHeight: .9, marginTop: 6 }}>MY POINTS<span className="na-ar-title">''' + CFG["arabic"]["me"] + '''</span></div>'''),
+    ('''fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS</div>''',
+     '''fontSize: 46, lineHeight: .9, marginTop: 6 }}>PLAYERS<span className="na-ar-title">''' + CFG["arabic"]["players"] + '''</span></div>'''),
+    ('''fontSize:44,lineHeight:.9,color:"#F2F2F2",marginTop:6}}>SESSIONS</div>''',
+     '''fontSize:44,lineHeight:.9,color:"#F2F2F2",marginTop:6}}>SESSIONS<span className="na-ar-title">''' + CFG["arabic"]["sessions"] + '''</span></div>'''),
+    ('''fontSize:50,lineHeight:.88,color:"#F2F2F2",marginTop:8}}>RANKINGS</div>''',
+     '''fontSize:50,lineHeight:.88,color:"#F2F2F2",marginTop:8}}>RANKINGS<span className="na-ar-title">''' + CFG["arabic"]["rank"] + '''</span></div>'''),
     # 13 · THE RACE on RANK, above the leader (national_screens.NaRace)
     ('''        {/* ── LEADER ── */}''',
      '''        {!lifetime && <NaRace state={state} leaderboard={leaderboard} setOpenPlayerId={setOpenPlayerId} />}
