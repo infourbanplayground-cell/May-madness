@@ -863,6 +863,9 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   cannot say "National Day is double but the night after is not".
   `doubleNights` holds the dates; the engine already honours a per-session
   flag. **18, 25 and 30 Nov — CONFIRMED by the owner, 4 Nov 2026.**
+  **Moved 21 Nov 2026:** the Wed 25 Nov night was played on **Sat 21 Nov**
+  (holiday, voted in the group) and is NOT double; the doubles are now
+  **18, 23 and 30 Nov**.
 - API: `/opt/national-api/api.js` — systemd: `national-api` — port **3011**,
   not 3010: the chisel tunnel binds 127.0.0.1:3010 on the VPS and can re-bind.
   Tables **`na_*`**. Stand it up with `ops/create-national.sh` (idempotent).
