@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "87bdda9f23b8";
+  var V = "4345d96a8ee8";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1103,10 +1103,10 @@ const SEASON_PRIZES = [75, 50, 35];
 // not. The engine has always honoured a per-session doublePoints flag, so
 // a list is what the app actually reads; the threshold below is kept only
 // because the countdown copy still refers to it.
-const DOUBLE_NIGHTS = ["2026-11-18", "2026-11-25", "2026-11-30"];
+const DOUBLE_NIGHTS = ["2026-11-18", "2026-11-23", "2026-11-30"];
 // The season's own schedule, so a session can be created on the right
 // night without anybody typing a date twice.
-const SEASON_NIGHTS = ["2026-11-02", "2026-11-04", "2026-11-09", "2026-11-11", "2026-11-16", "2026-11-18", "2026-11-23", "2026-11-25", "2026-11-30"];
+const SEASON_NIGHTS = ["2026-11-02", "2026-11-04", "2026-11-09", "2026-11-11", "2026-11-16", "2026-11-18", "2026-11-21", "2026-11-23", "2026-11-30"];
 // The night voucher, per winning player. PrizeSheet used to type its own
 // 14 beside a pool derived from this file, so changing the voucher here
 // would have moved every surface except the one that counts the money.
