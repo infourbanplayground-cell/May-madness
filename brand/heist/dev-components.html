@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Muscat Heist · components</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+/* MUSCAT HEIST · Vol.10 — tokens and the shared components.
+   The :root block is the handoff's tokens/tokens.css, verbatim except:
+     - no Google @import (the faces are vendored: brand/fonts + brand/heist/fonts)
+     - no Arabic face (the owner removed the Arabic name, 22 Nov 2026)
+     - a few extra tokens at the end, each a value the handoff's own static
+       design uses inline (the art tint, the fades, the band's shadow), so no
+       component below carries a colour of its own.
+   EVERY colour in this file and in the components comes from :root. */
+:root {
+  /* colour */
+  --mn-navy: #0F1B2B;
+  --mn-navy-2: #13202F;
+  --mn-sand: #FFF4E8;
+  --mn-peach: #FFC9A3;
+  --mn-coral: #F26B5B;
+  --mn-coral-2: #F59A62;
+  --mn-gold: #FFD08A;
+  --mn-teal: #2FB7B0;
+  --mn-rose: #E9849A;
+  --mn-mist: #B9C6D3;
+  --mn-dim: #7F8EA0;
+  --mn-red: #E5484D;
+  --mn-silver: #D7DDE4;
+  --mn-bronze: #D9A27A;
+  --mn-line: rgba(255,244,232,.10);
+  --mn-line-2: rgba(255,244,232,.18);
+
+  --mn-grad-primary: linear-gradient(135deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-title: linear-gradient(180deg, #FFFBF5 0%, var(--mn-sand) 55%, var(--mn-peach) 100%);
+  --mn-sky: linear-gradient(180deg,#24456E 0%,#6B5B8E 30%,#E07C8E 52%,#F6A06B 72%,#FFD39A 90%);
+
+  --mn-glass-bg: rgba(15,27,43,.62);
+  --mn-glass-border: 1px solid rgba(255,244,232,.18);
+  --mn-glass-blur: blur(14px);
+
+  --mn-tier-legend: linear-gradient(135deg,#FFD08A,#F59A62 50%,#FFD08A);
+  --mn-tier-elite: linear-gradient(135deg,#F26B5B,#E9849A);
+  --mn-tier-pro: linear-gradient(135deg,#2FB7B0,#2A7FA8);
+  --mn-tier-street: linear-gradient(135deg,#5A6B80,#B9C6D3);
+
+  --mn-rep-rookie: var(--mn-dim);
+  --mn-rep-rising: var(--mn-teal);
+  --mn-rep-known: var(--mn-coral);
+  --mn-rep-legend: var(--mn-gold);
+
+  --mn-font-display: 'Archivo', Impact, sans-serif;
+  --mn-display-axes: 'wdth' 66;
+  --mn-font-serif: 'Fraunces', Georgia, serif;
+  --mn-serif-axes: 'SOFT' 100, 'WONK' 1;
+  --mn-font-ui: 'Manrope', system-ui, sans-serif;
+  --mn-font-mono: 'JetBrains Mono', monospace;
+
+  --mn-r-card: 14px;
+  --mn-r-hero: 16px;
+  --mn-r-pill: 999px;
+  --mn-r-nav: 20px;
+
+  --mn-shadow-card: 0 14px 30px rgba(0,0,0,.40);
+  --mn-shadow-title: 0 3px 0 rgba(15,27,43,.55), 0 10px 22px rgba(0,0,0,.45);
+
+  --mn-cut-hero: polygon(0 0,100% 0,100% 82%,0 96%);
+  --mn-keyline: 3px solid var(--mn-sand);
+
+  --mn-s1: 4px; --mn-s2: 8px; --mn-s3: 12px; --mn-s4: 16px; --mn-s5: 20px; --mn-s6: 24px;
+  --mn-page-x: 20px;
+  --mn-min-text: 11px;
+
+  /* — added: values the static design uses inline, named once — */
+  --mn-art-filter: saturate(1.08) contrast(1.05);
+  --mn-art-tint: linear-gradient(180deg, rgba(255,140,90,.12), rgba(20,60,90,.22));
+  --mn-hero-fade: linear-gradient(180deg, rgba(15,27,43,.45), rgba(15,27,43,0) 22%, rgba(15,27,43,0) 50%, rgba(15,27,43,.85) 92%);
+  --mn-card-fade: linear-gradient(180deg, rgba(19,32,47,0) 55%, var(--mn-navy-2));
+  --mn-foil: linear-gradient(115deg, transparent 25%, rgba(255,244,232,.35) 40%, rgba(255,201,163,.3) 48%, transparent 62%);
+  --mn-sun: radial-gradient(circle, rgba(255,201,163,.55), rgba(242,107,91,.25) 45%, rgba(242,107,91,0) 70%);
+  --mn-band-shadow: 0 8px 20px rgba(0,0,0,.4);
+  --mn-keyline-shadow: drop-shadow(0 0 5px rgba(0,0,0,.35));
+  --mn-text-glow: 0 2px 8px rgba(0,0,0,.6);
+  --mn-tag-bg: rgba(15,27,43,.75);
+  --mn-scene-bg: rgba(15,27,43,.72);
+  --mn-nav-bg: rgba(15,27,43,.78);
+  --mn-nav-border: 1px solid rgba(255,244,232,.14);
+  --mn-pill-border: 1px solid rgba(255,244,232,.25);
+  --mn-ghost-border: 1.5px solid rgba(255,244,232,.35);
+  --mn-track: rgba(255,244,232,.12);
+  --mn-billing: rgba(255,244,232,.72);
+  --mn-billing-dim: rgba(255,244,232,.45);
+}
+
+/* ── type helpers (the handoff's own) ─────────────────────────────────── */
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; text-transform: uppercase; line-height: .86; color: var(--mn-sand); }
+.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-mist); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
+.mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }
+.mn-glass[data-accent="teal"]  { border-color: var(--mn-teal); }
+.mn-glass[data-accent="gold"]  { border-color: var(--mn-gold); }
+.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
+
+/* ── buttons ──────────────────────────────────────────────────────────── */
+.mn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; cursor: pointer; border: 0; text-decoration: none; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: uppercase; }
+.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; font-size: 17px; text-transform: uppercase; }
+.mn-btn-light   { background: var(--mn-sand); color: var(--mn-navy); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-ui); font-weight: 700; font-size: 15px; }
+.mn-btn[data-size="live"] { min-height: 56px; }
+.mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+
+/* ── pills ────────────────────────────────────────────────────────────── */
+.mn-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.mn-pills::-webkit-scrollbar { display: none; }
+/* the visible pill is the handoff's 32px chip; the button around it is 44px
+   tall so the target meets the floor without changing what is drawn */
+.mn-pill { flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-pill > span { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-pill[aria-pressed="true"] > span, .mn-pill[aria-selected="true"] > span { background: var(--mn-sand); border-color: var(--mn-sand); color: var(--mn-navy); }
+.mn-pill[data-round] { min-width: 44px; justify-content: center; }
+.mn-pill[data-round] > span { width: 32px; height: 32px; padding: 0; justify-content: center; }
+
+/* ── bottom nav ───────────────────────────────────────────────────────── */
+.mn-nav { position: fixed; left: 14px; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40; padding: 4px 8px; display: flex; justify-content: space-around; background: var(--mn-nav-bg); border: var(--mn-nav-border); border-radius: var(--mn-r-nav); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.mn-navtab { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-navtab > span { padding: 7px 12px; border-radius: 12px; color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-navtab[aria-current="page"] > span { background: var(--mn-sand); color: var(--mn-navy); }
+
+/* ── top bar ──────────────────────────────────────────────────────────── */
+.mn-topbar { position: absolute; left: 20px; right: 20px; top: 50px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
+.mn-topbar img { height: 28px; }
+.mn-topbar .mn-serif { font-size: 16px; color: var(--mn-sand); }
+
+/* ── art: every painting/photo gets the same treatment ────────────────── */
+.mn-art { position: absolute; inset: 0; overflow: hidden; }
+.mn-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
+.mn-art::after { content: ""; position: absolute; inset: 0; background: var(--mn-art-tint); mix-blend-mode: soft-light; }
+.mn-initials { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-mist); }
+
+/* ── hero cut ─────────────────────────────────────────────────────────── */
+.mn-hero { position: relative; overflow: hidden; }
+.mn-hero .mn-hero-img { position: absolute; inset: 0; }
+.mn-hero .mn-hero-fade { position: absolute; inset: 0; background: var(--mn-hero-fade); }
+.mn-hero .mn-keyline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: var(--mn-keyline-shadow); pointer-events: none; }
+.mn-hero .mn-keyline line { stroke: var(--mn-sand); stroke-width: 3; }
+.mn-hero[data-gold] .mn-keyline line { stroke: var(--mn-gold); }
+
+/* ── title lockup ─────────────────────────────────────────────────────── */
+.mn-lockup { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
+.mn-lockup[data-center] { align-items: center; }
+.mn-lockup .mn-sun { position: absolute; left: 50%; top: 4px; border-radius: 50%; background: var(--mn-sun); transform: translateX(-50%); pointer-events: none; }
+.mn-lockup .mn-presents { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-peach); }
+.mn-lockup .mn-presents::before, .mn-lockup .mn-presents::after { content: ""; width: 24px; height: 1px; background: var(--mn-peach); }
+.mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 rgba(15,27,43,.55)) drop-shadow(0 10px 22px rgba(0,0,0,.45)); }
+.mn-lockup .mn-band { position: relative; margin-top: -1px; padding: 4px 14px 3px; background: var(--mn-grad-nights); transform: skewX(-10deg); box-shadow: var(--mn-band-shadow); }
+.mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
+.mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
+
+/* ── scene tag ────────────────────────────────────────────────────────── */
+.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: uppercase; }
+.mn-scenetag[data-gold] { border-left-color: var(--mn-gold); color: var(--mn-gold); }
+
+/* ── billing (stories) ────────────────────────────────────────────────── */
+.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: uppercase; text-align: center; }
+.mn-billing i { font-style: normal; color: var(--mn-billing-dim); text-transform: none; }
+
+/* ── crew card ────────────────────────────────────────────────────────── */
+.mn-card { flex: 0 0 auto; padding: 4px; border-radius: var(--mn-r-card); box-shadow: var(--mn-shadow-card); background: var(--mn-tier-street); }
+.mn-card[data-tier="legend"] { background: var(--mn-tier-legend); }
+.mn-card[data-tier="elite"]  { background: var(--mn-tier-elite); }
+.mn-card[data-tier="pro"]    { background: var(--mn-tier-pro); }
+.mn-card > div { border-radius: 11px; overflow: hidden; background: var(--mn-navy-2); }
+.mn-card .mn-card-img { position: relative; }
+.mn-card .mn-foil { position: absolute; inset: 0; background: var(--mn-foil); background-size: 250% 100%; mix-blend-mode: overlay; animation: mn-foil 3.2s linear infinite; }
+.mn-card .mn-card-fade { position: absolute; inset: 0; background: var(--mn-card-fade); }
+.mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .1em; color: var(--mn-sand); }
+.mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-sand); text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; color: var(--mn-sand); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-card .mn-repline { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px; }
+.mn-card .mn-rep { font-family: var(--mn-font-mono); font-size: 11px; }
+.mn-card .mn-pts { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; color: var(--mn-sand); }
+.mn-card .mn-stats { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+.mn-card .mn-stat { display: flex; align-items: center; gap: 8px; }
+.mn-card .mn-stat > span:first-child { width: 52px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mn-card .mn-stat > span:nth-child(2) { flex: 1; height: 4px; border-radius: 2px; background: var(--mn-track); overflow: hidden; }
+.mn-card .mn-stat > span:nth-child(2) > span { display: block; height: 100%; border-radius: 2px; }
+.mn-card .mn-stat > b { min-width: 16px; text-align: right; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 13px; color: var(--mn-sand); }
+.mn-card[data-tilt] { animation: mn-tilt 6s ease-in-out infinite; }
+button.mn-cardbtn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: var(--mn-r-card); }
+
+/* ── avatar ───────────────────────────────────────────────────────────── */
+.mn-avatar { position: relative; flex: 0 0 auto; border-radius: 50%; overflow: hidden; background: var(--mn-navy-2); }
+
+/* ── film grain over every screen, as the static design draws it ──────── */
+.mn-grain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: .08; mix-blend-mode: overlay; pointer-events: none; z-index: 30; }
+
+/* ── motion ───────────────────────────────────────────────────────────── */
+@keyframes mn-foil { 0% { background-position: 120% 0 } 100% { background-position: -120% 0 } }
+@keyframes mn-tilt { 0%,100% { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) } 50% { transform: perspective(900px) rotateY(9deg) rotateX(-3deg) } }
+@keyframes mn-ring { 0% { transform: scale(.6); opacity: .9 } 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes mn-slam { 0% { transform: scale(2.4); opacity: 0 } 60% { transform: scale(.94); opacity: 1 } 100% { transform: scale(1); opacity: 1 } }
+@keyframes mn-fill { from { width: 0 } }
+.mn-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor; animation: mn-ring 2.4s ease-out infinite; }
+.mn-ring + .mn-ring { animation-delay: .8s; }
+.mn-slam { animation: mn-slam .7s ease-out both; }
+.mn-fill { animation: mn-fill .6s ease-out .7s both; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* preview chrome only */
+html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-family: var(--mn-font-ui); }
+.dev { max-width: 760px; margin: 0 auto; padding: 24px var(--mn-page-x) 140px; display: flex; flex-direction: column; gap: 34px; }
+.dev h2 { margin: 0 0 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; }
+.phone { position: relative; width: 100%; max-width: 375px; height: 520px; overflow: hidden; border-radius: 28px; background: var(--mn-navy); border: var(--mn-glass-border); }
+</style>
+</head><body>
+<div id="root"></div>
+<script>window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The episode titles and the session art are PLACEHOLDERS until the owner sends the real ones."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-corniche.jpg"}, {"code": "EP.02", "title": "The Arrival", "art": "art-club.jpg"}, {"code": "EP.03", "title": "The Heat", "art": "art-smash.jpg"}, {"code": "EP.04", "title": "The Knockout", "art": "art-rivals.jpg"}, {"code": "EP.05", "title": "The Smash", "art": "art-smash.jpg"}, {"code": "EP.06", "title": "The Grudge", "art": "art-rivals.jpg"}, {"code": "EP.07", "title": "The Rematch", "art": "art-corniche.jpg"}, {"code": "EP.08", "title": "The Crew", "art": "art-carpark.jpg"}, {"code": "EP.09", "title": "The Big Score", "art": "art-club.jpg"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "previousVolume": "56 National Series"}; window.MH_PLAYERS = [{"id": "p01", "name": "Munther Rahbi", "initials": "MR", "points": 104, "rank": 1, "movement": "\u2014", "winRate": 0.78, "sessionsPlayed": 5, "photo": "art/art-corniche.jpg", "art": null, "stats": {"smash": 94, "wall": 86, "speed": 88, "clutch": 97}, "photoPos": "34% 18%"}, {"id": "p02", "name": "Hamed Amri", "initials": "HA", "points": 93, "rank": 2, "movement": "\u2014", "winRate": 0.71, "sessionsPlayed": 5, "photo": "art/art-smash.jpg", "art": null, "stats": {"smash": 88, "wall": 84, "speed": 79, "clutch": 90}, "photoPos": "center 14%"}, {"id": "p03", "name": "Nooh Amri", "initials": "NA", "points": 90, "rank": 3, "movement": "\u25b21", "winRate": 0.66, "sessionsPlayed": 5, "photo": "art/art-carpark.jpg", "art": null, "photoPos": "40% 20%"}, {"id": "p04", "name": "Baraa", "initials": "BA", "points": 82, "rank": 4, "movement": "\u25bc1", "winRate": 0.64, "sessionsPlayed": 5, "photo": "art/art-rivals.jpg", "art": null, "photoPos": "82% 18%"}, {"id": "p05", "name": "mossa", "initials": "MO", "points": 80, "rank": 5, "movement": "\u25b22", "winRate": 0.62, "sessionsPlayed": 5, "photo": "art/art-rivals.jpg", "art": null, "photoPos": "18% 18%"}, {"id": "p06", "name": "Salim K.", "initials": "SK", "points": 76, "rank": 6, "movement": "\u2014", "winRate": 0.58, "sessionsPlayed": 5, "photo": null, "art": null, "photoPos": null}, {"id": "p07", "name": "Yousuf B.", "initials": "YB", "points": 71, "rank": 7, "movement": "\u25bc2", "winRate": 0.55, "sessionsPlayed": 4, "photo": null, "art": null, "photoPos": null}, {"id": "p08", "name": "Ahmed S.", "initials": "AS", "points": 68, "rank": 8, "movement": "\u25b21", "winRate": 0.52, "sessionsPlayed": 5, "photo": null, "art": null, "photoPos": null}, {"id": "p09", "name": "Khalid", "initials": "KH", "points": 64, "rank": 9, "movement": "\u2014", "winRate": 0.5, "sessionsPlayed": 4, "photo": null, "art": null, "photoPos": null}];</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+// MUSCAT HEIST · Vol.10 — the shared components (handoff components.md).
+// Plain JSX for Babel standalone, the way every volume's page is compiled.
+// Every colour is a token in heist.css; nothing here carries a hex value.
+// Images always come from data — player.photo, session.art — never a path
+// written into a component, so real art replaces the placeholders with no
+// code change (handoff rule 10).
+
+const MH = window.MH_SEASON || {};
+
+// ── derived rules (handoff data.md), as data ──────────────────────────────
+// REP IS PER NIGHT PLAYED (owner, 22 Nov 2026): the threshold for a level is
+// its per-night figure times the nights the season has played, so after five
+// nights it is exactly the handoff's 80 / 90 / 100. Rep never goes down: a
+// player's level is the highest they reached after ANY night, which is why
+// this takes their running totals, not just today's.
+const MH_REPS = (MH.rep && MH.rep.levels) || [];
+function mhRepAt(points, nights) {
+  return MH_REPS.find(l => points >= l.perNight * nights) || MH_REPS[MH_REPS.length - 1];
+}
+// totalsByNight: the player's series total after night 1, 2, ... n
+function mhRepFor(totalsByNight) {
+  let best = MH_REPS.length - 1;
+  (totalsByNight || []).forEach((pts, i) => {
+    const k = MH_REPS.indexOf(mhRepAt(pts, i + 1));
+    if (k < best) best = k;
+  });
+  return MH_REPS[best];
+}
+function mhNextRep(rep) {
+  const k = MH_REPS.indexOf(rep);
+  return k > 0 ? MH_REPS[k - 1] : null;
+}
+const mhTierFor = rank => (MH.tiers || []).find(t => rank <= t.maxRank) || (MH.tiers || [])[0];
+const mhInitials = name => (name || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+// ── the art treatment: one component, so every picture is graded alike ────
+function MhArt({ src, alt = "", pos = "center 25%", name }) {
+  return (
+    <div className="mn-art">
+      {src ? <img src={src} alt={alt} style={{ objectPosition: pos }} loading="lazy" decoding="async" />
+           : <div className="mn-initials" style={{ fontSize: "2.2em" }}>{mhInitials(name)}</div>}
+    </div>
+  );
+}
+
+// ── labels ────────────────────────────────────────────────────────────────
+const MhLabel = ({ children, tone, style }) => (
+  <div className="mn-label" style={{ color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+const MhSerif = ({ children, size = 15, tone, style }) => (
+  <div className="mn-serif" style={{ fontSize: size, color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+const MhDisplay = ({ children, size = 28, weight = 900, tone, style }) => (
+  <div className="mn-display" style={{ fontSize: size, fontWeight: weight, lineHeight: 1, color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+
+// ── glass card ────────────────────────────────────────────────────────────
+function MhGlass({ accent, as: Tag = "div", children, style, ...rest }) {
+  return <Tag className="mn-glass" data-accent={accent} style={style} {...rest}>{children}</Tag>;
+}
+
+// ── pills ─────────────────────────────────────────────────────────────────
+function MhPills({ items, value, onChange, round, label }) {
+  return (
+    <div className="mn-pills" role="group" aria-label={label}>
+      {items.map(it => {
+        const [k, text] = Array.isArray(it) ? it : [it, it];
+        return (
+          <button key={k} type="button" className="mn-pill" data-round={round ? "" : undefined}
+            aria-pressed={value === k} onClick={() => onChange && onChange(k)}><span>{text}</span></button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── buttons ───────────────────────────────────────────────────────────────
+function MhButton({ kind = "primary", live, children, style, ...rest }) {
+  return <button type="button" className={"mn-btn mn-btn-" + kind} data-size={live ? "live" : undefined}
+    style={style} {...rest}>{children}</button>;
+}
+
+// ── top bar: the UP logo and the volume line, over every screen ──────────
+function MhTopBar({ logo, line }) {
+  return (
+    <div className="mn-topbar">
+      <img src={logo} alt="Urban Playground" />
+      <div className="mn-serif">{line}</div>
+    </div>
+  );
+}
+
+// ── bottom nav ────────────────────────────────────────────────────────────
+const MH_TABS = [["home", "Home"], ["jobs", "Jobs"], ["wanted", "Wanted"], ["me", "Me"], ["crew", "Crew"]];
+function MhBottomNav({ tab, onTab }) {
+  return (
+    <nav className="mn-nav" aria-label="Sections">
+      {MH_TABS.map(([k, label]) => (
+        <button key={k} type="button" className="mn-navtab" aria-current={tab === k ? "page" : undefined}
+          onClick={() => onTab && onTab(k)}><span>{label}</span></button>
+      ))}
+    </nav>
+  );
+}
+
+// ── hero cut ──────────────────────────────────────────────────────────────
+// The keyline is an SVG line in the hero's own coordinates, so it lands on
+// the cut at any width. The static design positions a rotated div by
+// measured pixels, which is right at 375 and wrong at every other phone.
+// cut = [right edge %, left edge %] of the bottom edge, top to bottom.
+function MhHeroCut({ height, src, pos, cut = [82, 96], gold, children, style }) {
+  const poly = `polygon(0 0,100% 0,100% ${cut[0]}%,0 ${cut[1]}%)`;
+  return (
+    <div className="mn-hero" data-gold={gold ? "" : undefined} style={{ height, ...style }}>
+      <div className="mn-hero-img" style={{ clipPath: poly }}><MhArt src={src} pos={pos} /></div>
+      <div className="mn-hero-fade" style={{ clipPath: poly }} aria-hidden="true" />
+      <svg className="mn-keyline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1={cut[1]} x2="100" y2={cut[0]} vectorEffect="non-scaling-stroke" />
+      </svg>
+      {children}
+    </div>
+  );
+}
+
+// ── title lockup ──────────────────────────────────────────────────────────
+// MUSCAT at base x .74, HEIST on the skewed coral band at base x .42.
+// Sizes from the static design: S 76 (56/31 on Home), M 84 (62/35 loading),
+// L 104 (poster).
+const MH_LOCKUP = { S: 76, M: 84, L: 104 };
+function MhTitleLockup({ size = "S", center, presents, meta }) {
+  const base = MH_LOCKUP[size] || size;
+  return (
+    <div className="mn-lockup" data-center={center ? "" : undefined}>
+      {center && <div className="mn-sun" aria-hidden="true" style={{ width: base * 1.05, height: base * 1.05 }} />}
+      {presents && <div className="mn-presents" style={{ fontSize: Math.round(base * .2) }}>{presents}</div>}
+      <div className="mn-l1" style={{ fontSize: Math.round(base * .74) }}>{MH.nameLine1 || "MUSCAT"}</div>
+      <div className="mn-band"><span style={{ fontSize: Math.round(base * .42) }}>{MH.nameLine2 || "HEIST"}</span></div>
+      {meta !== false && <div className="mn-meta">{meta || `${MH.volumeLabel} · Muscat · ${MH.monthShort} ${MH.year}`}</div>}
+    </div>
+  );
+}
+
+// ── scene tag ─────────────────────────────────────────────────────────────
+const MhSceneTag = ({ children, gold, style }) => (
+  <span className="mn-scenetag" data-gold={gold ? "" : undefined} style={style}>{children}</span>
+);
+
+// ── billing (stories) ─────────────────────────────────────────────────────
+// parts: strings, and {link:"presents a"} for the dimmed linking words
+function MhBilling({ parts, style }) {
+  return <div className="mn-billing" style={style}>{parts.map((p, i) =>
+    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
+}
+
+// ── avatar ────────────────────────────────────────────────────────────────
+function MhAvatar({ player, size = 34, ring }) {
+  return (
+    <div className="mn-avatar" style={{ width: size, height: size,
+      boxShadow: ring ? `0 0 0 2px var(--mn-${ring})` : undefined }}>
+      <MhArt src={player && player.photo} name={player && player.name} pos={player && player.photoPos} />
+    </div>
+  );
+}
+
+// ── crew card ─────────────────────────────────────────────────────────────
+// Sizes measured off the static design (width / image / tag / rank / name /
+// points / body padding). The handoff's prose says image = 62% of a 1.42
+// card; the drawn cards are image = .875 x width, and the drawing wins.
+const MH_CARD = {
+  S: { w: 120, img: 105, tag: 11, rank: 18, name: 14, pts: 13, pad: "6px 8px 8px" },
+  M: { w: 150, img: 132, tag: 12, rank: 22, name: 18, pts: 15, pad: "7px 10px 10px" },
+  L: { w: 240, img: 210, tag: 19, rank: 36, name: 28, pts: 24, pad: "12px 16px 16px" },
+};
+const MH_STATS = [["smash", "SMASH"], ["wall", "WALL"], ["speed", "SPEED"], ["clutch", "CLUTCH"]];
+function MhCrewCard({ player, rank, points, rep, size = "M", stats, foil = true, tilt = true, onClick }) {
+  const d = MH_CARD[size];
+  const tier = mhTierFor(rank);
+  const shine = foil && (tier.id === "legend" || tier.id === "elite");
+  const card = (
+    <div className="mn-card" data-tier={tier.id} data-tilt={tilt && size === "L" && tier.id === "legend" ? "" : undefined}
+      style={{ width: d.w }}>
+      <div>
+        <div className="mn-card-img" style={{ height: d.img, fontSize: d.name }}>
+          <MhArt src={player.photo} name={player.name} pos={player.photoPos} />
+          {shine && <div className="mn-foil" aria-hidden="true" />}
+          <div className="mn-card-fade" aria-hidden="true" />
+          <div className="mn-tiertag" style={{ fontSize: d.tag }}>{tier.label}</div>
+          <div className="mn-rank" style={{ fontSize: d.rank }}>#{rank}</div>
+        </div>
+        <div style={{ padding: d.pad }}>
+          <div className="mn-name" style={{ fontSize: d.name }}>{player.name}</div>
+          <div className="mn-repline">
+            <div className="mn-rep" style={{ color: `var(--mn-rep-${rep.id})` }}>REP · {rep.label.toUpperCase()}</div>
+            <div className="mn-pts" style={{ fontSize: d.pts }}>{points}</div>
+          </div>
+          {size === "L" && stats && (
+            <div className="mn-stats">
+              {MH_STATS.map(([k, label]) => {
+                const v = stats[k];
+                return (
+                  <div key={k} className="mn-stat">
+                    <span>{label}</span>
+                    <span><span className="mn-fill" style={{ width: (v == null ? 0 : v) + "%", background: `var(--mn-rep-${rep.id})` }} /></span>
+                    <b>{v == null ? "—" : v}</b>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  return onClick
+    ? <button type="button" className="mn-cardbtn" onClick={onClick} aria-label={`${player.name}, rank ${rank}`}>{card}</button>
+    : card;
+}
+
+// ── film grain, as the static design lays over every screen ──────────────
+const MhGrain = () => (
+  <svg className="mn-grain" aria-hidden="true">
+    <filter id="mn-grain"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" /></filter>
+    <rect width="100%" height="100%" filter="url(#mn-grain)" />
+  </svg>
+);
+
+
+function Dev() {
+  const P = window.MH_PLAYERS;
+  const [pill, setPill] = React.useState("upcoming");
+  const [grp, setGrp] = React.useState("A");
+  const [tab, setTab] = React.useState("home");
+  // the fixtures are a table after FIVE nights, so rep is read at five
+  const lead = P[0];
+  return (
+    <div className="dev">
+      <section>
+        <MhLabel tone="peach">Muscat Heist · Vol.10</MhLabel>
+        <MhDisplay size={44} style={{ marginTop: 6 }}>Components</MhDisplay>
+        <MhSerif>Every shared part, every size and state, from the handoff's fixtures.</MhSerif>
+      </section>
+
+      <section>
+        <h2><MhLabel>Home · top of screen, components only</MhLabel></h2>
+        <div className="phone" data-shot="home-top">
+          <MhTopBar logo="up-logo-tight.png" line={`Vol.10 · ${MH.month}`} />
+          <MhHeroCut height={470} src="art/art-corniche.jpg" pos="34% 20%">
+            <div style={{ position: "absolute", left: 22, top: 250 }}><MhTitleLockup size="S" /></div>
+          </MhHeroCut>
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Title lockup · S · M · L</MhLabel></h2>
+        <div className="row" style={{ alignItems: "flex-start", gap: 28 }}>
+          <MhTitleLockup size="S" />
+          <MhTitleLockup size="M" center />
+          <MhTitleLockup size="L" center presents={MH.presents} />
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Crew card · M · every tier (foil on Legend and Elite only)</MhLabel></h2>
+        <div className="row">
+          {[0, 1, 3, 9].map(i => {
+            const p = P[i] || P[P.length - 1];
+            return <MhCrewCard key={p.id} player={p} rank={p.rank} points={p.points} rep={mhRepAt(p.points, 5)} size="M" onClick={() => {}} />;
+          })}
+          <MhCrewCard player={{ name: "No Photo Yet" }} rank={12} points={40} rep={mhRepAt(40, 5)} size="M" />
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Crew card · S (no foil) · L (stats, Legend tilt)</MhLabel></h2>
+        <div className="row" style={{ alignItems: "flex-start" }}>
+          <MhCrewCard player={P[4]} rank={5} points={P[4].points} rep={mhRepAt(P[4].points, 5)} size="S" foil={false} />
+          <MhCrewCard player={lead} rank={1} points={lead.points} rep={mhRepAt(lead.points, 5)} size="L" stats={lead.stats} />
+          <MhCrewCard player={P[1]} rank={2} points={P[1].points} rep={mhRepAt(P[1].points, 5)} size="L"
+            stats={{ smash: 88, wall: null, speed: 79, clutch: null }} />
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Glass card · plain and each accent</MhLabel></h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <MhGlass><MhLabel tone="peach">Next job · EP.07</MhLabel><MhDisplay size={28} style={{ marginTop: 3 }}>WED 23 DEC</MhDisplay><MhSerif>17:30 · {MH.venue}</MhSerif></MhGlass>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <MhGlass accent="peach"><MhLabel tone="peach">Serving</MhLabel></MhGlass>
+            <MhGlass accent="teal"><MhLabel tone="teal">You</MhLabel></MhGlass>
+            <MhGlass accent="gold"><MhLabel tone="gold">Finale</MhLabel></MhGlass>
+            <MhGlass accent="coral"><MhLabel tone="coral">● Live</MhLabel></MhGlass>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Pills · filter, tabs, round</MhLabel></h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <MhPills label="Filter" items={[["upcoming", "Upcoming"], ["done", "Done"], ["all", "All"]]} value={pill} onChange={setPill} />
+          <MhPills label="Groups" round items={["A", "B", "C", "D"]} value={grp} onChange={setGrp} />
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Buttons · primary · ghost · light · live 56px</MhLabel></h2>
+        <div className="row">
+          <MhButton>Share</MhButton>
+          <MhButton kind="ghost">Full results</MhButton>
+          <MhButton kind="light">Lock result</MhButton>
+          <MhButton live>+1 Munther</MhButton>
+        </div>
+      </section>
+
+      <section>
+        <h2><MhLabel>Scene tag · billing · avatar</MhLabel></h2>
+        <div className="row" style={{ alignItems: "center" }}>
+          <MhSceneTag>EP.07 · The Rematch</MhSceneTag>
+          <MhSceneTag gold>Episode complete</MhSceneTag>
+          <MhAvatar player={lead} size={42} ring="coral" />
+          <MhAvatar player={{ name: "No Photo" }} size={42} ring="teal" />
+        </div>
+        <MhBilling style={{ marginTop: 16 }} parts={["Urban Playground", { link: "presents a" }, "social padel league", { link: "starring" },
+          P.slice(0, 5).map(p => p.name).join(" · ")]} />
+      </section>
+
+      <MhBottomNav tab={tab} onTab={setTab} />
+      <MhGrain />
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<Dev />);
+</script>
+</body></html>

@@ -113,6 +113,7 @@
 .mn-pill { flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; }
 .mn-pill > span { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
 .mn-pill[aria-pressed="true"] > span, .mn-pill[aria-selected="true"] > span { background: var(--mn-sand); border-color: var(--mn-sand); color: var(--mn-navy); }
+.mn-pill[data-round] { min-width: 44px; justify-content: center; }
 .mn-pill[data-round] > span { width: 32px; height: 32px; padding: 0; justify-content: center; }
 
 /* ── bottom nav ───────────────────────────────────────────────────────── */
