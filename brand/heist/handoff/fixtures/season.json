@@ -1,0 +1,157 @@
+{
+  "season": {
+    "name": "Muscat Nights",
+    "nameAr": "ليالي مسقط",
+    "volume": 10,
+    "month": "2026-12",
+    "prizePoolOMR": 402,
+    "paidOMR": 140,
+    "seasonPrizesOMR": [
+      75,
+      50,
+      30
+    ],
+    "nightlyVoucherOMR": 28,
+    "currentUserId": "p05"
+  },
+  "sessions": [
+    {
+      "no": 1,
+      "code": "EP.01",
+      "title": "The Corniche",
+      "date": "2026-12-02",
+      "time": "17:30",
+      "state": "done",
+      "art": "art-corniche.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "champions": [
+        "Munther Rahbi",
+        "Khalid"
+      ]
+    },
+    {
+      "no": 2,
+      "code": "EP.02",
+      "title": "The Arrival",
+      "date": "2026-12-07",
+      "time": "17:30",
+      "state": "done",
+      "art": "art-club.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "champions": [
+        "Hamed Amri",
+        "Nooh Amri"
+      ]
+    },
+    {
+      "no": 3,
+      "code": "EP.03",
+      "title": "The Heat",
+      "date": "2026-12-09",
+      "time": "17:30",
+      "state": "done",
+      "art": "art-smash.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "champions": [
+        "Salim K.",
+        "Yousuf B."
+      ]
+    },
+    {
+      "no": 4,
+      "code": "EP.04",
+      "title": "The Knockout",
+      "date": "2026-12-14",
+      "time": "17:30",
+      "state": "done",
+      "art": "art-rivals.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "champions": [
+        "Munther Rahbi",
+        "Baraa"
+      ]
+    },
+    {
+      "no": 5,
+      "code": "EP.05",
+      "title": "The Smash",
+      "date": "2026-12-16",
+      "time": "17:30",
+      "state": "done",
+      "art": "art-smash.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "champions": [
+        "Baraa",
+        "mossa"
+      ],
+      "final": {
+        "winners": [
+          "Baraa",
+          "mossa"
+        ],
+        "losers": [
+          "Munther Rahbi",
+          "Khalid"
+        ],
+        "score": "6-4"
+      }
+    },
+    {
+      "no": 6,
+      "code": "EP.06",
+      "title": "The Grudge",
+      "date": "2026-12-21",
+      "time": "17:30",
+      "state": "live",
+      "art": "art-rivals.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "progress": {
+        "played": 14,
+        "total": 24
+      }
+    },
+    {
+      "no": 7,
+      "code": "EP.07",
+      "title": "The Rematch",
+      "date": "2026-12-23",
+      "time": "17:30",
+      "state": "soon",
+      "art": "art-corniche.jpg",
+      "doublePoints": false,
+      "finale": false,
+      "signups": {
+        "teams": 12,
+        "max": 16
+      }
+    },
+    {
+      "no": 8,
+      "code": "EP.08",
+      "title": "The Crew",
+      "date": "2026-12-28",
+      "time": "17:30",
+      "state": "soon",
+      "art": "art-carpark.jpg",
+      "doublePoints": false,
+      "finale": false
+    },
+    {
+      "no": 9,
+      "code": "EP.09",
+      "title": "The Big Score",
+      "date": "2026-12-30",
+      "time": "17:30",
+      "state": "soon",
+      "art": "art-club.jpg",
+      "doublePoints": true,
+      "finale": true
+    }
+  ]
+}

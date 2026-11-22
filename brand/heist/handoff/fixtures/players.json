@@ -1,0 +1,125 @@
+{
+  "_note": "Sample data. Points, rank and movement come from the existing points engine in production. rep and tier are derived in the client from tokens.ts.",
+  "players": [
+    {
+      "id": "p01",
+      "name": "Munther Rahbi",
+      "initials": "MR",
+      "points": 104,
+      "rank": 1,
+      "movement": "—",
+      "winRate": 0.78,
+      "sessionsPlayed": 5,
+      "photo": "/players/p01.png",
+      "art": null,
+      "stats": {
+        "smash": 94,
+        "wall": 86,
+        "speed": 88,
+        "clutch": 97
+      }
+    },
+    {
+      "id": "p02",
+      "name": "Hamed Amri",
+      "initials": "HA",
+      "points": 93,
+      "rank": 2,
+      "movement": "—",
+      "winRate": 0.71,
+      "sessionsPlayed": 5,
+      "photo": "/players/p02.png",
+      "art": null,
+      "stats": {
+        "smash": 88,
+        "wall": 84,
+        "speed": 79,
+        "clutch": 90
+      }
+    },
+    {
+      "id": "p03",
+      "name": "Nooh Amri",
+      "initials": "NA",
+      "points": 90,
+      "rank": 3,
+      "movement": "▲1",
+      "winRate": 0.66,
+      "sessionsPlayed": 5,
+      "photo": "/players/p03.png",
+      "art": null
+    },
+    {
+      "id": "p04",
+      "name": "Baraa",
+      "initials": "BA",
+      "points": 82,
+      "rank": 4,
+      "movement": "▼1",
+      "winRate": 0.64,
+      "sessionsPlayed": 5,
+      "photo": "/players/p04.png",
+      "art": null
+    },
+    {
+      "id": "p05",
+      "name": "mossa",
+      "initials": "MO",
+      "points": 80,
+      "rank": 5,
+      "movement": "▲2",
+      "winRate": 0.62,
+      "sessionsPlayed": 5,
+      "photo": "/players/p05.png",
+      "art": null
+    },
+    {
+      "id": "p06",
+      "name": "Salim K.",
+      "initials": "SK",
+      "points": 76,
+      "rank": 6,
+      "movement": "—",
+      "winRate": 0.58,
+      "sessionsPlayed": 5,
+      "photo": "/players/p06.png",
+      "art": null
+    },
+    {
+      "id": "p07",
+      "name": "Yousuf B.",
+      "initials": "YB",
+      "points": 71,
+      "rank": 7,
+      "movement": "▼2",
+      "winRate": 0.55,
+      "sessionsPlayed": 4,
+      "photo": "/players/p07.png",
+      "art": null
+    },
+    {
+      "id": "p08",
+      "name": "Ahmed S.",
+      "initials": "AS",
+      "points": 68,
+      "rank": 8,
+      "movement": "▲1",
+      "winRate": 0.52,
+      "sessionsPlayed": 5,
+      "photo": "/players/p08.png",
+      "art": null
+    },
+    {
+      "id": "p09",
+      "name": "Khalid",
+      "initials": "KH",
+      "points": 64,
+      "rank": 9,
+      "movement": "—",
+      "winRate": 0.5,
+      "sessionsPlayed": 4,
+      "photo": "/players/p09.png",
+      "art": null
+    }
+  ]
+}

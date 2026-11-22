@@ -1,0 +1,87 @@
+{
+  "session": 6,
+  "groupA": {
+    "standings": [
+      {
+        "team": "Munther & Baraa",
+        "w": 2,
+        "pts": 6
+      },
+      {
+        "team": "Salim & Yousuf",
+        "w": 1,
+        "pts": 5
+      },
+      {
+        "team": "Hamed & Nooh",
+        "w": 1,
+        "pts": 4
+      },
+      {
+        "team": "Ahmed & Khalid",
+        "w": 0,
+        "pts": 2
+      }
+    ],
+    "matches": [
+      {
+        "a": "Munther & Baraa",
+        "b": "Hamed & Nooh",
+        "score": "6-3",
+        "state": "final"
+      },
+      {
+        "a": "Salim & Yousuf",
+        "b": "Ahmed & Khalid",
+        "score": "4-3",
+        "state": "live",
+        "court": 2
+      }
+    ]
+  },
+  "live": {
+    "court": 1,
+    "group": "A",
+    "clock": "18:42",
+    "teamA": "Munther & Baraa",
+    "teamB": "Hamed & Nooh",
+    "a": 5,
+    "b": 3,
+    "serving": "A",
+    "firstTo": 6
+  },
+  "recap5": {
+    "champions": [
+      "Baraa",
+      "mossa"
+    ],
+    "beat": [
+      "Munther Rahbi",
+      "Khalid"
+    ],
+    "score": "6-4",
+    "mvp": {
+      "name": "Baraa",
+      "votes": 6
+    },
+    "biggestWin": {
+      "team": "Hamed & Nooh",
+      "score": "6-0"
+    },
+    "upset": {
+      "team": "Ali & Omar",
+      "note": "beat the #1"
+    },
+    "repUps": [
+      {
+        "name": "mossa",
+        "from": "Rookie",
+        "to": "Rising"
+      }
+    ],
+    "yourNight": {
+      "points": 26,
+      "note": "Champions"
+    }
+  }
+}

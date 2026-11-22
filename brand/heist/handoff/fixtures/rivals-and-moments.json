@@ -1,0 +1,60 @@
+{
+  "_note": "Rival = the player directly above you on the table. headToHead counts matches where the two were on opposing teams.",
+  "rivals": [
+    {
+      "playerId": "p05",
+      "rivalId": "p04",
+      "gap": 2,
+      "headToHead": {
+        "w": 1,
+        "l": 1
+      },
+      "meetings": [
+        {
+          "session": 5,
+          "label": "Final (same team)",
+          "result": "Champions"
+        },
+        {
+          "session": 3,
+          "label": "Group B",
+          "result": "Won 6-4"
+        },
+        {
+          "session": 2,
+          "label": "Quarter-final",
+          "result": "Lost 3-6"
+        }
+      ]
+    }
+  ],
+  "moments": [
+    {
+      "type": "repUp",
+      "playerId": "p05",
+      "from": "rookie",
+      "to": "rising",
+      "session": 5
+    },
+    {
+      "type": "tierUp",
+      "playerId": "p01",
+      "from": "elite",
+      "to": "legend",
+      "session": 5
+    },
+    {
+      "type": "scoreSettled",
+      "playerId": "p05",
+      "overtookId": "p04",
+      "session": 6,
+      "newRank": 4,
+      "points": [
+        86,
+        84
+      ],
+      "nextRivalId": "p03",
+      "nextGap": 4
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+/* Muscat Nights · design tokens (Vol.10, December 2026)
+   Import once at the app root. Every colour, font, radius and shadow in the app must come from here. */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..900;1,62..125,400..900&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,400..700,0..100,0..1;1,9..144,400..700,0..100,0..1&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@500;700&family=Reem+Kufi:wght@600;700&display=swap");
+
+:root {
+  /* colour */
+  --mn-navy: #0F1B2B;          /* app background */
+  --mn-navy-2: #13202F;        /* card body inside crew cards */
+  --mn-sand: #FFF4E8;          /* primary text, light buttons */
+  --mn-peach: #FFC9A3;         /* labels, secondary accent */
+  --mn-coral: #F26B5B;         /* primary action, live, rivals */
+  --mn-coral-2: #F59A62;       /* coral gradient end */
+  --mn-gold: #FFD08A;          /* leader, Legend, finale */
+  --mn-teal: #2FB7B0;          /* "you", Rising, positive */
+  --mn-rose: #E9849A;          /* Elite tier gradient end */
+  --mn-mist: #B9C6D3;          /* secondary text */
+  --mn-dim: #7F8EA0;           /* Rookie, disabled */
+  --mn-red: #E5484D;           /* Big Score lead bar only */
+  --mn-silver: #D7DDE4;        /* 2nd prize */
+  --mn-bronze: #D9A27A;        /* 3rd prize */
+  --mn-line: rgba(255,244,232,.10);
+  --mn-line-2: rgba(255,244,232,.18);
+
+  --mn-grad-primary: linear-gradient(135deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-title: linear-gradient(180deg, #FFFBF5 0%, var(--mn-sand) 55%, var(--mn-peach) 100%);
+  --mn-sky: linear-gradient(180deg,#24456E 0%,#6B5B8E 30%,#E07C8E 52%,#F6A06B 72%,#FFD39A 90%);
+
+  /* glass card */
+  --mn-glass-bg: rgba(15,27,43,.62);
+  --mn-glass-border: 1px solid rgba(255,244,232,.18);
+  --mn-glass-blur: blur(14px);
+
+  /* crew card tiers (frame gradients) */
+  --mn-tier-legend: linear-gradient(135deg,#FFD08A,#F59A62 50%,#FFD08A);
+  --mn-tier-elite: linear-gradient(135deg,#F26B5B,#E9849A);
+  --mn-tier-pro: linear-gradient(135deg,#2FB7B0,#2A7FA8);
+  --mn-tier-street: linear-gradient(135deg,#5A6B80,#B9C6D3);
+
+  /* rep levels */
+  --mn-rep-rookie: var(--mn-dim);
+  --mn-rep-rising: var(--mn-teal);
+  --mn-rep-known: var(--mn-coral);
+  --mn-rep-legend: var(--mn-gold);
+
+  /* type */
+  --mn-font-display: 'Archivo', Impact, sans-serif;     /* always with --mn-display-axes, weight 800–900, uppercase */
+  --mn-display-axes: 'wdth' 66;
+  --mn-font-serif: 'Fraunces', Georgia, serif;          /* italic only, captions and taglines */
+  --mn-serif-axes: 'SOFT' 100, 'WONK' 1;
+  --mn-font-ui: 'Manrope', system-ui, sans-serif;       /* buttons, body, names in lists: 600/700 */
+  --mn-font-mono: 'JetBrains Mono', monospace;          /* labels: 11px, 500, uppercase, letter-spacing .14em */
+  --mn-font-arabic: 'Reem Kufi', sans-serif;
+
+  /* radius */
+  --mn-r-card: 14px;
+  --mn-r-hero: 16px;
+  --mn-r-pill: 999px;
+  --mn-r-nav: 20px;
+
+  /* shadow */
+  --mn-shadow-card: 0 14px 30px rgba(0,0,0,.40);
+  --mn-shadow-title: 0 3px 0 rgba(15,27,43,.55), 0 10px 22px rgba(0,0,0,.45);
+
+  /* angled hero cut: used on Home, session headers, live, recap, loading, rival, Big Score */
+  --mn-cut-hero: polygon(0 0,100% 0,100% 82%,0 96%);
+  --mn-keyline: 3px solid var(--mn-sand);   /* the sand line drawn along the cut */
+
+  /* spacing (4px base) */
+  --mn-s1: 4px; --mn-s2: 8px; --mn-s3: 12px; --mn-s4: 16px; --mn-s5: 20px; --mn-s6: 24px;
+  --mn-page-x: 20px;
+  --mn-min-text: 11px;
+}
+
+/* helper classes the screens use */
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; text-transform: uppercase; line-height: .86; color: var(--mn-sand); }
+.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-mist); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mn-glass   { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; min-height: 48px; }
+.mn-btn-ghost   { border: 1.5px solid rgba(255,244,232,.35); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
