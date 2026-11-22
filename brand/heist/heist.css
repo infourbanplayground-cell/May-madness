@@ -1,0 +1,202 @@
+/* MUSCAT HEIST · Vol.10 — tokens and the shared components.
+   The :root block is the handoff's tokens/tokens.css, verbatim except:
+     - no Google @import (the faces are vendored: brand/fonts + brand/heist/fonts)
+     - no Arabic face (the owner removed the Arabic name, 22 Nov 2026)
+     - a few extra tokens at the end, each a value the handoff's own static
+       design uses inline (the art tint, the fades, the band's shadow), so no
+       component below carries a colour of its own.
+   EVERY colour in this file and in the components comes from :root. */
+:root {
+  /* colour */
+  --mn-navy: #0F1B2B;
+  --mn-navy-2: #13202F;
+  --mn-sand: #FFF4E8;
+  --mn-peach: #FFC9A3;
+  --mn-coral: #F26B5B;
+  --mn-coral-2: #F59A62;
+  --mn-gold: #FFD08A;
+  --mn-teal: #2FB7B0;
+  --mn-rose: #E9849A;
+  --mn-mist: #B9C6D3;
+  --mn-dim: #7F8EA0;
+  --mn-red: #E5484D;
+  --mn-silver: #D7DDE4;
+  --mn-bronze: #D9A27A;
+  --mn-line: rgba(255,244,232,.10);
+  --mn-line-2: rgba(255,244,232,.18);
+
+  --mn-grad-primary: linear-gradient(135deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-title: linear-gradient(180deg, #FFFBF5 0%, var(--mn-sand) 55%, var(--mn-peach) 100%);
+  --mn-sky: linear-gradient(180deg,#24456E 0%,#6B5B8E 30%,#E07C8E 52%,#F6A06B 72%,#FFD39A 90%);
+
+  --mn-glass-bg: rgba(15,27,43,.62);
+  --mn-glass-border: 1px solid rgba(255,244,232,.18);
+  --mn-glass-blur: blur(14px);
+
+  --mn-tier-legend: linear-gradient(135deg,#FFD08A,#F59A62 50%,#FFD08A);
+  --mn-tier-elite: linear-gradient(135deg,#F26B5B,#E9849A);
+  --mn-tier-pro: linear-gradient(135deg,#2FB7B0,#2A7FA8);
+  --mn-tier-street: linear-gradient(135deg,#5A6B80,#B9C6D3);
+
+  --mn-rep-rookie: var(--mn-dim);
+  --mn-rep-rising: var(--mn-teal);
+  --mn-rep-known: var(--mn-coral);
+  --mn-rep-legend: var(--mn-gold);
+
+  --mn-font-display: 'Archivo', Impact, sans-serif;
+  --mn-display-axes: 'wdth' 66;
+  --mn-font-serif: 'Fraunces', Georgia, serif;
+  --mn-serif-axes: 'SOFT' 100, 'WONK' 1;
+  --mn-font-ui: 'Manrope', system-ui, sans-serif;
+  --mn-font-mono: 'JetBrains Mono', monospace;
+
+  --mn-r-card: 14px;
+  --mn-r-hero: 16px;
+  --mn-r-pill: 999px;
+  --mn-r-nav: 20px;
+
+  --mn-shadow-card: 0 14px 30px rgba(0,0,0,.40);
+  --mn-shadow-title: 0 3px 0 rgba(15,27,43,.55), 0 10px 22px rgba(0,0,0,.45);
+
+  --mn-cut-hero: polygon(0 0,100% 0,100% 82%,0 96%);
+  --mn-keyline: 3px solid var(--mn-sand);
+
+  --mn-s1: 4px; --mn-s2: 8px; --mn-s3: 12px; --mn-s4: 16px; --mn-s5: 20px; --mn-s6: 24px;
+  --mn-page-x: 20px;
+  --mn-min-text: 11px;
+
+  /* — added: values the static design uses inline, named once — */
+  --mn-art-filter: saturate(1.08) contrast(1.05);
+  --mn-art-tint: linear-gradient(180deg, rgba(255,140,90,.12), rgba(20,60,90,.22));
+  --mn-hero-fade: linear-gradient(180deg, rgba(15,27,43,.45), rgba(15,27,43,0) 22%, rgba(15,27,43,0) 50%, rgba(15,27,43,.85) 92%);
+  --mn-card-fade: linear-gradient(180deg, rgba(19,32,47,0) 55%, var(--mn-navy-2));
+  --mn-foil: linear-gradient(115deg, transparent 25%, rgba(255,244,232,.35) 40%, rgba(255,201,163,.3) 48%, transparent 62%);
+  --mn-sun: radial-gradient(circle, rgba(255,201,163,.55), rgba(242,107,91,.25) 45%, rgba(242,107,91,0) 70%);
+  --mn-band-shadow: 0 8px 20px rgba(0,0,0,.4);
+  --mn-keyline-shadow: drop-shadow(0 0 5px rgba(0,0,0,.35));
+  --mn-text-glow: 0 2px 8px rgba(0,0,0,.6);
+  --mn-tag-bg: rgba(15,27,43,.75);
+  --mn-scene-bg: rgba(15,27,43,.72);
+  --mn-nav-bg: rgba(15,27,43,.78);
+  --mn-nav-border: 1px solid rgba(255,244,232,.14);
+  --mn-pill-border: 1px solid rgba(255,244,232,.25);
+  --mn-ghost-border: 1.5px solid rgba(255,244,232,.35);
+  --mn-track: rgba(255,244,232,.12);
+  --mn-billing: rgba(255,244,232,.72);
+  --mn-billing-dim: rgba(255,244,232,.45);
+}
+
+/* ── type helpers (the handoff's own) ─────────────────────────────────── */
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; text-transform: uppercase; line-height: .86; color: var(--mn-sand); }
+.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-mist); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
+.mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }
+.mn-glass[data-accent="teal"]  { border-color: var(--mn-teal); }
+.mn-glass[data-accent="gold"]  { border-color: var(--mn-gold); }
+.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
+
+/* ── buttons ──────────────────────────────────────────────────────────── */
+.mn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; cursor: pointer; border: 0; text-decoration: none; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: uppercase; }
+.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; font-size: 17px; text-transform: uppercase; }
+.mn-btn-light   { background: var(--mn-sand); color: var(--mn-navy); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-ui); font-weight: 700; font-size: 15px; }
+.mn-btn[data-size="live"] { min-height: 56px; }
+.mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+
+/* ── pills ────────────────────────────────────────────────────────────── */
+.mn-pills { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.mn-pills::-webkit-scrollbar { display: none; }
+/* the visible pill is the handoff's 32px chip; the button around it is 44px
+   tall so the target meets the floor without changing what is drawn */
+.mn-pill { flex: 0 0 auto; min-height: 44px; display: inline-flex; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-pill > span { display: inline-flex; align-items: center; padding: 7px 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-pill[aria-pressed="true"] > span, .mn-pill[aria-selected="true"] > span { background: var(--mn-sand); border-color: var(--mn-sand); color: var(--mn-navy); }
+.mn-pill[data-round] > span { width: 32px; height: 32px; padding: 0; justify-content: center; }
+
+/* ── bottom nav ───────────────────────────────────────────────────────── */
+.mn-nav { position: fixed; left: 14px; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40; padding: 4px 8px; display: flex; justify-content: space-around; background: var(--mn-nav-bg); border: var(--mn-nav-border); border-radius: var(--mn-r-nav); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.mn-navtab { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-navtab > span { padding: 7px 12px; border-radius: 12px; color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-navtab[aria-current="page"] > span { background: var(--mn-sand); color: var(--mn-navy); }
+
+/* ── top bar ──────────────────────────────────────────────────────────── */
+.mn-topbar { position: absolute; left: 20px; right: 20px; top: 50px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
+.mn-topbar img { height: 28px; }
+.mn-topbar .mn-serif { font-size: 16px; color: var(--mn-sand); }
+
+/* ── art: every painting/photo gets the same treatment ────────────────── */
+.mn-art { position: absolute; inset: 0; overflow: hidden; }
+.mn-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
+.mn-art::after { content: ""; position: absolute; inset: 0; background: var(--mn-art-tint); mix-blend-mode: soft-light; }
+.mn-initials { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-mist); }
+
+/* ── hero cut ─────────────────────────────────────────────────────────── */
+.mn-hero { position: relative; overflow: hidden; }
+.mn-hero .mn-hero-img { position: absolute; inset: 0; }
+.mn-hero .mn-hero-fade { position: absolute; inset: 0; background: var(--mn-hero-fade); }
+.mn-hero .mn-keyline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: var(--mn-keyline-shadow); pointer-events: none; }
+.mn-hero .mn-keyline line { stroke: var(--mn-sand); stroke-width: 3; }
+.mn-hero[data-gold] .mn-keyline line { stroke: var(--mn-gold); }
+
+/* ── title lockup ─────────────────────────────────────────────────────── */
+.mn-lockup { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
+.mn-lockup[data-center] { align-items: center; }
+.mn-lockup .mn-sun { position: absolute; left: 50%; top: 4px; border-radius: 50%; background: var(--mn-sun); transform: translateX(-50%); pointer-events: none; }
+.mn-lockup .mn-presents { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-peach); }
+.mn-lockup .mn-presents::before, .mn-lockup .mn-presents::after { content: ""; width: 24px; height: 1px; background: var(--mn-peach); }
+.mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 rgba(15,27,43,.55)) drop-shadow(0 10px 22px rgba(0,0,0,.45)); }
+.mn-lockup .mn-band { position: relative; margin-top: -1px; padding: 4px 14px 3px; background: var(--mn-grad-nights); transform: skewX(-10deg); box-shadow: var(--mn-band-shadow); }
+.mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
+.mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
+
+/* ── scene tag ────────────────────────────────────────────────────────── */
+.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: uppercase; }
+.mn-scenetag[data-gold] { border-left-color: var(--mn-gold); color: var(--mn-gold); }
+
+/* ── billing (stories) ────────────────────────────────────────────────── */
+.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: uppercase; text-align: center; }
+.mn-billing i { font-style: normal; color: var(--mn-billing-dim); text-transform: none; }
+
+/* ── crew card ────────────────────────────────────────────────────────── */
+.mn-card { flex: 0 0 auto; padding: 4px; border-radius: var(--mn-r-card); box-shadow: var(--mn-shadow-card); background: var(--mn-tier-street); }
+.mn-card[data-tier="legend"] { background: var(--mn-tier-legend); }
+.mn-card[data-tier="elite"]  { background: var(--mn-tier-elite); }
+.mn-card[data-tier="pro"]    { background: var(--mn-tier-pro); }
+.mn-card > div { border-radius: 11px; overflow: hidden; background: var(--mn-navy-2); }
+.mn-card .mn-card-img { position: relative; }
+.mn-card .mn-foil { position: absolute; inset: 0; background: var(--mn-foil); background-size: 250% 100%; mix-blend-mode: overlay; animation: mn-foil 3.2s linear infinite; }
+.mn-card .mn-card-fade { position: absolute; inset: 0; background: var(--mn-card-fade); }
+.mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .1em; color: var(--mn-sand); }
+.mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-sand); text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; color: var(--mn-sand); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-card .mn-repline { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px; }
+.mn-card .mn-rep { font-family: var(--mn-font-mono); font-size: 11px; }
+.mn-card .mn-pts { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; color: var(--mn-sand); }
+.mn-card .mn-stats { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+.mn-card .mn-stat { display: flex; align-items: center; gap: 8px; }
+.mn-card .mn-stat > span:first-child { width: 52px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mn-card .mn-stat > span:nth-child(2) { flex: 1; height: 4px; border-radius: 2px; background: var(--mn-track); overflow: hidden; }
+.mn-card .mn-stat > span:nth-child(2) > span { display: block; height: 100%; border-radius: 2px; }
+.mn-card .mn-stat > b { min-width: 16px; text-align: right; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 13px; color: var(--mn-sand); }
+.mn-card[data-tilt] { animation: mn-tilt 6s ease-in-out infinite; }
+button.mn-cardbtn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: var(--mn-r-card); }
+
+/* ── avatar ───────────────────────────────────────────────────────────── */
+.mn-avatar { position: relative; flex: 0 0 auto; border-radius: 50%; overflow: hidden; background: var(--mn-navy-2); }
+
+/* ── film grain over every screen, as the static design draws it ──────── */
+.mn-grain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: .08; mix-blend-mode: overlay; pointer-events: none; z-index: 30; }
+
+/* ── motion ───────────────────────────────────────────────────────────── */
+@keyframes mn-foil { 0% { background-position: 120% 0 } 100% { background-position: -120% 0 } }
+@keyframes mn-tilt { 0%,100% { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) } 50% { transform: perspective(900px) rotateY(9deg) rotateX(-3deg) } }
+@keyframes mn-ring { 0% { transform: scale(.6); opacity: .9 } 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes mn-slam { 0% { transform: scale(2.4); opacity: 0 } 60% { transform: scale(.94); opacity: 1 } 100% { transform: scale(1); opacity: 1 } }
+@keyframes mn-fill { from { width: 0 } }
+.mn-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor; animation: mn-ring 2.4s ease-out infinite; }
+.mn-ring + .mn-ring { animation-delay: .8s; }
+.mn-slam { animation: mn-slam .7s ease-out both; }
+.mn-fill { animation: mn-fill .6s ease-out .7s both; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

@@ -850,6 +850,40 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - App dir on VPS: `/opt/booking-app` — systemd: `booking-app` — port 3003
 - See `.claude/commands/deploy-booking-app.md` for full deploy steps
 
+### Muscat Heist (Vol.10 — IN BUILD, December 2026)
+- URL: https://heist.urbanpadel.om — nine Mon/Wed nights, Wed 2 Dec to Wed 30 Dec,
+  17:30 at Al Hail North. **Mon 28 and Wed 30 Dec are double.**
+- The design is the **Muscat Nights** handoff in `brand/heist/handoff/`, renamed
+  **Muscat Heist** by the owner (22 Nov 2026): HEIST sits on the coral band where
+  NIGHTS was. "Now Loading Muscat" stays. **No Arabic name** — the owner removed it
+  (22 Nov 2026); the title's meta line is `VOL.10 · MUSCAT · DEC 2026` alone.
+- Season numbers in **`heist-season.json`**. Prizes 75/50/30 + 14 OMR to each
+  of a night's two champions; the pool is DERIVED (**407**), the handoff's 402
+  does not add up from its own parts.
+- **Rep levels are per night played** (Rising 16, Known 18, Legend 20 x nights),
+  which is exactly the handoff's 80/90/100 after five nights; rep never drops.
+  The handoff's fixed thresholds would have made half the top ten Legend by
+  week three on Vol.9's numbers. Card stats approved as proposed. Scoring is
+  entered on the existing number pad, restyled — the handoff's point-by-point
+  "+1" screen is NOT a scoring change we make.
+- Session art and episode titles are placeholders until the owner sends real ones.
+- **The handoff's build rules (its own CLAUDE.md), kept here rather than
+  copied over this file:**
+  1. Re-read a screen's spec in `brand/heist/handoff/screens/` and look at its
+     screenshot before touching it.
+  2. Never change scoring. New fields are derived only (`handoff/data.md`).
+  3. Tokens only: every colour, font, radius and shadow from `handoff/tokens/`.
+  4. Reuse the shared components in `handoff/components.md`.
+  5. Exact copy (Muscat Heist, The Take, Now Loading Muscat, Most Wanted,
+     Score Settled, The Big Score).
+  6. One phase at a time; QA (`handoff/QA.md`) and a phase report, then stop.
+  7. Compare every screen at 375px against its reference PNG.
+  8. Report honestly — never tick an item without checking it.
+  9. Ask, don't guess.
+  10. Images load from data (`player.photo`, `session.art`), never hard-coded.
+  11. Boss Kill +3 stays off unless `bossKillBonus.enabled`.
+  12. Real buttons, 44px targets, 11px minimum text, honour reduced motion.
+
 ### 56 National Series (Vol.9 — LIVE APP)
 - URL: https://national.urbanpadel.om — November 2026, nine Mon/Wed nights.
 - Local copy: `national-index.html`, **generated** by `build-national-app.py`
