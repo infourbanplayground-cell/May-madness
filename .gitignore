@@ -16,3 +16,6 @@ node_modules/detect-libc/
 node_modules/is-arrayish/
 node_modules/semver/
 node_modules/simple-swizzle/
+
+# 38MB, re-download from opencv_zoo (media.githubusercontent.com) when needed
+ops/models/face_recognition_sface_2021dec.onnx
