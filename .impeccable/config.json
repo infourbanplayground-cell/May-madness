@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-11-23T12:06:13.866Z",
+        "reason": "Muscat Heist design handoff mandates Fraunces italic as its serif voice: brand/heist/handoff/tokens/ (rule 3: tokens only)"
+      }
+    ]
+  }
+}
