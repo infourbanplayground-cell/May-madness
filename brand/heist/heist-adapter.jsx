@@ -127,31 +127,72 @@ function heistData(state, o) {
   const next = S2.find(s => s.state === "soon");
 
   // ── one night, for the session screen ──
+  // One night, for the session screen and its share cards. Every figure is the
+  // inherited engine's: calcGroupStandings (wins, GD, head to head, games won),
+  // qualifyingTeamIds (the same set the bracket seeds from), calcPlayerNights.
+  // Photos: a Heist portrait wins, then the volume photo (stored as photoUrl —
+  // reading .photo alone is why every pair drew as initials).
+  const photoOf = id => (o.portraits || {})[id] || (byId[id] || {}).photo || (byId[id] || {}).photoUrl || null;
   const nightOf = sv => {
     const s = sessions.find(x => x.id === sv.sid); if (!s) return {};
-    const groups = {};
+    const pl = id => ({ id, name: (byId[id] || {}).name || "?", first: mhFirstOf((byId[id] || {}).name), photo: photoOf(id) });
+    const teamOf = tid => {
+      const t = (s.teams || []).find(x => x.id === tid);
+      return t ? { id: tid, group: t.group, name: mhTeamNames(s, tid, byId), players: [pl(t.p1Id), pl(t.p2Id)] } : null;
+    };
+    const fx = [...(s.groupMatches || []), ...((s.bracket || {}).qf || []), ...((s.bracket || {}).sf || []), (s.bracket || {}).final].filter(Boolean);
+    const started = fx.some(m => m.winner);
+    let Q = new Set();
+    try { if (started && typeof qualifyingTeamIds === "function") Q = qualifyingTeamIds(s); } catch (e) {}
+    const side = (m, k) => m.score ? (k === "a" ? m.score.t1 : m.score.t2) : null;
+    const groups = {}, posOf = {};
     [...new Set((s.teams || []).map(t => t.group).filter(Boolean))].sort().forEach(g => {
       const rows = calcGroupStandings(s, g);
       const ids = new Set((s.teams || []).filter(t => t.group === g).map(t => t.id));
+      const ms = (s.groupMatches || []).filter(m => ids.has(m.team1Id));
+      rows.forEach((r, i) => { posOf[r.team.id] = { pos: i + 1, w: r.wins, pts: r.pts, gd: r.gd, p: r.played - (r.byes || 0) }; });
       groups[g] = {
-        standings: rows.map(r => ({ team: mhTeamNames(s, r.team.id, byId), w: r.wins, pts: r.pts, id: r.team.id })),
-        matches: (s.groupMatches || []).filter(m => ids.has(m.team1Id)).map(m => ({
-          id: m.id, sid: s.id, a: mhTeamNames(s, m.team1Id, byId), b: mhTeamNames(s, m.team2Id, byId),
+        done: ms.length > 0 && ms.every(m => m.winner),
+        standings: rows.map((r, i) => ({ ...teamOf(r.team.id), team: mhTeamNames(s, r.team.id, byId), id: r.team.id,
+          pos: i + 1, w: r.wins, pts: r.pts, gd: r.gd, gf: r.gf, p: r.played - (r.byes || 0), q: Q.has(r.team.id) })),
+        matches: ms.map((m, i) => ({
+          id: m.id, sid: s.id, n: i + 1, a: mhTeamNames(s, m.team1Id, byId), b: mhTeamNames(s, m.team2Id, byId),
+          ta: teamOf(m.team1Id), tb: teamOf(m.team2Id), ga: side(m, "a"), gb: side(m, "b"),
+          winner: m.winner === "team1" ? "a" : m.winner === "team2" ? "b" : null,
           score: mhScore(m), state: m.winner ? "final" : mhScore(m) ? "live" : "next", court: m.court })),
       };
     });
     const B = s.bracket || {};
-    const ko = m => m && { a: m.team1Id ? mhTeamNames(s, m.team1Id, byId) : null, b: m.team2Id ? mhTeamNames(s, m.team2Id, byId) : null,
+    const ko = (m, round, n) => m && { round, n, a: m.team1Id ? mhTeamNames(s, m.team1Id, byId) : null, b: m.team2Id ? mhTeamNames(s, m.team2Id, byId) : null,
+      ta: m.team1Id ? teamOf(m.team1Id) : null, tb: m.team2Id ? teamOf(m.team2Id) : null, ga: side(m, "a"), gb: side(m, "b"),
       sa: m.s1, sb: m.s2, score: mhScore(m), winner: m.winner === "team1" ? "a" : m.winner === "team2" ? "b" : null };
     const hasKo = (B.qf || []).length || (B.sf || []).length || B.final;
+    const K = hasKo ? { qf: (B.qf || []).map((m, i) => ko(m, "qf", i + 1)), sf: (B.sf || []).map((m, i) => ko(m, "sf", i + 1)), final: ko(B.final, "final", 1) } : null;
+    const champ = K && K.final && K.final.winner ? {
+      team: K.final.winner === "a" ? K.final.ta : K.final.tb, beat: K.final.winner === "a" ? K.final.tb : K.final.ta,
+      score: K.final.winner === "a" ? `${K.final.ga}-${K.final.gb}` : `${K.final.gb}-${K.final.ga}` } : null;
     const votes = {};
     Object.values(s.mvpVotes || {}).forEach(v => { const id = typeof v === "string" ? v : v && v.playerId; if (id) votes[id] = (votes[id] || 0) + 1; });
+    // tonight's points: asked for only when a screen shows them (one engine
+    // walk per player), and remembered after the first ask
+    let tonightMemo = null;
+    const tonight = () => {
+      if (tonightMemo) return tonightMemo;
+      const ids = [...new Set((s.teams || []).flatMap(t => [t.p1Id, t.p2Id]))];
+      tonightMemo = ids.map(id => {
+        const r = calcPlayerNights(id, sessions, () => "").nights.find(n => n.id === s.id);
+        return r ? { ...pl(id), points: r.nightTotal, outcome: r.outcome } : null;
+      }).filter(x => x && x.points > 0).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+      return tonightMemo;
+    };
+    const teamsSorted = (s.teams || []).slice().sort((x, y) => (x.group || "").localeCompare(y.group || "") || ((posOf[x.id] || {}).pos || 9) - ((posOf[y.id] || {}).pos || 9));
     return {
+      started, champion: champ, tonight,
       groups,
-      teams: (s.teams || []).map(t => ({ group: t.group, a: mhFirstOf((byId[t.p1Id] || {}).name), b: mhFirstOf((byId[t.p2Id] || {}).name),
-        aPhoto: (byId[t.p1Id] || {}).photo, bPhoto: (byId[t.p2Id] || {}).photo })),
-      knockout: hasKo ? { qf: (B.qf || []).map(ko), sf: (B.sf || []).map(ko), final: ko(B.final) } : null,
-      mvp: { open: !s.completed, votes: Object.entries(votes).map(([id, n]) => ({ name: (byId[id] || {}).name || "?", votes: n })).sort((x, y) => y.votes - x.votes) },
+      teams: teamsSorted.map(t => ({ ...teamOf(t.id), ...(started ? posOf[t.id] || {} : {}), q: Q.has(t.id),
+        a: mhFirstOf((byId[t.p1Id] || {}).name), b: mhFirstOf((byId[t.p2Id] || {}).name), aPhoto: photoOf(t.p1Id), bPhoto: photoOf(t.p2Id) })),
+      knockout: K,
+      mvp: { open: !s.completed && !!s.mvpVotingOpen, votes: Object.entries(votes).map(([id, n]) => ({ ...pl(id), votes: n })).sort((x, y) => y.votes - x.votes) },
     };
   };
   const nightsD = {}; S2.forEach(sv => { if (sv.sid) nightsD[sv.no] = nightOf(sv); });
@@ -274,7 +315,7 @@ function heistData(state, o) {
 const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
   session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
   loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-  share: MhShareSheet });
+  share: MhShareSheet, nightshare: MhNightShare });
 
 function HeistShell(props) {
   const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
@@ -347,7 +388,7 @@ function HeistShell(props) {
         </button>
       )}
       <Screen key={route.join("/")} D={D} go={go} id={name === "share" ? arg2 : arg} no={arg} what={arg}
-        start={+arg2 || 0} canScore={canScore} match={live} onLock={onLock} />
+        start={+arg2 || 0} kind={arg2} canScore={canScore} match={live} onLock={onLock} />
     </>
   );
 }

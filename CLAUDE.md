@@ -1033,6 +1033,30 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     editor's TEAMS/GROUPS/KO/POINTS/LIST/MVP/POSTS and the sign-in sheet:
     no Vol.9 colour, no Vol.9 artwork, every text run AA against its
     composited ground. `WHY=1` prints the failing element's colours.
+- **THE SESSION PAGE, THE POSTS AND THE LINE-UPS WERE REBUILT (23 Nov 2026)** —
+  the owner's verdict on all three was "very bad".
+  - **Session page** (`MhSession`, heist-night.jsx): the night says what it IS
+    before any tab — champions with faces and the final score, or live progress
+    and what is on court next, or the date and sign-ups. Faces on every row.
+    Group tables carry W / GD / PTS and the teal bar is the engine's own
+    `qualifyingTeamIds`, worded "in a qualifying place right now" until the
+    group is complete. A match shows each side's own games with the winner lit.
+    Teams sorted A-D (they came out D, A, B, C). MVP becomes TONIGHT'S POINTS
+    when nobody voted (`calcPlayerNights`, streak bonus excluded and said so).
+  - **Every pair drew as initials** because the screen read `player.photo` and
+    the volumes store `photoUrl`. `photoOf()` in the adapter: Heist portrait,
+    then photo, then photoUrl.
+  - **Posts and line-ups are `brand/heist/heist-night-share.jsx`** — route
+    `#nightshare/<no>/<kind>`: line-up (any match, face to face, VS or the
+    score), the draw, group tables, the bracket, champions, tonight's points.
+    DOM stories exported through `mhExportStory`, so the preview is the file.
+    The inherited editor's POSTS and LINE-UP chips are rewired to it in the
+    build; Vol.9's canvas painters are no longer reachable.
+  - **The inherited skin caps EVERY corner at 28px with !important**, which
+    turned a 118px avatar into a rounded square; `.mn-avatar` is 50% under
+    `html:not(#mh)`.
+  - `node ops/check-heist-nightshare.mjs`: POSTS and LINE-UP open the Heist
+    share, and all six cards export at exactly 1080x1920 through the button.
 - **Deploy: `bash ops/deploy-heist.sh`** -> `/preview/` until launch;
   `ROOT=1` puts it at the front on **Tue 1 Dec**. It refuses to run 17:00-23:00
   on a Heist night, and writes `version.txt` at the SITE ROOT (the update check

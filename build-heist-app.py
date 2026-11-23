@@ -32,7 +32,7 @@ H = os.path.join(HERE, "brand", "heist")
 season = json.load(open(os.path.join(HERE, "heist-season.json"), encoding="utf-8"))
 read = lambda n: open(os.path.join(H, n), encoding="utf-8").read()
 MODULES = ["heist-components.jsx", "heist-screens.jsx", "heist-night.jsx", "heist-moments.jsx",
-           "heist-stories.jsx", "heist-adapter.jsx"]
+           "heist-stories.jsx", "heist-night-share.jsx", "heist-adapter.jsx"]
 
 
 def once(s, a, b, what):
@@ -315,6 +315,16 @@ def main():
     s = once(s, '  <div id="root"></div>', """  <a id="mh-back" href="./" hidden>← Muscat Heist<span>ORGANISER TOOLS</span></a>
   <script>if (new URLSearchParams(location.search).has("classic")) document.getElementById("mh-back").hidden = false;</script>
   <div id="root"></div>""", "classic way back")
+
+    # POSTS and LINE-UP in the inherited night editor opened Vol.9's canvas
+    # cards, re-coloured. They open the Heist night share now (the session's
+    # number is its date's place in the season's nights).
+    for key, kind in (("groups", "draw"), ("lineup", "lineup")):
+        old = {"groups": 'go:() => setShowGroupCards(true),', "lineup": 'go:() => setShowLineup(true),'}[key]
+        new = ('go:() => { const n = (MH.nights || []).indexOf(session.date) + 1; '
+               f'location.href = location.pathname + "#nightshare/" + (n || 1) + "/{kind}"; }},')
+        s = once(s, old, new, "classic " + key + " -> night share")
+    s = once(s, 'show:lineups.length > 0, warm:true },', 'show:(session.teams || []).length > 0, warm:true },', "line-up shown once there are teams")
 
     # The selected qualify chip was WHITE on ivory in the inherited markup
     # (1.08:1): the selected state of the one control that decides who goes through.

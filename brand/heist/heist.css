@@ -471,3 +471,130 @@ html:not(#mh), html:not(#mh) body, html:not(#mh) #root { background: var(--mn-na
 /* and National's own furniture on the page itself — the khanjar tile on body::before
    and the band on body::after — is Vol.9's, not Heist's */
 html:not(#mh) body::before, html:not(#mh) body::after { display: none !important; }
+
+/* ── 07 SESSION, rebuilt: status, actions, faces on every row ─────────── */
+.mh-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mh-act { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-glass-bg); color: var(--mn-sand); font-family: var(--mn-font-ui); font-weight: 700; font-size: 13px; cursor: pointer; }
+.mh-act[data-org] { border-color: var(--mn-coral); }
+.mh-act:disabled { opacity: .35; cursor: default; }
+.mh-act:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+.mh-pairfaces { display: flex; flex: none; }
+.mh-pairfaces > .mn-avatar + .mn-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--mn-navy-2); }
+.mh-pairfaces-s > .mn-avatar + .mn-avatar { margin-left: -6px; }
+.mh-champ { display: flex; align-items: center; gap: 12px; }
+.mh-champ .mh-pairfaces > .mn-avatar + .mn-avatar { margin-left: -12px; }
+.mh-champname { font-size: 22px; line-height: 1; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-champsub { font-family: var(--mn-font-ui); font-size: 12px; color: var(--mn-mist); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-progress { height: 6px; border-radius: 3px; background: var(--mn-line-2); margin: 10px 0 8px; overflow: hidden; }
+.mh-progress > div { height: 100%; background: var(--mn-grad-nights); }
+.mh-onnow { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+.mh-onnow > span { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-coral); margin-right: 8px; }
+.mh-onnow > i { color: var(--mn-mist); font-style: normal; margin: 0 4px; }
+/* group table: # · team (faces + names) · W · GD · PTS, qualifiers on a teal bar */
+.mh-grow { grid-template-columns: 16px 1fr 18px 28px 26px; position: relative; }
+.mh-grow[data-q]::before { content: ""; position: absolute; left: -14px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-ghead { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-mist); border-top: 0 !important; padding: 8px 0 4px; }
+.mh-ghead > span:nth-child(n+3) { text-align: right; }
+.mh-grow > .mh-gw { text-align: right; }
+.mh-gpos { font-size: 14px; color: var(--mn-mist); }
+.mh-grow[data-q] .mh-gpos { color: var(--mn-teal); }
+.mh-gpts { font-size: 18px; text-align: right; }
+.mh-gteamcell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mh-qkey { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); letter-spacing: .06em; }
+.mh-qkey > i { width: 3px; height: 12px; border-radius: 2px; background: var(--mn-teal); }
+/* a match: each side its own row with its own games; the winner lit */
+.mh-mrow { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.mh-mrow .mh-mteam { flex: 1; }
+.mh-mgames { font-size: 22px; min-width: 18px; text-align: right; color: var(--mn-mist); }
+.mh-mrow[data-win] .mh-mteam { font-weight: 800; }
+.mh-mrow[data-win] .mh-mgames { color: var(--mn-sand); }
+.mh-mrow[data-lose] .mh-mteam { color: var(--mn-mist); }
+.mh-mrow[data-lose] .mn-avatar { opacity: .55; }
+.mh-mstate { margin-top: 4px; }
+.mh-trow { gap: 10px; position: relative; }
+.mh-trow[data-q]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-tstat { text-align: right; flex: none; }
+.mh-tstat > b { display: block; font-size: 20px; }
+.mh-tstat > span { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mh-prow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: var(--mn-row-line); }
+.mh-prow:first-child { border-top: 0; }
+.mh-prow .mh-gpos { width: 18px; }
+.mh-psub { font-family: var(--mn-font-ui); font-size: 11px; color: var(--mn-mist); }
+.mh-lupick { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.mh-luselect { flex: 1; min-width: 0; min-height: 44px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-glass-bg); color: var(--mn-sand); font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; padding: 0 14px; }
+
+/* ── a NIGHT's stories (416x740 frames, exported at 1080x1920) ────────── */
+.mh-nsart { position: absolute; left: 0; right: 0; top: 0; }
+.mh-nsfade { position: absolute; left: 0; right: 0; top: 0; background: linear-gradient(180deg, rgba(15,27,43,.35) 0%, rgba(15,27,43,.55) 45%, var(--mn-navy) 100%); }
+.mh-nstop { position: absolute; left: 18px; right: 18px; top: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+.mh-nstop img { filter: var(--mn-logo-shadow); }
+.mh-nshead { position: absolute; left: 20px; right: 20px; top: 92px; z-index: 2; }
+.mh-nstitle { font-size: 54px; line-height: .9; margin-top: 6px; text-shadow: var(--mn-text-glow); }
+.mh-nsbody { position: absolute; left: 16px; right: 16px; top: 178px; bottom: 44px; z-index: 2; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.mh-nsfoot { position: absolute; left: 20px; right: 20px; bottom: 16px; z-index: 2; display: flex; justify-content: space-between; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-mist); }
+.mh-ngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mh-ngrid[data-n="1"] { grid-template-columns: 1fr; }
+.mh-ngrid[data-tight] { gap: 6px; }
+.mh-npanel { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: 16px; padding: 8px 10px 6px; min-width: 0; }
+.mh-npanelhead { display: flex; align-items: center; gap: 6px; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); padding-bottom: 4px; }
+.mh-nhcols { margin-left: auto; color: var(--mn-mist); letter-spacing: .06em; }
+.mh-nletter { width: 20px; height: 20px; border-radius: 50%; background: var(--mn-sand); color: var(--mn-navy); display: grid; place-items: center; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 12px; letter-spacing: 0; }
+.mh-npair { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); min-width: 0; }
+.mh-nnames { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; line-height: 1.2; color: var(--mn-sand); }
+.mh-nnames > div, .mh-nname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-nname { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; color: var(--mn-sand); }
+.mh-ntrow { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); position: relative; }
+.mh-ntrow[data-q]::before { content: ""; position: absolute; left: -10px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-npos { width: 12px; flex: none; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; color: var(--mn-mist); }
+.mh-ntrow[data-q] .mh-npos { color: var(--mn-teal); }
+.mh-nw { width: 14px; text-align: right; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mh-ntrow > b { width: 22px; text-align: right; font-size: 17px; }
+.mh-nkey { display: flex; align-items: center; gap: 8px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); letter-spacing: .06em; padding: 4px 4px 0; }
+.mh-nkey > i { width: 3px; height: 12px; border-radius: 2px; background: var(--mn-teal); }
+.mh-nround { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); margin-top: 4px; }
+.mh-nmini { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: 12px; padding: 4px 9px; min-width: 0; }
+.mh-nmini[data-big] { border-color: var(--mn-gold); padding: 8px 12px; }
+.mh-nmrow { display: flex; align-items: center; gap: 6px; padding: 3px 0; min-width: 0; }
+.mh-nmrow .mh-nname { font-size: 11px; font-weight: 600; color: var(--mn-mist); }
+.mh-nmini[data-big] .mh-nmrow .mh-nname { font-size: 15px; }
+.mh-nmrow > b { font-size: 15px; color: var(--mn-mist); min-width: 12px; text-align: right; }
+.mh-nmini[data-big] .mh-nmrow > b { font-size: 24px; }
+.mh-nmrow[data-win] .mh-nname, .mh-nmrow[data-win] > b { color: var(--mn-sand); font-weight: 800; }
+.mh-nmrow[data-lose] .mn-avatar { opacity: .5; }
+.mh-nseed { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); flex: none; }
+.mh-nchampline { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin-top: 4px; }
+.mh-nchampline > b { font-size: 24px; color: var(--mn-gold); }
+.mh-nprow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: var(--mn-row-line); }
+.mh-nprow:first-child { border-top: 0; }
+.mh-nprow > b { font-size: 24px; color: var(--mn-peach); }
+.mh-nsub { font-family: var(--mn-font-ui); font-size: 11px; color: var(--mn-mist); }
+/* line-up: face to face over the episode's art */
+.mh-nlufade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.55) 0%, rgba(15,27,43,.82) 30%, rgba(15,27,43,.92) 70%, var(--mn-navy) 100%); }
+.mh-nluhead { position: absolute; left: 20px; right: 20px; top: 70px; display: flex; align-items: center; gap: 10px; z-index: 2; }
+.mh-n2x { padding: 3px 9px; border-radius: 999px; background: var(--mn-gold); color: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; letter-spacing: .1em; }
+.mh-nlu { position: absolute; left: 16px; right: 16px; top: 112px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mh-nside { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.mh-nfaces > .mn-avatar + .mn-avatar { margin-left: -18px; box-shadow: 0 0 0 3px var(--mn-navy); }
+.mh-nside[data-win] .mh-nfaces > .mn-avatar { box-shadow: 0 0 0 3px var(--mn-gold); }
+.mh-nside[data-lose] { opacity: .5; }
+.mh-nsidename { font-size: 30px; line-height: .95; }
+.mh-nvs { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 46px; color: var(--mn-coral); line-height: 1; display: flex; gap: 10px; align-items: center; }
+.mh-nvs > span { color: var(--mn-sand); }
+.mh-nvs > i { font-style: normal; color: var(--mn-mist); }
+.mh-nlufoot { position: absolute; left: 0; right: 0; bottom: 24px; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+/* champions */
+.mh-nchfade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.4) 0%, rgba(15,27,43,.78) 35%, rgba(15,27,43,.95) 75%, var(--mn-navy) 100%); }
+.mh-nchhead { position: absolute; left: 20px; right: 20px; top: 76px; z-index: 2; text-align: center; }
+.mh-nchword { font-size: 66px; line-height: .9; margin-top: 6px; background: linear-gradient(180deg, #FFF4E8 0%, var(--mn-gold) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mh-nchpics { position: absolute; left: 22px; right: 22px; top: 176px; z-index: 2; display: flex; gap: 12px; }
+.mh-nchpic { flex: 1; min-width: 0; text-align: center; }
+.mh-nchphoto { position: relative; width: 100%; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 3px var(--mn-gold); background: var(--mn-navy-2); }
+.mh-nchname { font-size: 28px; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-nchscore { position: absolute; left: 20px; right: 20px; top: 498px; z-index: 2; text-align: center; }
+/* The inherited skin caps EVERY corner at 28px with !important
+   (:not(.rounded-full)...), which leaves a 24px avatar round and turns a
+   118px one into a rounded square. Faces are circles at every size. */
+html:not(#mh) .mn-avatar { border-radius: 50% !important; }
+.mn-avatar .mn-initials { font-size: max(9px, 2.2em) !important; }
+/* a player with no photo is a disc with their initials, not loose letters on the page */
+.mn-avatar .mn-initials { background: rgba(255,244,232,.12); color: var(--mn-sand); }

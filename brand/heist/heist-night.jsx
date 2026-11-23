@@ -25,86 +25,160 @@ function MhSessionHead({ s, height = 250, cut = [80, 100], fade = "session", bac
 }
 
 // ── 07 SESSION DETAIL ─────────────────────────────────────────────────────
+// What the night IS, before which tab you are on: a played night says who won,
+// a live one what is happening, an upcoming one when and how full. Then the
+// four tabs, every row carrying faces, every result saying who won it.
 function MhSession({ D, go, no, canScore }) {
-  const s = D.sessions.find(x => x.no === +no) || D.sessions.find(x => x.state === "live");
+  const s = D.sessions.find(x => x.no === +no) || D.sessions.find(x => x.state === "live") || D.sessions[0];
   const N = (D.nights && D.nights[s.no]) || {};
-  const [tab, setTab] = React.useState("groups");
   const groups = Object.keys(N.groups || {});
-  const [g, setG] = React.useState(groups[0] || "A");
+  const koDrawn = !!(N.knockout && [].concat(N.knockout.qf || [], N.knockout.sf || [], N.knockout.final || []).some(m => m && (m.a || m.b)));
+  const [tab, setTab] = React.useState(s.state === "done" && koDrawn ? "knockout" : groups.length ? "groups" : "teams");
+  const firstOpen = groups.find(g => !(N.groups[g] || {}).done) || groups[0] || "A";
+  const [g, setG] = React.useState(firstOpen);
   const live = s.state === "live";
   const stateLabel = live ? `● Live · ${mhDay(s.date)}` : s.state === "done" ? `Played · ${mhDay(s.date)}` : `${mhDay(s.date)} · ${s.time}`;
+  const hasTeams = (N.teams || []).length > 0;
   return (
     <div className="mh-page">
       <main className="mh-body" data-bare="" style={{ padding: 0 }}>
         <MhSessionHead s={s} back={{ label: "Jobs", onClick: () => go("jobs") }}
-          label={stateLabel} tone={live ? "coral" : "peach"} title={`${s.code} · ${s.title}`} />
-        <div className="mh-col" style={{ padding: "4px 20px 0", gap: 10 }}>
-          <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", "MVP"]]} value={tab} onChange={setTab} />
-          {tab === "groups" && <>
-            {groups.length > 0 && <MhPills label="Group" items={groups} value={g} onChange={setG} />}
-            <MhGroupTable rows={(N.groups[g] || {}).standings || []} played={(N.groups[g] || {}).matches || []} />
-            <MhLabel>Matches{canScore ? " · tap to score" : ""}</MhLabel>
-            {((N.groups[g] || {}).matches || []).map((m, i) => (
-              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
-            ))}
-          </>}
-          {tab === "teams" && <MhTeams N={N} />}
-          {tab === "knockout" && <MhKnockout N={N} />}
-          {tab === "mvp" && <MhMvp N={N} />}
+          label={stateLabel + (s.doublePoints ? " · 2X" : "")} tone={live ? "coral" : "peach"} title={`${s.code} · ${s.title}`} />
+        <div className="mh-col" style={{ padding: "4px 20px 0", gap: 12 }}>
+          <MhNightStatus s={s} N={N} go={go} />
+          <div className="mh-actions">
+            {hasTeams && <button type="button" className="mh-act" onClick={() => go("nightshare", `${s.no}/${N.champion ? "champions" : koDrawn ? "lineup" : "draw"}`)}>
+              <span aria-hidden="true">↗</span> Posts</button>}
+            {s.state === "done" && <button type="button" className="mh-act" onClick={() => go("recap", s.no)}><span aria-hidden="true">★</span> Recap</button>}
+            {canScore && s.sid && <button type="button" className="mh-act" data-org="" onClick={() => go("results", s.no)}><span aria-hidden="true">⚙</span> Organiser</button>}
+          </div>
+          {hasTeams ? <>
+            <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
+            {tab === "groups" && <>
+              {groups.length > 0 && <MhPills label="Group" items={groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x])} value={g} onChange={setG} />}
+              <MhGroupTable rows={(N.groups[g] || {}).standings || []} started={N.started} done={(N.groups[g] || {}).done} />
+              <MhLabel>Group {g} matches{canScore ? " · tap to score" : ""}</MhLabel>
+              {((N.groups[g] || {}).matches || []).map((m, i) => (
+                <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
+              ))}
+            </>}
+            {tab === "teams" && <MhTeams N={N} />}
+            {tab === "knockout" && <MhKnockout N={N} />}
+            {tab === "mvp" && <MhMvp N={N} />}
+          </> : <MhGlass><MhSerif size={15}>{s.state === "soon" ? "The draw is made on the night, once everybody has signed in." : "No teams were drawn for this night."}</MhSerif></MhGlass>}
         </div>
       </main>
       <MhGrain />
     </div>
   );
 }
-function MhGroupTable({ rows, played }) {
-  const started = played.some(m => m.state === "final");
+// the line under the header: who won / what is on / when it is
+function MhNightStatus({ s, N, go }) {
+  if (N.champion) {
+    const C = N.champion;
+    return (
+      <MhGlass accent="gold" style={{ padding: "12px 14px" }}>
+        <div className="mh-champ">
+          <div className="mh-pairfaces">{C.team.players.map(p => <MhAvatar key={p.id} player={p} size={52} ring="gold" />)}</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <MhLabel tone="gold">Champions</MhLabel>
+            <div className="mn-display mh-champname">{C.team.players.map(p => p.first).join(" & ")}</div>
+            <div className="mh-champsub">won the final v {C.beat ? C.beat.players.map(p => p.first).join(" & ") : "—"}</div>
+          </div>
+          <MhDisplay size={30} tone="gold">{C.score.replace("-", "–")}</MhDisplay>
+        </div>
+      </MhGlass>
+    );
+  }
+  if (s.state === "live" && s.progress) {
+    const all = Object.values(N.groups || {}).flatMap(g => g.matches);
+    const on = all.find(m => m.state === "live"), nx = all.find(m => m.state === "next");
+    return (
+      <MhGlass accent="coral" style={{ padding: "12px 14px" }}>
+        <div className="mh-split"><MhLabel tone="coral">● Tonight · in play</MhLabel><MhLabel>{s.progress.played}/{s.progress.total} matches</MhLabel></div>
+        <div className="mh-progress"><div style={{ width: (s.progress.total ? s.progress.played / s.progress.total * 100 : 0) + "%" }} /></div>
+        {(on || nx) && <div className="mh-onnow"><span>{on ? "On court" : "Next"}</span>{(on || nx).a} <i>v</i> {(on || nx).b}</div>}
+      </MhGlass>
+    );
+  }
+  if (s.state === "soon") {
+    const S = s.signups;
+    return (
+      <MhGlass style={{ padding: "12px 14px" }}>
+        <div className="mh-split">
+          <div><MhLabel tone="peach">{mhDay(s.date)} · {s.time}</MhLabel><MhSerif size={14} style={{ marginTop: 4 }}>{MH.venue}</MhSerif></div>
+          {S && <div style={{ textAlign: "right" }}><MhDisplay size={26}>{S.teams}/{S.max}</MhDisplay><MhLabel>teams in</MhLabel></div>}
+        </div>
+      </MhGlass>
+    );
+  }
+  return null;
+}
+function MhGroupTable({ rows, started, done }) {
   return (
-    <MhGlass style={{ padding: "6px 14px" }}>
-      {rows.map((r, i) => (
-        <div key={r.team} className="mh-grow">
-          {/* nothing is marked as qualifying before a ball is hit */}
-          <div className="mn-display" style={{ fontSize: 14, color: started && i < 2 ? "var(--mn-teal)" : "var(--mn-mist)" }}>{i + 1}</div>
-          <div className="mh-gteam">{r.team}</div>
+    <MhGlass style={{ padding: "4px 14px 6px" }}>
+      <div className="mh-grow mh-ghead" aria-hidden="true"><span>#</span><span>Team</span><span>W</span><span>GD</span><span>Pts</span></div>
+      {rows.map(r => (
+        // nothing is marked as qualifying before a ball is hit, and the mark is
+        // the engine's own qualifying set, not "top two"
+        <div key={r.id} className="mh-grow" data-q={started && r.q ? "" : undefined}>
+          <div className="mn-display mh-gpos">{r.pos}</div>
+          <div className="mh-gteamcell">
+            <div className="mh-pairfaces mh-pairfaces-s">{(r.players || []).map(p => <MhAvatar key={p.id} player={p} size={24} />)}</div>
+            <div className="mh-gteam">{r.team}</div>
+          </div>
           <div className="mh-gw">{r.w}</div>
-          <div className="mn-display" style={{ fontSize: 17, textAlign: "right" }}>{r.pts}</div>
+          <div className="mh-gw">{r.gd > 0 ? "+" + r.gd : r.gd}</div>
+          <div className="mn-display mh-gpts">{r.pts}</div>
         </div>
       ))}
+      {started && rows.some(r => r.q) && <div className="mh-qkey"><i /> {done ? "through to the knockout" : "in a qualifying place right now"}</div>}
     </MhGlass>
   );
 }
-function MhMatchCard({ m, onClick }) {
-  const inner = (
-    <div className="mh-split">
-      <div style={{ textAlign: "left", minWidth: 0 }}>
-        <div className="mh-mteam">{m.a}</div>
-        <div className="mh-mteam" style={{ color: "var(--mn-mist)" }}>{m.b}</div>
-      </div>
-      <div style={{ textAlign: "right", flex: "none" }}>
-        <MhDisplay size={22}>{m.score ? m.score.replace("-", "–") : "—"}</MhDisplay>
-        {m.state === "live" ? <MhLabel tone="coral">● Live · Court {m.court}</MhLabel>
-          : m.state === "final" ? <MhLabel>Final</MhLabel> : <MhLabel>Next</MhLabel>}
-      </div>
+// a result says who won it: the winner lit and their games in sand, the loser
+// dimmed; each side carries its own games so nobody reads a score backwards
+function MhMatchRow({ t, name, games, win, lose }) {
+  return (
+    <div className="mh-mrow" data-win={win ? "" : undefined} data-lose={lose ? "" : undefined}>
+      <div className="mh-pairfaces mh-pairfaces-s">{t && t.players.map(p => <MhAvatar key={p.id} player={p} size={24} />)}</div>
+      <div className="mh-mteam">{name || "TBD"}</div>
+      <div className="mn-display mh-mgames">{games == null ? "" : games}</div>
     </div>
   );
+}
+function MhMatchCard({ m, onClick, accent, seeds }) {
+  const inner = (
+    <>
+      <MhMatchRow t={m.ta} name={(seeds && m.sa ? m.sa + " · " : "") + (m.a || "TBD")} games={m.ga} win={m.winner === "a"} lose={m.winner === "b"} />
+      <MhMatchRow t={m.tb} name={(seeds && m.sb ? m.sb + " · " : "") + (m.b || "TBD")} games={m.gb} win={m.winner === "b"} lose={m.winner === "a"} />
+      <div className="mh-mstate">
+        {m.state === "live" ? <MhLabel tone="coral">● Live{m.court ? ` · Court ${m.court}` : ""}</MhLabel>
+          : m.winner ? (seeds ? null : <MhLabel>Final</MhLabel>) : <MhLabel>{onClick ? "Tap to score" : "Next"}</MhLabel>}
+      </div>
+    </>
+  );
   return onClick
-    ? <button type="button" className="mn-glass mh-tap mh-match" onClick={onClick}>{inner}</button>
-    : <div className="mn-glass mh-match">{inner}</div>;
+    ? <button type="button" className="mn-glass mh-tap mh-match" data-accent={accent} onClick={onClick}>{inner}</button>
+    : <div className="mn-glass mh-match" data-accent={accent}>{inner}</div>;
 }
 function MhTeams({ N }) {
   const by = {};
-  (N.teams || []).forEach(t => { (by[t.group] = by[t.group] || []).push(t); });
-  const gs = Object.keys(by);
+  (N.teams || []).forEach(t => { (by[t.group || "—"] = by[t.group || "—"] || []).push(t); });
+  const gs = Object.keys(by).sort();
   if (!gs.length) return <MhGlass><MhSerif size={14}>The draw hasn't been made yet.</MhSerif></MhGlass>;
   return gs.map(g => (
     <div key={g} className="mh-col" style={{ gap: 6 }}>
       <MhLabel tone="peach">Group {g}</MhLabel>
-      <MhGlass style={{ padding: "6px 14px" }}>
+      <MhGlass style={{ padding: "4px 14px" }}>
         {by[g].map(t => (
-          <div key={t.a + t.b} className="mh-trow">
-            <MhAvatar player={{ name: t.a, photo: t.aPhoto }} size={28} />
-            <MhAvatar player={{ name: t.b, photo: t.bPhoto }} size={28} />
-            <div className="mh-gteam" style={{ marginLeft: 4 }}>{t.a} &amp; {t.b}</div>
+          <div key={t.id} className="mh-trow" data-q={N.started && t.q ? "" : undefined}>
+            <div className="mh-pairfaces">{t.players.map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="mh-gteam">{t.players[0].name}</div>
+              <div className="mh-gteam">{t.players[1].name}</div>
+            </div>
+            {N.started && t.pos ? <div className="mh-tstat"><b className="mn-display">{t.pts}</b><span>{t.w}W · #{t.pos}</span></div> : null}
           </div>
         ))}
       </MhGlass>
@@ -115,41 +189,58 @@ const MH_ROUNDS = [["qf", "Quarter-finals"], ["sf", "Semi-finals"], ["final", "F
 function MhKnockout({ N }) {
   const K = N.knockout;
   if (!K) return <MhGlass><MhSerif size={14}>The knockout is drawn once the groups finish.</MhSerif></MhGlass>;
-  return MH_ROUNDS.filter(([k]) => K[k] && [].concat(K[k]).length).map(([k, label]) => (
-    <div key={k} className="mh-col" style={{ gap: 6 }}>
-      <MhLabel tone={k === "final" ? "gold" : "peach"}>{label}</MhLabel>
-      {[].concat(K[k]).map((m, i) => (
-        <div key={i} className="mn-glass mh-match" data-accent={k === "final" ? "gold" : undefined}>
-          <div className="mh-split">
-            <div style={{ minWidth: 0 }}>
-              <div className="mh-mteam" style={{ color: m.winner === "b" ? "var(--mn-mist)" : undefined }}>
-                {m.sa && <span className="mh-seed">{m.sa}</span>}{m.a || "TBD"}</div>
-              <div className="mh-mteam" style={{ color: m.winner === "a" ? "var(--mn-mist)" : m.winner === "b" ? undefined : "var(--mn-mist)" }}>
-                {m.sb && <span className="mh-seed">{m.sb}</span>}{m.b || "TBD"}</div>
-            </div>
-            <MhDisplay size={22}>{m.score ? m.score.replace("-", "–") : "—"}</MhDisplay>
-          </div>
+  return (
+    <>
+      {MH_ROUNDS.filter(([k]) => K[k] && [].concat(K[k]).length).map(([k, label]) => (
+        <div key={k} className="mh-col" style={{ gap: 6 }}>
+          <MhLabel tone={k === "final" ? "gold" : "peach"}>{label}</MhLabel>
+          {[].concat(K[k]).map((m, i) => <MhMatchCard key={i} m={m} seeds accent={k === "final" ? "gold" : undefined} />)}
         </div>
       ))}
-    </div>
-  ));
+      {N.champion && (
+        <MhGlass accent="gold" style={{ textAlign: "center", padding: "16px 14px" }}>
+          <MhLabel tone="gold">Champions</MhLabel>
+          <div className="mh-pairfaces" style={{ justifyContent: "center", margin: "10px 0 8px" }}>
+            {N.champion.team.players.map(p => <MhAvatar key={p.id} player={p} size={72} ring="gold" />)}</div>
+          <div className="mn-display" style={{ fontSize: 26 }}>{N.champion.team.players.map(p => p.first).join(" & ")}</div>
+          <MhSerif size={14} style={{ marginTop: 4 }}>{N.champion.score.replace("-", "–")} in the final · {MH.voucher} OMR voucher each</MhSerif>
+        </MhGlass>
+      )}
+    </>
+  );
 }
+// MVP when the players voted; tonight's points always — the engine's own
+// per-night total, streak bonus excluded (it belongs to a run of nights)
 function MhMvp({ N }) {
   const M = N.mvp || { votes: [] };
   const top = M.votes.length ? Math.max(...M.votes.map(v => v.votes)) : 0;
+  const T = N.started && N.tonight ? N.tonight().slice(0, 12) : [];
   return (
     <div className="mh-col" style={{ gap: 10 }}>
-      <MhLabel>{M.open ? "Voting open · players vote" : "MVP · player vote"}</MhLabel>
-      {M.votes.length === 0 && <MhGlass><MhSerif size={14}>No votes yet.</MhSerif></MhGlass>}
+      {(M.votes.length > 0 || M.open) && <MhLabel>{M.open ? "MVP · voting open" : "MVP · player vote"}</MhLabel>}
       {M.votes.map(v => (
-        <div key={v.name} className="mn-glass mh-match" data-accent={v.votes === top ? "peach" : undefined}>
+        <div key={v.id} className="mn-glass mh-match" data-accent={v.votes === top ? "peach" : undefined}>
           <div className="mh-split">
-            <div className="mh-mteam">{v.name}</div>
+            <div className="mh-mrow" style={{ border: 0, padding: 0, flex: 1 }}><MhAvatar player={v} size={28} /><div className="mh-mteam">{v.name}</div></div>
             <MhDisplay size={20} tone={v.votes === top ? "peach" : undefined}>{v.votes}</MhDisplay>
           </div>
           <div className="mh-vbar"><div className="mn-fill" style={{ width: (top ? v.votes / top * 100 : 0) + "%" }} /></div>
         </div>
       ))}
+      <MhLabel tone="peach">Tonight's points</MhLabel>
+      {T.length ? (
+        <MhGlass style={{ padding: "4px 14px" }}>
+          {T.map((p, i) => (
+            <div key={p.id} className="mh-prow">
+              <div className="mn-display mh-gpos">{i > 0 && T[i - 1].points === p.points ? "" : i + 1}</div>
+              <MhAvatar player={p} size={30} />
+              <div style={{ minWidth: 0, flex: 1 }}><div className="mh-gteam">{p.name}</div>{p.outcome && <div className="mh-psub">{p.outcome}</div>}</div>
+              <div className="mn-display mh-gpts">+{p.points}</div>
+            </div>
+          ))}
+        </MhGlass>
+      ) : <MhGlass><MhSerif size={14}>Points appear once the first result is in.</MhSerif></MhGlass>}
+      {T.length > 0 && <MhSerif size={12}>Per-night points. The streak bonus counts across the season, so it isn't in here.</MhSerif>}
     </div>
   );
 }

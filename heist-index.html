@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "8c0c07ce93d3";
+  var V = "33499f80eff9";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1320,6 +1320,133 @@ html:not(#mh), html:not(#mh) body, html:not(#mh) #root { background: var(--mn-na
 /* and National's own furniture on the page itself — the khanjar tile on body::before
    and the band on body::after — is Vol.9's, not Heist's */
 html:not(#mh) body::before, html:not(#mh) body::after { display: none !important; }
+
+/* ── 07 SESSION, rebuilt: status, actions, faces on every row ─────────── */
+.mh-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mh-act { min-height: 44px; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-glass-bg); color: var(--mn-sand); font-family: var(--mn-font-ui); font-weight: 700; font-size: 13px; cursor: pointer; }
+.mh-act[data-org] { border-color: var(--mn-coral); }
+.mh-act:disabled { opacity: .35; cursor: default; }
+.mh-act:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+.mh-pairfaces { display: flex; flex: none; }
+.mh-pairfaces > .mn-avatar + .mn-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--mn-navy-2); }
+.mh-pairfaces-s > .mn-avatar + .mn-avatar { margin-left: -6px; }
+.mh-champ { display: flex; align-items: center; gap: 12px; }
+.mh-champ .mh-pairfaces > .mn-avatar + .mn-avatar { margin-left: -12px; }
+.mh-champname { font-size: 22px; line-height: 1; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-champsub { font-family: var(--mn-font-ui); font-size: 12px; color: var(--mn-mist); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-progress { height: 6px; border-radius: 3px; background: var(--mn-line-2); margin: 10px 0 8px; overflow: hidden; }
+.mh-progress > div { height: 100%; background: var(--mn-grad-nights); }
+.mh-onnow { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+.mh-onnow > span { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-coral); margin-right: 8px; }
+.mh-onnow > i { color: var(--mn-mist); font-style: normal; margin: 0 4px; }
+/* group table: # · team (faces + names) · W · GD · PTS, qualifiers on a teal bar */
+.mh-grow { grid-template-columns: 16px 1fr 18px 28px 26px; position: relative; }
+.mh-grow[data-q]::before { content: ""; position: absolute; left: -14px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-ghead { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-mist); border-top: 0 !important; padding: 8px 0 4px; }
+.mh-ghead > span:nth-child(n+3) { text-align: right; }
+.mh-grow > .mh-gw { text-align: right; }
+.mh-gpos { font-size: 14px; color: var(--mn-mist); }
+.mh-grow[data-q] .mh-gpos { color: var(--mn-teal); }
+.mh-gpts { font-size: 18px; text-align: right; }
+.mh-gteamcell { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mh-qkey { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); letter-spacing: .06em; }
+.mh-qkey > i { width: 3px; height: 12px; border-radius: 2px; background: var(--mn-teal); }
+/* a match: each side its own row with its own games; the winner lit */
+.mh-mrow { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.mh-mrow .mh-mteam { flex: 1; }
+.mh-mgames { font-size: 22px; min-width: 18px; text-align: right; color: var(--mn-mist); }
+.mh-mrow[data-win] .mh-mteam { font-weight: 800; }
+.mh-mrow[data-win] .mh-mgames { color: var(--mn-sand); }
+.mh-mrow[data-lose] .mh-mteam { color: var(--mn-mist); }
+.mh-mrow[data-lose] .mn-avatar { opacity: .55; }
+.mh-mstate { margin-top: 4px; }
+.mh-trow { gap: 10px; position: relative; }
+.mh-trow[data-q]::before { content: ""; position: absolute; left: -14px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-tstat { text-align: right; flex: none; }
+.mh-tstat > b { display: block; font-size: 20px; }
+.mh-tstat > span { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mh-prow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-top: var(--mn-row-line); }
+.mh-prow:first-child { border-top: 0; }
+.mh-prow .mh-gpos { width: 18px; }
+.mh-psub { font-family: var(--mn-font-ui); font-size: 11px; color: var(--mn-mist); }
+.mh-lupick { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+.mh-luselect { flex: 1; min-width: 0; min-height: 44px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-glass-bg); color: var(--mn-sand); font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; padding: 0 14px; }
+
+/* ── a NIGHT's stories (416x740 frames, exported at 1080x1920) ────────── */
+.mh-nsart { position: absolute; left: 0; right: 0; top: 0; }
+.mh-nsfade { position: absolute; left: 0; right: 0; top: 0; background: linear-gradient(180deg, rgba(15,27,43,.35) 0%, rgba(15,27,43,.55) 45%, var(--mn-navy) 100%); }
+.mh-nstop { position: absolute; left: 18px; right: 18px; top: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+.mh-nstop img { filter: var(--mn-logo-shadow); }
+.mh-nshead { position: absolute; left: 20px; right: 20px; top: 92px; z-index: 2; }
+.mh-nstitle { font-size: 54px; line-height: .9; margin-top: 6px; text-shadow: var(--mn-text-glow); }
+.mh-nsbody { position: absolute; left: 16px; right: 16px; top: 178px; bottom: 44px; z-index: 2; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.mh-nsfoot { position: absolute; left: 20px; right: 20px; bottom: 16px; z-index: 2; display: flex; justify-content: space-between; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-mist); }
+.mh-ngrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mh-ngrid[data-n="1"] { grid-template-columns: 1fr; }
+.mh-ngrid[data-tight] { gap: 6px; }
+.mh-npanel { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: 16px; padding: 8px 10px 6px; min-width: 0; }
+.mh-npanelhead { display: flex; align-items: center; gap: 6px; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); padding-bottom: 4px; }
+.mh-nhcols { margin-left: auto; color: var(--mn-mist); letter-spacing: .06em; }
+.mh-nletter { width: 20px; height: 20px; border-radius: 50%; background: var(--mn-sand); color: var(--mn-navy); display: grid; place-items: center; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 12px; letter-spacing: 0; }
+.mh-npair { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); min-width: 0; }
+.mh-nnames { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; line-height: 1.2; color: var(--mn-sand); }
+.mh-nnames > div, .mh-nname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-nname { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; color: var(--mn-sand); }
+.mh-ntrow { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); position: relative; }
+.mh-ntrow[data-q]::before { content: ""; position: absolute; left: -10px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
+.mh-npos { width: 12px; flex: none; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; color: var(--mn-mist); }
+.mh-ntrow[data-q] .mh-npos { color: var(--mn-teal); }
+.mh-nw { width: 14px; text-align: right; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mh-ntrow > b { width: 22px; text-align: right; font-size: 17px; }
+.mh-nkey { display: flex; align-items: center; gap: 8px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); letter-spacing: .06em; padding: 4px 4px 0; }
+.mh-nkey > i { width: 3px; height: 12px; border-radius: 2px; background: var(--mn-teal); }
+.mh-nround { font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); margin-top: 4px; }
+.mh-nmini { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: 12px; padding: 4px 9px; min-width: 0; }
+.mh-nmini[data-big] { border-color: var(--mn-gold); padding: 8px 12px; }
+.mh-nmrow { display: flex; align-items: center; gap: 6px; padding: 3px 0; min-width: 0; }
+.mh-nmrow .mh-nname { font-size: 11px; font-weight: 600; color: var(--mn-mist); }
+.mh-nmini[data-big] .mh-nmrow .mh-nname { font-size: 15px; }
+.mh-nmrow > b { font-size: 15px; color: var(--mn-mist); min-width: 12px; text-align: right; }
+.mh-nmini[data-big] .mh-nmrow > b { font-size: 24px; }
+.mh-nmrow[data-win] .mh-nname, .mh-nmrow[data-win] > b { color: var(--mn-sand); font-weight: 800; }
+.mh-nmrow[data-lose] .mn-avatar { opacity: .5; }
+.mh-nseed { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); flex: none; }
+.mh-nchampline { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin-top: 4px; }
+.mh-nchampline > b { font-size: 24px; color: var(--mn-gold); }
+.mh-nprow { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-top: var(--mn-row-line); }
+.mh-nprow:first-child { border-top: 0; }
+.mh-nprow > b { font-size: 24px; color: var(--mn-peach); }
+.mh-nsub { font-family: var(--mn-font-ui); font-size: 11px; color: var(--mn-mist); }
+/* line-up: face to face over the episode's art */
+.mh-nlufade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.55) 0%, rgba(15,27,43,.82) 30%, rgba(15,27,43,.92) 70%, var(--mn-navy) 100%); }
+.mh-nluhead { position: absolute; left: 20px; right: 20px; top: 70px; display: flex; align-items: center; gap: 10px; z-index: 2; }
+.mh-n2x { padding: 3px 9px; border-radius: 999px; background: var(--mn-gold); color: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; letter-spacing: .1em; }
+.mh-nlu { position: absolute; left: 16px; right: 16px; top: 112px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.mh-nside { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.mh-nfaces > .mn-avatar + .mn-avatar { margin-left: -18px; box-shadow: 0 0 0 3px var(--mn-navy); }
+.mh-nside[data-win] .mh-nfaces > .mn-avatar { box-shadow: 0 0 0 3px var(--mn-gold); }
+.mh-nside[data-lose] { opacity: .5; }
+.mh-nsidename { font-size: 30px; line-height: .95; }
+.mh-nvs { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 46px; color: var(--mn-coral); line-height: 1; display: flex; gap: 10px; align-items: center; }
+.mh-nvs > span { color: var(--mn-sand); }
+.mh-nvs > i { font-style: normal; color: var(--mn-mist); }
+.mh-nlufoot { position: absolute; left: 0; right: 0; bottom: 24px; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+/* champions */
+.mh-nchfade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.4) 0%, rgba(15,27,43,.78) 35%, rgba(15,27,43,.95) 75%, var(--mn-navy) 100%); }
+.mh-nchhead { position: absolute; left: 20px; right: 20px; top: 76px; z-index: 2; text-align: center; }
+.mh-nchword { font-size: 66px; line-height: .9; margin-top: 6px; background: linear-gradient(180deg, #FFF4E8 0%, var(--mn-gold) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.mh-nchpics { position: absolute; left: 22px; right: 22px; top: 176px; z-index: 2; display: flex; gap: 12px; }
+.mh-nchpic { flex: 1; min-width: 0; text-align: center; }
+.mh-nchphoto { position: relative; width: 100%; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; box-shadow: 0 0 0 3px var(--mn-gold); background: var(--mn-navy-2); }
+.mh-nchname { font-size: 28px; margin-top: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-nchscore { position: absolute; left: 20px; right: 20px; top: 498px; z-index: 2; text-align: center; }
+/* The inherited skin caps EVERY corner at 28px with !important
+   (:not(.rounded-full)...), which leaves a 24px avatar round and turns a
+   118px one into a rounded square. Faces are circles at every size. */
+html:not(#mh) .mn-avatar { border-radius: 50% !important; }
+.mn-avatar .mn-initials { font-size: max(9px, 2.2em) !important; }
+/* a player with no photo is a disc with their initials, not loose letters on the page */
+.mn-avatar .mn-initials { background: rgba(255,244,232,.12); color: var(--mn-sand); }
 
 </style>
 <style id="heist-classic">
@@ -8219,86 +8346,160 @@ function MhSessionHead({ s, height = 250, cut = [80, 100], fade = "session", bac
 }
 
 // ── 07 SESSION DETAIL ─────────────────────────────────────────────────────
+// What the night IS, before which tab you are on: a played night says who won,
+// a live one what is happening, an upcoming one when and how full. Then the
+// four tabs, every row carrying faces, every result saying who won it.
 function MhSession({ D, go, no, canScore }) {
-  const s = D.sessions.find(x => x.no === +no) || D.sessions.find(x => x.state === "live");
+  const s = D.sessions.find(x => x.no === +no) || D.sessions.find(x => x.state === "live") || D.sessions[0];
   const N = (D.nights && D.nights[s.no]) || {};
-  const [tab, setTab] = React.useState("groups");
   const groups = Object.keys(N.groups || {});
-  const [g, setG] = React.useState(groups[0] || "A");
+  const koDrawn = !!(N.knockout && [].concat(N.knockout.qf || [], N.knockout.sf || [], N.knockout.final || []).some(m => m && (m.a || m.b)));
+  const [tab, setTab] = React.useState(s.state === "done" && koDrawn ? "knockout" : groups.length ? "groups" : "teams");
+  const firstOpen = groups.find(g => !(N.groups[g] || {}).done) || groups[0] || "A";
+  const [g, setG] = React.useState(firstOpen);
   const live = s.state === "live";
   const stateLabel = live ? `● Live · ${mhDay(s.date)}` : s.state === "done" ? `Played · ${mhDay(s.date)}` : `${mhDay(s.date)} · ${s.time}`;
+  const hasTeams = (N.teams || []).length > 0;
   return (
     <div className="mh-page">
       <main className="mh-body" data-bare="" style={{ padding: 0 }}>
         <MhSessionHead s={s} back={{ label: "Jobs", onClick: () => go("jobs") }}
-          label={stateLabel} tone={live ? "coral" : "peach"} title={`${s.code} · ${s.title}`} />
-        <div className="mh-col" style={{ padding: "4px 20px 0", gap: 10 }}>
-          <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", "MVP"]]} value={tab} onChange={setTab} />
-          {tab === "groups" && <>
-            {groups.length > 0 && <MhPills label="Group" items={groups} value={g} onChange={setG} />}
-            <MhGroupTable rows={(N.groups[g] || {}).standings || []} played={(N.groups[g] || {}).matches || []} />
-            <MhLabel>Matches{canScore ? " · tap to score" : ""}</MhLabel>
-            {((N.groups[g] || {}).matches || []).map((m, i) => (
-              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
-            ))}
-          </>}
-          {tab === "teams" && <MhTeams N={N} />}
-          {tab === "knockout" && <MhKnockout N={N} />}
-          {tab === "mvp" && <MhMvp N={N} />}
+          label={stateLabel + (s.doublePoints ? " · 2X" : "")} tone={live ? "coral" : "peach"} title={`${s.code} · ${s.title}`} />
+        <div className="mh-col" style={{ padding: "4px 20px 0", gap: 12 }}>
+          <MhNightStatus s={s} N={N} go={go} />
+          <div className="mh-actions">
+            {hasTeams && <button type="button" className="mh-act" onClick={() => go("nightshare", `${s.no}/${N.champion ? "champions" : koDrawn ? "lineup" : "draw"}`)}>
+              <span aria-hidden="true">↗</span> Posts</button>}
+            {s.state === "done" && <button type="button" className="mh-act" onClick={() => go("recap", s.no)}><span aria-hidden="true">★</span> Recap</button>}
+            {canScore && s.sid && <button type="button" className="mh-act" data-org="" onClick={() => go("results", s.no)}><span aria-hidden="true">⚙</span> Organiser</button>}
+          </div>
+          {hasTeams ? <>
+            <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
+            {tab === "groups" && <>
+              {groups.length > 0 && <MhPills label="Group" items={groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x])} value={g} onChange={setG} />}
+              <MhGroupTable rows={(N.groups[g] || {}).standings || []} started={N.started} done={(N.groups[g] || {}).done} />
+              <MhLabel>Group {g} matches{canScore ? " · tap to score" : ""}</MhLabel>
+              {((N.groups[g] || {}).matches || []).map((m, i) => (
+                <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
+              ))}
+            </>}
+            {tab === "teams" && <MhTeams N={N} />}
+            {tab === "knockout" && <MhKnockout N={N} />}
+            {tab === "mvp" && <MhMvp N={N} />}
+          </> : <MhGlass><MhSerif size={15}>{s.state === "soon" ? "The draw is made on the night, once everybody has signed in." : "No teams were drawn for this night."}</MhSerif></MhGlass>}
         </div>
       </main>
       <MhGrain />
     </div>
   );
 }
-function MhGroupTable({ rows, played }) {
-  const started = played.some(m => m.state === "final");
+// the line under the header: who won / what is on / when it is
+function MhNightStatus({ s, N, go }) {
+  if (N.champion) {
+    const C = N.champion;
+    return (
+      <MhGlass accent="gold" style={{ padding: "12px 14px" }}>
+        <div className="mh-champ">
+          <div className="mh-pairfaces">{C.team.players.map(p => <MhAvatar key={p.id} player={p} size={52} ring="gold" />)}</div>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <MhLabel tone="gold">Champions</MhLabel>
+            <div className="mn-display mh-champname">{C.team.players.map(p => p.first).join(" & ")}</div>
+            <div className="mh-champsub">won the final v {C.beat ? C.beat.players.map(p => p.first).join(" & ") : "—"}</div>
+          </div>
+          <MhDisplay size={30} tone="gold">{C.score.replace("-", "–")}</MhDisplay>
+        </div>
+      </MhGlass>
+    );
+  }
+  if (s.state === "live" && s.progress) {
+    const all = Object.values(N.groups || {}).flatMap(g => g.matches);
+    const on = all.find(m => m.state === "live"), nx = all.find(m => m.state === "next");
+    return (
+      <MhGlass accent="coral" style={{ padding: "12px 14px" }}>
+        <div className="mh-split"><MhLabel tone="coral">● Tonight · in play</MhLabel><MhLabel>{s.progress.played}/{s.progress.total} matches</MhLabel></div>
+        <div className="mh-progress"><div style={{ width: (s.progress.total ? s.progress.played / s.progress.total * 100 : 0) + "%" }} /></div>
+        {(on || nx) && <div className="mh-onnow"><span>{on ? "On court" : "Next"}</span>{(on || nx).a} <i>v</i> {(on || nx).b}</div>}
+      </MhGlass>
+    );
+  }
+  if (s.state === "soon") {
+    const S = s.signups;
+    return (
+      <MhGlass style={{ padding: "12px 14px" }}>
+        <div className="mh-split">
+          <div><MhLabel tone="peach">{mhDay(s.date)} · {s.time}</MhLabel><MhSerif size={14} style={{ marginTop: 4 }}>{MH.venue}</MhSerif></div>
+          {S && <div style={{ textAlign: "right" }}><MhDisplay size={26}>{S.teams}/{S.max}</MhDisplay><MhLabel>teams in</MhLabel></div>}
+        </div>
+      </MhGlass>
+    );
+  }
+  return null;
+}
+function MhGroupTable({ rows, started, done }) {
   return (
-    <MhGlass style={{ padding: "6px 14px" }}>
-      {rows.map((r, i) => (
-        <div key={r.team} className="mh-grow">
-          {/* nothing is marked as qualifying before a ball is hit */}
-          <div className="mn-display" style={{ fontSize: 14, color: started && i < 2 ? "var(--mn-teal)" : "var(--mn-mist)" }}>{i + 1}</div>
-          <div className="mh-gteam">{r.team}</div>
+    <MhGlass style={{ padding: "4px 14px 6px" }}>
+      <div className="mh-grow mh-ghead" aria-hidden="true"><span>#</span><span>Team</span><span>W</span><span>GD</span><span>Pts</span></div>
+      {rows.map(r => (
+        // nothing is marked as qualifying before a ball is hit, and the mark is
+        // the engine's own qualifying set, not "top two"
+        <div key={r.id} className="mh-grow" data-q={started && r.q ? "" : undefined}>
+          <div className="mn-display mh-gpos">{r.pos}</div>
+          <div className="mh-gteamcell">
+            <div className="mh-pairfaces mh-pairfaces-s">{(r.players || []).map(p => <MhAvatar key={p.id} player={p} size={24} />)}</div>
+            <div className="mh-gteam">{r.team}</div>
+          </div>
           <div className="mh-gw">{r.w}</div>
-          <div className="mn-display" style={{ fontSize: 17, textAlign: "right" }}>{r.pts}</div>
+          <div className="mh-gw">{r.gd > 0 ? "+" + r.gd : r.gd}</div>
+          <div className="mn-display mh-gpts">{r.pts}</div>
         </div>
       ))}
+      {started && rows.some(r => r.q) && <div className="mh-qkey"><i /> {done ? "through to the knockout" : "in a qualifying place right now"}</div>}
     </MhGlass>
   );
 }
-function MhMatchCard({ m, onClick }) {
-  const inner = (
-    <div className="mh-split">
-      <div style={{ textAlign: "left", minWidth: 0 }}>
-        <div className="mh-mteam">{m.a}</div>
-        <div className="mh-mteam" style={{ color: "var(--mn-mist)" }}>{m.b}</div>
-      </div>
-      <div style={{ textAlign: "right", flex: "none" }}>
-        <MhDisplay size={22}>{m.score ? m.score.replace("-", "–") : "—"}</MhDisplay>
-        {m.state === "live" ? <MhLabel tone="coral">● Live · Court {m.court}</MhLabel>
-          : m.state === "final" ? <MhLabel>Final</MhLabel> : <MhLabel>Next</MhLabel>}
-      </div>
+// a result says who won it: the winner lit and their games in sand, the loser
+// dimmed; each side carries its own games so nobody reads a score backwards
+function MhMatchRow({ t, name, games, win, lose }) {
+  return (
+    <div className="mh-mrow" data-win={win ? "" : undefined} data-lose={lose ? "" : undefined}>
+      <div className="mh-pairfaces mh-pairfaces-s">{t && t.players.map(p => <MhAvatar key={p.id} player={p} size={24} />)}</div>
+      <div className="mh-mteam">{name || "TBD"}</div>
+      <div className="mn-display mh-mgames">{games == null ? "" : games}</div>
     </div>
   );
+}
+function MhMatchCard({ m, onClick, accent, seeds }) {
+  const inner = (
+    <>
+      <MhMatchRow t={m.ta} name={(seeds && m.sa ? m.sa + " · " : "") + (m.a || "TBD")} games={m.ga} win={m.winner === "a"} lose={m.winner === "b"} />
+      <MhMatchRow t={m.tb} name={(seeds && m.sb ? m.sb + " · " : "") + (m.b || "TBD")} games={m.gb} win={m.winner === "b"} lose={m.winner === "a"} />
+      <div className="mh-mstate">
+        {m.state === "live" ? <MhLabel tone="coral">● Live{m.court ? ` · Court ${m.court}` : ""}</MhLabel>
+          : m.winner ? (seeds ? null : <MhLabel>Final</MhLabel>) : <MhLabel>{onClick ? "Tap to score" : "Next"}</MhLabel>}
+      </div>
+    </>
+  );
   return onClick
-    ? <button type="button" className="mn-glass mh-tap mh-match" onClick={onClick}>{inner}</button>
-    : <div className="mn-glass mh-match">{inner}</div>;
+    ? <button type="button" className="mn-glass mh-tap mh-match" data-accent={accent} onClick={onClick}>{inner}</button>
+    : <div className="mn-glass mh-match" data-accent={accent}>{inner}</div>;
 }
 function MhTeams({ N }) {
   const by = {};
-  (N.teams || []).forEach(t => { (by[t.group] = by[t.group] || []).push(t); });
-  const gs = Object.keys(by);
+  (N.teams || []).forEach(t => { (by[t.group || "—"] = by[t.group || "—"] || []).push(t); });
+  const gs = Object.keys(by).sort();
   if (!gs.length) return <MhGlass><MhSerif size={14}>The draw hasn't been made yet.</MhSerif></MhGlass>;
   return gs.map(g => (
     <div key={g} className="mh-col" style={{ gap: 6 }}>
       <MhLabel tone="peach">Group {g}</MhLabel>
-      <MhGlass style={{ padding: "6px 14px" }}>
+      <MhGlass style={{ padding: "4px 14px" }}>
         {by[g].map(t => (
-          <div key={t.a + t.b} className="mh-trow">
-            <MhAvatar player={{ name: t.a, photo: t.aPhoto }} size={28} />
-            <MhAvatar player={{ name: t.b, photo: t.bPhoto }} size={28} />
-            <div className="mh-gteam" style={{ marginLeft: 4 }}>{t.a} &amp; {t.b}</div>
+          <div key={t.id} className="mh-trow" data-q={N.started && t.q ? "" : undefined}>
+            <div className="mh-pairfaces">{t.players.map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="mh-gteam">{t.players[0].name}</div>
+              <div className="mh-gteam">{t.players[1].name}</div>
+            </div>
+            {N.started && t.pos ? <div className="mh-tstat"><b className="mn-display">{t.pts}</b><span>{t.w}W · #{t.pos}</span></div> : null}
           </div>
         ))}
       </MhGlass>
@@ -8309,41 +8510,58 @@ const MH_ROUNDS = [["qf", "Quarter-finals"], ["sf", "Semi-finals"], ["final", "F
 function MhKnockout({ N }) {
   const K = N.knockout;
   if (!K) return <MhGlass><MhSerif size={14}>The knockout is drawn once the groups finish.</MhSerif></MhGlass>;
-  return MH_ROUNDS.filter(([k]) => K[k] && [].concat(K[k]).length).map(([k, label]) => (
-    <div key={k} className="mh-col" style={{ gap: 6 }}>
-      <MhLabel tone={k === "final" ? "gold" : "peach"}>{label}</MhLabel>
-      {[].concat(K[k]).map((m, i) => (
-        <div key={i} className="mn-glass mh-match" data-accent={k === "final" ? "gold" : undefined}>
-          <div className="mh-split">
-            <div style={{ minWidth: 0 }}>
-              <div className="mh-mteam" style={{ color: m.winner === "b" ? "var(--mn-mist)" : undefined }}>
-                {m.sa && <span className="mh-seed">{m.sa}</span>}{m.a || "TBD"}</div>
-              <div className="mh-mteam" style={{ color: m.winner === "a" ? "var(--mn-mist)" : m.winner === "b" ? undefined : "var(--mn-mist)" }}>
-                {m.sb && <span className="mh-seed">{m.sb}</span>}{m.b || "TBD"}</div>
-            </div>
-            <MhDisplay size={22}>{m.score ? m.score.replace("-", "–") : "—"}</MhDisplay>
-          </div>
+  return (
+    <>
+      {MH_ROUNDS.filter(([k]) => K[k] && [].concat(K[k]).length).map(([k, label]) => (
+        <div key={k} className="mh-col" style={{ gap: 6 }}>
+          <MhLabel tone={k === "final" ? "gold" : "peach"}>{label}</MhLabel>
+          {[].concat(K[k]).map((m, i) => <MhMatchCard key={i} m={m} seeds accent={k === "final" ? "gold" : undefined} />)}
         </div>
       ))}
-    </div>
-  ));
+      {N.champion && (
+        <MhGlass accent="gold" style={{ textAlign: "center", padding: "16px 14px" }}>
+          <MhLabel tone="gold">Champions</MhLabel>
+          <div className="mh-pairfaces" style={{ justifyContent: "center", margin: "10px 0 8px" }}>
+            {N.champion.team.players.map(p => <MhAvatar key={p.id} player={p} size={72} ring="gold" />)}</div>
+          <div className="mn-display" style={{ fontSize: 26 }}>{N.champion.team.players.map(p => p.first).join(" & ")}</div>
+          <MhSerif size={14} style={{ marginTop: 4 }}>{N.champion.score.replace("-", "–")} in the final · {MH.voucher} OMR voucher each</MhSerif>
+        </MhGlass>
+      )}
+    </>
+  );
 }
+// MVP when the players voted; tonight's points always — the engine's own
+// per-night total, streak bonus excluded (it belongs to a run of nights)
 function MhMvp({ N }) {
   const M = N.mvp || { votes: [] };
   const top = M.votes.length ? Math.max(...M.votes.map(v => v.votes)) : 0;
+  const T = N.started && N.tonight ? N.tonight().slice(0, 12) : [];
   return (
     <div className="mh-col" style={{ gap: 10 }}>
-      <MhLabel>{M.open ? "Voting open · players vote" : "MVP · player vote"}</MhLabel>
-      {M.votes.length === 0 && <MhGlass><MhSerif size={14}>No votes yet.</MhSerif></MhGlass>}
+      {(M.votes.length > 0 || M.open) && <MhLabel>{M.open ? "MVP · voting open" : "MVP · player vote"}</MhLabel>}
       {M.votes.map(v => (
-        <div key={v.name} className="mn-glass mh-match" data-accent={v.votes === top ? "peach" : undefined}>
+        <div key={v.id} className="mn-glass mh-match" data-accent={v.votes === top ? "peach" : undefined}>
           <div className="mh-split">
-            <div className="mh-mteam">{v.name}</div>
+            <div className="mh-mrow" style={{ border: 0, padding: 0, flex: 1 }}><MhAvatar player={v} size={28} /><div className="mh-mteam">{v.name}</div></div>
             <MhDisplay size={20} tone={v.votes === top ? "peach" : undefined}>{v.votes}</MhDisplay>
           </div>
           <div className="mh-vbar"><div className="mn-fill" style={{ width: (top ? v.votes / top * 100 : 0) + "%" }} /></div>
         </div>
       ))}
+      <MhLabel tone="peach">Tonight's points</MhLabel>
+      {T.length ? (
+        <MhGlass style={{ padding: "4px 14px" }}>
+          {T.map((p, i) => (
+            <div key={p.id} className="mh-prow">
+              <div className="mn-display mh-gpos">{i > 0 && T[i - 1].points === p.points ? "" : i + 1}</div>
+              <MhAvatar player={p} size={30} />
+              <div style={{ minWidth: 0, flex: 1 }}><div className="mh-gteam">{p.name}</div>{p.outcome && <div className="mh-psub">{p.outcome}</div>}</div>
+              <div className="mn-display mh-gpts">+{p.points}</div>
+            </div>
+          ))}
+        </MhGlass>
+      ) : <MhGlass><MhSerif size={14}>Points appear once the first result is in.</MhSerif></MhGlass>}
+      {T.length > 0 && <MhSerif size={12}>Per-night points. The streak bonus counts across the season, so it isn't in here.</MhSerif>}
     </div>
   );
 }
@@ -9044,6 +9262,299 @@ function MhShareSheet({ D, go, what = "card", id }) {
   );
 }
 
+// MUSCAT HEIST · Vol.10 — a NIGHT's posts: line-up, the draw, group tables,
+// the bracket, champions and tonight's points, as 1080x1920 stories.
+//
+// These replace the inherited canvas painters behind POSTS and LINE-UP, which
+// were Vol.9's compositions re-coloured. They are DOM, built from the same
+// glass, display type and faces as the screens, and they go out through the
+// same export as the campaign poster (mhExportStory): the frame on screen is
+// the file that is posted. Every name and number is the night data the
+// session screen shows — the engine's standings, its qualifying set, its
+// per-night points — so a post cannot disagree with the app.
+
+const MH_NIGHT_KINDS = [["lineup", "Line-up"], ["draw", "The draw"], ["tables", "Tables"],
+  ["bracket", "Bracket"], ["champions", "Champions"], ["points", "Tonight"]];
+const MH_ROUND_NAME = { qf: "Quarter-final", sf: "Semi-final", final: "The final" };
+
+// the chrome every night story shares: art at the top fading to navy, the club
+// mark and the episode, a kicker and a headline, the venue line at the foot
+function MhNightFrame({ D, s, kicker, title, art = 300, children, label }) {
+  return (
+    <MhStoryFrame label={label || `${MH.name} · ${s.code} · ${title}`}>
+      <div className="mh-nsart" style={{ height: art }}><MhArt src={s.art} pos={s.artPos || "center 30%"} /></div>
+      <div className="mh-nsfade" style={{ height: art }} aria-hidden="true" />
+      <div className="mh-nstop">
+        <img src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ height: 24 }} />
+        <span className="mn-label" style={{ color: "var(--mn-sand)" }}>{MH.name} · {s.code}</span>
+      </div>
+      <div className="mh-nshead">
+        <div className="mn-label" style={{ color: "var(--mn-peach)" }}>{kicker}</div>
+        <div className="mn-display mh-nstitle">{title}</div>
+      </div>
+      <div className="mh-nsbody">{children}</div>
+      <div className="mh-nsfoot">
+        <span>{mhDay(s.date)} · {MH.venue}</span>
+        <span>{(MH.stories || {}).url || MH.host}</span>
+      </div>
+    </MhStoryFrame>
+  );
+}
+const mhPairName = t => t ? t.players.map(p => p.first).join(" & ") : "TBD";
+function MhNPair({ t, size = 22, stacked }) {
+  return (
+    <div className="mh-npair">
+      <div className="mh-pairfaces mh-pairfaces-s">{t && t.players.map(p => <MhAvatar key={p.id} player={p} size={size} />)}</div>
+      {stacked && t
+        ? <div className="mh-nnames"><div>{t.players[0].first}</div><div>{t.players[1].first}</div></div>
+        : <div className="mh-nname">{mhPairName(t)}</div>}
+    </div>
+  );
+}
+
+// ── THE DRAW ──────────────────────────────────────────────────────────────
+function MhNightDraw({ D, s, N }) {
+  const gs = Object.keys(N.groups || {});
+  return (
+    <MhNightFrame D={D} s={s} kicker={`${s.title} · ${(N.teams || []).length} teams`} title="The draw">
+      <div className="mh-ngrid" data-n={gs.length}>
+        {gs.map(g => (
+          <div key={g} className="mh-npanel">
+            <div className="mh-npanelhead"><span className="mh-nletter">{g}</span>Group {g}</div>
+            {N.groups[g].standings.slice().sort((a, b) => a.team.localeCompare(b.team)).map(r => <MhNPair key={r.id} t={r} stacked />)}
+          </div>
+        ))}
+      </div>
+    </MhNightFrame>
+  );
+}
+
+// ── GROUP TABLES ──────────────────────────────────────────────────────────
+function MhNightTables({ D, s, N }) {
+  const gs = Object.keys(N.groups || {});
+  const done = gs.every(g => N.groups[g].done);
+  return (
+    <MhNightFrame D={D} s={s} kicker={done ? "Groups complete" : "Group stage · live"} title="Group tables">
+      <div className="mh-ngrid" data-n={gs.length}>
+        {gs.map(g => (
+          <div key={g} className="mh-npanel">
+            <div className="mh-npanelhead"><span className="mh-nletter">{g}</span>Group {g}<span className="mh-nhcols">W&nbsp;&nbsp;Pts</span></div>
+            {N.groups[g].standings.map(r => (
+              <div key={r.id} className="mh-ntrow" data-q={N.started && r.q ? "" : undefined}>
+                <span className="mh-npos">{r.pos}</span>
+                <div className="mh-nnames"><div>{r.players[0].first}</div><div>{r.players[1].first}</div></div>
+                <span className="mh-nw">{r.w}</span><b className="mn-display">{r.pts}</b>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      {N.started && <div className="mh-nkey"><i /> {done ? "through to the knockout" : "in a qualifying place right now"}</div>}
+    </MhNightFrame>
+  );
+}
+
+// ── THE BRACKET ───────────────────────────────────────────────────────────
+function MhNMini({ m, big }) {
+  const row = (t, sd, g, win, lose) => (
+    <div className="mh-nmrow" data-win={win ? "" : undefined} data-lose={lose ? "" : undefined}>
+      {big && <div className="mh-pairfaces mh-pairfaces-s">{t && t.players.map(p => <MhAvatar key={p.id} player={p} size={26} />)}</div>}
+      {sd && <span className="mh-nseed">{sd}</span>}
+      <span className="mh-nname">{mhPairName(t)}</span>
+      <b className="mn-display">{g == null ? "" : g}</b>
+    </div>
+  );
+  return (
+    <div className="mh-nmini" data-big={big ? "" : undefined}>
+      {row(m.ta, m.sa, m.ga, m.winner === "a", m.winner === "b")}
+      {row(m.tb, m.sb, m.gb, m.winner === "b", m.winner === "a")}
+    </div>
+  );
+}
+function MhNightBracket({ D, s, N }) {
+  const K = N.knockout || {};
+  return (
+    <MhNightFrame D={D} s={s} kicker={N.champion ? "Knockout · decided" : "Knockout"} title="The bracket" art={260}>
+      {(K.qf || []).length > 0 && <><div className="mh-nround">Quarter-finals</div>
+        <div className="mh-ngrid" data-n="4" data-tight="">{K.qf.map((m, i) => <MhNMini key={i} m={m} />)}</div></>}
+      {(K.sf || []).length > 0 && <><div className="mh-nround">Semi-finals</div>
+        <div className="mh-ngrid" data-n="2" data-tight="">{K.sf.map((m, i) => <MhNMini key={i} m={m} />)}</div></>}
+      {K.final && <><div className="mh-nround" style={{ color: "var(--mn-gold)" }}>The final</div><MhNMini m={K.final} big /></>}
+      {N.champion && (
+        <div className="mh-nchampline">
+          <span className="mn-label" style={{ color: "var(--mn-gold)" }}>Champions</span>
+          <b className="mn-display">{mhPairName(N.champion.team)}</b>
+        </div>
+      )}
+    </MhNightFrame>
+  );
+}
+
+// ── LINE-UP: one match, face to face ─────────────────────────────────────
+function MhNightLineup({ D, s, m }) {
+  if (!m) return null;
+  const decided = !!m.winner;
+  const side = (t, sd, k) => (
+    <div className="mh-nside" data-win={m.winner === k ? "" : undefined} data-lose={decided && m.winner !== k ? "" : undefined}>
+      <div className="mh-pairfaces mh-nfaces">{t && t.players.map(p => <MhAvatar key={p.id} player={p} size={118} ring={m.winner === k ? "gold" : undefined} />)}</div>
+      <div className="mn-display mh-nsidename">{t ? t.players[0].first : "TBD"}<br />{t ? t.players[1].first : ""}</div>
+      {sd && <div className="mn-label" style={{ color: "var(--mn-mist)" }}>{sd}</div>}
+    </div>
+  );
+  const label = m.round ? `${MH_ROUND_NAME[m.round]}${m.round !== "final" ? " " + m.n : ""}` : `Group ${m.group} · match ${m.n}`;
+  return (
+    <MhStoryFrame label={`${MH.name} line-up: ${mhPairName(m.ta)} v ${mhPairName(m.tb)}`}>
+      <div style={{ position: "absolute", inset: 0 }}><MhArt src={s.art} pos={s.artPos || "center 30%"} /></div>
+      <div className="mh-nlufade" aria-hidden="true" />
+      <div className="mh-nstop">
+        <img src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ height: 24 }} />
+        <span className="mn-label" style={{ color: "var(--mn-sand)" }}>{s.code} · {s.title}</span>
+      </div>
+      <div className="mh-nluhead">
+        <MhSceneTag>{label}</MhSceneTag>
+        {s.doublePoints && <span className="mh-n2x">2X</span>}
+      </div>
+      <div className="mh-nlu">
+        {side(m.ta, m.sa, "a")}
+        <div className="mh-nvs">{decided ? <><span>{m.ga}</span><i>–</i><span>{m.gb}</span></> : "VS"}</div>
+        {side(m.tb, m.sb, "b")}
+      </div>
+      <div className="mh-nlufoot">
+        <MhTitleLockup size={64} center />
+        <div className="mn-label" style={{ color: "var(--mn-sand)", marginTop: 6, textAlign: "center" }}>
+          {decided ? (m.round === "final" ? "Champions crowned" : "Score settled") : `${mhDay(s.date)} · ${s.time} · ${MH.venue}`}</div>
+      </div>
+    </MhStoryFrame>
+  );
+}
+
+// ── CHAMPIONS ────────────────────────────────────────────────────────────
+function MhNightChampions({ D, s, N }) {
+  const C = N.champion; if (!C) return null;
+  const T = N.tonight ? N.tonight() : [];
+  const ptsOf = id => (T.find(p => p.id === id) || {}).points;
+  return (
+    <MhStoryFrame label={`${MH.name} champions: ${mhPairName(C.team)}`}>
+      <div style={{ position: "absolute", inset: 0 }}><MhArt src={s.art} pos={s.artPos || "center 30%"} /></div>
+      <div className="mh-nchfade" aria-hidden="true" />
+      <div className="mh-nstop">
+        <img src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ height: 24 }} />
+        <span className="mn-label" style={{ color: "var(--mn-sand)" }}>{s.code} · {s.title}</span>
+      </div>
+      <div className="mh-nchhead">
+        <div className="mn-label" style={{ color: "var(--mn-gold)" }}>{mhDay(s.date)} · {MH.name}</div>
+        <div className="mn-display mh-nchword">Champions</div>
+      </div>
+      <div className="mh-nchpics">
+        {C.team.players.map(p => (
+          <div key={p.id} className="mh-nchpic">
+            <div className="mh-nchphoto"><MhArt src={p.photo} name={p.name} pos="center 22%" /></div>
+            <div className="mn-display mh-nchname">{p.first}</div>
+            {ptsOf(p.id) != null && <div className="mn-label" style={{ color: "var(--mn-peach)" }}>+{ptsOf(p.id)} pts tonight</div>}
+          </div>
+        ))}
+      </div>
+      <div className="mh-nchscore">
+        <div className="mn-display" style={{ fontSize: 58, color: "var(--mn-gold)" }}>{C.score.replace("-", "–")}</div>
+        <div className="mn-serif" style={{ fontSize: 16, color: "var(--mn-sand)" }}>in the final against {mhPairName(C.beat)}</div>
+        <div className="mn-label" style={{ color: "var(--mn-sand)", marginTop: 10 }}>{MH.voucher} OMR voucher each</div>
+      </div>
+      <div className="mh-nsfoot"><span>{MH.venue}</span><span>{(MH.stories || {}).url || MH.host}</span></div>
+    </MhStoryFrame>
+  );
+}
+
+// ── TONIGHT'S POINTS ─────────────────────────────────────────────────────
+function MhNightPoints({ D, s, N }) {
+  const T = (N.tonight ? N.tonight() : []).slice(0, 8);
+  return (
+    <MhNightFrame D={D} s={s} kicker={`Points earned · ${s.doublePoints ? "2X night" : "tonight"}`} title="Tonight's take" art={240}>
+      <div className="mh-npanel" style={{ padding: "4px 14px" }}>
+        {T.map((p, i) => (
+          <div key={p.id} className="mh-nprow">
+            <span className="mh-npos" style={{ fontSize: 17 }}>{i > 0 && T[i - 1].points === p.points ? "" : i + 1}</span>
+            <MhAvatar player={p} size={40} ring={i === 0 ? "gold" : undefined} />
+            <div style={{ minWidth: 0, flex: 1 }}><div className="mh-nname" style={{ fontSize: 15 }}>{p.name}</div>{p.outcome && <div className="mh-nsub">{p.outcome}</div>}</div>
+            <b className="mn-display">+{p.points}</b>
+          </div>
+        ))}
+      </div>
+      <div className="mh-nkey" style={{ justifyContent: "center" }}>streak bonus not included · it counts across the season</div>
+    </MhNightFrame>
+  );
+}
+
+// ── the sheet ────────────────────────────────────────────────────────────
+// What can be posted is what the night has: a draw once there are teams, the
+// tables and points once a ball is hit, the bracket once it is drawn, the
+// champions once the final is won. Line-ups are the knockout's matches, or —
+// before it — the group matches still to play.
+function mhLineups(N) {
+  const K = N.knockout;
+  const ko = K ? [...(K.qf || []), ...(K.sf || []), ...(K.final ? [K.final] : [])].filter(m => m && m.ta && m.tb) : [];
+  if (ko.length) return ko;
+  return Object.entries(N.groups || {}).flatMap(([g, G]) => G.matches.map(m => ({ ...m, group: g }))).filter(m => m.ta && m.tb);
+}
+function MhNightShare({ D, go, no, kind }) {
+  const s = D.sessions.find(x => x.no === +no) || D.sessions[0];
+  const N = (D.nights && D.nights[s.no]) || {};
+  const L = mhLineups(N);
+  const has = { lineup: L.length > 0, draw: (N.teams || []).length > 0, tables: !!N.started, bracket: !!N.knockout,
+    champions: !!N.champion, points: !!N.started && N.tonight && N.tonight().length > 0 };
+  const kinds = MH_NIGHT_KINDS.filter(([k]) => has[k]);
+  const [k, setK] = React.useState(has[kind] ? kind : (kinds[0] || [])[0]);
+  // the first undecided match is the one about to be played
+  const [li, setLi] = React.useState(() => Math.max(0, L.findIndex(m => !m.winner)));
+  const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
+  const ref = React.useRef(null);
+  const m = L[Math.min(li, L.length - 1)];
+  const run = async () => {
+    setBusy(true); setErr("");
+    try {
+      const blob = await mhExportStory(ref.current.firstChild);
+      const tag = k === "lineup" && m ? (m.round ? m.round + (m.round !== "final" ? m.n : "") : `g${m.group}${m.n}`) : k;
+      const file = new File([blob], `muscat-heist-${s.code.replace(/\W/g, "").toLowerCase()}-${tag}.png`, { type: "image/png" });
+      window.__mhLastExport = blob;                       // for the harness
+      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
+      else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); }
+    } catch (e) { if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again."); }
+    setBusy(false);
+  };
+  const body = !k ? null : k === "lineup" ? <MhNightLineup D={D} s={s} m={m} /> : k === "draw" ? <MhNightDraw D={D} s={s} N={N} />
+    : k === "tables" ? <MhNightTables D={D} s={s} N={N} /> : k === "bracket" ? <MhNightBracket D={D} s={s} N={N} />
+    : k === "champions" ? <MhNightChampions D={D} s={s} N={N} /> : <MhNightPoints D={D} s={s} N={N} />;
+  return (
+    <div className="mh-page">
+      <main className="mh-body" data-bare="" style={{ padding: "56px 20px 0", display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
+        <div className="mh-split">
+          <MhLabel>{s.code} · posts</MhLabel>
+          <button type="button" className="mh-close mn-serif" onClick={() => go("session", s.no)}>close ✕</button>
+        </div>
+        {kinds.length ? <>
+          <div style={{ marginTop: 10 }}><MhPills label="What to post" items={kinds} value={k} onChange={setK} /></div>
+          {k === "lineup" && L.length > 1 && (
+            <div className="mh-lupick">
+              <button type="button" className="mh-act" aria-label="Previous match" disabled={li <= 0} onClick={() => setLi(i => Math.max(0, i - 1))}>‹</button>
+              <select className="mh-luselect" value={li} onChange={e => setLi(+e.target.value)} aria-label="Match">
+                {L.map((x, i) => <option key={i} value={i}>
+                  {(x.round ? `${MH_ROUND_NAME[x.round]}${x.round !== "final" ? " " + x.n : ""}` : `Group ${x.group} · ${x.n}`)} — {mhPairName(x.ta)} v {mhPairName(x.tb)}{x.winner ? " ✓" : ""}
+                </option>)}
+              </select>
+              <button type="button" className="mh-act" aria-label="Next match" disabled={li >= L.length - 1} onClick={() => setLi(i => Math.min(L.length - 1, i + 1))}>›</button>
+            </div>
+          )}
+          <div className="mh-sharepreview"><div ref={ref} className="mh-sharescale">{body}</div></div>
+          <MhLabel style={{ textAlign: "center" }}>1080 × 1920 · Instagram story</MhLabel>
+          {err && <MhSerif size={14} tone="coral" style={{ textAlign: "center" }}>{err}</MhSerif>}
+          <div className="mh-momentfoot" style={{ padding: "12px 0 26px" }}>
+            <MhButton live onClick={run} disabled={busy}>{busy ? "Making the image…" : "Share image"}</MhButton>
+          </div>
+        </> : <MhGlass style={{ marginTop: 14 }}><MhSerif size={15}>Nothing to post yet — the draw is made on the night.</MhSerif></MhGlass>}
+      </main>
+    </div>
+  );
+}
+
 // MUSCAT HEIST · Vol.10 — the adapter and the shell.
 //
 // heistData() turns the season STATE (the same shape every volume since July
@@ -9173,31 +9684,72 @@ function heistData(state, o) {
   const next = S2.find(s => s.state === "soon");
 
   // ── one night, for the session screen ──
+  // One night, for the session screen and its share cards. Every figure is the
+  // inherited engine's: calcGroupStandings (wins, GD, head to head, games won),
+  // qualifyingTeamIds (the same set the bracket seeds from), calcPlayerNights.
+  // Photos: a Heist portrait wins, then the volume photo (stored as photoUrl —
+  // reading .photo alone is why every pair drew as initials).
+  const photoOf = id => (o.portraits || {})[id] || (byId[id] || {}).photo || (byId[id] || {}).photoUrl || null;
   const nightOf = sv => {
     const s = sessions.find(x => x.id === sv.sid); if (!s) return {};
-    const groups = {};
+    const pl = id => ({ id, name: (byId[id] || {}).name || "?", first: mhFirstOf((byId[id] || {}).name), photo: photoOf(id) });
+    const teamOf = tid => {
+      const t = (s.teams || []).find(x => x.id === tid);
+      return t ? { id: tid, group: t.group, name: mhTeamNames(s, tid, byId), players: [pl(t.p1Id), pl(t.p2Id)] } : null;
+    };
+    const fx = [...(s.groupMatches || []), ...((s.bracket || {}).qf || []), ...((s.bracket || {}).sf || []), (s.bracket || {}).final].filter(Boolean);
+    const started = fx.some(m => m.winner);
+    let Q = new Set();
+    try { if (started && typeof qualifyingTeamIds === "function") Q = qualifyingTeamIds(s); } catch (e) {}
+    const side = (m, k) => m.score ? (k === "a" ? m.score.t1 : m.score.t2) : null;
+    const groups = {}, posOf = {};
     [...new Set((s.teams || []).map(t => t.group).filter(Boolean))].sort().forEach(g => {
       const rows = calcGroupStandings(s, g);
       const ids = new Set((s.teams || []).filter(t => t.group === g).map(t => t.id));
+      const ms = (s.groupMatches || []).filter(m => ids.has(m.team1Id));
+      rows.forEach((r, i) => { posOf[r.team.id] = { pos: i + 1, w: r.wins, pts: r.pts, gd: r.gd, p: r.played - (r.byes || 0) }; });
       groups[g] = {
-        standings: rows.map(r => ({ team: mhTeamNames(s, r.team.id, byId), w: r.wins, pts: r.pts, id: r.team.id })),
-        matches: (s.groupMatches || []).filter(m => ids.has(m.team1Id)).map(m => ({
-          id: m.id, sid: s.id, a: mhTeamNames(s, m.team1Id, byId), b: mhTeamNames(s, m.team2Id, byId),
+        done: ms.length > 0 && ms.every(m => m.winner),
+        standings: rows.map((r, i) => ({ ...teamOf(r.team.id), team: mhTeamNames(s, r.team.id, byId), id: r.team.id,
+          pos: i + 1, w: r.wins, pts: r.pts, gd: r.gd, gf: r.gf, p: r.played - (r.byes || 0), q: Q.has(r.team.id) })),
+        matches: ms.map((m, i) => ({
+          id: m.id, sid: s.id, n: i + 1, a: mhTeamNames(s, m.team1Id, byId), b: mhTeamNames(s, m.team2Id, byId),
+          ta: teamOf(m.team1Id), tb: teamOf(m.team2Id), ga: side(m, "a"), gb: side(m, "b"),
+          winner: m.winner === "team1" ? "a" : m.winner === "team2" ? "b" : null,
           score: mhScore(m), state: m.winner ? "final" : mhScore(m) ? "live" : "next", court: m.court })),
       };
     });
     const B = s.bracket || {};
-    const ko = m => m && { a: m.team1Id ? mhTeamNames(s, m.team1Id, byId) : null, b: m.team2Id ? mhTeamNames(s, m.team2Id, byId) : null,
+    const ko = (m, round, n) => m && { round, n, a: m.team1Id ? mhTeamNames(s, m.team1Id, byId) : null, b: m.team2Id ? mhTeamNames(s, m.team2Id, byId) : null,
+      ta: m.team1Id ? teamOf(m.team1Id) : null, tb: m.team2Id ? teamOf(m.team2Id) : null, ga: side(m, "a"), gb: side(m, "b"),
       sa: m.s1, sb: m.s2, score: mhScore(m), winner: m.winner === "team1" ? "a" : m.winner === "team2" ? "b" : null };
     const hasKo = (B.qf || []).length || (B.sf || []).length || B.final;
+    const K = hasKo ? { qf: (B.qf || []).map((m, i) => ko(m, "qf", i + 1)), sf: (B.sf || []).map((m, i) => ko(m, "sf", i + 1)), final: ko(B.final, "final", 1) } : null;
+    const champ = K && K.final && K.final.winner ? {
+      team: K.final.winner === "a" ? K.final.ta : K.final.tb, beat: K.final.winner === "a" ? K.final.tb : K.final.ta,
+      score: K.final.winner === "a" ? `${K.final.ga}-${K.final.gb}` : `${K.final.gb}-${K.final.ga}` } : null;
     const votes = {};
     Object.values(s.mvpVotes || {}).forEach(v => { const id = typeof v === "string" ? v : v && v.playerId; if (id) votes[id] = (votes[id] || 0) + 1; });
+    // tonight's points: asked for only when a screen shows them (one engine
+    // walk per player), and remembered after the first ask
+    let tonightMemo = null;
+    const tonight = () => {
+      if (tonightMemo) return tonightMemo;
+      const ids = [...new Set((s.teams || []).flatMap(t => [t.p1Id, t.p2Id]))];
+      tonightMemo = ids.map(id => {
+        const r = calcPlayerNights(id, sessions, () => "").nights.find(n => n.id === s.id);
+        return r ? { ...pl(id), points: r.nightTotal, outcome: r.outcome } : null;
+      }).filter(x => x && x.points > 0).sort((a, b) => b.points - a.points || a.name.localeCompare(b.name));
+      return tonightMemo;
+    };
+    const teamsSorted = (s.teams || []).slice().sort((x, y) => (x.group || "").localeCompare(y.group || "") || ((posOf[x.id] || {}).pos || 9) - ((posOf[y.id] || {}).pos || 9));
     return {
+      started, champion: champ, tonight,
       groups,
-      teams: (s.teams || []).map(t => ({ group: t.group, a: mhFirstOf((byId[t.p1Id] || {}).name), b: mhFirstOf((byId[t.p2Id] || {}).name),
-        aPhoto: (byId[t.p1Id] || {}).photo, bPhoto: (byId[t.p2Id] || {}).photo })),
-      knockout: hasKo ? { qf: (B.qf || []).map(ko), sf: (B.sf || []).map(ko), final: ko(B.final) } : null,
-      mvp: { open: !s.completed, votes: Object.entries(votes).map(([id, n]) => ({ name: (byId[id] || {}).name || "?", votes: n })).sort((x, y) => y.votes - x.votes) },
+      teams: teamsSorted.map(t => ({ ...teamOf(t.id), ...(started ? posOf[t.id] || {} : {}), q: Q.has(t.id),
+        a: mhFirstOf((byId[t.p1Id] || {}).name), b: mhFirstOf((byId[t.p2Id] || {}).name), aPhoto: photoOf(t.p1Id), bPhoto: photoOf(t.p2Id) })),
+      knockout: K,
+      mvp: { open: !s.completed && !!s.mvpVotingOpen, votes: Object.entries(votes).map(([id, n]) => ({ ...pl(id), votes: n })).sort((x, y) => y.votes - x.votes) },
     };
   };
   const nightsD = {}; S2.forEach(sv => { if (sv.sid) nightsD[sv.no] = nightOf(sv); });
@@ -9320,7 +9872,7 @@ function heistData(state, o) {
 const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
   session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
   loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-  share: MhShareSheet });
+  share: MhShareSheet, nightshare: MhNightShare });
 
 function HeistShell(props) {
   const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
@@ -9393,7 +9945,7 @@ function HeistShell(props) {
         </button>
       )}
       <Screen key={route.join("/")} D={D} go={go} id={name === "share" ? arg2 : arg} no={arg} what={arg}
-        start={+arg2 || 0} canScore={canScore} match={live} onLock={onLock} />
+        start={+arg2 || 0} kind={arg2} canScore={canScore} match={live} onLock={onLock} />
     </>
   );
 }
@@ -13119,10 +13671,10 @@ function SessionDetail({ session, state, isAdmin, canScore, canUploadPhotos, syn
                 // everyone once voting is; MvpVoteTab already enforces one
                 // vote per device.
                 show:canScore || !!session.mvpVotingOpen },
-              { key:"groups", label:"Posts", Ic:CIc.flame, go:() => setShowGroupCards(true),
+              { key:"groups", label:"Posts", Ic:CIc.flame, go:() => { const n = (MH.nights || []).indexOf(session.date) + 1; location.href = location.pathname + "#nightshare/" + (n || 1) + "/draw"; },
                 show: (session.teams || []).length > 0 },
-              { key:"lineup", label:"Line-up", Ic:CIc.share, go:() => setShowLineup(true),
-                show:lineups.length > 0, warm:true },
+              { key:"lineup", label:"Line-up", Ic:CIc.share, go:() => { const n = (MH.nights || []).indexOf(session.date) + 1; location.href = location.pathname + "#nightshare/" + (n || 1) + "/lineup"; },
+                show:(session.teams || []).length > 0, warm:true },
               { key:"draw", label:"Draw", Ic:CIc.dice, go:() => setShowDraw(true), show:isAdmin },
               { key:"remind", label:"Remind", Ic:CIc.megaphone, go:() => setShowRemind(true), show:isAdmin },
               { key:"share", label:"Share", Ic:CIc.share, go:() => setShowShare(true), show:!!session.completed, warm:true },
