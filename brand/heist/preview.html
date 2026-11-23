@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F1B2B">
+<title>Muscat Heist · preview</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>/* MUSCAT HEIST · Vol.10 — tokens and the shared components.
+   The :root block is the handoff's tokens/tokens.css, verbatim except:
+     - no Google @import (the faces are vendored: brand/fonts + brand/heist/fonts)
+     - no Arabic face (the owner removed the Arabic name, 22 Nov 2026)
+     - a few extra tokens at the end, each a value the handoff's own static
+       design uses inline (the art tint, the fades, the band's shadow), so no
+       component below carries a colour of its own.
+   EVERY colour in this file and in the components comes from :root. */
+:root {
+  /* colour */
+  --mn-navy: #0F1B2B;
+  --mn-navy-2: #13202F;
+  --mn-sand: #FFF4E8;
+  --mn-peach: #FFC9A3;
+  --mn-coral: #F26B5B;
+  --mn-coral-2: #F59A62;
+  --mn-gold: #FFD08A;
+  --mn-teal: #2FB7B0;
+  --mn-rose: #E9849A;
+  --mn-mist: #B9C6D3;
+  --mn-dim: #7F8EA0;
+  --mn-red: #E5484D;
+  --mn-silver: #D7DDE4;
+  --mn-bronze: #D9A27A;
+  --mn-line: rgba(255,244,232,.10);
+  --mn-line-2: rgba(255,244,232,.18);
+
+  --mn-grad-primary: linear-gradient(135deg, var(--mn-coral), var(--mn-coral-2));
+  /* the static design draws the band to #F5895E, not coral-2; the screenshots are the target */
+  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), #F5895E);
+  --mn-grad-title: linear-gradient(180deg, #FFFBF5 0%, var(--mn-sand) 55%, var(--mn-peach) 100%);
+  --mn-sky: linear-gradient(180deg,#24456E 0%,#6B5B8E 30%,#E07C8E 52%,#F6A06B 72%,#FFD39A 90%);
+
+  --mn-glass-bg: rgba(15,27,43,.62);
+  --mn-glass-border: 1px solid rgba(255,244,232,.18);
+  --mn-glass-blur: blur(14px);
+
+  --mn-tier-legend: linear-gradient(135deg,#FFD08A,#F59A62 50%,#FFD08A);
+  --mn-tier-elite: linear-gradient(135deg,#F26B5B,#E9849A);
+  --mn-tier-pro: linear-gradient(135deg,#2FB7B0,#2A7FA8);
+  --mn-tier-street: linear-gradient(135deg,#5A6B80,#B9C6D3);
+
+  --mn-rep-rookie: var(--mn-dim);
+  --mn-rep-rising: var(--mn-teal);
+  --mn-rep-known: var(--mn-coral);
+  --mn-rep-legend: var(--mn-gold);
+
+  --mn-font-display: 'Archivo', Impact, sans-serif;
+  --mn-display-axes: 'wdth' 66;
+  --mn-font-serif: 'Fraunces', Georgia, serif;
+  --mn-serif-axes: 'SOFT' 100, 'WONK' 1;
+  --mn-font-ui: 'Manrope', system-ui, sans-serif;
+  --mn-font-mono: 'JetBrains Mono', monospace;
+
+  --mn-r-card: 14px;
+  --mn-r-hero: 16px;
+  --mn-r-pill: 999px;
+  --mn-r-nav: 20px;
+
+  --mn-shadow-card: 0 14px 30px rgba(0,0,0,.40);
+  --mn-shadow-title: 0 3px 0 rgba(15,27,43,.55), 0 10px 22px rgba(0,0,0,.45);
+
+  --mn-cut-hero: polygon(0 0,100% 0,100% 82%,0 96%);
+  --mn-keyline: 3px solid var(--mn-sand);
+
+  --mn-s1: 4px; --mn-s2: 8px; --mn-s3: 12px; --mn-s4: 16px; --mn-s5: 20px; --mn-s6: 24px;
+  --mn-page-x: 20px;
+  --mn-min-text: 11px;
+
+  /* — added: values the static design uses inline, named once — */
+  --mn-art-filter: saturate(1.08) contrast(1.05);
+  --mn-art-tint: linear-gradient(180deg, rgba(255,140,90,.12), rgba(20,60,90,.22));
+  --mn-hero-fade: linear-gradient(180deg, rgba(15,27,43,.45), rgba(15,27,43,0) 22%, rgba(15,27,43,0) 50%, rgba(15,27,43,.85) 92%);
+  --mn-card-fade: linear-gradient(180deg, rgba(19,32,47,0) 55%, var(--mn-navy-2));
+  --mn-foil: linear-gradient(115deg, transparent 25%, rgba(255,244,232,.35) 40%, rgba(255,201,163,.3) 48%, transparent 62%);
+  --mn-sun: radial-gradient(circle, rgba(255,201,163,.55), rgba(242,107,91,.25) 45%, rgba(242,107,91,0) 70%);
+  --mn-band-shadow: 0 8px 20px rgba(0,0,0,.4);
+  --mn-keyline-shadow: drop-shadow(0 0 5px rgba(0,0,0,.35));
+  --mn-text-glow: 0 2px 8px rgba(0,0,0,.6);
+  --mn-tag-bg: rgba(15,27,43,.75);
+  --mn-scene-bg: rgba(15,27,43,.72);
+  --mn-nav-bg: rgba(15,27,43,.78);
+  --mn-nav-border: 1px solid rgba(255,244,232,.14);
+  --mn-pill-border: 1px solid rgba(255,244,232,.25);
+  --mn-ghost-border: 1.5px solid rgba(255,244,232,.35);
+  --mn-track: rgba(255,244,232,.12);
+  --mn-billing: rgba(255,244,232,.72);
+  --mn-billing-dim: rgba(255,244,232,.45);
+  --mn-title-filter: drop-shadow(0 3px 0 rgba(15,27,43,.55)) drop-shadow(0 10px 22px rgba(0,0,0,.45));
+  --mn-rank-glow: 0 2px 8px rgba(0,0,0,.5);
+  --mn-teal-45: rgba(47,183,176,.45);
+  --mn-teal-60: rgba(47,183,176,.6);
+  --mn-teal-20: rgba(47,183,176,.2);
+  --mn-teal-16: rgba(47,183,176,.16);
+  --mn-coral-14: rgba(242,107,91,.14);
+  --mn-coral-50: rgba(242,107,91,.5);
+  --mn-gold-45: rgba(255,208,138,.45);
+  --mn-gold-70: rgba(255,208,138,.7);
+  --mn-faint: rgba(255,244,232,.15);
+  --mn-leader-fade: linear-gradient(90deg, rgba(15,27,43,.88), rgba(15,27,43,0) 65%);
+  --mn-grad-progress: linear-gradient(90deg, var(--mn-teal), var(--mn-coral));
+  --mn-grad-meter: linear-gradient(90deg, var(--mn-teal), var(--mn-peach));
+}
+
+/* ── type helpers (the handoff's own) ─────────────────────────────────── */
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; text-transform: uppercase; line-height: .86; color: var(--mn-sand); }
+.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-mist); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
+.mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }
+.mn-glass[data-accent="teal"]  { border-color: var(--mn-teal); }
+.mn-glass[data-accent="gold"]  { border-color: var(--mn-gold); }
+.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
+
+/* ── buttons ──────────────────────────────────────────────────────────── */
+.mn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; cursor: pointer; border: 0; text-decoration: none; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: uppercase; }
+.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; font-size: 17px; text-transform: uppercase; }
+.mn-btn-light   { background: var(--mn-sand); color: var(--mn-navy); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-ui); font-weight: 700; font-size: 15px; }
+.mn-btn[data-size="live"] { min-height: 56px; }
+.mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+
+/* ── pills ────────────────────────────────────────────────────────────── */
+.mn-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.mn-pills::-webkit-scrollbar { display: none; }
+/* the visible pill is the handoff's 32px chip; the button around it is 44px
+   tall so the target meets the floor without changing what is drawn */
+.mn-pill { flex: 0 0 auto; min-height: 44px; min-width: 44px; justify-content: center; margin: -7px 0; display: inline-flex; align-items: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-pill > span { display: inline-flex; align-items: center; padding: 7px 12px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-pill[aria-pressed="true"] > span, .mn-pill[aria-selected="true"] > span { background: var(--mn-sand); border-color: var(--mn-sand); color: var(--mn-navy); }
+.mn-pill[data-round] { min-width: 44px; justify-content: center; }
+.mn-pill[data-round] > span { width: 32px; height: 32px; padding: 0; justify-content: center; }
+
+/* ── bottom nav ───────────────────────────────────────────────────────── */
+.mn-nav { position: fixed; left: 14px; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40; padding: 10px 8px; display: flex; justify-content: space-around; background: var(--mn-nav-bg); border: var(--mn-nav-border); border-radius: var(--mn-r-nav); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.mn-navtab { min-height: 44px; min-width: 44px; margin: -7px 0; display: inline-flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; }
+.mn-navtab > span { padding: 7px 12px; border-radius: 12px; color: var(--mn-mist); font-family: var(--mn-font-ui); font-weight: 600; font-size: 12px; }
+.mn-navtab[aria-current="page"] > span { background: var(--mn-sand); color: var(--mn-navy); }
+
+/* ── top bar ──────────────────────────────────────────────────────────── */
+.mn-topbar { position: absolute; left: 20px; right: 20px; top: 50px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
+.mn-topbar img { height: 28px; }
+.mn-topbar .mn-serif { font-size: 16px; color: var(--mn-sand); }
+
+/* ── art: every painting/photo gets the same treatment ────────────────── */
+.mn-art { position: absolute; inset: 0; overflow: hidden; }
+.mn-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
+.mn-art::after { content: ""; position: absolute; inset: 0; background: var(--mn-art-tint); mix-blend-mode: soft-light; }
+.mn-initials { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-mist); }
+
+/* ── hero cut ─────────────────────────────────────────────────────────── */
+.mn-hero { position: relative; overflow: hidden; }
+.mn-hero .mn-hero-img { position: absolute; inset: 0; }
+.mn-hero .mn-hero-fade { position: absolute; inset: 0; background: var(--mn-hero-fade); }
+.mn-hero .mn-keyline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: var(--mn-keyline-shadow); pointer-events: none; }
+.mn-hero .mn-keyline line { stroke: var(--mn-sand); stroke-width: 3; }
+.mn-hero[data-gold] .mn-keyline line { stroke: var(--mn-gold); }
+
+/* ── title lockup ─────────────────────────────────────────────────────── */
+.mn-lockup { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
+.mn-lockup[data-center] { align-items: center; }
+.mn-lockup .mn-sun { position: absolute; left: 50%; top: 4px; border-radius: 50%; background: var(--mn-sun); transform: translateX(-50%); pointer-events: none; }
+.mn-lockup .mn-presents { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-peach); }
+.mn-lockup .mn-presents::before, .mn-lockup .mn-presents::after { content: ""; width: 24px; height: 1px; background: var(--mn-peach); }
+.mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: var(--mn-title-filter); }
+.mn-lockup .mn-band { position: relative; margin-top: -1px; padding: 4px 14px 3px; background: var(--mn-grad-nights); transform: skewX(-10deg); box-shadow: var(--mn-band-shadow); }
+.mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
+.mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
+
+/* ── scene tag ────────────────────────────────────────────────────────── */
+.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: uppercase; }
+.mn-scenetag[data-gold] { border-left-color: var(--mn-gold); color: var(--mn-gold); }
+
+/* ── billing (stories) ────────────────────────────────────────────────── */
+.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: uppercase; text-align: center; }
+.mn-billing i { font-style: normal; color: var(--mn-billing-dim); text-transform: none; }
+
+/* ── crew card ────────────────────────────────────────────────────────── */
+.mn-card { flex: 0 0 auto; padding: 4px; border-radius: var(--mn-r-card); box-shadow: var(--mn-shadow-card); background: var(--mn-tier-street); }
+.mn-card[data-tier="legend"] { background: var(--mn-tier-legend); }
+.mn-card[data-tier="elite"]  { background: var(--mn-tier-elite); }
+.mn-card[data-tier="pro"]    { background: var(--mn-tier-pro); }
+.mn-card > div { border-radius: 11px; overflow: hidden; background: var(--mn-navy-2); }
+.mn-card .mn-card-img { position: relative; }
+.mn-card .mn-foil { position: absolute; inset: 0; background: var(--mn-foil); background-size: 250% 100%; mix-blend-mode: overlay; animation: mn-foil 3.2s linear infinite; }
+.mn-card .mn-card-fade { position: absolute; inset: 0; background: var(--mn-card-fade); }
+.mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .1em; color: var(--mn-sand); }
+.mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-sand); text-shadow: var(--mn-rank-glow); }
+.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; color: var(--mn-sand); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-card .mn-repline { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px; }
+.mn-card .mn-rep { font-family: var(--mn-font-mono); font-size: 11px; }
+.mn-card .mn-pts { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; color: var(--mn-sand); }
+.mn-card .mn-stats { display: flex; flex-direction: column; gap: 5px; margin-top: 6px; }
+.mn-card .mn-stat { display: flex; align-items: center; gap: 8px; }
+.mn-card .mn-stat > span:first-child { width: 52px; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mn-card .mn-stat > span:nth-child(2) { flex: 1; height: 4px; border-radius: 2px; background: var(--mn-track); overflow: hidden; }
+.mn-card .mn-stat > span:nth-child(2) > span { display: block; height: 100%; border-radius: 2px; }
+.mn-card .mn-stat > b { min-width: 16px; text-align: right; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 13px; color: var(--mn-sand); }
+.mn-card[data-tilt] { animation: mn-tilt 6s ease-in-out infinite; }
+button.mn-cardbtn { background: none; border: 0; padding: 0; cursor: pointer; border-radius: var(--mn-r-card); }
+
+/* ── avatar ───────────────────────────────────────────────────────────── */
+.mn-avatar { position: relative; flex: 0 0 auto; border-radius: 50%; overflow: hidden; background: var(--mn-navy-2); }
+
+/* ── film grain over every screen, as the static design draws it ──────── */
+.mn-grain { position: fixed; inset: 0; width: 100%; height: 100%; opacity: .08; mix-blend-mode: overlay; pointer-events: none; z-index: 30; }
+
+/* ── motion ───────────────────────────────────────────────────────────── */
+@keyframes mn-foil { 0% { background-position: 120% 0 } 100% { background-position: -120% 0 } }
+@keyframes mn-tilt { 0%,100% { transform: perspective(900px) rotateY(-9deg) rotateX(3deg) } 50% { transform: perspective(900px) rotateY(9deg) rotateX(-3deg) } }
+@keyframes mn-ring { 0% { transform: scale(.6); opacity: .9 } 100% { transform: scale(2.2); opacity: 0 } }
+@keyframes mn-slam { 0% { transform: scale(2.4); opacity: 0 } 60% { transform: scale(.94); opacity: 1 } 100% { transform: scale(1); opacity: 1 } }
+@keyframes mn-fill { from { width: 0 } }
+.mn-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid currentColor; animation: mn-ring 2.4s ease-out infinite; }
+.mn-ring + .mn-ring { animation-delay: .8s; }
+.mn-slam { animation: mn-slam .7s ease-out both; }
+.mn-fill { animation: mn-fill .6s ease-out .7s both; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ── the season screens (heist-screens.jsx) ───────────────────────────── */
+html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-family: var(--mn-font-ui); -webkit-font-smoothing: antialiased; }
+.mh-page { position: relative; min-height: 100vh; min-height: 100dvh; background: var(--mn-navy); overflow-x: hidden; }
+.mh-page .mn-topbar { position: absolute; }
+.mh-body { position: relative; z-index: 5; box-sizing: border-box; padding-bottom: 100px !important; }
+.mh-col { display: flex; flex-direction: column; gap: 12px; }
+.mh-title { display: flex; justify-content: space-between; align-items: flex-end; }
+.mh-title h1 { margin: 0; font-size: 44px; line-height: .86; }
+.mh-title .mn-serif { font-size: 15px; }
+.mh-split { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.mh-two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mh-small { padding: 12px 14px; }
+button.mh-tap { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+button.mn-glass { border: var(--mn-glass-border); }
+button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
+.mh-close { background: none; border: 0; cursor: pointer; font-size: 15px; min-height: 44px; margin: -14px 0; padding: 0; color: var(--mn-mist); }
+
+/* jobs */
+.mh-job { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 8px; border-radius: var(--mn-r-card); border: 1px solid transparent; }
+.mh-job[data-state="live"] { background: var(--mn-coral-14); border-color: var(--mn-coral-50); }
+.mh-job[data-state="finale"] { border-color: var(--mn-gold-45); }
+.mh-jobmain { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; min-height: 64px; }
+.mh-thumb { position: relative; height: 64px; border-radius: 10px; overflow: hidden; }
+.mh-job[data-state="done"] .mh-thumb { filter: grayscale(.6) brightness(.7); }
+.mh-jobtitle { font-size: 19px; line-height: 1.05; }
+.mh-job .mn-pill { margin: -7px 0; }
+
+/* most wanted */
+.mh-leader { position: relative; height: 200px; border-radius: var(--mn-r-hero); overflow: hidden; border: 0; padding: 0; }
+.mh-leaderfade { position: absolute; inset: 0; background: var(--mn-leader-fade); }
+.mh-stars { position: absolute; left: 16px; top: 14px; display: flex; gap: 3px; font-size: 15px; color: var(--mn-gold); }
+.mh-leaderbody { position: absolute; left: 16px; bottom: 14px; text-align: left; }
+.mh-mono-row { display: flex; gap: 12px; margin-top: 6px; font-family: var(--mn-font-mono); font-size: 12px; color: var(--mn-sand); }
+.mh-replegend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.mh-replegend > div { padding: 5px 0 0; border-top: 3px solid; text-align: center; }
+.mh-replegend b { display: block; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .08em; color: var(--mn-sand); }
+.mh-replegend span { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
+.mh-wrow { display: grid !important; grid-template-columns: 22px auto 1fr 24px 38px; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; background: none; border: 0; min-height: 50px; }
+.mh-wrow[data-me] { background: var(--mn-teal-16); }
+.mh-wrank { font-size: 17px; color: var(--mn-mist); }
+.mh-wname { font-family: var(--mn-font-ui); font-weight: 600; font-size: 14px; color: var(--mn-sand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-wname .mn-serif { font-weight: 400; color: var(--mn-teal); }
+.mh-wmove { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); text-align: right; }
+.mh-wgap { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-peach); }
+
+/* me */
+.mh-chip { padding: 3px 8px; border-radius: 6px; background: var(--mn-teal-20); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 13px; color: var(--mn-teal); }
+.mh-progress { height: 6px; border-radius: 3px; background: var(--mn-track); margin-top: 4px; overflow: hidden; }
+.mh-progress > div { height: 100%; border-radius: 3px; background: var(--mn-grad-progress); }
+.mh-stack { display: flex; height: 14px; gap: 2px; border-radius: 4px; overflow: hidden; }
+.mh-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; }
+.mh-legend > div { display: flex; justify-content: space-between; font-weight: 600; font-size: 12px; color: var(--mn-mist); }
+.mh-legend b { font-weight: 600; color: var(--mn-sand); }
+.mh-eprow { display: grid !important; grid-template-columns: 44px 1fr auto; gap: 10px; align-items: center; padding: 7px 0; border: 0; border-top: 1px solid var(--mn-line); background: none; min-height: 44px; }
+.mh-eprow > span { font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+
+/* crew */
+.mh-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; justify-items: center; }
+
+/* the take */
+.mh-takehero { position: relative; height: 150px; border-radius: var(--mn-r-hero); overflow: hidden; }
+.mh-takehero .mn-art img { filter: var(--mn-art-filter) brightness(.55); }
+.mh-takebody { position: absolute; left: 16px; bottom: 14px; }
+.mh-meter { position: relative; height: 12px; border-radius: 6px; background: var(--mn-line); overflow: hidden; }
+.mh-meter > div { height: 100%; border-radius: 6px; background: var(--mn-grad-meter); }
+.mh-segs { display: grid; gap: 3px; }
+.mh-segs > div { height: 4px; border-radius: 2px; background: var(--mn-faint); }
+.mh-segs > div[data-s="done"] { background: var(--mn-teal); }
+.mh-segs > div[data-s="finale"] { background: var(--mn-gold-70); }
+.mh-prize { display: flex !important; align-items: center; gap: 12px; padding: 10px 14px; }
+.mh-ptsline { font-family: var(--mn-font-mono); font-weight: 400; font-size: 11px; color: var(--mn-mist); font-variation-settings: normal; }
+.mh-omr { font-size: 12px; color: var(--mn-mist); }
+</style>
+</head><body>
+<div id="root"></div>
+<script>window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The episode titles and the session art are PLACEHOLDERS until the owner sends the real ones."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-corniche.jpg"}, {"code": "EP.02", "title": "The Arrival", "art": "art-club.jpg"}, {"code": "EP.03", "title": "The Heat", "art": "art-smash.jpg"}, {"code": "EP.04", "title": "The Knockout", "art": "art-rivals.jpg"}, {"code": "EP.05", "title": "The Smash", "art": "art-smash.jpg"}, {"code": "EP.06", "title": "The Grudge", "art": "art-rivals.jpg"}, {"code": "EP.07", "title": "The Rematch", "art": "art-corniche.jpg"}, {"code": "EP.08", "title": "The Crew", "art": "art-carpark.jpg"}, {"code": "EP.09", "title": "The Big Score", "art": "art-club.jpg"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "previousVolume": "56 National Series"};</script>
+<script>// PREVIEW DATA — the handoff's fixtures, shaped the way the screens read them.
+// The screens never read this file in the real app: there an adapter builds
+// the same shape out of the live state and the points engine. Here it is
+// built from brand/heist/handoff/fixtures plus the few figures only the
+// static design carries (the ME breakdown, the episode rows, "now"), so every
+// screen can be laid beside its reference PNG like for like.
+//
+// Photos: the fixtures name /players/pNN.png, which do not exist, and the
+// reference screenshots draw the stand-in paintings, so this does too.
+window.MH_PREVIEW = (function () {
+  const S = window.MH_SEASON;
+  const A = "art/";
+  // painting, crop, and (for the two-person painting) which half of it
+  const LOOK = {
+    p01: { photo: A + "art-corniche.jpg", pos: "34% 18%", heroPos: "34% 20%" },
+    p02: { photo: A + "art-smash.jpg", pos: "center 14%" },
+    p03: { photo: A + "art-carpark.jpg", pos: "center 18%" },
+    p04: { photo: A + "art-rivals.jpg", pos: "82% 18%", avPos: "center 20%", zoom: ["left", -10, -15] },
+    p05: { photo: A + "art-rivals.jpg", pos: "18% 20%", meCardPos: "82% 18%", avPos: "center 20%", zoom: ["right", -10, -12] },
+    p06: { photo: A + "art-club.jpg", pos: "center 60%" },
+    p07: { photo: A + "art-club.jpg", pos: "center 60%" },
+  };
+  const STATS = {
+    p01: { smash: 94, wall: 86, speed: 88, clutch: 97 }, p02: { smash: 88, wall: 84, speed: 79, clutch: 90 },
+  };
+  const players = [
+    ["p01", "Munther Rahbi", 104, "—", 5], ["p02", "Hamed Amri", 93, "—", 5], ["p03", "Nooh Amri", 90, "▲1", 5],
+    ["p04", "Baraa", 82, "▼1", 5], ["p05", "mossa", 80, "▲2", 5], ["p06", "Salim K.", 76, "—", 5],
+    ["p07", "Yousuf B.", 71, "▼2", 4], ["p08", "Ahmed S.", 68, "▲1", 5], ["p09", "Khalid", 64, "—", 4],
+  ].map(([id, name, points, movement, nights], i) => Object.assign(
+    { id, name, points, movement, nights, rank: i + 1, stats: STATS[id] || null }, LOOK[id] || {}));
+  const ep = n => S.episodes[n - 1];
+  const sessions = [
+    { no: 1, date: "2026-12-02", state: "done", champions: ["Munther Rahbi", "Khalid"] },
+    { no: 2, date: "2026-12-07", state: "done", champions: ["Hamed Amri", "Nooh Amri"] },
+    { no: 3, date: "2026-12-09", state: "done", champions: ["Salim K.", "Yousuf B."] },
+    { no: 4, date: "2026-12-14", state: "done", champions: ["Munther Rahbi", "Baraa"] },
+    { no: 5, date: "2026-12-16", state: "done", champions: ["Baraa", "mossa"], artPos: "center 16%" },
+    { no: 6, date: "2026-12-21", state: "live", progress: { played: 14, total: 24 }, artPos: "center 30%" },
+    { no: 7, date: "2026-12-23", state: "soon", signups: { teams: 12, max: 16, open: true }, artPos: "34% 18%" },
+    { no: 8, date: "2026-12-28", state: "soon", signups: { opensOn: "Thursday" }, artPos: "center 20%" },
+    { no: 9, date: "2026-12-30", state: "soon", artPos: "center 50%" },
+  ].map(s => Object.assign({ code: ep(s.no).code, title: ep(s.no).title, art: A + ep(s.no).art, time: S.time,
+    doublePoints: S.doubleNights.indexOf(s.date) >= 0, finale: s.no === S.sessions }, s));
+  return {
+    now: "2026-12-21T21:30:00",   // local time, like a phone in Muscat: "1D 20H TO GO" to Wed 23 Dec 17:30
+    meId: "p05",
+    homeNext: 7,                          // Home's NEXT JOB card (the reference shows EP.07 on a live night)
+    players, sessions,
+    rival: { playerId: "p05", rivalId: "p04", h2h: { w: 1, l: 1 },
+      meetings: [{ session: 5, label: "Final (same team)", result: "Champions" },
+                 { session: 3, label: "Group B", result: "Won 6-4" },
+                 { session: 2, label: "Quarter-final", result: "Lost 3-6" }] },
+    vsCard: { playerId: "p01", meetings: 3, w: 1, l: 2, last: { session: 4, won: false, score: "5–6" } },
+    me: {
+      seg: { groupWins: 36, lossPts: 8, knockout: 20, titles: 16 },
+      episodes: [{ session: 5, label: "Champions · rep up", pts: 26, title: true },
+                 { session: 4, label: "Made the knockout", pts: 11, knockout: true },
+                 { session: 3, label: "Group stage", pts: 7 }],
+    },
+    paidOMR: 140,
+    rosterSize: 32,                      // "THE CREW · 32 players" — the fixtures carry nine of them
+  };
+})();
+</script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+// MUSCAT HEIST · Vol.10 — the shared components (handoff components.md).
+// Plain JSX for Babel standalone, the way every volume's page is compiled.
+// Every colour is a token in heist.css; nothing here carries a hex value.
+// Images always come from data — player.photo, session.art — never a path
+// written into a component, so real art replaces the placeholders with no
+// code change (handoff rule 10).
+
+const MH = window.MH_SEASON || {};
+
+// ── derived rules (handoff data.md), as data ──────────────────────────────
+// REP IS PER NIGHT PLAYED (owner, 22 Nov 2026): the threshold for a level is
+// its per-night figure times the nights the season has played, so after five
+// nights it is exactly the handoff's 80 / 90 / 100. Rep never goes down: a
+// player's level is the highest they reached after ANY night, which is why
+// this takes their running totals, not just today's.
+const MH_REPS = (MH.rep && MH.rep.levels) || [];
+function mhRepAt(points, nights) {
+  return MH_REPS.find(l => points >= l.perNight * nights) || MH_REPS[MH_REPS.length - 1];
+}
+// totalsByNight: the player's series total after night 1, 2, ... n
+function mhRepFor(totalsByNight) {
+  let best = MH_REPS.length - 1;
+  (totalsByNight || []).forEach((pts, i) => {
+    const k = MH_REPS.indexOf(mhRepAt(pts, i + 1));
+    if (k < best) best = k;
+  });
+  return MH_REPS[best];
+}
+function mhNextRep(rep) {
+  const k = MH_REPS.indexOf(rep);
+  return k > 0 ? MH_REPS[k - 1] : null;
+}
+const mhTierFor = rank => (MH.tiers || []).find(t => rank <= t.maxRank) || (MH.tiers || [])[0];
+const mhInitials = name => (name || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+
+// ── the art treatment: one component, so every picture is graded alike ────
+function MhArt({ src, alt = "", pos = "center 25%", name }) {
+  return (
+    <div className="mn-art">
+      {src ? <img src={src} alt={alt} style={{ objectPosition: pos }} loading="lazy" decoding="async" />
+           : <div className="mn-initials" style={{ fontSize: "2.2em" }}>{mhInitials(name)}</div>}
+    </div>
+  );
+}
+
+// ── labels ────────────────────────────────────────────────────────────────
+const MhLabel = ({ children, tone, style }) => (
+  <div className="mn-label" style={{ color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+const MhSerif = ({ children, size = 15, tone, style }) => (
+  <div className="mn-serif" style={{ fontSize: size, color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+const MhDisplay = ({ children, size = 28, weight = 900, tone, style }) => (
+  <div className="mn-display" style={{ fontSize: size, fontWeight: weight, lineHeight: 1, color: tone ? `var(--mn-${tone})` : undefined, ...style }}>{children}</div>
+);
+
+// ── glass card ────────────────────────────────────────────────────────────
+function MhGlass({ accent, as: Tag = "div", children, style, ...rest }) {
+  return <Tag className="mn-glass" data-accent={accent} style={style} {...rest}>{children}</Tag>;
+}
+
+// ── pills ─────────────────────────────────────────────────────────────────
+function MhPills({ items, value, onChange, round, label }) {
+  return (
+    <div className="mn-pills" role="group" aria-label={label}>
+      {items.map(it => {
+        const [k, text] = Array.isArray(it) ? it : [it, it];
+        return (
+          <button key={k} type="button" className="mn-pill" data-round={round ? "" : undefined}
+            aria-pressed={value === k} onClick={() => onChange && onChange(k)}><span>{text}</span></button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── buttons ───────────────────────────────────────────────────────────────
+function MhButton({ kind = "primary", live, children, style, ...rest }) {
+  return <button type="button" className={"mn-btn mn-btn-" + kind} data-size={live ? "live" : undefined}
+    style={style} {...rest}>{children}</button>;
+}
+
+// ── top bar: the UP logo and the volume line, over every screen ──────────
+function MhTopBar({ logo, line }) {
+  return (
+    <div className="mn-topbar">
+      <img src={logo} alt="Urban Playground" />
+      <div className="mn-serif">{line}</div>
+    </div>
+  );
+}
+
+// ── bottom nav ────────────────────────────────────────────────────────────
+const MH_TABS = [["home", "Home"], ["jobs", "Jobs"], ["wanted", "Wanted"], ["me", "Me"], ["crew", "Crew"]];
+function MhBottomNav({ tab, onTab }) {
+  return (
+    <nav className="mn-nav" aria-label="Sections">
+      {MH_TABS.map(([k, label]) => (
+        <button key={k} type="button" className="mn-navtab" aria-current={tab === k ? "page" : undefined}
+          onClick={() => onTab && onTab(k)}><span>{label}</span></button>
+      ))}
+    </nav>
+  );
+}
+
+// ── hero cut ──────────────────────────────────────────────────────────────
+// The keyline is an SVG line in the hero's own coordinates, so it lands on
+// the cut at any width. The static design positions a rotated div by
+// measured pixels, which is right at 375 and wrong at every other phone.
+// cut = [right edge %, left edge %] of the bottom edge, top to bottom.
+function MhHeroCut({ height, src, pos, cut = [82, 96], gold, children, style }) {
+  const poly = `polygon(0 0,100% 0,100% ${cut[0]}%,0 ${cut[1]}%)`;
+  return (
+    <div className="mn-hero" data-gold={gold ? "" : undefined} style={{ height, ...style }}>
+      <div className="mn-hero-img" style={{ clipPath: poly }}><MhArt src={src} pos={pos} /></div>
+      <div className="mn-hero-fade" style={{ clipPath: poly }} aria-hidden="true" />
+      <svg className="mn-keyline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1={cut[1]} x2="100" y2={cut[0]} vectorEffect="non-scaling-stroke" />
+      </svg>
+      {children}
+    </div>
+  );
+}
+
+// ── title lockup ──────────────────────────────────────────────────────────
+// MUSCAT at base x .74, HEIST on the skewed coral band at base x .42.
+// Sizes from the static design: S 76 (56/31 on Home), M 84 (62/35 loading),
+// L 104 (poster).
+const MH_LOCKUP = { S: 76, M: 84, L: 104 };
+function MhTitleLockup({ size = "S", center, presents, meta }) {
+  const base = MH_LOCKUP[size] || size;
+  return (
+    <div className="mn-lockup" data-center={center ? "" : undefined}>
+      {center && <div className="mn-sun" aria-hidden="true" style={{ width: base * 1.05, height: base * 1.05 }} />}
+      {presents && <div className="mn-presents" style={{ fontSize: Math.round(base * .2) }}>{presents}</div>}
+      <div className="mn-l1" style={{ fontSize: Math.round(base * .74) }}>{MH.nameLine1 || "MUSCAT"}</div>
+      <div className="mn-band"><span style={{ fontSize: Math.round(base * .42) }}>{MH.nameLine2 || "HEIST"}</span></div>
+      {meta !== false && <div className="mn-meta">{meta || `${MH.volumeLabel} · Muscat · ${MH.monthShort} ${MH.year}`}</div>}
+    </div>
+  );
+}
+
+// ── scene tag ─────────────────────────────────────────────────────────────
+const MhSceneTag = ({ children, gold, style }) => (
+  <span className="mn-scenetag" data-gold={gold ? "" : undefined} style={style}>{children}</span>
+);
+
+// ── billing (stories) ─────────────────────────────────────────────────────
+// parts: strings, and {link:"presents a"} for the dimmed linking words
+function MhBilling({ parts, style }) {
+  return <div className="mn-billing" style={style}>{parts.map((p, i) =>
+    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
+}
+
+// ── avatar ────────────────────────────────────────────────────────────────
+// zoom = [side, x%, y%]: the static design crops ONE face out of a
+// two-person painting by blowing it up 220% x 160% and sliding it. Real
+// photos are one person and never need it.
+function MhAvatar({ player, size = 34, ring, zoom }) {
+  const art = <MhArt src={player && player.photo} name={player && player.name} pos={player && player.photoPos} />;
+  return (
+    <div className="mn-avatar" style={{ width: size, height: size, fontSize: size * .18,
+      boxShadow: ring ? `0 0 0 2px var(--mn-${ring})` : undefined }}>
+      {zoom ? <div style={{ position: "absolute", [zoom[0]]: zoom[1] + "%", top: zoom[2] + "%", width: "220%", height: "160%" }}>{art}</div> : art}
+    </div>
+  );
+}
+
+// ── crew card ─────────────────────────────────────────────────────────────
+// Sizes measured off the static design (width / image / tag / rank / name /
+// points / body padding). The handoff's prose says image = 62% of a 1.42
+// card; the drawn cards are image = .875 x width, and the drawing wins.
+const MH_CARD = {
+  S: { w: 120, img: 105, tag: 11, rank: 18, name: 14, pts: 13, pad: "6px 8px 8px" },
+  M: { w: 150, img: 132, tag: 12, rank: 22, name: 18, pts: 15, pad: "7px 10px 10px" },
+  L: { w: 240, img: 210, tag: 19, rank: 36, name: 28, pts: 24, pad: "12px 16px 16px" },
+};
+const MH_STATS = [["smash", "SMASH"], ["wall", "WALL"], ["speed", "SPEED"], ["clutch", "CLUTCH"]];
+function MhCrewCard({ player, rank, points, rep, size = "M", stats, foil = true, tilt = true, onClick }) {
+  const d = MH_CARD[size];
+  const tier = mhTierFor(rank);
+  const shine = foil && (tier.id === "legend" || tier.id === "elite");
+  const card = (
+    <div className="mn-card" data-tier={tier.id} data-tilt={tilt && size === "L" && tier.id === "legend" ? "" : undefined}
+      style={{ width: d.w }}>
+      <div>
+        <div className="mn-card-img" style={{ height: d.img, fontSize: d.name }}>
+          <MhArt src={player.photo} name={player.name} pos={player.photoPos} />
+          {shine && <div className="mn-foil" aria-hidden="true" />}
+          <div className="mn-card-fade" aria-hidden="true" />
+          <div className="mn-tiertag" style={{ fontSize: d.tag }}>{tier.label}</div>
+          <div className="mn-rank" style={{ fontSize: d.rank }}>#{rank}</div>
+        </div>
+        <div style={{ padding: d.pad }}>
+          <div className="mn-name" style={{ fontSize: d.name }}>{player.name}</div>
+          <div className="mn-repline">
+            <div className="mn-rep" style={{ color: `var(--mn-rep-${rep.id})` }}>REP · {rep.label.toUpperCase()}</div>
+            <div className="mn-pts" style={{ fontSize: d.pts }}>{points}</div>
+          </div>
+          {size === "L" && stats && (
+            <div className="mn-stats">
+              {MH_STATS.map(([k, label]) => {
+                const v = stats[k];
+                return (
+                  <div key={k} className="mn-stat">
+                    <span>{label}</span>
+                    <span><span className="mn-fill" style={{ width: (v == null ? 0 : v) + "%", background: `var(--mn-rep-${rep.id})` }} /></span>
+                    <b>{v == null ? "—" : v}</b>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+  return onClick
+    ? <button type="button" className="mn-cardbtn" onClick={onClick} aria-label={`${player.name}, rank ${rank}`}>{card}</button>
+    : card;
+}
+
+// ── film grain, as the static design lays over every screen ──────────────
+const MhGrain = () => (
+  <svg className="mn-grain" aria-hidden="true">
+    <filter id="mn-grain"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" /></filter>
+    <rect width="100%" height="100%" filter="url(#mn-grain)" />
+  </svg>
+);
+
+// MUSCAT HEIST · Vol.10 — the season screens (handoff phase 2):
+// 01 Home · 02 Jobs · 03 Most Wanted · 04 ME · 05 The Crew · 06 Crew Card ·
+// 17 The Take. Every value is the static design's own (handoff/design/
+// Muscat Nights App.html); every colour is a token. They read ONE shape of
+// data, D, built by brand/heist/preview-data.js in preview and by the app's
+// adapter from the live state — so a screen cannot be right in preview and
+// wrong on the night.
+
+// ── dates, without the UTC trap ──────────────────────────────────────────
+// A plain "2026-12-23" is parsed by its parts. new Date("2026-12-23") is UTC
+// midnight, which on this server and on every phone in Oman is 4am — fine —
+// but the repo's rule is never to rely on it (CLAUDE.md, dates on UTC+4).
+const MH_DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MH_MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function mhDate(s) { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); }
+function mhDay(s) { const d = mhDate(s); return `${MH_DOW[d.getDay()]} ${d.getDate()} ${MH_MON[d.getMonth()]}`; }
+function mhStart(s, time) { const d = mhDate(s); const [h, m] = (time || "17:30").split(":").map(Number); d.setHours(h, m, 0, 0); return d; }
+function mhCountdown(to, now) {
+  const ms = to - now; if (ms <= 0) return null;
+  const m = Math.floor(ms / 60000), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60);
+  return d > 0 ? `${d}D ${h}H` : `${h}H ${m % 60}M`;
+}
+const mhFirst = n => (n || "").split(" ")[0];
+const mhPts = n => `${n} pt${n === 1 ? "" : "s"}`;
+
+// ── what every screen derives from D ─────────────────────────────────────
+function mhDerive(D) {
+  const nightsPlayed = D.sessions.filter(s => s.state === "done").length;
+  const players = D.players.map(p => {
+    const rep = p.repId ? MH_REPS.find(r => r.id === p.repId) : mhRepAt(p.points, Math.max(1, nightsPlayed));
+    return Object.assign({}, p, { rep, tier: mhTierFor(p.rank) });
+  });
+  const byId = Object.fromEntries(players.map(p => [p.id, p]));
+  const above = p => players.find(q => q.rank === p.rank - 1);
+  const me = byId[D.meId] || null;
+  const lastDone = D.sessions.filter(s => s.state === "done").slice(-1)[0];
+  return { players, byId, above, me, nightsPlayed, lastDone,
+    gap: p => { const a = above(p); return a ? a.points - p.points : null; } };
+}
+
+// ── page shell: top bar, scrolling content, nav ──────────────────────────
+function MhPage({ D, tab, onTab, children, nav = true, pad = "96px 20px 0" }) {
+  return (
+    <div className="mh-page">
+      <MhTopBar logo={D.logo || "up-logo-tight.png"} line={`${MH.volumeLabel.replace("VOL", "Vol")} · ${MH.month}`} />
+      <main className="mh-body" style={{ padding: pad }}>{children}</main>
+      {nav && <MhBottomNav tab={tab} onTab={onTab} />}
+      <MhGrain />
+    </div>
+  );
+}
+const MhTitle = ({ title, aside }) => (
+  <div className="mh-title">
+    <h1 className="mn-display">{title}</h1>
+    {aside && <div className="mn-serif">{aside}</div>}
+  </div>
+);
+
+// ── 01 HOME ──────────────────────────────────────────────────────────────
+function MhHome({ D, go }) {
+  const X = mhDerive(D);
+  // the countdown moves every minute (spec); D.now pins it in preview only
+  const [tick, setTick] = React.useState(0);
+  React.useEffect(() => { if (D.now) return; const t = setInterval(() => setTick(x => x + 1), 60000); return () => clearInterval(t); }, [D.now]);
+  const now = D.now ? new Date(D.now) : new Date();
+  const live = D.sessions.find(s => s.state === "live");
+  const next = D.sessions.find(s => s.no === D.homeNext) || D.sessions.find(s => s.state === "soon");
+  const showLive = live && D.homeShowsLive;
+  const hero = showLive ? live : (next || X.lastDone);
+  const lead = X.players[0], second = X.players[1];
+  const me = X.me, rival = me && X.above(me);
+  const left = next && mhCountdown(mhStart(next.date, next.time), now);
+  return (
+    <MhPage D={D} tab="home" onTab={go} pad="0">
+      <MhHeroCut height={470} src={hero && hero.art} pos={hero && hero.heroPos || "34% 20%"}>
+        <div style={{ position: "absolute", left: 22, top: 250 }}><MhTitleLockup size="S" /></div>
+      </MhHeroCut>
+      <div className="mh-col" style={{ padding: "0 20px", marginTop: -8, gap: 10 }}>
+        {showLive ? (
+          <button type="button" className="mn-glass mh-tap" data-accent="coral" onClick={() => go("session", live.no)}>
+            <div className="mh-split">
+              <div>
+                <MhLabel tone="coral">● Live now · {live.code}</MhLabel>
+                <MhDisplay size={28} style={{ marginTop: 3 }}>{live.title}</MhDisplay>
+                {live.progress && <MhSerif>{live.progress.played} of {live.progress.total} matches played</MhSerif>}
+              </div>
+              <MhDisplay size={18} tone="coral">OPEN ›</MhDisplay>
+            </div>
+          </button>
+        ) : next ? (
+          <button type="button" className="mn-glass mh-tap" onClick={() => go("session", next.no)}>
+            <div className="mh-split">
+              <div>
+                <MhLabel tone="peach">Next job · {next.code}</MhLabel>
+                <MhDisplay size={28} style={{ marginTop: 3 }}>{mhDay(next.date).toUpperCase()}</MhDisplay>
+                <MhSerif>{next.time} · {MH.venue}</MhSerif>
+              </div>
+              {left && <div style={{ textAlign: "right" }}>
+                <MhDisplay size={28} tone="peach">{left}</MhDisplay>
+                <MhLabel>to go</MhLabel>
+              </div>}
+            </div>
+          </button>
+        ) : null}
+        <div className="mh-two">
+          {lead && <button type="button" className="mn-glass mh-tap mh-small" onClick={() => go("wanted")}>
+            <MhLabel tone="peach">Leader</MhLabel>
+            <MhDisplay size={19} weight={800} style={{ marginTop: 3, lineHeight: 1.05 }}>{mhFirst(lead.name)} · {lead.points}</MhDisplay>
+            <MhSerif size={14}>{second ? `${lead.points - second.points} clear` : "on top"}</MhSerif>
+          </button>}
+          {me && (rival ? (
+            <button type="button" className="mn-glass mh-tap mh-small" onClick={() => go("rival")}>
+              <MhLabel tone="teal">Your rival</MhLabel>
+              <MhDisplay size={19} weight={800} style={{ marginTop: 3, lineHeight: 1.05 }}>{mhFirst(rival.name)} · {rival.points}</MhDisplay>
+              <MhSerif size={14}>{mhPts(rival.points - me.points)} ahead</MhSerif>
+            </button>
+          ) : second && (
+            <button type="button" className="mn-glass mh-tap mh-small" onClick={() => go("rival")}>
+              <MhLabel tone="teal">#2 chasing</MhLabel>
+              <MhDisplay size={19} weight={800} style={{ marginTop: 3, lineHeight: 1.05 }}>{mhFirst(second.name)} · {second.points}</MhDisplay>
+              <MhSerif size={14}>{mhPts(me.points - second.points)} behind you</MhSerif>
+            </button>
+          ))}
+        </div>
+      </div>
+    </MhPage>
+  );
+}
+
+// ── 02 JOBS ──────────────────────────────────────────────────────────────
+function MhJobs({ D, go }) {
+  const [f, setF] = React.useState("upcoming");
+  const rows = D.sessions.filter(s => f === "all" || (f === "done" ? s.state === "done" : s.state !== "done"));
+  const ordered = f === "done" ? rows.slice().reverse() : f === "all" ? rows
+    : rows.concat(D.sessions.filter(s => s.state === "done").slice(-1));   // the reference trails the latest recap
+  const upcoming = D.sessions.some(s => s.state !== "done");
+  return (
+    <MhPage D={D} tab="jobs" onTab={go}>
+      <div className="mh-col">
+        <MhTitle title="JOBS" aside={`${MH.month} · ${D.sessions.length} episodes`} />
+        <MhPills label="Filter" items={[["upcoming", "Upcoming"], ["done", "Done"], ["all", "All"]]} value={f} onChange={setF} />
+        {!upcoming && f === "upcoming" && (
+          <button type="button" className="mn-glass mh-tap" onClick={() => go("take")}>
+            <MhDisplay size={19}>Season complete</MhDisplay><MhSerif size={14}>See The Take ›</MhSerif>
+          </button>
+        )}
+        {ordered.map(s => <MhJobRow key={s.no} s={s} go={go} />)}
+      </div>
+    </MhPage>
+  );
+}
+function MhJobRow({ s, go }) {
+  const live = s.state === "live", done = s.state === "done", signup = s.signups && s.signups.open;
+  const day = mhDay(s.date);
+  const label = live ? `● Live now · ${day}` : done ? day : `${day} · ${s.time}`;
+  const tone = live ? "coral" : done ? "dim" : s.finale ? "gold" : signup ? "peach" : "mist";
+  const sub = live && s.progress ? `${s.progress.played} of ${s.progress.total} matches played`
+    : done ? `${(s.champions || []).map(mhFirst).join(" & ")} won · recap ›`
+    : s.finale ? `Finale · 2× points`
+    : signup ? `Signups open · ${s.signups.teams} of ${s.signups.max} teams`
+    : s.signups && s.signups.opensOn ? `Signups open ${s.signups.opensOn}` : (s.doublePoints ? "2× points" : "");
+  return (
+    <div className="mh-job" data-state={live ? "live" : s.finale ? "finale" : done ? "done" : "soon"}>
+      <button type="button" className="mh-jobmain" onClick={() => go(done ? "recap" : "session", s.no)}
+        aria-label={`${s.code} ${s.title}`}>
+        <div className="mh-thumb"><MhArt src={s.art} pos={s.artPos} /></div>
+        <div style={{ minWidth: 0 }}>
+          <MhLabel tone={tone}>{label}</MhLabel>
+          <div className="mn-display mh-jobtitle">{s.code} · {s.title}</div>
+          {sub && <MhSerif size={14}>{sub}</MhSerif>}
+        </div>
+      </button>
+      {live ? <MhDisplay size={15} tone="coral" style={{ alignSelf: "center" }}>OPEN ›</MhDisplay>
+        : s.finale && !done ? <MhDisplay size={15} tone="gold" style={{ alignSelf: "center" }}>FINALE</MhDisplay>
+        : signup ? <button type="button" className="mn-pill" aria-pressed="true" onClick={() => go("signup", s.no)}><span>Sign up</span></button>
+        : null}
+    </div>
+  );
+}
+
+// ── 03 MOST WANTED ───────────────────────────────────────────────────────
+function MhWanted({ D, go }) {
+  const X = mhDerive(D);
+  const lead = X.players[0];
+  const bounty = r => (MH.seasonPrizes || [])[r - 1];
+  return (
+    <MhPage D={D} tab="wanted" onTab={go}>
+      <div className="mh-col">
+        <MhTitle title="MOST WANTED" aside={X.lastDone ? `after ${X.lastDone.code}` : "before EP.01"} />
+        {lead && (
+          <button type="button" className="mh-leader mh-tap" onClick={() => go("card", lead.id)}>
+            <MhArt src={lead.photo} pos={lead.pos} name={lead.name} />
+            <div className="mh-leaderfade" aria-hidden="true" />
+            <div className="mh-stars" aria-hidden="true">★★★★★</div>
+            <div className="mh-leaderbody">
+              <MhLabel tone="gold">Most wanted · Rep {lead.rep.label}</MhLabel>
+              <div className="mn-display" style={{ fontSize: 36, lineHeight: .86 }}>
+                {lead.name.split(" ").map((w, i) => <React.Fragment key={i}>{i ? <br /> : null}{w}</React.Fragment>)}
+              </div>
+              <div className="mh-mono-row">
+                <span>{lead.points} PTS</span>
+                {bounty(1) && <span style={{ color: "var(--mn-peach)" }}>BOUNTY {bounty(1)} OMR</span>}
+              </div>
+            </div>
+          </button>
+        )}
+        <div className="mh-replegend">
+          {MH_REPS.slice().reverse().map(r => (
+            <div key={r.id} style={{ borderTopColor: `var(--mn-rep-${r.id})` }}>
+              <b>{r.label.toUpperCase()}</b><span>{r.perNight * Math.max(1, X.nightsPlayed)}+</span>
+            </div>
+          ))}
+        </div>
+        {X.players.length >= 2 && (
+          <div>
+            {X.players.slice(1).map(p => {
+              const g = X.gap(p), mine = X.me && p.id === X.me.id;
+              const ring = p.rep.id === "rookie" ? null : `rep-${p.rep.id}`;
+              return (
+                <button type="button" key={p.id} className="mh-wrow mh-tap" data-me={mine ? "" : undefined}
+                  onClick={() => go("card", p.id)}>
+                  <div className="mn-display mh-wrank">{p.rank}</div>
+                  <MhAvatar player={{ name: p.name, photo: p.photo, photoPos: p.avPos || p.pos }} size={34} ring={ring} zoom={p.zoom} />
+                  <div style={{ minWidth: 0, textAlign: "left" }}>
+                    <div className="mh-wname">{p.name}{mine && <span className="mn-serif"> you</span>}</div>
+                    <MhLabel style={{ color: `var(--mn-rep-${p.rep.id})` }}>Rep · {p.rep.label.toUpperCase()}</MhLabel>
+                  </div>
+                  <div className="mh-wmove">{p.movement || "—"}</div>
+                  <div style={{ textAlign: "right" }}>
+                    <div className="mn-display" style={{ fontSize: 20, fontWeight: 800, lineHeight: 1 }}>{p.points}</div>
+                    <div className="mh-wgap">{g === 0 ? "level" : `−${g}`}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </MhPage>
+  );
+}
+
+// ── 04 ME ────────────────────────────────────────────────────────────────
+const MH_SEG = [["groupWins", "Group wins", "var(--mn-teal)"], ["lossPts", "Loss points", "var(--mn-teal-45)", "var(--mn-teal-60)"],
+                ["knockout", "Knockout", "var(--mn-coral)"], ["titles", "Titles", "var(--mn-sand)"]];
+function MhMe({ D, go }) {
+  const X = mhDerive(D);
+  const me = X.me;
+  if (!me || !me.points) {
+    return (
+      <MhPage D={D} tab="me" onTab={go}>
+        <div className="mh-col">
+          <MhTitle title="ME" />
+          <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
+            <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>
+        </div>
+      </MhPage>
+    );
+  }
+  const rival = X.above(me), next = mhNextRep(me.rep), n = Math.max(1, X.nightsPlayed);
+  const lo = me.rep.perNight * n, hi = next ? next.perNight * n : lo;
+  const frac = next ? Math.max(0, Math.min(1, (me.points - lo) / Math.max(1, hi - lo))) : 1;
+  const seg = (D.me && D.me.seg) || {};
+  const segTotal = MH_SEG.reduce((a, [k]) => a + (seg[k] || 0), 0);
+  return (
+    <MhPage D={D} tab="me" onTab={go}>
+      <div className="mh-col">
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <MhCrewCard player={{ name: me.name, photo: me.photo, photoPos: me.meCardPos || me.pos }} rank={me.rank}
+            points={me.points} rep={me.rep} size="S" foil={false} onClick={() => go("card", me.id)} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+            <MhLabel>Your season</MhLabel>
+            <MhDisplay size={56} style={{ lineHeight: .85 }}>{me.points}</MhDisplay>
+            <div style={{ display: "flex", gap: 6 }}>
+              <span className="mh-chip" data-tone={me.rep.id}>#{me.rank}</span>
+              <span className="mh-chip" data-tone={me.rep.id}>REP {me.rep.label.toUpperCase()}</span>
+            </div>
+            {next ? <>
+              <div className="mh-progress"><div className="mn-fill" style={{ width: (frac * 100).toFixed(1) + "%" }} /></div>
+              <MhLabel>{mhPts(hi - me.points)} to {next.label}</MhLabel>
+            </> : <MhLabel tone="gold">Top rep reached</MhLabel>}
+          </div>
+        </div>
+        {rival && (
+          <button type="button" className="mn-glass mh-tap" onClick={() => go("rival")}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <MhAvatar player={{ name: rival.name, photo: rival.photo, photoPos: rival.avPos || rival.pos }} size={42} ring="coral" zoom={rival.zoom} />
+              <div style={{ flex: 1, textAlign: "left" }}>
+                <MhLabel tone="coral">Your rival · #{rival.rank}</MhLabel>
+                <MhDisplay size={20}>{mhFirst(rival.name)} · {rival.points}</MhDisplay>
+                {D.rival && D.rival.h2h && <MhSerif size={14}>Head to head {D.rival.h2h.w}–{D.rival.h2h.l}</MhSerif>}
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <MhDisplay size={26} tone="peach">{rival.points - me.points}</MhDisplay>
+                <MhLabel>pts</MhLabel>
+              </div>
+            </div>
+          </button>
+        )}
+        {segTotal > 0 && <>
+          <MhLabel>Where the points came from</MhLabel>
+          <div className="mh-stack" role="img" aria-label={MH_SEG.map(([k, l]) => `${l} ${seg[k] || 0}`).join(", ")}>
+            {MH_SEG.map(([k, , c]) => (seg[k] ? <div key={k} style={{ flex: seg[k], background: c }} /> : null))}
+          </div>
+          <div className="mh-legend">
+            {MH_SEG.map(([k, l, c, sw]) => (
+              <div key={k}><span><span style={{ color: sw || c }}>■</span> {l}</span><b>{seg[k] || 0}</b></div>
+            ))}
+          </div>
+        </>}
+        {D.me && D.me.episodes && D.me.episodes.length > 0 && <>
+          <MhLabel>Episode by episode</MhLabel>
+          <div>
+            {D.me.episodes.map(e => (
+              <button type="button" key={e.session} className="mh-eprow mh-tap" onClick={() => go("receipt", e.session)}>
+                <MhDisplay size={16} tone="mist">{D.sessions[e.session - 1].code}</MhDisplay>
+                <span>{e.label}</span>
+                <MhDisplay size={17} tone={e.title ? "gold" : e.knockout ? "teal" : undefined}>+{e.pts}</MhDisplay>
+              </button>
+            ))}
+          </div>
+        </>}
+      </div>
+    </MhPage>
+  );
+}
+
+// ── 05 THE CREW ──────────────────────────────────────────────────────────
+function MhCrew({ D, go }) {
+  const X = mhDerive(D);
+  const [t, setT] = React.useState("all");
+  const tiers = [["all", "All"]].concat((MH.tiers || []).map(x => [x.id, x.label[0] + x.label.slice(1).toLowerCase()]));
+  const shown = X.players.filter(p => t === "all" || p.tier.id === t);
+  return (
+    <MhPage D={D} tab="crew" onTab={go}>
+      <div className="mh-col">
+        <MhTitle title="THE CREW" aside={`${D.rosterSize || X.players.length} players`} />
+        <MhPills label="Tier" items={tiers} value={t} onChange={setT} />
+        <div className="mh-grid">
+          {shown.map(p => (
+            <MhCrewCard key={p.id} player={{ name: p.name, photo: p.photo, photoPos: p.pos }} rank={p.rank}
+              points={p.points} rep={p.rep} size="M" onClick={() => go("card", p.id)} />
+          ))}
+        </div>
+      </div>
+    </MhPage>
+  );
+}
+
+// ── 06 CREW CARD ─────────────────────────────────────────────────────────
+function MhCardScreen({ D, go, id }) {
+  const X = mhDerive(D);
+  const p = X.byId[id] || X.players[0];
+  const own = X.me && p.id === X.me.id;
+  const v = D.vsCard && D.vsCard.playerId === p.id ? D.vsCard : null;
+  return (
+    <MhPage D={D} tab="crew" onTab={go} nav={false} pad="92px 20px 0">
+      <div className="mh-col">
+        <div className="mh-split">
+          <MhLabel>Crew card</MhLabel>
+          <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.pos }} rank={p.rank} points={p.points}
+            rep={p.rep} size="L" stats={p.stats || {}} />
+        </div>
+        {!own && v && (
+          <MhGlass>
+            <div className="mh-split">
+              <div>
+                <MhLabel tone="coral">You vs him</MhLabel>
+                <MhSerif size={14}>{v.meetings} meeting{v.meetings === 1 ? "" : "s"} · last {D.sessions[v.last.session - 1].code}, {v.last.won ? "won" : "lost"} {v.last.score}</MhSerif>
+              </div>
+              <MhDisplay size={28}>{v.w}–{v.l}</MhDisplay>
+            </div>
+          </MhGlass>
+        )}
+      </div>
+    </MhPage>
+  );
+}
+
+// ── 17 THE TAKE ──────────────────────────────────────────────────────────
+function MhTake({ D, go }) {
+  const X = mhDerive(D);
+  const pool = (MH.seasonPrizes || []).reduce((a, b) => a + b, 0) + MH.voucher * 2 * D.sessions.length;
+  const paid = D.paidOMR != null ? D.paidOMR : X.nightsPlayed * MH.voucher * 2;
+  const left = pool - paid;
+  const place = [["1ST", "gold"], ["2ND", "silver"], ["3RD", "bronze"]];
+  return (
+    <MhPage D={D} tab="me" onTab={go}>
+      <div className="mh-col">
+        <MhTitle title="THE TAKE" />
+        <div className="mh-takehero">
+          <MhArt src={D.sessions[D.sessions.length - 1].art} pos="center 50%" />
+          <div className="mh-takebody">
+            <MhLabel tone="peach">Prize pool</MhLabel>
+            <MhDisplay size={52} style={{ lineHeight: .9 }}>{pool} OMR</MhDisplay>
+            <div style={{ display: "flex", gap: 14 }}><MhLabel tone="teal">{paid} paid</MhLabel><MhLabel tone="gold">{left} left</MhLabel></div>
+          </div>
+        </div>
+        <div className="mh-col" style={{ gap: 6 }}>
+          <div className="mh-split"><MhLabel tone="teal">Won so far</MhLabel><MhLabel>{X.nightsPlayed} of {D.sessions.length} nights</MhLabel></div>
+          <div className="mh-meter"><div className="mn-fill" style={{ width: (paid / pool * 100).toFixed(1) + "%" }} /></div>
+          <div className="mh-segs" style={{ gridTemplateColumns: `repeat(${D.sessions.length},minmax(0,1fr))` }}>
+            {D.sessions.map(s => <div key={s.no} data-s={s.state === "done" ? "done" : s.finale ? "finale" : "rest"} />)}
+          </div>
+          <div className="mh-split mn-serif" style={{ fontSize: 13 }}><span>{paid} OMR in vouchers paid</span><span>{left} OMR still to win</span></div>
+        </div>
+        <MhLabel>If the season ended now</MhLabel>
+        {X.players.slice(0, 3).map((p, i) => (
+          <button type="button" key={p.id} className="mn-glass mh-tap mh-prize" onClick={() => go("card", p.id)}>
+            <MhDisplay size={20} tone={place[i][1]} style={{ width: 36 }}>{place[i][0]}</MhDisplay>
+            <MhAvatar player={{ name: p.name, photo: p.photo, photoPos: p.avPos || p.pos }} size={38} ring={place[i][1]} zoom={p.zoom} />
+            <div className="mn-display" style={{ flex: 1, fontSize: 17, textAlign: "left" }}>{p.name.toUpperCase()}
+              <div className="mh-ptsline">{p.points} PTS</div></div>
+            <MhDisplay size={24}>{MH.seasonPrizes[i]}<span className="mh-omr"> OMR</span></MhDisplay>
+          </button>
+        ))}
+        <MhLabel>Nightly · {MH.voucher * 2} OMR to each episode's champions</MhLabel>
+      </div>
+    </MhPage>
+  );
+}
+
+function Preview() {
+  const read = () => (location.hash.slice(1) || "home").split("/");
+  const [route, setRoute] = React.useState(read());
+  const [stack, setStack] = React.useState([]);
+  React.useEffect(() => { const f = () => setRoute(read()); addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
+  const D = window.MH_PREVIEW;
+  const go = (to, arg) => {
+    if (to === "back") { history.back(); return; }
+    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take"];
+    if (known.indexOf(to) < 0) return;      // later phases: session, recap, rival, receipt, signup
+    location.hash = arg != null ? `${to}/${arg}` : to; scrollTo(0, 0);
+  };
+  const [name, arg] = route;
+  const S = { home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake }[name] || MhHome;
+  return <S D={D} go={go} id={arg} />;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<Preview />);
+</script>
+</body></html>

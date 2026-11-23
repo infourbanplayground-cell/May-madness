@@ -153,11 +153,15 @@ function MhBilling({ parts, style }) {
 }
 
 // ── avatar ────────────────────────────────────────────────────────────────
-function MhAvatar({ player, size = 34, ring }) {
+// zoom = [side, x%, y%]: the static design crops ONE face out of a
+// two-person painting by blowing it up 220% x 160% and sliding it. Real
+// photos are one person and never need it.
+function MhAvatar({ player, size = 34, ring, zoom }) {
+  const art = <MhArt src={player && player.photo} name={player && player.name} pos={player && player.photoPos} />;
   return (
-    <div className="mn-avatar" style={{ width: size, height: size,
+    <div className="mn-avatar" style={{ width: size, height: size, fontSize: size * .18,
       boxShadow: ring ? `0 0 0 2px var(--mn-${ring})` : undefined }}>
-      <MhArt src={player && player.photo} name={player && player.name} pos={player && player.photoPos} />
+      {zoom ? <div style={{ position: "absolute", [zoom[0]]: zoom[1] + "%", top: zoom[2] + "%", width: "220%", height: "160%" }}>{art}</div> : art}
     </div>
   );
 }
