@@ -316,6 +316,49 @@ def main():
   <script>if (new URLSearchParams(location.search).has("classic")) document.getElementById("mh-back").hidden = false;</script>
   <div id="root"></div>""", "classic way back")
 
+    # THE BOOT SPLASH. The inherited page shows a static splash — the club mark
+    # and "LOADING..." — for the seconds Babel takes to compile the app, and it
+    # is the first thing anybody sees. The owner (24 Nov): "the loading still
+    # shows urban playground logo then loading", wanting the GTA-style posters.
+    # So the static splash IS the Now Loading screen now, drawn without React:
+    # the same poster (same day rotation), the same lockup classes, the same
+    # spinner — the React screen takes over on the identical picture. The pan
+    # crops a WIDE poster to a tall phone, so it always wants the 1200 cut.
+    import re as _re
+    posters = [x["art"].rsplit(".", 1)[0] for x in S.get("loadingArt", [])]
+    assert posters, "loadingArt is empty: the boot splash has no poster"
+    lock = (f'<div class="mn-lockup"><div class="mn-l1" style="font-size:62px">{S["nameLine1"]}</div>'
+            f'<div class="mn-band"><span style="font-size:35px">{S["nameLine2"]}</span></div>'
+            f'<div class="mn-meta">{S["volumeLabel"]} · Muscat · {S["monthShort"]} {S["year"]}</div></div>')
+    boot = f"""  <div id="splash" class="mh-boot" role="status" aria-label="Now loading Muscat">
+    <div class="mhb-art"><img id="mhb-img" alt="" fetchpriority="high"></div>
+    <div class="mhb-shade"></div>
+    <div class="mhb-lock">{lock}</div>
+    <div class="mhb-spin"><span class="mhb-ring"></span><span>NOW LOADING MUSCAT</span></div>
+  </div>
+  <script>(function(){{var P={json.dumps(posters)};var n=P[Math.floor(Date.now()/864e5)%P.length];
+    var i=document.getElementById("mhb-img");i.onerror=function(){{i.onerror=null;i.src="assets/art/"+n+".jpg";}};
+    i.src="assets/art/"+n+"-"+(Math.max(innerWidth,innerHeight)*(devicePixelRatio||1)>2400?1600:1200)+".webp";}})();</script>
+  <style>
+  .mh-boot{{position:fixed;inset:0;z-index:999;background:#0F1B2B;overflow:hidden}}
+  .mh-boot .mhb-art{{position:absolute;inset:0}}
+  .mh-boot .mhb-art img{{width:100%;height:100%;object-fit:cover;object-position:0% 35%;transform:scale(1.06);animation:mhbPan 4.6s linear forwards}}
+  @keyframes mhbPan{{to{{object-position:100% 35%;transform:scale(1.12)}}}}
+  .mh-boot .mhb-shade{{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.78),rgba(10,16,26,.35) 26%,rgba(10,16,26,0) 40%,rgba(10,16,26,0) 62%,rgba(10,16,26,.85) 88%)}}
+  .mh-boot .mhb-lock{{position:absolute;left:20px;top:calc(58px + env(safe-area-inset-top))}}
+  .mh-boot .mn-l1{{filter:var(--mn-title-filter) drop-shadow(4px 4px 0 rgba(0,0,0,.85))}}
+  .mh-boot .mn-band{{filter:drop-shadow(4px 4px 0 rgba(0,0,0,.85))}}
+  .mh-boot .mn-meta{{text-shadow:0 1px 6px rgba(0,0,0,.9)}}
+  .mh-boot .mhb-spin{{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#F2E6D8}}
+  .mh-boot .mhb-ring{{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#FFC9A3;animation:mhbSpin .8s linear infinite}}
+  @keyframes mhbSpin{{to{{transform:rotate(360deg)}}}}
+  @media (prefers-reduced-motion:reduce){{.mh-boot .mhb-art img{{animation:none}}.mh-boot .mhb-ring{{animation-duration:2.4s}}}}
+  </style>
+"""
+    s, n = _re.subn(r'  <div id="splash" class="splash">.*?</div></div>\n', lambda m: boot, s, count=1)
+    assert n == 1, "inherited splash markup not found"
+    assert "up-logo-tight.png\" alt=\"Muscat Heist\"></div><div class=\"splash-chip\"" not in s
+
     # POSTS and LINE-UP in the inherited night editor opened Vol.9's canvas
     # cards, re-coloured. They open the Heist night share now (the session's
     # number is its date's place in the season's nights).

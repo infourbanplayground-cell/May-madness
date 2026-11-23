@@ -896,6 +896,12 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   low down and a title over a title reads as neither — the tip in a dark box,
   a spinner bottom right that becomes TAP TO CONTINUE, and a 4px progress bar
   on the bottom edge. `check-heist-app.mjs` waits 4.8s for the change.
+  - **The BOOT SPLASH is the same screen, without React.** The inherited
+    static `#splash` (club mark + "LOADING...") showed for the seconds Babel
+    compiles the app and was the first thing anyone saw. `build-heist-app.py`
+    replaces it with the poster (same day rotation as MhLoading), the lockup's
+    own classes and the spinner, so React takes over on the identical picture.
+    It keeps `id="splash"` because the inherited loader removes it by id.
 - **Mobile + motion (23 Nov):** every scene ships as WebP at 480/1200/1600 beside
   the JPEG (`MhArt` writes the srcset for `assets/art/*.jpg`; the JPEG is the
   fallback) — a 390px phone at 2x fetches `-1200.webp`, ~45% lighter, and

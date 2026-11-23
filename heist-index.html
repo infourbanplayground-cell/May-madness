@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "ddb7eddbdd11";
+  var V = "e20b3e24d5e2";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1581,7 +1581,30 @@ html:not(#mh) .na-trow { background: rgba(255, 244, 232, .04) !important; border
 </style>
 </head>
 <body>
-  <div id="splash" class="splash"><div class="splash-logo-wrap"><img class="splash-logo" src="assets/up-logo-tight.png" alt="Muscat Heist"></div><div class="splash-chip">LOADING...</div></div>
+  <div id="splash" class="mh-boot" role="status" aria-label="Now loading Muscat">
+    <div class="mhb-art"><img id="mhb-img" alt="" fetchpriority="high"></div>
+    <div class="mhb-shade"></div>
+    <div class="mhb-lock"><div class="mn-lockup"><div class="mn-l1" style="font-size:62px">MUSCAT</div><div class="mn-band"><span style="font-size:35px">HEIST</span></div><div class="mn-meta">VOL.10 · Muscat · DEC 2026</div></div></div>
+    <div class="mhb-spin"><span class="mhb-ring"></span><span>NOW LOADING MUSCAT</span></div>
+  </div>
+  <script>(function(){var P=["art-load-club", "art-load-squad", "art-load-grid", "art-extra-collage"];var n=P[Math.floor(Date.now()/864e5)%P.length];
+    var i=document.getElementById("mhb-img");i.onerror=function(){i.onerror=null;i.src="assets/art/"+n+".jpg";};
+    i.src="assets/art/"+n+"-"+(Math.max(innerWidth,innerHeight)*(devicePixelRatio||1)>2400?1600:1200)+".webp";})();</script>
+  <style>
+  .mh-boot{position:fixed;inset:0;z-index:999;background:#0F1B2B;overflow:hidden}
+  .mh-boot .mhb-art{position:absolute;inset:0}
+  .mh-boot .mhb-art img{width:100%;height:100%;object-fit:cover;object-position:0% 35%;transform:scale(1.06);animation:mhbPan 4.6s linear forwards}
+  @keyframes mhbPan{to{object-position:100% 35%;transform:scale(1.12)}}
+  .mh-boot .mhb-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.78),rgba(10,16,26,.35) 26%,rgba(10,16,26,0) 40%,rgba(10,16,26,0) 62%,rgba(10,16,26,.85) 88%)}
+  .mh-boot .mhb-lock{position:absolute;left:20px;top:calc(58px + env(safe-area-inset-top))}
+  .mh-boot .mn-l1{filter:var(--mn-title-filter) drop-shadow(4px 4px 0 rgba(0,0,0,.85))}
+  .mh-boot .mn-band{filter:drop-shadow(4px 4px 0 rgba(0,0,0,.85))}
+  .mh-boot .mn-meta{text-shadow:0 1px 6px rgba(0,0,0,.9)}
+  .mh-boot .mhb-spin{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#F2E6D8}
+  .mh-boot .mhb-ring{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#FFC9A3;animation:mhbSpin .8s linear infinite}
+  @keyframes mhbSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.mh-boot .mhb-art img{animation:none}.mh-boot .mhb-ring{animation-duration:2.4s}}
+  </style>
   <a id="mh-back" href="./" hidden>← Muscat Heist<span>ORGANISER TOOLS</span></a>
   <script>if (new URLSearchParams(location.search).has("classic")) document.getElementById("mh-back").hidden = false;</script>
   <div id="root"></div>
