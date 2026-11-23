@@ -116,7 +116,7 @@ function heistData(state, o) {
     const st = s && s.completed ? "done" : s && started ? "live" : "soon";
     const f = s && (s.bracket || {}).final;
     const champTeam = f && f.winner && (s.teams || []).find(t => t.id === (f.winner === "team1" ? f.team1Id : f.team2Id));
-    return { no, date, state: st, code: ep(no).code, title: ep(no).title, art: (o.artBase || "") + ep(no).art,
+    return { no, date, state: st, code: ep(no).code, title: ep(no).title, art: (o.artBase || "") + ep(no).art, artPos: ep(no).artPos,
       time: S.time, doublePoints: (S.doubleNights || []).indexOf(date) >= 0, finale: no === nights.length,
       sid: s && s.id,
       champions: champTeam ? [champTeam.p1Id, champTeam.p2Id].map(i => (byId[i] || {}).name) : undefined,

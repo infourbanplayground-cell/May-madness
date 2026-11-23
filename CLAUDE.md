@@ -868,7 +868,15 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   week three on Vol.9's numbers. Card stats approved as proposed. Scoring is
   entered on the existing number pad, restyled — the handoff's point-by-point
   "+1" screen is NOT a scoring change we make.
-- Session art and episode titles are placeholders until the owner sends real ones.
+- **Session art is the owner's own** (23 Nov 2026): nine painted dusk scenes at
+  the club, `brand/heist/art/art-epNN-*.jpg` (1600px, q84), one per episode, with
+  an `artPos` per episode in `heist-season.json` (the crop a frame keeps — the
+  smash sits at `30%` because centred, the tall frame cuts through the jumper).
+  `art-extra-collage.jpg` is unassigned. The old `art-carpark/club/corniche/
+  rivals/smash` stay ONLY because the preview and dev pages use them as stand-in
+  player photos. Episode titles are still placeholders. The scenes carry
+  third-party marks (Nike, Head, Adidas, NOX, Ferrari, Premier Padel) and
+  sponsor shirts — fine in-app, worth a look before a paid post.
 - **Phase 3 (the night) is `brand/heist/heist-night.jsx`**: 07 Session (Teams /
   Groups / Knockout / MVP), 08 Live Scoring, 09 Episode Recap, 10 Recap Slides.
   - **Live Scoring's +1 is a GAME, not a point** — the fixture is first to 6 at

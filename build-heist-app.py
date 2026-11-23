@@ -197,7 +197,7 @@ Drop your name + partner below to lock your spot 👇
     head = re.sub(r'<meta name="apple-mobile-web-app-title" content="[^"]*" />', f'<meta name="apple-mobile-web-app-title" content="{name}" />', head)
     head = re.sub(r'<meta name="description" content="[^"]*" />', f'<meta name="description" content="{name} — Vol.{S["volume"]} of the Urban Social Series. {desc}" />', head)
     head = re.sub(r'<meta (property|name)="(og|twitter):description" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}:description" content="{desc}" />', head)
-    head = re.sub(r'<meta (property|name)="(og:image|twitter:image)" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}" content="https://{host}/assets/art/art-corniche.jpg" />', head)
+    head = re.sub(r'<meta (property|name)="(og:image|twitter:image)" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}" content="https://{host}/assets/art/art-ep02-arrival.jpg" />', head)
     head = re.sub(r'<meta property="og:image:alt" content="[^"]*" />', f'<meta property="og:image:alt" content="{name} — {tag}" />', head)
     s = s[:h0] + head + s[h1:]
 
