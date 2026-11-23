@@ -5,6 +5,7 @@
     "pngjs": "^7.0.0"
   },
   "scripts": {
-    "heist": "node ops/heist-portraits.mjs"
+    "heist": "node ops/heist-portraits.mjs",
+    "heist:treat": "python3.13 ops/heist-treatment.py"
   }
 }
