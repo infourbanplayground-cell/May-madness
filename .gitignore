@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .impeccable/hook.cache.json
+
+# heist portrait runs: player likenesses, progress and review sheets stay local
+brand/heist/portraits/

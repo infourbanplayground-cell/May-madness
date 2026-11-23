@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "sharp": "^0.33.5"
+  },
+  "scripts": {
+    "heist": "node ops/heist-portraits.mjs"
   }
 }
