@@ -1,0 +1,35 @@
+{
+  "_comment": "Copy to config.json and fill in. config.json is gitignored — never commit it.",
+
+  "heist": {
+    "base_url": "https://heist.urbanpadel.om",
+    "pin": "PUT_THE_PHOTOS_PIN_HERE"
+  },
+
+  "openai": {
+    "api_key": "PUT_YOUR_OPENAI_API_KEY_HERE",
+    "base_url": "https://api.openai.com/v1",
+
+    "_model_note": "gpt-image-1 was shut down 2026-10-23. gpt-image-2.6-sunburst is the current default and the better of the 2.6 pair for precise edits; gpt-image-2.6-flare is faster and cheaper.",
+    "model": "gpt-image-2.6-sunburst",
+
+    "_size_note": "Both edges must divide by 16, so 1080x1350 cannot be requested. 1536x1920 is exactly 4:5 and downscales cleanly to the 1080x1350 the site wants.",
+    "size": "1536x1920",
+
+    "quality": "high",
+    "output_format": "png",
+
+    "_fidelity_note": "input_fidelity is deliberately NOT sent: on the 2.x models it is always high, and passing it is documented as an error.",
+
+    "timeout_seconds": 300,
+    "max_retries": 3,
+    "retry_backoff_seconds": 20
+  },
+
+  "output": {
+    "_note": "The site builds a 1080x1350 canvas and uploads JPEG at 0.88 quality; we match that exactly.",
+    "final_width": 1080,
+    "final_height": 1350,
+    "upload_jpeg_quality": 88
+  }
+}
