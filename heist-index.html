@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "c46486376d38";
+  var V = "2c00a8494a84";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -11238,7 +11238,7 @@ const NATIONAL_DAY_LABEL = 'Mon 28 Dec';
 const NATIONAL_DAY_DATE = '';
 const NATIONAL_DAY_TITLE = "DOUBLE POINTS";
 const NATIONAL_DAY_TITLE_AR = "";
-const NA_HISTORY_V = "33d3f4055d";
+const NA_HISTORY_V = "0bd2ce0fc8";
 const NA_VOLUME_NAME = "Muscat Heist";
 const NA_HIGHLIGHTS_URL = "https://savemyplay.com/facility/192-UZgnrJWB-urban-playground-muscat/highlights";
 const NA_CLIPS_API = "https://api.savemyplay.com/v1/facilities/slug/192-UZgnrJWB-urban-playground-muscat/highlights?view=all&limit=60";

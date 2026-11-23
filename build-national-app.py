@@ -2183,8 +2183,10 @@ def main():
     # Deliberate: the all-time volume list names every previous volume, the
     # signup post links Vol.8's final standings, and THREE code comments
     # explain what Vol.8 did differently — DOUBLE_NIGHTS (a threshold, not a
-    # list), the skin's note on the tagline's second ink, and the skin's note
-    # on the nav's inherited blur. A comment naming the volume it is
+    # list), the skin's note on the tagline's second ink, the skin's note
+    # on the nav's inherited blur, and (FOURTH, national_player.py) the
+    # player card's ALL-TIME PLATE note on the two Vol.8 boxes it replaced —
+    # that one went in without the bump and failed every build until 24 Nov. A comment naming the volume it is
     # contrasting with is the point of the comment; the check is for renames
     # that stopped matching, and it stays an exact count rather than being
     # loosened to "any number".
@@ -2195,7 +2197,7 @@ def main():
     # verified" without ever being deployable. Raise the number WITH the
     # comment that says which mentions it covers; a bare bump is how the check
     # stops meaning anything.
-    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 3}
+    allowed = {"Blackout Series": 5, "blackout.urbanpadel.om": 1, "Vol.8": 4}
     bad = {k: v for k, v in leftovers.items() if v > allowed.get(k, 0)}
 
     # ANY OTHER VOLUME'S HOST, in any casing. The named checks above only ever

@@ -1084,6 +1084,20 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     `html:not(#mh)`.
   - `node ops/check-heist-nightshare.mjs`: POSTS and LINE-UP open the Heist
     share, and all six cards export at exactly 1080x1920 through the button.
+- **DUPLICATE PLAYERS ARE MERGED WITH `ops/merge-players.js`** (run on the
+  server with the API's .env sourced: `node merge-players.js <na|he> dup:keep`,
+  `DRY=1` first). It rewrites every reference (values and object keys), drops
+  the duplicate record, combines prevSeriesPts by MAX not sum (both MSM records
+  carried the same July Heat 50), refuses a session that would put one person
+  on two teams, backs the state up to `/root/merge-backup-*` and
+  `<prefix>_state_history`, and bumps `version` so a stale phone conflicts
+  instead of overwriting. **Done 24 Nov:** MSM `p_mrcbedrc_y5ioq` ->
+  `p_mtu5d6t0_agbyk`, Aamir `p_mw9axk6h_qfbnq` -> Aamir Al Saadi
+  `p_mqf8rb1i_seau4`, in National and Heist; `history.json` rewritten the same
+  way and both apps redeployed. The ARCHIVED volumes (Blackout and older) still
+  hold both ids — their own tables are history, and the all-time view reads
+  history.json. Re-running `build-history.py` would bring the old ids back:
+  apply the same two substitutions after it.
 - **Deploy: `bash ops/deploy-heist.sh`** -> `/preview/` until launch;
   `ROOT=1` puts it at the front on **Tue 1 Dec**. It refuses to run 17:00-23:00
   on a Heist night, and writes `version.txt` at the SITE ROOT (the update check
