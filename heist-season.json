@@ -36,6 +36,9 @@
     {"code": "EP.08", "title": "The Crew", "art": "art-ep08-crew.jpg", "artPos": "center 48%"},
     {"code": "EP.09", "title": "The Big Score", "art": "art-ep09-walkout.jpg", "artPos": "center 50%"}
   ],
+  "extraArt": [
+    {"art": "art-extra-collage.jpg", "artPos": "center 30%"}
+  ],
   "entry": 7,
   "voucher": 14,
   "seasonPrizes": [75, 50, 30],

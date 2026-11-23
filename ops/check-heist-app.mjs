@@ -127,6 +127,20 @@ for (const scen of (process.env.ONLY ? [process.env.ONLY] : ['mid', 'launch'])) 
     if (process.env.SHOTS) await p2.screenshot({ path: path.join(OUT, `${scen}-${r.replace(/\//g, '_')}.png`) });
   }
   ok(!e2.length, `${scen}: page errors: ${e2.slice(0, 2).join(' | ')}`);
+  // ── scenes: the loading screen must actually change picture, and no two
+  // pages may open on the same one (the owner: "I don't wanna see the same
+  // picture in each page")
+  {
+    const shown = async () => p2.evaluate(() => { const on = document.querySelector('.mh-scene[data-on] img');
+      return on ? on.getAttribute('src') : (document.querySelector('.mn-hero-img img, .mh-takehero img') || {}).getAttribute?.('src'); });
+    await look(p2, 'loading'); const a = await shown(); await p2.waitForTimeout(3000); const b = await shown();
+    ok(a && b && a !== b, `${scen} #loading: the picture did not change (${a} then ${b})`);
+    const first = {};
+    for (const r of ['loading', 'home', 'take']) { await look(p2, r); first[r] = await shown(); }
+    const vals = Object.values(first);
+    ok(vals.every(Boolean) && new Set(vals).size === vals.length, `${scen}: pages share a picture: ${JSON.stringify(first)}`);
+    console.log(`  ${scen} scenes: loading ${a.split('/').pop()} -> ${b.split('/').pop()} · home ${first.home.split('/').pop()} · take ${first.take.split('/').pop()}`);
+  }
   // ── facts ──
   if (scen === 'mid') {
     await look(p2, 'wanted');

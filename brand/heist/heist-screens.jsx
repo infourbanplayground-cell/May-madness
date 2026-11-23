@@ -73,7 +73,8 @@ function MhHome({ D, go }) {
   const left = next && mhCountdown(mhStart(next.date, next.time), now);
   return (
     <MhPage D={D} tab="home" onTab={go} pad="0">
-      <MhHeroCut height={470} src={hero && hero.art} pos={hero && hero.heroPos || "34% 20%"}>
+      <MhHeroCut height={470} src={hero && hero.art} pos={hero && hero.heroPos || "34% 20%"}
+        scenes={D.scenes} sceneStart={mhSceneIndex(D, "home")} every={6000}>
         <div style={{ position: "absolute", left: 22, top: 250 }}><MhTitleLockup size="S" /></div>
       </MhHeroCut>
       <div className="mh-col" style={{ padding: "0 20px", marginTop: -8, gap: 10 }}>
@@ -414,7 +415,7 @@ function MhTake({ D, go }) {
       <div className="mh-col">
         <MhTitle title="THE TAKE" />
         <div className="mh-takehero">
-          <MhArt src={D.sessions[D.sessions.length - 1].art} pos="center 50%" />
+          <MhArt src={mhScene(D, "take").src || D.sessions[D.sessions.length - 1].art} pos={mhScene(D, "take").pos || "center 50%"} />
           <div className="mh-takebody">
             <MhLabel tone="peach">Prize pool</MhLabel>
             <MhDisplay size={52} style={{ lineHeight: .9 }}>{pool} OMR</MhDisplay>

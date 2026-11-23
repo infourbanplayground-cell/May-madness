@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "587d6fa08ccf";
+  var V = "95b535b3d7fb";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -917,9 +917,9 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-min-text: 11px;
 
   /* — added: values the static design uses inline, named once — */
-  --mn-art-filter: saturate(1.08) contrast(1.05);
-  --mn-art-tint: linear-gradient(180deg, rgba(255,140,90,.12), rgba(20,60,90,.22));
-  --mn-hero-fade: linear-gradient(180deg, rgba(15,27,43,.45), rgba(15,27,43,0) 22%, rgba(15,27,43,0) 50%, rgba(15,27,43,.85) 92%);
+  --mn-art-filter: saturate(1.28) contrast(1.06) brightness(1.04);
+  --mn-art-tint: linear-gradient(180deg, rgba(255,140,90,.10), rgba(20,60,90,.08));
+  --mn-hero-fade: linear-gradient(180deg, rgba(15,27,43,.32), rgba(15,27,43,0) 18%, rgba(15,27,43,0) 58%, rgba(15,27,43,.82) 94%);
   --mn-card-fade: linear-gradient(180deg, rgba(19,32,47,0) 55%, var(--mn-navy-2));
   --mn-foil: linear-gradient(115deg, transparent 25%, rgba(255,244,232,.35) 40%, rgba(255,201,163,.3) 48%, transparent 62%);
   --mn-sun: radial-gradient(circle, rgba(255,201,163,.55), rgba(242,107,91,.25) 45%, rgba(242,107,91,0) 70%);
@@ -1122,7 +1122,7 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-job[data-state="finale"] { border-color: var(--mn-gold-45); }
 .mh-jobmain { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; background: none; border: 0; padding: 0; text-align: left; color: inherit; cursor: pointer; min-height: 64px; }
 .mh-thumb { position: relative; height: 64px; border-radius: 10px; overflow: hidden; }
-.mh-job[data-state="done"] .mh-thumb { filter: grayscale(.6) brightness(.7); }
+.mh-job[data-state="done"] .mh-thumb { filter: grayscale(.25) brightness(.85); }
 .mh-jobtitle { font-size: 19px; line-height: 1.05; }
 .mh-job .mn-pill { margin: -7px 0; }
 
@@ -1160,7 +1160,7 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 
 /* the take */
 .mh-takehero { position: relative; height: 150px; border-radius: var(--mn-r-hero); overflow: hidden; }
-.mh-takehero .mn-art img { filter: var(--mn-art-filter) brightness(.55); }
+.mh-takehero .mn-art img { filter: var(--mn-art-filter) brightness(.7); }
 .mh-takebody { position: absolute; left: 16px; bottom: 14px; }
 .mh-meter { position: relative; height: 12px; border-radius: 6px; background: var(--mn-line); overflow: hidden; }
 .mh-meter > div { height: 100%; border-radius: 6px; background: var(--mn-grad-meter); }
@@ -1447,6 +1447,16 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mn-avatar .mn-initials { font-size: max(9px, 2.2em) !important; }
 /* a player with no photo is a disc with their initials, not loose letters on the page */
 .mn-avatar .mn-initials { background: rgba(255,244,232,.12); color: var(--mn-sand); }
+
+/* ── scenes: the crossfading pictures (loading, home) ─────────────────── */
+.mh-scenes { position: absolute; inset: 0; }
+.mh-scene { position: absolute; inset: 0; opacity: 0; transition: opacity 1.1s ease; }
+.mh-scene[data-on] { opacity: 1; }
+.mh-scene .mn-art img { transform: scale(1.02); }
+.mh-scene[data-on] .mn-art img { animation: mhKen 7s ease-out forwards; }
+@keyframes mhKen { from { transform: scale(1.02); } to { transform: scale(1.1); } }
+.mh-loadtag { animation: mhTagIn .5s ease-out both; }
+@keyframes mhTagIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 </style>
 <style id="heist-classic">
@@ -7632,7 +7642,7 @@ function RosterView({ state, leaderboard, setOpenPlayerId, meId }) {
   );
 }
 
-window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The session art is the owner's (23 Nov 2026); the episode titles are still PLACEHOLDERS."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-ep01-lounge.jpg", "artPos": "center 38%"}, {"code": "EP.02", "title": "The Arrival", "art": "art-ep02-arrival.jpg", "artPos": "center 48%"}, {"code": "EP.03", "title": "The Heat", "art": "art-ep03-courts.jpg", "artPos": "center 62%"}, {"code": "EP.04", "title": "The Knockout", "art": "art-ep04-four.jpg", "artPos": "center 34%"}, {"code": "EP.05", "title": "The Smash", "art": "art-ep05-smash.jpg", "artPos": "30% 22%"}, {"code": "EP.06", "title": "The Grudge", "art": "art-ep06-trio.jpg", "artPos": "center 26%"}, {"code": "EP.07", "title": "The Rematch", "art": "art-ep07-rail.jpg", "artPos": "center 18%"}, {"code": "EP.08", "title": "The Crew", "art": "art-ep08-crew.jpg", "artPos": "center 48%"}, {"code": "EP.09", "title": "The Big Score", "art": "art-ep09-walkout.jpg", "artPos": "center 50%"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "stories": {"_note": "PLACEHOLDER ART until the owner sends the real artwork. The poster's hero panel is EP.01's scene; the two shards and the faded crew scene are chosen here. The billing names come from the table (top five), with 'starring' as the fallback list before a night is played.", "poster": {"hero": {"episode": 1, "pos": "34% 18%"}, "shards": [{"art": "art-smash.jpg", "pos": "center 22%", "tag": "THE SMASH"}, {"art": "art-rivals.jpg", "pos": "78% 22%", "tag": "THE RIVALS"}], "below": {"art": "art-carpark.jpg", "pos": "center 22%"}}, "contenders": {"art": "art-club.jpg", "pos": "center 40%"}, "starring": [], "url": "heist.urbanpadel.om"}, "previousVolume": "Muscat Heist"};
+window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The session art is the owner's (23 Nov 2026); the episode titles are still PLACEHOLDERS."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-ep01-lounge.jpg", "artPos": "center 38%"}, {"code": "EP.02", "title": "The Arrival", "art": "art-ep02-arrival.jpg", "artPos": "center 48%"}, {"code": "EP.03", "title": "The Heat", "art": "art-ep03-courts.jpg", "artPos": "center 62%"}, {"code": "EP.04", "title": "The Knockout", "art": "art-ep04-four.jpg", "artPos": "center 34%"}, {"code": "EP.05", "title": "The Smash", "art": "art-ep05-smash.jpg", "artPos": "30% 22%"}, {"code": "EP.06", "title": "The Grudge", "art": "art-ep06-trio.jpg", "artPos": "center 26%"}, {"code": "EP.07", "title": "The Rematch", "art": "art-ep07-rail.jpg", "artPos": "center 18%"}, {"code": "EP.08", "title": "The Crew", "art": "art-ep08-crew.jpg", "artPos": "center 48%"}, {"code": "EP.09", "title": "The Big Score", "art": "art-ep09-walkout.jpg", "artPos": "center 50%"}], "extraArt": [{"art": "art-extra-collage.jpg", "artPos": "center 30%"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "stories": {"_note": "PLACEHOLDER ART until the owner sends the real artwork. The poster's hero panel is EP.01's scene; the two shards and the faded crew scene are chosen here. The billing names come from the table (top five), with 'starring' as the fallback list before a night is played.", "poster": {"hero": {"episode": 1, "pos": "34% 18%"}, "shards": [{"art": "art-smash.jpg", "pos": "center 22%", "tag": "THE SMASH"}, {"art": "art-rivals.jpg", "pos": "78% 22%", "tag": "THE RIVALS"}], "below": {"art": "art-carpark.jpg", "pos": "center 22%"}}, "contenders": {"art": "art-club.jpg", "pos": "center 40%"}, "starring": [], "url": "heist.urbanpadel.om"}, "previousVolume": "Muscat Heist"};
 // MUSCAT HEIST · Vol.10 — the shared components (handoff components.md).
 // Plain JSX for Babel standalone, the way every volume's page is compiled.
 // Every colour is a token in heist.css; nothing here carries a hex value.
@@ -7749,11 +7759,52 @@ function MhBottomNav({ tab, onTab }) {
 // measured pixels, which is right at 375 and wrong at every other phone.
 // cut = [right edge %, left edge %] of the bottom edge, top to bottom.
 // fade names a --mn-fade-<name> token (session, live, recap); default is Home's.
-function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, style }) {
+// ── scenes ────────────────────────────────────────────────────────────────
+// Each page owns a SLOT, and the slot is offset by the day, so the pictures
+// change every day and two pages never open on the same one (while there are
+// more scenes than slots). Session pages keep their own episode's art.
+const MH_SLOTS = ["loading", "home", "take", "wanted", "jobs", "me", "crew"];
+function mhSceneIndex(D, slot) {
+  const n = (D && D.scenes || []).length; if (!n) return 0;
+  const k = MH_SLOTS.indexOf(slot);
+  return (Math.floor(Date.now() / 864e5) + (k < 0 ? 0 : k) * 3) % n;
+}
+function mhScene(D, slot) { return (D && D.scenes || [])[mhSceneIndex(D, slot)] || {}; }
+const mhStill = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// A crossfading stack. Only scenes already shown (and the next one, warming)
+// are in the DOM, so opening the page costs one picture, not ten.
+function MhScenes({ list, start = 0, every = 3200, onIndex }) {
+  const n = (list || []).length;
+  const [i, setI] = React.useState(n ? start % n : 0);
+  const [seen, setSeen] = React.useState(() => new Set([n ? start % n : 0]));
+  React.useEffect(() => {
+    if (n < 2 || mhStill()) return;
+    const t = setInterval(() => setI(x => (x + 1) % n), every);
+    return () => clearInterval(t);
+  }, [n, every]);
+  React.useEffect(() => {
+    if (onIndex) onIndex(i);
+    setSeen(s => { if (s.has(i) && s.has((i + 1) % n)) return s; const c = new Set(s); c.add(i); c.add((i + 1) % n); return c; });
+  }, [i]);
+  if (!n) return null;
+  return (
+    <div className="mh-scenes">
+      {list.map((sc, k) => seen.has(k) && (
+        <div key={sc.src + k} className="mh-scene" data-on={k === i ? "" : undefined} aria-hidden={k !== i}>
+          <div className="mn-art"><img src={sc.src} alt="" style={{ objectPosition: sc.pos || "center 30%" }} decoding="async" /></div>
+        </div>))}
+    </div>
+  );
+}
+
+function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, style, scenes, sceneStart, every, onScene }) {
   const poly = `polygon(0 0,100% 0,100% ${cut[0]}%,0 ${cut[1]}%)`;
   return (
     <div className="mn-hero" data-gold={gold ? "" : undefined} style={{ height, ...style }}>
-      <div className="mn-hero-img" style={{ clipPath: poly }}><MhArt src={src} pos={pos} /></div>
+      <div className="mn-hero-img" style={{ clipPath: poly }}>{scenes && scenes.length
+        ? <MhScenes list={scenes} start={sceneStart || 0} every={every} onIndex={onScene} />
+        : <MhArt src={src} pos={pos} />}</div>
       <div className="mn-hero-fade" style={{ clipPath: poly, background: fade ? `var(--mn-fade-${fade})` : undefined }} aria-hidden="true" />
       <svg className="mn-keyline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <line x1="0" y1={cut[1]} x2="100" y2={cut[0]} vectorEffect="non-scaling-stroke" />
@@ -7947,7 +7998,8 @@ function MhHome({ D, go }) {
   const left = next && mhCountdown(mhStart(next.date, next.time), now);
   return (
     <MhPage D={D} tab="home" onTab={go} pad="0">
-      <MhHeroCut height={470} src={hero && hero.art} pos={hero && hero.heroPos || "34% 20%"}>
+      <MhHeroCut height={470} src={hero && hero.art} pos={hero && hero.heroPos || "34% 20%"}
+        scenes={D.scenes} sceneStart={mhSceneIndex(D, "home")} every={6000}>
         <div style={{ position: "absolute", left: 22, top: 250 }}><MhTitleLockup size="S" /></div>
       </MhHeroCut>
       <div className="mh-col" style={{ padding: "0 20px", marginTop: -8, gap: 10 }}>
@@ -8288,7 +8340,7 @@ function MhTake({ D, go }) {
       <div className="mh-col">
         <MhTitle title="THE TAKE" />
         <div className="mh-takehero">
-          <MhArt src={D.sessions[D.sessions.length - 1].art} pos="center 50%" />
+          <MhArt src={mhScene(D, "take").src || D.sessions[D.sessions.length - 1].art} pos={mhScene(D, "take").pos || "center 50%"} />
           <div className="mh-takebody">
             <MhLabel tone="peach">Prize pool</MhLabel>
             <MhDisplay size={52} style={{ lineHeight: .9 }}>{pool} OMR</MhDisplay>
@@ -8826,6 +8878,8 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
   const s = D.sessions.find(x => x.no === (D.homeNext || 0)) || D.sessions.find(x => x.state !== "done") || D.sessions[D.sessions.length - 1];
   const tips = mhTips(D, X);
   const line = tips.length ? tips[(tip != null ? tip : Math.floor(Date.now() / 864e5)) % tips.length] : "";
+  const [scene, setScene] = React.useState(mhSceneIndex(D, "loading"));
+  const cur = (D.scenes || [])[scene] || {};
   // with no real progress to follow, the bar fills over the minimum time
   const [t, setT] = React.useState(progress != null ? progress : 0);
   React.useEffect(() => {
@@ -8840,8 +8894,9 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
       <button type="button" className="mh-loadtap" disabled={!done} onClick={() => go("home")}
         aria-label={done ? "Continue to Home" : "Loading"}>
         <MhHeroCut height="100%" src={s.art} pos={s.artPos || "center 28%"} cut={[54, 62]} fade="none"
+          scenes={D.scenes} sceneStart={mhSceneIndex(D, "loading")} every={2600} onScene={setScene}
           style={{ position: "absolute", inset: 0 }} />
-        <div className="mh-loadtag"><MhSceneTag>{s.code} · {s.title}</MhSceneTag></div>
+        {cur.code && <div className="mh-loadtag" key={cur.code}><MhSceneTag>{cur.code} · {cur.title}</MhSceneTag></div>}
         <div className="mh-loadlock"><MhTitleLockup size="M" center /></div>
         <div className="mh-loadfoot">
           <MhLabel tone="peach">Did you know</MhLabel>
@@ -9862,6 +9917,10 @@ function heistData(state, o) {
     paidOMR: done.length * (S.voucher || 0) * 2,
     rosterSize: preseason ? players.length : P.length,
     artBase: o.artBase || "", logo: o.logo,
+    // every scene the owner has sent: the nine episodes, then the spares. Pages
+    // draw from this through mhScene() so no two pages open on the same picture.
+    scenes: [...(S.episodes || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos, code: e.code, title: e.title })),
+             ...(S.extraArt || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos }))].filter(x => x.src && !/\/$/.test(x.src)),
   };
 }
 

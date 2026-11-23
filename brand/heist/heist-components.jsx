@@ -114,11 +114,52 @@ function MhBottomNav({ tab, onTab }) {
 // measured pixels, which is right at 375 and wrong at every other phone.
 // cut = [right edge %, left edge %] of the bottom edge, top to bottom.
 // fade names a --mn-fade-<name> token (session, live, recap); default is Home's.
-function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, style }) {
+// ── scenes ────────────────────────────────────────────────────────────────
+// Each page owns a SLOT, and the slot is offset by the day, so the pictures
+// change every day and two pages never open on the same one (while there are
+// more scenes than slots). Session pages keep their own episode's art.
+const MH_SLOTS = ["loading", "home", "take", "wanted", "jobs", "me", "crew"];
+function mhSceneIndex(D, slot) {
+  const n = (D && D.scenes || []).length; if (!n) return 0;
+  const k = MH_SLOTS.indexOf(slot);
+  return (Math.floor(Date.now() / 864e5) + (k < 0 ? 0 : k) * 3) % n;
+}
+function mhScene(D, slot) { return (D && D.scenes || [])[mhSceneIndex(D, slot)] || {}; }
+const mhStill = () => typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// A crossfading stack. Only scenes already shown (and the next one, warming)
+// are in the DOM, so opening the page costs one picture, not ten.
+function MhScenes({ list, start = 0, every = 3200, onIndex }) {
+  const n = (list || []).length;
+  const [i, setI] = React.useState(n ? start % n : 0);
+  const [seen, setSeen] = React.useState(() => new Set([n ? start % n : 0]));
+  React.useEffect(() => {
+    if (n < 2 || mhStill()) return;
+    const t = setInterval(() => setI(x => (x + 1) % n), every);
+    return () => clearInterval(t);
+  }, [n, every]);
+  React.useEffect(() => {
+    if (onIndex) onIndex(i);
+    setSeen(s => { if (s.has(i) && s.has((i + 1) % n)) return s; const c = new Set(s); c.add(i); c.add((i + 1) % n); return c; });
+  }, [i]);
+  if (!n) return null;
+  return (
+    <div className="mh-scenes">
+      {list.map((sc, k) => seen.has(k) && (
+        <div key={sc.src + k} className="mh-scene" data-on={k === i ? "" : undefined} aria-hidden={k !== i}>
+          <div className="mn-art"><img src={sc.src} alt="" style={{ objectPosition: sc.pos || "center 30%" }} decoding="async" /></div>
+        </div>))}
+    </div>
+  );
+}
+
+function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, style, scenes, sceneStart, every, onScene }) {
   const poly = `polygon(0 0,100% 0,100% ${cut[0]}%,0 ${cut[1]}%)`;
   return (
     <div className="mn-hero" data-gold={gold ? "" : undefined} style={{ height, ...style }}>
-      <div className="mn-hero-img" style={{ clipPath: poly }}><MhArt src={src} pos={pos} /></div>
+      <div className="mn-hero-img" style={{ clipPath: poly }}>{scenes && scenes.length
+        ? <MhScenes list={scenes} start={sceneStart || 0} every={every} onIndex={onScene} />
+        : <MhArt src={src} pos={pos} />}</div>
       <div className="mn-hero-fade" style={{ clipPath: poly, background: fade ? `var(--mn-fade-${fade})` : undefined }} aria-hidden="true" />
       <svg className="mn-keyline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <line x1="0" y1={cut[1]} x2="100" y2={cut[0]} vectorEffect="non-scaling-stroke" />

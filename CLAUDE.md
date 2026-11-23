@@ -877,6 +877,17 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   player photos. Episode titles are still placeholders. The scenes carry
   third-party marks (Nike, Head, Adidas, NOX, Ferrari, Premier Padel) and
   sponsor shirts — fine in-app, worth a look before a paid post.
+- **No two pages open on the same picture, and the loading screen is a
+  slideshow** (owner, 23 Nov: "I don't wanna see the same picture in each
+  page", "should be vibrant"). `D.scenes` is every episode scene plus
+  `extraArt`; `mhScene(D, slot)` gives each page a slot offset by the day, so
+  the pictures change daily and never collide while there are more scenes than
+  slots. Loading crossfades every 2.6s (its episode tag follows the picture and
+  hides on a spare), Home every 6s, The Take holds one. Only shown scenes are in
+  the DOM. Session pages keep their own episode's art. Reduced motion stops the
+  cycling. The art filter is `saturate(1.28)` and the fades are lighter.
+  `check-heist-app.mjs` fails if Loading does not change picture or if
+  Loading/Home/Take share one.
 - **Phase 3 (the night) is `brand/heist/heist-night.jsx`**: 07 Session (Teams /
   Groups / Knockout / MVP), 08 Live Scoring, 09 Episode Recap, 10 Recap Slides.
   - **Live Scoring's +1 is a GAME, not a point** — the fixture is first to 6 at

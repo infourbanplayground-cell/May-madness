@@ -305,6 +305,10 @@ function heistData(state, o) {
     paidOMR: done.length * (S.voucher || 0) * 2,
     rosterSize: preseason ? players.length : P.length,
     artBase: o.artBase || "", logo: o.logo,
+    // every scene the owner has sent: the nine episodes, then the spares. Pages
+    // draw from this through mhScene() so no two pages open on the same picture.
+    scenes: [...(S.episodes || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos, code: e.code, title: e.title })),
+             ...(S.extraArt || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos }))].filter(x => x.src && !/\/$/.test(x.src)),
   };
 }
 

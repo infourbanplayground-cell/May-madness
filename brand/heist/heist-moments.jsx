@@ -72,6 +72,8 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
   const s = D.sessions.find(x => x.no === (D.homeNext || 0)) || D.sessions.find(x => x.state !== "done") || D.sessions[D.sessions.length - 1];
   const tips = mhTips(D, X);
   const line = tips.length ? tips[(tip != null ? tip : Math.floor(Date.now() / 864e5)) % tips.length] : "";
+  const [scene, setScene] = React.useState(mhSceneIndex(D, "loading"));
+  const cur = (D.scenes || [])[scene] || {};
   // with no real progress to follow, the bar fills over the minimum time
   const [t, setT] = React.useState(progress != null ? progress : 0);
   React.useEffect(() => {
@@ -86,8 +88,9 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
       <button type="button" className="mh-loadtap" disabled={!done} onClick={() => go("home")}
         aria-label={done ? "Continue to Home" : "Loading"}>
         <MhHeroCut height="100%" src={s.art} pos={s.artPos || "center 28%"} cut={[54, 62]} fade="none"
+          scenes={D.scenes} sceneStart={mhSceneIndex(D, "loading")} every={2600} onScene={setScene}
           style={{ position: "absolute", inset: 0 }} />
-        <div className="mh-loadtag"><MhSceneTag>{s.code} · {s.title}</MhSceneTag></div>
+        {cur.code && <div className="mh-loadtag" key={cur.code}><MhSceneTag>{cur.code} · {cur.title}</MhSceneTag></div>}
         <div className="mh-loadlock"><MhTitleLockup size="M" center /></div>
         <div className="mh-loadfoot">
           <MhLabel tone="peach">Did you know</MhLabel>
