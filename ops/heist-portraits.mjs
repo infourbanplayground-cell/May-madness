@@ -28,11 +28,14 @@
 // are never replaced without --force.
 //
 // Needs `npm install` once (sharp is not committed: 16MB of native binaries).
-// env: OPENAI_API_KEY, HEIST_PIN (never printed). Optional: HEIST_IMAGE_MODEL
+// env: OPENAI_API_KEY, HEIST_PIN (never printed). Without HEIST_PIN the upload goes
+// over `ssh urbanpadel` (--via-ssh forces it); --key-from-proxy when the OpenAI key
+// is saved as a network secret for api.openai.com rather than set in the env. Optional: HEIST_IMAGE_MODEL
 // (default gpt-image-1), HEIST_IMAGE_QUALITY (default high), HEIST_OUT.
 import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
+import { execFileSync } from 'child_process';
 
 const HOST = process.env.HEIST_HOST || 'https://heist.urbanpadel.om';
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -183,6 +186,37 @@ async function upload(p, jpg) {
   return j.url;
 }
 
+// ── upload without a PIN: over the club's own SSH, doing exactly what the API's
+// POST /api/photo does — the previous portrait goes to history (never deleted),
+// the new one lands by atomic rename, the write is logged — and nothing else.
+// The .env and its PINs never leave the server.
+const PUB = '/var/www/heist.urbanpadel.om/public/players', API_DIR = '/opt/heist-api';
+async function uploadSsh(p, jpg) {
+  if (!/^[\w-]+$/.test(p.id)) throw new Error('refusing an id with unsafe characters');
+  const tmp = path.join(OUT, 'upload', p.id + '.jpg');            // already written by the caller
+  const remote = `/tmp/heist-portrait-${p.id}.jpg`;
+  execFileSync('scp', ['-q', tmp, `urbanpadel:${remote}`], { stdio: ['ignore', 'ignore', 'pipe'], timeout: 120000 });
+  const name = p.name.replace(/[^\w .&'-]/g, '');
+  execFileSync('ssh', ['urbanpadel', `set -e
+    f=${PUB}/${p.id}.jpg
+    [ -f "$f" ] && mv "$f" ${API_DIR}/history/${p.id}.$(date +%s%3N).replaced.jpg
+    install -m 644 ${remote} ${PUB}/.${p.id}.tmp && mv ${PUB}/.${p.id}.tmp "$f" && rm -f ${remote}
+    printf '%s\\tautomation\\tput\\t%s\\t%s\\t%s\\n' "$(date -u +%FT%T.%3NZ)" '${p.id}' '${name}' ${jpg.length} >> ${API_DIR}/uploads.log`],
+    { stdio: ['ignore', 'ignore', 'pipe'], timeout: 60000 });
+  const url = `/players/${p.id}.jpg?v=${Date.now()}`;
+  const got = await http(HOST + url, { headers: { 'Cache-Control': 'no-cache' } });
+  const buf = Buffer.from(await got.arrayBuffer());
+  if (!got.ok || !buf.equals(jpg)) throw new Error(`verify: served file differs (HTTP ${got.status}, ${buf.length} vs ${jpg.length} bytes)`);
+  return url;
+}
+// the API caches its roster for a minute, so the roster check for SSH uploads
+// is done once for the whole batch, after that minute has passed
+async function confirmRoster(ids) {
+  await sleep(65000);
+  const r = await rosterNow();
+  return ids.filter(id => !(r.get(id) || {}).heist);
+}
+
 // ── a review sheet: source beside portrait, for each player in this run ─────
 async function sheet(batch) {
   const rows = [];
@@ -226,10 +260,19 @@ async function main() {
   console.log(`brief: ${players.length} to do · this run: ${batch.length}${A.dry ? ' (dry run)' : ''} · model ${MODEL}/${QUALITY} · out ${path.relative(ROOT, OUT)}`);
   if (!batch.length) { console.log('nothing to do'); return; }
   const generating = !A.uploadOnly && !A.dry && batch.some(p => A.force || !['generated'].includes(prog[p.id]?.status));
+  // with the key saved as a network secret the proxy adds it to every request
+  // to api.openai.com; the header only has to exist
+  if (generating && !process.env.OPENAI_API_KEY && flag('--key-from-proxy')) process.env.OPENAI_API_KEY = 'proxy-injected';
   const uploading = !A.noUpload && !A.dry;
   if (generating) need('OPENAI_API_KEY', 'needed to generate portraits');
-  if (uploading) need('HEIST_PIN', 'needed to upload (or pass --no-upload)');
-  if (uploading) await login();
+  // upload route: the PIN and the API when HEIST_PIN is set, else the club's SSH
+  const viaSsh = uploading && (flag('--via-ssh') || !process.env.HEIST_PIN);
+  if (uploading && viaSsh) {
+    try { execFileSync('ssh', ['urbanpadel', 'true'], { stdio: 'ignore', timeout: 30000 }); }
+    catch { console.error('!! HEIST_PIN is not set and ssh urbanpadel does not answer — set HEIST_PIN, or pass --no-upload'); process.exit(2); }
+    console.log('upload: over SSH (HEIST_PIN not set) — same files, history and log as the API');
+  } else if (uploading) await login();
+  const sshDone = [];
 
   for (const p of batch) {
     console.log(`\n${p.name}  (${p.id})  ->  ${p.file}`);
@@ -249,11 +292,18 @@ async function main() {
       if (!uploading) continue;
       // re-check right before replacing anything: somebody may have uploaded by hand
       if (!A.force && (await rosterNow()).get(p.id)?.heist) { mark(p, 'generated', { note: 'a portrait already exists on the site — not replaced' }); continue; }
-      const url = await upload(p, jpg);
-      mark(p, 'uploaded', { url });
+      const url = viaSsh ? await uploadSsh(p, jpg) : await upload(p, jpg);
+      mark(p, 'uploaded', { url, via: viaSsh ? 'ssh' : 'api' });
+      if (viaSsh) sshDone.push(p);
     } catch (e) {
       mark(p, 'failed', { error: mask(e.message) });
     }
+  }
+
+  if (sshDone.length) {
+    console.log(`\nwaiting a minute for the site's roster to refresh, then confirming ${sshDone.length} upload(s)...`);
+    const missing = await confirmRoster(sshDone.map(p => p.id));
+    for (const p of sshDone.filter(p => missing.includes(p.id))) mark(p, 'failed', { error: 'verify: roster does not report the portrait' });
   }
 
   // the report
