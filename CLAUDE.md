@@ -881,6 +881,24 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - `.mh-body` reserves 100px for the nav with `!important`; nav-less screens
     carry `data-bare` or their footer floats 100px off the glass.
   - `node ops/check-heist-night.mjs` drives the controls (21 checks).
+- **Phase 4 (the moments) is `brand/heist/heist-moments.jsx`**: 11 Now Loading
+  Muscat, 12 New Crew Card, 13 Rep Up, 14 Your Rival, 15 Score Settled, 16 The
+  Big Score. **Every figure is derived, never read from the fixture's prose**:
+  the rival gap is the points difference, "10 to Known" is the next level's
+  per-night figure x nights - points, and Score Settled recomputes the table
+  with the locked points applied to find the new rank and the next rival.
+  - The Big Score hides the **+3 Boss Kill row** while
+    `bossKillBonus.enabled` is false, so it differs from the reference there
+    on purpose; nothing scores it.
+  - "Shown once" is `mhOnce(kind, key)` — per device, in localStorage, and if
+    storage is unavailable the moment shows again rather than never.
+  - `ops/shots-heist.mjs`'s on-screen face check also measures the lockup and
+    scene tags: Now Loading has no `.mn-display` at all, and a check with
+    nothing to measure failed for the wrong reason.
+  - `node ops/check-heist-moments.mjs` (21 checks) makes each state no
+    screenshot shows — tier up/hold/down, Legend reached, the rival at #1,
+    the finale before/during/after, Boss Kill on — by editing the preview's
+    data in the page and re-rendering.
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than
   copied over this file:**
   1. Re-read a screen's spec in `brand/heist/handoff/screens/` and look at its

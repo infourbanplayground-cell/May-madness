@@ -26,6 +26,9 @@ const SCREENS = [
   ['me', 'me', '04-me'], ['crew', 'crew', '05-crew'], ['card', 'card/p01', '06-crew-card'], ['take', 'take', '17-the-take'],
   ['session', 'session/6', '07-session-groups'], ['live', 'live', '08-live-scoring'],
   ['recap', 'recap/5', '09-episode-recap'], ['slides', 'slides/5/1', '10-recap-slides'],
+  ['loading', 'loading/64', '11-now-loading-muscat'], ['cardpull', 'cardpull/5', '12-new-crew-card'],
+  ['repup', 'repup/p05', '13-rep-up'], ['rival', 'rival', '14-your-rival'],
+  ['settled', 'settled', '15-score-settled'], ['finale', 'finale', '16-the-big-score'],
 ].filter(([n]) => !process.env.ONLY || process.env.ONLY.split(',').includes(n));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.js': 'application/javascript' };
 
@@ -83,7 +86,7 @@ const audit = () => {
   // only the element's OWN text: a child that sets its own face (the mono
   // points line inside a display figure) does not move when the parent's does
   const ownText = e => [...e.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
-  const runs = [...document.querySelectorAll('.mn-display')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
+  const runs = [...document.querySelectorAll('.mn-display, .mn-l1, .mn-band > span, .mn-scenetag')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
   const undrawn = runs.filter(e => {
     const r = document.createRange(); r.selectNodeContents(ownText(e)); const w0 = r.getBoundingClientRect().width;
     const was = e.style.fontFamily; e.style.fontFamily = 'Impact, sans-serif';

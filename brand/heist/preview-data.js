@@ -15,8 +15,8 @@ window.MH_PREVIEW = (function () {
     p01: { photo: A + "art-corniche.jpg", pos: "34% 18%", heroPos: "34% 20%" },
     p02: { photo: A + "art-smash.jpg", pos: "center 14%" },
     p03: { photo: A + "art-carpark.jpg", pos: "center 18%" },
-    p04: { photo: A + "art-rivals.jpg", pos: "82% 18%", avPos: "center 20%", zoom: ["left", -10, -15] },
-    p05: { photo: A + "art-rivals.jpg", pos: "18% 20%", meCardPos: "82% 18%", avPos: "center 20%", zoom: ["right", -10, -12] },
+    p04: { photo: A + "art-rivals.jpg", pos: "82% 18%", splitPos: "92% 22%", avPos: "center 20%", zoom: ["left", -10, -15] },
+    p05: { photo: A + "art-rivals.jpg", pos: "18% 20%", splitPos: "8% 25%", meCardPos: "82% 18%", avPos: "center 20%", zoom: ["right", -10, -12] },
     p06: { photo: A + "art-club.jpg", pos: "center 60%" },
     p07: { photo: A + "art-club.jpg", pos: "center 60%" },
   };
@@ -95,6 +95,14 @@ window.MH_PREVIEW = (function () {
       repUps: [{ name: "mossa", from: "Rookie", to: "Rising" }],
       yourNight: { points: 26, note: "Champions" },
     } },
+    // phase 4 — fixtures/rivals-and-moments.json, as the fixture has them.
+    // Rep Up's 80 is mossa's total after EP.05, the night it happened.
+    moments: [
+      { type: "repUp", playerId: "p05", from: "rookie", to: "rising", session: 5, points: 80 },
+      { type: "tierUp", playerId: "p01", from: "elite", to: "legend", session: 5 },
+      { type: "scoreSettled", playerId: "p05", overtookId: "p04", session: 6, newRank: 4, points: [86, 84] },
+    ],
+    finale: { leadAtStart: 11 },       // the leader's lead when the finale started ("11 / 11")
     paidOMR: 140,
     rosterSize: 32,                      // "THE CREW · 32 players" — the fixtures carry nine of them
   };

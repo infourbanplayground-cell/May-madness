@@ -111,6 +111,17 @@
   --mn-chip-bg: rgba(15,27,43,.6);
   --mn-seg-off: rgba(255,244,232,.3);
   --mn-slide-ring: 0 0 0 4px var(--mn-peach), 0 12px 30px rgba(0,0,0,.5);
+  /* phase 4 — the moments */
+  --mn-fade-none: none;
+  --mn-fade-settled: linear-gradient(180deg, rgba(15,27,43,.3), rgba(15,27,43,0) 35%, rgba(15,27,43,.9));
+  --mn-fade-finale: linear-gradient(180deg, rgba(15,27,43,.5), rgba(229,72,77,.12) 50%, rgba(15,27,43,.9));
+  --mn-fade-split: linear-gradient(180deg, rgba(15,27,43,.4), rgba(15,27,43,0) 30%, rgba(15,27,43,0) 60%, var(--mn-navy));
+  --mn-settled-filter: grayscale(.2);
+  --mn-gold-50: rgba(255,208,138,.5);
+  --mn-rule-bg: rgba(255,244,232,.05);
+  --mn-shout-shadow: 0 6px 24px rgba(0,0,0,.5);
+  --mn-grad-load: linear-gradient(90deg, var(--mn-coral), var(--mn-peach));
+  --mn-grad-lead: linear-gradient(90deg, var(--mn-red), var(--mn-coral));
 }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
@@ -356,3 +367,58 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-hint { min-height: 44px; min-width: 44px; margin: -12px 0; background: none; border: 0; cursor: pointer; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
 .mh-hint[data-next] { color: var(--mn-sand); }
 .mh-hint:disabled { cursor: default; }
+
+/* ── phase 4: the moments ─────────────────────────────────────────────── */
+.mn-glass[data-accent="gold-50"] { border-color: var(--mn-gold-50); }
+.mn-glass[data-accent="gold-45"] { border-color: var(--mn-gold-45); }
+.mh-moment main > *:not(.mh-mback):not(.mh-mglow) { position: relative; }
+.mh-mback, .mh-mglow { position: absolute; inset: 0; overflow: hidden; }
+.mh-mback .mn-art img { filter: blur(6px) brightness(var(--mh-dim)); transform: scale(1.1); }
+.mh-momentfoot { margin-top: auto; padding: 16px 20px 26px; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.mh-mtitle, .mh-shout { margin: 0; }
+.mh-shout { line-height: .84; text-shadow: var(--mn-shout-shadow); }
+
+/* 11 now loading */
+.mh-loading { position: relative; height: 100vh; height: 100dvh; overflow: hidden; }
+.mh-loadtap { position: absolute; inset: 0; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mh-loadtap:disabled { cursor: progress; }
+.mh-loadtag { position: absolute; left: 18px; top: 64px; }
+.mh-loadlock { position: absolute; left: 0; right: 0; top: calc(54% + 32px); display: flex; justify-content: center; }
+.mh-loadfoot { position: absolute; left: 24px; right: 24px; bottom: 48px; display: flex; flex-direction: column; gap: 10px; }
+.mh-loadbar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.mh-loadbar > [role="progressbar"] { flex: 1; height: 3px; background: var(--mn-line-2); }
+.mh-loadbar > [role="progressbar"] > div { height: 100%; background: var(--mn-grad-load); }
+
+/* 12 new crew card */
+.mh-pullhead { padding: 70px 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+
+/* 13 rep up */
+.mh-repphoto { position: absolute !important; left: 50%; top: 220px; width: 200px; height: 200px; margin-left: -100px; color: var(--mh-glow); }
+.mh-repphoto .mn-avatar { position: relative; box-shadow: 0 0 0 4px var(--mh-glow), 0 0 40px var(--mh-glow); }
+.mh-reptext { margin-top: 460px; padding: 0 24px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+
+/* 14 your rival */
+.mh-split2 { position: relative; height: 440px; }
+.mh-half { position: absolute; inset: 0; padding: 0; border: 0; background: none; cursor: pointer; overflow: hidden; }
+.mh-half[data-side="l"] { clip-path: polygon(0 0, 58% 0, 42% 100%, 0 100%); }
+.mh-half[data-side="r"] { clip-path: polygon(58% 0, 100% 0, 100% 100%, 42% 100%); }
+.mh-half > div { position: absolute; top: 0; width: 60%; height: 100%; }
+.mh-half[data-side="l"] > div { left: 0; }
+.mh-half[data-side="r"] > div { left: 40%; }
+.mh-splitline { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; filter: var(--mn-keyline-shadow); }
+.mh-splitline line { stroke: var(--mn-sand); stroke-width: 4; }
+.mh-splitfade { position: absolute; inset: 0; background: var(--mn-fade-split); pointer-events: none; }
+.mh-rivside { position: absolute; left: 20px; bottom: 20px; pointer-events: none; }
+.mh-rivside[data-right] { left: auto; right: 20px; text-align: right; }
+.mh-meet { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--mn-line); font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+
+/* 15 score settled */
+.mh-moment[data-kind="settled"] .mn-hero-img { filter: var(--mn-settled-filter); }
+.mh-settledhead { position: absolute; left: 0; right: 0; bottom: 70px; text-align: center; }
+
+/* 16 the big score */
+.mh-target { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+.mh-leadbar { height: 10px; border-radius: 5px; margin-top: 4px; background: var(--mn-line); overflow: hidden; }
+.mh-leadbar > div { height: 100%; border-radius: 5px; background: var(--mn-grad-lead); }
+.mh-rule { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--mn-rule-bg); }
+.mh-rule > span { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
