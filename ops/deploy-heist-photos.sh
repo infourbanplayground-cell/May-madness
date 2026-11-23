@@ -82,10 +82,24 @@ server {
         proxy_read_timeout 60s;
         add_header Cache-Control "no-store" always;
     }
+    # the SEASON API (heist-season-api, 3013, ops/create-heist.sh): the same
+    # route set every volume since July serves. "/photos" exact is the player
+    # photo store the app reads; "/photos/" (with the slash) is the page.
+    location ~ ^/(state|login|save|photos|session-photos|jf-leaderboard|photo-upload|recovery-dump|history|restore)$ {
+        proxy_pass http://127.0.0.1:3013;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        client_max_body_size 25m;
+    }
     # every Heist photo URL carries ?v=<mtime>, so a replaced photo is a new URL
     location /players/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
     location /photos/ { add_header Cache-Control "no-cache"; try_files $uri $uri/ =404; }
-    location / { try_files $uri $uri/ =404; }
+    # the page and version.txt must never be cached, or the app's update check
+    # never sees a new build (the lesson every volume's vhost carries)
+    location = /version.txt { add_header Cache-Control "no-store"; try_files $uri =404; }
+    location = /index.html  { add_header Cache-Control "no-store"; try_files $uri =404; }
+    location ~* ^/assets/.*\.(png|webp|jpg|jpeg|svg|woff2|json)$ { expires 30d; add_header Cache-Control "public, immutable"; }
+    location / { try_files $uri $uri/ /index.html; }
 }
 NGX
 ln -sf $VH /etc/nginx/sites-enabled/heist.urbanpadel.om

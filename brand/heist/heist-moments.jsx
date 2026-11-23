@@ -110,9 +110,11 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
 function MhCardPull({ D, go, no }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "tierUp" && (no == null || x.session === +no))
-    || { playerId: X.me.id, session: +no || X.lastDone, from: X.me.tier.id, to: X.me.tier.id };
+    || (X.me ? { playerId: X.me.id, session: +no || X.lastDone, from: X.me.tier.id, to: X.me.tier.id } : {});
   const p = X.byId[m.playerId];
   const s = D.sessions.find(x => x.no === m.session);
+  React.useEffect(() => { if (!p || !s) go("home"); }, [p, s]);
+  if (!p || !s) return null;
   const from = mhTierById(m.from), to = p.tier;
   const dir = mhTierIdx(to.id) < mhTierIdx(from.id) ? "up" : mhTierIdx(to.id) > mhTierIdx(from.id) ? "down" : "hold";
   const title = dir === "up" ? <>TIER UP:<br /><span className="mh-hl" style={{ color: "var(--mn-gold)" }}>{to.label}</span></>
@@ -145,6 +147,9 @@ function MhCardPull({ D, go, no }) {
 function MhRepUp({ D, go, id }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "repUp" && (id == null || x.playerId === id));
+  // a moment that is not (or no longer) true is never drawn: a stale link goes home
+  React.useEffect(() => { if (!m) go("home"); }, [m]);
+  if (!m || !X.byId[m.playerId]) return null;
   const p = X.byId[m.playerId];
   const from = mhRepById(m.from), to = mhRepById(m.to), next = mhNextRep(to);
   const nights = m.session;                               // the threshold is per night played
@@ -224,6 +229,8 @@ function MhRival({ D, go }) {
 function MhSettled({ D, go }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "scoreSettled");
+  React.useEffect(() => { if (!m) go("home"); }, [m]);
+  if (!m || !X.byId[m.playerId] || !X.byId[m.overtookId]) return null;
   const now = { [m.playerId]: m.points[0], [m.overtookId]: m.points[1] };
   const table = X.players.map(p => ({ ...p, points: now[p.id] != null ? now[p.id] : p.points }))
     .sort((a, b) => b.points - a.points || a.rank - b.rank);

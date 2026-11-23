@@ -37,6 +37,11 @@ SOURCES = [
 TARGETS = {
     "blackout": dict(name="Blackout Series",   prefix="bo_", api="/opt/blackout-api"),
     "national": dict(name="56 National Series", prefix="na_", api="/opt/national-api"),
+    # Heist carries National too. Run it again once National's last night is
+    # played (Mon 30 Nov): every total is RECOMPUTED, so a run made mid-season
+    # is corrected by the next, and no session is ever written.
+    "heist": dict(name="Muscat Heist", prefix="he_", api="/opt/heist-season-api",
+                  extra=[dict(key="na", name="56 National Series", page="national-index.html", prefix="na_")]),
 }
 
 NEEDED = ["getPlayerTeam", "teamWon", "teamGroupResults", "calcGroupStandings",
@@ -83,6 +88,8 @@ def main():
         sys.exit(f"usage: python3 ops/build-roster-merge.py <{'|'.join(TARGETS)}>")
     dst = TARGETS[sys.argv[1]]
     out = os.path.join(HERE, f"sync-roster-to-{sys.argv[1]}.js")
+    global SOURCES
+    SOURCES = SOURCES + dst.get("extra", [])
 
     engines = "\n\n".join(engine_for(s) for s in SOURCES)
     srcs = ",\n  ".join(

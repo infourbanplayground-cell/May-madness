@@ -1,0 +1,364 @@
+// MUSCAT HEIST · Vol.10 — the adapter and the shell.
+//
+// heistData() turns the season STATE (the same shape every volume since July
+// has saved) into the one data shape the Heist screens read — the shape
+// brand/heist/preview-data.js builds out of the handoff's fixtures. EVERY
+// FIGURE COMES FROM THE INHERITED ENGINE: calcPlayerStats for points,
+// calcPlayerNights for what a night paid, rankAt for the table after any
+// night, calcGroupStandings for a group, scoreToResult for a score. Nothing
+// here scores anything (handoff rule 2).
+//
+// HeistShell is what App() renders instead of the Vol.9 tabs. It routes the
+// Heist screens by hash, queues the moments, carries the NOT SAVING banner
+// (the 17 Oct lesson), and hands the organiser to the inherited screens for
+// what the handoff does not draw: creating a night, the draw, the bracket.
+
+const MH_HOST_PHOTOS = "/api/roster";              // Heist portraits, by id
+const mhFirstOf = n => (n || "").split(/\s+/)[0];
+
+// ── the card stats (data.md, approved 22 Nov) ───────────────────────────
+// SMASH  group-stage win rate
+// WALL   share of losses that were close or a tiebreak
+// SPEED  knockout win rate
+// CLUTCH tiebreak matches won, of tiebreak matches played
+// 0-99; under cardStats.minMatches behind a stat it is a dash, not a number.
+function mhCardStats(pid, sessions) {
+  const g = { w: 0, n: 0 }, ko = { w: 0, n: 0 }, loss = { close: 0, n: 0 }, tb = { w: 0, n: 0 };
+  sessions.forEach(s => {
+    const team = getPlayerTeam(s, pid); if (!team) return;
+    const mine = m => m && m.winner && (m.team1Id === team.id || m.team2Id === team.id);
+    const tally = (m, bucket) => {
+      const won = teamWon(m, team.id);
+      bucket.n++; if (won) bucket.w++;
+      if (!won) { loss.n++; if (m.lossType === "competitive" || m.lossType === "tiebreak") loss.close++; }
+      if (m.lossType === "tiebreak") { tb.n++; if (won) tb.w++; }
+    };
+    (s.groupMatches || []).filter(mine).forEach(m => tally(m, g));
+    const B = s.bracket || {};
+    [...(B.qf || []), ...(B.sf || []), B.final].filter(mine).forEach(m => tally(m, ko));
+  });
+  const min = (MH.cardStats && MH.cardStats.minMatches) || 3;
+  const sc = (a, n) => n >= min ? Math.min(99, Math.round(a / n * 99)) : null;
+  return { smash: sc(g.w, g.n), wall: sc(loss.close, loss.n), speed: sc(ko.w, ko.n), clutch: sc(tb.w, tb.n) };
+}
+
+function mhTeamNames(s, tid, byId) {
+  const t = (s.teams || []).find(x => x.id === tid);
+  if (!t) return "TBD";
+  return [t.p1Id, t.p2Id].map(i => mhFirstOf((byId[i] || {}).name || "?")).join(" & ");
+}
+const mhScore = m => m && m.score && m.score.t1 != null ? `${m.score.t1}-${m.score.t2}` : null;
+
+// Every match two players were both in this season, newest first.
+function mhMeetings(a, b, sessions) {
+  const out = [];
+  sessions.forEach((s, idx) => {
+    const ta = getPlayerTeam(s, a), tb = getPlayerTeam(s, b);
+    if (!ta || !tb) return;
+    const B = s.bracket || {};
+    const all = [...(s.groupMatches || []).map(m => [m, "Group " + ((s.teams.find(t => t.id === m.team1Id) || {}).group || "")]),
+      ...(B.qf || []).map(m => [m, "Quarter-final"]), ...(B.sf || []).map(m => [m, "Semi-final"]), [B.final, "Final"]];
+    all.forEach(([m, label]) => {
+      if (!m || !m.winner) return;
+      const inA = m.team1Id === ta.id || m.team2Id === ta.id, inB = m.team1Id === tb.id || m.team2Id === tb.id;
+      if (!inA || !inB) return;
+      const sc = mhScore(m); const won = teamWon(m, ta.id);
+      const mine = sc ? (m.team1Id === ta.id ? sc : sc.split("-").reverse().join("-")) : "";
+      if (ta.id === tb.id) out.push({ session: idx + 1, same: true, label: label + " (same team)", won,
+        result: label === "Final" && won ? "Champions" : (won ? "Won " : "Lost ") + mine, at: m.resultAt || 0 });
+      else out.push({ session: idx + 1, same: false, label, won, result: (won ? "Won " : "Lost ") + mine, score: mine, at: m.resultAt || 0 });
+    });
+  });
+  return out.sort((x, y) => y.session - x.session || y.at - x.at);
+}
+
+// ── the adapter ─────────────────────────────────────────────────────────
+function heistData(state, o) {
+  const S = MH, sessions = state.sessions || [], players = state.players || [];
+  const byId = Object.fromEntries(players.map(p => [p.id, p]));
+  const nights = S.nights || [];
+  const sessFor = date => sessions.find(s => s.date === date);
+  const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
+  const done = sessions.map((s, i) => [s, i]).filter(([s]) => s.completed);
+  const lastDoneIdx = done.length ? done[done.length - 1][1] : -1;
+
+  // the table after each completed night — rankAt is the engine's own
+  const after = sessions.map((s, i) => s.completed ? rankAt(state, i) : null);
+  const ptsAfter = (pid, i) => { for (let k = i; k >= 0; k--) if (after[k]) { const r = after[k].rows.find(x => x.id === pid); return r ? r.pts : 0; } return 0; };
+  const now = (o.leaderboard || []).map(r => ({ id: r.player.id, pts: r.totalPts, played: (r.stats || {}).sessionsPlayed || 0 }));
+  const season = now.filter(r => r.played > 0 || r.pts > 0);
+  // before night one nobody has a point: the crew is the carried roster, ranked all-time
+  const preseason = season.length === 0;
+  const ordered = preseason
+    ? (o.leaderboard || []).slice().sort((a, b) => (b.lifetimePts || 0) - (a.lifetimePts || 0)).filter(r => (r.lifetimePts || 0) > 0).slice(0, 60)
+        .map(r => ({ id: r.player.id, pts: 0, played: 0 }))
+    : season.sort((a, b) => b.pts - a.pts || (byId[a.id].name || "").localeCompare(byId[b.id].name || ""));
+  const before = lastDoneIdx > 0 ? rankAt(state, (done[done.length - 2] || [null, -1])[1]) : null;
+
+  const P = ordered.map((r, i) => {
+    const p = byId[r.id] || {};
+    const totals = sessions.map((s, k) => after[k] ? ptsAfter(r.id, k) : null).filter(x => x != null);
+    const rep = mhRepFor(totals.length ? totals : [0]);
+    const was = before && before.rank[r.id];
+    const mv = !before || !was ? "—" : was > i + 1 ? "▲" + (was - i - 1) : was < i + 1 ? "▼" + (i + 1 - was) : "—";
+    const heist = (o.portraits || {})[r.id];
+    return { id: r.id, name: p.name || "?", points: r.pts, rank: i + 1, movement: mv, nights: r.played,
+      repId: rep && rep.id, stats: mhCardStats(r.id, sessions),
+      photo: heist || p.photo || p.photoUrl || null, pos: heist ? "center 20%" : "center 25%" };
+  });
+
+  const ep = n => (S.episodes || [])[n - 1] || { code: "EP." + String(n).padStart(2, "0"), title: "", art: "" };
+  const S2 = nights.map((date, k) => {
+    const no = k + 1, s = sessFor(date);
+    const fx = s ? [...(s.groupMatches || []), ...((s.bracket || {}).qf || []), ...((s.bracket || {}).sf || []), (s.bracket || {}).final].filter(Boolean) : [];
+    const played = fx.filter(m => m.winner).length;
+    const started = played > 0 || (s && date === today);
+    const st = s && s.completed ? "done" : s && started ? "live" : "soon";
+    const f = s && (s.bracket || {}).final;
+    const champTeam = f && f.winner && (s.teams || []).find(t => t.id === (f.winner === "team1" ? f.team1Id : f.team2Id));
+    return { no, date, state: st, code: ep(no).code, title: ep(no).title, art: (o.artBase || "") + ep(no).art,
+      time: S.time, doublePoints: (S.doubleNights || []).indexOf(date) >= 0, finale: no === nights.length,
+      sid: s && s.id,
+      champions: champTeam ? [champTeam.p1Id, champTeam.p2Id].map(i => (byId[i] || {}).name) : undefined,
+      progress: st === "live" ? { played, total: Math.max(fx.length, played) } : undefined,
+      signups: s && st === "soon" ? { teams: (s.teams || []).length, max: typeof MAX_TEAMS !== "undefined" ? MAX_TEAMS : 16, open: true } : undefined };
+  });
+  const live = S2.find(s => s.state === "live");
+  const next = S2.find(s => s.state === "soon");
+
+  // ── one night, for the session screen ──
+  const nightOf = sv => {
+    const s = sessions.find(x => x.id === sv.sid); if (!s) return {};
+    const groups = {};
+    [...new Set((s.teams || []).map(t => t.group).filter(Boolean))].sort().forEach(g => {
+      const rows = calcGroupStandings(s, g);
+      const ids = new Set((s.teams || []).filter(t => t.group === g).map(t => t.id));
+      groups[g] = {
+        standings: rows.map(r => ({ team: mhTeamNames(s, r.team.id, byId), w: r.wins, pts: r.pts, id: r.team.id })),
+        matches: (s.groupMatches || []).filter(m => ids.has(m.team1Id)).map(m => ({
+          id: m.id, sid: s.id, a: mhTeamNames(s, m.team1Id, byId), b: mhTeamNames(s, m.team2Id, byId),
+          score: mhScore(m), state: m.winner ? "final" : mhScore(m) ? "live" : "next", court: m.court })),
+      };
+    });
+    const B = s.bracket || {};
+    const ko = m => m && { a: m.team1Id ? mhTeamNames(s, m.team1Id, byId) : null, b: m.team2Id ? mhTeamNames(s, m.team2Id, byId) : null,
+      sa: m.s1, sb: m.s2, score: mhScore(m), winner: m.winner === "team1" ? "a" : m.winner === "team2" ? "b" : null };
+    const hasKo = (B.qf || []).length || (B.sf || []).length || B.final;
+    const votes = {};
+    Object.values(s.mvpVotes || {}).forEach(v => { const id = typeof v === "string" ? v : v && v.playerId; if (id) votes[id] = (votes[id] || 0) + 1; });
+    return {
+      groups,
+      teams: (s.teams || []).map(t => ({ group: t.group, a: mhFirstOf((byId[t.p1Id] || {}).name), b: mhFirstOf((byId[t.p2Id] || {}).name),
+        aPhoto: (byId[t.p1Id] || {}).photo, bPhoto: (byId[t.p2Id] || {}).photo })),
+      knockout: hasKo ? { qf: (B.qf || []).map(ko), sf: (B.sf || []).map(ko), final: ko(B.final) } : null,
+      mvp: { open: !s.completed, votes: Object.entries(votes).map(([id, n]) => ({ name: (byId[id] || {}).name || "?", votes: n })).sort((x, y) => y.votes - x.votes) },
+    };
+  };
+  const nightsD = {}; S2.forEach(sv => { if (sv.sid) nightsD[sv.no] = nightOf(sv); });
+
+  // ── the recap of a finished night ──
+  const recaps = {};
+  const repAt = (pid, i) => mhRepFor(sessions.slice(0, i + 1).map((s, k) => after[k] ? ptsAfter(pid, k) : null).filter(x => x != null));
+  S2.filter(sv => sv.state === "done").forEach(sv => {
+    const idx = sessions.findIndex(x => x.id === sv.sid), s = sessions[idx], f = (s.bracket || {}).final;
+    if (!f || !f.winner) return;
+    const win = f.winner === "team1" ? f.team1Id : f.team2Id, lose = f.winner === "team1" ? f.team2Id : f.team1Id;
+    const tm = id => (s.teams || []).find(t => t.id === id) || {};
+    const names = id => [tm(id).p1Id, tm(id).p2Id].map(i => (byId[i] || {}).name).filter(Boolean);
+    const nightPts = pid => { const r = calcPlayerNights(pid, sessions, () => "").nights.find(n => n.id === s.id); return r ? r.nightTotal : null; };
+    const champPts = names(win).length ? [tm(win).p1Id, tm(win).p2Id].map(nightPts) : [];
+    const all = [...(s.groupMatches || []), ...((s.bracket || {}).qf || []), ...((s.bracket || {}).sf || []), f].filter(m => m && m.winner && m.score);
+    const big = all.slice().sort((x, y) => Math.abs(y.score.t1 - y.score.t2) - Math.abs(x.score.t1 - x.score.t2))[0];
+    // the upset: the biggest gap in season rank (before the night) a winning pair overturned
+    const prevRank = idx > 0 ? rankAt(state, idx - 1).rank : {};
+    const pairRank = id => Math.min(...[tm(id).p1Id, tm(id).p2Id].map(i => prevRank[i] || 999));
+    let upset = null;
+    if (idx > 0) all.forEach(m => {
+      const w = m.winner === "team1" ? m.team1Id : m.team2Id, l = m.winner === "team1" ? m.team2Id : m.team1Id;
+      const gap = pairRank(w) - pairRank(l);
+      if (gap > 0 && (!upset || gap > upset.gap)) upset = { gap, team: mhTeamNames(s, w, byId), note: `beat the #${pairRank(l)}` };
+    });
+    const votes = {}; Object.values(s.mvpVotes || {}).forEach(v => { const id = typeof v === "string" ? v : v && v.playerId; if (id) votes[id] = (votes[id] || 0) + 1; });
+    const mvpId = Object.keys(votes).sort((a, b) => votes[b] - votes[a])[0];
+    const repUps = idx > 0 ? (s.teams || []).flatMap(t => [t.p1Id, t.p2Id]).map(pid => {
+      const a = repAt(pid, idx - 1), b = repAt(pid, idx);
+      return a && b && MH_REPS.indexOf(b) < MH_REPS.indexOf(a) ? { name: mhFirstOf((byId[pid] || {}).name), from: a.label, to: b.label, id: pid } : null;
+    }).filter(Boolean) : [];
+    const myNight = o.meId ? calcPlayerNights(o.meId, sessions, () => "").nights.find(n => n.id === s.id) : null;
+    recaps[sv.no] = {
+      art: sv.art, champions: names(win), beat: names(lose), score: mhScore(f) && (f.winner === "team1" ? mhScore(f) : mhScore(f).split("-").reverse().join("-")),
+      pointsEach: champPts.length === 2 && champPts[0] === champPts[1] ? champPts[0] : null,
+      mvp: mvpId ? { name: mhFirstOf((byId[mvpId] || {}).name), votes: votes[mvpId] } : { name: "—", votes: 0 },
+      biggestWin: big ? { team: mhTeamNames(s, big.winner === "team1" ? big.team1Id : big.team2Id, byId),
+        score: big.winner === "team1" ? mhScore(big) : mhScore(big).split("-").reverse().join("-") } : { team: "—", score: "" },
+      upset: upset || { team: "—", note: "no upsets" },
+      repUps,
+      yourNight: myNight ? { points: myNight.nightTotal, note: myNight.outcome } : null,
+    };
+  });
+
+  // ── me: the points by kind, and the night-by-night ──
+  let meD = null;
+  if (o.meId && byId[o.meId]) {
+    const r = calcPlayerNights(o.meId, sessions, () => "");
+    const sg = r.seg;
+    meD = { seg: { groupWins: sg.groupWins + sg.topOfGroup, lossPts: sg.lossPts, knockout: sg.knockout, titles: sg.titles,
+                   bonus: sg.comeback + sg.streak + sg.double },
+      ok: r.ok,
+      episodes: r.nights.slice().reverse().map(n => {
+        const k = nights.indexOf(n.date) + 1;
+        return { session: k || n.no, label: n.outcome, pts: n.nightTotal, title: /champion/i.test(n.outcome), knockout: /knockout|final/i.test(n.outcome) };
+      }) };
+  }
+
+  // ── rival, and you-v-them for any card ──
+  const meIdx = P.findIndex(p => p.id === o.meId);
+  let rival = null;
+  if (meIdx >= 0 && !preseason) {
+    const them = meIdx === 0 ? P[1] : P[meIdx - 1];
+    if (them) {
+      const m = mhMeetings(o.meId, them.id, sessions);
+      const opp = m.filter(x => !x.same);
+      rival = { playerId: o.meId, rivalId: them.id, h2h: { w: opp.filter(x => x.won).length, l: opp.filter(x => !x.won).length },
+        meetings: m.slice(0, 3).map(x => ({ session: nights.indexOf((sessions[x.session - 1] || {}).date) + 1 || x.session, label: x.label, result: x.result })) };
+    }
+  }
+  const vsFor = id => {
+    if (!o.meId || id === o.meId) return null;
+    const opp = mhMeetings(o.meId, id, sessions).filter(x => !x.same);
+    if (!opp.length) return null;
+    const last = opp[0];
+    return { playerId: id, meetings: opp.length, w: opp.filter(x => x.won).length, l: opp.filter(x => !x.won).length,
+      last: { session: nights.indexOf((sessions[last.session - 1] || {}).date) + 1 || last.session, won: last.won, score: (last.score || "").replace("-", "–") } };
+  };
+
+  // ── the moments, for the player on this phone, after the last finished night ──
+  const moments = [];
+  if (o.meId && lastDoneIdx >= 0 && !preseason) {
+    const no = nights.indexOf(sessions[lastDoneIdx].date) + 1;
+    const prevI = done.length > 1 ? done[done.length - 2][1] : -1;
+    const a = prevI >= 0 ? repAt(o.meId, prevI) : MH_REPS[MH_REPS.length - 1], b = repAt(o.meId, lastDoneIdx);
+    if (a && b && MH_REPS.indexOf(b) < MH_REPS.indexOf(a)) moments.push({ type: "repUp", playerId: o.meId, from: a.id, to: b.id, session: no, points: ptsAfter(o.meId, lastDoneIdx) });
+    const me = P.find(p => p.id === o.meId);
+    if (me && getPlayerTeam(sessions[lastDoneIdx], o.meId)) {
+      const wasRank = before ? before.rank[o.meId] : null;
+      moments.push({ type: "tierUp", playerId: o.meId, from: wasRank ? mhTierFor(wasRank).id : mhTierFor(me.rank).id, to: mhTierFor(me.rank).id, session: no });
+      if (before && wasRank && wasRank > me.rank) {
+        const above = before.rows[wasRank - 2];
+        if (above && P.find(p => p.id === above.id) && P.find(p => p.id === above.id).rank > me.rank)
+          moments.push({ type: "scoreSettled", playerId: o.meId, overtookId: above.id, session: no,
+            points: [me.points, P.find(p => p.id === above.id).points] });
+      }
+    }
+  }
+
+  const n8 = sessions.findIndex(s => s.date === nights[nights.length - 2]);
+  let leadAtStart = null;
+  if (n8 >= 0 && after[n8]) { const rows = after[n8].rows; leadAtStart = rows.length > 1 ? rows[0].pts - rows[1].pts : null; }
+
+  return {
+    meId: o.meId || null, players: P, sessions: S2, preseason,
+    homeNext: (next || S2[S2.length - 1]).no, homeShowsLive: !!live,
+    nights: nightsD, recaps, me: meD, rival, vsFor, moments,
+    live: null, finale: { leadAtStart },
+    paidOMR: done.length * (S.voucher || 0) * 2,
+    rosterSize: preseason ? players.length : P.length,
+    artBase: o.artBase || "", logo: o.logo,
+  };
+}
+
+// ── the shell ───────────────────────────────────────────────────────────
+// Routes by hash (#home, #jobs, #card/<id>, #session/<no>, #live/<no>/<matchId>
+// ...), the same table the preview uses, so the screens are exactly the ones
+// the phase reports checked.
+const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
+  session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
+  loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
+  share: MhShareSheet });
+
+function HeistShell(props) {
+  const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
+  const read = () => (location.hash.slice(1) || "").split("/");
+  const [route, setRoute] = React.useState(read);
+  const [portraits, setPortraits] = React.useState({});
+  React.useEffect(() => { const f = () => setRoute(read()); addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
+  // the Heist portraits made on /photos/ — a portrait wins over the volume photo
+  React.useEffect(() => {
+    let live = true;
+    const pull = () => fetch(MH_HOST_PHOTOS).then(r => r.json()).then(j => {
+      if (!live || !j.ok) return;
+      setPortraits(Object.fromEntries(j.players.filter(p => p.heist).map(p => [p.id, p.heist])));
+    }).catch(() => {});
+    pull(); const t = setInterval(pull, 5 * 60000);
+    return () => { live = false; clearInterval(t); };
+  }, []);
+  const D = React.useMemo(() => {
+    const d = heistData(state, { leaderboard, meId, portraits, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
+    d.onLogo = openLogin; d.organiser = canScore ? openOrganiser : null; d.pickMe = openMe; d.signedIn = signedIn;
+    return d;
+  }, [state, leaderboard, meId, portraits, canScore, signedIn]);
+
+  // first open of the day: Now Loading Muscat, then any moment not yet seen
+  const day = (() => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; })();
+  React.useEffect(() => {
+    if (location.hash) return;
+    if (mhOnce("loaded", day).due()) { mhOnce("loaded", day).seen(); location.replace("#loading"); return; }
+    const m = mhNextMoment(D);
+    location.replace(m ? "#" + m : "#home");
+  }, []);
+
+  const go = (to, arg) => {
+    if (to === "back") { if (history.length > 1) history.back(); else location.hash = "home"; return; }
+    if (to === "home") { const m = mhNextMoment(D); if (m) { location.hash = m; return; } }
+    if (to === "signup" || to === "results") {
+      const s = D.sessions.find(x => x.no === +arg);
+      if (s && s.sid) { openSession(s.sid); return; }
+      location.hash = "jobs"; return;
+    }
+    if (to === "cardpull") to = "cardpull";
+    location.hash = arg != null ? `${to}/${arg}` : to; scrollTo(0, 0);
+  };
+  const [name, arg, arg2] = route;
+  const Screens = MH_SCREENS();
+  const Screen = Screens[name] || MhHome;
+  // live scoring writes the result through the engine's own scoreToResult
+  let live = null, onLock = null;
+  if (name === "live") {
+    const s = D.sessions.find(x => x.no === +arg);
+    const N = s && D.nights[s.no];
+    const m = N && Object.values(N.groups).flatMap(g => g.matches.map(x => ({ ...x, group: Object.keys(N.groups).find(k => N.groups[k] === g) }))).find(x => x.id === arg2);
+    if (m && canScore) {
+      const [a, b] = (m.score || "0-0").split("-").map(Number);
+      live = { court: m.court || 1, group: m.group, teamA: m.a, teamB: m.b, a, b, serving: "A", art: s.art, artPos: s.artPos };
+      onLock = ({ t1, t2 }) => {
+        const r = scoreToResult(t1, t2);
+        if (!r.winner || Math.max(t1, t2) < 6) { alert("Not a finished score: a set is first to 6 (7-5 or 7-6 if it goes on)."); return; }
+        updateSession(m.sid, ss => ({ ...ss, groupMatches: (ss.groupMatches || []).map(x => x.id === m.id ? { ...x, ...r, resultAt: Date.now() } : x) }));
+        go("back");
+      };
+    } else if (name === "live") { location.replace("#session/" + arg); return null; }
+  }
+  const banner = canScore && (sync === "error" || sync === "offline");
+  return (
+    <>
+      {banner && (
+        <button type="button" className="mh-savebanner" onClick={() => openLogin()}>
+          ⚠ NOT SAVING — your changes are only on this phone. {syncErr ? `(${syncErr}) ` : ""}Tap to sign in again.
+        </button>
+      )}
+      <Screen key={route.join("/")} D={D} go={go} id={name === "share" ? arg2 : arg} no={arg} what={arg}
+        start={+arg2 || 0} canScore={canScore} match={live} onLock={onLock} />
+    </>
+  );
+}
+// The next moment this phone has not seen, in the order the handoff plays them.
+function mhNextMoment(D) {
+  if (!D.meId) return null;
+  for (const m of D.moments || []) {
+    const key = { tierUp: ["card", `${m.playerId}/${m.session}`, `cardpull/${m.session}`],
+                  repUp: ["rep", `${m.playerId}/${m.to}`, `repup/${m.playerId}`],
+                  scoreSettled: ["settled", `${m.playerId}/${m.session}`, "settled"] }[m.type];
+    if (key && mhOnce(key[0], key[1]).due()) { mhOnce(key[0], key[1]).seen(); return key[2]; }
+  }
+  return null;
+}

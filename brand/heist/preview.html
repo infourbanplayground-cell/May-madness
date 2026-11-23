@@ -461,6 +461,16 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 /* the share sheet shows the frame itself, scaled to the phone */
 .mh-sharepreview { margin: 14px auto 10px; width: calc(416px * var(--k)); height: calc(740px * var(--k)); --k: min(1, calc((100vw - 40px) / 416px)); }
 .mh-sharescale { width: 416px; height: 740px; transform: scale(var(--k)); transform-origin: 0 0; border-radius: 12px; overflow: hidden; }
+
+/* ── the app shell ────────────────────────────────────────────────────── */
+.mn-logobtn { min-width: 44px; min-height: 44px; margin: -8px 0; padding: 0; border: 0; background: none; cursor: pointer; display: inline-flex; align-items: center; }
+.mn-logobtn img { height: 28px; }
+.mh-orgchip { position: absolute; right: 20px; top: 92px; z-index: 6; min-height: 44px; padding: 0 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-chip-bg); color: var(--mn-peach); font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+/* the 17 Oct lesson: a failed save is impossible to miss, and above everything */
+.mh-savebanner { position: sticky; top: 0; z-index: 100; display: block; width: 100%; min-height: 44px; padding: 10px 14px; border: 0; background: var(--mn-sand); color: var(--mn-navy); font: 800 13px var(--mn-font-ui); text-align: center; cursor: pointer; }
+/* the inherited Vol.9 skin paints the page oxblood with more specific
+   selectors (html:not(.light) body); the Heist ground is navy everywhere */
+html, body, html:not(.light) body, #root { background: var(--mn-navy) !important; }
 </style>
 </head><body>
 <div id="root"></div>
@@ -663,10 +673,15 @@ function MhButton({ kind = "primary", live, children, style, ...rest }) {
 }
 
 // ── top bar: the UP logo and the volume line, over every screen ──────────
-function MhTopBar({ logo, line }) {
+// The club mark is the way into staff sign-in on every volume: five taps.
+function MhTopBar({ logo, line, onLogo }) {
+  const taps = React.useRef({ n: 0, t: 0 });
+  const tap = () => { const now = Date.now(), r = taps.current; r.n = now - r.t < 2500 ? r.n + 1 : 1; r.t = now;
+    if (r.n >= 5) { r.n = 0; onLogo && onLogo(); } };
   return (
     <div className="mn-topbar">
-      <img src={logo} alt="Urban Playground" />
+      {onLogo ? <button type="button" className="mn-logobtn" onClick={tap} aria-label="Urban Playground"><img src={logo} alt="" /></button>
+              : <img src={logo} alt="Urban Playground" />}
       <div className="mn-serif">{line}</div>
     </div>
   );
@@ -858,7 +873,8 @@ function mhDerive(D) {
 function MhPage({ D, tab, onTab, children, nav = true, pad = "96px 20px 0" }) {
   return (
     <div className="mh-page">
-      <MhTopBar logo={D.logo || "up-logo-tight.png"} line={`${MH.volumeLabel.replace("VOL", "Vol")} · ${MH.month}`} />
+      <MhTopBar logo={D.logo || "up-logo-tight.png"} line={`${MH.volumeLabel.replace("VOL", "Vol")} · ${MH.month}`} onLogo={D.onLogo} />
+      {D.organiser && <button type="button" className="mh-orgchip" onClick={D.organiser}>Organiser</button>}
       <main className="mh-body" style={{ padding: pad }}>{children}</main>
       {nav && <MhBottomNav tab={tab} onTab={onTab} />}
       <MhGrain />
@@ -918,7 +934,13 @@ function MhHome({ D, go }) {
             </div>
           </button>
         ) : null}
-        <div className="mh-two">
+        {D.preseason ? (
+          <MhGlass>
+            <MhLabel tone="peach">The table</MhLabel>
+            <MhDisplay size={22} style={{ marginTop: 3, lineHeight: 1.05 }}>Opens after {(D.sessions[0] || {}).code || "EP.01"}</MhDisplay>
+            <MhSerif size={14}>Everyone starts on zero on {D.sessions[0] ? mhDay(D.sessions[0].date) : "night one"}. Your rival is whoever finishes just above you.</MhSerif>
+          </MhGlass>
+        ) : <div className="mh-two">
           {lead && <button type="button" className="mn-glass mh-tap mh-small" onClick={() => go("wanted")}>
             <MhLabel tone="peach">Leader</MhLabel>
             <MhDisplay size={19} weight={800} style={{ marginTop: 3, lineHeight: 1.05 }}>{mhFirst(lead.name)} · {lead.points}</MhDisplay>
@@ -937,7 +959,7 @@ function MhHome({ D, go }) {
               <MhSerif size={14}>{mhPts(me.points - second.points)} behind you</MhSerif>
             </button>
           ))}
-        </div>
+        </div>}
       </div>
     </MhPage>
   );
@@ -1003,7 +1025,13 @@ function MhWanted({ D, go }) {
     <MhPage D={D} tab="wanted" onTab={go}>
       <div className="mh-col">
         <MhTitle title="MOST WANTED" aside={X.lastDone ? `after ${X.lastDone.code}` : "before EP.01"} />
-        {lead && (
+        {D.preseason && (
+          <MhGlass>
+            <MhDisplay size={22} style={{ lineHeight: 1.05 }}>Nobody's wanted yet</MhDisplay>
+            <MhSerif size={14}>The table fills in as {(D.sessions[0] || {}).code || "EP.01"} is played on {D.sessions[0] ? mhDay(D.sessions[0].date) : "night one"}. Last season's crew is on the Crew tab.</MhSerif>
+          </MhGlass>
+        )}
+        {lead && !D.preseason && (
           <button type="button" className="mh-leader mh-tap" onClick={() => go("card", lead.id)}>
             <MhArt src={lead.photo} pos={lead.pos} name={lead.name} />
             <div className="mh-leaderfade" aria-hidden="true" />
@@ -1027,7 +1055,7 @@ function MhWanted({ D, go }) {
             </div>
           ))}
         </div>
-        {X.players.length >= 2 && (
+        {X.players.length >= 2 && !D.preseason && (
           <div>
             {X.players.slice(1).map(p => {
               const g = X.gap(p), mine = X.me && p.id === X.me.id;
@@ -1058,7 +1086,10 @@ function MhWanted({ D, go }) {
 
 // ── 04 ME ────────────────────────────────────────────────────────────────
 const MH_SEG = [["groupWins", "Group wins", "var(--mn-teal)"], ["lossPts", "Loss points", "var(--mn-teal-45)", "var(--mn-teal-60)"],
-                ["knockout", "Knockout", "var(--mn-coral)"], ["titles", "Titles", "var(--mn-sand)"]];
+                ["knockout", "Knockout", "var(--mn-coral)"], ["titles", "Titles", "var(--mn-sand)"],
+                // comeback, streak and the 2X extra: the engine pays them and the design's four
+                // segments have no room for them, so without this the bar would not add up to the total
+                ["bonus", "Bonuses & 2X", "var(--mn-gold)"]];
 function MhMe({ D, go }) {
   const X = mhDerive(D);
   const me = X.me;
@@ -1067,8 +1098,11 @@ function MhMe({ D, go }) {
       <MhPage D={D} tab="me" onTab={go}>
         <div className="mh-col">
           <MhTitle title="ME" />
-          <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
-            <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>
+          {!D.meId && D.pickMe ? <MhGlass><MhDisplay size={22}>Who are you?</MhDisplay>
+            <MhSerif size={14}>Pick yourself once and this phone shows your card, your rival and every point you earn.</MhSerif>
+            <MhButton style={{ marginTop: 10, width: "100%" }} onClick={D.pickMe}>Pick yourself</MhButton></MhGlass>
+          : <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
+            <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>}
         </div>
       </MhPage>
     );
@@ -1119,7 +1153,7 @@ function MhMe({ D, go }) {
             {MH_SEG.map(([k, , c]) => (seg[k] ? <div key={k} style={{ flex: seg[k], background: c }} /> : null))}
           </div>
           <div className="mh-legend">
-            {MH_SEG.map(([k, l, c, sw]) => (
+            {MH_SEG.filter(([k]) => k !== "bonus" || seg[k]).map(([k, l, c, sw]) => (
               <div key={k}><span><span style={{ color: sw || c }}>■</span> {l}</span><b>{seg[k] || 0}</b></div>
             ))}
           </div>
@@ -1168,7 +1202,8 @@ function MhCardScreen({ D, go, id }) {
   const X = mhDerive(D);
   const p = X.byId[id] || X.players[0];
   const own = X.me && p.id === X.me.id;
-  const v = D.vsCard && D.vsCard.playerId === p.id ? D.vsCard : null;
+  // the app works you-v-them out for whichever card is open; the preview carries one fixed pair
+  const v = D.vsFor ? D.vsFor(p.id) : D.vsCard && D.vsCard.playerId === p.id ? D.vsCard : null;
   return (
     <MhPage D={D} tab="crew" onTab={go} nav={false} pad="92px 20px 0">
       <div className="mh-col">
@@ -1288,7 +1323,7 @@ function MhSession({ D, go, no, canScore }) {
             <MhGroupTable rows={(N.groups[g] || {}).standings || []} played={(N.groups[g] || {}).matches || []} />
             <MhLabel>Matches{canScore ? " · tap to score" : ""}</MhLabel>
             {((N.groups[g] || {}).matches || []).map((m, i) => (
-              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${g}${i}`) : null} />
+              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
             ))}
           </>}
           {tab === "teams" && <MhTeams N={N} />}
@@ -1463,7 +1498,7 @@ function MhRecap({ D, go, no }) {
   const champs = R.champions.map(n => mhFirst(n).toUpperCase());
   const rep = R.repUps && R.repUps[0];
   const tiles = [
-    ["MVP", "peach", R.mvp.name.toUpperCase(), `${R.mvp.votes} votes`],
+    ["MVP", "peach", R.mvp.votes ? R.mvp.name.toUpperCase() : "NOT VOTED", R.mvp.votes ? `${R.mvp.votes} vote${R.mvp.votes === 1 ? "" : "s"}` : "no votes were cast"],
     ["Biggest win", "teal", R.biggestWin.team.toUpperCase(), R.biggestWin.score.replace("-", "–")],
     ["Upset", "coral", R.upset.team.toUpperCase(), R.upset.note],
     rep ? ["Rep up", "teal", rep.name.toUpperCase(), `${rep.from} → ${rep.to}`]
@@ -1520,10 +1555,12 @@ function mhSlides(D, s, R) {
   const P = n => D.players.find(p => p.name === n || mhFirst(p.name) === n) || { name: n };
   const out = [
     { key: "Champions", label: "Champions", name: R.champions.map(mhFirst).join(" & "), sub: `beat ${R.beat.map(mhFirst).join(" & ")} ${R.score.replace("-", "–")}`, who: P(R.champions[0]) },
-    { key: "MVP", label: "MVP · player vote", name: R.mvp.name, sub: `${R.mvp.votes} votes${R.mvp.note ? " · " + R.mvp.note : ""}`, who: P(R.mvp.name) },
+    // a night nobody voted on has no MVP slide rather than a slide that says "—"
+    R.mvp.votes ? { key: "MVP", label: "MVP · player vote", name: R.mvp.name, sub: `${R.mvp.votes} vote${R.mvp.votes === 1 ? "" : "s"}${R.mvp.note ? " · " + R.mvp.note : ""}`, who: P(R.mvp.name) } : null,
     { key: "Biggest win", label: "Biggest win", name: R.biggestWin.team, sub: R.biggestWin.score.replace("-", "–"), who: P(R.biggestWin.team.split(" & ")[0]) },
     { key: "Upset", label: "Upset", name: R.upset.team, sub: R.upset.note, who: P(R.upset.team.split(" & ")[0]) },
   ];
+  for (let k = out.length - 1; k >= 0; k--) if (!out[k]) out.splice(k, 1);
   if (R.yourNight && me) out.push({ key: "Your night", label: "Your night", name: `+${R.yourNight.points}`, sub: R.yourNight.note, who: me, last: true });
   return out;
 }
@@ -1693,9 +1730,11 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
 function MhCardPull({ D, go, no }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "tierUp" && (no == null || x.session === +no))
-    || { playerId: X.me.id, session: +no || X.lastDone, from: X.me.tier.id, to: X.me.tier.id };
+    || (X.me ? { playerId: X.me.id, session: +no || X.lastDone, from: X.me.tier.id, to: X.me.tier.id } : {});
   const p = X.byId[m.playerId];
   const s = D.sessions.find(x => x.no === m.session);
+  React.useEffect(() => { if (!p || !s) go("home"); }, [p, s]);
+  if (!p || !s) return null;
   const from = mhTierById(m.from), to = p.tier;
   const dir = mhTierIdx(to.id) < mhTierIdx(from.id) ? "up" : mhTierIdx(to.id) > mhTierIdx(from.id) ? "down" : "hold";
   const title = dir === "up" ? <>TIER UP:<br /><span className="mh-hl" style={{ color: "var(--mn-gold)" }}>{to.label}</span></>
@@ -1728,6 +1767,9 @@ function MhCardPull({ D, go, no }) {
 function MhRepUp({ D, go, id }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "repUp" && (id == null || x.playerId === id));
+  // a moment that is not (or no longer) true is never drawn: a stale link goes home
+  React.useEffect(() => { if (!m) go("home"); }, [m]);
+  if (!m || !X.byId[m.playerId]) return null;
   const p = X.byId[m.playerId];
   const from = mhRepById(m.from), to = mhRepById(m.to), next = mhNextRep(to);
   const nights = m.session;                               // the threshold is per night played
@@ -1807,6 +1849,8 @@ function MhRival({ D, go }) {
 function MhSettled({ D, go }) {
   const X = mhDerive(D);
   const m = (D.moments || []).find(x => x.type === "scoreSettled");
+  React.useEffect(() => { if (!m) go("home"); }, [m]);
+  if (!m || !X.byId[m.playerId] || !X.byId[m.overtookId]) return null;
   const now = { [m.playerId]: m.points[0], [m.overtookId]: m.points[1] };
   const table = X.players.map(p => ({ ...p, points: now[p.id] != null ? now[p.id] : p.points }))
     .sort((a, b) => b.points - a.points || a.rank - b.rank);

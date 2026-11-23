@@ -973,6 +973,46 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     National runs was touched (own service, own vhost, graceful reload).
 - The on-screen face check also measures the crew card's own type: your own
   card has no `.mn-display` at all, and "nothing to measure" read as a fail.
+- **THE APP: `build-heist-app.py` -> `heist-index.html`, inherited from
+  `national-index.html`** the way every volume is: scoring, saving, sign-in,
+  the recovery banner and every organiser sheet are Vol.9's code, untouched.
+  App() renders `HeistShell` (`brand/heist/heist-adapter.jsx`) instead of the
+  Vol.9 tabs; `heistData()` turns the season state into the screens' data
+  shape using ONLY the inherited engine (calcPlayerStats, calcPlayerNights,
+  rankAt, calcGroupStandings, scoreToResult). The organiser reaches the
+  inherited tools through the ORGANISER chip (`?classic`); a night's full
+  editor opens over the Heist screens.
+  - The build refuses a top-level name the modules share with the page (a
+    duplicate declaration blanks the whole page).
+  - **`ops/check-heist-app.mjs`** runs the BUILT app on National's real state
+    moved onto the Heist dates (mid-season) and on the bare roster (launch
+    day): every screen drawn, Most Wanted's order = calcPlayerStats', the ME
+    bar sums to the total, card stats 0-99 or a dash, no Vol.9 ground showing,
+    and a score entered on Live Scoring reaching `/save` through scoreToResult.
+  - **THE INHERITED SKIN OUTRANKS PLAIN RULES.** `html.aa-boot` and
+    `html:not(.light) body` painted the page oxblood behind every Heist screen
+    and `body::before` still carried the khanjar tile; some of those blocks sit
+    LATER in the page, so equal specificity lost on order too. `:not(#mh)`
+    carries an id's weight and wins in any order. Found by the harness's
+    ground check, twice.
+  - Before night one (`D.preseason`) Home and Most Wanted say when the table
+    opens instead of drawing a table of zeros; a recap nobody voted on says
+    NOT VOTED and the slides skip the MVP slide.
+  - The ME bar has a fifth segment, **Bonuses & 2X** (comeback + streak + the
+    2X extra), shown only when non-zero: without it the bar did not add up.
+- **THE SEASON API is `heist-season-api`, port 3013, tables `he_*`**, stood up
+  by `ops/create-heist.sh` (run on the server) — National's api.js with the
+  prefix changed, the way every volume is made. The vhost (in
+  `ops/deploy-heist-photos.sh`) routes `/state /save /login /photos ...` to it
+  and `/api/*` to the photos service on 3012.
+  - Roster: `python3 ops/build-roster-merge.py heist` (National is a source
+    for this target only). **Run 23 Nov: 358 players, 40 photos, provisional
+    National totals — RUN IT AGAIN after Mon 30 Nov**; it recomputes and never
+    writes a session.
+- **Deploy: `bash ops/deploy-heist.sh`** -> `/preview/` until launch;
+  `ROOT=1` puts it at the front on **Tue 1 Dec**. It refuses to run 17:00-23:00
+  on a Heist night, and writes `version.txt` at the SITE ROOT (the update check
+  fetches it from there) and `history.json` there too.
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than
   copied over this file:**
   1. Re-read a screen's spec in `brand/heist/handoff/screens/` and look at its

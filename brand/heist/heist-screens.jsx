@@ -42,7 +42,8 @@ function mhDerive(D) {
 function MhPage({ D, tab, onTab, children, nav = true, pad = "96px 20px 0" }) {
   return (
     <div className="mh-page">
-      <MhTopBar logo={D.logo || "up-logo-tight.png"} line={`${MH.volumeLabel.replace("VOL", "Vol")} · ${MH.month}`} />
+      <MhTopBar logo={D.logo || "up-logo-tight.png"} line={`${MH.volumeLabel.replace("VOL", "Vol")} · ${MH.month}`} onLogo={D.onLogo} />
+      {D.organiser && <button type="button" className="mh-orgchip" onClick={D.organiser}>Organiser</button>}
       <main className="mh-body" style={{ padding: pad }}>{children}</main>
       {nav && <MhBottomNav tab={tab} onTab={onTab} />}
       <MhGrain />
@@ -102,7 +103,13 @@ function MhHome({ D, go }) {
             </div>
           </button>
         ) : null}
-        <div className="mh-two">
+        {D.preseason ? (
+          <MhGlass>
+            <MhLabel tone="peach">The table</MhLabel>
+            <MhDisplay size={22} style={{ marginTop: 3, lineHeight: 1.05 }}>Opens after {(D.sessions[0] || {}).code || "EP.01"}</MhDisplay>
+            <MhSerif size={14}>Everyone starts on zero on {D.sessions[0] ? mhDay(D.sessions[0].date) : "night one"}. Your rival is whoever finishes just above you.</MhSerif>
+          </MhGlass>
+        ) : <div className="mh-two">
           {lead && <button type="button" className="mn-glass mh-tap mh-small" onClick={() => go("wanted")}>
             <MhLabel tone="peach">Leader</MhLabel>
             <MhDisplay size={19} weight={800} style={{ marginTop: 3, lineHeight: 1.05 }}>{mhFirst(lead.name)} · {lead.points}</MhDisplay>
@@ -121,7 +128,7 @@ function MhHome({ D, go }) {
               <MhSerif size={14}>{mhPts(me.points - second.points)} behind you</MhSerif>
             </button>
           ))}
-        </div>
+        </div>}
       </div>
     </MhPage>
   );
@@ -187,7 +194,13 @@ function MhWanted({ D, go }) {
     <MhPage D={D} tab="wanted" onTab={go}>
       <div className="mh-col">
         <MhTitle title="MOST WANTED" aside={X.lastDone ? `after ${X.lastDone.code}` : "before EP.01"} />
-        {lead && (
+        {D.preseason && (
+          <MhGlass>
+            <MhDisplay size={22} style={{ lineHeight: 1.05 }}>Nobody's wanted yet</MhDisplay>
+            <MhSerif size={14}>The table fills in as {(D.sessions[0] || {}).code || "EP.01"} is played on {D.sessions[0] ? mhDay(D.sessions[0].date) : "night one"}. Last season's crew is on the Crew tab.</MhSerif>
+          </MhGlass>
+        )}
+        {lead && !D.preseason && (
           <button type="button" className="mh-leader mh-tap" onClick={() => go("card", lead.id)}>
             <MhArt src={lead.photo} pos={lead.pos} name={lead.name} />
             <div className="mh-leaderfade" aria-hidden="true" />
@@ -211,7 +224,7 @@ function MhWanted({ D, go }) {
             </div>
           ))}
         </div>
-        {X.players.length >= 2 && (
+        {X.players.length >= 2 && !D.preseason && (
           <div>
             {X.players.slice(1).map(p => {
               const g = X.gap(p), mine = X.me && p.id === X.me.id;
@@ -242,7 +255,10 @@ function MhWanted({ D, go }) {
 
 // ── 04 ME ────────────────────────────────────────────────────────────────
 const MH_SEG = [["groupWins", "Group wins", "var(--mn-teal)"], ["lossPts", "Loss points", "var(--mn-teal-45)", "var(--mn-teal-60)"],
-                ["knockout", "Knockout", "var(--mn-coral)"], ["titles", "Titles", "var(--mn-sand)"]];
+                ["knockout", "Knockout", "var(--mn-coral)"], ["titles", "Titles", "var(--mn-sand)"],
+                // comeback, streak and the 2X extra: the engine pays them and the design's four
+                // segments have no room for them, so without this the bar would not add up to the total
+                ["bonus", "Bonuses & 2X", "var(--mn-gold)"]];
 function MhMe({ D, go }) {
   const X = mhDerive(D);
   const me = X.me;
@@ -251,8 +267,11 @@ function MhMe({ D, go }) {
       <MhPage D={D} tab="me" onTab={go}>
         <div className="mh-col">
           <MhTitle title="ME" />
-          <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
-            <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>
+          {!D.meId && D.pickMe ? <MhGlass><MhDisplay size={22}>Who are you?</MhDisplay>
+            <MhSerif size={14}>Pick yourself once and this phone shows your card, your rival and every point you earn.</MhSerif>
+            <MhButton style={{ marginTop: 10, width: "100%" }} onClick={D.pickMe}>Pick yourself</MhButton></MhGlass>
+          : <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
+            <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>}
         </div>
       </MhPage>
     );
@@ -303,7 +322,7 @@ function MhMe({ D, go }) {
             {MH_SEG.map(([k, , c]) => (seg[k] ? <div key={k} style={{ flex: seg[k], background: c }} /> : null))}
           </div>
           <div className="mh-legend">
-            {MH_SEG.map(([k, l, c, sw]) => (
+            {MH_SEG.filter(([k]) => k !== "bonus" || seg[k]).map(([k, l, c, sw]) => (
               <div key={k}><span><span style={{ color: sw || c }}>■</span> {l}</span><b>{seg[k] || 0}</b></div>
             ))}
           </div>
@@ -352,7 +371,8 @@ function MhCardScreen({ D, go, id }) {
   const X = mhDerive(D);
   const p = X.byId[id] || X.players[0];
   const own = X.me && p.id === X.me.id;
-  const v = D.vsCard && D.vsCard.playerId === p.id ? D.vsCard : null;
+  // the app works you-v-them out for whichever card is open; the preview carries one fixed pair
+  const v = D.vsFor ? D.vsFor(p.id) : D.vsCard && D.vsCard.playerId === p.id ? D.vsCard : null;
   return (
     <MhPage D={D} tab="crew" onTab={go} nav={false} pad="92px 20px 0">
       <div className="mh-col">

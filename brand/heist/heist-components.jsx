@@ -81,10 +81,15 @@ function MhButton({ kind = "primary", live, children, style, ...rest }) {
 }
 
 // ── top bar: the UP logo and the volume line, over every screen ──────────
-function MhTopBar({ logo, line }) {
+// The club mark is the way into staff sign-in on every volume: five taps.
+function MhTopBar({ logo, line, onLogo }) {
+  const taps = React.useRef({ n: 0, t: 0 });
+  const tap = () => { const now = Date.now(), r = taps.current; r.n = now - r.t < 2500 ? r.n + 1 : 1; r.t = now;
+    if (r.n >= 5) { r.n = 0; onLogo && onLogo(); } };
   return (
     <div className="mn-topbar">
-      <img src={logo} alt="Urban Playground" />
+      {onLogo ? <button type="button" className="mn-logobtn" onClick={tap} aria-label="Urban Playground"><img src={logo} alt="" /></button>
+              : <img src={logo} alt="Urban Playground" />}
       <div className="mn-serif">{line}</div>
     </div>
   );

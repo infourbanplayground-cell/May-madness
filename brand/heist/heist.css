@@ -454,3 +454,20 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 /* the share sheet shows the frame itself, scaled to the phone */
 .mh-sharepreview { margin: 14px auto 10px; width: calc(416px * var(--k)); height: calc(740px * var(--k)); --k: min(1, calc((100vw - 40px) / 416px)); }
 .mh-sharescale { width: 416px; height: 740px; transform: scale(var(--k)); transform-origin: 0 0; border-radius: 12px; overflow: hidden; }
+
+/* ── the app shell ────────────────────────────────────────────────────── */
+.mn-logobtn { min-width: 44px; min-height: 44px; margin: -8px 0; padding: 0; border: 0; background: none; cursor: pointer; display: inline-flex; align-items: center; }
+.mn-logobtn img { height: 28px; }
+.mh-orgchip { position: absolute; right: 20px; top: 92px; z-index: 6; min-height: 44px; padding: 0 14px; border-radius: var(--mn-r-pill); border: var(--mn-pill-border); background: var(--mn-chip-bg); color: var(--mn-peach); font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+/* the 17 Oct lesson: a failed save is impossible to miss, and above everything */
+.mh-savebanner { position: sticky; top: 0; z-index: 100; display: block; width: 100%; min-height: 44px; padding: 10px 14px; border: 0; background: var(--mn-sand); color: var(--mn-navy); font: 800 13px var(--mn-font-ui); text-align: center; cursor: pointer; }
+/* the inherited Vol.9 skin paints the page oxblood with more specific
+   selectors (html:not(.light) body); the Heist ground is navy everywhere */
+/* The inherited skin names <html> and <body> in every state it has (aa-boot,
+   :not(.light)) and some of its blocks sit LATER in the page than this one, so
+   equal specificity loses on order. :not(#mh) carries an id's weight and
+   outranks every class selector Vol.9 has, in any order. */
+html:not(#mh), html:not(#mh) body, html:not(#mh) #root { background: var(--mn-navy) !important; }
+/* and National's own furniture on the page itself — the khanjar tile on body::before
+   and the band on body::after — is Vol.9's, not Heist's */
+html:not(#mh) body::before, html:not(#mh) body::after { display: none !important; }

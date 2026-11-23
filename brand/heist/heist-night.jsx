@@ -45,7 +45,7 @@ function MhSession({ D, go, no, canScore }) {
             <MhGroupTable rows={(N.groups[g] || {}).standings || []} played={(N.groups[g] || {}).matches || []} />
             <MhLabel>Matches{canScore ? " · tap to score" : ""}</MhLabel>
             {((N.groups[g] || {}).matches || []).map((m, i) => (
-              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${g}${i}`) : null} />
+              <MhMatchCard key={i} m={m} onClick={canScore && m.state !== "final" ? () => go("live", `${s.no}/${m.id || g + i}`) : null} />
             ))}
           </>}
           {tab === "teams" && <MhTeams N={N} />}
@@ -220,7 +220,7 @@ function MhRecap({ D, go, no }) {
   const champs = R.champions.map(n => mhFirst(n).toUpperCase());
   const rep = R.repUps && R.repUps[0];
   const tiles = [
-    ["MVP", "peach", R.mvp.name.toUpperCase(), `${R.mvp.votes} votes`],
+    ["MVP", "peach", R.mvp.votes ? R.mvp.name.toUpperCase() : "NOT VOTED", R.mvp.votes ? `${R.mvp.votes} vote${R.mvp.votes === 1 ? "" : "s"}` : "no votes were cast"],
     ["Biggest win", "teal", R.biggestWin.team.toUpperCase(), R.biggestWin.score.replace("-", "–")],
     ["Upset", "coral", R.upset.team.toUpperCase(), R.upset.note],
     rep ? ["Rep up", "teal", rep.name.toUpperCase(), `${rep.from} → ${rep.to}`]
@@ -277,10 +277,12 @@ function mhSlides(D, s, R) {
   const P = n => D.players.find(p => p.name === n || mhFirst(p.name) === n) || { name: n };
   const out = [
     { key: "Champions", label: "Champions", name: R.champions.map(mhFirst).join(" & "), sub: `beat ${R.beat.map(mhFirst).join(" & ")} ${R.score.replace("-", "–")}`, who: P(R.champions[0]) },
-    { key: "MVP", label: "MVP · player vote", name: R.mvp.name, sub: `${R.mvp.votes} votes${R.mvp.note ? " · " + R.mvp.note : ""}`, who: P(R.mvp.name) },
+    // a night nobody voted on has no MVP slide rather than a slide that says "—"
+    R.mvp.votes ? { key: "MVP", label: "MVP · player vote", name: R.mvp.name, sub: `${R.mvp.votes} vote${R.mvp.votes === 1 ? "" : "s"}${R.mvp.note ? " · " + R.mvp.note : ""}`, who: P(R.mvp.name) } : null,
     { key: "Biggest win", label: "Biggest win", name: R.biggestWin.team, sub: R.biggestWin.score.replace("-", "–"), who: P(R.biggestWin.team.split(" & ")[0]) },
     { key: "Upset", label: "Upset", name: R.upset.team, sub: R.upset.note, who: P(R.upset.team.split(" & ")[0]) },
   ];
+  for (let k = out.length - 1; k >= 0; k--) if (!out[k]) out.splice(k, 1);
   if (R.yourNight && me) out.push({ key: "Your night", label: "Your night", name: `+${R.yourNight.points}`, sub: R.yourNight.note, who: me, last: true });
   return out;
 }
