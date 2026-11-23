@@ -2062,6 +2062,26 @@ var r=0;new MutationObserver(function(){if(r)return;r=requestAnimationFrame(func
 """
 
 
+# THE GROUP TIE-BREAK ORDER IS THE CLUB'S: wins, then GAME DIFFERENCE, then
+# HEAD TO HEAD, then games won (owner, 23 Nov 2026, live on Session 8). The
+# inherited order put games won before head to head, so two pairs level on
+# wins and difference were split by who scored more games rather than by the
+# match they played against each other: Group A sent Hassan & Faisal (15
+# games) through ahead of Majdi & Aamir (14), who had beaten them 6-3.
+TIEBREAK = [
+    ("""    if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
+    if (b.gf !== a.gf) return b.gf - a.gf;           // 3) games won
+    const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
+    if (aH !== 0) return -aH;                        // 4) head-to-head
+    return b.pts - a.pts;""",
+     """    if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
+    const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
+    if (aH !== 0) return -aH;                        // 3) head-to-head
+    if (b.gf !== a.gf) return b.gf - a.gf;           // 4) games won
+    return b.pts - a.pts;"""),
+]
+
+
 def plain(s, table, report, label, required=True):
     missing = [a for a, _ in table if a not in s]
     for a, b in table:
@@ -2119,6 +2139,7 @@ def main():
     s = src
     s = plain(s, TEXT, report, "wording")
     s = plain(s, INHERITED, report, "inherited quirks")
+    s = plain(s, TIEBREAK, report, "group tie-break order")
     s = plain(s, ASSETS, report, "assets")
     s = plain(s, SHARE_NAMES, report, "downloaded filenames")
     s = plain(s, ARCHIVE, report, "previous volume's archive link")

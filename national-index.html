@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "4345d96a8ee8";
+  var V = "f5761969a137";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1653,9 +1653,9 @@ function calcGroupStandings(session, group) {
   return rows.sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;   // 1) most wins
     if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
-    if (b.gf !== a.gf) return b.gf - a.gf;           // 3) games won
     const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
-    if (aH !== 0) return -aH;                        // 4) head-to-head
+    if (aH !== 0) return -aH;                        // 3) head-to-head
+    if (b.gf !== a.gf) return b.gf - a.gf;           // 4) games won
     return b.pts - a.pts;
   });
 }

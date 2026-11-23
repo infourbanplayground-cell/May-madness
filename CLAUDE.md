@@ -2329,6 +2329,13 @@ were retired the moment it arrived, and the handoff's own four with them.
   - **The flash frame belongs UNDER the letterbox**, at two frames and a third
     opacity. Above the bars at half for 90ms it washed the whole frame,
     including the bars, and read as a strobe rather than as a cut.
+- **GROUP TIE-BREAKS: wins, then GAME DIFFERENCE, then HEAD TO HEAD, then
+  games won** (owner, 23 Nov 2026, live on National's Session 8). The inherited
+  order had games won before head to head, which put Hassan & Faisal (15
+  games) through ahead of Majdi & Aamir (14), who had beaten them 6-3. Spliced
+  as `TIEBREAK` in `build-national-app.py` (Heist inherits it), not fixed in
+  the older volumes' files. `calcGroupStandingsNormalized` (uneven groups only)
+  still has no head-to-head step.
 - **THE FOUR-GROUP DRAW CROSSES BY LETTER** — A1 v D2, B1 v C2, C1 v B2,
   D1 v A2. The owner's call, live on 26 Oct 2026, correcting the bracket by
   hand mid-night.
