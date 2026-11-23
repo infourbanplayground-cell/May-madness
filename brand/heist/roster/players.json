@@ -1,0 +1,8034 @@
+{
+ "built": "2026-11-23",
+ "heistFormat": {
+  "w": 1080,
+  "h": 1350,
+  "quality": 88
+ },
+ "_note": "One record per player id. photo = the current one the apps hold; heist.photo = the new Heist-format one (4:5, 1080x1350, face in the top third). Rebuild with ops/heist-roster.py build — it keeps every imported Heist photo.",
+ "players": [
+  {
+   "id": "p_mptqpbkf_q9xn7",
+   "name": "Muntaser Hasni",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 47,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_q9xn7.jpg",
+   "photoFrom": "56 National Series",
+   "photoOlderFrom": "June Fury",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_hp51i",
+   "name": "Munther Rahbi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 44,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": "photos/p_mptqpbkf_hp51i.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_gc5kw",
+   "name": "7up",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 43,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": "photos/p_mpv748m8_gc5kw.jpg",
+   "photoFrom": "56 National Series",
+   "photoOlderFrom": "September Surge",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_h6gy7",
+   "name": "Mutaz Zadjali",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 40,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": "photos/p_mptqpbkf_h6gy7.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_oyp2j",
+   "name": "Faisal Al Harthi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 39,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_oyp2j.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_08mv4",
+   "name": "Riyadh",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 38,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_08mv4.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_8hdcr",
+   "name": "Faris Namaani",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 35,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_8hdcr.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_ixqzu",
+   "name": "Hamed Amri",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 35,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_ixqzu.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_ayrmy",
+   "name": "Muether Wahaibi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 33,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_iznki",
+   "name": "Said Habsi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 34,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_iznki.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_p7qv5",
+   "name": "Hassan Salhi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 30,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_p7qv5.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_e6ele",
+   "name": "Mustafa",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 28,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_e6ele.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqf8rb1i_seau4",
+   "name": "Aamir Al Saadi",
+   "volumes": [
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 27,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": "photos/p_mqf8rb1i_seau4.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_3d553",
+   "name": "Muatasim Sabri",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 25,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_3d553.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqi2ahgl_mkdyu",
+   "name": "Saif Bahlani",
+   "volumes": [
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 22,
+   "lastPlayed": "2026-10-30",
+   "photoUrl": null,
+   "photo": "photos/p_mqi2ahgl_mkdyu.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_dy8gc",
+   "name": "AR",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 21,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_drdo3",
+   "name": "Eathar",
+   "volumes": [
+    "56 National Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 21,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_drdo3.jpg",
+   "photoFrom": "56 National Series",
+   "photoOlderFrom": "June Fury",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_2yy4w",
+   "name": "Nooh Amri",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 21,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_2yy4w.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_72xek",
+   "name": "Ali Safwan",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 19,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrcb4jvk_knv4b",
+   "name": "Baraa",
+   "volumes": [
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 19,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": "photos/p_mrcb4jvk_knv4b.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_g7bid",
+   "name": "mossa",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 19,
+   "lastPlayed": "2026-11-09",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_g7bid.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_q4e7r",
+   "name": "Sultan Khanjari",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 19,
+   "lastPlayed": "2026-11-09",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpu00tek_pkper",
+   "name": "Majdi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 18,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": "photos/p_mpu00tek_pkper.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mu198buc_q510g",
+   "name": "amjad",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 17,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mu198buc_q510g.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": [
+    "g_cwjx7uvg"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_o5iva",
+   "name": "hmod",
+   "volumes": [
+    "56 National Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 16,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_o5iva.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_n0pyz",
+   "name": "Ahmed Rawas",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 14,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": "photos/p_mptqpbkf_n0pyz.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_3r3xw",
+   "name": "Talal Awadi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 15,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_3r3xw.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_4l1n7",
+   "name": "KB7",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 14,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_4l1n7.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_g04co",
+   "name": "Mohammed Khanjari",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 14,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mta3yrxi_c1ag6",
+   "name": "Mohammed Siyabi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 13,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_scp90",
+   "name": "Ahmed Busaidi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 10,
+   "lastPlayed": "2026-11-09",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": "photos/p_mpv748m8_scp90.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_yduma",
+   "name": "Said Eisry",
+   "volumes": [
+    "56 National Series",
+    "September Surge",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 11,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1793645484/august-attack/sessions/ctiidhomggtlszomcoun.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqs5582o_g736c",
+   "name": "A10",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 8,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_pxvnt",
+   "name": "Abdu Aghbari",
+   "volumes": [
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-10-30",
+   "photoUrl": null,
+   "uprising": 7,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrcb05y9_fg22m",
+   "name": "Asad Sukaiti",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat"
+   ],
+   "nights": 10,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq82cxdf_wje6z",
+   "name": "Fahad",
+   "volumes": [
+    "Blackout Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 10,
+   "lastPlayed": "2026-10-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqi2ahgl_7mzjt",
+   "name": "Sulieman",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 10,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq56iwkd_15ysl",
+   "name": "Dareen",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "uprising": 3,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_ndm6w",
+   "name": "Mazin",
+   "volumes": [
+    "56 National Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 9,
+   "lastPlayed": "2026-11-04",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_ndm6w.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_iur4l",
+   "name": "Nawaf Wahaibi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 9,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_iur4l.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpu7wekz_i856m",
+   "name": "Zorro",
+   "volumes": [
+    "56 National Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "uprising": 4,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msd9cbw4_62vrm",
+   "name": "Ali Nasseri",
+   "volumes": [
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 7,
+   "lastPlayed": "2026-09-30",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_jees3",
+   "name": "Munther Hinai",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 8,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvpa1bm9_klp6c",
+   "name": "Qusai",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series"
+   ],
+   "nights": 8,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1793645442/august-attack/sessions/r0y7buett7wixzqcawph.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_q0suuko5"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msn9jae9_5t5lk",
+   "name": "Suhail",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 8,
+   "lastPlayed": "2026-11-09",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1792003179/august-attack/sessions/lq8qdlnscxp6hctfy17d.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq82cxdf_ai1v6",
+   "name": "Kk",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 7,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_9j9wx",
+   "name": "Marwan Amri",
+   "volumes": [
+    "56 National Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 7,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_9j9wx.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqf8ouzv_1mm2u",
+   "name": "Said B",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_rwsqg",
+   "name": "Saif Mahrooqi",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 7,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1791986690/august-attack/sessions/ufxvpy4qajags4mal7mc.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_ebmbk",
+   "name": "Aimen Farsi",
+   "volumes": [
+    "Blackout Series",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-10-30",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_ebmbk.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrw1wb8w_w0vsa",
+   "name": "Aisha",
+   "volumes": [
+    "56 National Series",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqi2ahgl_cqxlc",
+   "name": "Mohammed",
+   "volumes": [
+    "56 National Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mqs4d461_f4qa9",
+    "p_muo526n9_3whzg"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpu6i7pi_8oe0x",
+   "name": "Mulhim",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mq82cxdf_fthk5"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpy293hz_67d5k",
+   "name": "Abo Sam",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-17",
+   "photoUrl": null,
+   "uprising": 3,
+   "photo": "photos/p_mpy293hz_67d5k.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mr98bzjt_whje2",
+   "name": "AMEER",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrt8ss18_0er5c",
+   "name": "Haitham",
+   "volumes": [
+    "56 National Series",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_cqi0d",
+   "name": "Haytham Bloushi",
+   "volumes": [
+    "September Surge",
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-09-14",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mu198buc_73ypj",
+   "name": "Ismail Al Nassri",
+   "volumes": [
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-10-30",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1791830232/august-attack/sessions/wanl3g7tojvprdj3cxvm.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_xftrh"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvf9vsrl_4nv5v",
+   "name": "Khamis A",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_0ump5",
+   "name": "Khamis Q",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrcbedrc_y5ioq",
+   "name": "MSM",
+   "volumes": [
+    "56 National Series",
+    "July Heat"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mtu5d6t0_agbyk"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mr98bzjt_ip2dm",
+   "name": "abdulrahman",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-13",
+   "photoUrl": null,
+   "uprising": 3,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrm26p48_yh1bl",
+   "name": "Ahmed Kalbani",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mu44czhy_q6r5z",
+   "name": "firas",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrw1wb8w_b2lit",
+   "name": "Hamed",
+   "volumes": [
+    "Blackout Series",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-10-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwqg6sra_1he64",
+    "p_ms386li9_vm4lf"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpu7wekz_y52vy",
+   "name": "Hamza",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1793645461/august-attack/sessions/v0hmdhwzw4db1edipxks.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msd9cbw4_irxa7",
+   "name": "Ibrahim",
+   "volumes": [
+    "Blackout Series",
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": "photos/p_msd9cbw4_irxa7.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msd9cbw4_1nl82",
+   "name": "leena",
+   "volumes": [
+    "56 National Series",
+    "August Attack"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_z6lbf",
+   "name": "Mahmood Mahrooqi",
+   "volumes": [
+    "56 National Series",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mtu5d6t0_agbyk",
+   "name": "MSM",
+   "volumes": [
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-10-19",
+   "photoUrl": "https://res.cloudinary.com/ewhslrhh/image/upload/v1792003116/august-attack/sessions/sn5itrf4i2daiek9yepk.jpg",
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mrcbedrc_y5ioq"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_ms0efap4_9vq8a",
+   "name": "musallam",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_vz3d4",
+   "name": "Raad",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series",
+    "June Fury"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_5t9ou",
+   "name": "Slim",
+   "volumes": [
+    "56 National Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqs5582o_vwwej",
+   "name": "Sultan",
+   "volumes": [
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_2powz",
+   "name": "Talal Hasni",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpy293hz_0k1oz",
+   "name": "3abadi",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mt04mxde_acfxq",
+   "name": "A Bahri",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mw9axk6h_qfbnq",
+   "name": "Aamir",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_auqi6",
+   "name": "Abdulrahman Shamsi",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-03",
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_ms0giolr_gzx97",
+   "name": "Ahmed",
+   "volumes": [
+    "56 National Series",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms386li9_gz45h",
+    "p_mt04mxde_ipu34",
+    "p_mthawokw_ed6ms",
+    "p_mthbje94_5cda1",
+    "p_mulbon4y_8c4rj",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq56cy6k_djlzu",
+   "name": "Ahmed (AR)",
+   "volumes": [
+    "Blackout Series",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpuupuxa_a1q28",
+   "name": "Ahmed Siyabi",
+   "volumes": [
+    "56 National Series",
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq56iwkd_13311",
+   "name": "Asad Balushi",
+   "volumes": [
+    "Blackout Series",
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": "photos/p_mq56iwkd_13311.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrm26p48_6yuxj",
+   "name": "Faisal Alriyami",
+   "volumes": [
+    "Blackout Series",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_luyvq",
+   "name": "Jamal Hasni",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqi2ahgl_nbduk",
+   "name": "Loay",
+   "volumes": [
+    "56 National Series",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_yctlm",
+   "name": "Mussab Mahrami",
+   "volumes": [
+    "56 National Series",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_qbe8o",
+   "name": "Wathab Amri",
+   "volumes": [
+    "56 National Series",
+    "August Attack"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpu7wekz_t83o5",
+   "name": "Zak",
+   "volumes": [
+    "Blackout Series",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": "photos/p_mpu7wekz_t83o5.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqs4d461_l1g8j",
+   "name": "Abdulaziz",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrm26p48_hlkz7",
+   "name": "Abdulaziz Al Hadhrami",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-15",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_mkksv",
+   "name": "Abdurahman Riyami",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": "photos/p_mptqpbkf_mkksv.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_3c9q2",
+   "name": "Abu Taymur",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_dmgvc",
+   "name": "Adil",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msg4ffog_r76lx",
+   "name": "AF",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-05",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_ms0efap4_rvkl7",
+   "name": "ahmed",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-25",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_ms386li9_gz45h",
+    "p_mt04mxde_ipu34",
+    "p_mthawokw_ed6ms",
+    "p_mthbje94_5cda1",
+    "p_mulbon4y_8c4rj"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_msq4trh5_p17ge",
+   "name": "Ahmed Alsaidi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_a9rseo2m",
+   "name": "Al muhaneed",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_muy5pj1x_2z525"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mr98bzjt_yw4du",
+   "name": "Ali",
+   "volumes": [
+    "Blackout Series",
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-30",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwc5h6pg_qpxx2",
+    "p_ms0efap4_qpx3w",
+    "p_ms0giolr_qgv8r"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_qg46s",
+   "name": "Ghassan",
+   "volumes": [
+    "56 National Series",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mu198buc_nocna"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_rgue6",
+   "name": "Hafidh",
+   "volumes": [
+    "Blackout Series",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_muo526n9_azixh",
+   "name": "Hamood",
+   "volumes": [
+    "56 National Series",
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mub8k53u_3dfay",
+   "name": "Hisham  2 B",
+   "volumes": [
+    "56 National Series",
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_rtn7dn5u"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_ah00t",
+   "name": "Husam Rawahi",
+   "volumes": [
+    "56 National Series",
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mptqpbkf_ah00t.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_xycet",
+   "name": "Khamis",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mw9axk6h_63kck",
+   "name": "Mahmood",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_u18zcjf9",
+   "name": "Mohammed s",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 2,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_msq4trh5_c5sej",
+   "name": "Muaiyad",
+   "volumes": [
+    "Blackout Series",
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mqs4d461_itrzc",
+   "name": "Musaab",
+   "volumes": [
+    "Blackout Series",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mulbon4y_qps92",
+   "name": "Musallam Amri",
+   "volumes": [
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-05",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mtr9drik_irmjf",
+   "name": "Nasser",
+   "volumes": [
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mt79n1f8_nx4xe",
+   "name": "Said",
+   "volumes": [
+    "Blackout Series",
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mtr9drik_a9ufm",
+   "name": "Salim",
+   "volumes": [
+    "Blackout Series",
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_v6kfc",
+    "p_mq82cxdf_px6yu"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mq56dnar_yzqci",
+   "name": "Salim (Az)",
+   "volumes": [
+    "56 National Series",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvs44coa_4cels",
+   "name": "saud",
+   "volumes": [
+    "56 National Series",
+    "Blackout Series"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_otdue",
+   "name": "Yahya",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mu44czhy_lyoc7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrcb7whs_0n58g",
+   "name": "Yusuf Mujaini",
+   "volumes": [
+    "56 National Series",
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": "photos/p_mrcb7whs_0n58g.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mrcb86cs_vu4n5",
+   "name": "000",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvpa1bm9_phxfc",
+   "name": "A.TALAL",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvpa1bm9_b6ajg",
+   "name": "Abu Ammar",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_30jzddd9"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_muva4aid_g3ktk",
+   "name": "Abu B",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-05",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_30jzddd9",
+   "name": "Abu.ammar",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mvpa1bm9_b6ajg"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mvpa1bm9_w8ewb",
+   "name": "AH",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvs53fb8_m4etp",
+   "name": "Ahmed Almshaikhi",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_b2zqy",
+   "name": "Ahmed Hindasi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_1qfky",
+   "name": "Ahmed Hosni",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mv86kjx9_oh0dy",
+   "name": "Ahmed Nasser",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_kyyuux6d",
+   "name": "Al maqbali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_x3iyfwm2",
+   "name": "Al muatasim",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwqg6sra_jjw7z",
+   "name": "Al-muhaned",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mwc5h6pg_qpxx2",
+   "name": "Ali",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mr98bzjt_yw4du",
+    "p_ms0efap4_qpx3w",
+    "p_ms0giolr_qgv8r"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_jicbtv0m",
+   "name": "Ali Abdullah",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwjafz06_7dotw",
+   "name": "AlMuether",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-16",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_muy5pj1x_2z525",
+   "name": "almuhaneed",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_a9rseo2m"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_p9viarjb",
+   "name": "Almutasim",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_cwjx7uvg",
+   "name": "Amjad",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mu198buc_q510g"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwc5h6pg_tqzzq",
+   "name": "Anas",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvs4oozn_fw6nq",
+   "name": "Anis",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mw9axk6h_x9uq8",
+   "name": "ARTORo",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-09",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_muy5pj1x_7n8us",
+   "name": "Arturo Nassr",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvi5bff0_yp7fk",
+   "name": "AS",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_1tk3dk3f",
+   "name": "Bashar",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwqg6sra_k664v",
+   "name": "Basil",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mv85evs1_cdlmk",
+   "name": "Baz",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mwc5h6pg_05n50",
+   "name": "BREIKI",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_ytq5wtgs",
+   "name": "Hafedh",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwqg6sra_1he64",
+   "name": "Hamed",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mrw1wb8w_b2lit",
+    "p_ms386li9_vm4lf"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mv85igy0_mpx7o",
+   "name": "Hamed H",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_gv2b3uew",
+   "name": "Harith",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mv59j71s_rjx4j",
+   "name": "Hashim 2b",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_rtn7dn5u",
+   "name": "Hisham 2b",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mub8k53u_3dfay"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_t258k",
+   "name": "Humood Mahrooqi",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mvz9bb1s_n1v0o",
+   "name": "Jalal",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-02",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_cz5dt",
+   "name": "Kamal",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_z80fkzm6",
+   "name": "Khalid s",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mptqpbkf_6mdvh",
+   "name": "Khalil",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_vyoyiyd0",
+   "name": "Khalili",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_lg53io81"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_lg53io81",
+   "name": "Khalili",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_vyoyiyd0"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_jxltiwol",
+   "name": "M hajr",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_sfu7z71r",
+   "name": "M Sadiq",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_zuxma95u",
+   "name": "Moad",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mwm66wg4_c9n6s",
+   "name": "Omaima",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_ft39l47y",
+   "name": "Omar",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_muo526n9_1qbkm"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_7c1tlxg9",
+   "name": "Omar s",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_gfj60u8e",
+   "name": "Oumaima",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_q0suuko5",
+   "name": "Qusai",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mvpa1bm9_klp6c"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_g3kiopgj",
+   "name": "Rami",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_64i04w6h",
+   "name": "Reaf",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mv85evs1_a4wwa",
+   "name": "sankh",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_egdcwjyw"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_egdcwjyw",
+   "name": "Sankh",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mv85evs1_a4wwa"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_mvf9vsrl_0z253",
+   "name": "Shahab Firoozi",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_muy5pj1x_g20p7",
+   "name": "Si",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "g_ma8dcnhr",
+   "name": "Talal Hashi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "g_nvrbszek",
+   "name": "Umaima",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "guest": true,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "current": true
+  },
+  {
+   "id": "p_muy5pj1x_lwr9r",
+   "name": "Wail",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mv85evs1_lp63r",
+   "name": "Yarubi",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mv59j71s_nxwxn",
+   "name": "Yousuf",
+   "volumes": [
+    "Blackout Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-10-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mw255tgs_du8c8",
+   "name": "Zakariya",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-04",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mwc6wo8o_0ukjx",
+   "name": "🇩🇰",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-11",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwc5h6pg_ccf5b"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mta3yrxi_mv8ze",
+   "name": "🏴‍☠️",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "uprising": 1,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mwm656m4_284lk",
+   "name": "👑",
+   "volumes": [
+    "56 National Series"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-11-18",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mulbon4y_wz8qr",
+    "p_mulbitnz_tq08s"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": true
+  },
+  {
+   "id": "p_mpv748m8_f2sd8",
+   "name": "Marwan Ghafri",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 11,
+   "lastPlayed": "2026-08-03",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_f2sd8.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mr98bzjt_yhiyj",
+   "name": "Sha",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 10,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_aoyxy",
+   "name": "Yousef Alhammadi",
+   "volumes": [
+    "September Surge",
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 9,
+   "lastPlayed": "2026-09-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrt8ss18_ls4qu",
+   "name": "Suliman",
+   "volumes": [
+    "September Surge",
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 8,
+   "lastPlayed": "2026-09-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_k6x16",
+   "name": "Ali M",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_cd31s",
+   "name": "Don Salim",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 6,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy293hz_kps93",
+   "name": "M.S",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mulbon4y_01u8e"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_7stus",
+   "name": "Manhal",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 5,
+   "lastPlayed": "2026-08-05",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpv748m8_5zwmz",
+   "name": "Khalid",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-07-25",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mt04mxde_jmv65"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_xcoo0",
+   "name": "Munther Qasmi",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-07-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_cl0t9",
+   "name": "Qoot",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpv748m8_rq2fg",
+   "name": "Tamim",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-07-27",
+   "photoUrl": null,
+   "photo": "photos/p_mpv748m8_rq2fg.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpuurpu2_xused",
+   "name": "Yaman",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 4,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4trh5_okwvt",
+   "name": "Barraq",
+   "volumes": [
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-09-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_j5x0z",
+   "name": "Eyad Jufaili",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrt8ss18_8kta2",
+   "name": "Jassim",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrm26p48_bvh14",
+   "name": "M.kalbani",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4trh5_pfohn",
+   "name": "Muatasim",
+   "volumes": [
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-09-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpv748m8_m3u0s",
+   "name": "Muhanad",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-07-27",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mqp9jgby_7wsh3"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_bz13p",
+   "name": "Nanki",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_hd7wu",
+   "name": "Qussai Abri",
+   "volumes": [
+    "August Attack",
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqf8rb1i_rd48y",
+   "name": "Saif B",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 3,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_rywk1",
+   "name": "Abood",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt04mxde_ipu34",
+   "name": "Ahmed",
+   "volumes": [
+    "September Surge",
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-09-21",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_ms386li9_gz45h",
+    "p_mthawokw_ed6ms",
+    "p_mthbje94_5cda1",
+    "p_mulbon4y_8c4rj",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0giolr_0vsgm",
+   "name": "Ahmed zdj",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy293hz_sl3eb",
+   "name": "Ali B",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-03",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_njm1c",
+   "name": "Anad",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_8j4w1",
+   "name": "Badar H",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-27",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrj60dr9_6lxy1",
+   "name": "Faisal",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0efap4_c5zrt",
+   "name": "Farhan",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms386li9_vm4lf",
+   "name": "Hamed",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwqg6sra_1he64",
+    "p_mrw1wb8w_b2lit"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msn9jae9_82kjo",
+   "name": "Hashim",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy20y0x_2fpr1",
+   "name": "Hooti",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": "photos/p_mpy20y0x_2fpr1.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_lq1cp",
+   "name": "Humaid",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-27",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_u883r",
+   "name": "Hussam Kiyumi",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_yzhdo",
+   "name": "Issa",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_55wx7",
+   "name": "Khalid Hammadi",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqi2ahgl_cguz0",
+   "name": "Meshal",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-13",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy21pgl_01mxf",
+   "name": "Moayad D",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-06",
+   "photoUrl": null,
+   "photo": "photos/p_mpy21pgl_01mxf.jpg",
+   "photoFrom": "56 National Series",
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqi2ahgl_8z0jt",
+   "name": "moayed",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-06",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqp9jgby_8m8wd",
+   "name": "Mohamed",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy21xwy_rinoq",
+   "name": "Mohammed Amri",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mulbon4y_01u8e",
+   "name": "MS",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-09-30",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mpy293hz_kps93"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms386li9_kbs4v",
+   "name": "muayad",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_6ww7z"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_elgnc",
+   "name": "Omer Al Rusheidi",
+   "volumes": [
+    "August Attack",
+    "July Heat"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_v6kfc",
+   "name": "Salim",
+   "volumes": [
+    "July Heat",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mq82cxdf_px6yu",
+    "p_mtr9drik_a9ufm"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56bokd_sd5w2",
+   "name": "Salim Hinai",
+   "volumes": [
+    "August Attack",
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_uio9c",
+   "name": "Taghlib",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt79n1f8_8nl3f",
+   "name": "Tatiana",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqi2ahgl_7hhs2",
+   "name": "Yacine",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mu44czhy_lyoc7",
+   "name": "yahya",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 2,
+   "lastPlayed": "2026-09-23",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_otdue"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mue5r0yf_f05x7",
+   "name": "3x",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-23",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msg4ffog_gma0v",
+   "name": "AD",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-05",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_591b8",
+   "name": "Adhami",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mtr9drik_adjxp",
+   "name": "adnan",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-07",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms386li9_gz45h",
+   "name": "Ahmed",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-27",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_mt04mxde_ipu34",
+    "p_mthawokw_ed6ms",
+    "p_mthbje94_5cda1",
+    "p_mulbon4y_8c4rj",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mthawokw_ed6ms",
+   "name": "Ahmed",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_ms386li9_gz45h",
+    "p_mt04mxde_ipu34",
+    "p_mthbje94_5cda1",
+    "p_mulbon4y_8c4rj",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mulbon4y_8c4rj",
+   "name": "Ahmed",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_ms386li9_gz45h",
+    "p_mt04mxde_ipu34",
+    "p_mthawokw_ed6ms",
+    "p_mthbje94_5cda1",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrm26p48_xiedn",
+   "name": "Ahmed Al Hadhrami",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mthawokw_gd48c",
+   "name": "Ahmed OJ",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcba4nn_l2fch",
+   "name": "Ahmed s",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mr98bzjt_zzzs0",
+   "name": "AL khatab",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-06",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0efap4_40cdw",
+   "name": "AlAlawi",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-25",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrj60dr9_uyhb9",
+   "name": "Albaraa",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-13",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqs4d461_nrm79",
+   "name": "Albreiki",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpuuq2o3_n2tep",
+   "name": "Alharith",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-01",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0giolr_qgv8r",
+   "name": "Ali",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-25",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwc5h6pg_qpxx2",
+    "p_mr98bzjt_yw4du",
+    "p_ms0efap4_qpx3w"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4trh5_dl7gu",
+   "name": "Ali Hooti",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqi2ahgl_rc40g",
+   "name": "Almunther",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqi2ahgl_m9ohg",
+   "name": "Alyaqadhan",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrw1wb8w_yzg4j",
+   "name": "AM",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcb4jvk_dfz4k",
+   "name": "Amr",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msn9jae9_2ihce",
+   "name": "Anees",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt04mxde_dz3zo",
+   "name": "Arif",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_vztra",
+   "name": "Asaad al Waili",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-01",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxb56ah_txkhu",
+   "name": "Asad Hadidi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mta3yrxj_ab6zz",
+   "name": "Asfoor",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqf8ouzv_fdl7w",
+   "name": "AYMAN",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_8ktu5",
+   "name": "Azan",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt79n1f8_4cplt",
+   "name": "Azzan",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_t03d1",
+   "name": "badr",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mthawokw_sg5sm",
+   "name": "Faisal Rawahi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqf8ouzv_tmb7k",
+   "name": "FaisalB",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_3yyqa",
+   "name": "FH",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mu198buc_nocna",
+   "name": "ghassan",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-14",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_qg46s"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqs5582o_qohs5",
+   "name": "Ghost",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msn9jae9_2800d",
+   "name": "Hamed T",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_ugqb2",
+   "name": "HD",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msd9cbw4_c2z6g",
+   "name": "Hussain",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-03",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_xftrh",
+   "name": "Ismail Alnassri",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mu198buc_73ypj"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0giolr_hhys3",
+   "name": "Joker",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-25",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt04mxde_jmv65",
+   "name": "Khalid",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-19",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mpv748m8_5zwmz"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4wg2p_f0la7",
+   "name": "Khalid Barwani",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt79n1f8_s206w",
+   "name": "Laith",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mta3yrxi_nrg7c",
+   "name": "Lutfi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy293hz_dwjtv",
+   "name": "M Abri",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-03",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56c15x_uxm63",
+   "name": "Mahmood Jabri",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrt8ss18_1vft2",
+   "name": "Maitha",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-20",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_y1e4h",
+   "name": "Mazin Nabhani",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_8tqe0",
+   "name": "mhmd",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mtu5d6t0_4798x",
+   "name": "Mishaal",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-09",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msg4ffog_inh7a",
+   "name": "MK",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-05",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqf8ouzv_63zl5",
+   "name": "MOH",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56fywr_h75mn",
+   "name": "Mohammad Awadi",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_muo526n9_3whzg",
+   "name": "Mohammed",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-30",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mqi2ahgl_cqxlc",
+    "p_mqs4d461_f4qa9"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcbbbcv_fv22x",
+   "name": "Mohammed Sadiq",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqp9jgby_v47do",
+   "name": "Mohd",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_msq4trh5_vvgyg"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4trh5_vvgyg",
+   "name": "Mohd",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mqp9jgby_v47do"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_o2mu3",
+   "name": "moosa",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_ffqxg",
+   "name": "Muadh Sawai",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_6ww7z",
+   "name": "Muayad",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms386li9_kbs4v"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcbbfzj_eo81y",
+   "name": "Muhalhal",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqp9jgby_7wsh3",
+   "name": "Muhanad",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mpv748m8_m3u0s"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrw1wb8w_mbpst",
+   "name": "Mulham",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_fthk5",
+   "name": "Mulhim",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mpu6i7pi_8oe0x"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_z5pxm",
+   "name": "Mundher Minji",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_l5uik",
+   "name": "Mundhir",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4wsn1_5dh09",
+   "name": "Munther Al shukaili",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqp9jgby_7qlte",
+   "name": "Musab",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqp9jgby_h4riy",
+   "name": "NM",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mta3yrxi_ui3f0",
+   "name": "nooh",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-26",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_muo526n9_1qbkm",
+   "name": "Omar",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-30",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "g_ft39l47y"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_teisc",
+   "name": "Omar Almamari",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_6w3mx",
+   "name": "Omar Saqri",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-01",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_r3ses",
+   "name": "Omar Y",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqs5582o_cn4iu",
+   "name": "Rashad",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_an01k",
+   "name": "Rawi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_t058h",
+   "name": "Reza",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcbaa2j_wh5vm",
+   "name": "Said A",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt79n1f8_1715o",
+   "name": "Saif",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mtu5d6t0_zfuqr"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mtu5d6t0_zfuqr",
+   "name": "Saif",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-09",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mt79n1f8_1715o"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqs4d461_nxz5u",
+   "name": "Saif K",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_rm3wx",
+   "name": "Sajed",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-17",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq82cxdf_px6yu",
+   "name": "Salim",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-10",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mptqpbkf_v6kfc",
+    "p_mtr9drik_a9ufm"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrm26p48_fvzkt",
+   "name": "Salim Bloushi",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-15",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mthawokw_1348s",
+   "name": "Salim Siyabi",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-31",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpy293hz_szy8w",
+   "name": "Sarmi",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-03",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mq56iwkd_hhobs",
+   "name": "Saud M",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqz9iy1f_bvhnr",
+   "name": "sheri",
+   "volumes": [
+    "June Fury"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-06-29",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcb80mb_vwfqw",
+   "name": "Sultana",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-08",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mrcb09m6_p06qo"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mr98bzjt_5f8e4",
+   "name": "Tariq",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-06",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msq4trh5_rhmzm",
+   "name": "Waleed",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-12",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mt79n1f8_qg4y8",
+   "name": "Wdnaji",
+   "volumes": [
+    "August Attack"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-08-24",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrw1wb8w_c5m4y",
+   "name": "Zak S",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-22",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mr98bzjt_vo8r0",
+   "name": "Ziyad",
+   "volumes": [
+    "July Heat"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-07-06",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mulbon4y_wz8qr",
+   "name": "👑",
+   "volumes": [
+    "September Surge"
+   ],
+   "nights": 1,
+   "lastPlayed": "2026-09-28",
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwm656m4_284lk",
+    "p_mulbitnz_tq08s"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mthbje94_5cda1",
+   "name": "Ahmed",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_ms0giolr_gzx97",
+    "p_ms386li9_gz45h",
+    "p_mt04mxde_ipu34",
+    "p_mthawokw_ed6ms",
+    "p_mulbon4y_8c4rj",
+    "p_ms0efap4_rvkl7"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_cy63m",
+   "name": "Ahmed Al Aadi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_msxgb",
+   "name": "Ahmed Hinai",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_y3t3a",
+   "name": "Ahmed Humaidi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_9bamu",
+   "name": "Ahmed Rawahi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_2fhaf",
+   "name": "Ahmed Saad",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_0eokp",
+   "name": "Akram",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms0efap4_qpx3w",
+   "name": "Ali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwc5h6pg_qpxx2",
+    "p_mr98bzjt_yw4du",
+    "p_ms0giolr_qgv8r"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_aizcu",
+   "name": "Ali Al Hashmi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_yx6ki",
+   "name": "Ali Alawi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_par8u",
+   "name": "Ali Hajri",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_tjlem",
+   "name": "Almuntaser",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mw9b0b9u_lh5sn",
+   "name": "Annony",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mw9ayta4_hp1u9",
+   "name": "anony",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_zxyqr",
+   "name": "Asaad Hadidi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_q8ucq",
+   "name": "Azzan Alyarubi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_wpgt3",
+   "name": "Bashar Balushi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_a5o3w",
+   "name": "Ghalib Al Amri",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mtuaqr8s_9rnj3",
+   "name": "Ghost 1",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mtuaqv2v_h3wpv",
+   "name": "Ghost 2",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_jzi5o",
+   "name": "Haitham Shukairi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_1wh7v",
+   "name": "Hamed Yahyai",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_5kerq",
+   "name": "Hatim Bahlani",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mu44czhy_ll5mt",
+   "name": "hood",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_edw3s",
+   "name": "Karim",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_rmgpl",
+   "name": "Khalil Ahmed",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_4u0z0",
+   "name": "Khamis Hinai",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_5oiep",
+   "name": "M3M",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_k7vt8",
+   "name": "Mahdi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_n3wza",
+   "name": "Manaf Zadjali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_dcx81",
+   "name": "Michael",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_gldov",
+   "name": "mody",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mqs4d461_f4qa9",
+   "name": "Mohammed",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mqi2ahgl_cqxlc",
+    "p_muo526n9_3whzg"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_5xnks",
+   "name": "Mohammed Araimi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_5laxk",
+   "name": "Mohammed Zadjali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_sm7e7",
+   "name": "MR",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_fn8oz",
+   "name": "Muadh Hinai",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mpuurukz_u53mw",
+   "name": "NOH",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_2tx5x",
+   "name": "Odba",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_owy70",
+   "name": "Omar Mazahmi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_6cqx9",
+   "name": "Omar zadjali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_9w5t2",
+   "name": "Orwa Sabri",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mvz9bb1s_v0t1l",
+   "name": "Othman",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_znj6x",
+   "name": "Othman Bait Said",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mvs44coa_ca5zi",
+   "name": "ou",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_msxai4rd_tkbby",
+   "name": "Q👻",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_mloic",
+   "name": "Said Al Mawaali",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_jnyad",
+   "name": "Said Balushi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_qx0ui",
+   "name": "Saif Almamri",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_sbhzz",
+   "name": "Salim Junaibi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_s1pva",
+   "name": "Shahab",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_m4pzp",
+   "name": "Sultan Al Kabi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mrcb09m6_p06qo",
+   "name": "Sultana",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mrcb80mb_vwfqw"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mptqpbkf_zo9gm",
+   "name": "Talal Yaqoobi",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mvs44coa_263lt",
+   "name": "to",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_ms58qx1m_ldzr0",
+   "name": "Trk",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mwqg6sra_xtdua",
+   "name": "🆘",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": null,
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mwc5h6pg_ccf5b",
+   "name": "🇩🇰",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwc6wo8o_0ukjx"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  },
+  {
+   "id": "p_mulbitnz_tq08s",
+   "name": "👑",
+   "volumes": [],
+   "nights": 0,
+   "lastPlayed": null,
+   "photoUrl": null,
+   "photo": null,
+   "photoFrom": null,
+   "sameNameAs": [
+    "p_mwm656m4_284lk",
+    "p_mulbon4y_wz8qr"
+   ],
+   "heist": {
+    "photo": null,
+    "status": "needed"
+   },
+   "uprising": 0,
+   "guest": false,
+   "current": false
+  }
+ ]
+}

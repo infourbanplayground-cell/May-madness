@@ -928,6 +928,23 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   fill) that pokes out of a scrolling row — `SABOTAGE=slice` puts it back and
   goes red; its first version was vacuous (it skipped rows whose content
   overflowed vertically, i.e. exactly the fault) and was caught by that.
+- **THE PLAYER DATABASE is `brand/heist/roster/`, built by `ops/heist-roster.py`**
+  (`build` fetches every volume over ssh; `import <dir>` takes new photos;
+  `sheet` writes `roster.html`). One record per player id — ids are stable
+  since June, names are not (Mohammed, Khalid, 👑 and others appear 2-3
+  times), so `import` refuses a filename that matches two people and asks for
+  the id. 386 people, 327 have played, **181 playing now** (a team since 1 Oct
+  or an UPRISING night) and **36 of those have any photo at all** — most of
+  them full-body action shots, not portraits.
+  - The Heist photo format is **4:5, 1080x1350, face in the top third**:
+    every Heist crop (card window, round avatars, rival split, stories)
+    anchors high. `import` crops wide shots to the centre and tall ones to the
+    TOP, and warns when the source is too small to stay sharp.
+  - A rebuild keeps every imported Heist photo; tested by importing, rebuilding
+    and reading the record back.
+  - 27 walk-ins exist only in the Americano app's `state.guests`; the sheet
+    marks them, and the same-name flag shows which ones are probably a roster
+    player already (see `ops/promote-guests.py`).
 - The on-screen face check also measures the crew card's own type: your own
   card has no `.mn-display` at all, and "nothing to measure" read as a fail.
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than
