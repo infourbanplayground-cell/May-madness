@@ -15,7 +15,7 @@ H=heist.urbanpadel.om
 
 ssh urbanpadel "mkdir -p /opt/heist-api/history $WEB/photos $WEB/fonts/brand $WEB/fonts/heist $WEB/players"
 scp -q heist-api/api.js urbanpadel:/opt/heist-api/api.js
-scp -q heist-photos/index.html urbanpadel:$WEB/photos/index.html
+scp -q heist-photos/index.html heist-photos/style.txt urbanpadel:$WEB/photos/
 scp -q brand/fonts/*.woff2 brand/fonts/fonts.css urbanpadel:$WEB/fonts/brand/
 scp -q brand/heist/fonts/*.woff2 brand/heist/fonts/fonts.css urbanpadel:$WEB/fonts/heist/
 

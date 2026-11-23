@@ -68,6 +68,8 @@ input[type=range]{width:100%;accent-color:var(--coral)}
       <li>Save what ChatGPT makes, back here tap <b>Upload Heist photo</b>, slide the crop if the head is cut, and save. It is cut to 4:5, 1080×1350, the size every Heist card, avatar and story uses.</li>
       <li>Many at once: name each file after the player (<span class="s">Munther Rahbi.png</span>) and use <b>Upload a batch</b>. A name two players share is refused; use the id shown on their card instead.</li>
     </ol>
+    <p style="margin:8px 0 6px">Or give ChatGPT the whole list in one go: the brief holds the prompt, every player still to do, their photo link and the file name to save each one as.</p>
+    <a class="btn" href="/api/brief" target="_blank" rel="noopener">Open the ChatGPT brief</a>
     <p class="s" style="margin:8px 0 0">No current photo? ChatGPT needs one to keep the likeness: take one on the night, or ask the player for a selfie.</p>
   </section>
   <section class="glass">
@@ -119,23 +121,14 @@ input[type=range]{width:100%;accent-color:var(--coral)}
 // The style is one prompt for everybody, so the cards come out as ONE SET:
 // the same light, the same place, the same framing. Tuned to the handoff's
 // own paintings — coral dusk on one side, teal floodlight on the other.
-const STYLE = `Turn the person in the attached photo into a portrait for MUSCAT HEIST, a padel league in Muscat, Oman.
-
-Likeness first: keep their face, skin tone, hair, beard and build exactly. Do not make them younger, slimmer or more handsome.
-
-Style: a cinematic painted illustration, like a heist-film poster. Realistic proportions, soft painterly brushwork, rich detail.
-Setting: an outdoor padel court in Muscat at dusk, floodlights on, the Hajar mountains and a coral sunset behind them, softly out of focus.
-Light: warm coral and peach sunset light from one side, cool teal floodlight from the other, deep navy shadows.
-Pose: standing, three-quarter view, confident, holding a padel racket at their side or over the shoulder. Framed from the waist up, with the head in the upper third and a little space above it.
-Clothing: a plain dark athletic t-shirt, no brand logos.
-
-Format: vertical 4:5. One person only. No text, letters, numbers, logos, watermark or border.`;
+// The prompt lives in style.txt, one file the page AND the ChatGPT brief
+// (/api/brief) both read, so the two can never tell ChatGPT different things.
+let STYLE = "";
 const W = 1080, H = 1350;
 const $ = s => document.querySelector(s);
 const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
                 set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
 let token = store.get("heist-token"), players = [], filter = "now", current = null, staged = null, stagedImg = null;
-$("#style").textContent = STYLE;
 
 const copy = async (t, btn) => {
   try { await navigator.clipboard.writeText(t); } catch (e) {
@@ -280,6 +273,7 @@ $("#batch").onchange = async e => {
   draw();
 };
 
+fetch("style.txt", { cache: "no-cache" }).then(r => r.text()).then(t => { STYLE = t.trim(); $("#style").textContent = STYLE; });
 drawAuth(); load().catch(() => { $("#grid").innerHTML = `<p class="s">The roster could not be loaded. Try again in a minute.</p>`; });
 </script>
 </body></html>

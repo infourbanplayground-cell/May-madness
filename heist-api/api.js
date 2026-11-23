@@ -104,6 +104,39 @@ app.get("/api/ref/:id", async (req, res) => {
     .set("Cache-Control", "no-store").send(Buffer.from(m[2], "base64"));
 });
 
+// ── the brief: one page ChatGPT can read ────────────────────────────────
+// The style prompt (the SAME file the page shows) and every player still to
+// do, with the link to their current photo and the exact file name to save
+// the result as — a file named that way goes straight in through the page's
+// batch upload. A name two players share is given as the id instead, which
+// is the only file name the batch will accept for them.
+const STYLE_FILE = "/var/www/heist.urbanpadel.om/public/photos/style.txt";
+app.get("/api/brief", async (req, res) => {
+  try {
+    const { data } = await roster();
+    const all = req.query.all != null;
+    const todo = data.filter(p => (all || p.now) && !p.heist);
+    const host = "https://heist.urbanpadel.om";
+    const fname = p => (p.sameName ? p.id : p.name.replace(/[\\/:*?"<>|]+/g, "").trim()) + ".png";
+    const withRef = todo.filter(p => p.ref), noRef = todo.filter(p => !p.ref);
+    const style = fs.existsSync(STYLE_FILE) ? fs.readFileSync(STYLE_FILE, "utf8").trim() : "";
+    const out = [
+      "# MUSCAT HEIST — player portraits", "",
+      "For EACH player below: open their photo link, make ONE portrait of that person following the style prompt, " +
+      "and save it with the exact file name given. Do one player at a time so faces never mix. " +
+      "Then upload the files at " + host + "/photos/ (Upload a batch).", "",
+      "## Style prompt", "", style, "",
+      `## To do — ${withRef.length} players with a photo`, "",
+      ...withRef.map((p, i) => `${i + 1}. ${p.name} — photo: ${host}/api/ref/${p.id} — save as: ${fname(p)}`), "",
+      `## Need a photo first — ${noRef.length} players`, "",
+      "No current photo, so no likeness to work from. Ask the player for a selfie, or take one on the night.", "",
+      ...noRef.map(p => `- ${p.name}`), "",
+      `_${data.filter(p => p.heist).length} portraits done. ${all ? "Everyone on the roster." : "Players playing now (on a team since 1 Oct, or at an UPRISING night). Add ?all for everyone."}_`, "",
+    ];
+    res.set("Content-Type", "text/plain; charset=utf-8").set("Cache-Control", "no-store").send(out.join("\n"));
+  } catch (e) { res.status(502).send("roster unavailable: " + e.message); }
+});
+
 // ── auth: the club's own PINs, the same token shape as every volume ─────
 const hmac = d => crypto.createHmac("sha256", process.env.TOKEN_SECRET).update(d).digest("base64url");
 const sign = role => { const exp = Math.floor(Date.now() / 1000) + TOKEN_TTL; return `${role}.${exp}.${hmac(role + "." + exp)}`; };
