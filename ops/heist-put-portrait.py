@@ -42,11 +42,16 @@ ch = min(ah, round(aw * 5 / 4)); cw = round(ch * 4 / 5)
 x0 = int(min(max(0, cx - cw / 2), aw - cw)); y0 = int(min(max(0, cy - ch * .30), ah - ch))
 crop = art.crop((x0, y0, x0 + cw, y0 + ch))
 print(f"face {int(fw)}px at ({int(cx)},{int(cy)}) · crop {cw}x{ch} at ({x0},{y0}) · face at {round((cy - y0) / ch * 100)}% height")
-if cw < 700: sys.exit(f"source too small ({cw}px wide after the crop) — ask for a bigger render")
+MIN = int(os.environ.get("MIN", 700))   # MIN=250 when the owner accepts a soft one for now
+if cw < MIN: sys.exit(f"source too small ({cw}px wide after the crop) — ask for a bigger render")
 if cw < 1080: print(f"note: enlarged {1080 / cw:.2f}x")
 
 out = os.path.join(os.environ.get("OUT", "/tmp"), pid + ".jpg")
-crop.resize((1080, 1350), Image.LANCZOS).save(out, quality=90)
+big = crop.resize((1080, 1350), Image.LANCZOS)
+if 1080 / cw > 1.6:   # a big enlargement goes soft; a light unsharp mask brings the line work back
+    from PIL import ImageFilter
+    big = big.filter(ImageFilter.UnsharpMask(radius=2.2, percent=90, threshold=2))
+big.save(out, quality=90)
 print("wrote", out)
 if os.environ.get("DRY"): sys.exit(0)
 
