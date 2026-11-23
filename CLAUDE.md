@@ -853,6 +853,8 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 ### Muscat Heist (Vol.10 — IN BUILD, December 2026)
 - URL: https://heist.urbanpadel.om — nine Mon/Wed nights, Wed 2 Dec to Wed 30 Dec,
   17:30 at Al Hail North. **Mon 28 and Wed 30 Dec are double.**
+  **The app goes live Tue 1 Dec** for signups (owner, 23 Nov); night 1 stays Wed 2 Dec.
+  National's last night is Mon 30 Nov, so the Heist deploy is Tue 1 Dec, never the 30th.
 - The design is the **Muscat Nights** handoff in `brand/heist/handoff/`, renamed
   **Muscat Heist** by the owner (22 Nov 2026): HEIST sits on the coral band where
   NIGHTS was. "Now Loading Muscat" stays. **No Arabic name** — the owner removed it
