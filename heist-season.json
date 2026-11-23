@@ -36,6 +36,12 @@
     {"code": "EP.08", "title": "The Crew", "art": "art-ep08-crew.jpg", "artPos": "center 48%"},
     {"code": "EP.09", "title": "The Big Score", "art": "art-ep09-walkout.jpg", "artPos": "center 50%"}
   ],
+  "loadingArt": [
+    {"art": "art-load-club.jpg", "artPos": "center 30%"},
+    {"art": "art-load-squad.jpg", "artPos": "center 35%"},
+    {"art": "art-load-grid.jpg", "artPos": "center 30%"},
+    {"art": "art-extra-collage.jpg", "artPos": "center 30%"}
+  ],
   "extraArt": [
     {"art": "art-extra-collage.jpg", "artPos": "center 30%"}
   ],

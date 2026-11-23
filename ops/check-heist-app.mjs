@@ -133,7 +133,7 @@ for (const scen of (process.env.ONLY ? [process.env.ONLY] : ['mid', 'launch'])) 
   {
     const shown = async () => p2.evaluate(() => { const on = document.querySelector('.mh-scene[data-on] img');
       return on ? on.getAttribute('src') : (document.querySelector('.mn-hero-img img, .mh-takehero img') || {}).getAttribute?.('src'); });
-    await look(p2, 'loading'); const a = await shown(); await p2.waitForTimeout(3000); const b = await shown();
+    await look(p2, 'loading'); const a = await shown(); await p2.waitForTimeout(4800); const b = await shown();  // a poster holds 4.2s
     ok(a && b && a !== b, `${scen} #loading: the picture did not change (${a} then ${b})`);
     const first = {};
     for (const r of ['loading', 'home', 'take']) { await look(p2, r); first[r] = await shown(); }

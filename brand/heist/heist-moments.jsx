@@ -68,13 +68,18 @@ function mhTips(D, X) {
   }).filter(Boolean);
 }
 function MhLoading({ D, go, progress, ready = true, tip }) {
+  // GTA-style: one full-bleed poster at a time, panning slowly across the art,
+  // the title big in the corner, the tip in a dark box, a spinner bottom right.
+  // The owner's own posters go first (loadingArt), then the episode scenes.
   const X = mhDerive(D);
-  const s = D.sessions.find(x => x.no === (D.homeNext || 0)) || D.sessions.find(x => x.state !== "done") || D.sessions[D.sessions.length - 1];
+  const nx = D.sessions.find(x => x.no === (D.homeNext || 0)) || D.sessions.find(x => x.state !== "done") || D.sessions[D.sessions.length - 1];
+  let list = [...(D.loadingArt || []), ...(D.scenes || [])];
+  if (!list.length && nx && nx.art) list = [{ src: nx.art, pos: nx.artPos, code: nx.code, title: nx.title }];  // preview data has no scene list
+  const start = (Math.floor(Date.now() / 864e5)) % Math.max(1, (D.loadingArt || []).length || list.length);
   const tips = mhTips(D, X);
   const line = tips.length ? tips[(tip != null ? tip : Math.floor(Date.now() / 864e5)) % tips.length] : "";
-  const [scene, setScene] = React.useState(mhSceneIndex(D, "loading"));
-  const cur = (D.scenes || [])[scene] || {};
-  // with no real progress to follow, the bar fills over the minimum time
+  const [scene, setScene] = React.useState(start);
+  const cur = list[scene] || {};
   const [t, setT] = React.useState(progress != null ? progress : 0);
   React.useEffect(() => {
     if (progress != null) { setT(progress); return; }
@@ -84,22 +89,24 @@ function MhLoading({ D, go, progress, ready = true, tip }) {
   }, [progress]);
   const done = ready && t >= 1;
   return (
-    <div className="mh-page mh-loading">
+    <div className="mh-page mh-loading" data-gta="">
       <button type="button" className="mh-loadtap" disabled={!done} onClick={() => go("home")}
         aria-label={done ? "Continue to Home" : "Loading"}>
-        <MhHeroCut height="100%" src={s.art} pos={s.artPos || "center 28%"} cut={[54, 62]} fade="none"
-          scenes={D.scenes} sceneStart={mhSceneIndex(D, "loading")} every={2600} onScene={setScene}
-          style={{ position: "absolute", inset: 0 }} />
+        <div className="mh-loadart"><MhScenes list={list} start={start} every={4200} onIndex={setScene} /></div>
+        <div className="mh-loadshade" aria-hidden="true" />
         {cur.code && <div className="mh-loadtag" key={cur.code}><MhSceneTag>{cur.code} · {cur.title}</MhSceneTag></div>}
-        <div className="mh-loadlock"><MhTitleLockup size="M" center /></div>
+        <div className="mh-loadlock"><MhTitleLockup size="M" /></div>
         <div className="mh-loadfoot">
-          <MhLabel tone="peach">Did you know</MhLabel>
-          <MhSerif size={18} tone="sand" style={{ lineHeight: 1.3 }}>{line}</MhSerif>
-          <div className="mh-loadbar">
-            <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(t * 100)}
-              aria-label="Now loading Muscat"><div style={{ width: (t * 100) + "%" }} /></div>
-            <MhLabel>Now loading Muscat</MhLabel>
-          </div>
+          {line && <div className="mh-loadtip"><MhLabel tone="peach">Did you know</MhLabel>
+            <MhSerif size={16} tone="sand" style={{ lineHeight: 1.3 }}>{line}</MhSerif></div>}
+        </div>
+        <div className="mh-loadspin" data-done={done ? "" : undefined}>
+          {done ? <MhLabel tone="sand">Tap to continue</MhLabel>
+                : <><span className="mh-spinner" aria-hidden="true" /><MhLabel tone="sand">Now loading Muscat</MhLabel></>}
+        </div>
+        <div className="mh-loadbar">
+          <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(t * 100)}
+            aria-label="Now loading Muscat"><div style={{ width: (t * 100) + "%" }} /></div>
         </div>
       </button>
       <MhGrain />

@@ -392,10 +392,6 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-loadtap { position: absolute; inset: 0; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .mh-loadtap:disabled { cursor: progress; }
 .mh-loadtag { position: absolute; left: 18px; top: 64px; }
-.mh-loadlock { position: absolute; left: 0; right: 0; top: calc(54% + 32px); display: flex; justify-content: center; }
-.mh-loadfoot { position: absolute; left: 24px; right: 24px; bottom: 48px; display: flex; flex-direction: column; gap: 10px; }
-.mh-loadbar { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-.mh-loadbar > [role="progressbar"] { flex: 1; height: 3px; background: var(--mn-line-2); }
 .mh-loadbar > [role="progressbar"] > div { height: 100%; background: var(--mn-grad-load); }
 
 /* 12 new crew card */
@@ -642,3 +638,31 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-orgchip:active, .mh-wrow:active, .mh-eprow:active { transform: scale(.97); filter: brightness(1.12); }
 /* long lists: skip painting rows that are off screen */
 .mh-wrow, .mh-job { content-visibility: auto; contain-intrinsic-size: auto 72px; }
+
+/* ── NOW LOADING, GTA-style (owner, 24 Nov) ───────────────────────────────
+   A poster fills the glass and PANS across itself (the wide ones are wider
+   than a phone, so the pan shows the whole scene over its 4s); title bottom
+   left with a hard drop shadow, the tip in a dark box, spinner bottom right. */
+.mh-loadart { position: absolute; inset: 0; }
+.mh-loading .mh-scene .mn-art img { transform: none; }
+.mh-loading .mh-scene[data-on] .mn-art img { animation: mhPan 4.6s linear forwards; }
+@keyframes mhPan { from { object-position: 0% 35%; transform: scale(1.06); } to { object-position: 100% 35%; transform: scale(1.12); } }
+.mh-loading .mh-scene { transition: opacity .7s ease; }
+.mh-loadshade { position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,16,26,.78), rgba(10,16,26,.35) 26%, rgba(10,16,26,0) 40%, rgba(10,16,26,0) 62%, rgba(10,16,26,.85) 88%); }
+.mh-loadtag { position: absolute; left: 18px; top: calc(18px + env(safe-area-inset-top)); }
+.mh-loadfoot { position: absolute; left: 20px; right: 20px; bottom: calc(64px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 14px; }
+/* the title sits TOP left: several posters carry their own lettering low down,
+   and a title over a title reads as neither */
+.mh-loadlock { position: absolute; left: 20px; top: calc(58px + env(safe-area-inset-top)); }
+.mh-loadlock .mn-l1 { filter: var(--mn-title-filter) drop-shadow(4px 4px 0 rgba(0,0,0,.85)); }
+.mh-loadlock .mn-band { filter: drop-shadow(4px 4px 0 rgba(0,0,0,.85)); }
+.mh-loadlock .mn-meta { text-shadow: 0 1px 6px rgba(0,0,0,.9); }
+.mh-loadtip { max-width: 330px; padding: 10px 12px; background: rgba(8,12,20,.82); border-left: 3px solid var(--mn-coral, #F26B5B); display: flex; flex-direction: column; gap: 4px; }
+.mh-loadspin { position: absolute; right: 18px; bottom: calc(22px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; }
+.mh-spinner { width: 22px; height: 22px; border-radius: 50%; border: 3px solid rgba(255,255,255,.25); border-top-color: var(--mn-peach, #FFC9A3); animation: mhSpin .8s linear infinite; }
+@keyframes mhSpin { to { transform: rotate(360deg); } }
+.mh-loadspin[data-done] { animation: mhBlink 1.4s ease-in-out infinite; }
+@keyframes mhBlink { 50% { opacity: .35; } }
+.mh-loadbar { position: absolute; left: 0; right: 0; bottom: 0; }
+.mh-loadbar > [role="progressbar"] { height: 4px; background: rgba(255,255,255,.12); }

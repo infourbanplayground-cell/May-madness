@@ -309,6 +309,8 @@ function heistData(state, o) {
     // draw from this through mhScene() so no two pages open on the same picture.
     scenes: [...(S.episodes || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos, code: e.code, title: e.title })),
              ...(S.extraArt || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos }))].filter(x => x.src && !/\/$/.test(x.src)),
+    // the loading screen's own posters (owner, 24 Nov: "GTA style"), then the scenes
+    loadingArt: (S.loadingArt || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos })),
   };
 }
 

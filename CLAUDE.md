@@ -888,6 +888,14 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   cycling. The art filter is `saturate(1.28)` and the fades are lighter.
   `check-heist-app.mjs` fails if Loading does not change picture or if
   Loading/Home/Take share one.
+- **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
+  time, panning across itself over 4.6s and crossfading every 4.2s; the
+  owner's own posters first (`loadingArt` in heist-season.json:
+  `art-load-club/-squad/-grid` + the collage), then the episode scenes. Title
+  TOP left with a hard drop shadow — several posters carry their own lettering
+  low down and a title over a title reads as neither — the tip in a dark box,
+  a spinner bottom right that becomes TAP TO CONTINUE, and a 4px progress bar
+  on the bottom edge. `check-heist-app.mjs` waits 4.8s for the change.
 - **Mobile + motion (23 Nov):** every scene ships as WebP at 480/1200/1600 beside
   the JPEG (`MhArt` writes the srcset for `assets/art/*.jpg`; the JPEG is the
   fallback) — a 390px phone at 2x fetches `-1200.webp`, ~45% lighter, and
