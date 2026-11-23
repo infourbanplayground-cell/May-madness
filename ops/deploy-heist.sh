@@ -30,7 +30,7 @@ PY
 echo "==> build $BID -> $DIR"
 ssh urbanpadel "mkdir -p $DIR/assets/art $DIR/assets/fonts/brand $DIR/assets/fonts/heist"
 scp -q "$PAGE" urbanpadel:$DIR/index.html.new
-scp -q brand/heist/art/*.jpg urbanpadel:$DIR/assets/art/
+scp -q brand/heist/art/*.jpg brand/heist/art/*.webp urbanpadel:$DIR/assets/art/
 scp -q brand/heist/up-logo-tight.png brand/national/history.json urbanpadel:$DIR/assets/
 # the inherited all-time plate fetches /assets/history.json from the SITE ROOT
 ssh urbanpadel "mkdir -p $WEB/assets"; scp -q brand/national/history.json urbanpadel:$WEB/assets/

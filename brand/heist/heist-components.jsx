@@ -34,10 +34,17 @@ const mhTierFor = rank => (MH.tiers || []).find(t => rank <= t.maxRank) || (MH.t
 const mhInitials = name => (name || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
 
 // ── the art treatment: one component, so every picture is graded alike ────
-function MhArt({ src, alt = "", pos = "center 25%", name }) {
+// The episode scenes ship as WebP at 480/1200/1600 beside the JPEG, so a phone
+// fetches the size it draws (about 45% lighter) and the JPEG stays the fallback.
+function mhSrcSet(src) {
+  const m = /^(.*assets\/art\/[^/]+)\.jpg$/.exec(src || "");
+  return m ? `${m[1]}-480.webp 480w, ${m[1]}-1200.webp 1200w, ${m[1]}-1600.webp 1600w` : undefined;
+}
+function MhArt({ src, alt = "", pos = "center 25%", name, sizes = "100vw", eager }) {
   return (
     <div className="mn-art">
-      {src ? <img src={src} alt={alt} style={{ objectPosition: pos }} loading="lazy" decoding="async" />
+      {src ? <img src={src} srcSet={mhSrcSet(src)} sizes={sizes} alt={alt} style={{ objectPosition: pos }}
+                  loading={eager ? "eager" : "lazy"} fetchpriority={eager ? "high" : undefined} decoding="async" />
            : <div className="mn-initials" style={{ fontSize: "2.2em" }}>{mhInitials(name)}</div>}
     </div>
   );
@@ -147,7 +154,8 @@ function MhScenes({ list, start = 0, every = 3200, onIndex }) {
     <div className="mh-scenes">
       {list.map((sc, k) => seen.has(k) && (
         <div key={sc.src + k} className="mh-scene" data-on={k === i ? "" : undefined} aria-hidden={k !== i}>
-          <div className="mn-art"><img src={sc.src} alt="" style={{ objectPosition: sc.pos || "center 30%" }} decoding="async" /></div>
+          <div className="mn-art"><img src={sc.src} srcSet={mhSrcSet(sc.src)} sizes="100vw" alt="" style={{ objectPosition: sc.pos || "center 30%" }}
+            fetchpriority={k === start % n ? "high" : undefined} decoding="async" /></div>
         </div>))}
     </div>
   );

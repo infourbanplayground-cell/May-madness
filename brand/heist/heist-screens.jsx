@@ -171,7 +171,7 @@ function MhJobRow({ s, go }) {
     <div className="mh-job" data-state={live ? "live" : s.finale ? "finale" : done ? "done" : "soon"}>
       <button type="button" className="mh-jobmain" onClick={() => go(done ? "recap" : "session", s.no)}
         aria-label={`${s.code} ${s.title}`}>
-        <div className="mh-thumb"><MhArt src={s.art} pos={s.artPos} /></div>
+        <div className="mh-thumb"><MhArt src={s.art} pos={s.artPos} sizes="96px" /></div>
         <div style={{ minWidth: 0 }}>
           <MhLabel tone={tone}>{label}</MhLabel>
           <div className="mn-display mh-jobtitle">{s.code} · {s.title}</div>

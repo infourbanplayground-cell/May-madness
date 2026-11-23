@@ -888,6 +888,14 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   cycling. The art filter is `saturate(1.28)` and the fades are lighter.
   `check-heist-app.mjs` fails if Loading does not change picture or if
   Loading/Home/Take share one.
+- **Mobile + motion (23 Nov):** every scene ships as WebP at 480/1200/1600 beside
+  the JPEG (`MhArt` writes the srcset for `assets/art/*.jpg`; the JPEG is the
+  fallback) — a 390px phone at 2x fetches `-1200.webp`, ~45% lighter, and
+  `check-heist-app.mjs` asserts it. **Re-make the WebPs when art is added**
+  (the snippet is in the commit; the deploy copies `*.webp`). Screens are keyed
+  by route, so each visit plays a short staggered rise (under 0.8s, fill mode
+  BACKWARDS so nothing keeps a transform), the hero settles and the lockup
+  slides in; buttons press to 0.97. Nothing loops except the scene slideshows.
 - **Phase 3 (the night) is `brand/heist/heist-night.jsx`**: 07 Session (Teams /
   Groups / Knockout / MVP), 08 Live Scoring, 09 Episode Recap, 10 Recap Slides.
   - **Live Scoring's +1 is a GAME, not a point** — the fixture is first to 6 at

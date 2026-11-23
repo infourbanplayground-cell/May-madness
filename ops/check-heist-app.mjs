@@ -139,6 +139,11 @@ for (const scen of (process.env.ONLY ? [process.env.ONLY] : ['mid', 'launch'])) 
     for (const r of ['loading', 'home', 'take']) { await look(p2, r); first[r] = await shown(); }
     const vals = Object.values(first);
     ok(vals.every(Boolean) && new Set(vals).size === vals.length, `${scen}: pages share a picture: ${JSON.stringify(first)}`);
+    // a phone must fetch the WebP it draws, not the 1600px JPEG fallback
+    await look(p2, 'home'); await p2.waitForTimeout(800);
+    const cur = await p2.evaluate(() => [...document.querySelectorAll('.mn-hero-img img')].map(i => i.currentSrc).filter(Boolean));
+    ok(cur.length && cur.every(s => /-\d+\.webp$/.test(s)), `${scen} #home: hero fetched ${cur.join(', ')} instead of a WebP size`);
+    console.log(`  ${scen} hero fetched: ${cur.map(s => s.split('/').pop()).join(', ')}`);
     console.log(`  ${scen} scenes: loading ${a.split('/').pop()} -> ${b.split('/').pop()} · home ${first.home.split('/').pop()} · take ${first.take.split('/').pop()}`);
   }
   // ── facts ──

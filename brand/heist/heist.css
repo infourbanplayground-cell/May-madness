@@ -608,3 +608,37 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 @keyframes mhKen { from { transform: scale(1.02); } to { transform: scale(1.1); } }
 .mh-loadtag { animation: mhTagIn .5s ease-out both; }
 @keyframes mhTagIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── motion: every screen arrives, nothing loops (owner, 23 Nov) ─────────
+   Screens are keyed by route, so each visit replays its entrance. Fill mode is
+   BACKWARDS only: once it has played the element gets its own transform back.
+   The global reduced-motion rule above switches all of it off. */
+@keyframes mhRise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes mhSlideIn { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: none; } }
+@keyframes mhBand { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes mhFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mhSettle { from { transform: scale(1.12); } to { transform: scale(1); } }
+.mh-body > *, .mh-body > .mh-col > *, .mh-body > .mh-col > .mh-col > * { animation: mhRise .48s cubic-bezier(.2,.8,.2,1) backwards; }
+.mh-body > .mh-col > :nth-child(1) { animation-delay: .04s } .mh-body > .mh-col > :nth-child(2) { animation-delay: .09s }
+.mh-body > .mh-col > :nth-child(3) { animation-delay: .14s } .mh-body > .mh-col > :nth-child(4) { animation-delay: .19s }
+.mh-body > .mh-col > :nth-child(5) { animation-delay: .24s } .mh-body > .mh-col > :nth-child(6) { animation-delay: .28s }
+.mh-body > .mh-col > :nth-child(n+7) { animation-delay: .32s }
+.mh-body > .mn-hero { animation: mhFade .5s ease-out backwards; }
+.mn-hero-img > .mn-art img { animation: mhSettle 1.4s cubic-bezier(.2,.8,.2,1) backwards; }
+.mn-hero .mn-lockup .mn-l1 { animation: mhSlideIn .6s .18s cubic-bezier(.2,.8,.2,1) backwards; }
+.mn-hero .mn-lockup .mn-band { animation: mhBand .55s .38s cubic-bezier(.6,0,.2,1) backwards; }
+.mn-hero .mn-lockup .mn-meta { animation: mhFade .5s .6s ease-out backwards; }
+.mh-job { animation: mhRise .45s cubic-bezier(.2,.8,.2,1) backwards; }
+.mh-job:nth-child(2) { animation-delay: .05s } .mh-job:nth-child(3) { animation-delay: .1s } .mh-job:nth-child(4) { animation-delay: .15s }
+.mh-job:nth-child(n+5) { animation-delay: .2s }
+.mh-loadlock { animation: mhRise .7s .1s cubic-bezier(.2,.8,.2,1) backwards; }
+.mh-loadfoot { animation: mhRise .6s .35s cubic-bezier(.2,.8,.2,1) backwards; }
+
+/* touch: a press you can feel, no double-tap zoom delay, no grey flash */
+.mh-page button, .mh-page a { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.mn-pill, .mh-chip, .mh-act, .mh-job, .mn-navtab, .mn-cardbtn, .mh-orgchip, .mh-wrow, .mh-eprow {
+  transition: transform .12s ease, filter .12s ease; }
+.mn-pill:active, .mh-chip:active, .mh-act:active, .mh-job:active, .mn-navtab:active, .mn-cardbtn:active,
+.mh-orgchip:active, .mh-wrow:active, .mh-eprow:active { transform: scale(.97); filter: brightness(1.12); }
+/* long lists: skip painting rows that are off screen */
+.mh-wrow, .mh-job { content-visibility: auto; contain-intrinsic-size: auto 72px; }
