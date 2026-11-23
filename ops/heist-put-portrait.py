@@ -51,7 +51,9 @@ print("wrote", out)
 if os.environ.get("DRY"): sys.exit(0)
 
 # 3. upload, as the API would
-sh = lambda c: subprocess.run(c, shell=True, check=True, capture_output=True, text=True).stdout
+# stdin=DEVNULL: ssh otherwise reads the caller's stdin, which ate the rest of a
+# `while read` batch after the first upload
+sh = lambda c: subprocess.run(c, shell=True, check=True, capture_output=True, text=True, stdin=subprocess.DEVNULL).stdout
 sh(f"scp -q {out} urbanpadel:/tmp/{pid}.jpg")
 print(sh(f"""ssh urbanpadel 'set -e; P=/var/www/heist.urbanpadel.om/public/players
   [ -f $P/{pid}.jpg ] && mv $P/{pid}.jpg /opt/heist-api/history/{pid}.$(date +%s%3N).replace.jpg || true
