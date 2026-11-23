@@ -2029,6 +2029,19 @@ node record-national-video.mjs           # CONTACT=1 for a strip, no encode
   matching the share cards. `build-national-post.py` still runs it full-bleed
   at 56px and has not been brought in line.
 
+#### The FINAL ROUND cut — `build-national-lastround-video.py`
+14.4s (and `SHORT=1` 7.2s) for Mon 30 Nov, the last night: FINAL ROUND, the
+season prizes, the table (paid places lit, the chase dimmed), the points that
+cover 1st to 3rd beside the biggest night so far, and the ask. Same motion
+engine as the double-night cut (copied from it), same bed and recorder:
+`CUT=$SP/national-lastround.cut.json python3.13 build-national-audio.py` then
+`PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav node record-national-video.mjs`.
+Refuses unless exactly one night remains, it is `finalsDate` and it is double.
+It never says what a 2X night is worth, nor that anybody is out of it. The
+recorder demands a landmark medallion on every National film — it sits over
+the prizes. Captions: `brand/national/posts/FINAL-ROUND-CAPTIONS.txt`.
+**Rebuild it after any score correction** — the table is read at build time.
+
 #### The landmark silhouettes — `ops/national-landmarks.py`
 **THE OWNER SUPPLIED THEM AND NOTHING HERE IS DRAWN.** Five images — a
 crenellated fort gate with a clock face, a three-arch gatehouse, the incense
