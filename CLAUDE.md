@@ -1009,6 +1009,30 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     for this target only). **Run 23 Nov: 358 players, 40 photos, provisional
     National totals — RUN IT AGAIN after Mon 30 Nov**; it recomputes and never
     writes a session.
+- **THE ORGANISER TOOLS (`?classic`) ARE RE-SKINNED, NOT REDESIGNED** — Vol.9's
+  screens, sheets and night editor, in Heist colours: `reskin()` in the builder
+  maps Vol.9's palette by value, and `brand/heist/heist-classic.css` turns
+  Vol.9's ivory PLATES into navy glass. A plate inversion flips every rule that
+  wrote dark-on-ivory, so inside the plates `--bg` / `--ink` are re-pointed to
+  light values rather than chasing each rule.
+  - **The copy that LEAVES the app was the real fault.** WhatsApp posts,
+    share captions and the link preview still said "56 National Series",
+    "all November", "One flag. One court." and linked national.urbanpadel.om —
+    23 links. `rebrand_copy()` rewrites the announcement and format post
+    wholesale from `heist-season.json` and the build REFUSES if any of those
+    strings survive outside a comment.
+  - The night eyebrows carried Vol.9's landmarks ("MUSCAT GATE"); `LANDMARKS`
+    is the episode list now, so each night shows its episode title.
+  - **The share cards are canvas** and no stylesheet reaches them:
+    `reskin_cards()` swaps `NC`'s palette, draws the trims as the coral nights
+    gradient, drops the khanjar tile, the masar weave and the empty landmark
+    medallion, and the ghost numeral reads 10.
+  - The way back is a bar ABOVE the app, in flow. As a floating pill it sat on
+    the score of whatever row was under it.
+  - `node ops/check-heist-classic.mjs` drives every tab, the recap, the night
+    editor's TEAMS/GROUPS/KO/POINTS/LIST/MVP/POSTS and the sign-in sheet:
+    no Vol.9 colour, no Vol.9 artwork, every text run AA against its
+    composited ground. `WHY=1` prints the failing element's colours.
 - **Deploy: `bash ops/deploy-heist.sh`** -> `/preview/` until launch;
   `ROOT=1` puts it at the front on **Tue 1 Dec**. It refuses to run 17:00-23:00
   on a Heist night, and writes `version.txt` at the SITE ROOT (the update check

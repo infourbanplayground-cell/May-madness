@@ -1,0 +1,59 @@
+/* MUSCAT HEIST — the organiser's screens (the inherited Vol.9 UI, ?classic, and
+   the night editor that opens over the Heist screens). Colours are swept to
+   Heist values at build time (build-heist-app.py, reskin); this layer does
+   what a sweep cannot: the SHAPES and the furniture. Every rule carries
+   :not(#mh) for an id's weight — the Vol.9 skin's own selectors run to
+   (0,3,0) and some of its blocks sit later in the page.
+
+   Heist shapes: cards 18px, heroes 24px, pills for buttons and chips, no
+   arches, no flag plaque, no medallions, no weave. */
+html:not(#mh) .na-flag, html:not(#mh) .vol-mark, html:not(#mh) .na-medal,
+html:not(#mh) .na-natday { display: none !important; }
+html:not(#mh) .sg-hero { border-radius: 24px !important; padding-top: 22px !important; }
+html:not(#mh) .na-ivory { border-radius: 18px !important; }
+html:not(#mh) .sg-card { border-radius: 18px !important; }
+html:not(#mh) body { font-family: 'Manrope', system-ui, sans-serif !important; }
+
+/* Vol.9's light PLATES (the ivory hero, the countdown, the table, the race,
+   the plates the home rows sit on) become Heist GLASS: a navy surface, a
+   hairline, sand type. Their text reads var(--ink), so pointing --ink at sand
+   inside a plate flips every rule that uses it; the few inline navy runs are
+   caught by their style attribute. */
+html:not(#mh) :is(.sg-hero, .na-hero, .na-ivory, .na-plate, .sg-top, .na-hl, .na-table, .na-rank, .na-race, .jh-mock-sess, .sg-card-cyan, .na-trow) {
+  background: var(--mn-navy-2) !important; border: var(--mn-glass-border) !important; box-shadow: none !important; --bg: #F59A62;
+  --ink: #FFF4E8; --muted-ink: #B9C6D3; color: var(--mn-sand) !important;
+}
+html:not(#mh) :is(.sg-hero, .na-hero, .na-ivory, .na-plate, .sg-top, .na-hl, .na-table, .na-rank, .na-race, .jh-mock-sess, .sg-card-cyan, .na-trow)
+  [style*="color: rgb(15, 27, 43)"]:not([style*="background"]) { color: var(--mn-sand) !important; }
+html:not(#mh) :is(.sg-hero, .na-hero, .na-ivory, .na-plate, .sg-top, .na-hl, .na-table, .na-rank, .na-race, .jh-mock-sess, .sg-card-cyan, .na-trow)
+  [style*="color: rgb(70, 86, 106)"] { color: var(--mn-mist) !important; }
+/* Vol.9's primary action (var(--red) re-pointed to ivory, with white type on it)
+   is the Heist primary: the coral gradient with navy type */
+html:not(#mh) [style*="background: var(--red)"] { background: var(--mn-grad-primary) !important; color: var(--mn-navy) !important; border-color: transparent !important; }
+/* 2X reads as the finale does: gold */
+html:not(#mh) :is(.na-natday-2x, .na-upcoming-2x) { background: var(--mn-gold) !important; color: var(--mn-navy) !important; }
+/* the landmark medallions are drawn from code, not the skin */
+html:not(#mh) .na-medallion { display: none !important; }
+/* the double-night chip: gold with navy type, the Heist 2X everywhere else */
+html:not(#mh) .na-race .na-racechip[data-two="1"]:not([data-a]):not([data-b]):not([data-c]) { background: var(--mn-gold) !important; border-color: var(--mn-gold) !important; color: var(--mn-navy) !important; }
+/* a badge that carries its own light fill keeps navy type inside a glass plate */
+html:not(#mh) .na-ivory button > span[style*="background"] { color: var(--mn-navy) !important; }
+/* the way back from the organiser tools: a bar above the app, in flow */
+#mh-back { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 16px;
+  background: var(--mn-grad-primary); color: var(--mn-navy); font: 800 14px var(--mn-font-ui, system-ui); text-decoration: none; }
+#mh-back[hidden] { display: none !important; }
+#mh-back span { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .18em; opacity: .8; }
+/* the selected chip on the organiser sheets (Tailwind's orange-to-red
+   gradient in the inherited markup): the Heist primary, navy type */
+html:not(#mh) .bg-gradient-to-b.from-orange-500.to-red-600 { background: var(--mn-grad-primary) !important; color: var(--mn-navy) !important; border-color: transparent !important; }
+/* a group winner's seed badge (A1, B1 ...) is a light fill: navy type on it */
+html:not(#mh) span.font-mono[style*="rgba(255, 244, 232, 0.9)"] { color: var(--mn-navy) !important; }
+/* Vol.9's ink was dark type on ivory; on Heist's navy, inline ink as TYPE is sand */
+html:not(#mh) [style*="color: var(--ink)"]:not([style*="background"]) { color: var(--mn-sand) !important; }
+/* the sign-up fields: the text sat on the field's own left edge */
+html:not(#mh) input[placeholder="Name + Partner"] { padding: 0 14px !important; }
+/* the header kept 44px of top padding for Vol.9's masar band, which is gone */
+html:not(#mh) header.sticky { padding-top: 8px !important; }
+html:not(#mh) header.sticky::before { display: none !important; }
+/* a team row is a row inside a plate, not a plate of its own: a hairline, not a ring */
+html:not(#mh) .na-trow { background: rgba(255, 244, 232, .04) !important; border: 1px solid rgba(255, 244, 232, .10) !important; }
