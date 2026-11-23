@@ -103,6 +103,7 @@ window.MH_PREVIEW = (function () {
       { type: "scoreSettled", playerId: "p05", overtookId: "p04", session: 6, newRank: 4, points: [86, 84] },
     ],
     finale: { leadAtStart: 11 },       // the leader's lead when the finale started ("11 / 11")
+    artBase: A,                       // where season art filenames resolve
     paidOMR: 140,
     rosterSize: 32,                      // "THE CREW · 32 players" — the fixtures carry nine of them
   };

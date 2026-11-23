@@ -1,7 +1,7 @@
 // Muscat Heist screen QA (handoff QA.md, steps 1, 2, 7, 8 in part).
 //   node ops/shots-heist.mjs                every screen built so far
 //   ONLY=wanted node ops/shots-heist.mjs    one screen
-//   SABOTAGE=nofont                         must go red
+//   SABOTAGE=nofont | slice                 must go red
 // For each screen: a 375x812 shot at deviceScaleFactor 2 — the reference
 // PNGs' own frame — laid beside handoff/screenshots/<ref>.png in
 // <scratch>/heist-qa/screens/<name>-compare.png, then the same checks at
@@ -29,6 +29,7 @@ const SCREENS = [
   ['loading', 'loading/64', '11-now-loading-muscat'], ['cardpull', 'cardpull/5', '12-new-crew-card'],
   ['repup', 'repup/p05', '13-rep-up'], ['rival', 'rival', '14-your-rival'],
   ['settled', 'settled', '15-score-settled'], ['finale', 'finale', '16-the-big-score'],
+  ['share', 'share/card/p05', null], ['mycard', 'card/p05', null],
 ].filter(([n]) => !process.env.ONLY || process.env.ONLY.split(',').includes(n));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.js': 'application/javascript' };
 
@@ -38,6 +39,12 @@ const srv = http.createServer((req, res) => {
   if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
   let body = fs.readFileSync(f);
   if (SAB === 'nofont' && f.endsWith('.html')) body = Buffer.from(body.toString().replace(/<link rel="stylesheet"[^>]*>/g, ''));
+  // the pill row as it shipped in phases 2-4: no room for the drawn pill
+  if (SAB === 'slice' && f.endsWith('.html')) {
+    const t = body.toString(), u = t.replace('padding: 4px 0; margin: -4px 0; }', '}');
+    if (u === t) throw new Error('SABOTAGE=slice: anchor not found, the sabotage would be vacuous');
+    body = Buffer.from(u);
+  }
   res.writeHead(200, { 'Content-Type': TYPES[path.extname(f)] || 'application/octet-stream' }); res.end(body);
 }).listen(0);
 const PORT = srv.address().port;
@@ -86,13 +93,14 @@ const audit = () => {
   // only the element's OWN text: a child that sets its own face (the mono
   // points line inside a display figure) does not move when the parent's does
   const ownText = e => [...e.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
-  const runs = [...document.querySelectorAll('.mn-display, .mn-l1, .mn-band > span, .mn-scenetag')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
+  const runs = [...document.querySelectorAll('.mn-display, .mn-l1, .mn-band > span, .mn-scenetag, .mn-name, .mn-rank, .mn-tiertag, .mn-pts')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
   const undrawn = runs.filter(e => {
     const r = document.createRange(); r.selectNodeContents(ownText(e)); const w0 = r.getBoundingClientRect().width;
     const was = e.style.fontFamily; e.style.fontFamily = 'Impact, sans-serif';
     const w1 = r.getBoundingClientRect().width; e.style.fontFamily = was; return Math.abs(w0 - w1) < .5;
   });
   fonts['display text on screen'] = runs.length > 0 && undrawn.length === 0;
+  if (undrawn.length) fonts['display text on screen: ' + undrawn.map(e => `"${e.textContent.trim().slice(0, 14)}"`).join(' ')] = false;
   const out = { fonts, broken: [...document.images].filter(i => !i.naturalWidth).map(i => i.getAttribute('src')),
     small: [], clipped: [], targets: [], scrollX: document.documentElement.scrollWidth - innerWidth, moving: [] };
   for (const el of document.querySelectorAll('body *')) {
@@ -102,7 +110,28 @@ const audit = () => {
     if (own && el.scrollWidth > el.clientWidth + 1 && cs.overflow !== 'visible') out.clipped.push(`${el.className} "${el.textContent.trim().slice(0, 24)}"`);
     if (cs.animationName && cs.animationName !== 'none') out.moving.push(`${el.className}:${cs.animationName}`);
   }
+  // a row that scrolls sideways CLIPS vertically too: anything drawn (a border
+  // or a fill) that pokes past its top or bottom is sliced. Every pill row lost
+  // a pixel of outline top and bottom for three phases and no text check saw it.
+  out.sliced = [];
+  for (const row of document.querySelectorAll('body *')) {
+    const cs = getComputedStyle(row);
+    if (!/auto|scroll/.test(cs.overflowX)) continue;
+    const R = row.getBoundingClientRect();
+    for (const d of row.querySelectorAll('*')) {
+      const ds = getComputedStyle(d);
+      const drawn = parseFloat(ds.borderTopWidth) > 0 || (ds.backgroundColor !== 'rgba(0, 0, 0, 0)' && ds.backgroundColor !== 'transparent');
+      if (!drawn) continue;
+      const r = d.getBoundingClientRect();
+      if (r.height && (r.top < R.top - .5 || r.bottom > R.bottom + .5))
+        out.sliced.push(`"${d.textContent.trim().slice(0, 12)}" ${Math.round(r.top - R.top)}..${Math.round(r.bottom - R.top)} in ${Math.round(R.height)}`);
+    }
+  }
+  out.unnamed = [];
   for (const b of document.querySelectorAll('button, a')) {
+    // QA step 8: every action reachable and LABELLED — a control with no text
+    // and no aria-label is announced as "button" and nothing else
+    if (!b.innerText.trim() && !b.getAttribute('aria-label')) out.unnamed.push(b.className || b.tagName);
     const r = b.getBoundingClientRect();
     if (r.width && (r.width < 44 || r.height < 44)) out.targets.push(`${b.className} "${b.textContent.trim().slice(0, 14)}" ${Math.round(r.width)}x${Math.round(r.height)}`);
   }
@@ -121,6 +150,8 @@ for (const [name, hash, ref] of SCREENS) {
     if (r.scrollX > 0) fails.push(`${tag}: scrolls sideways by ${r.scrollX}px`);
     if (r.small.length) fails.push(`${tag}: text under 11px: ${r.small.slice(0, 3).join(' | ')}`);
     if (r.clipped.length) fails.push(`${tag}: clipped: ${r.clipped.slice(0, 3).join(' | ')}`);
+    if (r.sliced.length) fails.push(`${tag}: sliced by a scrolling row: ${r.sliced.slice(0, 3).join(' | ')}`);
+    if (r.unnamed.length) fails.push(`${tag}: controls with no accessible name: ${r.unnamed.slice(0, 3).join(' | ')}`);
     if (r.targets.length) fails.push(`${tag}: targets under 44px: ${r.targets.slice(0, 3).join(' | ')}`);
     await pg.screenshot({ path: path.join(OUT, `${name}-${w}.png`) });
     if (w === 375) await pg.screenshot({ path: path.join(OUT, `${name}-full.png`), fullPage: true });
@@ -132,7 +163,8 @@ for (const [name, hash, ref] of SCREENS) {
   const m = await pg.evaluate(audit);
   if (m.moving.length) fails.push(`${name}: animating under reduced motion: ${m.moving.slice(0, 3).join(' | ')}`);
   await ctx.close();
-  // side by side with the reference
+  // side by side with the reference (screens the handoff never drew have none)
+  if (!ref) continue;
   execFileSync('python3.13', ['-c', `
 from PIL import Image
 a=Image.open(${JSON.stringify(path.join(ROOT, 'brand/heist/handoff/screenshots', ref + '.png'))}).convert('RGB')

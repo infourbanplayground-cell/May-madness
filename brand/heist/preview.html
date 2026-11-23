@@ -129,6 +129,12 @@
   --mn-shout-shadow: 0 6px 24px rgba(0,0,0,.5);
   --mn-grad-load: linear-gradient(90deg, var(--mn-coral), var(--mn-peach));
   --mn-grad-lead: linear-gradient(90deg, var(--mn-red), var(--mn-coral));
+  /* phase 5 — the stories */
+  --mn-story-foot: linear-gradient(180deg, rgba(15,27,43,0), rgba(15,27,43,.88) 45%, var(--mn-navy));
+  --mn-story-back: linear-gradient(180deg, rgba(15,27,43,.55), rgba(15,27,43,.05) 30%, rgba(15,27,43,.35) 55%, rgba(15,27,43,.95) 82%);
+  --mn-story-panel: linear-gradient(180deg, rgba(15,27,43,0) 55%, rgba(15,27,43,.9));
+  --mn-story-shadow: 0 2px 12px rgba(0,0,0,.5);
+  --mn-logo-shadow: drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
@@ -150,7 +156,10 @@
 .mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
 
 /* ── pills ────────────────────────────────────────────────────────────── */
-.mn-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+/* the row scrolls sideways, which clips; the drawn pill is 32px and the row it
+   leaves after the 44px target's -7px margins is 30, so the outline lost a
+   pixel or two top and bottom on every pill row. 4px of room, taken back outside. */
+.mn-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px 0; margin: -4px 0; }
 .mn-pills::-webkit-scrollbar { display: none; }
 /* the visible pill is the handoff's 32px chip; the button around it is 44px
    tall so the target meets the floor without changing what is drawn */
@@ -429,10 +438,33 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-leadbar > div { height: 100%; border-radius: 5px; background: var(--mn-grad-lead); }
 .mh-rule { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--mn-rule-bg); }
 .mh-rule > span { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+
+/* ── phase 5: the stories (a 416x740 artboard, exported at 1080x1920) ─── */
+.mh-story { position: relative; width: 416px; height: 740px; overflow: hidden; background: var(--mn-navy); flex: none; }
+.mh-shard { position: absolute; inset: 0; }
+.mh-shard[data-dim] { filter: brightness(.62); }
+.mh-shardlines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: var(--mn-keyline-shadow); pointer-events: none; }
+.mh-shardlines line { stroke: var(--mn-sand); stroke-width: 3; }
+.mh-storyfoot { position: absolute; left: 0; right: 0; bottom: 0; height: 330px; background: var(--mn-story-foot); }
+.mh-storylock { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+.mh-storybill { position: absolute; left: 22px; right: 22px; }
+.mh-storywhen { display: flex; justify-content: center; gap: 16px; margin-top: 8px; }
+.mh-storylogo { position: absolute; filter: var(--mn-logo-shadow); }
+.mh-contback { position: absolute; inset: 0; background: var(--mn-story-back); }
+.mh-conttag { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font-size: 22px; color: var(--mn-sand); text-shadow: var(--mn-story-shadow); }
+.mh-controw { position: absolute; left: 18px; right: 18px; top: 230px; height: 250px; display: flex; gap: 8px; }
+.mh-contender { position: relative; overflow: hidden; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
+.mh-contfade { position: absolute; inset: 0; background: var(--mn-story-panel); }
+.mh-contname { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; letter-spacing: .12em; line-height: 1; }
+.mh-mycard { position: absolute; left: 0; right: 0; top: 92px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mh-story .mn-grain { z-index: 5; }
+/* the share sheet shows the frame itself, scaled to the phone */
+.mh-sharepreview { margin: 14px auto 10px; width: calc(416px * var(--k)); height: calc(740px * var(--k)); --k: min(1, calc((100vw - 40px) / 416px)); }
+.mh-sharescale { width: 416px; height: 740px; transform: scale(var(--k)); transform-origin: 0 0; border-radius: 12px; overflow: hidden; }
 </style>
 </head><body>
 <div id="root"></div>
-<script>window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The episode titles and the session art are PLACEHOLDERS until the owner sends the real ones."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-corniche.jpg"}, {"code": "EP.02", "title": "The Arrival", "art": "art-club.jpg"}, {"code": "EP.03", "title": "The Heat", "art": "art-smash.jpg"}, {"code": "EP.04", "title": "The Knockout", "art": "art-rivals.jpg"}, {"code": "EP.05", "title": "The Smash", "art": "art-smash.jpg"}, {"code": "EP.06", "title": "The Grudge", "art": "art-rivals.jpg"}, {"code": "EP.07", "title": "The Rematch", "art": "art-corniche.jpg"}, {"code": "EP.08", "title": "The Crew", "art": "art-carpark.jpg"}, {"code": "EP.09", "title": "The Big Score", "art": "art-club.jpg"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "previousVolume": "56 National Series"};</script>
+<script>window.MH_SEASON = {"_notes": ["Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.", "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.", "No Arabic name — the owner removed it (22 Nov 2026). The episode titles and the session art are PLACEHOLDERS until the owner sends the real ones."], "name": "Muscat Heist", "nameLine1": "MUSCAT", "nameLine2": "HEIST", "volume": 10, "volumeLabel": "VOL.10", "month": "December", "monthShort": "DEC", "year": 2026, "host": "heist.urbanpadel.om", "presents": "Urban Playground presents", "loadingLabel": "NOW LOADING MUSCAT", "venue": "Al Hail North", "schedule": "Mon & Wed, 5:30 PM", "time": "17:30", "sessions": 9, "nights": ["2026-12-02", "2026-12-07", "2026-12-09", "2026-12-14", "2026-12-16", "2026-12-21", "2026-12-23", "2026-12-28", "2026-12-30"], "doubleNights": ["2026-12-28", "2026-12-30"], "finalsDate": "2026-12-30", "episodes": [{"code": "EP.01", "title": "The Corniche", "art": "art-corniche.jpg"}, {"code": "EP.02", "title": "The Arrival", "art": "art-club.jpg"}, {"code": "EP.03", "title": "The Heat", "art": "art-smash.jpg"}, {"code": "EP.04", "title": "The Knockout", "art": "art-rivals.jpg"}, {"code": "EP.05", "title": "The Smash", "art": "art-smash.jpg"}, {"code": "EP.06", "title": "The Grudge", "art": "art-rivals.jpg"}, {"code": "EP.07", "title": "The Rematch", "art": "art-corniche.jpg"}, {"code": "EP.08", "title": "The Crew", "art": "art-carpark.jpg"}, {"code": "EP.09", "title": "The Big Score", "art": "art-club.jpg"}], "entry": 7, "voucher": 14, "seasonPrizes": [75, 50, 30], "rep": {"_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.", "levels": [{"id": "legend", "label": "Legend", "perNight": 20}, {"id": "known", "label": "Known", "perNight": 18}, {"id": "rising", "label": "Rising", "perNight": 16}, {"id": "rookie", "label": "Rookie", "perNight": 0}]}, "tiers": [{"id": "legend", "label": "LEGEND", "maxRank": 1}, {"id": "elite", "label": "ELITE", "maxRank": 3}, {"id": "pro", "label": "PRO", "maxRank": 8}, {"id": "street", "label": "STREET", "maxRank": 100000}], "cardStats": {"_note": "Approved as the handoff proposed, 22 Nov 2026. Scale 0-99; fewer than 3 matches behind a stat shows a dash.", "minMatches": 3}, "bossKillBonus": {"enabled": false, "points": 3}, "tips": ["A tiebreak loss still earns 2 points. Never give up a set.", "Passing your rival on the table unlocks a share card. {rival} is {gap} points ahead of you.", "You're {n} points from {nextRep}.", "The Big Score on {finaleDay} is double points.", "Session champions get a {voucher} OMR voucher each."], "stories": {"_note": "PLACEHOLDER ART until the owner sends the real artwork. The poster's hero panel is EP.01's scene; the two shards and the faded crew scene are chosen here. The billing names come from the table (top five), with 'starring' as the fallback list before a night is played.", "poster": {"hero": {"episode": 1, "pos": "34% 18%"}, "shards": [{"art": "art-smash.jpg", "pos": "center 22%", "tag": "THE SMASH"}, {"art": "art-rivals.jpg", "pos": "78% 22%", "tag": "THE RIVALS"}], "below": {"art": "art-carpark.jpg", "pos": "center 22%"}}, "contenders": {"art": "art-club.jpg", "pos": "center 40%"}, "starring": [], "url": "heist.urbanpadel.om"}, "previousVolume": "56 National Series"};</script>
 <script>// PREVIEW DATA — the handoff's fixtures, shaped the way the screens read them.
 // The screens never read this file in the real app: there an adapter builds
 // the same shape out of the live state and the points engine. Here it is
@@ -538,6 +570,7 @@ window.MH_PREVIEW = (function () {
       { type: "scoreSettled", playerId: "p05", overtookId: "p04", session: 6, newRank: 4, points: [86, 84] },
     ],
     finale: { leadAtStart: 11 },       // the leader's lead when the finale started ("11 / 11")
+    artBase: A,                       // where season art filenames resolve
     paidOMR: 140,
     rosterSize: 32,                      // "THE CREW · 32 players" — the fixtures carry nine of them
   };
@@ -698,8 +731,10 @@ const MhSceneTag = ({ children, gold, style }) => (
 // ── billing (stories) ─────────────────────────────────────────────────────
 // parts: strings, and {link:"presents a"} for the dimmed linking words
 function MhBilling({ parts, style }) {
+  // parts: strings, {link} for the dimmed words, and elements (a <br />) as they are
   return <div className="mn-billing" style={style}>{parts.map((p, i) =>
-    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
+    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment>
+    : React.isValidElement(p) ? <React.Fragment key={i}>{p}</React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
 }
 
 // ── avatar ────────────────────────────────────────────────────────────────
@@ -1145,6 +1180,8 @@ function MhCardScreen({ D, go, id }) {
           <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.pos }} rank={p.rank} points={p.points}
             rep={p.rep} size="L" stats={p.stats || {}} />
         </div>
+        {/* the handoff's "Share (optional) → share sheet MY CARD", on your own card only */}
+        {own && <MhButton live onClick={() => go("share", "card/" + p.id)}>Share my card</MhButton>}
         {!own && v && (
           <MhGlass>
             <div className="mh-split">
@@ -1843,6 +1880,215 @@ function MhFinale({ D, go }) {
   );
 }
 
+// MUSCAT HEIST · Vol.10 — the share exports (handoff phase 5):
+// 18 Story · Campaign Poster, 19 Story · Contenders, and MY CARD.
+//
+// Each story is a 416x740 frame, the handoff's own artboard, exported at
+// 1080x1920 (x2.596). The frame on screen IS the export — the sheet's
+// preview and the saved PNG are the same DOM — so what somebody sees is what
+// they post. Every word on them is data: the starring names are the table's
+// top five, "27 MORE" is the roster minus them, the pool is derived, the days
+// and the first night come from the nights list, and the contenders' "Eleven
+// points" is #1 minus #2 in words.
+const MH_STORY = { w: 416, h: 740, outW: 1080, outH: 1920 };
+const MH_WORDS = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven",
+  "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+const MH_TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+function mhWords(n) {
+  if (n < 20) return MH_WORDS[n];
+  if (n < 100) return MH_TENS[Math.floor(n / 10)] + (n % 10 ? "-" + MH_WORDS[n % 10].toLowerCase() : "");
+  return String(n);
+}
+const mhPool = D => (MH.seasonPrizes || []).reduce((a, b) => a + b, 0) + MH.voucher * 2 * D.sessions.length;
+// "Mon & Wed", from the weekdays the nights actually fall on — in week order,
+// Monday first: the season opens on a Wednesday, and in date order this read
+// "Wed & Mon".
+function mhDays() {
+  const seen = [];
+  (MH.nights || []).forEach(n => { const k = (mhDate(n).getDay() + 6) % 7; if (seen.indexOf(k) < 0) seen.push(k); });
+  return seen.sort((a, b) => a - b).map(k => MH_DOW[(k + 1) % 7]).join(" & ");
+}
+const mhArt = (D, file) => (D.artBase || "") + file;
+
+function MhStoryFrame({ children, label }) {
+  return <div className="mh-story" role="img" aria-label={label}>{children}<MhGrain /></div>;
+}
+// the film-credits block both stories close on
+function MhStoryBilling({ D, X }) {
+  const S = MH.stories || {};
+  const played = X.players.some(p => p.points > 0);
+  const five = played ? X.players.slice(0, 5).map(p => p.name) : (S.starring || []).slice(0, 5);
+  const more = Math.max(0, (D.rosterSize || X.players.length) - five.length);
+  return (
+    <MhBilling parts={[
+      "Urban Playground", { link: "presents a" }, "Social Padel League",
+      ...(five.length ? [{ link: "starring" }, <br key="b1" />, five.join(" · "), <br key="b2" />] : [<br key="b3" />]),
+      ...(more ? [{ link: "with" }, `${more} more of Muscat’s finest ·`] : []),
+      { link: "prize pool" }, `${mhPool(D)} OMR ·`, { link: "courts" }, MH.venue,
+    ]} />
+  );
+}
+
+// ── 18 CAMPAIGN POSTER ────────────────────────────────────────────────────
+// Shattered panels: the hero scene left, two action shards right, the crew
+// scene faded below, sand keylines along every cut.
+function MhStoryPoster({ D }) {
+  const X = mhDerive(D);
+  const P = (MH.stories || {}).poster || {};
+  const ep = MH.episodes[(P.hero && P.hero.episode || 1) - 1];
+  const shards = P.shards || [];
+  const first = (MH.nights || [])[0];
+  return (
+    <MhStoryFrame label={`${MH.name} campaign poster`}>
+      <div className="mh-shard" style={{ clipPath: "polygon(0 0,62% 0,50% 70%,0 76%)" }}>
+        <MhArt src={mhArt(D, ep.art)} pos={P.hero && P.hero.pos} /></div>
+      {shards[0] && <div className="mh-shard" style={{ clipPath: "polygon(62% 0,100% 0,100% 30%,57% 34%)" }}>
+        <div style={{ position: "absolute", left: "52%", top: 0, width: "48%", height: "36%" }}><MhArt src={mhArt(D, shards[0].art)} pos={shards[0].pos} /></div></div>}
+      {shards[1] && <div className="mh-shard" style={{ clipPath: "polygon(57% 34%,100% 30%,100% 58%,52% 66%)" }}>
+        <div style={{ position: "absolute", left: "48%", top: "28%", width: "52%", height: "40%" }}><MhArt src={mhArt(D, shards[1].art)} pos={shards[1].pos} /></div></div>}
+      {P.below && <div className="mh-shard" data-dim="" style={{ clipPath: "polygon(0 76%,50% 70%,52% 66%,100% 58%,100% 100%,0 100%)" }}>
+        <MhArt src={mhArt(D, P.below.art)} pos={P.below.pos} /></div>}
+      <svg className="mh-shardlines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {[[62, 0, 50, 70], [62, 0, 100, 0], [57, 34, 100, 30], [52, 66, 100, 58], [0, 76, 50, 70]].map((l, i) =>
+          <line key={i} x1={l[0]} y1={l[1]} x2={l[2]} y2={l[3]} vectorEffect="non-scaling-stroke" />)}
+      </svg>
+      <div className="mh-storyfoot" aria-hidden="true" />
+      {shards[0] && <div style={{ position: "absolute", left: 300, top: 190 }}><MhSceneTag>{shards[0].tag}</MhSceneTag></div>}
+      {shards[1] && <div style={{ position: "absolute", left: 300, top: 400 }}><MhSceneTag>{shards[1].tag}</MhSceneTag></div>}
+      <div style={{ position: "absolute", left: 18, top: 60 }}><MhSceneTag>{ep.code} · {ep.title}</MhSceneTag></div>
+      <div className="mh-storylock" style={{ top: 418 }}><MhTitleLockup size="L" center presents={MH.presents} /></div>
+      <div className="mh-storybill" style={{ bottom: 18 }}>
+        <MhStoryBilling D={D} X={X} />
+        <div className="mh-storywhen">
+          <MhLabel tone="peach">Every {mhDays()} · {MH.time}</MhLabel>
+          {first && <MhLabel tone="sand">From {mhDay(first)}</MhLabel>}
+        </div>
+      </div>
+      <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ right: 18, top: 16, height: 26 }} />
+    </MhStoryFrame>
+  );
+}
+
+// ── 19 CONTENDERS ─────────────────────────────────────────────────────────
+function MhStoryContenders({ D }) {
+  const X = mhDerive(D);
+  const C = (MH.stories || {}).contenders || {};
+  const [a, b, c] = X.players;                           // #1, #2, #3
+  const gap = a.points - b.points;
+  const Panel = ({ p, big }) => (
+    <div className="mh-contender" style={{ flex: big ? 1.35 : 1, marginTop: big ? 0 : 26 }}>
+      <MhArt src={p.photo} pos={p.pos} />
+      <div className="mh-contfade" aria-hidden="true" />
+      <div className="mn-display mh-contname" style={{ fontSize: big ? 17 : 14 }}>{mhFirst(p.name).toUpperCase()}</div>
+    </div>
+  );
+  return (
+    <MhStoryFrame label={`${MH.name}: the top three`}>
+      <div style={{ position: "absolute", inset: 0 }}><MhArt src={mhArt(D, C.art)} pos={C.pos} /></div>
+      <div className="mh-contback" aria-hidden="true" />
+      <div className="mh-conttag mn-serif">Three contenders. {mhWords(gap)} point{gap === 1 ? "" : "s"}.<br />One {MH.month}.</div>
+      <div className="mh-controw"><Panel p={b} /><Panel p={a} big /><Panel p={c} /></div>
+      <div className="mh-storylock" style={{ top: 478 }}><MhTitleLockup size={92} center /></div>
+      <div className="mh-storybill" style={{ bottom: 16 }}><MhStoryBilling D={D} X={X} /></div>
+      <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ left: 18, top: 14, height: 24 }} />
+    </MhStoryFrame>
+  );
+}
+
+// ── MY CARD ───────────────────────────────────────────────────────────────
+// The handoff names it ("Share → share sheet MY CARD") but draws no artboard,
+// so this is composed from the New Crew Card moment it is shared from: the
+// player's own art blurred under the gold glow, the card L, the lockup and
+// the address. A proposal until the owner says otherwise.
+function MhStoryCard({ D, id }) {
+  const X = mhDerive(D);
+  const p = X.byId[id] || X.me;
+  return (
+    <MhStoryFrame label={`${p.name}'s crew card`}>
+      <MhMomentBack src={p.photo} pos={p.heroPos || p.pos} dim={.6} glow="gold" at="50% 40%" />
+      <div className="mh-mycard">
+        <MhLabel tone="peach">My crew card · {MH.volumeLabel}</MhLabel>
+        <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.meCardPos || p.pos }} rank={p.rank} points={p.points}
+          rep={p.rep} size="L" stats={p.stats || {}} tilt={false} />
+        <div style={{ marginTop: 14 }}><MhTitleLockup size={70} center /></div>
+        <MhLabel tone="sand" style={{ marginTop: 4 }}>{(MH.stories || {}).url || MH.host}</MhLabel>
+      </div>
+      <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ left: 18, top: 14, height: 24 }} />
+    </MhStoryFrame>
+  );
+}
+
+// ── the export ────────────────────────────────────────────────────────────
+// html-to-image is loaded only when somebody exports: no screen pays for it.
+// Pinned to an exact version, like every script this club loads.
+const MH_H2I = "https://unpkg.com/html-to-image@1.11.11/dist/html-to-image.js";
+function mhLoadH2I() {
+  if (window.htmlToImage) return Promise.resolve(window.htmlToImage);
+  return new Promise((ok, no) => {
+    const s = document.createElement("script"); s.src = MH_H2I;
+    s.onload = () => ok(window.htmlToImage); s.onerror = () => no(new Error("export library failed to load"));
+    document.head.appendChild(s);
+  });
+}
+// The node is the 416x740 frame — the handoff's artboard, which is not quite
+// 9:16. At 1080/416 it would be 1080 x 1921.2; the canvas is set to exactly
+// 1080x1920 and the frame is drawn into it, a 0.06% vertical squeeze that no
+// eye can see and that keeps the file to Instagram's own size.
+async function mhExportStory(node) {
+  const h = await mhLoadH2I();
+  await document.fonts.ready;
+  const k = MH_STORY.outW / MH_STORY.w;
+  const canvas = await h.toCanvas(node, { width: MH_STORY.w, height: MH_STORY.h, pixelRatio: k,
+    canvasWidth: MH_STORY.outW / k, canvasHeight: MH_STORY.outH / k, cacheBust: false });
+  return new Promise(r => canvas.toBlob(r, "image/png"));
+}
+
+// ── the share sheet ───────────────────────────────────────────────────────
+const MH_SHARES = [["card", "My card"], ["poster", "Campaign poster"], ["contenders", "Contenders"]];
+function MhShareSheet({ D, go, what = "card", id }) {
+  const [k, setK] = React.useState(MH_SHARES.some(s => s[0] === what) ? what : "card");
+  const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
+  const ref = React.useRef(null);
+  const name = { card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
+  const run = async () => {
+    setBusy(true); setErr("");
+    try {
+      const blob = await mhExportStory(ref.current.firstChild);
+      const file = new File([blob], `muscat-heist-${name}.png`, { type: "image/png" });
+      window.__mhLastExport = blob;                       // for the harness
+      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
+      else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); }
+    } catch (e) { if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again."); }
+    setBusy(false);
+  };
+  return (
+    <div className="mh-page">
+      <main className="mh-body" data-bare="" style={{ padding: "56px 20px 0", display: "flex", flexDirection: "column", minHeight: "100dvh" }}>
+        <div className="mh-split">
+          <MhLabel>Share</MhLabel>
+          <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
+        </div>
+        <div style={{ marginTop: 10 }}><MhPills label="What to share" items={MH_SHARES} value={k} onChange={setK} /></div>
+        <div className="mh-sharepreview">
+          <div ref={ref} className="mh-sharescale">
+            {k === "card" ? <MhStoryCard D={D} id={id} /> : k === "poster" ? <MhStoryPoster D={D} /> : <MhStoryContenders D={D} />}
+          </div>
+        </div>
+        <MhLabel style={{ textAlign: "center" }}>1080 × 1920 · Instagram story</MhLabel>
+        {err && <MhSerif size={14} tone="coral" style={{ textAlign: "center" }}>{err}</MhSerif>}
+        <div className="mh-momentfoot" style={{ padding: "12px 0 26px" }}>
+          <MhButton live onClick={run} disabled={busy}>{busy ? "Making the image…" : "Share image"}</MhButton>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+// #story/<poster|contenders|card>/<id>: the bare 416x740 frame, for export and compare
+function MhStoryOnly({ D, what, id }) {
+  const S = { poster: MhStoryPoster, contenders: MhStoryContenders, card: MhStoryCard }[what] || MhStoryPoster;
+  return <div className="mh-page mh-storyonly"><S D={D} id={id} /></div>;
+}
 function Preview() {
   const read = () => (location.hash.slice(1) || "home").split("/");
   const [route, setRoute] = React.useState(read());
@@ -1851,16 +2097,18 @@ function Preview() {
   const D = window.MH_PREVIEW;
   const go = (to, arg) => {
     if (to === "back") { history.back(); return; }
-    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take", "session", "live", "recap", "slides", "loading", "cardpull", "repup", "rival", "settled", "finale"];
+    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take", "session", "live", "recap", "slides", "loading", "cardpull", "repup", "rival", "settled", "finale", "share", "story"];
     if (known.indexOf(to) < 0) return;      // later phases: session, recap, rival, receipt, signup
     location.hash = arg != null ? `${to}/${arg}` : to; scrollTo(0, 0);
   };
   const [name, arg, arg2] = route;
   const S = { home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
               session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
-              loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale }[name] || MhHome;
+              loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
+              share: MhShareSheet, story: MhStoryOnly }[name] || MhHome;
   // the preview is the organiser's phone: matches are tappable, as in the reference
-  return <S key={route.join("/")} D={D} go={go} id={arg} no={arg} start={+arg2 || 0} canScore
+  return <S key={route.join("/")} D={D} go={go} no={arg} start={+arg2 || 0} canScore what={arg}
+    id={name === "share" || name === "story" ? arg2 : arg}
     progress={name === "loading" && arg ? +arg / 100 : undefined} ready={!(name === "loading" && arg)} tip={name === "loading" ? 1 : undefined} />;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<Preview />);

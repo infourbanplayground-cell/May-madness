@@ -364,6 +364,8 @@ function MhCardScreen({ D, go, id }) {
           <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.pos }} rank={p.rank} points={p.points}
             rep={p.rep} size="L" stats={p.stats || {}} />
         </div>
+        {/* the handoff's "Share (optional) → share sheet MY CARD", on your own card only */}
+        {own && <MhButton live onClick={() => go("share", "card/" + p.id)}>Share my card</MhButton>}
         {!own && v && (
           <MhGlass>
             <div className="mh-split">

@@ -122,6 +122,12 @@
   --mn-shout-shadow: 0 6px 24px rgba(0,0,0,.5);
   --mn-grad-load: linear-gradient(90deg, var(--mn-coral), var(--mn-peach));
   --mn-grad-lead: linear-gradient(90deg, var(--mn-red), var(--mn-coral));
+  /* phase 5 — the stories */
+  --mn-story-foot: linear-gradient(180deg, rgba(15,27,43,0), rgba(15,27,43,.88) 45%, var(--mn-navy));
+  --mn-story-back: linear-gradient(180deg, rgba(15,27,43,.55), rgba(15,27,43,.05) 30%, rgba(15,27,43,.35) 55%, rgba(15,27,43,.95) 82%);
+  --mn-story-panel: linear-gradient(180deg, rgba(15,27,43,0) 55%, rgba(15,27,43,.9));
+  --mn-story-shadow: 0 2px 12px rgba(0,0,0,.5);
+  --mn-logo-shadow: drop-shadow(0 2px 6px rgba(0,0,0,.6));
 }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
@@ -143,7 +149,10 @@
 .mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
 
 /* ── pills ────────────────────────────────────────────────────────────── */
-.mn-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+/* the row scrolls sideways, which clips; the drawn pill is 32px and the row it
+   leaves after the 44px target's -7px margins is 30, so the outline lost a
+   pixel or two top and bottom on every pill row. 4px of room, taken back outside. */
+.mn-pills { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 4px 0; margin: -4px 0; }
 .mn-pills::-webkit-scrollbar { display: none; }
 /* the visible pill is the handoff's 32px chip; the button around it is 44px
    tall so the target meets the floor without changing what is drawn */
@@ -422,3 +431,26 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-leadbar > div { height: 100%; border-radius: 5px; background: var(--mn-grad-lead); }
 .mh-rule { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--mn-rule-bg); }
 .mh-rule > span { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+
+/* ── phase 5: the stories (a 416x740 artboard, exported at 1080x1920) ─── */
+.mh-story { position: relative; width: 416px; height: 740px; overflow: hidden; background: var(--mn-navy); flex: none; }
+.mh-shard { position: absolute; inset: 0; }
+.mh-shard[data-dim] { filter: brightness(.62); }
+.mh-shardlines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; filter: var(--mn-keyline-shadow); pointer-events: none; }
+.mh-shardlines line { stroke: var(--mn-sand); stroke-width: 3; }
+.mh-storyfoot { position: absolute; left: 0; right: 0; bottom: 0; height: 330px; background: var(--mn-story-foot); }
+.mh-storylock { position: absolute; left: 0; right: 0; display: flex; justify-content: center; }
+.mh-storybill { position: absolute; left: 22px; right: 22px; }
+.mh-storywhen { display: flex; justify-content: center; gap: 16px; margin-top: 8px; }
+.mh-storylogo { position: absolute; filter: var(--mn-logo-shadow); }
+.mh-contback { position: absolute; inset: 0; background: var(--mn-story-back); }
+.mh-conttag { position: absolute; left: 0; right: 0; top: 40px; text-align: center; font-size: 22px; color: var(--mn-sand); text-shadow: var(--mn-story-shadow); }
+.mh-controw { position: absolute; left: 18px; right: 18px; top: 230px; height: 250px; display: flex; gap: 8px; }
+.mh-contender { position: relative; overflow: hidden; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
+.mh-contfade { position: absolute; inset: 0; background: var(--mn-story-panel); }
+.mh-contname { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; letter-spacing: .12em; line-height: 1; }
+.mh-mycard { position: absolute; left: 0; right: 0; top: 92px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mh-story .mn-grain { z-index: 5; }
+/* the share sheet shows the frame itself, scaled to the phone */
+.mh-sharepreview { margin: 14px auto 10px; width: calc(416px * var(--k)); height: calc(740px * var(--k)); --k: min(1, calc((100vw - 40px) / 416px)); }
+.mh-sharescale { width: 416px; height: 740px; transform: scale(var(--k)); transform-origin: 0 0; border-radius: 12px; overflow: hidden; }

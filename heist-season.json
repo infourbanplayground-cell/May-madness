@@ -66,5 +66,19 @@
     "The Big Score on {finaleDay} is double points.",
     "Session champions get a {voucher} OMR voucher each."
   ],
+  "stories": {
+    "_note": "PLACEHOLDER ART until the owner sends the real artwork. The poster's hero panel is EP.01's scene; the two shards and the faded crew scene are chosen here. The billing names come from the table (top five), with 'starring' as the fallback list before a night is played.",
+    "poster": {
+      "hero": {"episode": 1, "pos": "34% 18%"},
+      "shards": [
+        {"art": "art-smash.jpg", "pos": "center 22%", "tag": "THE SMASH"},
+        {"art": "art-rivals.jpg", "pos": "78% 22%", "tag": "THE RIVALS"}
+      ],
+      "below": {"art": "art-carpark.jpg", "pos": "center 22%"}
+    },
+    "contenders": {"art": "art-club.jpg", "pos": "center 40%"},
+    "starring": [],
+    "url": "heist.urbanpadel.om"
+  },
   "previousVolume": "56 National Series"
 }

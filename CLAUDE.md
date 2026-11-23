@@ -899,6 +899,37 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     screenshot shows — tier up/hold/down, Legend reached, the rival at #1,
     the finale before/during/after, Boss Kill on — by editing the preview's
     data in the page and re-rendering.
+- **Phase 5 (the share exports) is `brand/heist/heist-stories.jsx`**: 18
+  Campaign Poster, 19 Contenders, MY CARD and the share sheet. Each story is
+  the handoff's 416x740 artboard; the sheet shows that same DOM and exports
+  it at **exactly 1080x1920** with `html-to-image@1.11.11`, loaded only when
+  somebody exports. Rendered copies are in `brand/heist/stories/`.
+  - **MY CARD has no artboard in the handoff** — it is composed from the New
+    Crew Card moment and is a proposal until the owner approves it.
+  - The billing is data: top five by points (the `stories.starring` list
+    before a night is played), "N more" = roster minus five, the pool
+    derived, the weekdays from the nights IN WEEK ORDER — in date order the
+    season (opening on a Wednesday) printed "Every Wed & Mon".
+  - **`MhBilling` swallowed `<br>`**: a React element was treated as a
+    `{link}` part and rendered as an empty `<i>`, so the line breaks the
+    design sets never happened.
+  - `node ops/render-heist-stories.mjs` renders all three, checks size, face
+    (the stack minus its first family — JetBrains Mono is installed here, so
+    mono is checked as loaded instead), text leaving the frame, the data's
+    words, and drives the IN-APP export through the share sheet, comparing
+    its file to the render after a 3px blur (grain is noise; a dropped face
+    is shape). Clean 0.7-1.6, faces dropped 3.8-9.5, limit 3.
+    `SABOTAGE=nofont|spill|exportfont` all go red.
+- **EVERY PILL ROW CLIPPED ITS PILLS FOR THREE PHASES.** `.mn-pills` scrolls
+  sideways, which also clips vertically; the 44px target's -7px margins left
+  a 30px row for a 33px drawn pill, so each outline lost its top and bottom
+  edge. Invisible at review size, invisible to every text check. The row has
+  4px of room now, and `shots-heist.mjs` fails anything drawn (border or
+  fill) that pokes out of a scrolling row — `SABOTAGE=slice` puts it back and
+  goes red; its first version was vacuous (it skipped rows whose content
+  overflowed vertically, i.e. exactly the fault) and was caught by that.
+- The on-screen face check also measures the crew card's own type: your own
+  card has no `.mn-display` at all, and "nothing to measure" read as a fail.
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than
   copied over this file:**
   1. Re-read a screen's spec in `brand/heist/handoff/screens/` and look at its

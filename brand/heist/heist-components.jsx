@@ -149,8 +149,10 @@ const MhSceneTag = ({ children, gold, style }) => (
 // ── billing (stories) ─────────────────────────────────────────────────────
 // parts: strings, and {link:"presents a"} for the dimmed linking words
 function MhBilling({ parts, style }) {
+  // parts: strings, {link} for the dimmed words, and elements (a <br />) as they are
   return <div className="mn-billing" style={style}>{parts.map((p, i) =>
-    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
+    typeof p === "string" ? <React.Fragment key={i}>{p} </React.Fragment>
+    : React.isValidElement(p) ? <React.Fragment key={i}>{p}</React.Fragment> : <i key={i}>{p.link} </i>)}</div>;
 }
 
 // ── avatar ────────────────────────────────────────────────────────────────
