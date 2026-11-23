@@ -16,12 +16,16 @@ import { execFileSync } from 'child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
-const OUT = path.join(SC, 'heist-qa', 'screens');
-fs.mkdirSync(OUT, { recursive: true });
 const SAB = process.env.SABOTAGE || '';
+// a sabotage run must never overwrite the real shots: the next look at the
+// compares would show a fallback face from a run that was meant to fail
+const OUT = path.join(SC, 'heist-qa', SAB ? 'screens-sabotage' : 'screens');
+fs.mkdirSync(OUT, { recursive: true });
 const SCREENS = [
   ['home', 'home', '01-home'], ['jobs', 'jobs', '02-jobs'], ['wanted', 'wanted', '03-most-wanted'],
   ['me', 'me', '04-me'], ['crew', 'crew', '05-crew'], ['card', 'card/p01', '06-crew-card'], ['take', 'take', '17-the-take'],
+  ['session', 'session/6', '07-session-groups'], ['live', 'live', '08-live-scoring'],
+  ['recap', 'recap/5', '09-episode-recap'], ['slides', 'slides/5/1', '10-recap-slides'],
 ].filter(([n]) => !process.env.ONLY || process.env.ONLY.split(',').includes(n));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.js': 'application/javascript' };
 
@@ -47,8 +51,13 @@ async function open(w, h, hash, reduced) {
     r.fulfill({ status: 200, contentType: 'application/javascript', body: fs.readFileSync(path.join(SC, 'vendor', f), 'utf8') });
   });
   await pg.goto(`http://127.0.0.1:${PORT}/brand/heist/preview.html#${hash}`, { waitUntil: 'load' });
-  await pg.waitForSelector('.mh-page', { timeout: 30000 });
+  await pg.waitForSelector('.mh-page, .mh-slides', { timeout: 30000 });
+  // a face no text on the screen uses is never fetched, and would measure as the
+  // fallback; ask for each one, so the probe tests availability, not usage
+  await pg.evaluate(() => Promise.all(["italic 40px Fraunces", "900 40px Archivo", "600 40px Manrope"]
+    .map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => document.fonts.ready);
+  await pg.waitForFunction(() => [...document.fonts].every(f => f.status !== 'loading'), null, { timeout: 15000 });
   await pg.evaluate(() => Promise.all([...document.images].map(i => { i.loading = 'eager';
     return i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }); })));
   await pg.waitForTimeout(reduced ? 300 : 1600);
@@ -67,6 +76,20 @@ const audit = () => {
     'Fraunces italic': probe("'Fraunces',serif", 'font-style:italic') !== probe('serif', 'font-style:italic'),
     'Manrope': probe("'Manrope',serif", 'font-weight:600') !== probe('serif', 'font-weight:600'),
   };
+  // and the screen's OWN display text: the probe above is a span this check
+  // made, which loads the face on demand; the 08 Live shot went out in the
+  // fallback with that probe green. Each run is measured as it stands and again
+  // forced to the fallback stack; identical widths mean it was never drawn.
+  // only the element's OWN text: a child that sets its own face (the mono
+  // points line inside a display figure) does not move when the parent's does
+  const ownText = e => [...e.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+  const runs = [...document.querySelectorAll('.mn-display')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
+  const undrawn = runs.filter(e => {
+    const r = document.createRange(); r.selectNodeContents(ownText(e)); const w0 = r.getBoundingClientRect().width;
+    const was = e.style.fontFamily; e.style.fontFamily = 'Impact, sans-serif';
+    const w1 = r.getBoundingClientRect().width; e.style.fontFamily = was; return Math.abs(w0 - w1) < .5;
+  });
+  fonts['display text on screen'] = runs.length > 0 && undrawn.length === 0;
   const out = { fonts, broken: [...document.images].filter(i => !i.naturalWidth).map(i => i.getAttribute('src')),
     small: [], clipped: [], targets: [], scrollX: document.documentElement.scrollWidth - innerWidth, moving: [] };
   for (const el of document.querySelectorAll('body *')) {

@@ -2,7 +2,7 @@
 """Muscat Heist — the screens preview (handoff phases 2+), from fixture data.
 
 Writes brand/heist/preview.html: the real screen components on the handoff's
-fixtures, routed by hash (#home #jobs #wanted #me #crew #card/p01 #take), so
+fixtures, routed by hash (#home #jobs #wanted #me #crew #card/p01 #take #session/6 #live #recap/5 #slides/5/1), so
 each can be shot at 375x812 and laid beside handoff/screenshots/<nn>-*.png.
 
     python3 ops/build-heist-preview.py && node ops/shots-heist.mjs
@@ -33,6 +33,7 @@ page = """<!doctype html>
 <script type="text/babel" data-presets="react">
 @@COMPONENTS@@
 @@SCREENS@@
+@@NIGHT@@
 function Preview() {
   const read = () => (location.hash.slice(1) || "home").split("/");
   const [route, setRoute] = React.useState(read());
@@ -41,13 +42,15 @@ function Preview() {
   const D = window.MH_PREVIEW;
   const go = (to, arg) => {
     if (to === "back") { history.back(); return; }
-    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take"];
+    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take", "session", "live", "recap", "slides"];
     if (known.indexOf(to) < 0) return;      // later phases: session, recap, rival, receipt, signup
     location.hash = arg != null ? `${to}/${arg}` : to; scrollTo(0, 0);
   };
-  const [name, arg] = route;
-  const S = { home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake }[name] || MhHome;
-  return <S D={D} go={go} id={arg} />;
+  const [name, arg, arg2] = route;
+  const S = { home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
+              session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides }[name] || MhHome;
+  // the preview is the organiser's phone: matches are tappable, as in the reference
+  return <S key={route.join("/")} D={D} go={go} id={arg} no={arg} start={+arg2 || 0} canScore />;
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<Preview />);
 </script>
@@ -55,7 +58,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<Preview />);
 """
 for k, v in (("@@CSS@@", read("heist.css")), ("@@SEASON@@", json.dumps(season, ensure_ascii=False)),
              ("@@DATA@@", read("preview-data.js")), ("@@COMPONENTS@@", read("heist-components.jsx")),
-             ("@@SCREENS@@", read("heist-screens.jsx"))):
+             ("@@SCREENS@@", read("heist-screens.jsx")), ("@@NIGHT@@", read("heist-night.jsx"))):
     assert page.count(k) == 1, k
     page = page.replace(k, v)
 out = os.path.join(H, "preview.html")

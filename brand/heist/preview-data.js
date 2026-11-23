@@ -30,6 +30,7 @@ window.MH_PREVIEW = (function () {
   ].map(([id, name, points, movement, nights], i) => Object.assign(
     { id, name, points, movement, nights, rank: i + 1, stats: STATS[id] || null }, LOOK[id] || {}));
   const ep = n => S.episodes[n - 1];
+  const mhShort = n => n.split(" ")[0];
   const sessions = [
     { no: 1, date: "2026-12-02", state: "done", champions: ["Munther Rahbi", "Khalid"] },
     { no: 2, date: "2026-12-07", state: "done", champions: ["Hamed Amri", "Nooh Amri"] },
@@ -58,6 +59,42 @@ window.MH_PREVIEW = (function () {
                  { session: 4, label: "Made the knockout", pts: 11, knockout: true },
                  { session: 3, label: "Group stage", pts: 7 }],
     },
+    // phase 3 — fixtures/session-night.json. Group A, the live match and the
+    // EP.05 recap are the fixture's; groups B-D, the teams list, the knockout
+    // and the MVP tally are filled in so those tabs have something to draw.
+    nights: { 6: {
+      groups: {
+        A: { standings: [{ team: "Munther & Baraa", w: 2, pts: 6 }, { team: "Salim & Yousuf", w: 1, pts: 5 },
+                         { team: "Hamed & Nooh", w: 1, pts: 4 }, { team: "Ahmed & Khalid", w: 0, pts: 2 }],
+             matches: [{ a: "Munther & Baraa", b: "Hamed & Nooh", score: "6-3", state: "final" },
+                       { a: "Salim & Yousuf", b: "Ahmed & Khalid", score: "4-3", state: "live", court: 2 }] },
+        B: { standings: [{ team: "mossa & Ali", w: 1, pts: 3 }, { team: "Omar & Said", w: 0, pts: 1 }],
+             matches: [{ a: "mossa & Ali", b: "Omar & Said", score: "6-2", state: "final" }] },
+        C: { standings: [{ team: "Faisal & Hilal", w: 0, pts: 0 }, { team: "Majid & Talal", w: 0, pts: 0 }],
+             matches: [{ a: "Faisal & Hilal", b: "Majid & Talal", state: "next" }] },
+        D: { standings: [{ team: "Rashid & Zaher", w: 0, pts: 0 }, { team: "Nasser & Saif", w: 0, pts: 0 }],
+             matches: [{ a: "Rashid & Zaher", b: "Nasser & Saif", state: "next" }] },
+      },
+      teams: [["A", "Munther Rahbi", "Baraa"], ["A", "Salim K.", "Yousuf B."], ["A", "Hamed Amri", "Nooh Amri"],
+              ["A", "Ahmed S.", "Khalid"], ["B", "mossa", "Ali"], ["B", "Omar", "Said"]]
+        .map(([group, a, b]) => {
+          const pa = players.find(p => p.name === a) || {}, pb = players.find(p => p.name === b) || {};
+          return { group, a: mhShort(a), b: mhShort(b), aPhoto: pa.photo, bPhoto: pb.photo };
+        }),
+      knockout: null,                         // drawn once the groups finish
+      mvp: { open: false, votes: [] },
+    } },
+    live: { court: 1, group: "A", clock: "18:42", teamA: "Munther & Baraa", teamB: "Hamed & Nooh",
+            a: 5, b: 3, serving: "A", firstTo: 6, art: A + "art-smash.jpg", artPos: "center 25%" },
+    recaps: { 5: {
+      art: A + "art-club.jpg", artPos: "center 50%",
+      champions: ["Baraa", "mossa"], beat: ["Munther Rahbi", "Khalid"], score: "6-4", pointsEach: 8,
+      mvp: { name: "Baraa", votes: 6, note: "won the final with mossa" },
+      biggestWin: { team: "Hamed & Nooh", score: "6-0" },
+      upset: { team: "Ali & Omar", note: "beat the #1" },
+      repUps: [{ name: "mossa", from: "Rookie", to: "Rising" }],
+      yourNight: { points: 26, note: "Champions" },
+    } },
     paidOMR: 140,
     rosterSize: 32,                      // "THE CREW · 32 players" — the fixtures carry nine of them
   };

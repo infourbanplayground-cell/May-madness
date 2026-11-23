@@ -100,6 +100,17 @@
   --mn-leader-fade: linear-gradient(90deg, rgba(15,27,43,.88), rgba(15,27,43,0) 65%);
   --mn-grad-progress: linear-gradient(90deg, var(--mn-teal), var(--mn-coral));
   --mn-grad-meter: linear-gradient(90deg, var(--mn-teal), var(--mn-peach));
+  /* phase 3 — the night */
+  --mn-fade-session: linear-gradient(180deg, rgba(15,27,43,.5), rgba(15,27,43,0) 40%, rgba(15,27,43,.8));
+  --mn-fade-live: linear-gradient(180deg, rgba(15,27,43,.4), rgba(15,27,43,0) 35%, rgba(15,27,43,.75));
+  --mn-fade-recap: linear-gradient(180deg, rgba(15,27,43,.4), rgba(15,27,43,0) 35%, rgba(15,27,43,.85));
+  --mn-fade-slides: linear-gradient(180deg, rgba(15,27,43,.6), rgba(15,27,43,.1) 30%, rgba(15,27,43,.92) 80%);
+  --mn-row-line: 1px solid rgba(255,244,232,.08);
+  --mn-peach-50: rgba(255,201,163,.5);
+  --mn-teal-50: rgba(47,183,176,.5);
+  --mn-chip-bg: rgba(15,27,43,.6);
+  --mn-seg-off: rgba(255,244,232,.3);
+  --mn-slide-ring: 0 0 0 4px var(--mn-peach), 0 12px 30px rgba(0,0,0,.5);
 }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
@@ -222,6 +233,8 @@ html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-
 .mh-page { position: relative; min-height: 100vh; min-height: 100dvh; background: var(--mn-navy); overflow-x: hidden; }
 .mh-page .mn-topbar { position: absolute; }
 .mh-body { position: relative; z-index: 5; box-sizing: border-box; padding-bottom: 100px !important; }
+/* the night's screens carry no nav, so nothing to clear: the footer sits on the glass */
+.mh-body[data-bare] { padding-bottom: 0 !important; }
 .mh-col { display: flex; flex-direction: column; gap: 12px; }
 .mh-title { display: flex; justify-content: space-between; align-items: flex-end; }
 .mh-title h1 { margin: 0; font-size: 44px; line-height: .86; }
@@ -289,3 +302,57 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-prize { display: flex !important; align-items: center; gap: 12px; padding: 10px 14px; }
 .mh-ptsline { font-family: var(--mn-font-mono); font-weight: 400; font-size: 11px; color: var(--mn-mist); font-variation-settings: normal; }
 .mh-omr { font-size: 12px; color: var(--mn-mist); }
+
+/* ── phase 3: the night ───────────────────────────────────────────────── */
+.mn-glass[data-accent="peach-50"] { border-color: var(--mn-peach-50); }
+.mn-glass[data-accent="teal-50"], button.mn-glass[data-accent="teal-50"] { border-color: var(--mn-teal-50); }
+.mh-back { position: absolute; left: 20px; top: 56px; margin: -12px -12px; padding: 12px; min-height: 44px; min-width: 44px; background: none; border: 0; cursor: pointer; font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); text-align: left; }
+.mh-grow { display: grid; grid-template-columns: 18px 1fr 22px 28px; gap: 8px; align-items: center; padding: 8px 0; border-top: var(--mn-row-line); }
+.mh-gteam, .mh-mteam { font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-gw { font-family: var(--mn-font-mono); font-size: 12px; color: var(--mn-mist); }
+.mn-glass.mh-match { padding: 10px 14px; }
+.mh-seed { font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); margin-right: 6px; }
+.mh-trow { display: flex; align-items: center; gap: 4px; padding: 8px 0; border-top: var(--mn-row-line); }
+.mh-trow:first-child, .mh-grow:first-child { border-top: var(--mn-row-line); }
+.mh-vbar { margin-top: 6px; height: 4px; border-radius: 2px; background: var(--mn-track); overflow: hidden; }
+.mh-vbar > div { height: 100%; background: var(--mn-peach); border-radius: 2px; }
+
+/* live scoring */
+/* 44px to tap, the design's 6px-padded pill to look at (drawn by ::before) */
+.mh-livepill { position: absolute; left: 20px; top: 56px; display: flex; gap: 8px; align-items: center; padding: 0; border: 0; background: none; cursor: pointer; min-height: 44px; margin-top: -8px; }
+.mh-livepill::before { content: ""; position: absolute; left: 0; right: 0; top: 8px; bottom: 8px; border-radius: var(--mn-r-pill); background: var(--mn-chip-bg); }
+.mh-livepill > * { position: relative; }
+.mh-livepill .mh-dot { margin-left: 10px; }
+.mh-livepill .mn-label { margin-right: 10px; }
+.mh-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mn-coral); flex: none; }
+.mh-clock { position: absolute; right: 20px; top: 56px; padding: 6px 10px; border-radius: var(--mn-r-pill); background: var(--mn-chip-bg); font-family: var(--mn-font-mono); font-size: 12px; color: var(--mn-sand); }
+.mh-live .mn-btn[data-size="live"] { padding: 15px 0; }
+.mh-livefoot, .mh-recapfoot { margin-top: auto; padding: 16px 20px 26px; display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+.mh-recapfoot { grid-template-columns: 1fr 1fr; }
+.mh-undo { padding: 15px 16px; min-height: 56px; border-radius: var(--mn-r-card); border: var(--mn-pill-border); background: none; cursor: pointer; font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-mist); }
+.mh-undo:disabled { opacity: .5; cursor: default; }
+.mh-undo:focus-visible, .mh-back:focus-visible, .mh-livepill:focus-visible, .mh-x:focus-visible, .mh-hint:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+
+/* episode recap */
+.mh-tiles { padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* recap slides */
+.mh-slides { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--mn-navy); overflow: hidden; user-select: none; -webkit-user-select: none; }
+.mh-slidesart { position: absolute; inset: 0; }
+.mh-slidesart .mn-art img { filter: var(--mn-art-filter) brightness(.55); }
+.mh-slidesfade { position: absolute; inset: 0; background: var(--mn-fade-slides); }
+.mh-segbar { position: relative; padding: 54px 16px 0; display: flex; gap: 4px; }
+.mh-segbar > div { flex: 1; height: 3px; border-radius: 2px; background: var(--mn-seg-off); overflow: hidden; }
+.mh-segbar > div > div { height: 100%; background: var(--mn-sand); border-radius: 2px; }
+.mh-segrun { animation: mh-seg 5s linear both; }
+.mh-segrun[data-held] { animation-play-state: paused; }
+@keyframes mh-seg { from { width: 0 } to { width: 100% } }
+.mh-slideshead { position: relative; padding: 12px 20px 0; display: flex; justify-content: space-between; align-items: center; }
+.mh-x { min-width: 44px; min-height: 44px; margin: -12px -14px -12px 0; background: none; border: 0; cursor: pointer; font-family: var(--mn-font-ui); font-weight: 600; font-size: 13px; color: var(--mn-sand); }
+.mh-slide { position: relative; margin-top: auto; padding: 0 24px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px; animation: mh-slidein .35s ease-out both; }
+@keyframes mh-slidein { from { opacity: 0; transform: translateY(10px) } }
+.mh-slidephoto .mn-avatar { box-shadow: var(--mn-slide-ring); }
+.mh-slidesfoot { position: relative; padding: 22px 20px 30px; display: flex; justify-content: space-between; }
+.mh-hint { min-height: 44px; min-width: 44px; margin: -12px 0; background: none; border: 0; cursor: pointer; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mh-hint[data-next] { color: var(--mn-sand); }
+.mh-hint:disabled { cursor: default; }

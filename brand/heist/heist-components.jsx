@@ -108,12 +108,13 @@ function MhBottomNav({ tab, onTab }) {
 // the cut at any width. The static design positions a rotated div by
 // measured pixels, which is right at 375 and wrong at every other phone.
 // cut = [right edge %, left edge %] of the bottom edge, top to bottom.
-function MhHeroCut({ height, src, pos, cut = [82, 96], gold, children, style }) {
+// fade names a --mn-fade-<name> token (session, live, recap); default is Home's.
+function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, style }) {
   const poly = `polygon(0 0,100% 0,100% ${cut[0]}%,0 ${cut[1]}%)`;
   return (
     <div className="mn-hero" data-gold={gold ? "" : undefined} style={{ height, ...style }}>
       <div className="mn-hero-img" style={{ clipPath: poly }}><MhArt src={src} pos={pos} /></div>
-      <div className="mn-hero-fade" style={{ clipPath: poly }} aria-hidden="true" />
+      <div className="mn-hero-fade" style={{ clipPath: poly, background: fade ? `var(--mn-fade-${fade})` : undefined }} aria-hidden="true" />
       <svg className="mn-keyline" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
         <line x1="0" y1={cut[1]} x2="100" y2={cut[0]} vectorEffect="non-scaling-stroke" />
       </svg>

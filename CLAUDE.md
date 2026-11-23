@@ -867,6 +867,20 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   entered on the existing number pad, restyled — the handoff's point-by-point
   "+1" screen is NOT a scoring change we make.
 - Session art and episode titles are placeholders until the owner sends real ones.
+- **Phase 3 (the night) is `brand/heist/heist-night.jsx`**: 07 Session (Teams /
+  Groups / Knockout / MVP), 08 Live Scoring, 09 Episode Recap, 10 Recap Slides.
+  - **Live Scoring's +1 is a GAME, not a point** — the fixture is first to 6 at
+    5-3 — so +1 / Undo / Lock produce exactly the final score the number pad
+    always recorded, and Lock hands `{t1, t2}` to the existing engine. No
+    scoring change. The live pill is the way back (the design has no other exit).
+  - **`ops/shots-heist.mjs` now checks the screen's OWN display text**, not
+    only a probe span: the probe loads the face on demand, and the first Live
+    shot went out in Arial with it green. It also waits for every face the page
+    asked for, and a sabotage run writes to `screens-sabotage/` — it used to
+    overwrite the real compares with fallback-face shots.
+  - `.mh-body` reserves 100px for the nav with `!important`; nav-less screens
+    carry `data-bare` or their footer floats 100px off the glass.
+  - `node ops/check-heist-night.mjs` drives the controls (21 checks).
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than
   copied over this file:**
   1. Re-read a screen's spec in `brand/heist/handoff/screens/` and look at its
