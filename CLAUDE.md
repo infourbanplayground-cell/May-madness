@@ -945,6 +945,30 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - 27 walk-ins exist only in the Americano app's `state.guests`; the sheet
     marks them, and the same-name flag shows which ones are probably a roster
     player already (see `ops/promote-guests.py`).
+- **THE PLAYER PHOTOS ARE MADE AT https://heist.urbanpadel.om/photos/** — the
+  first live piece of Heist: `heist-photos/index.html` (plain JS, no build) and
+  `heist-api/api.js` (systemd `heist-api`, **port 3012**, no database — photos
+  are files). Deploy with `bash ops/deploy-heist-photos.sh` (idempotent; the
+  .env is assembled on the server from National's PINs and never leaves it).
+  - The roster is READ LIVE from National (3011), Blackout (3009) and the
+    Americano app's guests (3007), so the page cannot drift from the apps.
+    "Playing now" = a team since 1 Oct or an UPRISING night.
+  - Flow: tap a player -> save their current photo -> ChatGPT with the STYLE
+    PROMPT on the page -> upload; the page cuts 4:5 at 1080x1350 in the
+    browser (with a slider for ChatGPT's 2:3) and the API refuses any other
+    size. Batch upload matches files by player name or id and refuses a name
+    two players share.
+  - Admin or photographer PIN to upload; 10 wrong PINs in 10 minutes locks the
+    IP out for the rest of them. Replaced/removed photos go to
+    `/opt/heist-api/history/`, every write is in `/opt/heist-api/uploads.log`.
+  - Stored at `/var/www/heist.urbanpadel.om/public/players/<id>.jpg`; the app
+    adapter should read `player.photo` from there and fall back to the volume
+    photo.
+  - **`[hidden]` needs `display:none!important`** on that page: `.btn` sets
+    `display`, which beats the attribute, and the upload button showed signed
+    out. Found by `node ops/check-heist-photos.mjs` (19 checks, local mocks).
+  - Deployed 23 Nov 16:04, before that night's National session; nothing
+    National runs was touched (own service, own vhost, graceful reload).
 - The on-screen face check also measures the crew card's own type: your own
   card has no `.mn-display` at all, and "nothing to measure" read as a fail.
 - **The handoff's build rules (its own CLAUDE.md), kept here rather than

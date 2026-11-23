@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F1B2B"><meta name="robots" content="noindex">
+<title>Heist photos</title>
+<link rel="stylesheet" href="/fonts/brand/fonts.css">
+<link rel="stylesheet" href="/fonts/heist/fonts.css">
+<style>
+/* Muscat Heist tokens (brand/heist/handoff/tokens) */
+:root{--navy:#0F1B2B;--navy2:#13202F;--sand:#FFF4E8;--mist:#B9C6D3;--dim:#7F8EA0;--coral:#F26B5B;--coral2:#F59A62;
+--peach:#FFC9A3;--teal:#2FB7B0;--gold:#FFD08A;--line:rgba(255,244,232,.12);--glass:rgba(19,32,47,.78);
+--disp:'Archivo',Impact,sans-serif;--ui:'Manrope',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;--serif:'Fraunces',Georgia,serif}
+*{box-sizing:border-box}
+/* a class that sets display beats the hidden attribute: the upload button showed signed out */
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--navy);color:var(--sand);font:14px/1.45 var(--ui);-webkit-font-smoothing:antialiased}
+main{max-width:1180px;margin:0 auto;padding:28px 16px 80px}
+.d{font-family:var(--disp);font-variation-settings:'wdth' 66;font-weight:900;text-transform:uppercase;line-height:.9}
+.l{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+.s{font-family:var(--serif);font-style:italic;color:var(--mist)}
+h1{margin:0;font-size:44px}.band{display:inline-block;background:linear-gradient(90deg,var(--coral),#F5895E);color:var(--navy);padding:2px 12px;transform:skewX(-10deg);margin-left:6px}
+.band>span{display:inline-block;transform:skewX(10deg);letter-spacing:.2em}
+.intro{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin:18px 0}
+@media(max-width:760px){.intro{grid-template-columns:1fr}}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+ol{margin:6px 0 0;padding-left:20px}li{margin:4px 0}
+.prompt{white-space:pre-wrap;font:12px/1.5 var(--mono);color:var(--sand);background:rgba(0,0,0,.25);border-radius:10px;padding:10px;max-height:190px;overflow:auto;margin:8px 0}
+button,.btn{font:700 14px var(--ui);min-height:44px;padding:0 16px;border-radius:14px;border:1.5px solid rgba(255,244,232,.35);background:none;color:var(--sand);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.pri{background:linear-gradient(135deg,var(--coral),var(--coral2));color:var(--navy);border:0;font-family:var(--disp);font-variation-settings:'wdth' 66;font-weight:900;font-size:16px;letter-spacing:.06em;text-transform:uppercase}
+button:disabled{opacity:.45;cursor:default}button:focus-visible,input:focus-visible{outline:2px solid var(--peach);outline-offset:2px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.pill{min-height:44px;border-radius:999px;font-weight:600;font-size:13px;padding:0 14px;border:1px solid rgba(255,244,232,.25);color:var(--mist)}
+.pill[aria-pressed=true]{background:var(--sand);color:var(--navy);border-color:var(--sand)}
+input[type=search],input[type=password]{min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--navy2);color:var(--sand);padding:0 12px;font:14px var(--ui)}
+.k{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px}.k b{font-family:var(--disp);font-variation-settings:'wdth' 66;font-size:26px;display:block}
+.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.card{background:var(--navy2);border:1px solid var(--line);border-radius:14px;overflow:hidden;padding:0;text-align:left;display:block;min-height:0;font-weight:400}
+.card .ph{position:relative;aspect-ratio:4/5;background:#1B2A3C;display:grid;place-items:center}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%}
+.ini{font-family:var(--disp);font-variation-settings:'wdth' 66;font-weight:900;font-size:40px;color:var(--dim)}
+.tag{position:absolute;left:8px;top:8px;padding:2px 7px;border-radius:6px;background:rgba(15,27,43,.8);font:700 11px var(--mono);letter-spacing:.1em}
+.t-done{color:var(--teal)}.t-ref{color:var(--gold)}.t-none{color:var(--coral)}
+.card .cap{padding:8px 10px 10px}.card b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card small{color:var(--mist);font-size:12px}
+dialog{border:0;padding:0;background:var(--navy2);color:var(--sand);border-radius:18px;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 24px)}
+dialog::backdrop{background:rgba(5,10,18,.75)}
+.sheet{padding:18px;display:grid;gap:12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pair figure{margin:0}.pair .box{aspect-ratio:4/5;border-radius:12px;overflow:hidden;background:#1B2A3C;display:grid;place-items:center;position:relative}
+.pair img,.pair canvas{width:100%;height:100%;object-fit:cover;object-position:center 20%;display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input[type=range]{width:100%;accent-color:var(--coral)}
+.msg{font-size:13px}.ok{color:var(--teal)}.err{color:var(--coral)}
+.log{font:12px/1.6 var(--mono);color:var(--mist);max-height:220px;overflow:auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body><main>
+<div class="l">Urban Playground · Vol.10 · Dec 2026</div>
+<h1 class="d">Muscat <span class="band"><span>Heist</span></span> photos</h1>
+<div class="k" id="kpi" aria-live="polite"></div>
+
+<div class="intro">
+  <section class="glass">
+    <div class="l" style="color:var(--peach)">How it works</div>
+    <ol>
+      <li>Tap a player. <b>Save their current photo</b> (the one the apps hold today).</li>
+      <li>In ChatGPT: attach that photo and paste the <b>style prompt</b>. Several at once is fine: one message per player keeps their faces apart.</li>
+      <li>Save what ChatGPT makes, back here tap <b>Upload Heist photo</b>, slide the crop if the head is cut, and save. It is cut to 4:5, 1080×1350, the size every Heist card, avatar and story uses.</li>
+      <li>Many at once: name each file after the player (<span class="s">Munther Rahbi.png</span>) and use <b>Upload a batch</b>. A name two players share is refused; use the id shown on their card instead.</li>
+    </ol>
+    <p class="s" style="margin:8px 0 0">No current photo? ChatGPT needs one to keep the likeness: take one on the night, or ask the player for a selfie.</p>
+  </section>
+  <section class="glass">
+    <div class="row" style="justify-content:space-between;align-items:center"><div class="l" style="color:var(--peach)">The style prompt</div>
+      <button type="button" id="copyStyle">Copy prompt</button></div>
+    <div class="prompt" id="style"></div>
+  </section>
+</div>
+
+<div class="bar" id="auth"></div>
+<div class="bar">
+  <div class="row" role="group" aria-label="Show">
+    <button type="button" class="pill" data-f="now" aria-pressed="true">Playing now</button>
+    <button type="button" class="pill" data-f="need" aria-pressed="false">Still to do</button>
+    <button type="button" class="pill" data-f="done" aria-pressed="false">Done</button>
+    <button type="button" class="pill" data-f="all" aria-pressed="false">Everyone</button>
+  </div>
+  <label class="sr" for="q">Search players</label><input type="search" id="q" placeholder="Search a name" style="flex:1;min-width:180px">
+  <label class="btn" id="batchBtn" hidden>Upload a batch<input type="file" id="batch" accept="image/*" multiple hidden></label>
+</div>
+<div class="log" id="batchLog" aria-live="polite"></div>
+<div class="g" id="grid" aria-live="polite"></div>
+</main>
+
+<dialog id="dlg" aria-labelledby="dlgName"><div class="sheet">
+  <div class="row" style="justify-content:space-between;align-items:flex-start;flex-wrap:nowrap">
+    <div style="min-width:0"><h2 class="d" id="dlgName" style="margin:0;font-size:30px"></h2><div class="l" id="dlgMeta" style="overflow-wrap:anywhere"></div></div>
+    <button type="button" id="close" aria-label="Close">✕</button>
+  </div>
+  <div class="pair">
+    <figure><div class="box" id="refBox"></div><figcaption class="l" style="margin-top:6px">Current photo</figcaption></figure>
+    <figure><div class="box" id="newBox"></div><figcaption class="l" style="margin-top:6px" id="newCap">Heist photo</figcaption></figure>
+  </div>
+  <div id="cropRow" hidden><label class="l" for="crop">Move the crop up or down</label><input type="range" id="crop" min="0" max="100" value="35"></div>
+  <div class="row">
+    <a class="btn" id="saveRef" download>Save current photo</a>
+    <button type="button" id="copyP">Copy prompt</button>
+  </div>
+  <div class="row">
+    <label class="btn" id="pick">Upload Heist photo<input type="file" id="file" accept="image/*" hidden></label>
+    <button type="button" class="pri" id="save" hidden>Save</button>
+    <button type="button" id="remove" hidden>Remove Heist photo</button>
+  </div>
+  <div class="msg" id="dlgMsg" aria-live="polite"></div>
+</div></dialog>
+
+<script>
+"use strict";
+// The style is one prompt for everybody, so the cards come out as ONE SET:
+// the same light, the same place, the same framing. Tuned to the handoff's
+// own paintings — coral dusk on one side, teal floodlight on the other.
+const STYLE = `Turn the person in the attached photo into a portrait for MUSCAT HEIST, a padel league in Muscat, Oman.
+
+Likeness first: keep their face, skin tone, hair, beard and build exactly. Do not make them younger, slimmer or more handsome.
+
+Style: a cinematic painted illustration, like a heist-film poster. Realistic proportions, soft painterly brushwork, rich detail.
+Setting: an outdoor padel court in Muscat at dusk, floodlights on, the Hajar mountains and a coral sunset behind them, softly out of focus.
+Light: warm coral and peach sunset light from one side, cool teal floodlight from the other, deep navy shadows.
+Pose: standing, three-quarter view, confident, holding a padel racket at their side or over the shoulder. Framed from the waist up, with the head in the upper third and a little space above it.
+Clothing: a plain dark athletic t-shirt, no brand logos.
+
+Format: vertical 4:5. One person only. No text, letters, numbers, logos, watermark or border.`;
+const W = 1080, H = 1350;
+const $ = s => document.querySelector(s);
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+let token = store.get("heist-token"), players = [], filter = "now", current = null, staged = null, stagedImg = null;
+$("#style").textContent = STYLE;
+
+const copy = async (t, btn) => {
+  try { await navigator.clipboard.writeText(t); } catch (e) {
+    const a = document.createElement("textarea"); a.value = t; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove();
+  }
+  const was = btn.textContent; btn.textContent = "Copied ✓"; setTimeout(() => btn.textContent = was, 1400);
+};
+$("#copyStyle").onclick = e => copy(STYLE, e.currentTarget);
+$("#copyP").onclick = e => copy(STYLE, e.currentTarget);
+
+// ── sign in ──────────────────────────────────────────────────────────────
+function tokenLive(t) { const exp = +(t || "").split(".")[1]; return exp && exp > Date.now() / 1000; }
+function drawAuth() {
+  const a = $("#auth");
+  if (tokenLive(token)) {
+    a.innerHTML = `<span class="l" style="color:var(--teal)">Signed in · you can upload</span><button type="button" id="out">Sign out</button>`;
+    $("#out").onclick = () => { token = null; store.set("heist-token", null); drawAuth(); };
+    $("#batchBtn").hidden = false;
+  } else {
+    a.innerHTML = `<label class="l" for="pin">Organiser PIN</label><input type="password" id="pin" inputmode="numeric" autocomplete="off" style="width:140px">
+      <button type="button" id="in">Sign in to upload</button><span class="msg err" id="inMsg"></span>`;
+    $("#in").onclick = login; $("#pin").onkeydown = e => { if (e.key === "Enter") login(); };
+    $("#batchBtn").hidden = true;
+  }
+}
+async function login() {
+  const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: $("#pin").value }) });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok) { $("#inMsg").textContent = j.error || "could not sign in"; return; }
+  token = j.token; store.set("heist-token", token); drawAuth(); if (current) open(current.id);
+}
+
+// ── the roster ───────────────────────────────────────────────────────────
+async function load() {
+  const r = await fetch("/api/roster"); const j = await r.json();
+  players = j.players || []; draw();
+}
+const ini = n => (n || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+function draw() {
+  const now = players.filter(p => p.now), q = $("#q").value.trim().toLowerCase();
+  $("#kpi").innerHTML = `<span><b>${now.length}</b><span class="l">playing now</span></span>
+    <span><b>${now.filter(p => p.heist).length}</b><span class="l">Heist photo done</span></span>
+    <span><b>${now.filter(p => !p.heist && p.ref).length}</b><span class="l">to do · have a photo</span></span>
+    <span><b>${now.filter(p => !p.heist && !p.ref).length}</b><span class="l">to do · need a photo first</span></span>`;
+  let list = q ? players.filter(p => p.name.toLowerCase().includes(q) || p.id.includes(q))
+    : filter === "now" ? now : filter === "need" ? now.filter(p => !p.heist) : filter === "done" ? players.filter(p => p.heist) : players;
+  $("#grid").innerHTML = list.length ? list.map(p => {
+    const img = p.heist || (p.ref ? `/api/ref/${p.id}` : null);
+    const tag = p.heist ? ["HEIST ✓", "t-done"] : p.ref ? ["TO DO", "t-ref"] : ["NO PHOTO", "t-none"];
+    return `<button type="button" class="card" data-id="${p.id}"><div class="ph">${img ? `<img src="${img}" alt="" loading="lazy">` : `<span class="ini">${esc(ini(p.name))}</span>`}
+      <span class="tag ${tag[1]}">${tag[0]}</span></div><div class="cap"><b>${esc(p.name)}</b>
+      <small>${p.nights} nights since Oct${p.uprising ? ` · ${p.uprising} uprising` : ""}${p.sameName ? " · same name as another" : ""}${p.walkIn ? " · walk-in" : ""}</small></div></button>`;
+  }).join("") : `<p class="s">Nobody here.</p>`;
+}
+document.querySelectorAll(".pill").forEach(b => b.onclick = () => {
+  filter = b.dataset.f; document.querySelectorAll(".pill").forEach(x => x.setAttribute("aria-pressed", x === b)); draw();
+});
+$("#q").oninput = draw;
+$("#grid").onclick = e => { const c = e.target.closest(".card"); if (c) open(c.dataset.id); };
+
+// ── one player ───────────────────────────────────────────────────────────
+function open(id) {
+  current = players.find(p => p.id === id); staged = null; stagedImg = null;
+  const p = current;
+  $("#dlgName").textContent = p.name;
+  $("#dlgMeta").textContent = `${p.nights} nights since Oct · ${p.uprising} uprising · id ${p.id}`;
+  $("#refBox").innerHTML = p.ref ? `<img src="/api/ref/${p.id}" alt="${esc(p.name)}, current photo">` : `<span class="ini">${esc(ini(p.name))}</span>`;
+  $("#newBox").innerHTML = p.heist ? `<img src="${p.heist}" alt="${esc(p.name)}, Heist photo">` : `<span class="s">not made yet</span>`;
+  $("#newCap").textContent = "Heist photo";
+  const a = $("#saveRef"); a.hidden = !p.ref; a.href = `/api/ref/${p.id}`; a.download = `${p.name}.jpg`;
+  const can = tokenLive(token);
+  $("#pick").hidden = !can; $("#remove").hidden = !(can && p.heist); $("#save").hidden = true; $("#cropRow").hidden = true;
+  $("#dlgMsg").className = "msg"; $("#dlgMsg").textContent = can ? "" : "Sign in with the organiser PIN to upload.";
+  $("#dlg").showModal();
+}
+$("#close").onclick = () => $("#dlg").close();
+$("#dlg").addEventListener("close", () => { current = null; });   // or signing in reopens whoever was last closed
+
+// 4:5 at 1080x1350: a wide picture keeps its middle, a tall one keeps the
+// part the slider says (default a little above centre, where a head is).
+function cut(img, pos) {
+  const c = document.createElement("canvas"); c.width = W; c.height = H;
+  const x = c.getContext("2d"); x.imageSmoothingQuality = "high";
+  const r = Math.max(W / img.naturalWidth, H / img.naturalHeight);
+  const w = img.naturalWidth * r, h = img.naturalHeight * r;
+  x.drawImage(img, (W - w) / 2, (H - h) * pos, w, h);
+  return c;
+}
+const readImg = f => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("not an image")); i.src = URL.createObjectURL(f); });
+$("#file").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { stagedImg = await readImg(f); } catch (err) { $("#dlgMsg").className = "msg err"; $("#dlgMsg").textContent = "That file is not an image this browser can read (save it as JPG or PNG)."; return; }
+  const tall = stagedImg.naturalHeight / stagedImg.naturalWidth > H / W + .01;
+  $("#cropRow").hidden = !tall; $("#crop").value = 35; preview();
+  $("#save").hidden = false; $("#newCap").textContent = "Heist photo · preview, not saved";
+  const small = Math.min(stagedImg.naturalWidth / W, stagedImg.naturalHeight / H) < .6;
+  $("#dlgMsg").className = "msg" + (small ? " err" : "");
+  $("#dlgMsg").textContent = small ? `This is only ${stagedImg.naturalWidth}×${stagedImg.naturalHeight} — it will look soft on the card.` : "Check the head is not cut, then Save.";
+};
+function preview() { staged = cut(stagedImg, $("#crop").value / 100); $("#newBox").innerHTML = ""; $("#newBox").appendChild(staged); }
+$("#crop").oninput = preview;
+async function upload(id, canvas) {
+  const r = await fetch(`/api/photo/${id}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ image: canvas.toDataURL("image/jpeg", .88) }) });
+  const j = await r.json().catch(() => ({ error: "server error " + r.status }));
+  if (r.status === 401) { token = null; store.set("heist-token", null); drawAuth(); }
+  if (!j.ok) throw new Error(j.error || "upload failed");
+  return j;
+}
+$("#save").onclick = async () => {
+  $("#save").disabled = true; $("#dlgMsg").className = "msg"; $("#dlgMsg").textContent = "Saving…";
+  try {
+    const j = await upload(current.id, staged);
+    current.heist = j.url; $("#dlgMsg").className = "msg ok"; $("#dlgMsg").textContent = "Saved ✓";
+    $("#save").hidden = true; $("#cropRow").hidden = true; $("#remove").hidden = false; $("#newCap").textContent = "Heist photo"; draw();
+  } catch (err) { $("#dlgMsg").className = "msg err"; $("#dlgMsg").textContent = err.message; }
+  $("#save").disabled = false;
+};
+$("#remove").onclick = async () => {
+  if (!confirm(`Remove ${current.name}'s Heist photo? A copy is kept on the server.`)) return;
+  const r = await fetch(`/api/photo/${current.id}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } });
+  if (r.ok) { current.heist = null; open(current.id); draw(); }
+};
+
+// ── a batch, matched by file name ───────────────────────────────────────
+const fold = s => (s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/\b(al|el)[\s-]+/g, "al").replace(/[^a-z0-9]+/g, "");
+$("#batch").onchange = async e => {
+  const files = [...e.target.files]; e.target.value = "";
+  const log = $("#batchLog"); log.innerHTML = "";
+  const line = (t, c) => { const d = document.createElement("div"); d.className = c || ""; d.textContent = t; log.appendChild(d); };
+  for (const f of files) {
+    const stem = f.name.replace(/\.[^.]+$/, "");
+    const hit = players.filter(p => p.id === stem);
+    const by = hit.length ? hit : players.filter(p => fold(p.name) && fold(p.name) === fold(stem));
+    if (by.length !== 1) { line(`✕ ${f.name}: ${by.length ? `matches ${by.length} players — rename it to the id (${by.map(p => p.id).join(", ")})` : "no player with that name"}`, "err"); continue; }
+    try {
+      const img = await readImg(f); const j = await upload(by[0].id, cut(img, .35));
+      by[0].heist = j.url; line(`✓ ${f.name} → ${by[0].name}`, "ok");
+    } catch (err) { line(`✕ ${f.name}: ${err.message}`, "err"); }
+  }
+  draw();
+};
+
+drawAuth(); load().catch(() => { $("#grid").innerHTML = `<p class="s">The roster could not be loaded. Try again in a minute.</p>`; });
+</script>
+</body></html>
