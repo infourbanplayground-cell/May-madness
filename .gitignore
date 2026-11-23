@@ -4,3 +4,15 @@ __pycache__/
 
 # heist portrait runs: player likenesses, progress and review sheets stay local
 brand/heist/portraits/
+# sharp and its native binaries (16MB) come from npm install, not the repo
+node_modules/.bin/semver
+node_modules/@img/
+node_modules/sharp/
+node_modules/color/
+node_modules/color-convert/
+node_modules/color-name/
+node_modules/color-string/
+node_modules/detect-libc/
+node_modules/is-arrayish/
+node_modules/semver/
+node_modules/simple-swizzle/

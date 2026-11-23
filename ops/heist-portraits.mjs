@@ -27,6 +27,7 @@
 // so a re-run never regenerates an image it already paid for. Existing portraits
 // are never replaced without --force.
 //
+// Needs `npm install` once (sharp is not committed: 16MB of native binaries).
 // env: OPENAI_API_KEY, HEIST_PIN (never printed). Optional: HEIST_IMAGE_MODEL
 // (default gpt-image-1), HEIST_IMAGE_QUALITY (default high), HEIST_OUT.
 import fs from 'fs';
