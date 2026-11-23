@@ -104,7 +104,10 @@ function heistData(state, o) {
     const heist = (o.portraits || {})[r.id];
     return { id: r.id, name: p.name || "?", points: r.pts, rank: i + 1, movement: mv, nights: r.played,
       repId: rep && rep.id, stats: mhCardStats(r.id, sessions),
-      photo: heist || p.photo || p.photoUrl || null, pos: heist ? "center 20%" : "center 25%" };
+      photo: heist || p.photo || p.photoUrl || null, // A Heist portrait is made with the face in the top third, so the card shows its
+      // TOP edge: at 20% the face rose into the corners and the tier tag and rank
+      // sat on foreheads (owner, 24 Nov: "the badge covers the photos").
+      pos: heist ? "center 0%" : "center 25%" };
   });
 
   const ep = n => (S.episodes || [])[n - 1] || { code: "EP." + String(n).padStart(2, "0"), title: "", art: "" };

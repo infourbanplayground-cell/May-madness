@@ -902,6 +902,22 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     replaces it with the poster (same day rotation as MhLoading), the lockup's
     own classes and the spinner, so React takes over on the identical picture.
     It keeps `id="splash"` because the inherited loader removes it by id.
+- **CLIPS, as National has them (24 Nov).** A night page carries a `▶ Clips · n`
+  action (shown once the night is not upcoming, or as soon as it has a clip)
+  that swaps the tabs for the night's SaveMyPlay clips; HOME shows the latest
+  night's clips as a strip for a week, under the live/next card. The engine is
+  National's, inherited with the page — `useNaClips` (polls every 60s while the
+  night is live), `naClipsForNight`, `naClipNight` (Muscat time, before 04:00
+  is the night before) — and the Heist screens are `MhClips`/`MhHomeClips`/
+  `MhClipViewer` in heist-night.jsx, guarded with `typeof` so the preview pages
+  without the engine still render. The player is PORTALLED to `<body>`: inside
+  the page it inherited the entrance animation, whose transform made it
+  see-through and fixed to the column. `check-heist-app.mjs` mocks the
+  SaveMyPlay feed and drives the button, the grid, the player and the strip.
+- **Card photos show a Heist portrait's TOP edge** (`pos: center 0%`): at 20%
+  the face rose into the corners and the tier tag and rank sat on foreheads.
+  A short dark wash under the tags keeps them readable. `PORTRAITS=<dir>` on
+  `check-heist-app.mjs` serves real portraits so this can be looked at.
 - **Mobile + motion (23 Nov):** every scene ships as WebP at 480/1200/1600 beside
   the JPEG (`MhArt` writes the srcset for `assets/art/*.jpg`; the JPEG is the
   fallback) — a 390px phone at 2x fetches `-1200.webp`, ~45% lighter, and

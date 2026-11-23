@@ -38,6 +38,7 @@ const SCEN = { mid, launch };
 
 const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json' };
 let scenario = 'mid'; const saves = [];
+const PORTRAITS = process.env.PORTRAITS || '';
 const map = [['/assets/fonts/brand/', 'brand/fonts/'], ['/assets/fonts/heist/', 'brand/heist/fonts/'], ['/assets/art/', 'brand/heist/art/'],
              ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/history.json', 'brand/national/history.json']];
 const srv = http.createServer((q, r) => {
@@ -48,7 +49,9 @@ const srv = http.createServer((q, r) => {
   if (u === '/state') return json({ ok: true, state: SCEN[scenario], version: 1 });
   if (u === '/photos') return json(PHOTOS);
   if (u === '/session-photos') return json({ ok: true, photos: {} });
-  if (u === '/api/roster') return json({ ok: true, players: [] });
+  // PORTRAITS=<dir of <id>.jpg>: serve real Heist portraits, as the photos API does
+  if (u === '/api/roster') return json({ ok: true, players: PORTRAITS ? fs.readdirSync(PORTRAITS).filter(f => f.endsWith('.jpg')).map(f => ({ id: f.slice(0, -4), heist: '/players/' + f })) : [] });
+  if (PORTRAITS && u.startsWith('/players/')) { const f = path.join(PORTRAITS, path.basename(u)); if (fs.existsSync(f)) { r.writeHead(200, { 'Content-Type': 'image/jpeg' }); return r.end(fs.readFileSync(f)); } }
   if (u === '/save') { let b = ''; q.on('data', c => b += c); q.on('end', () => { saves.push(JSON.parse(b)); json({ ok: true, version: 2 }); }); return; }
   for (const [a, b] of map) if (u.startsWith(a)) {
     const f = path.join(ROOT, b + u.slice(a.length));
@@ -82,6 +85,16 @@ async function page(scen, me, admin) {
   });
   await pg.route('**/cdn.tailwindcss.com/**', r => r.fulfill({ status: 200, contentType: 'application/javascript', body: '' }));
   await pg.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, contentType: 'text/css', body: '' }));
+  // SaveMyPlay is unreachable from here: two clips on night 5 (19:00 and 19:20
+  // Muscat) and one yesterday evening, which is what puts a strip on Home
+  await pg.route('**/api.savemyplay.com/**', r => {
+    const night5 = (JSON.parse(fs.readFileSync(path.join(ROOT, 'heist-season.json'))).nights)[4];
+    const at = (iso, h, m) => Math.floor(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10), h - 4, m) / 1000);
+    const y = new Date(Date.now() - 86400e3), yIso = y.getFullYear() + '-' + String(y.getMonth() + 1).padStart(2, '0') + '-' + String(y.getDate()).padStart(2, '0');
+    const clip = (id, t) => ({ id, start_time: t, video: ORIGIN + '/clip.mp4', thumb: ORIGIN + '/assets/art/art-ep01-lounge-480.webp', court: { name: 'Court ' + (id % 3 + 1) }, rel_url: '/h/' + id });
+    r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify({ clips: [clip(1, at(night5, 19, 0)), clip(2, at(night5, 19, 20)), clip(3, at(yIso, 20, 5))] }) });
+  });
   await pg.goto(ORIGIN + '/#home', { waitUntil: 'load' });
   await pg.waitForSelector('.mh-page, .mh-slides, .mh-loading', { timeout: 40000 });
   await pg.evaluate(() => Promise.all(["900 40px Archivo", "600 40px Manrope", "italic 40px Fraunces"].map(f => document.fonts.load(f).catch(() => 0))));
@@ -127,6 +140,25 @@ for (const scen of (process.env.ONLY ? [process.env.ONLY] : ['mid', 'launch'])) 
     if (process.env.SHOTS) await p2.screenshot({ path: path.join(OUT, `${scen}-${r.replace(/\//g, '_')}.png`) });
   }
   ok(!e2.length, `${scen}: page errors: ${e2.slice(0, 2).join(' | ')}`);
+  // ── clips: a night's CLIPS button, its grid, the player, and the Home strip
+  if (scen === 'mid') {
+    await look(p2, 'session/5'); await p2.waitForTimeout(600);
+    const btn = p2.locator('.mh-act', { hasText: 'Clips' });
+    ok(await btn.count() === 1 && /Clips · 2/.test(await btn.innerText()), `mid #session/5: no "Clips · 2" button`);
+    if (await btn.count()) await btn.click();
+    ok(await p2.locator('.mh-clipgrid .mh-clip img').count() === 2, 'mid #session/5: the clips grid does not show the night\'s 2 clips');
+    if (await p2.locator('.mh-clipgrid .mh-clip').count()) {
+      await p2.locator('.mh-clipgrid .mh-clip').first().click();
+      ok(await p2.locator('.mh-clipview video').count() === 1, 'mid: tapping a clip does not open the player');
+      if (process.env.SHOTS) await p2.screenshot({ path: path.join(OUT, 'mid-clip-player.png') });
+      await p2.locator('.mh-clipx').click();
+      ok(await p2.locator('.mh-clipview').count() === 0, 'mid: the clip player does not close');
+      if (process.env.SHOTS) await p2.screenshot({ path: path.join(OUT, 'mid-session-clips.png') });
+    }
+    await look(p2, 'home'); await p2.waitForTimeout(600);
+    ok(await p2.locator('.mh-cliprow .mh-clip').count() >= 1, 'mid #home: no "Latest clips" strip');  // the mock's night 5 is in December, so it counts as newest
+    if (process.env.SHOTS) await p2.screenshot({ path: path.join(OUT, 'mid-home-clips.png') });
+  }
   // ── scenes: the loading screen must actually change picture, and no two
   // pages may open on the same one (the owner: "I don't wanna see the same
   // picture in each page")

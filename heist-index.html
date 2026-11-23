@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "e20b3e24d5e2";
+  var V = "1dc3a34cc749";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1515,6 +1515,34 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 @keyframes mhBlink { 50% { opacity: .35; } }
 .mh-loadbar { position: absolute; left: 0; right: 0; bottom: 0; }
 .mh-loadbar > [role="progressbar"] { height: 4px; background: rgba(255,255,255,.12); }
+
+/* the tier tag and the rank sit over the photo: a short dark wash at the top keeps
+   them readable over a bright sky without covering the face (24 Nov) */
+.mn-card .mn-card-img::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26%; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,16,26,.55), rgba(10,16,26,0)); }
+.mn-card .mn-tiertag, .mn-card .mn-rank { z-index: 2; }
+
+/* ── clips ───────────────────────────────────────────────────────────────── */
+.mh-act[data-on] { background: var(--mn-sand); color: var(--mn-navy); }
+.mh-clipgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mh-cliprow { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 0 20px 2px; }
+.mh-cliprow::-webkit-scrollbar { display: none; }
+.mh-clip { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,.06); cursor: pointer; }
+.mh-clip[data-wide] { flex: 0 0 210px; width: 210px; }
+.mh-clip[data-skel] { animation: mhFade 1.2s ease-in-out infinite alternate; }
+.mh-clip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mh-clipplay { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; padding-left: 3px; font-size: 13px; color: var(--mn-navy); background: rgba(255,240,225,.9); }
+.mh-clipcap { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 5px; text-align: left; font: 500 11px/1.2 var(--mn-font-mono); letter-spacing: .06em; color: var(--mn-sand); background: linear-gradient(180deg, rgba(10,16,26,0), rgba(10,16,26,.85)); }
+.mh-clipview { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: calc(14px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom)); background: rgba(6,10,18,.96); }
+.mh-clipview video { display: block; width: 100%; max-height: 62vh; background: #000; border-radius: 12px; }
+.mh-clipbar { display: flex; align-items: center; gap: 10px; }
+.mh-clipbar > :first-child { flex: 1; }
+.mh-clipn { font: 500 11px var(--mn-font-mono); color: var(--mn-mist); }
+.mh-clipx { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: var(--mn-sand); font-size: 16px; cursor: pointer; }
+.mh-clipnav { display: flex; gap: 8px; justify-content: center; }
+.mh-clipnav .mh-act[disabled] { opacity: .35; }
+.mh-cliplink { align-self: center; font: italic 14px var(--mn-font-serif); color: var(--mn-mist); text-decoration: underline; padding: 10px 0; }
+.mh-linkbtn { border: 0; background: none; color: var(--mn-peach); font: 500 12px var(--mn-font-mono); letter-spacing: .08em; min-height: 44px; cursor: pointer; }
 
 </style>
 <style id="heist-classic">
@@ -8118,6 +8146,7 @@ function MhHome({ D, go }) {
             </div>
           </button>
         ) : null}
+        {typeof MhHomeClips === "function" && <MhHomeClips D={D} go={go} />}
         {D.preseason ? (
           <MhGlass>
             <MhLabel tone="peach">The table</MhLabel>
@@ -8501,6 +8530,8 @@ function MhSession({ D, go, no, canScore }) {
   const live = s.state === "live";
   const stateLabel = live ? `● Live · ${mhDay(s.date)}` : s.state === "done" ? `Played · ${mhDay(s.date)}` : `${mhDay(s.date)} · ${s.time}`;
   const hasTeams = (N.teams || []).length > 0;
+  const clipSt = mhUseClips()(s.state === "live");
+  const clips = mhClipsFor(clipSt, s.date);
   return (
     <div className="mh-page">
       <main className="mh-body" data-bare="" style={{ padding: 0 }}>
@@ -8513,8 +8544,10 @@ function MhSession({ D, go, no, canScore }) {
               <span aria-hidden="true">↗</span> Posts</button>}
             {s.state === "done" && <button type="button" className="mh-act" onClick={() => go("recap", s.no)}><span aria-hidden="true">★</span> Recap</button>}
             {canScore && s.sid && <button type="button" className="mh-act" data-org="" onClick={() => go("results", s.no)}><span aria-hidden="true">⚙</span> Organiser</button>}
+            {(clips.length > 0 || s.state !== "soon") && <button type="button" className="mh-act" data-on={tab === "clips" ? "" : undefined}
+              onClick={() => setTab(tab === "clips" ? (hasTeams ? "teams" : "") : "clips")}><span aria-hidden="true">▶</span> Clips{clips.length ? ` · ${clips.length}` : ""}</button>}
           </div>
-          {hasTeams ? <>
+          {tab === "clips" ? <MhClips st={clipSt} list={clips} /> : hasTeams ? <>
             <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
             {tab === "groups" && <>
               {groups.length > 0 && <MhPills label="Group" items={groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x])} value={g} onChange={setG} />}
@@ -8889,6 +8922,93 @@ function MhSlides({ D, go, no, start = 0 }) {
         <button type="button" className="mh-hint" onClick={e => { e.stopPropagation(); prev(); }} disabled={i === 0}>{i > 0 ? `‹ ${slides[i - 1].key}` : ""}</button>
         <button type="button" className="mh-hint" data-next="" onClick={e => { e.stopPropagation(); next(); }} disabled={i === slides.length - 1}>{i < slides.length - 1 ? `${slides[i + 1].key} ›` : ""}</button>
       </div>
+    </div>
+  );
+}
+
+
+// ── CLIPS (SaveMyPlay), as National has them ────────────────────────────────
+// A player presses the button on court after a point and the last 25 seconds
+// land on the club's SaveMyPlay page a few minutes later. The fetching, the
+// night a clip belongs to (Muscat time, anything before 04:00 is the night
+// before) and the polling are National's own (useNaClips, naClipsForNight),
+// inherited with the page; these are the Heist screens over them. Nothing is
+// copied to our server: the video plays from SaveMyPlay and links back there.
+const mhNoClips = () => ({ clips: [], err: false });
+function mhUseClips() { return typeof useNaClips === "function" ? useNaClips : mhNoClips; }
+function mhClipsFor(st, date) { return typeof naClipsForNight === "function" ? naClipsForNight(st.clips, date) : []; }
+const mhClipLine = c => (typeof naClipCourt === "function" ? naClipCourt(c) : "Court") + " · " + (typeof naClipWhen === "function" ? naClipWhen(c) : "");
+
+function MhClipThumb({ c, onPick, wide }) {
+  return (
+    <button type="button" className="mh-clip" data-wide={wide ? "" : undefined} onClick={onPick} aria-label={"Play clip, " + mhClipLine(c)}>
+      <img src={c.thumb} alt="" loading="lazy" decoding="async" />
+      <span className="mh-clipplay" aria-hidden="true">▶</span>
+      <span className="mh-clipcap">{mhClipLine(c)}</span>
+    </button>
+  );
+}
+function MhClipViewer({ list, at, onAt, onClose }) {
+  const c = list[at];
+  React.useEffect(() => {
+    const k = e => { if (e.key === "Escape") onClose(); };
+    addEventListener("keydown", k); return () => removeEventListener("keydown", k);
+  }, []);
+  if (!c) return null;
+  const page = typeof naClipPage === "function" ? naClipPage(c) : (typeof NA_HIGHLIGHTS_URL !== "undefined" ? NA_HIGHLIGHTS_URL : "#");
+  // portalled to <body>: inside the page it inherited the screen's entrance
+  // animation, whose transform turns position:fixed into "fixed to the column"
+  const ui = (
+    <div className="mh-clipview" role="dialog" aria-modal="true" aria-label="Clip">
+      <div className="mh-clipbar">
+        <MhLabel tone="sand">{mhClipLine(c)}</MhLabel>
+        <span className="mh-clipn">{at + 1} / {list.length}</span>
+        <button type="button" className="mh-clipx" onClick={onClose} aria-label="Close">✕</button>
+      </div>
+      <video key={c.id} src={c.video} poster={c.poster || c.thumb} controls playsInline autoPlay preload="metadata" />
+      <div className="mh-clipnav">
+        <button type="button" className="mh-act" disabled={at === 0} onClick={() => onAt(at - 1)}>← Earlier</button>
+        <a className="mh-act" href={c.video} download target="_blank" rel="noopener noreferrer">⤓ Save</a>
+        <button type="button" className="mh-act" disabled={at === list.length - 1} onClick={() => onAt(at + 1)}>Later →</button>
+      </div>
+      <a className="mh-cliplink" href={page} target="_blank" rel="noopener noreferrer">Open on SaveMyPlay ↗</a>
+    </div>
+  );
+  return ReactDOM.createPortal(ui, document.body);
+}
+function MhClips({ st, list }) {
+  const [at, setAt] = React.useState(null);
+  const all = typeof NA_HIGHLIGHTS_URL !== "undefined" ? NA_HIGHLIGHTS_URL : null;
+  return (
+    <div className="mh-col" style={{ gap: 10 }}>
+      <div className="mh-split"><MhDisplay size={22}>From the courts</MhDisplay>
+        {list.length > 0 && <MhLabel>{list.length} clip{list.length === 1 ? "" : "s"}</MhLabel>}</div>
+      <MhSerif size={14} tone="mist">Press the SaveMyPlay button on court after a point and the last 25 seconds land here a few minutes later.</MhSerif>
+      {st.clips === null && !st.err && <div className="mh-clipgrid">{[0, 1, 2, 3].map(k => <div key={k} className="mh-clip" data-skel="" />)}</div>}
+      {st.err && !st.clips && <MhSerif size={14}>The clips could not be loaded just now.</MhSerif>}
+      {st.clips && list.length === 0 && <MhSerif size={14}>No clips from this night yet.</MhSerif>}
+      {list.length > 0 && <div className="mh-clipgrid">{list.map((c, k) => <MhClipThumb key={c.id} c={c} onPick={() => setAt(k)} />)}</div>}
+      {all && <a className="mh-cliplink" href={all} target="_blank" rel="noopener noreferrer">Every clip from the club on SaveMyPlay ↗</a>}
+      {at !== null && <MhClipViewer list={list} at={at} onAt={setAt} onClose={() => setAt(null)} />}
+    </div>
+  );
+}
+// HOME: the latest night's clips for a week after it, then only the night page has them
+function MhHomeClips({ D, go }) {
+  const st = mhUseClips()(false);
+  const [at, setAt] = React.useState(null);
+  if (!st.clips || !st.clips.length || typeof naClipNight !== "function") return null;
+  const newest = [...st.clips].sort((a, b) => b.start_time - a.start_time)[0];
+  if (Date.now() / 1000 - newest.start_time > 7 * 86400) return null;
+  const night = naClipNight(newest);
+  const list = mhClipsFor(st, night).reverse().slice(0, 12);
+  const s = (D.sessions || []).find(x => x.date === night);
+  return (
+    <div className="mh-col" style={{ gap: 8 }}>
+      <div className="mh-split"><MhLabel tone="peach">Latest clips · {s ? s.code : mhDay(night)}</MhLabel>
+        {s && <button type="button" className="mh-linkbtn" onClick={() => go("session", s.no)}>All {list.length} ›</button>}</div>
+      <div className="mh-cliprow">{list.map((c, k) => <MhClipThumb key={c.id} c={c} wide onPick={() => setAt(k)} />)}</div>
+      {at !== null && <MhClipViewer list={list} at={at} onAt={setAt} onClose={() => setAt(null)} />}
     </div>
   );
 }
@@ -9812,7 +9932,10 @@ function heistData(state, o) {
     const heist = (o.portraits || {})[r.id];
     return { id: r.id, name: p.name || "?", points: r.pts, rank: i + 1, movement: mv, nights: r.played,
       repId: rep && rep.id, stats: mhCardStats(r.id, sessions),
-      photo: heist || p.photo || p.photoUrl || null, pos: heist ? "center 20%" : "center 25%" };
+      photo: heist || p.photo || p.photoUrl || null, // A Heist portrait is made with the face in the top third, so the card shows its
+      // TOP edge: at 20% the face rose into the corners and the tier tag and rank
+      // sat on foreheads (owner, 24 Nov: "the badge covers the photos").
+      pos: heist ? "center 0%" : "center 25%" };
   });
 
   const ep = n => (S.episodes || [])[n - 1] || { code: "EP." + String(n).padStart(2, "0"), title: "", art: "" };

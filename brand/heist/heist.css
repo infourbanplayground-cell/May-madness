@@ -666,3 +666,31 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 @keyframes mhBlink { 50% { opacity: .35; } }
 .mh-loadbar { position: absolute; left: 0; right: 0; bottom: 0; }
 .mh-loadbar > [role="progressbar"] { height: 4px; background: rgba(255,255,255,.12); }
+
+/* the tier tag and the rank sit over the photo: a short dark wash at the top keeps
+   them readable over a bright sky without covering the face (24 Nov) */
+.mn-card .mn-card-img::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 26%; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,16,26,.55), rgba(10,16,26,0)); }
+.mn-card .mn-tiertag, .mn-card .mn-rank { z-index: 2; }
+
+/* ── clips ───────────────────────────────────────────────────────────────── */
+.mh-act[data-on] { background: var(--mn-sand); color: var(--mn-navy); }
+.mh-clipgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mh-cliprow { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -20px; padding: 0 20px 2px; }
+.mh-cliprow::-webkit-scrollbar { display: none; }
+.mh-clip { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,.06); cursor: pointer; }
+.mh-clip[data-wide] { flex: 0 0 210px; width: 210px; }
+.mh-clip[data-skel] { animation: mhFade 1.2s ease-in-out infinite alternate; }
+.mh-clip img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mh-clipplay { position: absolute; left: 50%; top: 42%; transform: translate(-50%,-50%); width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; padding-left: 3px; font-size: 13px; color: var(--mn-navy); background: rgba(255,240,225,.9); }
+.mh-clipcap { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 8px 5px; text-align: left; font: 500 11px/1.2 var(--mn-font-mono); letter-spacing: .06em; color: var(--mn-sand); background: linear-gradient(180deg, rgba(10,16,26,0), rgba(10,16,26,.85)); }
+.mh-clipview { position: fixed; inset: 0; z-index: 90; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: calc(14px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom)); background: rgba(6,10,18,.96); }
+.mh-clipview video { display: block; width: 100%; max-height: 62vh; background: #000; border-radius: 12px; }
+.mh-clipbar { display: flex; align-items: center; gap: 10px; }
+.mh-clipbar > :first-child { flex: 1; }
+.mh-clipn { font: 500 11px var(--mn-font-mono); color: var(--mn-mist); }
+.mh-clipx { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: var(--mn-sand); font-size: 16px; cursor: pointer; }
+.mh-clipnav { display: flex; gap: 8px; justify-content: center; }
+.mh-clipnav .mh-act[disabled] { opacity: .35; }
+.mh-cliplink { align-self: center; font: italic 14px var(--mn-font-serif); color: var(--mn-mist); text-decoration: underline; padding: 10px 0; }
+.mh-linkbtn { border: 0; background: none; color: var(--mn-peach); font: 500 12px var(--mn-font-mono); letter-spacing: .08em; min-height: 44px; cursor: pointer; }

@@ -104,6 +104,7 @@ function MhHome({ D, go }) {
             </div>
           </button>
         ) : null}
+        {typeof MhHomeClips === "function" && <MhHomeClips D={D} go={go} />}
         {D.preseason ? (
           <MhGlass>
             <MhLabel tone="peach">The table</MhLabel>

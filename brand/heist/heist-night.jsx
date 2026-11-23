@@ -39,6 +39,8 @@ function MhSession({ D, go, no, canScore }) {
   const live = s.state === "live";
   const stateLabel = live ? `● Live · ${mhDay(s.date)}` : s.state === "done" ? `Played · ${mhDay(s.date)}` : `${mhDay(s.date)} · ${s.time}`;
   const hasTeams = (N.teams || []).length > 0;
+  const clipSt = mhUseClips()(s.state === "live");
+  const clips = mhClipsFor(clipSt, s.date);
   return (
     <div className="mh-page">
       <main className="mh-body" data-bare="" style={{ padding: 0 }}>
@@ -51,8 +53,10 @@ function MhSession({ D, go, no, canScore }) {
               <span aria-hidden="true">↗</span> Posts</button>}
             {s.state === "done" && <button type="button" className="mh-act" onClick={() => go("recap", s.no)}><span aria-hidden="true">★</span> Recap</button>}
             {canScore && s.sid && <button type="button" className="mh-act" data-org="" onClick={() => go("results", s.no)}><span aria-hidden="true">⚙</span> Organiser</button>}
+            {(clips.length > 0 || s.state !== "soon") && <button type="button" className="mh-act" data-on={tab === "clips" ? "" : undefined}
+              onClick={() => setTab(tab === "clips" ? (hasTeams ? "teams" : "") : "clips")}><span aria-hidden="true">▶</span> Clips{clips.length ? ` · ${clips.length}` : ""}</button>}
           </div>
-          {hasTeams ? <>
+          {tab === "clips" ? <MhClips st={clipSt} list={clips} /> : hasTeams ? <>
             <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
             {tab === "groups" && <>
               {groups.length > 0 && <MhPills label="Group" items={groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x])} value={g} onChange={setG} />}
@@ -427,6 +431,93 @@ function MhSlides({ D, go, no, start = 0 }) {
         <button type="button" className="mh-hint" onClick={e => { e.stopPropagation(); prev(); }} disabled={i === 0}>{i > 0 ? `‹ ${slides[i - 1].key}` : ""}</button>
         <button type="button" className="mh-hint" data-next="" onClick={e => { e.stopPropagation(); next(); }} disabled={i === slides.length - 1}>{i < slides.length - 1 ? `${slides[i + 1].key} ›` : ""}</button>
       </div>
+    </div>
+  );
+}
+
+
+// ── CLIPS (SaveMyPlay), as National has them ────────────────────────────────
+// A player presses the button on court after a point and the last 25 seconds
+// land on the club's SaveMyPlay page a few minutes later. The fetching, the
+// night a clip belongs to (Muscat time, anything before 04:00 is the night
+// before) and the polling are National's own (useNaClips, naClipsForNight),
+// inherited with the page; these are the Heist screens over them. Nothing is
+// copied to our server: the video plays from SaveMyPlay and links back there.
+const mhNoClips = () => ({ clips: [], err: false });
+function mhUseClips() { return typeof useNaClips === "function" ? useNaClips : mhNoClips; }
+function mhClipsFor(st, date) { return typeof naClipsForNight === "function" ? naClipsForNight(st.clips, date) : []; }
+const mhClipLine = c => (typeof naClipCourt === "function" ? naClipCourt(c) : "Court") + " · " + (typeof naClipWhen === "function" ? naClipWhen(c) : "");
+
+function MhClipThumb({ c, onPick, wide }) {
+  return (
+    <button type="button" className="mh-clip" data-wide={wide ? "" : undefined} onClick={onPick} aria-label={"Play clip, " + mhClipLine(c)}>
+      <img src={c.thumb} alt="" loading="lazy" decoding="async" />
+      <span className="mh-clipplay" aria-hidden="true">▶</span>
+      <span className="mh-clipcap">{mhClipLine(c)}</span>
+    </button>
+  );
+}
+function MhClipViewer({ list, at, onAt, onClose }) {
+  const c = list[at];
+  React.useEffect(() => {
+    const k = e => { if (e.key === "Escape") onClose(); };
+    addEventListener("keydown", k); return () => removeEventListener("keydown", k);
+  }, []);
+  if (!c) return null;
+  const page = typeof naClipPage === "function" ? naClipPage(c) : (typeof NA_HIGHLIGHTS_URL !== "undefined" ? NA_HIGHLIGHTS_URL : "#");
+  // portalled to <body>: inside the page it inherited the screen's entrance
+  // animation, whose transform turns position:fixed into "fixed to the column"
+  const ui = (
+    <div className="mh-clipview" role="dialog" aria-modal="true" aria-label="Clip">
+      <div className="mh-clipbar">
+        <MhLabel tone="sand">{mhClipLine(c)}</MhLabel>
+        <span className="mh-clipn">{at + 1} / {list.length}</span>
+        <button type="button" className="mh-clipx" onClick={onClose} aria-label="Close">✕</button>
+      </div>
+      <video key={c.id} src={c.video} poster={c.poster || c.thumb} controls playsInline autoPlay preload="metadata" />
+      <div className="mh-clipnav">
+        <button type="button" className="mh-act" disabled={at === 0} onClick={() => onAt(at - 1)}>← Earlier</button>
+        <a className="mh-act" href={c.video} download target="_blank" rel="noopener noreferrer">⤓ Save</a>
+        <button type="button" className="mh-act" disabled={at === list.length - 1} onClick={() => onAt(at + 1)}>Later →</button>
+      </div>
+      <a className="mh-cliplink" href={page} target="_blank" rel="noopener noreferrer">Open on SaveMyPlay ↗</a>
+    </div>
+  );
+  return ReactDOM.createPortal(ui, document.body);
+}
+function MhClips({ st, list }) {
+  const [at, setAt] = React.useState(null);
+  const all = typeof NA_HIGHLIGHTS_URL !== "undefined" ? NA_HIGHLIGHTS_URL : null;
+  return (
+    <div className="mh-col" style={{ gap: 10 }}>
+      <div className="mh-split"><MhDisplay size={22}>From the courts</MhDisplay>
+        {list.length > 0 && <MhLabel>{list.length} clip{list.length === 1 ? "" : "s"}</MhLabel>}</div>
+      <MhSerif size={14} tone="mist">Press the SaveMyPlay button on court after a point and the last 25 seconds land here a few minutes later.</MhSerif>
+      {st.clips === null && !st.err && <div className="mh-clipgrid">{[0, 1, 2, 3].map(k => <div key={k} className="mh-clip" data-skel="" />)}</div>}
+      {st.err && !st.clips && <MhSerif size={14}>The clips could not be loaded just now.</MhSerif>}
+      {st.clips && list.length === 0 && <MhSerif size={14}>No clips from this night yet.</MhSerif>}
+      {list.length > 0 && <div className="mh-clipgrid">{list.map((c, k) => <MhClipThumb key={c.id} c={c} onPick={() => setAt(k)} />)}</div>}
+      {all && <a className="mh-cliplink" href={all} target="_blank" rel="noopener noreferrer">Every clip from the club on SaveMyPlay ↗</a>}
+      {at !== null && <MhClipViewer list={list} at={at} onAt={setAt} onClose={() => setAt(null)} />}
+    </div>
+  );
+}
+// HOME: the latest night's clips for a week after it, then only the night page has them
+function MhHomeClips({ D, go }) {
+  const st = mhUseClips()(false);
+  const [at, setAt] = React.useState(null);
+  if (!st.clips || !st.clips.length || typeof naClipNight !== "function") return null;
+  const newest = [...st.clips].sort((a, b) => b.start_time - a.start_time)[0];
+  if (Date.now() / 1000 - newest.start_time > 7 * 86400) return null;
+  const night = naClipNight(newest);
+  const list = mhClipsFor(st, night).reverse().slice(0, 12);
+  const s = (D.sessions || []).find(x => x.date === night);
+  return (
+    <div className="mh-col" style={{ gap: 8 }}>
+      <div className="mh-split"><MhLabel tone="peach">Latest clips · {s ? s.code : mhDay(night)}</MhLabel>
+        {s && <button type="button" className="mh-linkbtn" onClick={() => go("session", s.no)}>All {list.length} ›</button>}</div>
+      <div className="mh-cliprow">{list.map((c, k) => <MhClipThumb key={c.id} c={c} wide onPick={() => setAt(k)} />)}</div>
+      {at !== null && <MhClipViewer list={list} at={at} onAt={setAt} onClose={() => setAt(null)} />}
     </div>
   );
 }
