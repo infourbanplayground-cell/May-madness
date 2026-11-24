@@ -2104,7 +2104,7 @@ node record-national-video.mjs           # CONTACT=1 for a strip, no encode
 **Rebuilt 24 Nov 2026** on the owner's "animation and design could be a lot
 better" and "better music or Omani music". 18.2s (`SHORT=1` 9.6s), six
 scenes: FINAL ROUND inside an Omani door that draws itself, THE CONTENDERS
-(the top three's own Heist portraits in arches, the leader large), HOW THE
+(the top three's National photos in arches, the leader large), HOW THE
 TABLE SHAPED UP (the race chart with faces riding the line ends), THE MONEY
 (who holds each paid place now + the spread in an arch), 2X with shock rings,
 and the ask. Cuts are a DOOR WIPE (ivory-rimmed arch rising out of the floor),
