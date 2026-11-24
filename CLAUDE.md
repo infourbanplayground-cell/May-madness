@@ -2100,31 +2100,46 @@ node record-national-video.mjs           # CONTACT=1 for a strip, no encode
   matching the share cards. `build-national-post.py` still runs it full-bleed
   at 56px and has not been brought in line.
 
-#### The FINAL ROUND cut — `build-national-lastround-video.py`
-14.4s (and `SHORT=1` 7.2s) for Mon 30 Nov, the last night: FINAL ROUND, the
-season prizes, the table (paid places lit, the chase dimmed), the points that
-cover 1st to 3rd beside the biggest night so far, and the ask. Same motion
-engine as the double-night cut (copied from it), same bed and recorder:
-`CUT=$SP/national-lastround.cut.json python3.13 build-national-audio.py` then
-`PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav node record-national-video.mjs`.
-Refuses unless exactly one night remains, it is `finalsDate` and it is double.
-It never says what a 2X night is worth, nor that anybody is out of it. The
-recorder demands a landmark medallion on every National film — it sits over
-the prizes. Captions: `brand/national/posts/FINAL-ROUND-CAPTIONS.txt`.
-**Rebuild it after any score correction** — the table is read at build time.
-- **HOW THE TABLE SHAPED UP (24 Nov, owner: "add a graph")** is the fifth of SIX
-  scenes now (17.7s; `SHORT=1` 9.0s): the top five's running totals night by
-  night on the ivory plate, lines drawing left to right, names landing at each
-  line's end (stacked at least 46px apart — amjad 142 and Munther 141 sit on
-  one pixel). Every point is `ops/national-standings.mjs`'s `race` (the engine
-  re-run over the first n nights). The two lines under it come from the new
-  `leaders` field, computed over EVERYBODY — Faisal led after night 1 and is
-  not one of the five drawn — so "the lead changed hands 5 times" and "Hamed
-  Amri went top on night 8" cannot be artefacts of which lines are shown.
-  The recorder now finds the outro as the LAST scene and reads `#s4n` at the
-  end of its own scene; the bed takes a sixth block and its shape rule is
-  about the block before the ask, so a 5-scene film is checked exactly as
-  before.
+#### The FINAL ROUND film — `build-national-lastround-video.py` + `build-national-omani-audio.py`
+**Rebuilt 24 Nov 2026** on the owner's "animation and design could be a lot
+better" and "better music or Omani music". 18.2s (`SHORT=1` 9.6s), six
+scenes: FINAL ROUND inside an Omani door that draws itself, THE CONTENDERS
+(the top three's own Heist portraits in arches, the leader large), HOW THE
+TABLE SHAPED UP (the race chart with faces riding the line ends), THE MONEY
+(who holds each paid place now + the spread in an arch), 2X with shock rings,
+and the ask. Cuts are a DOOR WIPE (ivory-rimmed arch rising out of the floor),
+sparks drift, the camera kicks on every hero hit — all pure functions of t.
+```bash
+python3.13 build-national-lastround-video.py $SP/na-standings.json   # SHORT=1, AS_OF=, PORTRAITS=<dir>
+CUT=$SP/national-lastround.cut.json python3.13 build-national-omani-audio.py
+PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav node record-national-video.mjs
+```
+- Refuses unless exactly one night remains, it is `finalsDate` and it is
+  double. Never says what a 2X night is worth, nor that anybody is out of it.
+  **Rebuild after any score correction**; it reads the table at build time.
+- Portraits come from `PORTRAITS=<dir>` (default `$SP/live-portraits`) or
+  heist.urbanpadel.om/players/<id>.jpg; a contender without one gets initials.
+- **The Ken Burns push and the sheen are BACKGROUND motion**
+  (`background-size`, `background-position`), never a transform on a child:
+  a transformed child overflows its arch and the recorder's clipped check
+  reads it, correctly, as content cut off.
+- **`data-pts` is the recorder's COUNT-UP attribute.** The chart heads first
+  carried their polyline in `data-pts` and the recorder demanded they count
+  up to an array. They use `data-path`.
+- A slam stays under 0.6 opacity while it is oversized, so nothing legible
+  ever stands past the frame.
+- **The score is `build-national-omani-audio.py`, all synthesised** (nothing
+  to license): Khaleeji 2/4 frame drums (doum/tek, off-beats late), ragged
+  group handclaps, a Karplus-Strong oud with risha tremolo in MAQAM HIJAZ on
+  D, a ney over the door and the ask, a D/A drone and a big tabl on every hero
+  hit. Reads the film's own cut JSON. Asserts: the 2X scene is the peak, the
+  door builds into the money, the ask drops under 3dB and stays fuller than
+  the door, and ≥35% of the energy is in 300-3400Hz. **The first pass put
+  the centroid at 6.7kHz** — white-noise claps and teks are mostly hiss; they
+  are double low-passed now and the mix rolled off near 5kHz (centroid ~2.1k).
+- `ops/national-standings.mjs`'s `leaders` is computed over EVERYBODY, so
+  "the lead changed hands 5 times" cannot be an artefact of which five lines
+  are drawn. Captions: `brand/national/posts/FINAL-ROUND-CAPTIONS.txt`.
 
 #### The landmark silhouettes — `ops/national-landmarks.py`
 **THE OWNER SUPPLIED THEM AND NOTHING HERE IS DRAWN.** Five images — a
