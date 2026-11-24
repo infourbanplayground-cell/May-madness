@@ -6,7 +6,7 @@ could be a lot better" and "better music or Omani music". So this is a film,
 not a sequence of type cards:
 
   1  FINAL ROUND      an Omani door draws itself, the words SLAM in
-  2  THE CONTENDERS   the top three's own painted portraits, each in an arch
+  2  THE CONTENDERS   the top three's National photos, each in an arch
   3  HOW IT SHAPED UP the race chart, faces riding the line ends
   4  THE MONEY        who holds each paid place right now, and the spread
   5  2X               the double stamp, shock rings
@@ -20,8 +20,8 @@ recorder scrubs it frame-exact and no CSS animation exists to drift.
 EVERY FIGURE IS READ. The table, the race and the lead changes come from
 ops/national-standings.mjs (the app's own engine over the live state); the
 night, time, entry and prizes from national-season.json. The portraits are
-the Heist portraits the owner made (/players/<id>.jpg), read from
-PORTRAITS=<dir> or fetched; a contender without one gets an initial.
+National's OWN photos (the app's /photos store, then a player's photoUrl) —
+never the Heist portraits; a contender without one gets an initial.
 
 IT REFUSES TO BUILD unless exactly ONE night remains, it is the finals date
 and it is a double night. It never says what a doubled night is worth, nor
@@ -29,7 +29,7 @@ that anybody is out of it.
 
   ssh urbanpadel 'curl -s localhost:3011/state' > $SP/na.json
   node ops/national-standings.mjs $SP/na.json $SP/na-standings.json
-  python3.13 build-national-lastround-video.py   # AS_OF=, SHORT=1, PORTRAITS=<dir>
+  python3.13 build-national-lastround-video.py   # AS_OF=, SHORT=1, NA_PHOTOS=, NA_STATE=
   CUT=$SP/national-lastround.cut.json python3.13 build-national-omani-audio.py
   PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav \\
       node record-national-video.mjs             # CONTACT=1 for a strip
@@ -77,25 +77,39 @@ ORD = {1: "1ST", 2: "2ND", 3: "3RD", 4: "4TH", 5: "5TH"}
 ROSE = "#F2D0D3"
 
 
+_NA_PHOTOS = None
+
+
 def portrait(pid):
-    """A Heist portrait as a small JPEG data URL, or None."""
+    """The player's NATIONAL photo — the one the app itself shows — as a small
+    JPEG data URL, or None. Never the Heist portraits (owner, 24 Nov 2026:
+    "don't use heist faces"): this is a Vol.9 film and it wears Vol.9's faces.
+    Read from NA_PHOTOS (the API's /photos) and NA_STATE (/state, for a
+    player's photoUrl), the same two places the app merges."""
+    global _NA_PHOTOS
+    if _NA_PHOTOS is None:
+        ph = json.load(open(os.environ.get("NA_PHOTOS") or os.path.join(SP, "na-photos.json")))
+        st = json.load(open(os.environ.get("NA_STATE") or os.path.join(SP, "na-live.json")))
+        st = st.get("state", st)
+        _NA_PHOTOS = {"store": ph.get("photos", ph),
+                      "url": {p["id"]: p.get("photoUrl") for p in st.get("players", [])}}
     raw = None
-    src = os.environ.get("PORTRAITS") or os.path.join(SP, "live-portraits")
-    f = os.path.join(src, pid + ".jpg")
-    if os.path.exists(f):
-        raw = open(f, "rb").read()
-    else:
+    src = _NA_PHOTOS["store"].get(pid)
+    if src and src.startswith("data:image"):
+        raw = base64.b64decode(src.split(",", 1)[1])
+    elif _NA_PHOTOS["url"].get(pid):
         try:
-            req = urllib.request.Request(f"https://heist.urbanpadel.om/players/{pid}.jpg",
-                                         headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(_NA_PHOTOS["url"][pid], headers={"User-Agent": "Mozilla/5.0"})
             raw = urllib.request.urlopen(req, timeout=20).read()
-        except Exception:
-            return None
+        except Exception as e:
+            print(f"  photo for {pid} not fetched: {e}")
+    if not raw:
+        return None
     try:
         from PIL import Image
         im = Image.open(io.BytesIO(raw)).convert("RGB")
         im.thumbnail((640, 800))
-        b = io.BytesIO(); im.save(b, "JPEG", quality=84); raw = b.getvalue()
+        b = io.BytesIO(); im.save(b, "JPEG", quality=86); raw = b.getvalue()
     except ImportError:
         pass
     return "data:image/jpeg;base64," + base64.b64encode(raw).decode()

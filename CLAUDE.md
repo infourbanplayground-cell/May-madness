@@ -2117,8 +2117,11 @@ PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav 
 - Refuses unless exactly one night remains, it is `finalsDate` and it is
   double. Never says what a 2X night is worth, nor that anybody is out of it.
   **Rebuild after any score correction**; it reads the table at build time.
-- Portraits come from `PORTRAITS=<dir>` (default `$SP/live-portraits`) or
-  heist.urbanpadel.om/players/<id>.jpg; a contender without one gets initials.
+- **The faces are NATIONAL's own photos, never the Heist portraits** (owner,
+  24 Nov: "don't use heist faces"). `portrait()` reads the app's `/photos`
+  store (`NA_PHOTOS`, default `$SP/na-photos.json`) and then a player's
+  `photoUrl` from `/state` (`NA_STATE`, default `$SP/na-live.json`) — the
+  same two sources the app merges. A contender with neither gets initials.
 - **The Ken Burns push and the sheen are BACKGROUND motion**
   (`background-size`, `background-position`), never a transform on a child:
   a transformed child overflows its arch and the recorder's clipped check
