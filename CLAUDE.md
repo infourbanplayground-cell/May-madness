@@ -2134,12 +2134,22 @@ PAGE=national-lastround.html NAME=national-lastround WAV=national-lastround.wav 
 - **The score is `build-national-omani-audio.py`, all synthesised** (nothing
   to license): Khaleeji 2/4 frame drums (doum/tek, off-beats late), ragged
   group handclaps, a Karplus-Strong oud with risha tremolo in MAQAM HIJAZ on
-  D, a ney over the door and the ask, a D/A drone and a big tabl on every hero
-  hit. Reads the film's own cut JSON. Asserts: the 2X scene is the peak, the
-  door builds into the money, the ask drops under 3dB and stays fuller than
-  the door, and ≥35% of the energy is in 300-3400Hz. **The first pass put
-  the centroid at 6.7kHz** — white-noise claps and teks are mostly hiss; they
-  are double low-passed now and the mix rolled off near 5kHz (centroid ~2.1k).
+  D, a ney, a D/A drone and a tabl on every hero hit. Reads the film's own
+  cut JSON.
+  - **It is a COUNTDOWN, not an invitation** (owner, 24 Nov: "more hyped,
+    gets intense, to show we are reaching the end"). The first pass peaked on
+    2X and released into the ask; it never lets go now. The tempo
+    ACCELERATES 104 -> 138 bpm over the film, a clock ticks on every beat
+    until 2X, a tek roll tightens into every cut, a riser and a 0.16s STOP
+    sit before the 2X stamp, and the last two scenes are full (doubled claps,
+    doum on the eighths, oud in octaves, Hijaz stabs) to one final hit with
+    no fade.
+  - Asserted: every scene at least as loud as the one before, 2X and the ask
+    the loudest, ≥6dB from door to end (9 now), the stop really silent
+    (>15dB under 2X), and ≥35% of the energy in 300-3400Hz.
+  - **The first pass put the centroid at 6.7kHz** — white-noise claps and
+    teks are mostly hiss; they are double low-passed and the mix rolled off
+    near 5kHz (centroid ~2.3k).
 - `ops/national-standings.mjs`'s `leaders` is computed over EVERYBODY, so
   "the lead changed hands 5 times" cannot be an artefact of which five lines
   are drawn. Captions: `brand/national/posts/FINAL-ROUND-CAPTIONS.txt`.
