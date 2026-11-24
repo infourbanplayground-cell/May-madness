@@ -102,6 +102,14 @@ const nightTop = done.map((s, i) => {
     top: gained.slice(0, 3) };
 });
 
+// Who LED the series after each completed night — over EVERYBODY, not just the
+// tracked lines, so a chart's "took the lead on night n" cannot be an artefact
+// of which six were drawn. Same engine, same tie order as the table.
+const leaders = done.map((_, i) => {
+  const r = (st.players || []).map(p => row(p, sessions.slice(0, i + 1))).filter(x => x.nights > 0).sort(order)[0];
+  return r ? { n: i + 1, id: r.id, name: r.name, pts: r.pts } : null;
+});
+
 const remaining = SEASON.nights.filter(d => !done.some(s => s.date === d));
 const played = done.length;
 const doubleNights = remaining.filter(d => (SEASON.doubleNights || []).includes(d));
@@ -117,7 +125,7 @@ const out = {
     a + (s.groupMatches || []).filter(m => m.winner).length
       + Object.values(s.knockout || {}).flat().filter(m => m && m.winner).length, 0),
   table: rows,
-  race, nightTop,
+  race, nightTop, leaders,
   // The form story, derived rather than chosen: who has taken the most points
   // out of the last two nights, and what the biggest single night has been
   // worth so far. The second is what makes "the last two are worth double"

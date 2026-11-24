@@ -53,17 +53,20 @@ OUT = os.path.join(SP, "national-lastround.html")
 CUT = os.path.join(SP, "national-lastround.cut.json")
 CAPS = os.path.join(HERE, "brand", "national", "posts", "FINAL-ROUND-CAPTIONS.txt")
 W, H = 1080, 1920
-DUR = 14.40
-SCENES = [0.00, 2.40, 5.40, 8.40, 11.40]
-BEATS = [0.00, 1.20, 2.40, 3.90, 5.40, 6.90, 8.40, 9.90, 11.40, 12.90]
-HERO = [0.00, 2.40, 8.40, 11.40]
-BASE = [2.40, 3.00, 3.00, 3.00, 3.00]
+# Six scenes: FINAL ROUND, the prizes, the table, the spread, HOW IT SHAPED UP
+# (the race chart, owner 24 Nov: "add a graph showing how the leaderboard
+# shaped up"), and the ask.
+DUR = 17.70
+SCENES = [0.00, 2.40, 5.40, 8.40, 11.40, 14.70]
+BEATS = [0.00, 1.20, 2.40, 3.90, 5.40, 6.90, 8.40, 9.90, 11.40, 12.60, 13.80, 14.70, 16.20]
+HERO = [0.00, 2.40, 8.40, 14.70]
+BASE = [2.40, 3.00, 3.00, 3.00, 3.30, 3.00]
 SHORT = bool(os.environ.get("SHORT"))
 if SHORT:
-    DUR = 7.20
-    SCENES = [0.00, 1.20, 2.40, 4.20, 5.40]
-    BEATS = [0.00, 0.60, 1.20, 1.80, 2.40, 3.00, 3.60, 4.20, 4.80, 5.40, 6.00, 6.60]
-    HERO = [0.00, 1.20, 4.20, 5.40]
+    DUR = 9.00
+    SCENES = [0.00, 1.20, 2.40, 4.20, 5.40, 7.20]
+    BEATS = [0.00, 0.60, 1.20, 1.80, 2.40, 3.00, 3.60, 4.20, 4.80, 5.40, 6.00, 6.60, 7.20, 7.80, 8.40]
+    HERO = [0.00, 1.20, 4.20, 7.20]
     OUT = os.path.join(SP, "national-lastround-7s.html")
     CUT = os.path.join(SP, "national-lastround-7s.cut.json")
 FULLDAY = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"]
@@ -120,6 +123,62 @@ def main():
     chase = table[n_paid - 1]["pts"] - table[n_paid]["pts"]      # first place outside the money
     unit = lambda n: "POINT" if n == 1 else "POINTS"
     prizes = cfg["seasonPrizes"]
+
+    # ── HOW IT SHAPED UP: the race chart ───────────────────────────────────
+    # Every point is the app's engine re-run over the first n nights
+    # (ops/national-standings.mjs), never a running sum. The lines are the top
+    # five on the table; the lead line is read over EVERYBODY (ST['leaders']),
+    # so "went top on night n" cannot be an artefact of which five are drawn.
+    raceby = {r["id"]: r for r in ST["race"]}
+    lines = [raceby[r["id"]] for r in table[:5] if r["id"] in raceby]
+    assert len(lines) == 5, "the race does not cover the top five"
+    L = ST["leaders"]
+    changes = sum(1 for a, b in zip(L, L[1:]) if a["id"] != b["id"])
+    holders = len({x["id"] for x in L})
+    ldr = L[-1]
+    since = len(L)
+    while since > 1 and L[since - 2]["id"] == ldr["id"]:
+        since -= 1
+    lead_line = (f"{ldr['name'].upper()} WENT TOP ON NIGHT {since}" if since == len(L)
+                 else f"{ldr['name'].upper()} HAS LED SINCE NIGHT {since}")
+    VW, VH = 952, 820
+    X0, X1, Y0, Y1 = 78, 600, 48, 720          # plot box inside the plate
+    top = max(max(r["pts"]) for r in lines)
+    ymax = (top // 50 + 1) * 50
+    nN = ST["played"]
+    xa = lambda i: X0 + (X1 - X0) * i / max(1, nN - 1)
+    ya = lambda v: Y1 - (Y1 - Y0) * v / ymax
+    INK = [P["bg"], P["green"], P["ink"], P["muted"], P["muted"]]
+    DASH = [None, None, None, None, "14 10"]
+    grid = "".join(f'<line x1="{X0}" x2="{X1}" y1="{ya(v):.1f}" y2="{ya(v):.1f}" stroke="rgba(26,10,12,.10)" stroke-width="2"/>'
+                   f'<text x="{X0 - 14}" y="{ya(v) + 8:.1f}" text-anchor="end" class="ax">{v}</text>'
+                   for v in range(0, ymax + 1, 50 if ymax <= 250 else 100))
+    xlab = "".join(f'<text x="{xa(i):.1f}" y="{Y1 + 46}" text-anchor="middle" class="ax">N{i + 1}</text>' for i in range(nN))
+    paths, dots, ends = [], [], []
+    for k, r in enumerate(lines):
+        pts = [(xa(i), ya(v)) for i, v in enumerate(r["pts"]) if i >= r["from"]]
+        dpath = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts)
+        dash = f' data-dash="{DASH[k]}"' if DASH[k] else ""
+        paths.append(f'<path class="rl" d="{dpath}" pathLength="1" fill="none" stroke="{INK[k]}" stroke-width="{9 if k == 0 else 6}"'
+                     f' stroke-linejoin="round" stroke-linecap="round"{dash}/>')
+        for j, (x, y) in enumerate(pts):
+            dots.append(f'<circle class="rd" data-at="{(j / max(1, len(pts) - 1)):.3f}" cx="{x:.1f}" cy="{y:.1f}" r="{11 if j == len(pts) - 1 else 6}" fill="{INK[k]}"/>')
+        ends.append([pts[-1][1], k, r])
+    # end labels never touch: sorted by height, each at least 46px under the last
+    ends.sort()
+    for i in range(1, len(ends)):
+        ends[i][0] = max(ends[i][0], ends[i - 1][0] + 46)
+    if ends[-1][0] > Y1 + 4:                   # pushed off the bottom: shift the stack up
+        shift = ends[-1][0] - (Y1 + 4)
+        for e in ends:
+            e[0] -= shift
+    labels = "".join(
+        f'<g class="rlab" data-k="{k}"><line x1="{X1 + 14}" x2="{X1 + 34}" y1="{ya(r["pts"][-1]):.1f}" y2="{yy:.1f}" stroke="{INK[k]}" stroke-width="3"/>'
+        f'<text x="{X1 + 44}" y="{yy + 10:.1f}" class="nm2" fill="{P["ink"]}">{r["name"].upper()}'
+        f'<tspan class="pv" fill="{INK[k] if k < 3 else P["ink"]}" dx="12">{r["pts"][-1]}</tspan></text></g>'
+        for yy, k, r in ends)
+    chart = (f'<svg id="s6svg" viewBox="0 0 {VW} {VH}" width="{VW}" height="{VH}">{grid}{xlab}'
+             f'{"".join(paths)}{"".join(dots)}{labels}</svg>')
 
     rows = "".join(
         f'<div class="tr{" paid" if i < n_paid else ""}"><div class="rk disp">{i + 1}</div>'
@@ -211,6 +270,17 @@ body{{position:relative}}
 #s4c{{top:1300px;font-size:120px}}
 #s4d{{top:1480px;font-size:34px;letter-spacing:.2em;color:{ROSE}}}
 
+/* 6 · HOW IT SHAPED UP: the race chart on the plate you read */
+#s6a{{top:330px}}
+#s6plate{{position:absolute;top:410px;left:64px;right:64px;z-index:2;background:{P['ivory']};
+  border-radius:44px;box-shadow:0 0 0 7px {P['bg']},0 0 0 11px {P['ivory']};padding:24px 0 20px;overflow:hidden}}
+#s6svg{{display:block;margin:0 auto}}
+#s6svg .ax{{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;fill:{P['muted']}}}
+#s6svg .nm2{{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:23px;letter-spacing:.02em}}
+#s6svg .pv{{font-family:'Archivo',sans-serif;font-style:italic;font-variation-settings:'wdth' 125,'wght' 900;font-size:36px}}
+#s6b{{top:1330px;font-size:30px;letter-spacing:.18em;color:{P['ivory']}}}
+#s6c{{top:1400px;font-size:28px;letter-spacing:.2em;color:{ROSE}}}
+
 /* 5 · the ask */
 #s5a{{top:400px}}
 #s5b{{top:480px;font-size:150px}}
@@ -261,6 +331,13 @@ body{{position:relative}}
   <div class="blk disp" id="s4b">BIGGEST NIGHT SO FAR</div>
   <div class="blk disp" id="s4c">+{ST['bestNight']}</div>
   <div class="blk mono" id="s4d">{inner[0]} {unit(inner[0])} BETWEEN {ORD[inner[1]]} AND {ORD[inner[2]]}</div>
+</div>
+
+<div class="scene" id="s6">
+  <div class="blk mono k" id="s6a">HOW THE TABLE SHAPED UP</div>
+  <div id="s6plate">{chart}</div>
+  <div class="blk mono" id="s6b">THE LEAD CHANGED HANDS {changes} TIME{"" if changes == 1 else "S"}</div>
+  <div class="blk mono" id="s6c">{lead_line}</div>
 </div>
 
 <div class="scene" id="s5">
@@ -416,6 +493,26 @@ window.__seek = function (t) {
     reveal(E('s4b'), (S - 0.90) / 0.60);
     reveal(E('s4c'), (S - 1.04) / 0.65, true);
     fade(E('s4d'), (S - 1.45) / 0.50);
+  } else if (i === 4) {
+    fade(E('s6a'), S / 0.40);
+    open(E('s6plate'), (S - 0.08) / 0.60, 'top');
+    // the lines draw together, left to right, one night at a time on the eye
+    const p = clamp((S - 0.45) / 1.55, 0, 1), pe = 1 - Math.pow(1 - p, 2);
+    document.querySelectorAll('#s6svg .rl').forEach(el => {
+      const d = el.dataset.dash;
+      if (d) { el.style.strokeDasharray = d; el.style.opacity = pe > 0 ? 1 : 0;
+               el.style.clipPath = 'inset(0 ' + ((1 - pe) * 100).toFixed(2) + '%% 0 0)'; }
+      else { el.style.strokeDasharray = '1'; el.style.strokeDashoffset = (1 - pe).toFixed(4); }
+    });
+    document.querySelectorAll('#s6svg .rd').forEach(el => {
+      const at = +el.dataset.at;
+      el.style.opacity = pe >= at - 0.001 ? 1 : 0;
+    });
+    document.querySelectorAll('#s6svg .rlab').forEach(el => {
+      el.style.opacity = clamp((S - 1.90 - (+el.dataset.k) * 0.05) / 0.35, 0, 1);
+    });
+    fade(E('s6b'), (S - 2.15) / 0.45);
+    fade(E('s6c'), (S - 2.35) / 0.45);
   } else {
     fade(E('s5a'), S / 0.40);
     reveal(E('s5b'), (S - 0.08) / 0.70, true);
@@ -460,6 +557,8 @@ The season prizes are decided on this one night: {pz}.
 The table after {WORDS[ST['played']].lower()} nights:
 {top}
 
+The lead has changed hands {changes} time{"" if changes == 1 else "s"} this season; {ldr['name']} {lead_line[len(ldr['name']) + 1:].lower()}.
+
 {spread} points cover 1st to {ORD[n_paid].lower()}, with {inner[0]} between {ORD[inner[1]].lower()} and {ORD[inner[2]].lower()}. The biggest night anyone has had this season is +{ST['bestNight']}.
 
 {start} · {cfg['entry']} OMR to play. Drop your name in the group — or come and watch it settled.
@@ -481,6 +580,7 @@ Final round. {nice}, {start}. Double points.
     print(f"built {OUT}  {len(html)/1024:.0f}KB  {DUR}s")
     print(f"  night {n_night} is {longish(night)}, {away} day(s) from {today} (Muscat) -> \"{when}\"")
     print(f"  table: " + ", ".join(f"{r['name']} {r['pts']}" for r in table[:5]))
+    print(f"  race: {changes} lead changes, {holders} leaders · {lead_line}")
     print(f"  hook: {spread} cover 1st-{ORD[n_paid]} · inner {inner} · chase {chase} · best +{ST['bestNight']}")
 
 

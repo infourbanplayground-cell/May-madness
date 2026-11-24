@@ -122,7 +122,8 @@ if (noart.length) { console.error('MOTIF NOT DRAWN: ' + noart.join(', ')); proce
 const widths = await pg.evaluate(() => {
   const el = document.querySelector('#s5b .fitspan');
   if (!el) return null;
-  const t0 = window.__scenes[4];
+  // the outro is the LAST scene, however many come before it
+  const t0 = window.__scenes[window.__scenes.length - 1];
   const at = t => { window.__seek(t); return el.getBoundingClientRect().width; };
   return [at(t0 + 0.06), at(t0 + 0.20), at(t0 + 0.80)];
 });
@@ -333,9 +334,12 @@ if (underband.length) { console.error('copy under the trim:\n  ' + underband.joi
 // 411 in the film and 412 everywhere else is the exact class of drift every
 // figure here is read from the config to prevent.
 const pool = await pg.evaluate((scenes) => {
-  const t1 = scenes[4];
-  window.__seek(t1 - 0.05);
   const el = document.getElementById('s4n');
+  if (!el) return 'n/a';
+  // the END of #s4n's own scene, not a fixed index: a film may add scenes after it
+  const k = [...document.querySelectorAll('.scene')].indexOf(el.closest('.scene'));
+  const t1 = k + 1 < scenes.length ? scenes[k + 1] : window.__dur;
+  window.__seek(t1 - 0.05);
   return el ? el.textContent.trim() : 'n/a';
 }, pre.scenes);
 // EVERY COUNT-UP MUST LAND ON ITS FIGURE before its scene cuts: the recap's

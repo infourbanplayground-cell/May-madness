@@ -158,6 +158,11 @@ PLAN = [
     dict(root=C2, shaker=2, pluck=[E4, A4, E4, C4],     gain=1.14),
     dict(root=A1, shaker=1, pluck=[A3, E4, A4],         gain=0.96),
 ]
+if len(SCENES) == 6:
+    # the FINAL ROUND cut's race chart sits between the spread and the ask: the
+    # build carries on into it and peaks there, and the ask still opens out
+    PLAN = PLAN[:3] + [dict(root=C2, shaker=2, pluck=[E4, A4, E4, C4], gain=1.07),
+                       dict(root=C2, shaker=2, pluck=[A4, E4, A4, C4], gain=1.14), PLAN[4]]
 assert len(PLAN) == len(SCENES), "a block per scene, or the two media drift"
 bounds = [(SCENES[i], SCENES[i + 1] if i + 1 < len(SCENES) else DUR)
           for i in range(len(SCENES))]
@@ -236,11 +241,12 @@ for i, (a, b) in enumerate(bounds):
 # Vol.8 assertion and the wrong shape for an invitation — but the release has
 # to be a release and not a collapse, so it is held within 3dB of the peak.
 peak_i = levels.index(max(levels))
-assert peak_i == 3, f"the bed peaks on scene {peak_i+1}, not on the money"
-assert levels[:4] == sorted(levels[:4]), "the first four blocks should grow"
-assert levels[4] < levels[3], "scene 5 should open out, not keep climbing"
-assert levels[3] - levels[4] < 3.0, \
-    f"scene 5 drops {levels[3]-levels[4]:.1f} dB — that is a collapse, not a release"
+PK = len(levels) - 2          # the block before the ask: the money, or the race chart
+assert peak_i == PK, f"the bed peaks on scene {peak_i+1}, not on scene {PK+1}"
+assert levels[:PK + 1] == sorted(levels[:PK + 1]), "the blocks up to the peak should grow"
+assert levels[-1] < levels[PK], "the last scene should open out, not keep climbing"
+assert levels[PK] - levels[-1] < 3.0, \
+    f"the last scene drops {levels[PK]-levels[-1]:.1f} dB — that is a collapse, not a release"
 
 # The same two claims every bed here makes: darker than the synthwave bed they
 # all replaced, and still audible on a phone, which rolls off hard below

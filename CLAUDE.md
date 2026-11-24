@@ -2112,6 +2112,19 @@ It never says what a 2X night is worth, nor that anybody is out of it. The
 recorder demands a landmark medallion on every National film — it sits over
 the prizes. Captions: `brand/national/posts/FINAL-ROUND-CAPTIONS.txt`.
 **Rebuild it after any score correction** — the table is read at build time.
+- **HOW THE TABLE SHAPED UP (24 Nov, owner: "add a graph")** is the fifth of SIX
+  scenes now (17.7s; `SHORT=1` 9.0s): the top five's running totals night by
+  night on the ivory plate, lines drawing left to right, names landing at each
+  line's end (stacked at least 46px apart — amjad 142 and Munther 141 sit on
+  one pixel). Every point is `ops/national-standings.mjs`'s `race` (the engine
+  re-run over the first n nights). The two lines under it come from the new
+  `leaders` field, computed over EVERYBODY — Faisal led after night 1 and is
+  not one of the five drawn — so "the lead changed hands 5 times" and "Hamed
+  Amri went top on night 8" cannot be artefacts of which lines are shown.
+  The recorder now finds the outro as the LAST scene and reads `#s4n` at the
+  end of its own scene; the bed takes a sixth block and its shape rule is
+  about the block before the ask, so a 5-scene film is checked exactly as
+  before.
 
 #### The landmark silhouettes — `ops/national-landmarks.py`
 **THE OWNER SUPPLIED THEM AND NOTHING HERE IS DRAWN.** Five images — a
