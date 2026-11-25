@@ -721,3 +721,81 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 /* the posts' headlines are one line in the wider face, shrunk to fit: "champions"
    ran off the card and "tonight's take" wrapped onto the first row */
 .mh-nstitle, .mh-nchword, .mh-nchname { white-space: nowrap; overflow: hidden; }
+
+/* ── THE LOOT — knockout cards (heist-loot.jsx) ─────────────────────────
+   One card per night you reach the knockout; the frame says how far you got.
+   Sizes are in em off the card's own font-size (16px at 264 wide), so the
+   album thumbnail and the story card are one drawing at two scales. */
+:root {
+  --mh-loot-job: linear-gradient(150deg, #FFF6E6, #E8D6B4 55%, #F6EAD3);
+  --mh-loot-inside: linear-gradient(150deg, #FFC36B, #FF7A3D 55%, #D2357E);
+  --mh-loot-getaway: linear-gradient(150deg, #FF4F8B, #FF2D78 40%, #B0306E 70%, #FF7AA8);
+  --mh-loot-score: linear-gradient(150deg, #FFE7A3, #FFC24A 35%, #E89A1F 65%, #FFE7A3);
+  --mh-loot-ink: #07040D;
+  --mh-loot-foil: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.42) 38%, rgba(255,201,163,.35) 46%, rgba(255,45,120,.25) 54%, transparent 68%);
+  --mh-loot-wash: linear-gradient(180deg, rgba(15,27,43,.15), rgba(15,27,43,.0) 30%, rgba(15,27,43,.55) 62%, rgba(7,4,13,.92) 100%);
+}
+.mh-loot { position: relative; flex: 0 0 auto; box-sizing: border-box; padding: .3em; border-radius: .9em;
+  background: var(--mh-loot-job); box-shadow: var(--mn-shadow-card); overflow: hidden; isolation: isolate; }
+.mh-loot[data-tier="inside"]  { background: var(--mh-loot-inside); box-shadow: var(--mn-shadow-card), 0 0 1.6em rgba(255,122,61,.35); }
+.mh-loot[data-tier="getaway"] { background: var(--mh-loot-getaway); box-shadow: var(--mn-shadow-card), 0 0 1.8em rgba(255,45,120,.45); }
+.mh-loot[data-tier="score"]   { background: var(--mh-loot-score); box-shadow: var(--mn-shadow-card), 0 0 2.4em rgba(255,194,74,.6); }
+.mh-loot > .mh-loot-scene, .mh-loot > .mh-loot-custom, .mh-loot > .mh-loot-wash, .mh-loot > .mh-loot-face, .mh-loot > .mh-loot-fade, .mh-loot > .mh-loot-foil {
+  position: absolute; inset: .3em; border-radius: .65em; overflow: hidden; }
+.mh-loot-scene .mn-art img { filter: var(--mn-art-filter) brightness(.72); }
+.mh-loot-wash { background: var(--mh-loot-wash); z-index: 1; }
+/* the player stands in an arch cut out of the painting */
+.mh-loot > .mh-loot-face { inset: 2.1em 2.2em 4.6em; border-radius: 50% 50% .5em .5em / 34% 34% .5em .5em; z-index: 2;
+  box-shadow: 0 0 0 .18em var(--mh-loot-ink), 0 0 0 .38em currentColor; color: var(--mn-sand); }
+.mh-loot[data-tier="inside"]  > .mh-loot-face { color: var(--mn-coral-2); }
+.mh-loot[data-tier="getaway"] > .mh-loot-face { color: var(--mn-coral); }
+.mh-loot[data-tier="score"]   > .mh-loot-face { color: var(--mn-gold); }
+.mh-loot-face .mn-initials { font-size: 2.6em; background: rgba(15,27,43,.85); }
+.mh-loot > .mh-loot-fade { z-index: 3; background: linear-gradient(180deg, rgba(7,4,13,0) 58%, rgba(7,4,13,.86) 82%); }
+.mh-loot > .mh-loot-foil { z-index: 4; background: var(--mh-loot-foil); background-size: 260% 100%; mix-blend-mode: overlay; animation: mn-foil 3.4s linear infinite; pointer-events: none; }
+.mh-loot[data-tier="score"] > .mh-loot-foil { background-image: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55) 40%, rgba(255,231,163,.45) 48%, transparent 64%); }
+.mh-loot[data-still] > .mh-loot-foil { animation: none; background-position: 40% 0; }
+.mh-loot-top { position: absolute; z-index: 5; left: .9em; right: .9em; top: .8em; display: flex; justify-content: space-between; align-items: center; }
+.mh-loot-code, .mh-loot-2x { font-family: var(--mn-font-mono); font-weight: 700; font-size: max(11px, .78em); letter-spacing: .08em;
+  padding: .15em .5em; border-radius: .4em; background: var(--mn-tag-bg); color: var(--mn-sand); }
+.mh-loot-2x { background: var(--mn-coral); color: var(--mh-loot-ink); }
+.mh-loot-foot { position: absolute; z-index: 5; left: .9em; right: .9em; bottom: .8em; text-align: center; }
+.mh-loot-tier { font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; line-height: 1; font-size: 1.9em;
+  color: var(--mn-sand); -webkit-text-stroke: .085em var(--mh-loot-ink); paint-order: stroke fill; text-shadow: .06em .07em 0 var(--mh-loot-ink); }
+.mh-loot[data-tier="inside"]  .mh-loot-tier { color: var(--mn-peach); }
+.mh-loot[data-tier="getaway"] .mh-loot-tier { color: var(--mn-teal); }
+.mh-loot[data-tier="score"]   .mh-loot-tier { color: var(--mn-gold); }
+.mh-loot[data-size="s"] .mh-loot-tier { font-size: max(14px, 1.9em); }
+.mh-loot[data-size="s"] .mh-loot-face { inset: 2.4em 1.9em 3.6em; }
+.mh-loot-name { margin-top: .3em; font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; font-size: 1.15em; line-height: 1.05; color: var(--mn-sand); }
+.mh-loot-with { font-family: var(--mn-font-serif); font-size: max(11px, .95em); color: var(--mn-coral); margin-top: .1em; }
+.mh-loot-meta { display: flex; justify-content: space-between; margin-top: .45em; font-family: var(--mn-font-mono); font-size: max(11px, .72em);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--mn-mist); }
+.mh-loot-custom .mn-art img { filter: none; }
+.mh-loot-custom .mn-art::after { display: none; }
+.mh-loot-empty { background: rgba(255,244,232,.08); box-shadow: inset 0 0 0 1px var(--mn-line-2); }
+.mh-loot-empty .mh-loot-scene .mn-art img { filter: grayscale(.85) brightness(.32); }
+.mh-loot-lock { position: absolute; z-index: 5; left: 0; right: 0; bottom: .9em; text-align: center; font-family: var(--mn-font-mono);
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-dim); }
+.mh-lootbtn { padding: 0; border: 0; background: none; cursor: pointer; border-radius: .9em; display: block; transition: transform .15s; }
+.mh-lootbtn:active { transform: scale(.97); }
+.mh-lootbtn:focus-visible { outline: 2px solid var(--mn-coral); outline-offset: 3px; }
+.mh-album-grid { display: grid; grid-template-columns: repeat(3, 104px); justify-content: space-between; row-gap: 12px; }
+.mh-album-tally { display: flex; flex-wrap: wrap; gap: 6px; }
+.mh-chip[data-loot="job"] { background: rgba(246,234,211,.14); color: var(--mn-sand); }
+.mh-chip[data-loot="inside"] { background: rgba(255,122,61,.18); color: var(--mn-peach); }
+.mh-chip[data-loot="getaway"] { background: rgba(255,45,120,.2); color: var(--mn-teal); }
+.mh-chip[data-loot="score"] { background: rgba(255,194,74,.2); color: var(--mn-gold); }
+.mh-badges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mh-badge { padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--mn-line-2); color: var(--mn-dim); }
+.mh-badge .mn-display { font-size: 17px; color: var(--mn-dim); }
+.mh-badge[data-earned] { border: 1px solid rgba(255,194,74,.55); background: rgba(255,194,74,.1); }
+.mh-badge[data-earned] .mn-display { color: var(--mn-gold); }
+.mh-badge-rule { margin-top: 4px; font-size: 12px; line-height: 1.3; color: var(--mn-mist); }
+.mh-badge-n { margin-top: 6px; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.mh-badge[data-earned] .mh-badge-n { color: var(--mn-gold); }
+.mh-loot-stage { display: flex; justify-content: center; padding: 18px 0 6px; }
+.mh-loot-stage[data-tier="score"] { background: radial-gradient(circle at 50% 50%, rgba(255,194,74,.28), transparent 62%); }
+.mh-loot-stage[data-tier="getaway"] { background: radial-gradient(circle at 50% 50%, rgba(255,45,120,.25), transparent 62%); }
+.mh-lootstory { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding-top: 10px; }
+@media (max-width: 359px) { .mh-album-grid { grid-template-columns: repeat(3, 92px); } .mh-album-grid .mh-loot { width: 92px !important; height: 115px !important; font-size: 5.6px !important; } }

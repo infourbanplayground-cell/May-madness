@@ -341,6 +341,7 @@ function MhMe({ D, go }) {
             ))}
           </div>
         </>}
+        <MhAlbum D={D} pid={me.id} go={go} title="Your loot" />
       </div>
     </MhPage>
   );
@@ -399,6 +400,7 @@ function MhCardScreen({ D, go, id }) {
             </div>
           </MhGlass>
         )}
+        <MhAlbum D={D} pid={p.id} go={go} title={own ? "Your loot" : `${mhFirst(p.name)}'s loot`} />
       </div>
     </MhPage>
   );

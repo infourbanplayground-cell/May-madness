@@ -190,8 +190,21 @@ function mhFitAll() {
     if (!el.offsetWidth) continue;
     el.style.fontSize = "";
     let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
-    while (el.scrollWidth > el.clientWidth + .5 && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+    while (mhOver(el) && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
   }
+}
+// scrollWidth and clientWidth are whole numbers: text 0.4px too wide for a
+// 92.66px box reads as 93 = 93 while text-overflow draws the ellipsis ("inside
+// m…" on a 104px knockout card). And a range over ellipsised text measures the
+// TRIMMED run, so the ellipsis is switched off while the text is measured.
+function mhOver(el) {
+  if (el.scrollWidth > el.clientWidth + .5) return true;
+  const box = el.getBoundingClientRect().width, s = el.style, d = s.display, t = s.textOverflow;
+  s.display = "inline-block"; s.textOverflow = "clip";
+  const r = document.createRange(); r.selectNodeContents(el);
+  const w = r.getBoundingClientRect().width;
+  s.display = d; s.textOverflow = t;
+  return w > box + .05;
 }
 if (typeof window !== "undefined" && !window.__mhFit) {
   window.__mhFit = true;

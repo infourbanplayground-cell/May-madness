@@ -14,6 +14,7 @@
 // what the handoff does not draw: creating a night, the draw, the bracket.
 
 const MH_HOST_PHOTOS = "/api/roster";              // Heist portraits, by id
+const MH_HOST_LOOT = "/api/loot";                  // the owner's champion art, by "<night>/<id>"
 const mhFirstOf = n => (n || "").split(/\s+/)[0];
 
 // ── the card stats (data.md, approved 22 Nov) ───────────────────────────
@@ -296,6 +297,16 @@ function heistData(state, o) {
     }
   }
 
+  // a knockout card dealt last night (heist-loot.jsx): shown once, after the others.
+  // Pushed as a marker; the card itself is derived when the screen asks.
+  if (o.meId && lastDoneIdx >= 0 && !preseason) {
+    const no = nights.indexOf(sessions[lastDoneIdx].date) + 1;
+    const B = sessions[lastDoneIdx].bracket || {};
+    const inKo = [...(B.qf || []), ...(B.sf || []), B.final].filter(Boolean).some(m => {
+      const t = getPlayerTeam(sessions[lastDoneIdx], o.meId); return t && (m.team1Id === t.id || m.team2Id === t.id); });
+    if (no > 0 && inKo) moments.push({ type: "loot", playerId: o.meId, session: no });
+  }
+
   const n8 = sessions.findIndex(s => s.date === nights[nights.length - 2]);
   let leadAtStart = null;
   if (n8 >= 0 && after[n8]) { const rows = after[n8].rows; leadAtStart = rows.length > 1 ? rows[0].pts - rows[1].pts : null; }
@@ -307,7 +318,7 @@ function heistData(state, o) {
     live: null, finale: { leadAtStart },
     paidOMR: done.length * (S.voucher || 0) * 2,
     rosterSize: preseason ? players.length : P.length,
-    artBase: o.artBase || "", logo: o.logo,
+    artBase: o.artBase || "", logo: o.logo, lootArt: o.lootArt || {},
     // every scene the owner has sent: the nine episodes, then the spares. Pages
     // draw from this through mhScene() so no two pages open on the same picture.
     scenes: [...(S.episodes || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos, code: e.code, title: e.title })),
@@ -324,13 +335,14 @@ function heistData(state, o) {
 const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
   session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
   loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-  share: MhShareSheet, nightshare: MhNightShare });
+  share: MhShareSheet, nightshare: MhNightShare, loot: MhLootScreen });
 
 function HeistShell(props) {
   const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
   const read = () => (location.hash.slice(1) || "").split("/");
   const [route, setRoute] = React.useState(read);
   const [portraits, setPortraits] = React.useState({});
+  const [lootArt, setLootArt] = React.useState({});
   React.useEffect(() => { const f = () => setRoute(read()); addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
   // the Heist portraits made on /photos/ — a portrait wins over the volume photo
   React.useEffect(() => {
@@ -342,11 +354,18 @@ function HeistShell(props) {
     pull(); const t = setInterval(pull, 5 * 60000);
     return () => { live = false; clearInterval(t); };
   }, []);
+  // the owner's champion artwork, uploaded on /photos/ — it replaces a SCORE card
+  React.useEffect(() => {
+    let live = true;
+    const pull = () => fetch(MH_HOST_LOOT).then(r => r.json()).then(j => { if (live && j.ok) setLootArt(j.art || {}); }).catch(() => {});
+    pull(); const t = setInterval(pull, 5 * 60000);
+    return () => { live = false; clearInterval(t); };
+  }, []);
   const D = React.useMemo(() => {
-    const d = heistData(state, { leaderboard, meId, portraits, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
+    const d = heistData(state, { leaderboard, meId, portraits, lootArt, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
     d.onLogo = openLogin; d.organiser = canScore ? openOrganiser : null; d.pickMe = openMe; d.signedIn = signedIn;
     return d;
-  }, [state, leaderboard, meId, portraits, canScore, signedIn]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn]);
 
   // first open of the day: Now Loading Muscat, then any moment not yet seen
   const day = (() => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; })();
@@ -407,7 +426,8 @@ function mhNextMoment(D) {
   for (const m of D.moments || []) {
     const key = { tierUp: ["card", `${m.playerId}/${m.session}`, `cardpull/${m.session}`],
                   repUp: ["rep", `${m.playerId}/${m.to}`, `repup/${m.playerId}`],
-                  scoreSettled: ["settled", `${m.playerId}/${m.session}`, "settled"] }[m.type];
+                  scoreSettled: ["settled", `${m.playerId}/${m.session}`, "settled"],
+                  loot: ["loot", `${m.playerId}/${m.session}`, `loot/${m.playerId}.${m.session}`] }[m.type];
     if (key && mhOnce(key[0], key[1]).due()) { mhOnce(key[0], key[1]).seen(); return key[2]; }
   }
   return null;

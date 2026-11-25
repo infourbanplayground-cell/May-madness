@@ -36,9 +36,10 @@ page = """<!doctype html>
 @@NIGHT@@
 @@MOMENTS@@
 @@STORIES@@
+@@LOOT@@
 // #story/<poster|contenders|card>/<id>: the bare 416x740 frame, for export and compare
 function MhStoryOnly({ D, what, id }) {
-  const S = { poster: MhStoryPoster, contenders: MhStoryContenders, card: MhStoryCard }[what] || MhStoryPoster;
+  const S = { poster: MhStoryPoster, contenders: MhStoryContenders, card: MhStoryCard, loot: MhStoryLoot }[what] || MhStoryPoster;
   return <div className="mh-page mh-storyonly"><S D={D} id={id} /></div>;
 }
 function Preview() {
@@ -49,7 +50,7 @@ function Preview() {
   const D = window.MH_PREVIEW;
   const go = (to, arg) => {
     if (to === "back") { history.back(); return; }
-    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take", "session", "live", "recap", "slides", "loading", "cardpull", "repup", "rival", "settled", "finale", "share", "story"];
+    const known = ["home", "jobs", "wanted", "me", "crew", "card", "take", "session", "live", "recap", "slides", "loading", "cardpull", "repup", "rival", "settled", "finale", "share", "story", "loot"];
     if (known.indexOf(to) < 0) return;      // later phases: session, recap, rival, receipt, signup
     location.hash = arg != null ? `${to}/${arg}` : to; scrollTo(0, 0);
   };
@@ -57,7 +58,7 @@ function Preview() {
   const S = { home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
               session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
               loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-              share: MhShareSheet, story: MhStoryOnly }[name] || MhHome;
+              share: MhShareSheet, story: MhStoryOnly, loot: MhLootScreen }[name] || MhHome;
   // the preview is the organiser's phone: matches are tappable, as in the reference
   return <S key={route.join("/")} D={D} go={go} no={arg} start={+arg2 || 0} canScore what={arg}
     id={name === "share" || name === "story" ? arg2 : arg}
@@ -69,7 +70,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<Preview />);
 """
 for k, v in (("@@CSS@@", read("heist.css")), ("@@SEASON@@", json.dumps(season, ensure_ascii=False)),
              ("@@DATA@@", read("preview-data.js")), ("@@COMPONENTS@@", read("heist-components.jsx")),
-             ("@@SCREENS@@", read("heist-screens.jsx")), ("@@NIGHT@@", read("heist-night.jsx")), ("@@MOMENTS@@", read("heist-moments.jsx")), ("@@STORIES@@", read("heist-stories.jsx"))):
+             ("@@SCREENS@@", read("heist-screens.jsx")), ("@@NIGHT@@", read("heist-night.jsx")), ("@@MOMENTS@@", read("heist-moments.jsx")), ("@@STORIES@@", read("heist-stories.jsx")), ("@@LOOT@@", read("heist-loot.jsx"))):
     assert page.count(k) == 1, k
     page = page.replace(k, v)
 out = os.path.join(H, "preview.html")

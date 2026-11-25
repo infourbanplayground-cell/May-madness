@@ -171,10 +171,11 @@ async function mhExportStory(node) {
 // ── the share sheet ───────────────────────────────────────────────────────
 const MH_SHARES = [["card", "My card"], ["poster", "Campaign poster"], ["contenders", "Contenders"]];
 function MhShareSheet({ D, go, what = "card", id }) {
-  const [k, setK] = React.useState(MH_SHARES.some(s => s[0] === what) ? what : "card");
+  const shares = what === "loot" ? [["loot", "Knockout card"], ...MH_SHARES] : MH_SHARES;
+  const [k, setK] = React.useState(shares.some(s => s[0] === what) ? what : "card");
   const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
   const ref = React.useRef(null);
-  const name = { card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
+  const name = { loot: "knockout-card", card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
   const run = async () => {
     setBusy(true); setErr("");
     try {
@@ -193,10 +194,10 @@ function MhShareSheet({ D, go, what = "card", id }) {
           <MhLabel>Share</MhLabel>
           <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
         </div>
-        <div style={{ marginTop: 10 }}><MhPills label="What to share" items={MH_SHARES} value={k} onChange={setK} /></div>
+        <div style={{ marginTop: 10 }}><MhPills label="What to share" items={shares} value={k} onChange={setK} /></div>
         <div className="mh-sharepreview">
           <div ref={ref} className="mh-sharescale">
-            {k === "card" ? <MhStoryCard D={D} id={id} /> : k === "poster" ? <MhStoryPoster D={D} /> : <MhStoryContenders D={D} />}
+            {k === "loot" ? <MhStoryLoot D={D} id={id} /> : k === "card" ? <MhStoryCard D={D} id={id && id.split(".")[0]} /> : k === "poster" ? <MhStoryPoster D={D} /> : <MhStoryContenders D={D} />}
           </div>
         </div>
         <MhLabel style={{ textAlign: "center" }}>1080 × 1920 · Instagram story</MhLabel>

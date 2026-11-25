@@ -13,8 +13,9 @@ cd "$(dirname "$0")/.."
 WEB=/var/www/heist.urbanpadel.om/public
 H=heist.urbanpadel.om
 
-ssh urbanpadel "mkdir -p /opt/heist-api/history $WEB/photos $WEB/fonts/brand $WEB/fonts/heist $WEB/players"
-scp -q heist-api/api.js urbanpadel:/opt/heist-api/api.js
+ssh urbanpadel "mkdir -p /opt/heist-api/history $WEB/photos $WEB/fonts/brand $WEB/fonts/heist $WEB/players $WEB/loot"
+# the nights, for the champion-art routes (/api/loot)
+scp -q heist-api/api.js heist-season.json urbanpadel:/opt/heist-api/
 scp -q heist-photos/index.html heist-photos/style.txt urbanpadel:$WEB/photos/
 scp -q brand/fonts/*.woff2 brand/fonts/fonts.css urbanpadel:$WEB/fonts/brand/
 scp -q brand/heist/fonts/*.woff2 brand/heist/fonts/fonts.css urbanpadel:$WEB/fonts/heist/
@@ -93,6 +94,7 @@ server {
     }
     # every Heist photo URL carries ?v=<mtime>, so a replaced photo is a new URL
     location /players/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
+    location /loot/ { add_header Cache-Control "public, max-age=31536000, immutable"; try_files $uri =404; }
     location /photos/ { add_header Cache-Control "no-cache"; try_files $uri $uri/ =404; }
     # the page and version.txt must never be cached, or the app's update check
     # never sees a new build (the lesson every volume's vhost carries)

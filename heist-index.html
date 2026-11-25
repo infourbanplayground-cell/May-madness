@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "2d0c1131e13f";
+  var V = "1f03e5d0ca3f";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1570,6 +1570,84 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 /* the posts' headlines are one line in the wider face, shrunk to fit: "champions"
    ran off the card and "tonight's take" wrapped onto the first row */
 .mh-nstitle, .mh-nchword, .mh-nchname { white-space: nowrap; overflow: hidden; }
+
+/* ── THE LOOT — knockout cards (heist-loot.jsx) ─────────────────────────
+   One card per night you reach the knockout; the frame says how far you got.
+   Sizes are in em off the card's own font-size (16px at 264 wide), so the
+   album thumbnail and the story card are one drawing at two scales. */
+:root {
+  --mh-loot-job: linear-gradient(150deg, #FFF6E6, #E8D6B4 55%, #F6EAD3);
+  --mh-loot-inside: linear-gradient(150deg, #FFC36B, #FF7A3D 55%, #D2357E);
+  --mh-loot-getaway: linear-gradient(150deg, #FF4F8B, #FF2D78 40%, #B0306E 70%, #FF7AA8);
+  --mh-loot-score: linear-gradient(150deg, #FFE7A3, #FFC24A 35%, #E89A1F 65%, #FFE7A3);
+  --mh-loot-ink: #07040D;
+  --mh-loot-foil: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.42) 38%, rgba(255,201,163,.35) 46%, rgba(255,45,120,.25) 54%, transparent 68%);
+  --mh-loot-wash: linear-gradient(180deg, rgba(15,27,43,.15), rgba(15,27,43,.0) 30%, rgba(15,27,43,.55) 62%, rgba(7,4,13,.92) 100%);
+}
+.mh-loot { position: relative; flex: 0 0 auto; box-sizing: border-box; padding: .3em; border-radius: .9em;
+  background: var(--mh-loot-job); box-shadow: var(--mn-shadow-card); overflow: hidden; isolation: isolate; }
+.mh-loot[data-tier="inside"]  { background: var(--mh-loot-inside); box-shadow: var(--mn-shadow-card), 0 0 1.6em rgba(255,122,61,.35); }
+.mh-loot[data-tier="getaway"] { background: var(--mh-loot-getaway); box-shadow: var(--mn-shadow-card), 0 0 1.8em rgba(255,45,120,.45); }
+.mh-loot[data-tier="score"]   { background: var(--mh-loot-score); box-shadow: var(--mn-shadow-card), 0 0 2.4em rgba(255,194,74,.6); }
+.mh-loot > .mh-loot-scene, .mh-loot > .mh-loot-custom, .mh-loot > .mh-loot-wash, .mh-loot > .mh-loot-face, .mh-loot > .mh-loot-fade, .mh-loot > .mh-loot-foil {
+  position: absolute; inset: .3em; border-radius: .65em; overflow: hidden; }
+.mh-loot-scene .mn-art img { filter: var(--mn-art-filter) brightness(.72); }
+.mh-loot-wash { background: var(--mh-loot-wash); z-index: 1; }
+/* the player stands in an arch cut out of the painting */
+.mh-loot > .mh-loot-face { inset: 2.1em 2.2em 4.6em; border-radius: 50% 50% .5em .5em / 34% 34% .5em .5em; z-index: 2;
+  box-shadow: 0 0 0 .18em var(--mh-loot-ink), 0 0 0 .38em currentColor; color: var(--mn-sand); }
+.mh-loot[data-tier="inside"]  > .mh-loot-face { color: var(--mn-coral-2); }
+.mh-loot[data-tier="getaway"] > .mh-loot-face { color: var(--mn-coral); }
+.mh-loot[data-tier="score"]   > .mh-loot-face { color: var(--mn-gold); }
+.mh-loot-face .mn-initials { font-size: 2.6em; background: rgba(15,27,43,.85); }
+.mh-loot > .mh-loot-fade { z-index: 3; background: linear-gradient(180deg, rgba(7,4,13,0) 58%, rgba(7,4,13,.86) 82%); }
+.mh-loot > .mh-loot-foil { z-index: 4; background: var(--mh-loot-foil); background-size: 260% 100%; mix-blend-mode: overlay; animation: mn-foil 3.4s linear infinite; pointer-events: none; }
+.mh-loot[data-tier="score"] > .mh-loot-foil { background-image: linear-gradient(115deg, transparent 20%, rgba(255,255,255,.55) 40%, rgba(255,231,163,.45) 48%, transparent 64%); }
+.mh-loot[data-still] > .mh-loot-foil { animation: none; background-position: 40% 0; }
+.mh-loot-top { position: absolute; z-index: 5; left: .9em; right: .9em; top: .8em; display: flex; justify-content: space-between; align-items: center; }
+.mh-loot-code, .mh-loot-2x { font-family: var(--mn-font-mono); font-weight: 700; font-size: max(11px, .78em); letter-spacing: .08em;
+  padding: .15em .5em; border-radius: .4em; background: var(--mn-tag-bg); color: var(--mn-sand); }
+.mh-loot-2x { background: var(--mn-coral); color: var(--mh-loot-ink); }
+.mh-loot-foot { position: absolute; z-index: 5; left: .9em; right: .9em; bottom: .8em; text-align: center; }
+.mh-loot-tier { font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; line-height: 1; font-size: 1.9em;
+  color: var(--mn-sand); -webkit-text-stroke: .085em var(--mh-loot-ink); paint-order: stroke fill; text-shadow: .06em .07em 0 var(--mh-loot-ink); }
+.mh-loot[data-tier="inside"]  .mh-loot-tier { color: var(--mn-peach); }
+.mh-loot[data-tier="getaway"] .mh-loot-tier { color: var(--mn-teal); }
+.mh-loot[data-tier="score"]   .mh-loot-tier { color: var(--mn-gold); }
+.mh-loot[data-size="s"] .mh-loot-tier { font-size: max(14px, 1.9em); }
+.mh-loot[data-size="s"] .mh-loot-face { inset: 2.4em 1.9em 3.6em; }
+.mh-loot-name { margin-top: .3em; font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; font-size: 1.15em; line-height: 1.05; color: var(--mn-sand); }
+.mh-loot-with { font-family: var(--mn-font-serif); font-size: max(11px, .95em); color: var(--mn-coral); margin-top: .1em; }
+.mh-loot-meta { display: flex; justify-content: space-between; margin-top: .45em; font-family: var(--mn-font-mono); font-size: max(11px, .72em);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--mn-mist); }
+.mh-loot-custom .mn-art img { filter: none; }
+.mh-loot-custom .mn-art::after { display: none; }
+.mh-loot-empty { background: rgba(255,244,232,.08); box-shadow: inset 0 0 0 1px var(--mn-line-2); }
+.mh-loot-empty .mh-loot-scene .mn-art img { filter: grayscale(.85) brightness(.32); }
+.mh-loot-lock { position: absolute; z-index: 5; left: 0; right: 0; bottom: .9em; text-align: center; font-family: var(--mn-font-mono);
+  font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mn-dim); }
+.mh-lootbtn { padding: 0; border: 0; background: none; cursor: pointer; border-radius: .9em; display: block; transition: transform .15s; }
+.mh-lootbtn:active { transform: scale(.97); }
+.mh-lootbtn:focus-visible { outline: 2px solid var(--mn-coral); outline-offset: 3px; }
+.mh-album-grid { display: grid; grid-template-columns: repeat(3, 104px); justify-content: space-between; row-gap: 12px; }
+.mh-album-tally { display: flex; flex-wrap: wrap; gap: 6px; }
+.mh-chip[data-loot="job"] { background: rgba(246,234,211,.14); color: var(--mn-sand); }
+.mh-chip[data-loot="inside"] { background: rgba(255,122,61,.18); color: var(--mn-peach); }
+.mh-chip[data-loot="getaway"] { background: rgba(255,45,120,.2); color: var(--mn-teal); }
+.mh-chip[data-loot="score"] { background: rgba(255,194,74,.2); color: var(--mn-gold); }
+.mh-badges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mh-badge { padding: 10px 12px; border-radius: 12px; border: 1px dashed var(--mn-line-2); color: var(--mn-dim); }
+.mh-badge .mn-display { font-size: 17px; color: var(--mn-dim); }
+.mh-badge[data-earned] { border: 1px solid rgba(255,194,74,.55); background: rgba(255,194,74,.1); }
+.mh-badge[data-earned] .mn-display { color: var(--mn-gold); }
+.mh-badge-rule { margin-top: 4px; font-size: 12px; line-height: 1.3; color: var(--mn-mist); }
+.mh-badge-n { margin-top: 6px; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.mh-badge[data-earned] .mh-badge-n { color: var(--mn-gold); }
+.mh-loot-stage { display: flex; justify-content: center; padding: 18px 0 6px; }
+.mh-loot-stage[data-tier="score"] { background: radial-gradient(circle at 50% 50%, rgba(255,194,74,.28), transparent 62%); }
+.mh-loot-stage[data-tier="getaway"] { background: radial-gradient(circle at 50% 50%, rgba(255,45,120,.25), transparent 62%); }
+.mh-lootstory { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding-top: 10px; }
+@media (max-width: 359px) { .mh-album-grid { grid-template-columns: repeat(3, 92px); } .mh-album-grid .mh-loot { width: 92px !important; height: 115px !important; font-size: 5.6px !important; } }
 
 </style>
 <style id="heist-classic">
@@ -7971,8 +8049,21 @@ function mhFitAll() {
     if (!el.offsetWidth) continue;
     el.style.fontSize = "";
     let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
-    while (el.scrollWidth > el.clientWidth + .5 && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+    while (mhOver(el) && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
   }
+}
+// scrollWidth and clientWidth are whole numbers: text 0.4px too wide for a
+// 92.66px box reads as 93 = 93 while text-overflow draws the ellipsis ("inside
+// m…" on a 104px knockout card). And a range over ellipsised text measures the
+// TRIMMED run, so the ellipsis is switched off while the text is measured.
+function mhOver(el) {
+  if (el.scrollWidth > el.clientWidth + .5) return true;
+  const box = el.getBoundingClientRect().width, s = el.style, d = s.display, t = s.textOverflow;
+  s.display = "inline-block"; s.textOverflow = "clip";
+  const r = document.createRange(); r.selectNodeContents(el);
+  const w = r.getBoundingClientRect().width;
+  s.display = d; s.textOverflow = t;
+  return w > box + .05;
 }
 if (typeof window !== "undefined" && !window.__mhFit) {
   window.__mhFit = true;
@@ -8448,6 +8539,7 @@ function MhMe({ D, go }) {
             ))}
           </div>
         </>}
+        <MhAlbum D={D} pid={me.id} go={go} title="Your loot" />
       </div>
     </MhPage>
   );
@@ -8506,6 +8598,7 @@ function MhCardScreen({ D, go, id }) {
             </div>
           </MhGlass>
         )}
+        <MhAlbum D={D} pid={p.id} go={go} title={own ? "Your loot" : `${mhFirst(p.name)}'s loot`} />
       </div>
     </MhPage>
   );
@@ -9568,10 +9661,11 @@ async function mhExportStory(node) {
 // ── the share sheet ───────────────────────────────────────────────────────
 const MH_SHARES = [["card", "My card"], ["poster", "Campaign poster"], ["contenders", "Contenders"]];
 function MhShareSheet({ D, go, what = "card", id }) {
-  const [k, setK] = React.useState(MH_SHARES.some(s => s[0] === what) ? what : "card");
+  const shares = what === "loot" ? [["loot", "Knockout card"], ...MH_SHARES] : MH_SHARES;
+  const [k, setK] = React.useState(shares.some(s => s[0] === what) ? what : "card");
   const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
   const ref = React.useRef(null);
-  const name = { card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
+  const name = { loot: "knockout-card", card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
   const run = async () => {
     setBusy(true); setErr("");
     try {
@@ -9590,10 +9684,10 @@ function MhShareSheet({ D, go, what = "card", id }) {
           <MhLabel>Share</MhLabel>
           <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
         </div>
-        <div style={{ marginTop: 10 }}><MhPills label="What to share" items={MH_SHARES} value={k} onChange={setK} /></div>
+        <div style={{ marginTop: 10 }}><MhPills label="What to share" items={shares} value={k} onChange={setK} /></div>
         <div className="mh-sharepreview">
           <div ref={ref} className="mh-sharescale">
-            {k === "card" ? <MhStoryCard D={D} id={id} /> : k === "poster" ? <MhStoryPoster D={D} /> : <MhStoryContenders D={D} />}
+            {k === "loot" ? <MhStoryLoot D={D} id={id} /> : k === "card" ? <MhStoryCard D={D} id={id && id.split(".")[0]} /> : k === "poster" ? <MhStoryPoster D={D} /> : <MhStoryContenders D={D} />}
           </div>
         </div>
         <MhLabel style={{ textAlign: "center" }}>1080 × 1920 · Instagram story</MhLabel>
@@ -9603,6 +9697,256 @@ function MhShareSheet({ D, go, what = "card", id }) {
         </div>
       </main>
     </div>
+  );
+}
+
+// MUSCAT HEIST · Vol.10 — THE LOOT: knockout cards (owner, 25 Nov 2026).
+//
+// Reach the knockout and you are dealt a card for that night; it UPGRADES as
+// you win, and you keep your best one per night — so a season is at most nine
+// cards, one per episode, collected into an album on the profile.
+//
+//   THE JOB     quarter-final        cream
+//   INSIDE MAN  semi-final           orange, sunset glow
+//   GETAWAY     finalist             pink foil
+//   THE SCORE   champion             gold; the owner's own artwork when uploaded
+//
+// EVERYTHING HERE IS DERIVED FROM THE BRACKET the night already stores — D.nights
+// [no].knockout, the adapter's shape, which the preview fixtures share — so
+// nothing new is saved and nothing is scored (handoff rule 2). The badges are
+// for show and never touch the table.
+//
+// SERIALS ARE REAL. "EP03 · INSIDE MAN · 2/4" means four people hold that card:
+// the losing pairs of that round, in bracket order. A serial is printed only
+// once every match in that round has a result — before then the card is IN
+// PLAY, because it can still upgrade and the count is not yet a fact.
+
+const MH_LOOT = [
+  { id: "job", name: "The Job", round: "Quarter-final", reached: "Made the quarter-finals" },
+  { id: "inside", name: "Inside Man", round: "Semi-final", reached: "Made the semi-finals" },
+  { id: "getaway", name: "Getaway", round: "Finalist", reached: "Made the final" },
+  { id: "score", name: "The Score", round: "Champion", reached: "Champions" },
+];
+const mhLootTier = id => MH_LOOT.find(t => t.id === id) || MH_LOOT[0];
+const mhLootRank = id => MH_LOOT.findIndex(t => t.id === id);
+
+// The badges: cosmetic, counted off the album.
+const MH_LOOT_BADGES = [
+  { id: "crew", name: "Crew", rule: "Reach the knockout on 3 nights", need: 3, count: c => c.length },
+  { id: "made", name: "Made Man", rule: "Reach 3 finals", need: 3, count: c => c.filter(x => mhLootRank(x.tier) >= 2).length },
+  { id: "mastermind", name: "Mastermind", rule: "Win a night — hold The Score", need: 1, count: c => c.filter(x => x.tier === "score").length },
+  { id: "full", name: "Full Heist", rule: "Reach the knockout on all nine nights", need: 0, count: c => c.length },
+];
+
+// mhLoot(D) -> { byPlayer: { pid: [card] }, of(pid, no) }
+// A card: { pid, no, tier, name, first, photo, partner, code, title, art, artPos,
+//           date, doubled, settled, serial, of, beat, score, custom }
+function mhLoot(D) {
+  if (D.__loot) return D.__loot;
+  const byPlayer = {};
+  const total = (D.sessions || []).length;
+  (D.sessions || []).forEach(sv => {
+    const N = (D.nights || {})[sv.no], K = N && N.knockout;
+    if (!K) return;
+    const best = {};                                   // pid -> { tier, team, partner, match }
+    const deal = (team, tier, extra) => (team && team.players || []).forEach((p, i, all) => {
+      if (!p || !p.id) return;
+      if (best[p.id] && mhLootRank(best[p.id].tier) >= mhLootRank(tier)) return;
+      best[p.id] = Object.assign({ tier, p, partner: all[1 - i] || null }, extra);
+    });
+    const rounds = [["job", K.qf || []], ["inside", K.sf || []], ["getaway", K.final ? [K.final] : []]];
+    rounds.forEach(([tier, ms]) => ms.forEach(m => { deal(m && m.ta, tier, { m }); deal(m && m.tb, tier, { m }); }));
+    const F = K.final;
+    if (F && F.winner) deal(F.winner === "a" ? F.ta : F.tb, "score", { m: F });
+
+    // serials: the losers of each round in bracket order (the champions for The Score)
+    const serial = {};
+    const holders = (tier, ms) => {
+      const real = ms.filter(m => m && m.ta && m.tb);
+      const decided = real.length > 0 && real.every(m => m.winner);
+      const list = [];
+      real.forEach(m => {
+        const lose = tier === "score" ? (m.winner === "a" ? m.ta : m.tb) : (m.winner === "a" ? m.tb : m.winner === "b" ? m.ta : null);
+        (lose && lose.players || []).forEach(p => p && list.push(p.id));
+      });
+      serial[tier] = { decided, of: real.length * 2, list };
+    };
+    holders("job", K.qf || []); holders("inside", K.sf || []);
+    holders("getaway", F ? [F] : []); holders("score", F ? [F] : []);
+
+    Object.keys(best).forEach(pid => {
+      const b = best[pid], S = serial[b.tier], m = b.m;
+      const mine = m && (m.ta && m.ta.players.some(p => p && p.id === pid) ? "a" : "b");
+      const opp = m && (mine === "a" ? m.tb : m.ta);
+      const settled = b.tier === "score" || (m && !!m.winner && m.winner !== mine) || sv.state === "done";
+      const idx = S.list.indexOf(pid);
+      const card = {
+        pid, no: sv.no, tier: b.tier, name: b.p.name, first: b.p.first || mhFirstName(b.p.name), photo: b.p.photo,
+        partner: b.partner ? { name: b.partner.name, first: b.partner.first || mhFirstName(b.partner.name), photo: b.partner.photo } : null,
+        code: sv.code, title: sv.title, art: sv.art, artPos: sv.artPos, date: sv.date, doubled: !!sv.doublePoints,
+        settled, serial: S.decided && idx >= 0 ? idx + 1 : null, of: S.decided ? S.of : null,
+        opp: opp ? opp.players.map(p => p && (p.first || mhFirstName(p.name))).join(" & ") : null,
+        score: m && m.ga != null ? (mine === "a" ? `${m.ga}-${m.gb}` : `${m.gb}-${m.ga}`) : null,
+        custom: b.tier === "score" ? ((D.lootArt || {})[`${sv.no}/${pid}`] || null) : null,
+      };
+      (byPlayer[pid] = byPlayer[pid] || []).push(card);
+    });
+  });
+  Object.values(byPlayer).forEach(l => l.sort((a, b) => a.no - b.no));
+  const out = { byPlayer, total, of: (pid, no) => (byPlayer[pid] || []).find(c => c.no === +no) || null };
+  try { Object.defineProperty(D, "__loot", { value: out, enumerable: false }); } catch (e) {}
+  return out;
+}
+const mhFirstName = n => (n || "").split(/\s+/)[0];
+const mhBadgeNeed = (b, total) => b.need || total;
+function mhLootBadges(cards, total) {
+  return MH_LOOT_BADGES.map(b => { const n = b.count(cards), need = mhBadgeNeed(b, total);
+    return Object.assign({}, b, { n: Math.min(n, need), need, earned: n >= need }); });
+}
+const mhLootSerial = c => c.serial ? `${c.serial}/${c.of}` : c.settled ? "" : "in play";
+
+// ── the card ─────────────────────────────────────────────────────────────
+// 4:5, the same proportion as a Heist portrait and the owner's champion art, so
+// an uploaded picture drops in exactly. size: "S" (album), "M", "L" (screen, story)
+const MH_LOOT_W = { S: 104, M: 168, L: 264 };
+function MhLootCard({ card, size = "L", onClick, still }) {
+  const w = MH_LOOT_W[size] || size, t = mhLootTier(card.tier), small = w < 140;
+  const body = (
+    <div className="mh-loot" data-tier={card.tier} data-size={small ? "s" : "l"} data-still={still ? "" : undefined}
+      style={{ width: w, height: Math.round(w * 1.25), fontSize: w / 264 * 16 }}>
+      {card.custom ? (
+        <div className="mh-loot-custom"><MhArt src={card.custom} pos="center 30%" eager={!small} /></div>
+      ) : <>
+        <div className="mh-loot-scene"><MhArt src={card.art} pos={card.artPos} sizes={small ? "120px" : "300px"} /></div>
+        <div className="mh-loot-wash" aria-hidden="true" />
+        <div className="mh-loot-face"><MhArt src={card.photo} name={card.name} pos="center 0%" sizes={small ? "120px" : "300px"} /></div>
+        <div className="mh-loot-fade" aria-hidden="true" />
+      </>}
+      {(card.tier === "getaway" || card.tier === "score") && <div className="mh-loot-foil" aria-hidden="true" />}
+      <div className="mh-loot-top">
+        <span className="mh-loot-code">{card.code}</span>
+        {card.doubled && <span className="mh-loot-2x">2X</span>}
+      </div>
+      <div className="mh-loot-foot">
+        <div className="mh-loot-tier"><span className="mh-fitline">{t.name}</span></div>
+        {!small && <>
+          <div className="mh-loot-name"><span className="mh-fitline">{card.name}</span></div>
+          {card.partner && <div className="mh-loot-with">with {card.partner.first}</div>}
+          <div className="mh-loot-meta"><span>{t.round}</span><span>{mhLootSerial(card)}</span></div>
+        </>}
+      </div>
+    </div>
+  );
+  return onClick
+    ? <button type="button" className="mh-lootbtn" onClick={onClick} aria-label={`${card.code} ${t.name}, ${card.name}`}>{body}</button>
+    : body;
+}
+
+// an empty slot: the night's painting, darkened, and what the slot is waiting for
+function MhLootSlot({ s, label }) {
+  return (
+    <div className="mh-loot mh-loot-empty" style={{ width: MH_LOOT_W.S, height: Math.round(MH_LOOT_W.S * 1.25) }}>
+      <div className="mh-loot-scene"><MhArt src={s.art} pos={s.artPos} sizes="120px" /></div>
+      <div className="mh-loot-top"><span className="mh-loot-code">{s.code}</span></div>
+      <div className="mh-loot-lock">{label}</div>
+    </div>
+  );
+}
+
+// ── the album ────────────────────────────────────────────────────────────
+function MhAlbum({ D, pid, go, title = "The loot" }) {
+  const L = mhLoot(D), cards = L.byPlayer[pid] || [];
+  const badges = mhLootBadges(cards, L.total);
+  const count = id => cards.filter(c => c.tier === id).length;
+  return (
+    <section className="mh-col mh-album" aria-label="Knockout cards" style={{ gap: 10 }}>
+      <div className="mh-split">
+        <MhLabel tone="peach">{title}</MhLabel>
+        <MhLabel>{cards.length} of {L.total} nights</MhLabel>
+      </div>
+      <div className="mh-album-grid">
+        {D.sessions.map(s => {
+          const c = cards.find(x => x.no === s.no);
+          if (c) return <MhLootCard key={s.no} card={c} size="S" onClick={() => go("loot", `${pid}.${s.no}`)} />;
+          return <MhLootSlot key={s.no} s={s} label={s.state === "done" ? "No card" : s.state === "live" ? "Tonight" : mhDay(s.date)} />;
+        })}
+      </div>
+      <div className="mh-album-tally">
+        {MH_LOOT.map(t => <span key={t.id} className="mh-chip" data-loot={t.id}>{t.name} · {count(t.id)}</span>)}
+      </div>
+      <div className="mh-badges">
+        {badges.map(b => (
+          <div key={b.id} className="mh-badge" data-earned={b.earned ? "" : undefined}>
+            <div className="mn-display">{b.name}</div>
+            <div className="mh-badge-rule">{b.rule}</div>
+            <div className="mh-badge-n">{b.earned ? "Earned" : `${b.n}/${b.need}`}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ── one card, big — #loot/<pid>.<no> (one route argument, so the app shell and
+// the preview hand it over the same way) ──
+function MhLootScreen({ D, go, id }) {
+  const L = mhLoot(D);
+  const [pid, no] = String(id || "").split("."), card = L.of(pid, no);
+  const fresh = D.meId === pid && D.sessions.filter(s => s.state === "done").slice(-1).some(s => s.no === +no);
+  if (!card) {
+    return (
+      <MhPage D={D} tab="me" onTab={go} nav={false} pad="92px 20px 0">
+        <div className="mh-col">
+          <div className="mh-split"><MhLabel>Knockout card</MhLabel>
+            <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button></div>
+          <MhGlass><MhSerif size={15}>No card for this night.</MhSerif></MhGlass>
+        </div>
+      </MhPage>
+    );
+  }
+  const t = mhLootTier(card.tier);
+  const line = card.tier === "score"
+    ? `Won the final ${card.score || ""}${card.opp ? " against " + card.opp : ""}`
+    : card.settled && card.opp ? `${t.reached} · lost ${card.score || ""} to ${card.opp}` : t.reached;
+  return (
+    <MhPage D={D} tab="me" onTab={go} nav={false} pad="92px 20px 0">
+      <div className="mh-col">
+        <div className="mh-split">
+          <MhLabel tone={fresh ? "gold" : undefined}>{fresh ? "New knockout card" : "Knockout card"}</MhLabel>
+          <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
+        </div>
+        <div className="mh-loot-stage" data-tier={card.tier}><MhLootCard card={card} size="L" /></div>
+        <div style={{ textAlign: "center" }}>
+          <MhSerif size={16}>{card.code} · {card.title}</MhSerif>
+          <MhLabel style={{ marginTop: 4 }}>{line}</MhLabel>
+          {card.serial && <MhLabel tone="peach" style={{ marginTop: 4 }}>One of {card.of} {t.name} cards from this night</MhLabel>}
+        </div>
+        <MhButton live onClick={() => go("share", `loot/${pid}.${card.no}`)}>Share to story</MhButton>
+        <MhAlbum D={D} pid={pid} go={(to, a) => to === "loot" ? location.replace(`#loot/${a}`) : go(to, a)}
+          title={D.meId === pid ? "Your loot" : `${mhFirstName(card.name)}'s loot`} />
+      </div>
+    </MhPage>
+  );
+}
+
+// ── the story — the share sheet's "Knockout card" ──────────────────────
+function MhStoryLoot({ D, id }) {
+  const [pid, no] = String(id || "").split(".");
+  const card = mhLoot(D).of(pid, no);
+  if (!card) return <MhStoryFrame label="Knockout card"><div /></MhStoryFrame>;
+  const t = mhLootTier(card.tier);
+  return (
+    <MhStoryFrame label={`${card.name}: ${t.name}, ${card.code}`}>
+      <MhMomentBack src={card.custom || card.art} pos={card.custom ? "center 30%" : card.artPos} dim={.55}
+        glow={card.tier === "score" ? "gold" : "coral"} at="50% 42%" />
+      <div className="mh-lootstory">
+        <MhLabel tone="peach">Knockout card · {card.code}</MhLabel>
+        <MhLootCard card={card} size={300} still />
+        <MhLabel tone="sand" style={{ marginTop: 6 }}>{card.title ? card.title + " · " : ""}{mhDay(card.date)}</MhLabel>
+        <div style={{ marginTop: 6 }}><MhTitleLockup size={50} center meta={false} /></div>
+        <MhLabel tone="sand" style={{ marginTop: 2 }}>{(MH.stories || {}).url || MH.host}</MhLabel>
+      </div>
+    </MhStoryFrame>
   );
 }
 
@@ -9916,6 +10260,7 @@ function MhNightShare({ D, go, no, kind }) {
 // what the handoff does not draw: creating a night, the draw, the bracket.
 
 const MH_HOST_PHOTOS = "/api/roster";              // Heist portraits, by id
+const MH_HOST_LOOT = "/api/loot";                  // the owner's champion art, by "<night>/<id>"
 const mhFirstOf = n => (n || "").split(/\s+/)[0];
 
 // ── the card stats (data.md, approved 22 Nov) ───────────────────────────
@@ -10198,6 +10543,16 @@ function heistData(state, o) {
     }
   }
 
+  // a knockout card dealt last night (heist-loot.jsx): shown once, after the others.
+  // Pushed as a marker; the card itself is derived when the screen asks.
+  if (o.meId && lastDoneIdx >= 0 && !preseason) {
+    const no = nights.indexOf(sessions[lastDoneIdx].date) + 1;
+    const B = sessions[lastDoneIdx].bracket || {};
+    const inKo = [...(B.qf || []), ...(B.sf || []), B.final].filter(Boolean).some(m => {
+      const t = getPlayerTeam(sessions[lastDoneIdx], o.meId); return t && (m.team1Id === t.id || m.team2Id === t.id); });
+    if (no > 0 && inKo) moments.push({ type: "loot", playerId: o.meId, session: no });
+  }
+
   const n8 = sessions.findIndex(s => s.date === nights[nights.length - 2]);
   let leadAtStart = null;
   if (n8 >= 0 && after[n8]) { const rows = after[n8].rows; leadAtStart = rows.length > 1 ? rows[0].pts - rows[1].pts : null; }
@@ -10209,7 +10564,7 @@ function heistData(state, o) {
     live: null, finale: { leadAtStart },
     paidOMR: done.length * (S.voucher || 0) * 2,
     rosterSize: preseason ? players.length : P.length,
-    artBase: o.artBase || "", logo: o.logo,
+    artBase: o.artBase || "", logo: o.logo, lootArt: o.lootArt || {},
     // every scene the owner has sent: the nine episodes, then the spares. Pages
     // draw from this through mhScene() so no two pages open on the same picture.
     scenes: [...(S.episodes || []).map(e => ({ src: (o.artBase || "") + e.art, pos: e.artPos, code: e.code, title: e.title })),
@@ -10226,13 +10581,14 @@ function heistData(state, o) {
 const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
   session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
   loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-  share: MhShareSheet, nightshare: MhNightShare });
+  share: MhShareSheet, nightshare: MhNightShare, loot: MhLootScreen });
 
 function HeistShell(props) {
   const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
   const read = () => (location.hash.slice(1) || "").split("/");
   const [route, setRoute] = React.useState(read);
   const [portraits, setPortraits] = React.useState({});
+  const [lootArt, setLootArt] = React.useState({});
   React.useEffect(() => { const f = () => setRoute(read()); addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
   // the Heist portraits made on /photos/ — a portrait wins over the volume photo
   React.useEffect(() => {
@@ -10244,11 +10600,18 @@ function HeistShell(props) {
     pull(); const t = setInterval(pull, 5 * 60000);
     return () => { live = false; clearInterval(t); };
   }, []);
+  // the owner's champion artwork, uploaded on /photos/ — it replaces a SCORE card
+  React.useEffect(() => {
+    let live = true;
+    const pull = () => fetch(MH_HOST_LOOT).then(r => r.json()).then(j => { if (live && j.ok) setLootArt(j.art || {}); }).catch(() => {});
+    pull(); const t = setInterval(pull, 5 * 60000);
+    return () => { live = false; clearInterval(t); };
+  }, []);
   const D = React.useMemo(() => {
-    const d = heistData(state, { leaderboard, meId, portraits, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
+    const d = heistData(state, { leaderboard, meId, portraits, lootArt, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
     d.onLogo = openLogin; d.organiser = canScore ? openOrganiser : null; d.pickMe = openMe; d.signedIn = signedIn;
     return d;
-  }, [state, leaderboard, meId, portraits, canScore, signedIn]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn]);
 
   // first open of the day: Now Loading Muscat, then any moment not yet seen
   const day = (() => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; })();
@@ -10309,7 +10672,8 @@ function mhNextMoment(D) {
   for (const m of D.moments || []) {
     const key = { tierUp: ["card", `${m.playerId}/${m.session}`, `cardpull/${m.session}`],
                   repUp: ["rep", `${m.playerId}/${m.to}`, `repup/${m.playerId}`],
-                  scoreSettled: ["settled", `${m.playerId}/${m.session}`, "settled"] }[m.type];
+                  scoreSettled: ["settled", `${m.playerId}/${m.session}`, "settled"],
+                  loot: ["loot", `${m.playerId}/${m.session}`, `loot/${m.playerId}.${m.session}`] }[m.type];
     if (key && mhOnce(key[0], key[1]).due()) { mhOnce(key[0], key[1]).seen(); return key[2]; }
   }
   return null;

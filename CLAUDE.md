@@ -938,6 +938,34 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     with no player list and blanked the WHOLE night page (preview fixtures);
     `check-heist-night.mjs` still clicked an "MVP" tab that has been "Points"
     whenever nobody voted since 23 Nov.
+- **THE LOOT — knockout cards (owner, 25 Nov 2026: "a collectible kind of
+  thing")** — `brand/heist/heist-loot.jsx`. Reach a night's knockout and you
+  are dealt a card that UPGRADES as you win; you keep your best per night, so a
+  season is nine slots: THE JOB (quarter-final, cream), INSIDE MAN (semi,
+  orange), GETAWAY (finalist, pink foil), THE SCORE (champion, gold). Each card
+  wears that night's painting; double nights carry a 2X stamp.
+  - **Derived, never stored**: `mhLoot(D)` reads `D.nights[no].knockout`, the
+    adapter's bracket shape the preview shares. Nothing is saved, nothing scored.
+    The badges (Crew, Made Man, Mastermind, Full Heist) are for show.
+  - **Serials are real**: "one of 4 Inside Man cards" is that round's losers x2,
+    in bracket order — printed only once every match in the round has a result.
+  - The album is on ME and on every crew card (`#card/<id>`); one card is
+    `#loot/<id>.<no>` (ONE route argument — the shell and the preview pass the
+    second one differently); a card dealt last night is a once-only moment; the
+    share sheet's "Knockout card" exports it at 1080x1920.
+  - **The owner's champion art replaces a SCORE card**: uploaded on
+    `/photos/` (Knockout cards section) to `heist-api` `POST /api/loot/:no/:id`,
+    4:5 1080x1350, stored as `public/loot/epNN-<id>.jpg`, refused for anyone who
+    did not win that night (champions read from the season API on 3013, nights
+    from `heist-season.json`, which `deploy-heist-photos.sh` copies beside
+    api.js). Replaced/removed art goes to `/opt/heist-api/history/`.
+  - **`mhFitAll` measured whole pixels**: "inside man" was 0.34px too wide for a
+    92.66px box, scrollWidth and clientWidth both read 93, and the album drew
+    "inside m…". It now measures the text with the ellipsis switched off (a
+    range over ellipsised text measures the TRIMMED run). Proved by reverting.
+  - `node ops/check-heist-loot.mjs` (expected cards worked out in Node from the
+    stored brackets, serials, fit, custom art, export; `SABOTAGE=tier` goes red)
+    and `node ops/check-heist-loot-art.mjs` (the upload end to end, real API).
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:

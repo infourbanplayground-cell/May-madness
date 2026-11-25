@@ -52,6 +52,12 @@ dialog::backdrop{background:rgba(5,10,18,.75)}
 input[type=range]{width:100%;accent-color:var(--coral)}
 .msg{font-size:13px}.ok{color:var(--teal)}.err{color:var(--coral)}
 .log{font:12px/1.6 var(--mono);color:var(--mist);max-height:220px;overflow:auto}
+.night{margin:14px 0}.night .row{align-items:center}
+.champs{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:8px}
+.champ{background:var(--navy2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.champ .ph{position:relative;aspect-ratio:4/5;background:#1B2A3C;display:grid;place-items:center}
+.champ .ph img,.champ .ph canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.champ .cap{padding:8px 10px 10px;display:grid;gap:8px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head><body><main>
@@ -92,6 +98,12 @@ input[type=range]{width:100%;accent-color:var(--coral)}
 </div>
 <div class="log" id="batchLog" aria-live="polite"></div>
 <div class="g" id="grid" aria-live="polite"></div>
+
+<section id="loot" style="margin-top:40px">
+  <h2 class="d" style="margin:0 0 6px;font-size:34px">Knockout cards: champion artwork</h2>
+  <p class="s" style="margin:0 0 12px">Everyone who reaches the knockout gets a card in the app automatically. A night's two champions hold <b>The Score</b>: upload a picture here and it replaces their card. 4:5, cut to 1080×1350 like the photos above. Remove it and the card goes back to automatic.</p>
+  <div id="lootList"></div>
+</section>
 </main>
 
 <dialog id="dlg" aria-labelledby="dlgName"><div class="sheet">
@@ -146,12 +158,12 @@ function drawAuth() {
   if (tokenLive(token)) {
     a.innerHTML = `<span class="l" style="color:var(--teal)">Signed in · you can upload</span><button type="button" id="out">Sign out</button>`;
     $("#out").onclick = () => { token = null; store.set("heist-token", null); drawAuth(); };
-    $("#batchBtn").hidden = false;
+    $("#batchBtn").hidden = false; if (window.drawLoot) drawLoot();
   } else {
     a.innerHTML = `<label class="l" for="pin">Organiser PIN</label><input type="password" id="pin" inputmode="numeric" autocomplete="off" style="width:140px">
       <button type="button" id="in">Sign in to upload</button><span class="msg err" id="inMsg"></span>`;
     $("#in").onclick = login; $("#pin").onkeydown = e => { if (e.key === "Enter") login(); };
-    $("#batchBtn").hidden = true;
+    $("#batchBtn").hidden = true; if (window.drawLoot) drawLoot();
   }
 }
 async function login() {
@@ -273,7 +285,55 @@ $("#batch").onchange = async e => {
   draw();
 };
 
+// ── champion artwork (THE SCORE cards) ─────────────────────────────────
+let lootData = { art: {}, nights: [] };
+const lootStaged = {};
+async function loadLoot() {
+  const r = await fetch("/api/loot", { cache: "no-store" }); lootData = await r.json(); drawLoot();
+}
+function drawLoot() {
+  const can = tokenLive(token), played = (lootData.nights || []).filter(n => n.champions.length);
+  $("#lootList").innerHTML = played.length ? played.map(n => `<div class="night"><div class="l">Night ${n.no} · ${esc(n.date)}</div><div class="champs">${
+    n.champions.map(c => { const k = `${n.no}/${c.id}`, art = lootData.art[k], st = lootStaged[k];
+      return `<div class="champ" data-k="${k}"><div class="ph" id="ph-${n.no}-${c.id}">${art && !st ? `<img src="${art}" alt="${esc(c.name)}, champion art">` : st ? "" : `<span class="s">automatic card</span>`}</div>
+        <div class="cap"><b>${esc(c.name)}</b>${can ? (st ? `${st.tall ? `<input type="range" min="0" max="100" value="${st.pos}" aria-label="Move the crop" data-crop="${k}">` : ""}<div class="row"><button type="button" class="pri" data-save="${k}">Save</button><button type="button" data-cancel="${k}">Cancel</button></div>`
+          : `<div class="row"><label class="btn">${art ? "Replace" : "Upload art"}<input type="file" accept="image/*" hidden data-pick="${k}"></label>${art ? `<button type="button" data-del="${k}">Remove</button>` : ""}</div>`) : ""}
+        <div class="msg" data-msg="${k}"></div></div></div>`; }).join("")}</div></div>`).join("")
+    : `<p class="s">No night has champions yet. After the first final, they appear here.</p>`;
+  Object.entries(lootStaged).forEach(([k, st]) => { const ph = document.getElementById("ph-" + k.replace("/", "-")); if (ph) { ph.innerHTML = ""; ph.appendChild(st.canvas); } });
+}
+$("#lootList").addEventListener("change", async e => {
+  const k = e.target.dataset.pick; if (!k) return;
+  const f = e.target.files[0]; if (!f) return;
+  try { const img = await readImg(f); const tall = img.naturalHeight / img.naturalWidth > H / W + .01;
+    lootStaged[k] = { img, tall, pos: 35, canvas: cut(img, .35) }; drawLoot();
+  } catch (err) { const m = document.querySelector(`[data-msg="${k}"]`); if (m) { m.className = "msg err"; m.textContent = "Not an image this browser can read."; } }
+});
+$("#lootList").addEventListener("input", e => {
+  const k = e.target.dataset.crop; if (!k) return;
+  const st = lootStaged[k]; st.pos = +e.target.value; st.canvas = cut(st.img, st.pos / 100);
+  const ph = document.getElementById("ph-" + k.replace("/", "-")); ph.innerHTML = ""; ph.appendChild(st.canvas);
+});
+$("#lootList").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const k = b.dataset.save || b.dataset.cancel || b.dataset.del; if (!k) return;
+  const msg = t => { const m = document.querySelector(`[data-msg="${k}"]`); if (m) { m.className = "msg err"; m.textContent = t; } };
+  if (b.dataset.cancel) { delete lootStaged[k]; drawLoot(); return; }
+  if (b.dataset.del) {
+    if (!confirm("Remove this artwork? The card goes back to automatic; a copy is kept on the server.")) return;
+    await fetch(`/api/loot/${k}`, { method: "DELETE", headers: { Authorization: "Bearer " + token } }); loadLoot(); return;
+  }
+  b.disabled = true;
+  const r = await fetch(`/api/loot/${k}`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
+    body: JSON.stringify({ image: lootStaged[k].canvas.toDataURL("image/jpeg", .9) }) });
+  const j = await r.json().catch(() => ({ error: "server error " + r.status }));
+  if (r.status === 401) { token = null; store.set("heist-token", null); drawAuth(); }
+  if (!j.ok) { b.disabled = false; msg(j.error || "upload failed"); return; }
+  delete lootStaged[k]; loadLoot();
+});
+
 fetch("style.txt", { cache: "no-cache" }).then(r => r.text()).then(t => { STYLE = t.trim(); $("#style").textContent = STYLE; });
+loadLoot().catch(() => { $("#lootList").innerHTML = `<p class="s">The nights could not be loaded.</p>`; });
 drawAuth(); load().catch(() => { $("#grid").innerHTML = `<p class="s">The roster could not be loaded. Try again in a minute.</p>`; });
 </script>
 </body></html>

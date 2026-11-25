@@ -11,6 +11,9 @@
  *   POST   /api/login {pin}       -> { token }   admin or photographer PIN
  *   POST   /api/photo/:id {image} Bearer token; image = data:image/jpeg;base64,...
  *   DELETE /api/photo/:id         Bearer token; the previous Heist photo goes to history
+ *   GET    /api/loot              the nights, their champions, and the champion art uploaded
+ *   POST   /api/loot/:no/:id      Bearer token; the owner's art for night <no>'s champion <id>
+ *   DELETE /api/loot/:no/:id      Bearer token; the art goes to history, the card goes back to automatic
  *
  * Photos are files: /var/www/heist.urbanpadel.om/public/players/<id>.jpg, served
  * by nginx, with every replaced one kept in /opt/heist-api/history/ — an
@@ -33,7 +36,9 @@ const LOG = path.join(__dirname, "uploads.log");
 const CURRENT_FROM = "2026-10-01";      // "playing now": a team since Blackout began, or an UPRISING night
 const TOKEN_TTL = 60 * 60 * 24 * 30;
 const MAX = 6 * 1024 * 1024;            // a 1080x1350 JPEG is ~300KB; this is a guard, not a target
+const LOOT = "/var/www/heist.urbanpadel.om/public/loot";
 fs.mkdirSync(PUB, { recursive: true });
+fs.mkdirSync(LOOT, { recursive: true });
 fs.mkdirSync(HIST, { recursive: true });
 
 const app = express();
@@ -203,6 +208,60 @@ app.delete("/api/photo/:id", (req, res) => {
   keep(req.params.id, "removed");
   fs.appendFileSync(LOG, `${new Date().toISOString()}\t${role}\tdel\t${req.params.id}\n`);
   cache.at = 0;
+  res.json({ ok: true });
+});
+
+// ── champion art: the owner's picture for a night's champions (THE SCORE card) ──
+// A knockout card is derived in the app from the bracket; only the champions'
+// can be replaced by art. The nights come from heist-season.json (copied beside
+// this file by the deploy) and the champions from the season API on 3013, so an
+// upload is refused for anyone who did not win that night.
+const SEASON_FILE = path.join(__dirname, "heist-season.json");
+const nights = () => { try { return JSON.parse(fs.readFileSync(SEASON_FILE, "utf8")).nights || []; } catch (e) { return []; } };
+const lootFile = (no, id) => path.join(LOOT, `ep${String(no).padStart(2, "0")}-${id}.jpg`);
+async function champions() {
+  const st = ((await get(3013, "/state").catch(() => ({}))).state) || {};
+  const byId = Object.fromEntries((st.players || []).map(p => [p.id, p.name]));
+  return nights().map((date, i) => {
+    const s = (st.sessions || []).find(x => x.date === date), f = s && (s.bracket || {}).final;
+    const t = f && f.winner && (s.teams || []).find(x => x.id === (f.winner === "team1" ? f.team1Id : f.team2Id));
+    return { no: i + 1, date, champions: t ? [t.p1Id, t.p2Id].map(id => ({ id, name: byId[id] || id })) : [] };
+  });
+}
+app.get("/api/loot", async (req, res) => {
+  const art = {};
+  for (const f of fs.readdirSync(LOOT)) {
+    const m = /^ep(\d\d)-([\w-]+)\.jpg$/.exec(f); if (!m) continue;
+    art[`${+m[1]}/${m[2]}`] = `/loot/${f}?v=${Math.floor(fs.statSync(path.join(LOOT, f)).mtimeMs)}`;
+  }
+  res.set("Cache-Control", "no-store").json({ ok: true, art, nights: await champions() });
+});
+app.post("/api/loot/:no/:id", async (req, res) => {
+  const role = authed(req);
+  if (!role) return res.status(401).json({ ok: false, error: "sign in first" });
+  const no = +req.params.no, night = (await champions()).find(n => n.no === no);
+  if (!night) return res.status(404).json({ ok: false, error: "no such night" });
+  const who = night.champions.find(c => c.id === req.params.id);
+  if (!who) return res.status(400).json({ ok: false, error: "only that night's champions have a SCORE card" });
+  const m = /^data:image\/jpeg;base64,(.+)$/s.exec((req.body || {}).image || "");
+  if (!m) return res.status(400).json({ ok: false, error: "send a JPEG data URL" });
+  const buf = Buffer.from(m[1], "base64");
+  if (buf.length > MAX || !buf.subarray(0, 3).equals(JPEG)) return res.status(400).json({ ok: false, error: "not a JPEG, or too large" });
+  const d = jpegSize(buf);
+  if (!d || d.w !== 1080 || d.h !== 1350) return res.status(400).json({ ok: false, error: `must be 1080x1350, got ${d ? d.w + "x" + d.h : "unreadable"}` });
+  const f = lootFile(no, who.id);
+  if (fs.existsSync(f)) fs.renameSync(f, path.join(HIST, `loot-${path.basename(f, ".jpg")}.${Date.now()}.replaced.jpg`));
+  fs.writeFileSync(f + ".tmp", buf); fs.renameSync(f + ".tmp", f);
+  fs.appendFileSync(LOG, `${new Date().toISOString()}\t${role}\tloot\t${no}\t${who.id}\t${who.name}\t${buf.length}\n`);
+  res.json({ ok: true, url: `/loot/${path.basename(f)}?v=${Date.now()}` });
+});
+app.delete("/api/loot/:no/:id", (req, res) => {
+  const role = authed(req);
+  if (!role) return res.status(401).json({ ok: false, error: "sign in first" });
+  if (!/^\d+$/.test(req.params.no) || !/^[\w-]+$/.test(req.params.id)) return res.status(400).end();
+  const f = lootFile(+req.params.no, req.params.id);
+  if (fs.existsSync(f)) fs.renameSync(f, path.join(HIST, `loot-${path.basename(f, ".jpg")}.${Date.now()}.removed.jpg`));
+  fs.appendFileSync(LOG, `${new Date().toISOString()}\t${role}\tloot-del\t${req.params.no}\t${req.params.id}\n`);
   res.json({ ok: true });
 });
 
