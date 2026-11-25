@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "9675e849c9d6";
+  var V = "971364e560ae";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -9502,7 +9502,10 @@ async function mhExportStory(node) {
   await document.fonts.ready;
   const k = MH_STORY.outW / MH_STORY.w;
   const canvas = await h.toCanvas(node, { width: MH_STORY.w, height: MH_STORY.h, pixelRatio: k,
-    canvasWidth: MH_STORY.outW / k, canvasHeight: MH_STORY.outH / k, cacheBust: false });
+    canvasWidth: MH_STORY.outW / k, canvasHeight: MH_STORY.outH / k, cacheBust: false,
+    // one image that fails to load must not lose the whole card: html-to-image
+    // rejects outright, and the line-up came back with NOTHING when the logo 404'd
+    imagePlaceholder: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" });
   return new Promise(r => canvas.toBlob(r, "image/png"));
 }
 
@@ -9705,7 +9708,8 @@ function MhNightLineup({ D, s, m }) {
         {side(m.tb, m.sb, "b")}
       </div>
       <div className="mh-nlufoot">
-        <MhTitleLockup size={64} center />
+        {/* the owner's logo stands ~50% taller than the typeset lockup it replaced: at 64 it sat on the second pair's names */}
+        <MhTitleLockup size={46} center meta={false} />
         <div className="mn-label" style={{ color: "var(--mn-sand)", marginTop: 6, textAlign: "center" }}>
           {decided ? (m.round === "final" ? "Champions crowned" : "Score settled") : `${mhDay(s.date)} · ${s.time} · ${MH.venue}`}</div>
       </div>

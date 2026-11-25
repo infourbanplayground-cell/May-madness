@@ -22,18 +22,19 @@ const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae3
 const SEASON = JSON.parse(fs.readFileSync(path.join(ROOT, 'heist-season.json'), 'utf8'));
 const NAT = JSON.parse(fs.readFileSync(path.join(SC, 'roster', 'state-3011.json'), 'utf8')).state;
 const PHOTOS = fs.readFileSync(path.join(SC, 'roster', 'photos-3011.json'), 'utf8');
-const BID = fs.readFileSync(path.join(ROOT, 'heist-index.html.version'), 'utf8').trim();
+const APP = process.env.APP || path.join(ROOT, 'heist-index.html');   // APP=<build> checks another build
+const BID = fs.readFileSync(APP + '.version', 'utf8').trim();
 const OUT = path.join(SC, 'heist-qa', 'classic'); fs.mkdirSync(OUT, { recursive: true });
 const st = JSON.parse(JSON.stringify(NAT));
 st.sessions.forEach((s, i) => { s.date = SEASON.nights[i]; s.doublePoints = SEASON.doubleNights.includes(s.date); });
-const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json' };
+const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.json': 'application/json' };
 const map = [['/assets/fonts/brand/', 'brand/fonts/'], ['/assets/fonts/heist/', 'brand/heist/fonts/'], ['/assets/art/', 'brand/heist/art/'],
-             ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/history.json', 'brand/national/history.json'],
+             ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/heist-logo.webp', 'brand/heist/heist-logo.webp'], ['/assets/heist-logo.png', 'brand/heist/heist-logo.png'], ['/assets/history.json', 'brand/national/history.json'],
              ['/assets/', 'brand/national/']];
 const srv = http.createServer((q, r) => {
   const u = decodeURIComponent(q.url.split('?')[0]);
   const json = o => { r.writeHead(200, { 'Content-Type': 'application/json' }); r.end(typeof o === 'string' ? o : JSON.stringify(o)); };
-  if (u === '/' || u === '/index.html') { r.writeHead(200, { 'Content-Type': T['.html'] }); return r.end(fs.readFileSync(path.join(ROOT, 'heist-index.html'))); }
+  if (u === '/' || u === '/index.html') { r.writeHead(200, { 'Content-Type': T['.html'] }); return r.end(fs.readFileSync(APP)); }
   if (u === '/version.txt') { r.writeHead(200); return r.end(BID + '\n'); }
   if (u === '/state') return json({ ok: true, state: st, version: 1 });
   if (u === '/photos') return json(PHOTOS);
@@ -102,9 +103,22 @@ const results = [];
   const { ctx, pg, errs } = await open(true, '/#nightshare/7/lineup');
   for (const k of ['lineup', 'draw', 'tables', 'bracket', 'champions', 'points']) {
     await pg.evaluate(k => { window.__mhLastExport = null; location.hash = 'nightshare/7/' + k; }, k); await pg.waitForTimeout(1200);
+    // the logo is an image, so no text check sees it lying over a name (it did, on the line-up)
+    const hits = await pg.evaluate(() => {
+      const L = document.querySelector('.mh-story .mn-logo img'); if (!L) return [];
+      const a = L.getBoundingClientRect(), out = [], lock = L.closest('.mn-lockup');
+      const w = document.createTreeWalker(document.querySelector('.mh-story'), NodeFilter.SHOW_TEXT);
+      for (let n; (n = w.nextNode());) {
+        if (!n.textContent.trim() || lock.contains(n.parentElement)) continue;
+        const rg = document.createRange(); rg.selectNodeContents(n);
+        for (const b of rg.getClientRects()) if (Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 3 && Math.min(a.right, b.right) - Math.max(a.left, b.left) > 3) { out.push(n.textContent.trim().slice(0, 24)); break; }
+      }
+      return out;
+    });
+    if (hits.length) results.push(`logo over text on ${k}: ${hits.join(' | ')}  FAIL`);
     const dl = pg.waitForEvent('download', { timeout: 20000 }).catch(() => null);
     await pg.locator('button', { hasText: 'Share image' }).click();
-    await dl;
+    const d = await dl; if (d) await d.saveAs(path.join(OUT, 'post-' + k + '.png'));
     const r = await pg.evaluate(async () => { for (let i = 0; i < 40 && !window.__mhLastExport; i++) await new Promise(r => setTimeout(r, 250));
       const b = window.__mhLastExport; if (!b) return null; const im = await createImageBitmap(b); return [im.width, im.height, b.size]; });
     results.push(`export ${k}: ${r ? r.join('x').replace(/x(\d+)$/, ' · $1 bytes') : 'NOTHING'}` + (r && r[0] === 1080 && r[1] === 1920 ? '  ok' : '  FAIL'));

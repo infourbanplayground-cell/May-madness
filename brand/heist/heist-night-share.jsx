@@ -156,7 +156,8 @@ function MhNightLineup({ D, s, m }) {
         {side(m.tb, m.sb, "b")}
       </div>
       <div className="mh-nlufoot">
-        <MhTitleLockup size={64} center />
+        {/* the owner's logo stands ~50% taller than the typeset lockup it replaced: at 64 it sat on the second pair's names */}
+        <MhTitleLockup size={46} center meta={false} />
         <div className="mn-label" style={{ color: "var(--mn-sand)", marginTop: 6, textAlign: "center" }}>
           {decided ? (m.round === "final" ? "Champions crowned" : "Score settled") : `${mhDay(s.date)} · ${s.time} · ${MH.venue}`}</div>
       </div>

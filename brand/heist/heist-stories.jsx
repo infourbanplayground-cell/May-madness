@@ -159,7 +159,10 @@ async function mhExportStory(node) {
   await document.fonts.ready;
   const k = MH_STORY.outW / MH_STORY.w;
   const canvas = await h.toCanvas(node, { width: MH_STORY.w, height: MH_STORY.h, pixelRatio: k,
-    canvasWidth: MH_STORY.outW / k, canvasHeight: MH_STORY.outH / k, cacheBust: false });
+    canvasWidth: MH_STORY.outW / k, canvasHeight: MH_STORY.outH / k, cacheBust: false,
+    // one image that fails to load must not lose the whole card: html-to-image
+    // rejects outright, and the line-up came back with NOTHING when the logo 404'd
+    imagePlaceholder: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" });
   return new Promise(r => canvas.toBlob(r, "image/png"));
 }
 
