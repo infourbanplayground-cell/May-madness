@@ -47,7 +47,14 @@ const BOLD = base('BowlbyOne', '#1A0B2E') + `
   border-color:rgba(255,45,120,.45) !important; }
 .mn-serif{ font-size:1.12em }
 `;
-const OPTS = process.env.ONLYBOLD ? { BOLD } : { A: base('LilitaOne', '#120D22'), B: base('BowlbyOne', '#1B0F2E'), BOLD };
+// BOLD2 (owner, 25 Nov: "purple is a bit much"): the same type and accents on the
+// app's own near-black navy, cards as dark glass with only a pink EDGE
+const BOLD2 = BOLD.replace(/#1A0B2E/g, '#0E1420') + `
+[class*="mn-card"],[class*="mh-row"],.mn-glass,.mh-take-row,.mh-wrow{ background:rgba(255,255,255,.045) !important;
+  border-color:rgba(255,45,120,.38) !important; }
+:root{ --mn-mist:#D8DEE8; --mn-dim:#9AA6B6; }
+`;
+const OPTS = process.env.ONLYBOLD ? { BOLD, BOLD2 } : { A: base('LilitaOne', '#120D22'), B: base('BowlbyOne', '#1B0F2E'), BOLD };
 const SCREENS = (process.env.SCREENS || 'home,take,wanted,me').split(',');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 for (const [opt, css] of [...(process.env.ONLYBOLD ? [] : [['now', '']]), ...Object.entries(OPTS)]) {
