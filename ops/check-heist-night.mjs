@@ -25,7 +25,8 @@ pg=await page('session/6');
 await pg.click('.mn-pill:has-text("B")'); ok(await pg.isVisible('text=mossa & Ali'),'group B pill shows group B');
 await pg.click('.mn-pill:has-text("Teams")'); ok(await pg.isVisible('text=Group A'),'Teams tab lists the draw');
 await pg.click('.mn-pill:has-text("Knockout")'); ok(await pg.isVisible('text=drawn once the groups finish'),'Knockout empty state');
-await pg.click('.mn-pill:has-text("MVP")'); ok(await pg.isVisible('text=No votes yet'),'MVP empty state');
+// with no votes the tab is POINTS and shows tonight's points (23 Nov rebuild), not an MVP empty state
+await pg.click('.mn-pill:has-text("Points")'); ok(await pg.isVisible("text=Tonight's points"),'no votes -> the Points tab shows tonight\'s points');
 await pg.click('.mn-pill:has-text("Groups")'); await pg.click('.mn-pill >> text="A"'); await pg.click('.mh-match:has-text("Salim")'); await pg.waitForTimeout(300);
 ok(await pg.evaluate(()=>location.hash).then(h=>h.startsWith('#live')),'tapping the live match opens scoring');
 // slides

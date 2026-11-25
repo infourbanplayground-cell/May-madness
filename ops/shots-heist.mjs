@@ -64,7 +64,7 @@ async function open(w, h, hash, reduced) {
   await pg.waitForSelector('.mh-page, .mh-slides', { timeout: 30000 });
   // a face no text on the screen uses is never fetched, and would measure as the
   // fallback; ask for each one, so the probe tests availability, not usage
-  await pg.evaluate(() => Promise.all(["italic 40px Fraunces", "900 40px Archivo", "600 40px Manrope"]
+  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "40px 'Bowlby One'", "600 40px Manrope"]
     .map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => [...document.fonts].every(f => f.status !== 'loading'), null, { timeout: 15000 });
@@ -82,8 +82,9 @@ const audit = () => {
     const v = s.getBoundingClientRect().width; s.remove(); return v;
   };
   const fonts = {
-    'Archivo wdth 66': probe("'Archivo',serif", "font-weight:900;font-variation-settings:'wdth' 66") !== probe('serif', 'font-weight:900'),
-    'Fraunces italic': probe("'Fraunces',serif", 'font-style:italic') !== probe('serif', 'font-style:italic'),
+    // the logo's faces since 25 Nov 2026 (Archivo / Fraunces before)
+    'Bowlby One': probe("'Bowlby One',serif") !== probe('serif'),
+    'Kaushan Script': probe("'Kaushan Script',serif") !== probe('serif'),
     'Manrope': probe("'Manrope',serif", 'font-weight:600') !== probe('serif', 'font-weight:600'),
   };
   // and the screen's OWN display text: the probe above is a span this check

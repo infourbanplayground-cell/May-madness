@@ -908,6 +908,36 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - `preview.html` is GENERATED (`python3 ops/build-heist-preview.py`) — the
     stories render from it, so a component change needs it rebuilt or the
     stories keep the old one with every check green.
+- **THE APP WEARS THE LOGO'S LANGUAGE — "Bold on navy" (owner, 25 Nov 2026,
+  "match the font type and colors, it feels off now")**, picked from mocks made
+  by `ops/mock-heist-theme.mjs` (NOW / A / B / BOLD / BOLD2; `NOWONLY=1` shoots
+  the shipped theme). Changed at the TOKENS in `heist.css`, so every screen,
+  post and story follows:
+  - display face **Bowlby One, set lowercase**, with a thick black outline
+    under the fill and a hard drop (`--mn-ink*`) — the "urban playground"
+    block face; script **Kaushan Script** in hot pink — the "Muscat Heist"
+    brush. Vendored by `ops/vendor-heist-fonts.py` into `brand/heist/fonts/`.
+  - coral -> hot pink `#FF2D78`, coral-2 -> orange, teal -> pink `#FF4F8B`,
+    sand -> the logo's cream `#F6EAD3`, labels orange, the sunset skies.
+    **The ground stays navy**: a purple ground was mocked and was "a bit much".
+  - **Both faces are single-weight and upright**: every `font-weight: 900` and
+    `font-style: italic` on them was neutralised, or the browser SYNTHESISES a
+    smeared bold and a fake oblique.
+  - **Bowlby One is far wider than the condensed Archivo it replaced**, so
+    names and headlines are shrunk to fit ONE line by `mhFitAll()`
+    (heist-components.jsx; `.mh-fitline`, crew-card names, the posts'
+    headlines). It re-fits on every render AND on `document.fonts`
+    `loadingdone` — the face lands after the first render, and a swap changes
+    widths without touching the DOM, which left "munther ra…" with the fitter
+    green on the first try.
+  - `check-heist-nightshare.mjs` now fails text CUT by its box or running OFF
+    the card: "champions" ran off the edge and "tonight's take" wrapped onto
+    the first row with every other check green. The moments, stories and night
+    checks read text case-insensitively now (the copy is the same, lowercased).
+  - Found on the way, not caused by it: the session Teams tab threw on a team
+    with no player list and blanked the WHOLE night page (preview fixtures);
+    `check-heist-night.mjs` still clicked an "MVP" tab that has been "Points"
+    whenever nobody voted since 23 Nov.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:

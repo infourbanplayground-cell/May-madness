@@ -116,6 +116,19 @@ const results = [];
       return out;
     });
     if (hits.length) results.push(`logo over text on ${k}: ${hits.join(' | ')}  FAIL`);
+    // text cut by its box, or running out of the card — the wider face did both
+    // ("champions" off the edge) and every check above passed
+    const cut = await pg.evaluate(() => {
+      const F = document.querySelector('.mh-story').getBoundingClientRect(), out = [];
+      for (const e of document.querySelectorAll('.mh-story *')) {
+        const own = [...e.childNodes].find(n => n.nodeType === 3 && n.textContent.trim()); if (!own || !e.offsetWidth) continue;
+        const rg = document.createRange(); rg.selectNodeContents(own); const b = rg.getBoundingClientRect();
+        if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX !== 'visible') out.push('cut "' + own.textContent.trim().slice(0, 20) + '"');
+        else if (b.right > F.right + 1 || b.left < F.left - 1) out.push('off the card "' + own.textContent.trim().slice(0, 20) + '"');
+      }
+      return out;
+    });
+    if (cut.length) results.push(`${k}: ${cut.slice(0, 3).join(' | ')}  FAIL`);
     const dl = pg.waitForEvent('download', { timeout: 20000 }).catch(() => null);
     await pg.locator('button', { hasText: 'Share image' }).click();
     const d = await dl; if (d) await d.saveAs(path.join(OUT, 'post-' + k + '.png'));

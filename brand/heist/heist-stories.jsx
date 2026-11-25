@@ -130,7 +130,9 @@ function MhStoryCard({ D, id }) {
         <MhLabel tone="peach">My crew card · {MH.volumeLabel}</MhLabel>
         <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.meCardPos || p.pos }} rank={p.rank} points={p.points}
           rep={p.rep} size="L" stats={p.stats || {}} tilt={false} />
-        <div style={{ marginTop: 14 }}><MhTitleLockup size={70} center /></div>
+        {/* the logo is taller than the typeset lockup was, and its meta line repeats the
+            label above the card: without it the address cleared the frame again */}
+        <div style={{ marginTop: 10 }}><MhTitleLockup size={58} center meta={false} /></div>
         <MhLabel tone="sand" style={{ marginTop: 4 }}>{(MH.stories || {}).url || MH.host}</MhLabel>
       </div>
       <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ left: 18, top: 14, height: 24 }} />

@@ -59,7 +59,7 @@ async function open(hash, vp, dsf) {
   });
   await pg.goto(`http://127.0.0.1:${PORT}/brand/heist/preview.html#${hash}`, { waitUntil: 'load' });
   await pg.waitForSelector('.mh-story', { timeout: 30000 });
-  await pg.evaluate(() => Promise.all(["italic 40px Fraunces", "900 40px Archivo", "600 40px Manrope", "500 40px 'JetBrains Mono'"]
+  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "40px 'Bowlby One'", "600 40px Manrope", "500 40px 'JetBrains Mono'"]
     .map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => [...document.fonts].every(f => f.status !== 'loading'), null, { timeout: 15000 });
@@ -87,6 +87,9 @@ const audit = () => {
     // fallback resolves to the same face and no width can tell them apart;
     // it is checked below as a face the page really loaded instead
     if (/mono/i.test(cs.fontFamily)) continue;
+    // a run with no letter or digit ("—", "·") is the same width in any face, so it
+    // proves nothing either way; it read as FACE NOT DRAWN on the card's stat dashes
+    if (!/[A-Za-z0-9]/.test(t.textContent)) continue;
     // the stack minus its first face IS what draws when that face is missing
     e.style.fontFamily = cs.fontFamily.split(',').slice(1).join(',') || 'serif';
     const w1 = r.getBoundingClientRect().width; e.style.fontFamily = was;
@@ -111,7 +114,7 @@ for (const [name, hash, ref] of STORIES) {
   // the words are the data's
   const T = r.text.replace(/\s+/g, ' ');
   if (/NIGHTS/.test(T) || /\b402\b/.test(T) || /[؀-ۿ]/.test(T)) fails.push(`${tag}: old design's copy on the frame`);
-  if (name !== 'my-card' && !/407 OMR/.test(T)) fails.push(`${tag}: pool is not the derived 407`);
+  if (name !== 'my-card' && !/407 OMR/i.test(T)) fails.push(`${tag}: pool is not the derived 407`);
   // the lockup is the owner's logo image since 25 Nov, not typeset HEIST: it must be there AND decoded
   const logo = await pg.evaluate(() => { const i = document.querySelector('.mn-logo img'); return i ? i.naturalWidth : -1; });
   // an image is invisible to the text checks, so a logo lying over the billing passed them all

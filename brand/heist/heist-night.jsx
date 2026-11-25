@@ -177,10 +177,11 @@ function MhTeams({ N }) {
       <MhGlass style={{ padding: "4px 14px" }}>
         {by[g].map(t => (
           <div key={t.id} className="mh-trow" data-q={N.started && t.q ? "" : undefined}>
-            <div className="mh-pairfaces">{t.players.map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
+            {/* a team without a player list (the preview's fixture teams carry a name only)
+                blanked the WHOLE night page on the Teams tab — React unmounts on a throw */}
+            <div className="mh-pairfaces">{(t.players || []).map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="mh-gteam">{t.players[0].name}</div>
-              <div className="mh-gteam">{t.players[1].name}</div>
+              {(t.players && t.players.length ? t.players : [{ name: t.name || "TBD" }]).map((p, i) => <div key={i} className="mh-gteam">{p.name}</div>)}
             </div>
             {N.started && t.pos ? <div className="mh-tstat"><b className="mn-display">{t.pts}</b><span>{t.w}W · #{t.pos}</span></div> : null}
           </div>

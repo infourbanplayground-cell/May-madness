@@ -177,6 +177,34 @@ function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, sty
   );
 }
 
+// ── shrink-to-fit names ───────────────────────────────────────────────────
+// The logo's block face (Bowlby One, 25 Nov 2026) is far wider than the
+// condensed Archivo it replaced: "MUNTHER RAHBI" ellipsised on the crew card
+// and wrapped in The Take. Anything marked .mh-fitline (and every crew-card
+// name) is shrunk, in steps, until its whole text fits its one line — down to
+// 60% of its set size, and the ellipsis stays as the last resort. One observer
+// on the body re-fits after every render, so no screen has to remember to.
+const MH_FIT_SEL = ".mh-fitline, .mn-card .mn-name, .mh-nstitle, .mh-nchword, .mh-nchname";
+function mhFitAll() {
+  for (const el of document.querySelectorAll(MH_FIT_SEL)) {
+    if (!el.offsetWidth) continue;
+    el.style.fontSize = "";
+    let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
+    while (el.scrollWidth > el.clientWidth + .5 && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+  }
+}
+if (typeof window !== "undefined" && !window.__mhFit) {
+  window.__mhFit = true;
+  let raf = 0;
+  const kick = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; mhFitAll(); }); };
+  const start = () => { new MutationObserver(kick).observe(document.body, { childList: true, subtree: true, characterData: true }); kick(); };
+  if (document.body) start(); else addEventListener("DOMContentLoaded", start);
+  // the face arrives AFTER the first render: a swap changes widths without
+  // touching the DOM, so the observer alone never re-fits (it left "munther ra…")
+  if (document.fonts) { document.fonts.ready.then(kick); document.fonts.addEventListener("loadingdone", kick); }
+  addEventListener("resize", kick);
+}
+
 // ── title lockup ──────────────────────────────────────────────────────────
 // THE OWNER'S LOGO (25 Nov 2026: "I like this logo instead of the one we've
 // used"): URBAN PLAYGROUND in the block face over "Muscat Heist" in pink

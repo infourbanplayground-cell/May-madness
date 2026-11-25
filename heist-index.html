@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "971364e560ae";
+  var V = "2d0c1131e13f";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -854,20 +854,29 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
      - a few extra tokens at the end, each a value the handoff's own static
        design uses inline (the art tint, the fades, the band's shadow), so no
        component below carries a colour of its own.
-   EVERY colour in this file and in the components comes from :root. */
+   EVERY colour in this file and in the components comes from :root.
+
+   RE-THEMED TO THE OWNER'S LOGO (25 Nov 2026, "Bold on navy", chosen from mocks
+   made by ops/mock-heist-theme.mjs): the handoff's Archivo / Fraunces / coral /
+   teal became the logo's language — Bowlby One set LOWERCASE with a thick
+   black outline and a hard drop (the "urban playground" block face), Kaushan
+   Script in hot pink (the "Muscat Heist" brush), pink and orange where teal
+   and coral were, and the sunset skies. The ground stays the navy: a purple
+   ground was tried and was "a bit much". Values changed here, at the tokens,
+   so no component carries a colour of its own. */
 :root {
   /* colour */
   --mn-navy: #0F1B2B;
   --mn-navy-2: #13202F;
-  --mn-sand: #FFF4E8;
-  --mn-peach: #FFC9A3;
-  --mn-coral: #F26B5B;
-  --mn-coral-2: #F59A62;
-  --mn-gold: #FFD08A;
-  --mn-teal: #2FB7B0;
+  --mn-sand: #F6EAD3;
+  --mn-peach: #FFB36B;
+  --mn-coral: #FF2D78;
+  --mn-coral-2: #FF7A3D;
+  --mn-gold: #FFC24A;
+  --mn-teal: #FF4F8B;
   --mn-rose: #E9849A;
-  --mn-mist: #B9C6D3;
-  --mn-dim: #7F8EA0;
+  --mn-mist: #D8DEE8;
+  --mn-dim: #9AA6B6;
   --mn-red: #E5484D;
   --mn-silver: #D7DDE4;
   --mn-bronze: #D9A27A;
@@ -876,17 +885,17 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 
   --mn-grad-primary: linear-gradient(135deg, var(--mn-coral), var(--mn-coral-2));
   /* the static design draws the band to #F5895E, not coral-2; the screenshots are the target */
-  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), #F5895E);
-  --mn-grad-title: linear-gradient(180deg, #FFFBF5 0%, var(--mn-sand) 55%, var(--mn-peach) 100%);
-  --mn-sky: linear-gradient(180deg,#24456E 0%,#6B5B8E 30%,#E07C8E 52%,#F6A06B 72%,#FFD39A 90%);
+  --mn-grad-nights: linear-gradient(90deg, var(--mn-coral), var(--mn-coral-2));
+  --mn-grad-title: linear-gradient(180deg, var(--mn-sand), var(--mn-sand));
+  --mn-sky: linear-gradient(180deg,#2A1650 0%,#6B2C8F 32%,#D2357E 56%,#FF7A3D 78%,#FFC36B 95%);
 
   --mn-glass-bg: rgba(15,27,43,.62);
-  --mn-glass-border: 1px solid rgba(255,244,232,.18);
+  --mn-glass-border: 1px solid rgba(255,45,120,.38);
   --mn-glass-blur: blur(14px);
 
-  --mn-tier-legend: linear-gradient(135deg,#FFD08A,#F59A62 50%,#FFD08A);
-  --mn-tier-elite: linear-gradient(135deg,#F26B5B,#E9849A);
-  --mn-tier-pro: linear-gradient(135deg,#2FB7B0,#2A7FA8);
+  --mn-tier-legend: linear-gradient(135deg,#FFC24A,#FF7A3D 50%,#FFC24A);
+  --mn-tier-elite: linear-gradient(135deg,#FF2D78,#FF7A3D);
+  --mn-tier-pro: linear-gradient(135deg,#FF4F8B,#B0306E);
   --mn-tier-street: linear-gradient(135deg,#5A6B80,#B9C6D3);
 
   --mn-rep-rookie: var(--mn-dim);
@@ -894,10 +903,10 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-rep-known: var(--mn-coral);
   --mn-rep-legend: var(--mn-gold);
 
-  --mn-font-display: 'Archivo', Impact, sans-serif;
-  --mn-display-axes: 'wdth' 66;
-  --mn-font-serif: 'Fraunces', Georgia, serif;
-  --mn-serif-axes: 'SOFT' 100, 'WONK' 1;
+  --mn-font-display: 'Bowlby One', Impact, sans-serif;
+  --mn-display-axes: normal;
+  --mn-font-serif: 'Kaushan Script', cursive;
+  --mn-serif-axes: normal;
   --mn-font-ui: 'Manrope', system-ui, sans-serif;
   --mn-font-mono: 'JetBrains Mono', monospace;
 
@@ -937,14 +946,14 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-billing-dim: rgba(255,244,232,.45);
   --mn-title-filter: drop-shadow(0 3px 0 rgba(15,27,43,.55)) drop-shadow(0 10px 22px rgba(0,0,0,.45));
   --mn-rank-glow: 0 2px 8px rgba(0,0,0,.5);
-  --mn-teal-45: rgba(47,183,176,.45);
-  --mn-teal-60: rgba(47,183,176,.6);
-  --mn-teal-20: rgba(47,183,176,.2);
-  --mn-teal-16: rgba(47,183,176,.16);
-  --mn-coral-14: rgba(242,107,91,.14);
-  --mn-coral-50: rgba(242,107,91,.5);
-  --mn-gold-45: rgba(255,208,138,.45);
-  --mn-gold-70: rgba(255,208,138,.7);
+  --mn-teal-45: rgba(255,79,139,.45);
+  --mn-teal-60: rgba(255,79,139,.6);
+  --mn-teal-20: rgba(255,79,139,.2);
+  --mn-teal-16: rgba(255,79,139,.16);
+  --mn-coral-14: rgba(255,45,120,.14);
+  --mn-coral-50: rgba(255,45,120,.5);
+  --mn-gold-45: rgba(255,194,74,.45);
+  --mn-gold-70: rgba(255,194,74,.7);
   --mn-faint: rgba(255,244,232,.15);
   --mn-leader-fade: linear-gradient(90deg, rgba(15,27,43,.88), rgba(15,27,43,0) 65%);
   --mn-grad-progress: linear-gradient(90deg, var(--mn-teal), var(--mn-coral));
@@ -955,8 +964,8 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-fade-recap: linear-gradient(180deg, rgba(15,27,43,.4), rgba(15,27,43,0) 35%, rgba(15,27,43,.85));
   --mn-fade-slides: linear-gradient(180deg, rgba(15,27,43,.6), rgba(15,27,43,.1) 30%, rgba(15,27,43,.92) 80%);
   --mn-row-line: 1px solid rgba(255,244,232,.08);
-  --mn-peach-50: rgba(255,201,163,.5);
-  --mn-teal-50: rgba(47,183,176,.5);
+  --mn-peach-50: rgba(255,179,107,.5);
+  --mn-teal-50: rgba(255,79,139,.5);
   --mn-chip-bg: rgba(15,27,43,.6);
   --mn-seg-off: rgba(255,244,232,.3);
   --mn-slide-ring: 0 0 0 4px var(--mn-peach), 0 12px 30px rgba(0,0,0,.5);
@@ -966,7 +975,7 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-fade-finale: linear-gradient(180deg, rgba(15,27,43,.5), rgba(229,72,77,.12) 50%, rgba(15,27,43,.9));
   --mn-fade-split: linear-gradient(180deg, rgba(15,27,43,.4), rgba(15,27,43,0) 30%, rgba(15,27,43,0) 60%, var(--mn-navy));
   --mn-settled-filter: grayscale(.2);
-  --mn-gold-50: rgba(255,208,138,.5);
+  --mn-gold-50: rgba(255,194,74,.5);
   --mn-rule-bg: rgba(255,244,232,.05);
   --mn-shout-shadow: 0 6px 24px rgba(0,0,0,.5);
   --mn-grad-load: linear-gradient(90deg, var(--mn-coral), var(--mn-peach));
@@ -977,12 +986,22 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-story-panel: linear-gradient(180deg, rgba(15,27,43,0) 55%, rgba(15,27,43,.9));
   --mn-story-shadow: 0 2px 12px rgba(0,0,0,.5);
   --mn-logo-shadow: drop-shadow(0 2px 6px rgba(0,0,0,.6));
+  /* the logo's ink: outline and hard drop on the block face */
+  --mn-ink: #07040D;
+  --mn-ink-stroke: .085em;
+  --mn-ink-drop: .055em .075em 0 #07040D;
 }
+[style*="--mn-font-display"], .mn-display * { font-weight: 400; font-style: normal; }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
-.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; text-transform: uppercase; line-height: .86; color: var(--mn-sand); }
-.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-mist); }
-.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-mist); }
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; text-transform: lowercase; line-height: .9; color: var(--mn-sand); letter-spacing: -.005em;
+  /* the logo's block face: cream, a thick black outline drawn UNDER the fill, a hard drop */
+  -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
+/* Bowlby One and Kaushan Script are single-weight upright faces: asking for
+   900 or italic makes the browser SYNTHESISE a smeared bold and a slanted
+   oblique, so every rule that set those on them is neutralised at the root */
+.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: normal; color: var(--mn-coral); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
 .mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
 .mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }
 .mn-glass[data-accent="teal"]  { border-color: var(--mn-teal); }
@@ -991,8 +1010,8 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 
 /* ── buttons ──────────────────────────────────────────────────────────── */
 .mn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; cursor: pointer; border: 0; text-decoration: none; }
-.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: uppercase; }
-.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .06em; font-size: 17px; text-transform: uppercase; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: lowercase; }
+.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; font-size: 17px; text-transform: lowercase; }
 .mn-btn-light   { background: var(--mn-sand); color: var(--mn-navy); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-ui); font-weight: 700; font-size: 15px; }
 .mn-btn[data-size="live"] { min-height: 56px; }
 .mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
@@ -1026,7 +1045,7 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-art { position: absolute; inset: 0; overflow: hidden; }
 .mn-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
 .mn-art::after { content: ""; position: absolute; inset: 0; background: var(--mn-art-tint); mix-blend-mode: soft-light; }
-.mn-initials { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-mist); }
+.mn-initials { position: absolute; inset: 0; display: grid; place-items: center; background: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; color: var(--mn-mist); }
 
 /* ── hero cut ─────────────────────────────────────────────────────────── */
 .mn-hero { position: relative; overflow: hidden; }
@@ -1040,21 +1059,21 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-lockup { position: relative; display: flex; flex-direction: column; align-items: flex-start; }
 .mn-lockup[data-center] { align-items: center; }
 .mn-lockup .mn-sun { position: absolute; left: 50%; top: 4px; border-radius: 50%; background: var(--mn-sun); transform: translateX(-50%); pointer-events: none; }
-.mn-lockup .mn-presents { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: italic; color: var(--mn-peach); }
+.mn-lockup .mn-presents { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: normal; color: var(--mn-peach); }
 .mn-lockup .mn-presents::before, .mn-lockup .mn-presents::after { content: ""; width: 24px; height: 1px; background: var(--mn-peach); }
-.mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: var(--mn-title-filter); }
+.mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: var(--mn-title-filter); }
 .mn-lockup .mn-band { position: relative; margin-top: -1px; padding: 4px 14px 3px; background: var(--mn-grad-nights); transform: skewX(-10deg); box-shadow: var(--mn-band-shadow); }
-.mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
+.mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
 .mn-lockup .mn-logo { position: relative; display: block; line-height: 0; }
 .mn-lockup .mn-logo img { display: block; max-width: 100%; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
 .mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
 
 /* ── scene tag ────────────────────────────────────────────────────────── */
-.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: uppercase; }
+.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: lowercase; }
 .mn-scenetag[data-gold] { border-left-color: var(--mn-gold); color: var(--mn-gold); }
 
 /* ── billing (stories) ────────────────────────────────────────────────── */
-.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: uppercase; text-align: center; }
+.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: lowercase; text-align: center; }
 .mn-billing i { font-style: normal; color: var(--mn-billing-dim); text-transform: none; }
 
 /* ── crew card ────────────────────────────────────────────────────────── */
@@ -1066,9 +1085,9 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-card .mn-card-img { position: relative; }
 .mn-card .mn-foil { position: absolute; inset: 0; background: var(--mn-foil); background-size: 250% 100%; mix-blend-mode: overlay; animation: mn-foil 3.2s linear infinite; }
 .mn-card .mn-card-fade { position: absolute; inset: 0; background: var(--mn-card-fade); }
-.mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; letter-spacing: .1em; color: var(--mn-sand); }
-.mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; color: var(--mn-sand); text-shadow: var(--mn-rank-glow); }
-.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; color: var(--mn-sand); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .1em; color: var(--mn-sand); }
+.mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; color: var(--mn-sand); text-shadow: var(--mn-rank-glow); }
+.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; line-height: 1; color: var(--mn-sand); text-transform: lowercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mn-card .mn-repline { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px; }
 .mn-card .mn-rep { font-family: var(--mn-font-mono); font-size: 11px; }
 .mn-card .mn-pts { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; color: var(--mn-sand); }
@@ -1116,7 +1135,7 @@ html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-
 button.mh-tap { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 button.mn-glass { border: var(--mn-glass-border); }
 button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
-.mh-close { background: none; border: 0; cursor: pointer; font-size: 15px; min-height: 44px; margin: -14px 0; padding: 0; color: var(--mn-mist); }
+.mh-close { background: none; border: 0; cursor: pointer; font-size: 15px; min-height: 44px; min-width: 48px; margin: -14px 0; padding: 0; color: var(--mn-mist); }
 
 /* jobs */
 .mh-job { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 8px; border-radius: var(--mn-r-card); border: 1px solid transparent; }
@@ -1296,7 +1315,7 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 .mh-contender { position: relative; overflow: hidden; clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%); }
 .mh-contfade { position: absolute; inset: 0; background: var(--mn-story-panel); }
 .mh-contname { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; letter-spacing: .12em; line-height: 1; }
-.mh-mycard { position: absolute; left: 0; right: 0; top: 92px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.mh-mycard { position: absolute; left: 0; right: 0; top: 76px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .mh-story .mn-grain { z-index: 5; }
 /* the share sheet shows the frame itself, scaled to the phone */
 .mh-sharepreview { margin: 14px auto 10px; width: calc(416px * var(--k)); height: calc(740px * var(--k)); --k: min(1, calc((100vw - 40px) / 416px)); }
@@ -1385,14 +1404,14 @@ html:not(#mh) body::before, html:not(#mh) body::after { display: none !important
 .mh-npanel { background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: 16px; padding: 8px 10px 6px; min-width: 0; }
 .mh-npanelhead { display: flex; align-items: center; gap: 6px; font-family: var(--mn-font-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); padding-bottom: 4px; }
 .mh-nhcols { margin-left: auto; color: var(--mn-mist); letter-spacing: .06em; }
-.mh-nletter { width: 20px; height: 20px; border-radius: 50%; background: var(--mn-sand); color: var(--mn-navy); display: grid; place-items: center; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 12px; letter-spacing: 0; }
+.mh-nletter { width: 20px; height: 20px; border-radius: 50%; background: var(--mn-sand); color: var(--mn-navy); display: grid; place-items: center; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: 12px; letter-spacing: 0; }
 .mh-npair { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); min-width: 0; }
 .mh-nnames { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; line-height: 1.2; color: var(--mn-sand); }
 .mh-nnames > div, .mh-nname { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mh-nname { min-width: 0; flex: 1; font-family: var(--mn-font-ui); font-weight: 700; font-size: 12px; color: var(--mn-sand); }
 .mh-ntrow { display: flex; align-items: center; gap: 7px; padding: 5px 0; border-top: var(--mn-row-line); position: relative; }
 .mh-ntrow[data-q]::before { content: ""; position: absolute; left: -10px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--mn-teal); }
-.mh-npos { width: 12px; flex: none; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; color: var(--mn-mist); }
+.mh-npos { width: 12px; flex: none; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: 13px; color: var(--mn-mist); }
 .mh-ntrow[data-q] .mh-npos { color: var(--mn-teal); }
 .mh-nw { width: 14px; text-align: right; font-family: var(--mn-font-mono); font-size: 11px; color: var(--mn-mist); }
 .mh-ntrow > b { width: 22px; text-align: right; font-size: 17px; }
@@ -1418,14 +1437,14 @@ html:not(#mh) body::before, html:not(#mh) body::after { display: none !important
 /* line-up: face to face over the episode's art */
 .mh-nlufade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.55) 0%, rgba(15,27,43,.82) 30%, rgba(15,27,43,.92) 70%, var(--mn-navy) 100%); }
 .mh-nluhead { position: absolute; left: 20px; right: 20px; top: 70px; display: flex; align-items: center; gap: 10px; z-index: 2; }
-.mh-n2x { padding: 3px 9px; border-radius: 999px; background: var(--mn-gold); color: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 13px; letter-spacing: .1em; }
+.mh-n2x { padding: 3px 9px; border-radius: 999px; background: var(--mn-gold); color: var(--mn-navy); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: 13px; letter-spacing: .1em; }
 .mh-nlu { position: absolute; left: 16px; right: 16px; top: 112px; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .mh-nside { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .mh-nfaces > .mn-avatar + .mn-avatar { margin-left: -18px; box-shadow: 0 0 0 3px var(--mn-navy); }
 .mh-nside[data-win] .mh-nfaces > .mn-avatar { box-shadow: 0 0 0 3px var(--mn-gold); }
 .mh-nside[data-lose] { opacity: .5; }
 .mh-nsidename { font-size: 30px; line-height: .95; }
-.mh-nvs { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; font-size: 46px; color: var(--mn-coral); line-height: 1; display: flex; gap: 10px; align-items: center; }
+.mh-nvs { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: 46px; color: var(--mn-coral); line-height: 1; display: flex; gap: 10px; align-items: center; }
 .mh-nvs > span { color: var(--mn-sand); }
 .mh-nvs > i { font-style: normal; color: var(--mn-mist); }
 .mh-nlufoot { position: absolute; left: 0; right: 0; bottom: 24px; z-index: 2; display: flex; flex-direction: column; align-items: center; }
@@ -1545,6 +1564,12 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-clipnav .mh-act[disabled] { opacity: .35; }
 .mh-cliplink { align-self: center; font: italic 14px var(--mn-font-serif); color: var(--mn-mist); text-decoration: underline; padding: 10px 0; }
 .mh-linkbtn { border: 0; background: none; color: var(--mn-peach); font: 500 12px var(--mn-font-mono); letter-spacing: .08em; min-height: 44px; cursor: pointer; }
+
+/* shrink-to-fit names (mhFitAll in heist-components.jsx): one line, never cut */
+.mh-fitline { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the posts' headlines are one line in the wider face, shrunk to fit: "champions"
+   ran off the card and "tonight's take" wrapped onto the first row */
+.mh-nstitle, .mh-nchword, .mh-nchname { white-space: nowrap; overflow: hidden; }
 
 </style>
 <style id="heist-classic">
@@ -7933,6 +7958,34 @@ function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, sty
   );
 }
 
+// ── shrink-to-fit names ───────────────────────────────────────────────────
+// The logo's block face (Bowlby One, 25 Nov 2026) is far wider than the
+// condensed Archivo it replaced: "MUNTHER RAHBI" ellipsised on the crew card
+// and wrapped in The Take. Anything marked .mh-fitline (and every crew-card
+// name) is shrunk, in steps, until its whole text fits its one line — down to
+// 60% of its set size, and the ellipsis stays as the last resort. One observer
+// on the body re-fits after every render, so no screen has to remember to.
+const MH_FIT_SEL = ".mh-fitline, .mn-card .mn-name, .mh-nstitle, .mh-nchword, .mh-nchname";
+function mhFitAll() {
+  for (const el of document.querySelectorAll(MH_FIT_SEL)) {
+    if (!el.offsetWidth) continue;
+    el.style.fontSize = "";
+    let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
+    while (el.scrollWidth > el.clientWidth + .5 && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+  }
+}
+if (typeof window !== "undefined" && !window.__mhFit) {
+  window.__mhFit = true;
+  let raf = 0;
+  const kick = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; mhFitAll(); }); };
+  const start = () => { new MutationObserver(kick).observe(document.body, { childList: true, subtree: true, characterData: true }); kick(); };
+  if (document.body) start(); else addEventListener("DOMContentLoaded", start);
+  // the face arrives AFTER the first render: a swap changes widths without
+  // touching the DOM, so the observer alone never re-fits (it left "munther ra…")
+  if (document.fonts) { document.fonts.ready.then(kick); document.fonts.addEventListener("loadingdone", kick); }
+  addEventListener("resize", kick);
+}
+
 // ── title lockup ──────────────────────────────────────────────────────────
 // THE OWNER'S LOGO (25 Nov 2026: "I like this logo instead of the one we've
 // used"): URBAN PLAYGROUND in the block face over "Muscat Heist" in pink
@@ -8490,7 +8543,7 @@ function MhTake({ D, go }) {
           <button type="button" key={p.id} className="mn-glass mh-tap mh-prize" onClick={() => go("card", p.id)}>
             <MhDisplay size={20} tone={place[i][1]} style={{ width: 36 }}>{place[i][0]}</MhDisplay>
             <MhAvatar player={{ name: p.name, photo: p.photo, photoPos: p.avPos || p.pos }} size={38} ring={place[i][1]} zoom={p.zoom} />
-            <div className="mn-display" style={{ flex: 1, fontSize: 17, textAlign: "left" }}>{p.name.toUpperCase()}
+            <div className="mn-display" style={{ flex: 1, minWidth: 0, fontSize: 17, textAlign: "left" }}><span className="mh-fitline">{p.name}</span>
               <div className="mh-ptsline">{p.points} PTS</div></div>
             <MhDisplay size={24}>{MH.seasonPrizes[i]}<span className="mh-omr"> OMR</span></MhDisplay>
           </button>
@@ -8680,10 +8733,11 @@ function MhTeams({ N }) {
       <MhGlass style={{ padding: "4px 14px" }}>
         {by[g].map(t => (
           <div key={t.id} className="mh-trow" data-q={N.started && t.q ? "" : undefined}>
-            <div className="mh-pairfaces">{t.players.map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
+            {/* a team without a player list (the preview's fixture teams carry a name only)
+                blanked the WHOLE night page on the Teams tab — React unmounts on a throw */}
+            <div className="mh-pairfaces">{(t.players || []).map(p => <MhAvatar key={p.id} player={p} size={36} />)}</div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="mh-gteam">{t.players[0].name}</div>
-              <div className="mh-gteam">{t.players[1].name}</div>
+              {(t.players && t.players.length ? t.players : [{ name: t.name || "TBD" }]).map((p, i) => <div key={i} className="mh-gteam">{p.name}</div>)}
             </div>
             {N.started && t.pos ? <div className="mh-tstat"><b className="mn-display">{t.pts}</b><span>{t.w}W · #{t.pos}</span></div> : null}
           </div>
@@ -9473,7 +9527,9 @@ function MhStoryCard({ D, id }) {
         <MhLabel tone="peach">My crew card · {MH.volumeLabel}</MhLabel>
         <MhCrewCard player={{ name: p.name, photo: p.photo, photoPos: p.meCardPos || p.pos }} rank={p.rank} points={p.points}
           rep={p.rep} size="L" stats={p.stats || {}} tilt={false} />
-        <div style={{ marginTop: 14 }}><MhTitleLockup size={70} center /></div>
+        {/* the logo is taller than the typeset lockup was, and its meta line repeats the
+            label above the card: without it the address cleared the frame again */}
+        <div style={{ marginTop: 10 }}><MhTitleLockup size={58} center meta={false} /></div>
         <MhLabel tone="sand" style={{ marginTop: 4 }}>{(MH.stories || {}).url || MH.host}</MhLabel>
       </div>
       <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ left: 18, top: 14, height: 24 }} />

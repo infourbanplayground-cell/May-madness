@@ -57,7 +57,7 @@ const BOLD2 = BOLD.replace(/#1A0B2E/g, '#0E1420') + `
 const OPTS = process.env.ONLYBOLD ? { BOLD, BOLD2 } : { A: base('LilitaOne', '#120D22'), B: base('BowlbyOne', '#1B0F2E'), BOLD };
 const SCREENS = (process.env.SCREENS || 'home,take,wanted,me').split(',');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-for (const [opt, css] of [...(process.env.ONLYBOLD ? [] : [['now', '']]), ...Object.entries(OPTS)]) {
+for (const [opt, css] of process.env.NOWONLY ? [['now', '']] : [...(process.env.ONLYBOLD ? [] : [['now', '']]), ...Object.entries(OPTS)]) {
   for (const s of SCREENS) {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
     const pg = await ctx.newPage();

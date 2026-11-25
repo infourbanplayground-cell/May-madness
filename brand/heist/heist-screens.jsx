@@ -436,7 +436,7 @@ function MhTake({ D, go }) {
           <button type="button" key={p.id} className="mn-glass mh-tap mh-prize" onClick={() => go("card", p.id)}>
             <MhDisplay size={20} tone={place[i][1]} style={{ width: 36 }}>{place[i][0]}</MhDisplay>
             <MhAvatar player={{ name: p.name, photo: p.photo, photoPos: p.avPos || p.pos }} size={38} ring={place[i][1]} zoom={p.zoom} />
-            <div className="mn-display" style={{ flex: 1, fontSize: 17, textAlign: "left" }}>{p.name.toUpperCase()}
+            <div className="mn-display" style={{ flex: 1, minWidth: 0, fontSize: 17, textAlign: "left" }}><span className="mh-fitline">{p.name}</span>
               <div className="mh-ptsline">{p.points} PTS</div></div>
             <MhDisplay size={24}>{MH.seasonPrizes[i]}<span className="mh-omr"> OMR</span></MhDisplay>
           </button>
