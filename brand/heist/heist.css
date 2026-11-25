@@ -196,6 +196,8 @@
 .mn-lockup .mn-l1 { position: relative; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: .84; letter-spacing: -.01em; background: var(--mn-grad-title); -webkit-background-clip: text; background-clip: text; color: transparent; filter: var(--mn-title-filter); }
 .mn-lockup .mn-band { position: relative; margin-top: -1px; padding: 4px 14px 3px; background: var(--mn-grad-nights); transform: skewX(-10deg); box-shadow: var(--mn-band-shadow); }
 .mn-lockup .mn-band > span { display: block; transform: skewX(10deg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 900; line-height: 1; letter-spacing: .32em; padding-left: .32em; color: var(--mn-navy); }
+.mn-lockup .mn-logo { position: relative; display: block; line-height: 0; }
+.mn-lockup .mn-logo img { display: block; max-width: 100%; filter: drop-shadow(0 6px 14px rgba(0,0,0,.45)); }
 .mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
 
 /* ── scene tag ────────────────────────────────────────────────────────── */
@@ -621,7 +623,7 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-body > .mh-col > :nth-child(n+7) { animation-delay: .32s }
 .mh-body > .mn-hero { animation: mhFade .5s ease-out backwards; }
 .mn-hero-img > .mn-art img { animation: mhSettle 1.4s cubic-bezier(.2,.8,.2,1) backwards; }
-.mn-hero .mn-lockup .mn-l1 { animation: mhSlideIn .6s .18s cubic-bezier(.2,.8,.2,1) backwards; }
+.mn-hero .mn-lockup .mn-logo { animation: mhSlideIn .6s .18s cubic-bezier(.2,.8,.2,1) backwards; }
 .mn-hero .mn-lockup .mn-band { animation: mhBand .55s .38s cubic-bezier(.6,0,.2,1) backwards; }
 .mn-hero .mn-lockup .mn-meta { animation: mhFade .5s .6s ease-out backwards; }
 .mh-job { animation: mhRise .45s cubic-bezier(.2,.8,.2,1) backwards; }

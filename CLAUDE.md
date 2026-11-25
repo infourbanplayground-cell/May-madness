@@ -888,6 +888,26 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   cycling. The art filter is `saturate(1.28)` and the fades are lighter.
   `check-heist-app.mjs` fails if Loading does not change picture or if
   Loading/Home/Take share one.
+- **THE LOGO IS THE OWNER'S (25 Nov 2026: "I like this logo instead of the
+  one we've used")** — URBAN PLAYGROUND in the block face over "Muscat Heist"
+  in pink script, CUT OUT of their own poster (`brand/heist/art-source-logo-poster.webp`)
+  to `brand/heist/heist-logo.{png,webp}` (715x491, transparent). It replaces
+  the typeset MUSCAT + coral HEIST band in `MhTitleLockup`, so every screen,
+  the boot splash and all three stories carry it. The cut keeps the letters'
+  own black outline by DILATING the cream and pink letter cores by 18px
+  inside the dark-outlined region, which is what drops the clubhouse roof and
+  palms the outline touches; checked on navy, white and coral.
+  - A plain `<img src=...webp>`, never `<picture>`: html-to-image inlines an
+    img's src and leaves a `<source>` unfetched, so the story export came out
+    without the logo (mean diff 15-19 against the render; 0.8-1.8 now).
+  - The logo stands ~100px taller than the old lockup and first landed on the
+    billing, a scene tag and a contender's name — all invisible to the text
+    checks, because an image is not text. `render-heist-stories.mjs` now
+    fails a logo that lies over any text outside its own lockup, and the
+    poster drops "Urban Playground presents" (the logo says it).
+  - `preview.html` is GENERATED (`python3 ops/build-heist-preview.py`) — the
+    stories render from it, so a component change needs it rebuilt or the
+    stories keep the old one with every check green.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:

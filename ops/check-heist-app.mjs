@@ -36,11 +36,11 @@ n7.groupMatches.slice(12).forEach(m => { delete m.winner; delete m.score; delete
 const launch = { ...clone(NAT), sessions: [] };
 const SCEN = { mid, launch };
 
-const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.json': 'application/json' };
+const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.json': 'application/json' };
 let scenario = 'mid'; const saves = [];
 const PORTRAITS = process.env.PORTRAITS || '';
 const map = [['/assets/fonts/brand/', 'brand/fonts/'], ['/assets/fonts/heist/', 'brand/heist/fonts/'], ['/assets/art/', 'brand/heist/art/'],
-             ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/history.json', 'brand/national/history.json']];
+             ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/heist-logo.png', 'brand/heist/heist-logo.png'], ['/assets/heist-logo.webp', 'brand/heist/heist-logo.webp'], ['/assets/history.json', 'brand/national/history.json']];
 const srv = http.createServer((q, r) => {
   const u = decodeURIComponent(q.url.split('?')[0]);
   const json = o => { r.writeHead(200, { 'Content-Type': 'application/json' }); r.end(typeof o === 'string' ? o : JSON.stringify(o)); };

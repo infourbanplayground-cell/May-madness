@@ -178,18 +178,28 @@ function MhHeroCut({ height, src, pos, cut = [82, 96], gold, fade, children, sty
 }
 
 // ── title lockup ──────────────────────────────────────────────────────────
-// MUSCAT at base x .74, HEIST on the skewed coral band at base x .42.
-// Sizes from the static design: S 76 (56/31 on Home), M 84 (62/35 loading),
-// L 104 (poster).
+// THE OWNER'S LOGO (25 Nov 2026: "I like this logo instead of the one we've
+// used"): URBAN PLAYGROUND in the block face over "Muscat Heist" in pink
+// script, cut out of their own poster (brand/heist/heist-logo.png, source
+// art-source-logo-poster.webp). It replaces the typeset MUSCAT + coral HEIST
+// band everywhere this component is used. Widths keep the old lockup's
+// footprint: S 76 -> 236px, M 84 -> 260px, L 104 -> 322px.
 const MH_LOCKUP = { S: 76, M: 84, L: 104 };
+const MH_LOGO_RATIO = 715 / 491;
+const mhLogoSrc = () => (window.MH_LOGO || "heist-logo");
 function MhTitleLockup({ size = "S", center, presents, meta }) {
   const base = MH_LOCKUP[size] || size;
+  const w = Math.round(base * 3.1);
   return (
     <div className="mn-lockup" data-center={center ? "" : undefined}>
       {center && <div className="mn-sun" aria-hidden="true" style={{ width: base * 1.05, height: base * 1.05 }} />}
       {presents && <div className="mn-presents" style={{ fontSize: Math.round(base * .2) }}>{presents}</div>}
-      <div className="mn-l1" style={{ fontSize: Math.round(base * .74) }}>{MH.nameLine1 || "MUSCAT"}</div>
-      <div className="mn-band"><span style={{ fontSize: Math.round(base * .42) }}>{MH.nameLine2 || "HEIST"}</span></div>
+      {/* a plain <img>, not <picture>: the story export (html-to-image) inlines an
+          img's src and leaves a <source> unfetched, so a <picture> exported blank */}
+      <span className="mn-logo">
+        <img src={mhLogoSrc() + ".webp"} alt={`Urban Playground ${MH.nameLine1 || "Muscat"} ${MH.nameLine2 || "Heist"}`}
+          width={w} height={Math.round(w / MH_LOGO_RATIO)} style={{ width: w, height: "auto" }} />
+      </span>
       {meta !== false && <div className="mn-meta">{meta || `${MH.volumeLabel} · Muscat · ${MH.monthShort} ${MH.year}`}</div>}
     </div>
   );

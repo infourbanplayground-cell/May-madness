@@ -31,7 +31,7 @@ echo "==> build $BID -> $DIR"
 ssh urbanpadel "mkdir -p $DIR/assets/art $DIR/assets/fonts/brand $DIR/assets/fonts/heist"
 scp -q "$PAGE" urbanpadel:$DIR/index.html.new
 scp -q brand/heist/art/*.jpg brand/heist/art/*.webp urbanpadel:$DIR/assets/art/
-scp -q brand/heist/up-logo-tight.png brand/national/history.json urbanpadel:$DIR/assets/
+scp -q brand/heist/up-logo-tight.png brand/heist/heist-logo.png brand/heist/heist-logo.webp brand/national/history.json urbanpadel:$DIR/assets/
 # the inherited all-time plate fetches /assets/history.json from the SITE ROOT
 ssh urbanpadel "mkdir -p $WEB/assets"; scp -q brand/national/history.json urbanpadel:$WEB/assets/
 scp -q brand/fonts/*.woff2 brand/fonts/fonts.css urbanpadel:$DIR/assets/fonts/brand/
@@ -43,7 +43,7 @@ ssh urbanpadel "set -e
 
 # as a visitor sees it, through Cloudflare
 PATHP=/; [ "${ROOT:-}" = 1 ] || PATHP=/preview/
-for u in "$PATHP" /version.txt /state "${PATHP}assets/up-logo-tight.png" "${PATHP}assets/fonts/heist/fonts.css"; do
+for u in "$PATHP" /version.txt /state "${PATHP}assets/up-logo-tight.png" "${PATHP}assets/heist-logo.webp" "${PATHP}assets/fonts/heist/fonts.css"; do
   printf '%-40s %s\n' "$u" "$(curl -s -o /dev/null --max-time 20 -w '%{http_code} %{content_type}' "https://$HOST$u" || echo unreachable)"
 done
 LIVE=$(curl -s --max-time 20 "https://$HOST/version.txt" | tr -d '\n')

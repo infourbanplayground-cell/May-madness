@@ -327,15 +327,18 @@ def main():
     import re as _re
     posters = [x["art"].rsplit(".", 1)[0] for x in S.get("loadingArt", [])]
     assert posters, "loadingArt is empty: the boot splash has no poster"
-    lock = (f'<div class="mn-lockup"><div class="mn-l1" style="font-size:62px">{S["nameLine1"]}</div>'
-            f'<div class="mn-band"><span style="font-size:35px">{S["nameLine2"]}</span></div>'
+    # the owner's logo (25 Nov), the same file MhTitleLockup draws at size M
+    lock = (f'<div class="mn-lockup"><span class="mn-logo">'
+            f'<img src="assets/heist-logo.webp" alt="Urban Playground {S["nameLine1"]} {S["nameLine2"]}" width="260" height="179" style="width:260px;height:auto"></span>'
             f'<div class="mn-meta">{S["volumeLabel"]} · Muscat · {S["monthShort"]} {S["year"]}</div></div>')
+    boot_logo = '<script>window.MH_LOGO="assets/heist-logo";</script>'
     boot = f"""  <div id="splash" class="mh-boot" role="status" aria-label="Now loading Muscat">
     <div class="mhb-art"><img id="mhb-img" alt="" fetchpriority="high"></div>
     <div class="mhb-shade"></div>
     <div class="mhb-lock">{lock}</div>
     <div class="mhb-spin"><span class="mhb-ring"></span><span>NOW LOADING MUSCAT</span></div>
   </div>
+  {boot_logo}
   <script>(function(){{var P={json.dumps(posters)};var n=P[Math.floor(Date.now()/864e5)%P.length];
     var i=document.getElementById("mhb-img");i.onerror=function(){{i.onerror=null;i.src="assets/art/"+n+".jpg";}};
     i.src="assets/art/"+n+"-"+(Math.max(innerWidth,innerHeight)*(devicePixelRatio||1)>2400?1600:1200)+".webp";}})();</script>
@@ -346,8 +349,7 @@ def main():
   @keyframes mhbPan{{to{{object-position:100% 35%;transform:scale(1.12)}}}}
   .mh-boot .mhb-shade{{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,26,.78),rgba(10,16,26,.35) 26%,rgba(10,16,26,0) 40%,rgba(10,16,26,0) 62%,rgba(10,16,26,.85) 88%)}}
   .mh-boot .mhb-lock{{position:absolute;left:20px;top:calc(58px + env(safe-area-inset-top))}}
-  .mh-boot .mn-l1{{filter:var(--mn-title-filter) drop-shadow(4px 4px 0 rgba(0,0,0,.85))}}
-  .mh-boot .mn-band{{filter:drop-shadow(4px 4px 0 rgba(0,0,0,.85))}}
+  .mh-boot .mn-logo img{{display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}}
   .mh-boot .mn-meta{{text-shadow:0 1px 6px rgba(0,0,0,.9)}}
   .mh-boot .mhb-spin{{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#F2E6D8}}
   .mh-boot .mhb-ring{{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#FFC9A3;animation:mhbSpin .8s linear infinite}}

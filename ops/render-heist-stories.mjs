@@ -29,7 +29,7 @@ const K = 1080 / 416;
 const STORIES = [['campaign-poster', 'story/poster', '18-story-campaign-poster'],
                  ['contenders', 'story/contenders', '19-story-contenders'],
                  ['my-card', 'story/card/p05', null]];
-const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg' };
 const srv = http.createServer((req, res) => {
   const f = path.join(ROOT, decodeURIComponent((req.url || '/').split('?')[0]));
   if (!f.startsWith(ROOT) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end(); }
@@ -112,7 +112,26 @@ for (const [name, hash, ref] of STORIES) {
   const T = r.text.replace(/\s+/g, ' ');
   if (/NIGHTS/.test(T) || /\b402\b/.test(T) || /[؀-ۿ]/.test(T)) fails.push(`${tag}: old design's copy on the frame`);
   if (name !== 'my-card' && !/407 OMR/.test(T)) fails.push(`${tag}: pool is not the derived 407`);
-  if (!/HEIST/.test(T)) fails.push(`${tag}: no HEIST in the lockup`);
+  // the lockup is the owner's logo image since 25 Nov, not typeset HEIST: it must be there AND decoded
+  const logo = await pg.evaluate(() => { const i = document.querySelector('.mn-logo img'); return i ? i.naturalWidth : -1; });
+  // an image is invisible to the text checks, so a logo lying over the billing passed them all
+  const hits = await pg.evaluate(() => {
+    const L = document.querySelector('.mn-logo img'); if (!L) return [];
+    const a = L.getBoundingClientRect(), out = [];
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n; (n = w.nextNode());) {
+      if (!n.textContent.trim() || L.closest('.mn-lockup').contains(n.parentElement)) continue;
+      const cs = getComputedStyle(n.parentElement); if (cs.visibility === 'hidden' || +cs.opacity === 0) continue;
+      const rg = document.createRange(); rg.selectNodeContents(n);
+      for (const b of rg.getClientRects()) {
+        const ov = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top), oh = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+        if (ov > 3 && oh > 3) { out.push(n.textContent.trim().slice(0, 30)); break; }
+      }
+    }
+    return out;
+  });
+  if (hits.length) fails.push(`${tag}: the logo lies over text: ${hits.slice(0, 3).join(' | ')}`);
+  if (logo <= 0) fails.push(`${tag}: the Muscat Heist logo ${logo < 0 ? 'is missing' : 'did not load'}`);
   if (name === 'contenders' && !/Eleven points/.test(T)) fails.push(`${tag}: tagline gap is not #1 - #2 in words`);
   if (name === 'campaign-poster' && !(/Every Mon & Wed · 17:30/i.test(T) && /From Wed 2 Dec/i.test(T))) fails.push(`${tag}: schedule line not from the nights: ${T.slice(-90)}`);
   const file = path.join(OUT, `${name}.png`);

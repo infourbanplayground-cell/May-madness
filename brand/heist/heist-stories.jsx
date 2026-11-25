@@ -72,9 +72,11 @@ function MhStoryPoster({ D }) {
       </svg>
       <div className="mh-storyfoot" aria-hidden="true" />
       {shards[0] && <div style={{ position: "absolute", left: 300, top: 190 }}><MhSceneTag>{shards[0].tag}</MhSceneTag></div>}
-      {shards[1] && <div style={{ position: "absolute", left: 300, top: 400 }}><MhSceneTag>{shards[1].tag}</MhSceneTag></div>}
+      {shards[1] && <div style={{ position: "absolute", left: 300, top: 330 }}><MhSceneTag>{shards[1].tag}</MhSceneTag></div>}
       <div style={{ position: "absolute", left: 18, top: 60 }}><MhSceneTag>{ep.code} · {ep.title}</MhSceneTag></div>
-      <div className="mh-storylock" style={{ top: 418 }}><MhTitleLockup size="L" center presents={MH.presents} /></div>
+      {/* the owner's logo already says Urban Playground, so no "presents" line over it; it stands
+          ~100px taller than the typeset lockup it replaced, hence higher and a touch smaller */}
+      <div className="mh-storylock" style={{ top: 380 }}><MhTitleLockup size={86} center /></div>
       <div className="mh-storybill" style={{ bottom: 18 }}>
         <MhStoryBilling D={D} X={X} />
         <div className="mh-storywhen">
@@ -106,7 +108,7 @@ function MhStoryContenders({ D }) {
       <div className="mh-contback" aria-hidden="true" />
       <div className="mh-conttag mn-serif">Three contenders. {mhWords(gap)} point{gap === 1 ? "" : "s"}.<br />One {MH.month}.</div>
       <div className="mh-controw"><Panel p={b} /><Panel p={a} big /><Panel p={c} /></div>
-      <div className="mh-storylock" style={{ top: 478 }}><MhTitleLockup size={92} center /></div>
+      <div className="mh-storylock" style={{ top: 484 }}><MhTitleLockup size={68} center meta={false} /></div>
       <div className="mh-storybill" style={{ bottom: 16 }}><MhStoryBilling D={D} X={X} /></div>
       <img className="mh-storylogo" src={D.logo || "up-logo-tight.png"} alt="Urban Playground" style={{ left: 18, top: 14, height: 24 }} />
     </MhStoryFrame>
