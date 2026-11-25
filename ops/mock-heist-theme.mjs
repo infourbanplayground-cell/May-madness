@@ -34,12 +34,25 @@ html,body,#root{background:${ground} !important}
   -webkit-text-stroke:.07em #0b0b10;paint-order:stroke fill;text-shadow:.05em .07em 0 #0b0b10}
 .mn-serif{font-style:normal !important;color:#FF2D78;-webkit-text-stroke:.05em #0b0b10;paint-order:stroke fill}
 `;
-const OPTS = { A: base('LilitaOne', '#120D22'), B: base('BowlbyOne', '#1B0F2E') };
-const SCREENS = ['home', 'take', 'wanted', 'me'];
+const BOLD = base('BowlbyOne', '#1A0B2E') + `
+:root{ --mn-teal:#FF2D78; --mn-mist:#E7C8FF; --mn-dim:#B79BD6; --mn-gold:#FFB347;
+  --mn-line:rgba(255,45,120,.28); }
+/* the logo's block face is LOWERCASE and fat, outlined and dropped */
+.mn-display,.mn-name,.mn-l1{ text-transform:lowercase !important; letter-spacing:-.005em !important;
+  -webkit-text-stroke:.09em #07040d; text-shadow:.06em .08em 0 #07040d, .06em .08em 0 #FF2D78; }
+.mn-pts,.mn-rank{ -webkit-text-stroke:.07em #07040d; text-shadow:.05em .06em 0 #07040d }
+/* kickers and labels go hot pink / orange instead of teal and sand */
+.mn-label{ color:#FFB347 !important; }
+[class*="mn-card"],[class*="mh-row"],.mn-glass,.mh-take-row,.mh-wrow{ background:linear-gradient(180deg,rgba(74,22,110,.55),rgba(30,10,50,.75)) !important;
+  border-color:rgba(255,45,120,.45) !important; }
+.mn-serif{ font-size:1.12em }
+`;
+const OPTS = process.env.ONLYBOLD ? { BOLD } : { A: base('LilitaOne', '#120D22'), B: base('BowlbyOne', '#1B0F2E'), BOLD };
+const SCREENS = (process.env.SCREENS || 'home,take,wanted,me').split(',');
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
-for (const [opt, css] of [['now', ''], ...Object.entries(OPTS)]) {
+for (const [opt, css] of [...(process.env.ONLYBOLD ? [] : [['now', '']]), ...Object.entries(OPTS)]) {
   for (const s of SCREENS) {
-    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+    const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
     const pg = await ctx.newPage();
     await pg.route('**/unpkg.com/**', r => { const u = r.request().url();
       r.fulfill({ status: 200, contentType: 'application/javascript', body: vendor(/html-to-image/.test(u) ? 'h2i.js' : /babel/.test(u) ? 'babel.js' : /react-dom/.test(u) ? 'react-dom.js' : 'react.js') }); });
