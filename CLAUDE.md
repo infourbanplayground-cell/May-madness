@@ -1258,6 +1258,21 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   hold both ids — their own tables are history, and the all-time view reads
   history.json. Re-running `build-history.py` would bring the old ids back:
   apply the same two substitutions after it.
+  - **26 Nov, six more, confirmed one by one by the owner**: Ismail Al Nassri,
+    Ghassan, Yahya, Muayad, Mulhim, Sultana (in he and na). Khalid, Mohd and the
+    common names (seven Ahmeds, four Alis, three each of Mohammed, Hamed, Salim)
+    are DIFFERENT people and were left alone; M.S (June Fury) / MS (Surge) is
+    waiting on the owner.
+  - **`ops/player-aliases.json` is the one list of merges**, and it is what
+    stops them coming undone. `build-roster-merge.py` reads every archived
+    volume, where both ids still exist, so before this it re-added every merged
+    duplicate (MSM and Aamir included) and left its old points on it; it now
+    counts a duplicate's matches for the kept id and never re-adds it.
+    `ops/apply-aliases-history.py` does the same to history.json (run it after
+    `build-history.py`), and the Heist build stamps `NA_HISTORY_V` with that
+    file's OWN hash — the inherited value named National's copy and the file is
+    cached 30 days, so a rewritten history never reached a phone.
+    **Add a pair to the aliases file BEFORE merging it.**
 - **Deploy: `bash ops/deploy-heist.sh`** -> `/preview/` until launch;
   `ROOT=1` puts it at the front on **Tue 1 Dec**. It refuses to run 17:00-23:00
   on a Heist night, and writes `version.txt` at the SITE ROOT (the update check

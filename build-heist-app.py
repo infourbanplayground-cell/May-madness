@@ -421,6 +421,14 @@ def main():
     s, k = re.subn(r"^const LANDMARKS = \[.*?\];$", lambda m: "const LANDMARKS = " + json.dumps(eps, ensure_ascii=False) + ";", s, count=1, flags=re.M)
     assert k == 1, "LANDMARKS not found"
 
+    # ── the all-time history file is versioned by ITS OWN hash, re-read at every
+    # Heist build: the value inherited from National's page names the file as it
+    # was when National was built, and /assets/*.json is cached for 30 days, so a
+    # history rewritten since (the duplicate merges) would never reach a phone
+    hv = hashlib.sha256(open(os.path.join(HERE, "brand", "national", "history.json"), "rb").read()).hexdigest()[:10]
+    s, k = re.subn(r'const NA_HISTORY_V = "[0-9a-f]+";', f'const NA_HISTORY_V = "{hv}";', s)
+    assert k == 1, f"NA_HISTORY_V found {k} times"
+
     # ── compile the JSX here, once, instead of on every phone on every open ──
     # (3.1MB of Babel downloaded and ~900KB compiled before the first frame);
     # ops/precompile-jsx.js runs the same compiler and preset and drops the CDN tag

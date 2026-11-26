@@ -20,6 +20,10 @@ const { Pool } = require("pg");
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const DRY = process.env.DRY === "1";
 const ONLY_PLAYED = process.env.ONLY_PLAYED === "1";
+// one person, two records (ops/player-aliases.json): the duplicate's matches count
+// for the kept id, and the duplicate is never put back into the roster
+const ALIAS = {"p_mrcbedrc_y5ioq": "p_mtu5d6t0_agbyk", "p_mw9axk6h_qfbnq": "p_mqf8rb1i_seau4", "p_mptqpbkf_xftrh": "p_mu198buc_73ypj", "p_mu198buc_nocna": "p_mptqpbkf_qg46s", "p_mu44czhy_lyoc7": "p_mptqpbkf_otdue", "p_mptqpbkf_6ww7z": "p_ms386li9_kbs4v", "p_mq82cxdf_fthk5": "p_mpu6i7pi_8oe0x", "p_mrcb09m6_p06qo": "p_mrcb80mb_vwfqw"};
+const canon = id => ALIAS[id] || id;
 
 const calc_jh = (function () {
   const GROUPS = ["A", "B", "C", "D"];
@@ -663,9 +667,9 @@ function calcGroupStandings(session, group) {
   return rows.sort((a, b) => {
     if (b.wins !== a.wins) return b.wins - a.wins;   // 1) most wins
     if (b.gd !== a.gd) return b.gd - a.gd;           // 2) game difference
-    if (b.gf !== a.gf) return b.gf - a.gf;           // 3) games won
     const aH = (h2h[a.team.id]?.[b.team.id] || 0) - (h2h[b.team.id]?.[a.team.id] || 0);
-    if (aH !== 0) return -aH;                        // 4) head-to-head
+    if (aH !== 0) return -aH;                        // 3) head-to-head
+    if (b.gf !== a.gf) return b.gf - a.gf;           // 4) games won
     return b.pts - a.pts;
   });
 }
@@ -774,13 +778,15 @@ const SOURCES = [
     for (const n of st.prevSeriesNames || []) if (!seriesNames.includes(n)) seriesNames.push(n);
     if (!seriesNames.includes(src.name)) seriesNames.push(src.name);
 
-    for (const p of st.players || []) base.set(p.id, { p, vol: src.name });
+    for (const p of st.players || []) if (!ALIAS[p.id]) base.set(p.id, { p, vol: src.name });
+    for (const p of st.players || []) if (ALIAS[p.id] && !base.has(canon(p.id))) base.set(canon(p.id), { p: { ...p, id: canon(p.id) }, vol: src.name });
     for (const p of st.players || []) {
       const r = src.calc(p.id, st.sessions || []);
       if (r.stats.sessionsPlayed > 0) {
-        played.add(p.id);
-        if (!totals.has(p.id)) totals.set(p.id, {});
-        totals.get(p.id)[src.name] = r.totalPts;
+        const id = canon(p.id);              // two records in one volume are different matches: they add
+        played.add(id);
+        if (!totals.has(id)) totals.set(id, {});
+        totals.get(id)[src.name] = (totals.get(id)[src.name] || 0) + r.totalPts;
       }
     }
     console.log(`${src.name.padEnd(17)} roster ${String((st.players || []).length).padStart(4)}  `
@@ -813,7 +819,8 @@ const SOURCES = [
   const toCopy = new Map();
   for (const src of SOURCES) {
     const rows = (await pool.query(`select player_id, photo_data from ${src.photos}`)).rows;
-    for (const r of rows) if (byId.has(r.player_id) && !have.has(r.player_id)) toCopy.set(r.player_id, r.photo_data);
+    for (const r of rows) { const id = canon(r.player_id);
+      if (byId.has(id) && !have.has(id) && !(ALIAS[r.player_id] && toCopy.has(id))) toCopy.set(id, r.photo_data); }
   }
 
   const allTime = [...byId.values()]

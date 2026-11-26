@@ -1,0 +1,11 @@
+{
+  "_note": "One person, two records: duplicate id -> the id that is kept. Applied by ops/merge-players.js to a live state, and honoured by ops/build-roster-merge.py (which reads every archived volume, where both ids still exist, and would otherwise put the duplicate back) and by ops/apply-aliases-history.py for brand/national/history.json. Add a pair here BEFORE merging it, never after.",
+  "p_mrcbedrc_y5ioq": "p_mtu5d6t0_agbyk",
+  "p_mw9axk6h_qfbnq": "p_mqf8rb1i_seau4",
+  "p_mptqpbkf_xftrh": "p_mu198buc_73ypj",
+  "p_mu198buc_nocna": "p_mptqpbkf_qg46s",
+  "p_mu44czhy_lyoc7": "p_mptqpbkf_otdue",
+  "p_mptqpbkf_6ww7z": "p_ms386li9_kbs4v",
+  "p_mq82cxdf_fthk5": "p_mpu6i7pi_8oe0x",
+  "p_mrcb09m6_p06qo": "p_mrcb80mb_vwfqw"
+}
