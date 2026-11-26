@@ -25,10 +25,15 @@ const T = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': '
 const map = [['/assets/fonts/brand/', 'brand/fonts/'], ['/assets/fonts/heist/', 'brand/heist/fonts/'], ['/assets/art/', 'brand/heist/art/'],
              ['/assets/up-logo-tight.png', 'brand/heist/up-logo-tight.png'], ['/assets/history.json', 'brand/national/history.json'],
              ['/assets/', 'brand/national/']];
+// APP=<file> checks another build. DUMP=<json> writes every element's laid-out
+// box and key computed styles per screen, so two builds (Tailwind at runtime
+// vs compiled ahead) can be compared element by element.
+const PAGE = () => fs.readFileSync(process.env.APP ? path.resolve(process.env.APP) : path.join(ROOT, 'heist-index.html'));
+const DUMPS = {};
 const srv = http.createServer((q, r) => {
   const u = decodeURIComponent(q.url.split('?')[0]);
   const json = o => { r.writeHead(200, { 'Content-Type': 'application/json' }); r.end(typeof o === 'string' ? o : JSON.stringify(o)); };
-  if (u === '/' || u === '/index.html') { r.writeHead(200, { 'Content-Type': T['.html'] }); return r.end(fs.readFileSync(path.join(ROOT, 'heist-index.html'))); }
+  if (u === '/' || u === '/index.html') { r.writeHead(200, { 'Content-Type': T['.html'] }); return r.end(PAGE()); }
   if (u === '/version.txt') { r.writeHead(200); return r.end(BID + '\n'); }
   if (u === '/state') return json({ ok: true, state: st, version: 1 });
   if (u === '/photos') return json(PHOTOS);
@@ -101,6 +106,10 @@ const AUDIT = () => {
 };
 
 async function check(pg, errs, name) {
+  if (process.env.DUMP) DUMPS[name] = await pg.evaluate(() => [...document.querySelectorAll('body *')].filter(e => !e.closest('script,style,svg'))
+    .map(e => { const c = getComputedStyle(e), b = e.getBoundingClientRect();
+      return [e.tagName + '.' + (typeof e.className === 'string' ? e.className : ''), Math.round(b.x), Math.round(b.y), Math.round(b.width), Math.round(b.height),
+        c.display, c.position, c.padding, c.margin, c.fontSize, c.fontWeight, c.color, c.backgroundColor, c.borderRadius, c.gap, c.justifyContent, c.alignItems, c.gridTemplateColumns, c.textAlign, c.opacity].join('|'); }));
   const r = await pg.evaluate(AUDIT);
   await pg.screenshot({ path: path.join(OUT, name + '.png') });
   const bad = [];
@@ -157,5 +166,6 @@ async function check(pg, errs, name) {
   await ctx.close();
 }
 await browser.close(); srv.close();
+if (process.env.DUMP) fs.writeFileSync(process.env.DUMP, JSON.stringify(DUMPS));
 if (fails.length) { console.error(`\n${fails.length} problems`); process.exit(1); }
 console.log(`ok — ${OUT}`);

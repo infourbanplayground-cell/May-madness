@@ -451,6 +451,32 @@ def main():
     s = subprocess.run(["node", os.path.join(HERE, "ops", "precompile-jsx.js")], input=s, capture_output=True,
                        text=True, check=True).stdout
 
+    # ── Tailwind compiled here too, not by a ~400KB script on the phone ──
+    # The inherited organiser screens (and the sheets over the Heist ones) are
+    # laid out by the Tailwind Play CDN, which downloads its compiler and scans
+    # the DOM on every open. The CLI at the SAME major (3.4) scans the built page
+    # once and emits ~23KB. Checked element by element on every organiser screen
+    # with check-heist-classic.mjs DUMP=: 7,068 of 7,070 identical (the two are a
+    # pulsing dot caught at a different phase). Placed at the end of <head>,
+    # where the CDN injects its own sheet, so the cascade order is unchanged.
+    TW = '<script src="https://cdn.tailwindcss.com"></script>'
+    assert s.count(TW) == 1, "Tailwind CDN tag not found once"
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        open(os.path.join(td, "page.html"), "w", encoding="utf-8").write(s.replace(TW, ""))
+        open(os.path.join(td, "in.css"), "w").write("@tailwind base;\n@tailwind components;\n@tailwind utilities;\n")
+        r = subprocess.run(["npx", "-y", "tailwindcss@3.4.17", "-i", os.path.join(td, "in.css"), "-o", os.path.join(td, "out.css"),
+                            "--content", os.path.join(td, "page.html"), "--minify"], capture_output=True, text=True)
+        css = open(os.path.join(td, "out.css")).read() if r.returncode == 0 and os.path.exists(os.path.join(td, "out.css")) else ""
+    if len(css) > 8000:
+        s = s.replace(TW, "").replace("</head>", '<style id="tw-pre">' + css + "</style></head>", 1)
+        print(f"  tailwind: compiled ahead, {len(css) // 1024}KB")
+    else:
+        # npm unreachable: keep the runtime, but PINNED — an unpinned CDN is how
+        # Babel 8 once blanked three sites at once
+        s = s.replace(TW, '<script src="https://cdn.tailwindcss.com/3.4.17"></script>')
+        print("  !! tailwind: CLI unavailable, shipping the PINNED runtime CDN instead", file=sys.stderr)
+
     # ── stamp ──
     bid = hashlib.sha256(s.encode()).hexdigest()[:12]
     s, n = re.subn(r'(\n\s*var V = )"[0-9a-f]{6,}";', r'\1"%s";' % bid, s, count=1)
