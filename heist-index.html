@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "3798952ab169";
+  var V = "e4f2bcd76871";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1732,6 +1732,21 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 .mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
   font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+.mh-upnext { display: grid !important; grid-template-columns: 64px minmax(0,1fr) auto; gap: 8px !important; align-items: center; width: 100%; min-height: 46px; padding: 6px 0;
+  border: 0; border-top: 1px solid rgba(246,234,211,.12); background: none; color: var(--mn-sand); text-align: left; }
+.mh-upnext:first-of-type { border-top: 0; }
+.mh-upnexttag { font: 700 10px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--mn-coral); }
+.mh-upnextname { font: 600 14px 'Manrope', sans-serif; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-upnextname i { font-style: normal; color: var(--mn-mist); }
+.mh-upnextg { font: 700 12px 'JetBrains Mono', monospace; color: var(--mn-peach); }
+.mh-cirow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 14px; background: rgba(7,4,13,.35); border: 1px solid rgba(246,234,211,.1); }
+.mh-cirow[data-done] { border-color: rgba(255,179,107,.55); }
+.mh-ciname { display: flex !important; align-items: center; gap: 8px; min-height: 48px; padding: 4px 8px; border-radius: 10px; border: 0; background: none;
+  color: var(--mn-sand); font: 600 14px 'Manrope', sans-serif; text-align: left; min-width: 0; }
+.mh-ciname span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-ciname b { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(246,234,211,.35); display: grid; place-items: center; font-size: 13px; }
+.mh-ciname[aria-pressed="true"] { background: rgba(255,179,107,.16); }
+.mh-ciname[aria-pressed="true"] b { background: var(--mn-peach); border-color: var(--mn-peach); color: #07040D; }
 
 </style>
 <style id="heist-classic">
@@ -13052,14 +13067,22 @@ function MhSession({
     onClick: () => setTab(tab === "clips" ? hasTeams ? "teams" : "" : "clips")
   }, React.createElement("span", {
     "aria-hidden": "true"
-  }, "\u25B6"), " Clips", clips.length ? ` · ${clips.length}` : "")), tab === "clips" ? React.createElement(MhClips, {
+  }, "\u25B6"), " Clips", clips.length ? ` · ${clips.length}` : "")), canScore && live && typeof MhUpNext === "function" && React.createElement(MhUpNext, {
+    s: s,
+    N: N,
+    go: go
+  }), tab === "clips" ? React.createElement(MhClips, {
     st: clipSt,
     list: clips
   }) : hasTeams ? React.createElement(React.Fragment, null, React.createElement(MhPills, {
     label: "Session",
-    items: [["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]],
+    items: [...(canScore && s.state !== "done" && D.checkIn ? [["checkin", "Check-in"]] : []), ["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]],
     value: tab,
     onChange: setTab
+  }), tab === "checkin" && typeof MhCheckIn === "function" && React.createElement(MhCheckIn, {
+    D: D,
+    s: s,
+    N: N
   }), tab === "groups" && React.createElement(React.Fragment, null, groups.length > 0 && React.createElement(MhPills, {
     label: "Group",
     items: groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x]),
@@ -16671,6 +16694,94 @@ function MhWhatsApp({
     onClick: () => mhHaptic()
   }, label);
 }
+function MhUpNext({
+  s,
+  N,
+  go
+}) {
+  const all = Object.entries(N.groups || {}).flatMap(([g, G]) => G.matches.map((m, i) => ({
+    ...m,
+    g,
+    i
+  })));
+  const on = all.filter(m => m.state === "live"),
+    nx = all.filter(m => m.state === "next");
+  const q = [...on, ...nx].slice(0, 3);
+  if (!q.length) return null;
+  return React.createElement(MhGlass, {
+    style: {
+      padding: "10px 14px"
+    }
+  }, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "Scorer \xB7 up next"), q.map((m, k) => React.createElement("button", {
+    type: "button",
+    key: m.id || k,
+    className: "mh-upnext mh-tap",
+    onClick: () => {
+      mhHaptic();
+      go("live", `${s.no}/${m.id || m.g + m.i}`);
+    }
+  }, React.createElement("span", {
+    className: "mh-upnexttag"
+  }, m.state === "live" ? "On court" : k === on.length ? "Next" : "Then"), React.createElement("span", {
+    className: "mh-upnextname"
+  }, m.a, " ", React.createElement("i", null, "v"), " ", m.b), React.createElement("span", {
+    className: "mh-upnextg"
+  }, m.court ? `C${m.court}` : `Gr ${m.g}`, " \u203A"))));
+}
+function MhCheckIn({
+  D,
+  s,
+  N
+}) {
+  const here = D.checkedIn && D.checkedIn[s.no] || {};
+  const teams = N.teams || [];
+  const both = teams.filter(t => (t.players || []).every(p => here[p.id])).length;
+  return React.createElement("div", {
+    className: "mh-col",
+    style: {
+      gap: 8
+    }
+  }, React.createElement(MhGlass, {
+    style: {
+      padding: "10px 14px"
+    }
+  }, React.createElement("div", {
+    className: "mh-split"
+  }, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "Check-in"), React.createElement(MhLabel, null, both, "/", teams.length, " pairs here")), React.createElement("div", {
+    className: "mh-progress"
+  }, React.createElement("div", {
+    style: {
+      width: (teams.length ? both / teams.length * 100 : 0) + "%"
+    }
+  })), React.createElement(MhSerif, {
+    size: 13,
+    style: {
+      marginTop: 6
+    }
+  }, "Tap a name when they arrive. Swapping a partner or adding a walk-in is in Organiser.")), teams.map(t => React.createElement("div", {
+    key: t.id,
+    className: "mh-cirow",
+    "data-done": (t.players || []).every(p => here[p.id]) ? "" : undefined
+  }, (t.players || []).map(p => React.createElement("button", {
+    type: "button",
+    key: p.id,
+    className: "mh-ciname",
+    "aria-pressed": !!here[p.id],
+    onClick: () => {
+      mhHaptic();
+      D.checkIn(s.sid, p.id, !here[p.id]);
+    }
+  }, React.createElement(MhAvatar, {
+    player: p,
+    size: 30
+  }), React.createElement("span", null, p.name), React.createElement("b", {
+    "aria-hidden": "true"
+  }, here[p.id] ? "✓" : ""))))));
+}
 const MH_HOST_PHOTOS = "/api/roster";
 const MH_HOST_LOOT = "/api/loot";
 const mhFirstOf = n => (n || "").split(/\s+/)[0];
@@ -17361,8 +17472,19 @@ function HeistShell(props) {
     d.pickMe = setMe ? () => {
       location.hash = "who";
     } : openMe;
+    d.checkedIn = Object.fromEntries((d.sessions || []).filter(x => x.sid).map(x => [x.no, ((state.sessions || []).find(y => y.id === x.sid) || {}).checkIn || {}]));
+    d.checkIn = canScore ? (sid, pid, on) => updateSession(sid, ss => {
+      const c = {
+        ...(ss.checkIn || {})
+      };
+      if (on) c[pid] = Date.now();else delete c[pid];
+      return {
+        ...ss,
+        checkIn: c
+      };
+    }) : null;
     return d;
-  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe, updateSession]);
   const day = (() => {
     const t = new Date();
     return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`;
@@ -17464,12 +17586,41 @@ function HeistShell(props) {
       return null;
     }
   }
+  const [pending, setPending] = React.useState(0);
+  const seen = React.useRef(state);
+  React.useEffect(() => {
+    if (canScore && seen.current && state !== seen.current) setPending(n => n + 1);
+    seen.current = state;
+  }, [state]);
+  React.useEffect(() => {
+    if (sync === "saved") setPending(0);
+  }, [sync]);
+  React.useEffect(() => {
+    window.__mhDirty = canScore && pending > 0;
+  }, [canScore, pending, sync]);
+  React.useEffect(() => {
+    const f = () => {
+      if (!window.__mhDirty) return;
+      const sid = ((state.sessions || [])[0] || {}).id;
+      if (sid) updateSession(sid, ss => ({
+        ...ss
+      }));
+    };
+    addEventListener("online", f);
+    return () => removeEventListener("online", f);
+  }, [state]);
   const banner = canScore && (sync === "error" || sync === "offline");
-  return React.createElement(React.Fragment, null, banner && React.createElement("button", {
+  const noSignal = typeof navigator !== "undefined" && navigator.onLine === false;
+  const auth = /401|403|token|auth|unauthor/i.test(syncErr || "");
+  return React.createElement(React.Fragment, null, banner && (noSignal || !auth ? React.createElement("div", {
+    className: "mh-savebanner",
+    role: "status",
+    "data-kind": "offline"
+  }, "\u23F3 ", noSignal ? "No signal" : "Not saved yet", " \u2014 ", pending > 0 ? `${pending} change${pending > 1 ? "s" : ""} waiting` : "changes waiting", " on this phone. They send by themselves; keep the app open.") : React.createElement("button", {
     type: "button",
     className: "mh-savebanner",
     onClick: () => openLogin()
-  }, "\u26A0 NOT SAVING \u2014 your changes are only on this phone. ", syncErr ? `(${syncErr}) ` : "", "Tap to sign in again."), typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") && React.createElement(MhFresh, {
+  }, "\u26A0 NOT SAVING \u2014 your changes are only on this phone. ", syncErr ? `(${syncErr}) ` : "", "Tap to sign in again.")), typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") && React.createElement(MhFresh, {
     pullY: pullY || 0,
     lastSync: lastSync,
     sync: sync,
@@ -17558,6 +17709,7 @@ function App() {
   const [refreshing, setRefreshing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
   const refreshNow = React.useCallback(async () => {
+    if (window.__mhDirty) return;
     setRefreshing(true);
     setSync("syncing");
     try {
@@ -17647,6 +17799,7 @@ function App() {
           });
           setSync("saved");
           setSyncErr("");
+          setLastSync(new Date());
           clearTimeout(savedFlash.current);
           savedFlash.current = setTimeout(() => setSync(s => s === "saved" ? "idle" : s), 1500);
           if (res && res.merged && res.mergedState) {
@@ -17677,6 +17830,7 @@ function App() {
         if (res?.ok && res.state) {
           setState(s => JSON.stringify(s) !== JSON.stringify(res.state) ? res.state : s);
           setSync("idle");
+          setLastSync(new Date());
         }
       } catch (e) {
         setSync("offline");

@@ -203,6 +203,28 @@ for (const scen of (process.env.ONLY ? [process.env.ONLY] : ['mid', 'launch'])) 
 if (!process.env.ONLY || process.env.ONLY === 'mid') {
   const { ctx, pg, errs } = await page('mid', null, true);
   await look(pg, 'session/7');
+  const upn = await pg.locator('.mh-upnext').count();
+  ok(upn >= 1 && upn <= 3, `organiser: up-next queue shows ${upn} match(es)`);
+  if (SHOTS) await pg.screenshot({ path: path.join(OUT, 'qol-session-org.png') });
+  // check-in: tap a name, the night carries it on the next save
+  await pg.click('.mn-pills button:has-text("Check-in")'); await pg.waitForTimeout(300);
+  const c0 = saves.length;
+  await pg.click('.mh-ciname >> nth=0'); await pg.waitForTimeout(4200);
+  const cs = saves.slice(c0).pop(), cn = cs && cs.state.sessions.find(x => x.date === SEASON.nights[6]);
+  ok(cn && cn.checkIn && Object.keys(cn.checkIn).length === 1, 'check-in is saved on the night: ' + JSON.stringify(cn && cn.checkIn ? Object.keys(cn.checkIn) : null));
+  if (SHOTS) await pg.screenshot({ path: path.join(OUT, 'qol-checkin.png') });
+  // no signal at the court: the change waits on the phone, says so, and goes when signal is back
+  await ctx.setOffline(true);
+  await pg.click('.mh-ciname >> nth=1'); await pg.waitForTimeout(5000);
+  const ban = await pg.locator('.mh-savebanner').count() ? await pg.locator('.mh-savebanner').innerText() : '';
+  ok(/no signal/i.test(ban) && /waiting/i.test(ban), 'offline banner says no signal and changes waiting: ' + ban.replace(/\s+/g, ' ').slice(0, 90));
+  ok(await pg.evaluate(() => window.__mhDirty === true), 'the phone is marked dirty, so a pull-to-refresh cannot overwrite it');
+  const o0 = saves.length;
+  await ctx.setOffline(false); await pg.evaluate(() => dispatchEvent(new Event('online'))); await pg.waitForTimeout(6000);
+  const os = saves.slice(o0).pop(), on2 = os && os.state.sessions.find(x => x.date === SEASON.nights[6]);
+  ok(on2 && on2.checkIn && Object.keys(on2.checkIn).length === 2, 'back online, the waiting change is saved: ' + (on2 && on2.checkIn ? Object.keys(on2.checkIn).length : 'no save'));
+  ok(await pg.locator('.mh-savebanner').count() === 0, 'and the banner clears');
+  await pg.click('.mn-pills button:has-text("Groups")'); await pg.waitForTimeout(300);
   const tap = await pg.$('button.mh-match');
   ok(!!tap, 'organiser: an unplayed match is tappable on tonight\'s session');
   if (tap) {

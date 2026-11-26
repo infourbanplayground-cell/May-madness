@@ -883,3 +883,18 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 .mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
   font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+.mh-upnext { display: grid !important; grid-template-columns: 64px minmax(0,1fr) auto; gap: 8px !important; align-items: center; width: 100%; min-height: 46px; padding: 6px 0;
+  border: 0; border-top: 1px solid rgba(246,234,211,.12); background: none; color: var(--mn-sand); text-align: left; }
+.mh-upnext:first-of-type { border-top: 0; }
+.mh-upnexttag { font: 700 10px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--mn-coral); }
+.mh-upnextname { font: 600 14px 'Manrope', sans-serif; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-upnextname i { font-style: normal; color: var(--mn-mist); }
+.mh-upnextg { font: 700 12px 'JetBrains Mono', monospace; color: var(--mn-peach); }
+.mh-cirow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 14px; background: rgba(7,4,13,.35); border: 1px solid rgba(246,234,211,.1); }
+.mh-cirow[data-done] { border-color: rgba(255,179,107,.55); }
+.mh-ciname { display: flex !important; align-items: center; gap: 8px; min-height: 48px; padding: 4px 8px; border-radius: 10px; border: 0; background: none;
+  color: var(--mn-sand); font: 600 14px 'Manrope', sans-serif; text-align: left; min-width: 0; }
+.mh-ciname span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-ciname b { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(246,234,211,.35); display: grid; place-items: center; font-size: 13px; }
+.mh-ciname[aria-pressed="true"] { background: rgba(255,179,107,.16); }
+.mh-ciname[aria-pressed="true"] b { background: var(--mn-peach); border-color: var(--mn-peach); color: #07040D; }

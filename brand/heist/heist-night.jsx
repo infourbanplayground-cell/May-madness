@@ -56,8 +56,10 @@ function MhSession({ D, go, no, canScore }) {
             {(clips.length > 0 || s.state !== "soon") && <button type="button" className="mh-act" data-on={tab === "clips" ? "" : undefined}
               onClick={() => setTab(tab === "clips" ? (hasTeams ? "teams" : "") : "clips")}><span aria-hidden="true">▶</span> Clips{clips.length ? ` · ${clips.length}` : ""}</button>}
           </div>
+          {canScore && live && typeof MhUpNext === "function" && <MhUpNext s={s} N={N} go={go} />}
           {tab === "clips" ? <MhClips st={clipSt} list={clips} /> : hasTeams ? <>
-            <MhPills label="Session" items={[["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
+            <MhPills label="Session" items={[...(canScore && s.state !== "done" && D.checkIn ? [["checkin", "Check-in"]] : []), ["teams", "Teams"], ["groups", "Groups"], ["knockout", "Knockout"], ["mvp", N.mvp && N.mvp.votes.length ? "MVP" : "Points"]]} value={tab} onChange={setTab} />
+            {tab === "checkin" && typeof MhCheckIn === "function" && <MhCheckIn D={D} s={s} N={N} />}
             {tab === "groups" && <>
               {groups.length > 0 && <MhPills label="Group" items={groups.map(x => [x, (N.groups[x] || {}).done ? `${x} ✓` : x])} value={g} onChange={setG} />}
               <MhGroupTable rows={(N.groups[g] || {}).standings || []} started={N.started} done={(N.groups[g] || {}).done} />

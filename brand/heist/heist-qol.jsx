@@ -239,3 +239,52 @@ function MhWhatsApp({ text, label = "Send on WhatsApp" }) {
   const href = "https://wa.me/?text=" + encodeURIComponent((text ? text + "\n" : "") + mhLink());
   return <a className="mn-btn mn-btn-ghost mh-wa" href={href} target="_blank" rel="noopener" onClick={() => mhHaptic()}>{label}</a>;
 }
+
+// ── the organiser: the next matches to start, one tap from scoring ───────
+function MhUpNext({ s, N, go }) {
+  const all = Object.entries(N.groups || {}).flatMap(([g, G]) => G.matches.map((m, i) => ({ ...m, g, i })));
+  const on = all.filter(m => m.state === "live"), nx = all.filter(m => m.state === "next");
+  const q = [...on, ...nx].slice(0, 3);
+  if (!q.length) return null;
+  return (
+    <MhGlass style={{ padding: "10px 14px" }}>
+      <MhLabel tone="peach">Scorer · up next</MhLabel>
+      {q.map((m, k) => (
+        <button type="button" key={m.id || k} className="mh-upnext mh-tap" onClick={() => { mhHaptic(); go("live", `${s.no}/${m.id || m.g + m.i}`); }}>
+          <span className="mh-upnexttag">{m.state === "live" ? "On court" : k === on.length ? "Next" : "Then"}</span>
+          <span className="mh-upnextname">{m.a} <i>v</i> {m.b}</span>
+          <span className="mh-upnextg">{m.court ? `C${m.court}` : `Gr ${m.g}`} ›</span>
+        </button>
+      ))}
+    </MhGlass>
+  );
+}
+
+// ── check-in: who has arrived, before the draw goes up ───────────────────
+// Stored on the night as checkIn {playerId: time}. Nothing reads it to score;
+// it is the organiser's list on the night, and the count says how many pairs
+// are complete.
+function MhCheckIn({ D, s, N }) {
+  const here = (D.checkedIn && D.checkedIn[s.no]) || {};
+  const teams = N.teams || [];
+  const both = teams.filter(t => (t.players || []).every(p => here[p.id])).length;
+  return (
+    <div className="mh-col" style={{ gap: 8 }}>
+      <MhGlass style={{ padding: "10px 14px" }}>
+        <div className="mh-split"><MhLabel tone="peach">Check-in</MhLabel><MhLabel>{both}/{teams.length} pairs here</MhLabel></div>
+        <div className="mh-progress"><div style={{ width: (teams.length ? both / teams.length * 100 : 0) + "%" }} /></div>
+        <MhSerif size={13} style={{ marginTop: 6 }}>Tap a name when they arrive. Swapping a partner or adding a walk-in is in Organiser.</MhSerif>
+      </MhGlass>
+      {teams.map(t => (
+        <div key={t.id} className="mh-cirow" data-done={(t.players || []).every(p => here[p.id]) ? "" : undefined}>
+          {(t.players || []).map(p => (
+            <button type="button" key={p.id} className="mh-ciname" aria-pressed={!!here[p.id]}
+              onClick={() => { mhHaptic(); D.checkIn(s.sid, p.id, !here[p.id]); }}>
+              <MhAvatar player={p} size={30} /><span>{p.name}</span><b aria-hidden="true">{here[p.id] ? "✓" : ""}</b>
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}

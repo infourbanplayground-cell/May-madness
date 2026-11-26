@@ -323,6 +323,20 @@ def main():
              "  // what the Heist design does not draw (a new night, the draw, the bracket).\n"
              "  const [classic] = useState(() => new URLSearchParams(location.search).has(\"classic\"));\n",
              "classic state")
+    # A pull-to-refresh replaces the phone's state with the server's. With
+    # scores not yet saved (no signal at the court) that would throw them away,
+    # so the Heist shell marks the phone dirty and the refresh waits for the save.
+    s = once(s, "  const refreshNow = React.useCallback(async () => {\n    setRefreshing(true);",
+             "  const refreshNow = React.useCallback(async () => {\n    if (window.__mhDirty) return;\n    setRefreshing(true);",
+             "refresh guard")
+    # "updated 12s ago" must mean the last time this phone heard from the server:
+    # the 30s poll and every successful save count, not only a manual refresh
+    s = once(s, "          setState(s => (JSON.stringify(s) !== JSON.stringify(res.state) ? res.state : s));\n          setSync(\"idle\");",
+             "          setState(s => (JSON.stringify(s) !== JSON.stringify(res.state) ? res.state : s));\n          setSync(\"idle\"); setLastSync(new Date());",
+             "poll stamps lastSync")
+    s = once(s, "          setSync(\"saved\"); setSyncErr(\"\");\n          // brief",
+             "          setSync(\"saved\"); setSyncErr(\"\"); setLastSync(new Date());\n          // brief",
+             "save stamps lastSync")
     app = s.index("function App()")
     nav = s.index("  const navTabs = [", app)
     tail = s[nav:s.index("\n}\n", nav)]

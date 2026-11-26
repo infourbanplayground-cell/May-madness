@@ -381,8 +381,12 @@ function HeistShell(props) {
     // the Heist picker when the shell was handed the setter; the inherited sheet otherwise
     d.setMe = setMe || null; d.clearMe = clearMe || null;
     d.pickMe = setMe ? () => { location.hash = "who"; } : openMe;
+    // check-in: stored on the night, never read by the engine
+    d.checkedIn = Object.fromEntries((d.sessions || []).filter(x => x.sid).map(x => [x.no, ((state.sessions || []).find(y => y.id === x.sid) || {}).checkIn || {}]));
+    d.checkIn = canScore ? (sid, pid, on) => updateSession(sid, ss => {
+      const c = { ...(ss.checkIn || {}) }; if (on) c[pid] = Date.now(); else delete c[pid]; return { ...ss, checkIn: c }; }) : null;
     return d;
-  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe, updateSession]);
 
   // first open of the day: Now Loading Muscat, then any moment not yet seen
   const day = (() => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; })();
@@ -432,14 +436,32 @@ function HeistShell(props) {
       };
     } else if (name === "live") { location.replace("#session/" + arg); return null; }
   }
+  // Unsaved changes, counted from the scorer's own edits: every state change
+  // while signed in is a change to send, and a save that lands clears them.
+  const [pending, setPending] = React.useState(0);
+  const seen = React.useRef(state);
+  React.useEffect(() => { if (canScore && seen.current && state !== seen.current) setPending(n => n + 1); seen.current = state; }, [state]);
+  React.useEffect(() => { if (sync === "saved") setPending(0); }, [sync]);
+  React.useEffect(() => { window.__mhDirty = canScore && pending > 0; }, [canScore, pending, sync]);
+  // back in signal: nudge the save rather than wait out the backoff
+  React.useEffect(() => {
+    const f = () => { if (!window.__mhDirty) return; const sid = ((state.sessions || [])[0] || {}).id; if (sid) updateSession(sid, ss => ({ ...ss })); };
+    addEventListener("online", f); return () => removeEventListener("online", f);
+  }, [state]);
   const banner = canScore && (sync === "error" || sync === "offline");
+  const noSignal = typeof navigator !== "undefined" && navigator.onLine === false;
+  const auth = /401|403|token|auth|unauthor/i.test(syncErr || "");
   return (
     <>
-      {banner && (
+      {banner && (noSignal || !auth ? (
+        <div className="mh-savebanner" role="status" data-kind="offline">
+          ⏳ {noSignal ? "No signal" : "Not saved yet"} — {pending > 0 ? `${pending} change${pending > 1 ? "s" : ""} waiting` : "changes waiting"} on this phone. They send by themselves; keep the app open.
+        </div>
+      ) : (
         <button type="button" className="mh-savebanner" onClick={() => openLogin()}>
           ⚠ NOT SAVING — your changes are only on this phone. {syncErr ? `(${syncErr}) ` : ""}Tap to sign in again.
         </button>
-      )}
+      ))}
       {typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") &&
         <MhFresh pullY={pullY || 0} lastSync={lastSync} sync={sync} onRefresh={refreshNow} />}
       {undo && canScore && (
