@@ -17,6 +17,8 @@ import { chromium } from 'playwright';
 import fs from 'fs';
 import http from 'http';
 import path from 'path';
+const _S = JSON.parse((await import('fs')).readFileSync(new URL('../heist-season.json', import.meta.url), 'utf8'));
+const POOL_DERIVED = _S.seasonPrizes.reduce((a, b) => a + b, 0) + _S.voucher * 2 * _S.nights.length;
 import { execFileSync } from 'child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
@@ -114,7 +116,7 @@ for (const [name, hash, ref] of STORIES) {
   // the words are the data's
   const T = r.text.replace(/\s+/g, ' ');
   if (/NIGHTS/.test(T) || /\b402\b/.test(T) || /[؀-ۿ]/.test(T)) fails.push(`${tag}: old design's copy on the frame`);
-  if (name !== 'my-card' && !/407 OMR/i.test(T)) fails.push(`${tag}: pool is not the derived 407`);
+  if (name !== 'my-card' && !new RegExp(POOL_DERIVED + ' OMR', 'i').test(T)) fails.push(`${tag}: pool is not the derived ${POOL_DERIVED}`);
   // the lockup is the owner's logo image since 25 Nov, not typeset HEIST: it must be there AND decoded
   const logo = await pg.evaluate(() => { const i = document.querySelector('.mn-logo img'); return i ? i.naturalWidth : -1; });
   // an image is invisible to the text checks, so a logo lying over the billing passed them all

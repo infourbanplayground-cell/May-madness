@@ -859,9 +859,9 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   **Muscat Heist** by the owner (22 Nov 2026): HEIST sits on the coral band where
   NIGHTS was. "Now Loading Muscat" stays. **No Arabic name** — the owner removed it
   (22 Nov 2026); the title's meta line is `VOL.10 · MUSCAT · DEC 2026` alone.
-- Season numbers in **`heist-season.json`**. Prizes 75/50/30 + 14 OMR to each
-  of a night's two champions; the pool is DERIVED (**407**), the handoff's 402
-  does not add up from its own parts.
+- Season numbers in **`heist-season.json`**. Prizes **75/50/35** (third moved
+  from 30 by the owner, 26 Nov) + 14 OMR to each of a night's two champions;
+  the pool is DERIVED (**412**). The handoff's 402 never added up from its own parts.
 - **Rep levels are per night played** (Rising 16, Known 18, Legend 20 x nights),
   which is exactly the handoff's 80/90/100 after five nights; rep never drops.
   The handoff's fixed thresholds would have made half the top ten Legend by

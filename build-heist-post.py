@@ -38,7 +38,7 @@ DAYS = " & ".join(sorted({d.strftime("%a") for d in NIGHTS}, key=lambda x: ["Mon
 FIRST = NIGHTS[0].strftime("%a %-d %b")
 LAST = NIGHTS[-1].strftime("%a %-d %b")
 WORDS = ["zero","one","two","three","four","five","six","seven","eight","nine","ten"]
-assert POOL == 407, f"pool derived as {POOL}; the app and CLAUDE.md say 407 — find out which part moved"
+assert POOL == 412, f"pool derived as {POOL}; the owner set 75/50/35 + 14 x 2 x 9 = 412 on 26 Nov — find out which part moved"
 
 
 def data_url(path, mime):

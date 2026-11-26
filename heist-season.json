@@ -1,7 +1,7 @@
 {
   "_notes": [
     "Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.",
-    "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407.",
+    "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407. Third place moved 30 -> 35 (owner, 26 Nov 2026), so the pool is 412.",
     "No Arabic name — the owner removed it (22 Nov 2026). The session art is the owner's (23 Nov 2026); the episode titles are still PLACEHOLDERS."
   ],
   "name": "Muscat Heist",
@@ -47,7 +47,7 @@
   ],
   "entry": 7,
   "voucher": 14,
-  "seasonPrizes": [75, 50, 30],
+  "seasonPrizes": [75, 50, 35],
   "rep": {
     "_note": "Owner-approved 22 Nov 2026: thresholds are POINTS PER NIGHT PLAYED in the season, so they rise with it. After 5 nights they are exactly the handoff's 80 / 90 / 100. Rep never goes down: a player's rep is the highest level they reached after any night.",
     "levels": [
