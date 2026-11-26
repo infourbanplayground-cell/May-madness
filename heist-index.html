@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "a9a4bb08a947";
+  var V = "35859ba3e256";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1672,6 +1672,55 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-album-grid > :nth-child(7) { animation-delay: 240ms; }
 .mh-album-grid > :nth-child(8) { animation-delay: 280ms; }
 .mh-album-grid > :nth-child(9) { animation-delay: 320ms; }
+
+/* ── quality of life (heist-qol.jsx) ─────────────────────────────────── */
+.mh-search { width: 100%; min-height: 46px; padding: 10px 14px; border-radius: var(--mn-r-pill); border: 1px solid rgba(246,234,211,.28);
+  background: rgba(7,4,13,.55); color: var(--mn-sand); font: 600 16px 'Manrope', system-ui, sans-serif; }
+.mh-search::placeholder { color: rgba(246,234,211,.62); }
+.mh-search:focus { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+/* pinned above the nav: the page shell clips overflow, so sticky never engages */
+.mh-youstrip { position: fixed; left: 16px; right: 16px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: auto !important;
+  box-shadow: 0 10px 30px rgba(7,4,13,.55); display: flex !important; align-items: center; gap: 10px !important; min-height: 52px;
+  padding: 8px 16px; border-radius: var(--mn-r-pill); border: 1px solid var(--mn-peach); background: #13233A;
+  color: var(--mn-sand); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.mh-youlab { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mn-peach); }
+.mh-yourank { font-size: 20px; line-height: 1; }
+.mh-youname { flex: 1; min-width: 0; text-align: left; font: 700 15px 'Manrope', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-youpts { font: 700 13px 'JetBrains Mono', monospace; }
+.mh-youarrow { font: 700 12px 'JetBrains Mono', monospace; color: var(--mn-peach); letter-spacing: .08em; text-transform: uppercase; }
+.mh-wrow.mh-flash { animation: mhFlash 1.6s ease-out 1; }
+@keyframes mhFlash { 0%, 30% { background: rgba(255,179,107,.32); } 100% { background: transparent; } }
+.mh-whorow { grid-template-columns: auto 1fr auto !important; width: 100%; }
+.mh-livemine { text-align: left; }
+.mh-livenext { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(246,234,211,.18); font: 600 14px 'Manrope', sans-serif; color: var(--mn-sand); }
+.mh-livenext b { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .14em; color: var(--mn-coral); margin-right: 6px; }
+.mh-pull { position: fixed; left: 0; right: 0; top: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 8px; background: linear-gradient(180deg, rgba(7,4,13,.9), rgba(7,4,13,0)); pointer-events: none;
+  font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
+.mh-fresh { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 30; white-space: nowrap; min-height: 32px; padding: 6px 12px;
+  border-radius: var(--mn-r-pill); border: 1px solid rgba(246,234,211,.22); background: rgba(7,4,13,.78); color: rgba(246,234,211,.86);
+  font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .06em; }
+.mh-install { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+.mh-installbtns { display: flex; align-items: center; gap: 6px; flex: none; }
+.mh-x { min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--mn-sand); font-size: 18px; }
+.mh-howto { min-height: 60vh; justify-content: center; }
+.mh-dots { display: flex; gap: 8px; justify-content: center; }
+.mh-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(246,234,211,.3); }
+.mh-dots i[data-on] { background: var(--mn-peach); width: 22px; border-radius: 4px; }
+.mh-setrows { display: grid; margin-top: 6px; }
+.mh-setrow { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 2px; border: 0;
+  border-top: 1px solid rgba(246,234,211,.14); background: none; color: var(--mn-sand); font: 600 15px 'Manrope', sans-serif; text-align: left; }
+.mh-setrow:first-child { border-top: 0; }
+.mh-toggle { width: 42px; height: 24px; border-radius: 12px; background: rgba(246,234,211,.22); position: relative; flex: none; }
+.mh-toggle::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--mn-sand); transition: transform .18s; }
+.mh-toggle[data-on] { background: var(--mn-coral); }
+.mh-toggle[data-on]::after { transform: translateX(18px); }
+/* bigger text: the reading sizes, not the display type, which is already fitted to its box */
+html.mh-bigtext .mn-serif, html.mh-bigtext .mh-wname, html.mh-bigtext .mh-setrow { font-size: 118% !important; }
+html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenext { font-size: 112% !important; }
+@media (prefers-reduced-motion: reduce) { .mh-wrow.mh-flash { animation: none; background: rgba(255,179,107,.24); } .mh-toggle::after { transition: none; } }
+
+.mh-page:has(.mh-youstrip) .mh-body { padding-bottom: 170px !important; }
 
 </style>
 <style id="heist-classic">
@@ -12206,7 +12255,11 @@ function MhHome({
   }, React.createElement(MhDisplay, {
     size: 28,
     tone: "peach"
-  }, left), React.createElement(MhLabel, null, "to go")))) : null, typeof MhHomeClips === "function" && React.createElement(MhHomeClips, {
+  }, left), React.createElement(MhLabel, null, "to go")))) : null, showLive && typeof MhLiveMine === "function" && React.createElement(MhLiveMine, {
+    D: D,
+    live: live,
+    go: go
+  }), typeof MhHomeClips === "function" && React.createElement(MhHomeClips, {
     D: D,
     go: go
   }), D.preseason ? React.createElement(MhGlass, null, React.createElement(MhLabel, {
@@ -12266,7 +12319,15 @@ function MhHome({
     }
   }, mhFirst(second.name), " \xB7 ", second.points), React.createElement(MhSerif, {
     size: 14
-  }, mhPts(me.points - second.points), " behind you"))))));
+  }, mhPts(me.points - second.points), " behind you")))), !D.meId && D.setMe && !D.preseason && React.createElement("button", {
+    type: "button",
+    className: "mn-glass mh-tap",
+    onClick: () => go("who")
+  }, React.createElement(MhLabel, {
+    tone: "teal"
+  }, "Where are you?"), React.createElement(MhSerif, {
+    size: 14
+  }, "Pick your name once and Home shows your rank, your rival and your next match.")), typeof MhInstall === "function" && React.createElement(MhInstall, null)));
 }
 function MhJobs({
   D,
@@ -12363,6 +12424,8 @@ function MhWanted({
   go
 }) {
   const X = mhDerive(D);
+  const [q, setQ] = React.useState("");
+  const qn = q.trim().toLowerCase();
   const lead = X.players[0];
   const bounty = r => (MH.seasonPrizes || [])[r - 1];
   return React.createElement(MhPage, {
@@ -12374,6 +12437,10 @@ function MhWanted({
   }, React.createElement(MhTitle, {
     title: "MOST WANTED",
     aside: X.lastDone ? `after ${X.lastDone.code}` : "before EP.01"
+  }), !D.preseason && typeof MhYouStrip === "function" && React.createElement(MhYouStrip, {
+    D: D,
+    me: X.me,
+    go: go
   }), D.preseason && React.createElement(MhGlass, null, React.createElement(MhDisplay, {
     size: 22,
     style: {
@@ -12420,13 +12487,23 @@ function MhWanted({
     style: {
       borderTopColor: `var(--mn-rep-${r.id})`
     }
-  }, React.createElement("b", null, r.label.toUpperCase()), React.createElement("span", null, r.perNight * Math.max(1, X.nightsPlayed), "+")))), X.players.length >= 2 && !D.preseason && React.createElement("div", null, X.players.slice(1).map(p => {
+  }, React.createElement("b", null, r.label.toUpperCase()), React.createElement("span", null, r.perNight * Math.max(1, X.nightsPlayed), "+")))), X.players.length > 8 && !D.preseason && React.createElement("input", {
+    className: "mh-search",
+    type: "search",
+    placeholder: `Search ${X.players.length} names`,
+    value: q,
+    onChange: e => setQ(e.target.value),
+    "aria-label": "Search Most Wanted"
+  }), qn && !X.players.some(p => p.name.toLowerCase().includes(qn)) && React.createElement(MhSerif, {
+    size: 14
+  }, "Nobody on the table called \"", q, "\" yet."), X.players.length >= 2 && !D.preseason && React.createElement("div", null, X.players.slice(qn ? 0 : 1).filter(p => !qn || p.name.toLowerCase().includes(qn)).map(p => {
     const g = X.gap(p),
       mine = X.me && p.id === X.me.id;
     const ring = p.rep.id === "rookie" ? null : `rep-${p.rep.id}`;
     return React.createElement("button", {
       type: "button",
       key: p.id,
+      id: "w-" + p.id,
       className: "mh-wrow mh-tap",
       "data-me": mine ? "" : undefined,
       onClick: () => go("card", p.id)
@@ -12502,7 +12579,10 @@ function MhMe({
       size: 22
     }, "Play your first night"), React.createElement(MhSerif, {
       size: 14
-    }, "Your card, your rival and every point you earn show up here."))));
+    }, "Your card, your rival and every point you earn show up here.")), typeof MhSettings === "function" && React.createElement(MhSettings, {
+      D: D,
+      go: go
+    })));
   }
   const rival = X.above(me),
     next = mhNextRep(me.rep),
@@ -12641,6 +12721,9 @@ function MhMe({
     pid: me.id,
     go: go,
     title: "Your loot"
+  }), typeof MhSettings === "function" && React.createElement(MhSettings, {
+    D: D,
+    go: go
   })));
 }
 function MhCrew({
@@ -16105,6 +16188,394 @@ function MhNightShare({
     size: 15
   }, "Nothing to post yet \u2014 the draw is made on the night."))));
 }
+const mhStore = {
+  get: (k, d) => {
+    try {
+      const v = localStorage.getItem(k);
+      return v == null ? d : v;
+    } catch (e) {
+      return d;
+    }
+  },
+  set: (k, v) => {
+    try {
+      localStorage.setItem(k, v);
+    } catch (e) {}
+  }
+};
+const mhHaptic = (ms = 10) => {
+  try {
+    navigator.vibrate && navigator.vibrate(ms);
+  } catch (e) {}
+};
+const mhNorm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9؀-ۿ ]/g, " ").replace(/\s+/g, " ").trim();
+const mhTextSize = {
+  on: () => mhStore.get("mh-bigtext", "") === "1",
+  apply: on => {
+    try {
+      document.documentElement.classList.toggle("mh-bigtext", !!on);
+    } catch (e) {}
+  },
+  set: on => {
+    mhStore.set("mh-bigtext", on ? "1" : "");
+    mhTextSize.apply(on);
+  }
+};
+mhTextSize.apply(mhTextSize.on());
+function MhWho({
+  D,
+  go
+}) {
+  const [q, setQ] = React.useState("");
+  const n = mhNorm(q);
+  const all = D.roster || D.players;
+  const list = (n ? all.filter(p => mhNorm(p.name).includes(n)) : all.filter(p => p.points > 0 || p.nights > 0)).slice(0, n ? 60 : 40);
+  const pick = id => {
+    mhHaptic();
+    D.setMe && D.setMe(id);
+    mhStore.set("mh-who-asked", "1");
+    go("home");
+  };
+  return React.createElement(MhPage, {
+    D: D,
+    tab: "me",
+    onTab: go
+  }, React.createElement("div", {
+    className: "mh-col"
+  }, React.createElement(MhTitle, {
+    title: "WHO ARE YOU?",
+    aside: "remembered on this phone"
+  }), React.createElement(MhSerif, {
+    size: 14
+  }, "Pick your name once and the app follows you: your rank, your rival, your cards. No PIN \u2014 that is for the scorer."), React.createElement("input", {
+    className: "mh-search",
+    type: "search",
+    placeholder: "Search your name",
+    value: q,
+    autoFocus: true,
+    onChange: e => setQ(e.target.value),
+    "aria-label": "Search your name"
+  }), React.createElement("div", null, list.map(p => React.createElement("button", {
+    type: "button",
+    key: p.id,
+    className: "mh-wrow mh-tap mh-whorow",
+    onClick: () => pick(p.id),
+    "data-me": p.id === D.meId ? "" : undefined
+  }, React.createElement(MhAvatar, {
+    player: {
+      name: p.name,
+      photo: p.photo,
+      photoPos: p.pos
+    },
+    size: 34
+  }), React.createElement("div", {
+    className: "mh-wname",
+    style: {
+      textAlign: "left"
+    }
+  }, p.name, p.id === D.meId && React.createElement("span", {
+    className: "mn-serif"
+  }, " you")), React.createElement("div", {
+    className: "mh-wgap"
+  }, p.points > 0 ? `${p.points} pts` : ""))), !list.length && React.createElement(MhSerif, {
+    size: 14
+  }, "Nobody called \"", q, "\" yet. Ask the organiser to add you; you will be here once you have.")), React.createElement("div", {
+    className: "mh-split",
+    style: {
+      marginTop: 8
+    }
+  }, D.meId && D.clearMe && React.createElement(MhButton, {
+    kind: "ghost",
+    onClick: () => {
+      D.clearMe();
+      go("home");
+    }
+  }, "I'm not on here \u2014 clear"), React.createElement(MhButton, {
+    kind: "ghost",
+    onClick: () => {
+      mhStore.set("mh-who-asked", "1");
+      go("home");
+    }
+  }, "Just looking"))));
+}
+function MhYouStrip({
+  D,
+  me,
+  go
+}) {
+  if (!me) return D.setMe ? React.createElement("button", {
+    type: "button",
+    className: "mh-youstrip mh-tap",
+    onClick: () => go("who")
+  }, React.createElement("span", {
+    className: "mh-youlab"
+  }, "Find yourself"), React.createElement("span", {
+    className: "mh-youarrow"
+  }, "Pick your name \u203A")) : null;
+  const jump = () => {
+    mhHaptic();
+    const el = document.getElementById("w-" + me.id);
+    if (!el) return;
+    el.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+    el.classList.remove("mh-flash");
+    void el.offsetWidth;
+    el.classList.add("mh-flash");
+  };
+  return React.createElement("button", {
+    type: "button",
+    className: "mh-youstrip mh-tap",
+    onClick: jump,
+    "aria-label": `Jump to your row, rank ${me.rank}`
+  }, React.createElement("span", {
+    className: "mh-youlab"
+  }, "You"), React.createElement("span", {
+    className: "mn-display mh-yourank"
+  }, "#", me.rank), React.createElement("span", {
+    className: "mh-youname"
+  }, mhFirst ? mhFirst(me.name) : me.name), React.createElement("span", {
+    className: "mh-youpts"
+  }, me.points, " pts"), React.createElement("span", {
+    className: "mh-youarrow"
+  }, "Show \u203A"));
+}
+function MhLiveMine({
+  D,
+  live,
+  go
+}) {
+  const N = live && D.nights && D.nights[live.no];
+  if (!N || !D.meId || !N.groups) return null;
+  let mine = null,
+    grp = null;
+  for (const [g, G] of Object.entries(N.groups)) {
+    const row = G.standings.find(r => (r.players || []).some(p => p.id === D.meId));
+    if (row) {
+      mine = row;
+      grp = [g, G];
+      break;
+    }
+  }
+  if (!mine) return null;
+  const [g, G] = grp;
+  const myMatch = m => [m.ta, m.tb].some(t => t && t.id === mine.id);
+  const ms = G.matches.filter(myMatch);
+  const onCourt = ms.find(m => m.state === "live");
+  const nextM = ms.find(m => m.state === "next");
+  const left = ms.filter(m => m.state !== "final").length;
+  const vs = m => m.ta && m.ta.id === mine.id ? m.b : m.a;
+  const K = N.knockout,
+    koM = K && [...(K.qf || []), ...(K.sf || []), K.final].filter(Boolean).find(m => !m.winner && [m.ta, m.tb].some(t => t && t.id === mine.id));
+  return React.createElement("button", {
+    type: "button",
+    className: "mn-glass mh-tap mh-livemine",
+    "data-accent": "coral",
+    onClick: () => go("session", live.no)
+  }, React.createElement(MhLabel, {
+    tone: "coral"
+  }, "Your night \xB7 Group ", g), React.createElement("div", {
+    className: "mh-split",
+    style: {
+      marginTop: 4
+    }
+  }, React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement(MhDisplay, {
+    size: 24
+  }, mine.pos, ["", "st", "nd", "rd"][mine.pos] || "th", " in the group"), React.createElement(MhSerif, {
+    size: 14
+  }, mine.w, " won \xB7 ", mine.pts, " pts \xB7 GD ", mine.gd > 0 ? "+" : "", mine.gd, mine.q ? " · in a qualifying place" : ""))), React.createElement("div", {
+    className: "mh-livenext"
+  }, koM ? React.createElement(React.Fragment, null, React.createElement("b", null, koM.round === "final" ? "FINAL" : koM.round.toUpperCase()), " v ", koM.ta && koM.ta.id === mine.id ? koM.b : koM.a) : onCourt ? React.createElement(React.Fragment, null, React.createElement("b", null, "ON COURT"), " v ", vs(onCourt), onCourt.score ? ` · ${onCourt.score}` : "") : nextM ? React.createElement(React.Fragment, null, React.createElement("b", null, "NEXT"), " v ", vs(nextM), nextM.court ? ` · Court ${nextM.court}` : "") : left === 0 ? React.createElement(React.Fragment, null, React.createElement("b", null, "GROUP DONE"), " ", mine.q ? "· waiting on the draw" : "") : null));
+}
+function MhFresh({
+  pullY,
+  lastSync,
+  sync,
+  onRefresh
+}) {
+  const [, tick] = React.useState(0);
+  React.useEffect(() => {
+    const t = setInterval(() => tick(x => x + 1), 10000);
+    return () => clearInterval(t);
+  }, []);
+  const ago = lastSync ? Math.max(0, Math.round((Date.now() - lastSync) / 1000)) : null;
+  const txt = sync === "syncing" ? "Updating…" : ago == null ? "" : ago < 15 ? "Updated just now" : ago < 90 ? `Updated ${ago}s ago` : `Updated ${Math.round(ago / 60)} min ago`;
+  return React.createElement(React.Fragment, null, pullY > 0 && React.createElement("div", {
+    className: "mh-pull",
+    style: {
+      height: pullY
+    },
+    "aria-hidden": "true"
+  }, React.createElement("span", {
+    style: {
+      opacity: Math.min(1, pullY / 64)
+    }
+  }, pullY >= 64 ? "Release to refresh" : "Pull to refresh")), txt && React.createElement("button", {
+    type: "button",
+    className: "mh-fresh",
+    onClick: () => {
+      mhHaptic();
+      onRefresh && onRefresh();
+    },
+    "aria-label": "Refresh now"
+  }, txt, " \xB7 \u21BB"));
+}
+let mhInstallEvt = null;
+try {
+  addEventListener("beforeinstallprompt", e => {
+    e.preventDefault();
+    mhInstallEvt = e;
+  });
+} catch (e) {}
+(() => {
+  const v = +mhStore.get("mh-visits", "0") || 0;
+  mhStore.set("mh-visits", String(v + 1));
+})();
+function MhInstall() {
+  const standalone = (() => {
+    try {
+      return matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+    } catch (e) {
+      return false;
+    }
+  })();
+  const [gone, setGone] = React.useState(() => standalone || mhStore.get("mh-install-done", "") === "1" || (+mhStore.get("mh-visits", "0") || 0) < 2);
+  if (gone) return null;
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent || "");
+  const close = () => {
+    mhStore.set("mh-install-done", "1");
+    setGone(true);
+  };
+  const add = async () => {
+    if (mhInstallEvt) {
+      mhInstallEvt.prompt();
+      try {
+        await mhInstallEvt.userChoice;
+      } catch (e) {}
+    }
+    close();
+  };
+  return React.createElement("div", {
+    className: "mn-glass mh-install"
+  }, React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "Keep it one tap away"), React.createElement(MhSerif, {
+    size: 14
+  }, ios ? "Tap Share, then “Add to Home Screen”." : mhInstallEvt ? "Add Muscat Heist to your home screen." : "Open your browser menu and choose “Add to Home screen”.")), React.createElement("div", {
+    className: "mh-installbtns"
+  }, !ios && mhInstallEvt && React.createElement(MhButton, {
+    onClick: add
+  }, "Add"), React.createElement("button", {
+    type: "button",
+    className: "mh-x",
+    onClick: close,
+    "aria-label": "Dismiss"
+  }, "\u2715")));
+}
+function MhHowTo({
+  D,
+  go
+}) {
+  const [i, setI] = React.useState(0);
+  const per = (MH_REPS || []).slice().reverse();
+  const cards = [{
+    k: "The nights",
+    t: `${(D.sessions || []).length || 9} nights. Points every one.`,
+    b: ["Bring a partner. Groups first, then the top teams play a knockout.", "Every match you win scores; losing close still scores something.", `${(MH.doubleNights || []).length ? "The last two nights pay double." : ""}`]
+  }, {
+    k: "Knockout cards",
+    t: "Reach the knockout, get dealt a card.",
+    b: ["THE JOB for a quarter-final, INSIDE MAN for a semi, GETAWAY for the final, THE SCORE for the champions.", "You keep your best card each night. Nine nights, nine slots in your album."]
+  }, {
+    k: "Rep",
+    t: "Your rep grows with every night you play.",
+    b: [per.map(r => `${r.label}: ${r.perNight} a night`).join(" · "), "Rep never drops. Your rival is whoever sits just above you on Most Wanted."]
+  }];
+  const c = cards[i],
+    last = i === cards.length - 1;
+  const done = () => {
+    mhStore.set("mh-howto-seen", "1");
+    go("home");
+  };
+  return React.createElement(MhPage, {
+    D: D,
+    tab: "home",
+    onTab: go
+  }, React.createElement("div", {
+    className: "mh-col mh-howto"
+  }, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "How it works \xB7 ", i + 1, " of ", cards.length), React.createElement(MhDisplay, {
+    size: 30,
+    style: {
+      lineHeight: 1.02
+    }
+  }, c.k), React.createElement(MhGlass, null, React.createElement(MhDisplay, {
+    size: 20,
+    style: {
+      lineHeight: 1.08
+    }
+  }, c.t), c.b.filter(Boolean).map((x, k) => React.createElement(MhSerif, {
+    key: k,
+    size: 15,
+    style: {
+      marginTop: 8
+    }
+  }, x))), React.createElement("div", {
+    className: "mh-dots",
+    "aria-hidden": "true"
+  }, cards.map((_, k) => React.createElement("i", {
+    key: k,
+    "data-on": k === i ? "" : undefined
+  }))), React.createElement("div", {
+    className: "mh-split"
+  }, React.createElement(MhButton, {
+    kind: "ghost",
+    onClick: done
+  }, "Skip"), React.createElement(MhButton, {
+    onClick: () => last ? done() : setI(i + 1)
+  }, last ? "Got it" : "Next ›"))));
+}
+function MhSettings({
+  D,
+  go
+}) {
+  const [big, setBig] = React.useState(mhTextSize.on());
+  return React.createElement(MhGlass, null, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "This phone"), React.createElement("div", {
+    className: "mh-setrows"
+  }, React.createElement("button", {
+    type: "button",
+    className: "mh-setrow mh-tap",
+    "aria-pressed": big,
+    onClick: () => {
+      mhHaptic();
+      setBig(!big);
+      mhTextSize.set(!big);
+    }
+  }, React.createElement("span", null, "Bigger text"), React.createElement("span", {
+    className: "mh-toggle",
+    "data-on": big ? "" : undefined
+  })), D.setMe && React.createElement("button", {
+    type: "button",
+    className: "mh-setrow mh-tap",
+    onClick: () => go("who")
+  }, React.createElement("span", null, D.meId ? "Not you? Change player" : "Pick your name"), React.createElement("span", null, "\u203A")), React.createElement("button", {
+    type: "button",
+    className: "mh-setrow mh-tap",
+    onClick: () => go("howto")
+  }, React.createElement("span", null, "How it works"), React.createElement("span", null, "\u203A"))));
+}
 const MH_HOST_PHOTOS = "/api/roster";
 const MH_HOST_LOOT = "/api/loot";
 const mhFirstOf = n => (n || "").split(/\s+/)[0];
@@ -16635,11 +17106,21 @@ function heistData(state, o) {
     const rows = after[n8].rows;
     leadAtStart = rows.length > 1 ? rows[0].pts - rows[1].pts : null;
   }
+  const inP = new Set(P.map(p => p.id));
+  const roster = [...P.filter(p => !preseason), ...players.filter(p => preseason || !inP.has(p.id)).map(p => ({
+    id: p.id,
+    name: p.name || "?",
+    points: 0,
+    nights: 0,
+    photo: photoOf(p.id),
+    pos: (o.portraits || {})[p.id] ? "center 0%" : "center 25%"
+  })).sort((a, b) => a.name.localeCompare(b.name))];
   return {
     meId: o.meId || null,
     players: P,
     sessions: S2,
     preseason,
+    roster,
     homeNext: (next || S2[S2.length - 1]).no,
     homeShowsLive: !!live,
     nights: nightsD,
@@ -16692,7 +17173,9 @@ const MH_SCREENS = () => ({
   finale: MhFinale,
   share: MhShareSheet,
   nightshare: MhNightShare,
-  loot: MhLootScreen
+  loot: MhLootScreen,
+  who: MhWho,
+  howto: MhHowTo
 });
 function HeistShell(props) {
   const {
@@ -16707,7 +17190,12 @@ function HeistShell(props) {
     openMe,
     openOrganiser,
     openSession,
-    signedIn
+    signedIn,
+    setMe,
+    clearMe,
+    lastSync,
+    refreshNow,
+    pullY
   } = props;
   const read = () => (location.hash.slice(1) || "").split("/");
   const [route, setRoute] = React.useState(read);
@@ -16754,10 +17242,14 @@ function HeistShell(props) {
     });
     d.onLogo = openLogin;
     d.organiser = canScore ? openOrganiser : null;
-    d.pickMe = openMe;
     d.signedIn = signedIn;
+    d.setMe = setMe || null;
+    d.clearMe = clearMe || null;
+    d.pickMe = setMe ? () => {
+      location.hash = "who";
+    } : openMe;
     return d;
-  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe]);
   const day = (() => {
     const t = new Date();
     return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`;
@@ -16769,7 +17261,7 @@ function HeistShell(props) {
       location.replace("#loading");
       return;
     }
-    const m = mhNextMoment(D);
+    const m = mhNextMoment(D) || mhFirstRun(D);
     location.replace(m ? "#" + m : "#home");
   }, []);
   const go = (to, arg) => {
@@ -16778,7 +17270,7 @@ function HeistShell(props) {
       return;
     }
     if (to === "home") {
-      const m = mhNextMoment(D);
+      const m = mhNextMoment(D) || mhFirstRun(D);
       if (m) {
         location.hash = m;
         return;
@@ -16851,7 +17343,12 @@ function HeistShell(props) {
     type: "button",
     className: "mh-savebanner",
     onClick: () => openLogin()
-  }, "\u26A0 NOT SAVING \u2014 your changes are only on this phone. ", syncErr ? `(${syncErr}) ` : "", "Tap to sign in again."), React.createElement(Screen, {
+  }, "\u26A0 NOT SAVING \u2014 your changes are only on this phone. ", syncErr ? `(${syncErr}) ` : "", "Tap to sign in again."), typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") && React.createElement(MhFresh, {
+    pullY: pullY || 0,
+    lastSync: lastSync,
+    sync: sync,
+    onRefresh: refreshNow
+  }), React.createElement(Screen, {
     key: route.join("/"),
     D: D,
     go: go,
@@ -16864,6 +17361,12 @@ function HeistShell(props) {
     match: live,
     onLock: onLock
   }));
+}
+function mhFirstRun(D) {
+  if (typeof mhStore === "undefined") return null;
+  if (mhStore.get("mh-howto-seen", "") !== "1") return "howto";
+  if (!D.meId && D.setMe && mhStore.get("mh-who-asked", "") !== "1") return "who";
+  return null;
 }
 function mhNextMoment(D) {
   if (!D.meId) return null;
@@ -17131,7 +17634,12 @@ function App() {
     openOrganiser: () => {
       location.href = location.pathname + "?classic";
     },
-    openSession: id => setOpenSessionId(id)
+    openSession: id => setOpenSessionId(id),
+    setMe: pickMe,
+    clearMe: clearMe,
+    lastSync: lastSync,
+    refreshNow: refreshNow,
+    pullY: pullY
   }), currentSession && React.createElement(SessionDetail, {
     session: currentSession,
     state: state,

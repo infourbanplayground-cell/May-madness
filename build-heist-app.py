@@ -32,7 +32,7 @@ H = os.path.join(HERE, "brand", "heist")
 season = json.load(open(os.path.join(HERE, "heist-season.json"), encoding="utf-8"))
 read = lambda n: open(os.path.join(H, n), encoding="utf-8").read()
 MODULES = ["heist-components.jsx", "heist-screens.jsx", "heist-night.jsx", "heist-moments.jsx",
-           "heist-stories.jsx", "heist-loot.jsx", "heist-night-share.jsx", "heist-adapter.jsx"]
+           "heist-stories.jsx", "heist-loot.jsx", "heist-night-share.jsx", "heist-qol.jsx", "heist-adapter.jsx"]
 
 
 def once(s, a, b, what):
@@ -334,7 +334,8 @@ def main():
         updateSession={{updateSession}} signedIn={{role !== "guest"}}
         openLogin={{() => setShowLogin(true)}} openMe={{() => setShowMe(true)}}
         openOrganiser={{() => {{ location.href = location.pathname + "?classic"; }}}}
-        openSession={{id => setOpenSessionId(id)}} />
+        openSession={{id => setOpenSessionId(id)}}
+        setMe={{pickMe}} clearMe={{clearMe}} lastSync={{lastSync}} refreshNow={{refreshNow}} pullY={{pullY}} />
       {sheets}
     </>
   );

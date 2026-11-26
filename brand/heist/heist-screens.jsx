@@ -104,6 +104,7 @@ function MhHome({ D, go }) {
             </div>
           </button>
         ) : null}
+        {showLive && typeof MhLiveMine === "function" && <MhLiveMine D={D} live={live} go={go} />}
         {typeof MhHomeClips === "function" && <MhHomeClips D={D} go={go} />}
         {D.preseason ? (
           <MhGlass>
@@ -131,6 +132,13 @@ function MhHome({ D, go }) {
             </button>
           ))}
         </div>}
+        {!D.meId && D.setMe && !D.preseason && (
+          <button type="button" className="mn-glass mh-tap" onClick={() => go("who")}>
+            <MhLabel tone="teal">Where are you?</MhLabel>
+            <MhSerif size={14}>Pick your name once and Home shows your rank, your rival and your next match.</MhSerif>
+          </button>
+        )}
+        {typeof MhInstall === "function" && <MhInstall />}
       </div>
     </MhPage>
   );
@@ -190,12 +198,15 @@ function MhJobRow({ s, go }) {
 // ── 03 MOST WANTED ───────────────────────────────────────────────────────
 function MhWanted({ D, go }) {
   const X = mhDerive(D);
+  const [q, setQ] = React.useState("");
+  const qn = q.trim().toLowerCase();
   const lead = X.players[0];
   const bounty = r => (MH.seasonPrizes || [])[r - 1];
   return (
     <MhPage D={D} tab="wanted" onTab={go}>
       <div className="mh-col">
         <MhTitle title="MOST WANTED" aside={X.lastDone ? `after ${X.lastDone.code}` : "before EP.01"} />
+        {!D.preseason && typeof MhYouStrip === "function" && <MhYouStrip D={D} me={X.me} go={go} />}
         {D.preseason && (
           <MhGlass>
             <MhDisplay size={22} style={{ lineHeight: 1.05 }}>Nobody's wanted yet</MhDisplay>
@@ -226,13 +237,18 @@ function MhWanted({ D, go }) {
             </div>
           ))}
         </div>
+        {X.players.length > 8 && !D.preseason && (
+          <input className="mh-search" type="search" placeholder={`Search ${X.players.length} names`} value={q}
+            onChange={e => setQ(e.target.value)} aria-label="Search Most Wanted" />
+        )}
+        {qn && !X.players.some(p => p.name.toLowerCase().includes(qn)) && <MhSerif size={14}>Nobody on the table called "{q}" yet.</MhSerif>}
         {X.players.length >= 2 && !D.preseason && (
           <div>
-            {X.players.slice(1).map(p => {
+            {X.players.slice(qn ? 0 : 1).filter(p => !qn || p.name.toLowerCase().includes(qn)).map(p => {
               const g = X.gap(p), mine = X.me && p.id === X.me.id;
               const ring = p.rep.id === "rookie" ? null : `rep-${p.rep.id}`;
               return (
-                <button type="button" key={p.id} className="mh-wrow mh-tap" data-me={mine ? "" : undefined}
+                <button type="button" key={p.id} id={"w-" + p.id} className="mh-wrow mh-tap" data-me={mine ? "" : undefined}
                   onClick={() => go("card", p.id)}>
                   <div className="mn-display mh-wrank">{p.rank}</div>
                   <MhAvatar player={{ name: p.name, photo: p.photo, photoPos: p.avPos || p.pos }} size={34} ring={ring} zoom={p.zoom} />
@@ -274,6 +290,7 @@ function MhMe({ D, go }) {
             <MhButton style={{ marginTop: 10, width: "100%" }} onClick={D.pickMe}>Pick yourself</MhButton></MhGlass>
           : <MhGlass><MhDisplay size={22}>Play your first night</MhDisplay>
             <MhSerif size={14}>Your card, your rival and every point you earn show up here.</MhSerif></MhGlass>}
+          {typeof MhSettings === "function" && <MhSettings D={D} go={go} />}
         </div>
       </MhPage>
     );
@@ -342,6 +359,7 @@ function MhMe({ D, go }) {
           </div>
         </>}
         <MhAlbum D={D} pid={me.id} go={go} title="Your loot" />
+        {typeof MhSettings === "function" && <MhSettings D={D} go={go} />}
       </div>
     </MhPage>
   );

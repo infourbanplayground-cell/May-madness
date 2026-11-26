@@ -311,8 +311,14 @@ function heistData(state, o) {
   let leadAtStart = null;
   if (n8 >= 0 && after[n8]) { const rows = after[n8].rows; leadAtStart = rows.length > 1 ? rows[0].pts - rows[1].pts : null; }
 
+  // the whole roster, for "who are you?": table order first, then everyone else by name
+  const inP = new Set(P.map(p => p.id));
+  const roster = [...P.filter(p => !preseason), ...players.filter(p => preseason || !inP.has(p.id))
+    .map(p => ({ id: p.id, name: p.name || "?", points: 0, nights: 0, photo: photoOf(p.id), pos: (o.portraits || {})[p.id] ? "center 0%" : "center 25%" }))
+    .sort((a, b) => a.name.localeCompare(b.name))];
+
   return {
-    meId: o.meId || null, players: P, sessions: S2, preseason,
+    meId: o.meId || null, players: P, sessions: S2, preseason, roster,
     homeNext: (next || S2[S2.length - 1]).no, homeShowsLive: !!live,
     nights: nightsD, recaps, me: meD, rival, vsFor, moments,
     live: null, finale: { leadAtStart },
@@ -335,10 +341,11 @@ function heistData(state, o) {
 const MH_SCREENS = () => ({ home: MhHome, jobs: MhJobs, wanted: MhWanted, me: MhMe, crew: MhCrew, card: MhCardScreen, take: MhTake,
   session: MhSession, live: MhLive, recap: MhRecap, slides: MhSlides,
   loading: MhLoading, cardpull: MhCardPull, repup: MhRepUp, rival: MhRival, settled: MhSettled, finale: MhFinale,
-  share: MhShareSheet, nightshare: MhNightShare, loot: MhLootScreen });
+  share: MhShareSheet, nightshare: MhNightShare, loot: MhLootScreen, who: MhWho, howto: MhHowTo });
 
 function HeistShell(props) {
-  const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn } = props;
+  const { state, leaderboard, meId, canScore, sync, syncErr, updateSession, openLogin, openMe, openOrganiser, openSession, signedIn,
+    setMe, clearMe, lastSync, refreshNow, pullY } = props;
   const read = () => (location.hash.slice(1) || "").split("/");
   const [route, setRoute] = React.useState(read);
   const [portraits, setPortraits] = React.useState({});
@@ -363,22 +370,25 @@ function HeistShell(props) {
   }, []);
   const D = React.useMemo(() => {
     const d = heistData(state, { leaderboard, meId, portraits, lootArt, artBase: "assets/art/", logo: "assets/up-logo-tight.png" });
-    d.onLogo = openLogin; d.organiser = canScore ? openOrganiser : null; d.pickMe = openMe; d.signedIn = signedIn;
+    d.onLogo = openLogin; d.organiser = canScore ? openOrganiser : null; d.signedIn = signedIn;
+    // the Heist picker when the shell was handed the setter; the inherited sheet otherwise
+    d.setMe = setMe || null; d.clearMe = clearMe || null;
+    d.pickMe = setMe ? () => { location.hash = "who"; } : openMe;
     return d;
-  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn]);
+  }, [state, leaderboard, meId, portraits, lootArt, canScore, signedIn, setMe, clearMe]);
 
   // first open of the day: Now Loading Muscat, then any moment not yet seen
   const day = (() => { const t = new Date(); return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`; })();
   React.useEffect(() => {
     if (location.hash) return;
     if (mhOnce("loaded", day).due()) { mhOnce("loaded", day).seen(); location.replace("#loading"); return; }
-    const m = mhNextMoment(D);
+    const m = mhNextMoment(D) || mhFirstRun(D);
     location.replace(m ? "#" + m : "#home");
   }, []);
 
   const go = (to, arg) => {
     if (to === "back") { if (history.length > 1) history.back(); else location.hash = "home"; return; }
-    if (to === "home") { const m = mhNextMoment(D); if (m) { location.hash = m; return; } }
+    if (to === "home") { const m = mhNextMoment(D) || mhFirstRun(D); if (m) { location.hash = m; return; } }
     if (to === "signup" || to === "results") {
       const s = D.sessions.find(x => x.no === +arg);
       if (s && s.sid) { openSession(s.sid); return; }
@@ -415,10 +425,20 @@ function HeistShell(props) {
           ⚠ NOT SAVING — your changes are only on this phone. {syncErr ? `(${syncErr}) ` : ""}Tap to sign in again.
         </button>
       )}
+      {typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") &&
+        <MhFresh pullY={pullY || 0} lastSync={lastSync} sync={sync} onRefresh={refreshNow} />}
       <Screen key={route.join("/")} D={D} go={go} id={name === "share" ? arg2 : arg} no={arg} what={arg}
         start={+arg2 || 0} kind={arg2} canScore={canScore} match={live} onLock={onLock} />
     </>
   );
+}
+// A phone's first open: how it works once, then who are you once (a player
+// who says "just looking" is not asked again).
+function mhFirstRun(D) {
+  if (typeof mhStore === "undefined") return null;
+  if (mhStore.get("mh-howto-seen", "") !== "1") return "howto";
+  if (!D.meId && D.setMe && mhStore.get("mh-who-asked", "") !== "1") return "who";
+  return null;
 }
 // The next moment this phone has not seen, in the order the handoff plays them.
 function mhNextMoment(D) {

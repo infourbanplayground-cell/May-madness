@@ -823,3 +823,52 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-album-grid > :nth-child(7) { animation-delay: 240ms; }
 .mh-album-grid > :nth-child(8) { animation-delay: 280ms; }
 .mh-album-grid > :nth-child(9) { animation-delay: 320ms; }
+
+/* ── quality of life (heist-qol.jsx) ─────────────────────────────────── */
+.mh-search { width: 100%; min-height: 46px; padding: 10px 14px; border-radius: var(--mn-r-pill); border: 1px solid rgba(246,234,211,.28);
+  background: rgba(7,4,13,.55); color: var(--mn-sand); font: 600 16px 'Manrope', system-ui, sans-serif; }
+.mh-search::placeholder { color: rgba(246,234,211,.62); }
+.mh-search:focus { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
+/* pinned above the nav: the page shell clips overflow, so sticky never engages */
+.mh-youstrip { position: fixed; left: 16px; right: 16px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: auto !important;
+  box-shadow: 0 10px 30px rgba(7,4,13,.55); display: flex !important; align-items: center; gap: 10px !important; min-height: 52px;
+  padding: 8px 16px; border-radius: var(--mn-r-pill); border: 1px solid var(--mn-peach); background: #13233A;
+  color: var(--mn-sand); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.mh-youlab { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mn-peach); }
+.mh-yourank { font-size: 20px; line-height: 1; }
+.mh-youname { flex: 1; min-width: 0; text-align: left; font: 700 15px 'Manrope', sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-youpts { font: 700 13px 'JetBrains Mono', monospace; }
+.mh-youarrow { font: 700 12px 'JetBrains Mono', monospace; color: var(--mn-peach); letter-spacing: .08em; text-transform: uppercase; }
+.mh-wrow.mh-flash { animation: mhFlash 1.6s ease-out 1; }
+@keyframes mhFlash { 0%, 30% { background: rgba(255,179,107,.32); } 100% { background: transparent; } }
+.mh-whorow { grid-template-columns: auto 1fr auto !important; width: 100%; }
+.mh-livemine { text-align: left; }
+.mh-livenext { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(246,234,211,.18); font: 600 14px 'Manrope', sans-serif; color: var(--mn-sand); }
+.mh-livenext b { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .14em; color: var(--mn-coral); margin-right: 6px; }
+.mh-pull { position: fixed; left: 0; right: 0; top: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 8px; background: linear-gradient(180deg, rgba(7,4,13,.9), rgba(7,4,13,0)); pointer-events: none;
+  font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
+.mh-fresh { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 30; white-space: nowrap; min-height: 32px; padding: 6px 12px;
+  border-radius: var(--mn-r-pill); border: 1px solid rgba(246,234,211,.22); background: rgba(7,4,13,.78); color: rgba(246,234,211,.86);
+  font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .06em; }
+.mh-install { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+.mh-installbtns { display: flex; align-items: center; gap: 6px; flex: none; }
+.mh-x { min-width: 44px; min-height: 44px; border: 0; background: none; color: var(--mn-sand); font-size: 18px; }
+.mh-howto { min-height: 60vh; justify-content: center; }
+.mh-dots { display: flex; gap: 8px; justify-content: center; }
+.mh-dots i { width: 8px; height: 8px; border-radius: 50%; background: rgba(246,234,211,.3); }
+.mh-dots i[data-on] { background: var(--mn-peach); width: 22px; border-radius: 4px; }
+.mh-setrows { display: grid; margin-top: 6px; }
+.mh-setrow { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 2px; border: 0;
+  border-top: 1px solid rgba(246,234,211,.14); background: none; color: var(--mn-sand); font: 600 15px 'Manrope', sans-serif; text-align: left; }
+.mh-setrow:first-child { border-top: 0; }
+.mh-toggle { width: 42px; height: 24px; border-radius: 12px; background: rgba(246,234,211,.22); position: relative; flex: none; }
+.mh-toggle::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--mn-sand); transition: transform .18s; }
+.mh-toggle[data-on] { background: var(--mn-coral); }
+.mh-toggle[data-on]::after { transform: translateX(18px); }
+/* bigger text: the reading sizes, not the display type, which is already fitted to its box */
+html.mh-bigtext .mn-serif, html.mh-bigtext .mh-wname, html.mh-bigtext .mh-setrow { font-size: 118% !important; }
+html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenext { font-size: 112% !important; }
+@media (prefers-reduced-motion: reduce) { .mh-wrow.mh-flash { animation: none; background: rgba(255,179,107,.24); } .mh-toggle::after { transition: none; } }
+
+.mh-page:has(.mh-youstrip) .mh-body { padding-bottom: 170px !important; }

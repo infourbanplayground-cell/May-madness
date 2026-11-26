@@ -19,6 +19,7 @@ import http from 'http';
 import path from 'path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
+const SHOTS = !!process.env.SHOTS;
 const SC = '/tmp/claude-0/-home-user-May-madness/0e44f0ad-a683-5f0d-9de6-9459ae328963/scratchpad';
 const SEASON = JSON.parse(fs.readFileSync(path.join(ROOT, 'heist-season.json'), 'utf8'));
 const NAT = JSON.parse(fs.readFileSync(path.join(SC, 'roster', 'state-3011.json'), 'utf8')).state;
@@ -218,6 +219,52 @@ if (!process.env.ONLY || process.env.ONLY === 'mid') {
   }
   ok(!errs.length, 'organiser: page errors: ' + errs.slice(0, 2).join(' | '));
   await ctx.close();
+}
+// ── quality of life: who are you, find me, your night, settings, how it works ──
+{
+  // a player in tonight's night 7 with a group match still to play
+  const t7 = n7.teams.find(t => n7.groupMatches.some(m => !m.winner && (m.team1Id === t.id || m.team2Id === t.id)));
+  const meQ = t7.p1Id;
+  const { ctx, pg, errs } = await page('mid', meQ, false);
+  await look(pg, 'home');
+  const home = await pg.evaluate(() => { const b = document.querySelector('.mh-livemine'); return b ? b.innerText : null; });
+  ok(home && /Group [A-D]/i.test(home) && /(NEXT|ON COURT)/.test(home), 'Home shows your live night: ' + (home || 'no card').replace(/\s+/g, ' ').slice(0, 140));
+  if (SHOTS) await pg.screenshot({ path: path.join(OUT, 'qol-home-live.png') });
+  await look(pg, 'wanted');
+  const strip = await pg.evaluate(() => { const b = document.querySelector('.mh-youstrip'); return b && b.innerText.replace(/\s+/g, ' '); });
+  ok(strip && /you\s*#\d+/i.test(strip), 'Most Wanted carries the you-strip: ' + strip);
+  await pg.click('.mh-youstrip'); await pg.waitForTimeout(900);
+  const jumped = await pg.evaluate(id => { const r = document.getElementById('w-' + id); if (!r) return 'no row'; const b = r.getBoundingClientRect();
+    return b.top > 40 && b.bottom < innerHeight - 90 ? 'ok' : `row at ${Math.round(b.top)}`; }, meQ);
+  ok(jumped === 'ok', 'the strip brings your row on screen: ' + jumped);
+  if (SHOTS) await pg.screenshot({ path: path.join(OUT, 'qol-wanted.png') });
+  await pg.fill('.mh-search', 'zzzz-nobody'); await pg.waitForTimeout(200);
+  ok(await pg.evaluate(() => document.querySelectorAll('.mh-wrow').length === 0 && /Nobody on the table/i.test(document.body.innerText)), 'search with no match says so');
+  await look(pg, 'me');
+  ok(await pg.evaluate(() => /Bigger text/i.test(document.body.innerText)), 'ME carries the phone settings');
+  await pg.click('.mh-setrow[aria-pressed]'); await pg.waitForTimeout(150);
+  ok(await pg.evaluate(() => document.documentElement.classList.contains('mh-bigtext') && localStorage.getItem('mh-bigtext') === '1'), 'bigger text applies and is remembered');
+  await look(pg, 'howto');
+  ok(await pg.evaluate(() => /How it works · 1 of 3/i.test(document.body.innerText)), 'how it works opens');
+  if (SHOTS) await pg.screenshot({ path: path.join(OUT, 'qol-howto.png') });
+  ok(!errs.length, 'qol: page errors: ' + errs.slice(0, 2).join(' | '));
+  await ctx.close();
+  // a fresh phone: how it works once, then who-are-you, and the pick sticks
+  const { ctx: c2, pg: p2, errs: e2 } = await page('mid', null, false);
+  await p2.evaluate(() => { localStorage.removeItem('mh-howto-seen'); localStorage.removeItem('mh-who-asked'); location.hash = ''; });
+  await p2.reload(); await p2.waitForTimeout(1500);
+  // Now Loading plays first on a new day; its tap is the way into the app
+  const cont = async () => { if (await p2.locator('.mh-loadtap').count()) { await p2.waitForSelector('.mh-loadtap:not([disabled])', { timeout: 15000 }); await p2.click('.mh-loadtap'); await p2.waitForTimeout(500); } };
+  await cont();
+  ok(/howto/.test(await p2.evaluate(() => location.hash)), 'first open shows how it works: ' + await p2.evaluate(() => location.hash));
+  await p2.evaluate(() => { localStorage.setItem('mh-howto-seen', '1'); location.hash = ''; }); await p2.reload(); await p2.waitForTimeout(1500); await cont();
+  ok(/who/.test(await p2.evaluate(() => location.hash)), 'then asks who you are: ' + await p2.evaluate(() => location.hash));
+  if (SHOTS) await p2.screenshot({ path: path.join(OUT, 'qol-who.png') });
+  await p2.fill('.mh-search', (NAT.players.find(p => p.id === meQ) || {}).name.split(' ')[0]); await p2.waitForTimeout(200);
+  await p2.click(`.mh-whorow >> nth=0`); await p2.waitForTimeout(400);
+  ok(await p2.evaluate(() => !!localStorage.getItem('aa-me')), 'the pick is remembered on the phone');
+  ok(!e2.length, 'who: page errors: ' + e2.slice(0, 2).join(' | '));
+  await c2.close();
 }
 await browser.close(); srv.close();
 if (fails.length) { console.error(`\n${fails.length} failed`); process.exit(1); }
