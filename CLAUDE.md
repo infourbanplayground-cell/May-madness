@@ -1018,6 +1018,21 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - **Per-night emailed backups** for `na` and `he`: `ops/volume-email-backup.sh`,
     installed by `ops/install-volume-backups.sh` (`/etc/cron.d/volume-email-backup`,
     hourly at :17, sends only when the completed count rises).
+- **THE LAUNCH FILM is `build-heist-video.py` + `build-heist-audio.py` +
+  `record-heist-video.mjs`** (26 Nov) — 18s, 1080x1920, poster voice: the
+  open (logo), NINE NIGHTS as a one-painting-a-beat montage with each episode's
+  code and title, THE LAST TWO PAY DOUBLE, 412 counting up, WED 2 DEC + bring a
+  partner. Every figure from `heist-season.json`; refuses once night one is
+  played or if the doubles stop being the last two. Score is synthesised and
+  reads the picture's cut table (`$SP/heist-launch.cut.json`). Captions in
+  `brand/heist/posts/VIDEO-CAPTIONS.txt`.
+  - **A face is fetched only when text is laid out in it**, and hidden scenes
+    lay nothing out: `fonts.ready` resolved before the wide cut was requested
+    and the fit sized NINE NIGHTS against the fallback (1109px in a 936 box).
+    The page loads every bundled FontFace outright before fitting.
+  - Titles track in, so they are fitted at their WIDEST tracking.
+  - Scene paintings are CHOSEN: the clubhouse poster and the walkout carry
+    their own lettering, and a title over a title reads as neither.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:
