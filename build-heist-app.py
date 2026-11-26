@@ -405,7 +405,7 @@ def main():
   .mh-boot .mhb-lock{{position:absolute;left:20px;top:calc(58px + env(safe-area-inset-top))}}
   .mh-boot .mn-logo img{{display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}}
   .mh-boot .mn-meta{{text-shadow:0 1px 6px rgba(0,0,0,.9)}}
-  .mh-boot .mhb-spin{{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#F2E6D8}}
+  .mh-boot .mhb-spin{{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:700 11px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:.14em;color:#F2E6D8}}
   .mh-boot .mhb-ring{{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#FFC9A3;animation:mhbSpin .8s linear infinite}}
   @keyframes mhbSpin{{to{{transform:rotate(360deg)}}}}
   @media (prefers-reduced-motion:reduce){{.mh-boot .mhb-art img{{animation:none}}.mh-boot .mhb-ring{{animation-duration:2.4s}}}}

@@ -98,7 +98,7 @@ async function page(scen, me, admin) {
   });
   await pg.goto(ORIGIN + '/#home', { waitUntil: 'load' });
   await pg.waitForSelector('.mh-page, .mh-slides, .mh-loading', { timeout: 40000 });
-  await pg.evaluate(() => Promise.all(["40px 'Bowlby One'", "600 40px Manrope", "40px 'Kaushan Script'"].map(f => document.fonts.load(f).catch(() => 0))));
+  await pg.evaluate(() => Promise.all(["900 40px Archivo", "600 40px Barlow", "700 40px 'Barlow Semi Condensed'", "40px 'Kaushan Script'"].map(f => document.fonts.load(f).catch(() => 0))));
   return { ctx, pg, errs };
 }
 const look = async (pg, hash) => {

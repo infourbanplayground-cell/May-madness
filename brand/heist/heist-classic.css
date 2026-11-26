@@ -12,7 +12,7 @@ html:not(#mh) .na-natday { display: none !important; }
 html:not(#mh) .sg-hero { border-radius: 24px !important; padding-top: 22px !important; }
 html:not(#mh) .na-ivory { border-radius: 18px !important; }
 html:not(#mh) .sg-card { border-radius: 18px !important; }
-html:not(#mh) body { font-family: 'Manrope', system-ui, sans-serif !important; }
+html:not(#mh) body { font-family: 'Barlow', system-ui, sans-serif !important; }
 
 /* Vol.9's light PLATES (the ivory hero, the countdown, the table, the race,
    the plates the home rows sit on) become Heist GLASS: a navy surface, a
@@ -42,7 +42,7 @@ html:not(#mh) .na-ivory button > span[style*="background"] { color: var(--mn-nav
 #mh-back { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 16px;
   background: var(--mn-grad-primary); color: var(--mn-navy); font: 800 14px var(--mn-font-ui, system-ui); text-decoration: none; }
 #mh-back[hidden] { display: none !important; }
-#mh-back span { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .18em; opacity: .8; }
+#mh-back span { font: 700 11px 'Barlow Semi Condensed', sans-serif; letter-spacing: .18em; opacity: .8; }
 /* the selected chip on the organiser sheets (Tailwind's orange-to-red
    gradient in the inherited markup): the Heist primary, navy type */
 html:not(#mh) .bg-gradient-to-b.from-orange-500.to-red-600 { background: var(--mn-grad-primary) !important; color: var(--mn-navy) !important; border-color: transparent !important; }

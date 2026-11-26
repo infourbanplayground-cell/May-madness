@@ -1083,6 +1083,25 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     settings, confirm, undo restores the match, up-next, check-in saved,
     offline banner -> back online saves and clears) and `shots-heist.mjs`
     (who, howto).
+- **THE TYPE IS ARCHIVO CONDENSED BLACK + BARLOW (owner, 26 Nov: "I still
+  don't like the font")**, picked from mocks made by `ops/mock-heist-fonts.mjs`
+  (headings: A of five — Archivo / Anton / Bebas / Barlow Condensed Italic /
+  Oswald; then `MODE=body`, small text: 2 of four). It SUPERSEDES the Bowlby One
+  lowercase + cartoon outline below — that look stays only in the owner's logo.
+  - Changed at the TOKENS: `--mn-font-display` Archivo with `--mn-display-axes:
+    'wdth' 72, 'wght' 900`, every display rule set UPPERCASE, `--mn-ink-stroke` 0
+    and a soft drop instead of the hard one; `--mn-font-ui` Barlow and
+    `--mn-font-mono` Barlow Semi Condensed (the token keeps its name so no rule
+    moved). Barlow is vendored by `ops/vendor-heist-fonts.py`; the page sets
+    `tabular-nums` so the tables' figures still line up without a mono face.
+  - Archivo's space at `wdth` 72 is narrow enough that "GROUP A" read GROUPA:
+    `.mn-display` carries `word-spacing: .12em`.
+  - **`shots-heist.mjs`'s face check was rebuilt three times on the way**: a range
+    over the run IN PLACE did not move when its family was forced (MOST WANTED
+    160.2 -> 160.3 forced to monospace), monospace ties condensed black caps and
+    Liberation Serif ties its digits. It now measures a detached copy against the
+    stack minus its first face (what really draws if the face is missing) at
+    0.1px; `SABOTAGE=nofont` still goes red.
 - **THE BIG SCREEN (`?tv=`) IS THE HEIST'S OWN — `brand/heist/heist-wall.jsx`**
   (owner, 26 Nov: "everyone sees the session on the big screen, I don't want it
   to be bland"). Blackout's `WallPage` stays in the page unreferenced; the route,

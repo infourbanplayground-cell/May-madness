@@ -73,7 +73,7 @@ async function open(vp, sid) {
   await pg.route('**/api.savemyplay.com/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"clips":[]}' }));
   await pg.goto(`${ORIGIN}/?tv=1&s=${sid}`, { waitUntil: 'load' });
   await pg.waitForSelector('.mhw', { timeout: 40000 });
-  await pg.evaluate(() => Promise.all(["40px 'Bowlby One'", "800 40px Manrope", "800 40px 'JetBrains Mono'"].map(f => document.fonts.load(f).catch(() => 0))));
+  await pg.evaluate(() => Promise.all(["900 40px Archivo", "800 40px Barlow", "700 40px 'Barlow Semi Condensed'"].map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => Promise.all([...document.images].map(i => i.complete ? 0 : new Promise(r => { i.onload = i.onerror = r; }))));
   await pg.waitForTimeout(900);
   return { ctx, pg, errs };
@@ -111,7 +111,7 @@ const audit = pg => pg.evaluate(() => {
   }
   const probe = (fam, fb) => { const s = document.createElement('span'); s.textContent = 'muscat heist 0123'; s.style.cssText = `position:absolute;font:40px ${fam},${fb};white-space:nowrap`; document.body.append(s); const w = s.offsetWidth; s.style.fontFamily = fb; const w2 = s.offsetWidth; s.remove(); return w !== w2; };
   return { bad: [...new Set(bad)], scroll: document.documentElement.scrollHeight - innerHeight + (document.documentElement.scrollWidth - innerWidth),
-    bowlby: probe("'Bowlby One'", 'serif'), manrope: probe("'Manrope'", 'serif'),
+    bowlby: probe("'Archivo'", 'serif'), manrope: probe("'Barlow'", 'serif'),
     faces: document.querySelectorAll('.mhw-face').length, art: !!document.querySelector('.mhw-kb img') && document.querySelector('.mhw-kb img').naturalWidth > 0,
     logo: (document.querySelector('.mhw-logo') || {}).naturalWidth > 0, stage: document.querySelector('.mhw').dataset.stage,
     panel: (document.querySelector('.mhw-panel .mhw-label') || {}).textContent, text: document.querySelector('.mhw').innerText };

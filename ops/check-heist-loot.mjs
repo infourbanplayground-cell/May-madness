@@ -109,7 +109,7 @@ await pg.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, conte
 await pg.route('**/api.savemyplay.com/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"clips":[]}' }));
 await pg.goto(ORIGIN + '/#home', { waitUntil: 'load' });
 await pg.waitForSelector('.mh-page, .mh-loading', { timeout: 40000 });
-await pg.evaluate(() => Promise.all(["40px 'Bowlby One'", "40px 'Kaushan Script'", "700 12px 'JetBrains Mono'"].map(f => document.fonts.load(f).catch(() => 0))));
+await pg.evaluate(() => Promise.all(["900 40px Archivo", "40px 'Kaushan Script'", "700 12px 'Barlow Semi Condensed'", "600 12px Barlow"].map(f => document.fonts.load(f).catch(() => 0))));
 const go = async h => { await pg.evaluate(x => { location.hash = x; }, h); await pg.waitForTimeout(700); };
 const shot = async n => { if (process.env.SHOTS) await pg.screenshot({ path: path.join(OUT, n + '.png'), fullPage: true }); };
 // text cut by its box or leaving its card

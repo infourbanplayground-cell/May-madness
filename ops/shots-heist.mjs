@@ -64,7 +64,7 @@ async function open(w, h, hash, reduced) {
   await pg.waitForSelector('.mh-page, .mh-slides', { timeout: 30000 });
   // a face no text on the screen uses is never fetched, and would measure as the
   // fallback; ask for each one, so the probe tests availability, not usage
-  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "40px 'Bowlby One'", "600 40px Manrope"]
+  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "900 40px Archivo", "600 40px Barlow", "700 40px 'Barlow Semi Condensed'"]
     .map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => [...document.fonts].every(f => f.status !== 'loading'), null, { timeout: 15000 });
@@ -82,10 +82,11 @@ const audit = () => {
     const v = s.getBoundingClientRect().width; s.remove(); return v;
   };
   const fonts = {
-    // the logo's faces since 25 Nov 2026 (Archivo / Fraunces before)
-    'Bowlby One': probe("'Bowlby One',serif") !== probe('serif'),
+    // Archivo condensed black headings + Barlow small text since 26 Nov 2026
+    'Archivo': probe("'Archivo',serif", 'font-weight:900') !== probe('serif', 'font-weight:900'),
+    'Barlow Semi Condensed': probe("'Barlow Semi Condensed',serif", 'font-weight:700') !== probe('serif', 'font-weight:700'),
     'Kaushan Script': probe("'Kaushan Script',serif") !== probe('serif'),
-    'Manrope': probe("'Manrope',serif", 'font-weight:600') !== probe('serif', 'font-weight:600'),
+    'Barlow': probe("'Barlow',serif", 'font-weight:600') !== probe('serif', 'font-weight:600'),
   };
   // and the screen's OWN display text: the probe above is a span this check
   // made, which loads the face on demand; the 08 Live shot went out in the
@@ -95,13 +96,26 @@ const audit = () => {
   // points line inside a display figure) does not move when the parent's does
   const ownText = e => [...e.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
   const runs = [...document.querySelectorAll('.mn-display, .mn-l1, .mn-band > span, .mn-scenetag, .mn-name, .mn-rank, .mn-tiertag, .mn-pts')].filter(e => ownText(e) && e.offsetWidth).slice(0, 12);
+  // measured on a DETACHED copy carrying the run's own computed face, size, axes,
+  // case and tracking: a range over the run in place reported the same width after
+  // its family was forced to monospace ("MOST WANTED" 160.2 -> 160.3 at 44px, where
+  // DejaVu Sans Mono needs ~290), so the in-place test could not tell anything apart
   const undrawn = runs.filter(e => {
-    const r = document.createRange(); r.selectNodeContents(ownText(e)); const w0 = r.getBoundingClientRect().width;
-    const was = e.style.fontFamily; e.style.fontFamily = 'Impact, sans-serif';
-    const w1 = r.getBoundingClientRect().width; e.style.fontFamily = was; return Math.abs(w0 - w1) < .5;
+    const cs = getComputedStyle(e), s = document.createElement('span');
+    s.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-style:${cs.fontStyle};font-weight:${cs.fontWeight};font-size:${cs.fontSize};font-variation-settings:${cs.fontVariationSettings};text-transform:${cs.textTransform};letter-spacing:${cs.letterSpacing}`;
+    s.style.fontFamily = cs.fontFamily; s.textContent = ownText(e).textContent; document.body.appendChild(s);
+    // against the stack minus its first face, which IS what draws when that face is
+    // missing (the stories harness's rule). Any other stand-in can tie by accident:
+    // condensed black caps run monospace's advance ("MUNTHER" 80.7 v 80.8) and the
+    // digits run Liberation Serif's ("93" 20.2 v 20.2)
+    const w0 = s.getBoundingClientRect().width;
+    s.style.fontFamily = cs.fontFamily.split(',').slice(1).join(',') || 'serif'; const w1 = s.getBoundingClientRect().width; s.remove();
+    e.__dbg = `${w0.toFixed(2)}/${w1.toFixed(2)}`;
+    // 0.1px, not 0.5: "#5" at 11px differs by 0.3 in the two faces; layout is 1/64px exact
+    return Math.abs(w0 - w1) < .1;
   });
   fonts['display text on screen'] = runs.length > 0 && undrawn.length === 0;
-  if (undrawn.length) fonts['display text on screen: ' + undrawn.map(e => `"${e.textContent.trim().slice(0, 14)}"`).join(' ')] = false;
+  if (undrawn.length) fonts["display text on screen: " + undrawn.map(e => `"${e.textContent.trim().slice(0, 14)}"` + `[${e.className} ${e.__dbg}]`).join(' ')] = false;
   const out = { fonts, broken: [...document.images].filter(i => !i.naturalWidth).map(i => i.getAttribute('src')),
     small: [], clipped: [], targets: [], scrollX: document.documentElement.scrollWidth - innerWidth, moving: [] };
   for (const el of document.querySelectorAll('body *')) {

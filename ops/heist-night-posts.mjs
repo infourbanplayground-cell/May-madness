@@ -75,7 +75,7 @@ await pg.route('**/fonts.googleapis.com/**', r => r.fulfill({ status: 200, conte
 await pg.route('**/api.savemyplay.com/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"clips":[]}' }));
 await pg.goto(`${ORIGIN}/#nightshare/${no}/champions`);
 await pg.waitForSelector('.mh-page', { timeout: 60000 });
-await pg.evaluate(() => Promise.all(["40px 'Bowlby One'", "40px 'Kaushan Script'", "800 40px Archivo"].map(f => document.fonts.load(f).catch(() => 0))));
+await pg.evaluate(() => Promise.all(["900 40px Archivo", "40px 'Kaushan Script'", "600 40px Barlow", "700 40px 'Barlow Semi Condensed'"].map(f => document.fonts.load(f).catch(() => 0))));
 
 async function exportAt(hash, file) {
   await pg.evaluate(h => { window.__mhLastExport = null; location.hash = h; }, hash);

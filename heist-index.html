@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "1e086a2a4e16";
+  var V = "0d0549a3e2b4";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -903,12 +903,17 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-rep-known: var(--mn-coral);
   --mn-rep-legend: var(--mn-gold);
 
-  --mn-font-display: 'Bowlby One', Impact, sans-serif;
-  --mn-display-axes: normal;
+  /* THE DISPLAY FACE IS ARCHIVO CONDENSED BLACK, IN CAPS (owner, 26 Nov: "I still
+     don't like the font" -> option A of five, the launch posts' own face). Bowlby
+     One lowercase with the cartoon outline is gone from the app; the logo keeps it. */
+  --mn-font-display: 'Archivo', 'Arial Narrow', sans-serif;
+  --mn-display-axes: 'wdth' 72, 'wght' 900;
   --mn-font-serif: 'Kaushan Script', cursive;
   --mn-serif-axes: normal;
-  --mn-font-ui: 'Manrope', system-ui, sans-serif;
-  --mn-font-mono: 'JetBrains Mono', monospace;
+  /* the small text is Barlow, the labels Barlow Semi Condensed (owner, 26 Nov,
+     option 2): the mono token keeps its name so no rule had to move */
+  --mn-font-ui: 'Barlow', system-ui, sans-serif;
+  --mn-font-mono: 'Barlow Semi Condensed', 'Barlow', system-ui, sans-serif;
 
   --mn-r-card: 14px;
   --mn-r-hero: 16px;
@@ -988,13 +993,13 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
   --mn-logo-shadow: drop-shadow(0 2px 6px rgba(0,0,0,.6));
   /* the logo's ink: outline and hard drop on the block face */
   --mn-ink: #07040D;
-  --mn-ink-stroke: .085em;
-  --mn-ink-drop: .055em .075em 0 #07040D;
+  --mn-ink-stroke: 0;
+  --mn-ink-drop: 0 .04em .12em rgba(0,0,0,.45);
 }
 [style*="--mn-font-display"], .mn-display * { font-weight: 400; font-style: normal; }
 
 /* ── type helpers (the handoff's own) ─────────────────────────────────── */
-.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; text-transform: lowercase; line-height: .9; color: var(--mn-sand); letter-spacing: -.005em;
+.mn-display { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; text-transform: uppercase; line-height: .92; color: var(--mn-sand); letter-spacing: .005em; word-spacing: .12em;
   /* the logo's block face: cream, a thick black outline drawn UNDER the fill, a hard drop */
   -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
 /* Bowlby One and Kaushan Script are single-weight upright faces: asking for
@@ -1009,7 +1014,7 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-topbar .mn-serif, .mh-title > .mn-serif, .mh-wname .mn-serif, .mh-conttag.mn-serif, .mn-lockup .mn-serif
             { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-weight: 400; line-height: 1.2; color: var(--mn-coral); }
 .mn-topbar .mn-serif { color: var(--mn-sand); }
-.mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
+.mn-label   { font-family: var(--mn-font-mono); font-weight: 700; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
 .mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
 .mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }
 .mn-glass[data-accent="teal"]  { border-color: var(--mn-teal); }
@@ -1018,8 +1023,8 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 
 /* ── buttons ──────────────────────────────────────────────────────────── */
 .mn-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; cursor: pointer; border: 0; text-decoration: none; }
-.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: lowercase; }
-.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; font-size: 17px; text-transform: lowercase; }
+.mn-btn-primary { background: var(--mn-grad-primary); color: var(--mn-navy); border-radius: var(--mn-r-card); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; min-height: 48px; font-size: 17px; text-transform: uppercase; }
+.mn-btn-ghost   { background: transparent; border: var(--mn-ghost-border); color: var(--mn-sand); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .06em; font-size: 17px; text-transform: uppercase; }
 .mn-btn-light   { background: var(--mn-sand); color: var(--mn-navy); border-radius: var(--mn-r-card); min-height: 48px; font-family: var(--mn-font-ui); font-weight: 700; font-size: 15px; }
 .mn-btn[data-size="live"] { min-height: 56px; }
 .mn-btn:focus-visible, .mn-pill:focus-visible, .mn-navtab:focus-visible { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
@@ -1077,11 +1082,11 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-lockup .mn-meta { position: relative; margin-top: 9px; font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-sand); text-shadow: var(--mn-text-glow); }
 
 /* ── scene tag ────────────────────────────────────────────────────────── */
-.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: lowercase; }
+.mn-scenetag { display: inline-block; padding: 3px 8px; background: var(--mn-scene-bg); border-left: 2px solid var(--mn-coral); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; font-size: 12px; letter-spacing: .18em; color: var(--mn-sand); text-transform: uppercase; }
 .mn-scenetag[data-gold] { border-left-color: var(--mn-gold); color: var(--mn-gold); }
 
 /* ── billing (stories) ────────────────────────────────────────────────── */
-.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: lowercase; text-align: center; }
+.mn-billing { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 700; font-size: 12px; letter-spacing: .08em; line-height: 1.25; color: var(--mn-billing); text-transform: uppercase; text-align: center; }
 .mn-billing i { font-style: normal; color: var(--mn-billing-dim); text-transform: none; }
 
 /* ── crew card ────────────────────────────────────────────────────────── */
@@ -1095,7 +1100,7 @@ button[style*="linear-gradient"]{box-shadow:var(--glow) !important;}
 .mn-card .mn-card-fade { position: absolute; inset: 0; background: var(--mn-card-fade); }
 .mn-card .mn-tiertag { position: absolute; left: 8px; top: 8px; padding: 2px 7px; border-radius: 6px; background: var(--mn-tag-bg); font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; letter-spacing: .1em; color: var(--mn-sand); }
 .mn-card .mn-rank { position: absolute; right: 8px; top: 6px; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; color: var(--mn-sand); text-shadow: var(--mn-rank-glow); }
-.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; line-height: 1; color: var(--mn-sand); text-transform: lowercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-card .mn-name { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; line-height: 1; color: var(--mn-sand); text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .mn-card .mn-repline { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3px; }
 .mn-card .mn-rep { font-family: var(--mn-font-mono); font-size: 11px; }
 .mn-card .mn-pts { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 800; color: var(--mn-sand); }
@@ -1127,7 +1132,7 @@ button.mn-cardbtn { background: none; border: 0; padding: 0; cursor: pointer; bo
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 /* ── the season screens (heist-screens.jsx) ───────────────────────────── */
-html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-family: var(--mn-font-ui); -webkit-font-smoothing: antialiased; }
+html, body { margin: 0; background: var(--mn-navy); color: var(--mn-sand); font-family: var(--mn-font-ui); -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
 .mh-page { position: relative; min-height: 100vh; min-height: 100dvh; background: var(--mn-navy); overflow-x: hidden; }
 .mh-page .mn-topbar { position: absolute; }
 .mh-body { position: relative; z-index: 5; box-sizing: border-box; padding-bottom: 100px !important; }
@@ -1619,14 +1624,14 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
   padding: .15em .5em; border-radius: .4em; background: var(--mn-tag-bg); color: var(--mn-sand); }
 .mh-loot-2x { background: var(--mn-coral); color: var(--mh-loot-ink); }
 .mh-loot-foot { position: absolute; z-index: 5; left: .9em; right: .9em; bottom: .8em; text-align: center; }
-.mh-loot-tier { font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; line-height: 1; font-size: 1.9em;
+.mh-loot-tier { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; text-transform: uppercase; line-height: 1; font-size: 1.9em;
   color: var(--mn-sand); -webkit-text-stroke: .085em var(--mh-loot-ink); paint-order: stroke fill; text-shadow: .06em .07em 0 var(--mh-loot-ink); }
 .mh-loot[data-tier="inside"]  .mh-loot-tier { color: var(--mn-peach); }
 .mh-loot[data-tier="getaway"] .mh-loot-tier { color: var(--mn-teal); }
 .mh-loot[data-tier="score"]   .mh-loot-tier { color: var(--mn-gold); }
 .mh-loot[data-size="s"] .mh-loot-tier { font-size: max(14px, 1.9em); }
 .mh-loot[data-size="s"] .mh-loot-face { inset: 2.4em 1.9em 3.6em; }
-.mh-loot-name { margin-top: .3em; font-family: var(--mn-font-display); font-weight: 400; text-transform: lowercase; font-size: 1.15em; line-height: 1.05; color: var(--mn-sand); }
+.mh-loot-name { margin-top: .3em; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; text-transform: uppercase; font-size: 1.15em; line-height: 1.05; color: var(--mn-sand); }
 .mh-loot-with { font-family: var(--mn-font-serif); font-size: max(11px, .95em); color: var(--mn-coral); margin-top: .1em; }
 .mh-loot-meta { display: flex; justify-content: space-between; margin-top: .45em; font-family: var(--mn-font-mono); font-size: max(11px, .72em);
   letter-spacing: .08em; text-transform: uppercase; color: var(--mn-mist); }
@@ -1789,14 +1794,14 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 .mhw-code { font-family: var(--mn-font-mono); font-weight: 700; font-size: calc(var(--u) * 1.35); letter-spacing: .3em; color: var(--mn-peach); display: flex; align-items: center; gap: calc(var(--u)*1); }
 .mhw-title { flex: none; font-size: calc(var(--u) * 4.2); line-height: 1; margin-top: calc(var(--u) * 1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .08em .1em 0; }
 .mhw-meta { font-size: calc(var(--u) * 1.3); font-weight: 600; color: var(--mn-mist); margin-top: calc(var(--u) * .4); letter-spacing: .04em; }
-.mhw-2x { display: inline-block; font-family: var(--mn-font-display); font-size: calc(var(--u)*1.4); letter-spacing: .04em; line-height: 1; padding: calc(var(--u)*.35) calc(var(--u)*.7);
+.mhw-2x { display: inline-block; font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-size: calc(var(--u)*1.4); letter-spacing: .04em; line-height: 1; padding: calc(var(--u)*.35) calc(var(--u)*.7);
   background: var(--mn-tier-legend); color: var(--mn-ink); border-radius: calc(var(--u)*.5); margin-left: calc(var(--u)*.8); }
 .mhw-clock { flex: none; text-align: right; }
 .mhw-live { display: inline-flex; align-items: center; gap: calc(var(--u)*.6); font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.3); letter-spacing: .25em; color: var(--mn-mist); }
 .mhw-live[data-on] { color: #fff; }
 .mhw-live[data-on]::before { content: ""; width: calc(var(--u)*1.1); height: calc(var(--u)*1.1); border-radius: 50%; background: var(--mn-coral); box-shadow: 0 0 0 0 rgba(255,45,120,.7); animation: mhwPulse 1.6s ease-out infinite; }
 @keyframes mhwPulse { 0% { box-shadow: 0 0 0 0 rgba(255,45,120,.7); } 100% { box-shadow: 0 0 0 calc(var(--u)*1.4) rgba(255,45,120,0); } }
-.mhw-time { font-family: var(--mn-font-display); font-size: calc(var(--u)*3.4); line-height: 1; margin-top: calc(var(--u)*1); color: var(--mn-sand); -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
+.mhw-time { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-size: calc(var(--u)*3.4); line-height: 1; margin-top: calc(var(--u)*1); color: var(--mn-sand); -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
 
 /* progress */
 .mhw-prog { display: flex; align-items: center; gap: calc(var(--u)*1.4); flex: none; }
@@ -1873,7 +1878,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 .mhw-grow[data-q]::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: calc(var(--u)*.35); border-radius: 2px; background: var(--mn-coral); }
 .mhw-grow em { font-size: calc(var(--u)*1.2*var(--t)); color: var(--mn-mist); }
 .mhw-grow .mhw-gpts { color: #fff; font-size: calc(var(--u)*1.4*var(--t)); }
-.mhw-gpos { font-family: var(--mn-font-display); font-size: calc(var(--u)*1.45*var(--t)); color: var(--mn-peach); text-align: center; }
+.mhw-gpos { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-size: calc(var(--u)*1.45*var(--t)); color: var(--mn-peach); text-align: center; }
 .mhw-stack { min-width: 0; display: flex; flex-direction: column; line-height: 1.08; }
 .mhw-stack span { font-weight: 800; font-size: calc(var(--u)*1.12*var(--t)); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
 
@@ -1890,7 +1895,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 .mhw-kside[data-lose] { opacity: .5; }
 .mhw-kname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.15*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
 .mhw-kmatch[data-final] .mhw-kname { font-size: calc(var(--u)*1.5*var(--t)); }
-.mhw-kside b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.6*var(--t)); color: var(--mn-gold); min-width: calc(var(--u)*1.6); text-align: right; }
+.mhw-kside b { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: calc(var(--u)*1.6*var(--t)); color: var(--mn-gold); min-width: calc(var(--u)*1.6); text-align: right; }
 .mhw-kside .mhw-pairfaces > * + * { margin-left: calc(var(--u) * -.6); }
 
 /* tonight's points */
@@ -1899,7 +1904,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 .mhw-prow { display: grid; grid-template-columns: calc(var(--u)*2*var(--t)) auto 1fr auto; align-items: center; gap: calc(var(--u)*1); padding: calc(var(--u)*.25*var(--t)) calc(var(--u)*.8); border-radius: calc(var(--u)*.7); background: rgba(15,27,43,.4); }
 .mhw-prow[data-top] { background: linear-gradient(90deg, rgba(255,194,74,.22), rgba(15,27,43,.35)); }
 .mhw-prow .mhw-gname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.35*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
-.mhw-prow b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.8*var(--t)); color: var(--mn-gold); }
+.mhw-prow b { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; font-size: calc(var(--u)*1.8*var(--t)); color: var(--mn-gold); }
 
 /* before the night, and the champions */
 .mhw-soon, .mhw-champs { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: calc(var(--u)*1.2); min-height: 0; }
@@ -1914,7 +1919,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 @keyframes mhwRise { from { transform: scale(.6); opacity: 0; } }
 .mhw-champname { flex: none; line-height: 1.15; font-size: calc(var(--u)*4.8); color: var(--mn-gold); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .1em .12em; }
 .mhw-champscore { font-size: calc(var(--u)*1.6); font-weight: 600; color: var(--mn-mist); }
-.mhw-champscore b { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-sand); font-size: 1.3em; margin-right: .3em; }
+.mhw-champscore b { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; color: var(--mn-sand); font-size: 1.3em; margin-right: .3em; }
 
 /* foot: the ticker */
 .mhw-foot { flex: none; display: flex; align-items: center; gap: calc(var(--u)*1.4); height: calc(var(--u)*4); border-radius: calc(var(--u)*1); background: rgba(7,4,13,.7); border: 1px solid var(--mn-line-2); padding: 0 calc(var(--u)*1.2); overflow: hidden; }
@@ -1925,7 +1930,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 @keyframes mhwTick { to { transform: translateX(-50%); } }
 .mhw-tick em { font-style: normal; font-size: calc(var(--u)*1.35); font-weight: 700; color: var(--mn-mist); padding-right: calc(var(--u)*3.2); text-transform: uppercase; letter-spacing: .02em; }
 .mhw-tick em b { font-family: var(--mn-font-mono); color: var(--mn-peach); letter-spacing: .14em; margin-right: .5em; }
-.mhw-tick em strong { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-gold); margin: 0 .35em; }
+.mhw-tick em strong { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-weight: 400; color: var(--mn-gold); margin: 0 .35em; }
 .mhw-tickidle { font-size: calc(var(--u)*1.3); color: var(--mn-dim); font-weight: 600; }
 .mhw-url { flex: none; font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.2); letter-spacing: .14em; color: var(--mn-sand); }
 
@@ -1951,7 +1956,7 @@ html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--m
 .mhw-fscore { font-size: calc(var(--u)*15); line-height: .9; color: var(--mn-gold); animation: mhwSlam .55s .4s cubic-bezier(.2,1.4,.4,1) backwards; display: flex; align-items: center; gap: .08em; }
 .mhw-fscore span { color: var(--mn-sand); font-size: .6em; }
 @keyframes mhwSlam { from { transform: scale(2.2); opacity: 0; } 60% { opacity: 1; } }
-.mhw-fwhat { font-family: var(--mn-font-display); font-size: calc(var(--u)*3); text-transform: lowercase; color: var(--mn-sand); background: var(--mn-grad-primary); color: var(--mn-ink);
+.mhw-fwhat { font-family: var(--mn-font-display); font-variation-settings: var(--mn-display-axes); font-size: calc(var(--u)*3); text-transform: uppercase; color: var(--mn-sand); background: var(--mn-grad-primary); color: var(--mn-ink);
   padding: calc(var(--u)*.5) calc(var(--u)*1.6) calc(var(--u)*.7); border-radius: calc(var(--u)*.8); animation: mhwDrop .5s .7s ease-out backwards; }
 .mhw-flash[data-final] .mhw-fwhat { background: var(--mn-tier-legend); }
 .mhw-flose { display: flex; align-items: center; gap: calc(var(--u)*1); font-size: calc(var(--u)*1.6); font-weight: 700; color: var(--mn-mist); text-transform: uppercase; animation: mhwDrop .5s .9s ease-out backwards; }
@@ -1974,7 +1979,7 @@ html:not(#mh) .na-natday { display: none !important; }
 html:not(#mh) .sg-hero { border-radius: 24px !important; padding-top: 22px !important; }
 html:not(#mh) .na-ivory { border-radius: 18px !important; }
 html:not(#mh) .sg-card { border-radius: 18px !important; }
-html:not(#mh) body { font-family: 'Manrope', system-ui, sans-serif !important; }
+html:not(#mh) body { font-family: 'Barlow', system-ui, sans-serif !important; }
 
 /* Vol.9's light PLATES (the ivory hero, the countdown, the table, the race,
    the plates the home rows sit on) become Heist GLASS: a navy surface, a
@@ -2004,7 +2009,7 @@ html:not(#mh) .na-ivory button > span[style*="background"] { color: var(--mn-nav
 #mh-back { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 10px 16px;
   background: var(--mn-grad-primary); color: var(--mn-navy); font: 800 14px var(--mn-font-ui, system-ui); text-decoration: none; }
 #mh-back[hidden] { display: none !important; }
-#mh-back span { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .18em; opacity: .8; }
+#mh-back span { font: 700 11px 'Barlow Semi Condensed', sans-serif; letter-spacing: .18em; opacity: .8; }
 /* the selected chip on the organiser sheets (Tailwind's orange-to-red
    gradient in the inherited markup): the Heist primary, navy type */
 html:not(#mh) .bg-gradient-to-b.from-orange-500.to-red-600 { background: var(--mn-grad-primary) !important; color: var(--mn-navy) !important; border-color: transparent !important; }
@@ -2042,7 +2047,7 @@ html:not(#mh) .na-trow { background: rgba(255, 244, 232, .04) !important; border
   .mh-boot .mhb-lock{position:absolute;left:20px;top:calc(58px + env(safe-area-inset-top))}
   .mh-boot .mn-logo img{display:block;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))}
   .mh-boot .mn-meta{text-shadow:0 1px 6px rgba(0,0,0,.9)}
-  .mh-boot .mhb-spin{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:500 11px/1 'JetBrains Mono',monospace;letter-spacing:.14em;color:#F2E6D8}
+  .mh-boot .mhb-spin{position:absolute;right:18px;bottom:calc(22px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;font:700 11px/1 'Barlow Semi Condensed',sans-serif;letter-spacing:.14em;color:#F2E6D8}
   .mh-boot .mhb-ring{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:#FFC9A3;animation:mhbSpin .8s linear infinite}
   @keyframes mhbSpin{to{transform:rotate(360deg)}}
   @media (prefers-reduced-motion:reduce){.mh-boot .mhb-art img{animation:none}.mh-boot .mhb-ring{animation-duration:2.4s}}

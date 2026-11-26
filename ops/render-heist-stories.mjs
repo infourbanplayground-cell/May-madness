@@ -61,7 +61,7 @@ async function open(hash, vp, dsf) {
   });
   await pg.goto(`http://127.0.0.1:${PORT}/brand/heist/preview.html#${hash}`, { waitUntil: 'load' });
   await pg.waitForSelector('.mh-story', { timeout: 30000 });
-  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "40px 'Bowlby One'", "600 40px Manrope", "500 40px 'JetBrains Mono'"]
+  await pg.evaluate(() => Promise.all(["40px 'Kaushan Script'", "900 40px Archivo", "600 40px Barlow", "700 40px 'Barlow Semi Condensed'"]
     .map(f => document.fonts.load(f).catch(() => 0))));
   await pg.evaluate(() => document.fonts.ready);
   await pg.waitForFunction(() => [...document.fonts].every(f => f.status !== 'loading'), null, { timeout: 15000 });
@@ -97,8 +97,8 @@ const audit = () => {
     const w1 = r.getBoundingClientRect().width; e.style.fontFamily = was;
     if (Math.abs(w0 - w1) < .5) out.undrawn.push(`${cs.fontFamily.split(',')[0]} "${t.textContent.trim().slice(0, 16)}"`);
   }
-  if (frame.querySelector('.mn-label') && ![...document.fonts].some(f => /JetBrains/.test(f.family) && f.status === 'loaded'))
-    out.undrawn.push('JetBrains Mono never loaded');
+  if (frame.querySelector('.mn-label') && ![...document.fonts].some(f => /Barlow Semi Condensed/.test(f.family) && f.status === 'loaded'))
+    out.undrawn.push('Barlow Semi Condensed never loaded');
   out.broken = [...frame.querySelectorAll('img')].filter(i => !i.naturalWidth).map(i => i.getAttribute('src'));
   return out;
 };
