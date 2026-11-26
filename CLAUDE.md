@@ -1042,6 +1042,47 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   The renderer's font probe asks for weight 800 at `font-stretch:112%`, the
   style the sheet draws — probing Blackout's italic 900 measured a face never
   fetched and failed with nothing wrong. Heist MEDALS are not built yet.
+- **QUALITY OF LIFE (26 Nov, owner: "do all one by one") — `brand/heist/heist-qol.jsx`.**
+  Nothing in it scores; every figure is the adapter's.
+  - **Who are you?** (`#who`): pick your name once, kept by the inherited
+    `saveMe` (`aa-me`); a first open shows HOW IT WORKS (`#howto`, three cards)
+    then asks, once each (`mh-howto-seen`, `mh-who-asked`), via `mhFirstRun`,
+    which also runs when Now Loading hands over to Home.
+  - **Most Wanted**: a "You #6" strip PINNED above the nav (the page shell
+    clips overflow, so `sticky` never engages) that scrolls to and flashes your
+    row; name search on Most Wanted and on the Crew.
+  - **Home during a live night** (`MhLiveMine`): your group place, W/pts/GD,
+    and ON COURT / NEXT / your knockout tie.
+  - **Freshness**: an "Updated 12s ago" pill (tap to refresh) and the pull
+    indicator. `lastSync` is now stamped by the 30s poll and by every save,
+    not only a manual refresh.
+  - **A refresh can no longer overwrite unsaved scores.** The inherited
+    pull-to-refresh replaced the phone's state with the server's; with no
+    signal at the court that threw away what the scorer had locked. The shell
+    sets `window.__mhDirty` while changes are waiting and `refreshNow` returns.
+  - **No signal is not "sign in again"**: the banner says how many changes are
+    waiting and that they send by themselves; an `online` event nudges the save.
+    Only an auth error keeps the old tap-to-sign-in banner.
+  - **Scoring**: Lock asks once ("6–3, match to …"), then a 10-second UNDO
+    toast that also names the next match; the scorer's UP NEXT queue (three
+    matches, tap to score) sits on a live night; a CHECK-IN tab stores
+    `session.checkIn {playerId: time}`, read by nothing that scores.
+  - Share sends the image WITH a caption, plus a "Send the link on WhatsApp"
+    button (`wa.me`, whose preview is the og-card). Haptic ticks on +1, lock,
+    picks and `celebrate()`; a "Bigger text" setting on ME; an add-to-home-screen
+    hint from the second visit; dusk placeholders behind images.
+  - **No animated placeholder sheen**: the story export caught the pseudo-element
+    mid-phase and the render-vs-export compare read 7.8 per channel.
+  - **Tailwind is compiled at BUILD time** (`npx tailwindcss@3.4.17`, ~22KB,
+    placed where the CDN injected its sheet). Proved with
+    `APP=<build> DUMP=<json> node ops/check-heist-classic.mjs` run against both
+    builds: 7,068 of 7,070 elements identical on every organiser screen (the
+    two: a pulsing dot's phase). If npm is unreachable the build ships the
+    PINNED runtime and says so.
+  - All covered in `check-heist-app.mjs` (picker, strip jump, live card,
+    settings, confirm, undo restores the match, up-next, check-in saved,
+    offline banner -> back online saves and clears) and `shots-heist.mjs`
+    (who, howto).
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:

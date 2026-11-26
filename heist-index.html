@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "e46e7474b230";
+  var V = "78b267668866";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1732,11 +1732,11 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 .mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
   font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
-.mh-upnext { display: grid !important; grid-template-columns: 64px minmax(0,1fr) auto; gap: 8px !important; align-items: center; width: 100%; min-height: 46px; padding: 6px 0;
+.mh-upnext { display: grid !important; grid-template-columns: 70px minmax(0,1fr) auto; gap: 8px !important; align-items: center; width: 100%; min-height: 46px; padding: 6px 0;
   border: 0; border-top: 1px solid rgba(246,234,211,.12); background: none; color: var(--mn-sand); text-align: left; }
 .mh-upnext:first-of-type { border-top: 0; }
-.mh-upnexttag { font: 700 10px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--mn-coral); }
-.mh-upnextname { font: 600 14px 'Manrope', sans-serif; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mh-upnexttag { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--mn-coral); }
+.mh-upnextname { font: 600 14px 'Manrope', sans-serif; min-width: 0; line-height: 1.3; }
 .mh-upnextname i { font-style: normal; color: var(--mn-mist); }
 .mh-upnextg { font: 700 12px 'JetBrains Mono', monospace; color: var(--mn-peach); }
 .mh-cirow { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 6px; border-radius: 14px; background: rgba(7,4,13,.35); border: 1px solid rgba(246,234,211,.1); }
@@ -1747,6 +1747,12 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 .mh-ciname b { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(246,234,211,.35); display: grid; place-items: center; font-size: 13px; }
 .mh-ciname[aria-pressed="true"] { background: rgba(255,179,107,.16); }
 .mh-ciname[aria-pressed="true"] b { background: var(--mn-peach); border-color: var(--mn-peach); color: #07040D; }
+/* loading placeholders: a painting or a portrait still on its way over 4G shows
+   a dusk-toned plate, not a hole. The image covers it when it lands. */
+.mn-art { background: linear-gradient(160deg, #23324A 0%, #1A2638 55%, #2A2036 100%); }
+/* no animated sheen: story exports capture pseudo-elements mid-phase and the
+   render-vs-export compare read it as a lost layer (7.8 per channel) */
+
 
 </style>
 <style id="heist-classic">
@@ -4474,6 +4480,9 @@ function PublicPhotosPage({
   }, "heist.urbanpadel.om/?photos \xB7 Urban Playground Oman")));
 }
 function celebrate(word) {
+  try {
+    navigator.vibrate && navigator.vibrate([18, 60, 18, 60, 40]);
+  } catch (e) {}
   try {
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const host = document.createElement("div");
@@ -12758,8 +12767,10 @@ function MhCrew({
 }) {
   const X = mhDerive(D);
   const [t, setT] = React.useState("all");
+  const [q, setQ] = React.useState("");
   const tiers = [["all", "All"]].concat((MH.tiers || []).map(x => [x.id, x.label[0] + x.label.slice(1).toLowerCase()]));
-  const shown = X.players.filter(p => t === "all" || p.tier.id === t);
+  const qn = q.trim().toLowerCase();
+  const shown = X.players.filter(p => (t === "all" || p.tier.id === t) && (!qn || p.name.toLowerCase().includes(qn)));
   return React.createElement(MhPage, {
     D: D,
     tab: "crew",
@@ -12774,7 +12785,16 @@ function MhCrew({
     items: tiers,
     value: t,
     onChange: setT
-  }), React.createElement("div", {
+  }), X.players.length > 8 && React.createElement("input", {
+    className: "mh-search",
+    type: "search",
+    placeholder: "Search the crew",
+    value: q,
+    onChange: e => setQ(e.target.value),
+    "aria-label": "Search the crew"
+  }), !shown.length && React.createElement(MhGlass, null, React.createElement(MhSerif, {
+    size: 14
+  }, qn ? `Nobody called "${q}" in this tier.` : "Nobody in this tier yet — it fills as the table moves.")), React.createElement("div", {
     className: "mh-grid"
   }, shown.map(p => React.createElement(MhCrewCard, {
     key: p.id,

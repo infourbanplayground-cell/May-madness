@@ -29,7 +29,7 @@ const SCREENS = [
   ['loading', 'loading/64', '11-now-loading-muscat'], ['cardpull', 'cardpull/5', '12-new-crew-card'],
   ['repup', 'repup/p05', '13-rep-up'], ['rival', 'rival', '14-your-rival'],
   ['settled', 'settled', '15-score-settled'], ['finale', 'finale', '16-the-big-score'],
-  ['share', 'share/card/p05', null], ['mycard', 'card/p05', null],
+  ['share', 'share/card/p05', null], ['mycard', 'card/p05', null], ['who', 'who', null], ['howto', 'howto', null],
 ].filter(([n]) => !process.env.ONLY || process.env.ONLY.split(',').includes(n));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.woff2': 'font/woff2', '.png': 'image/png', '.jpg': 'image/jpeg', '.js': 'application/javascript' };
 

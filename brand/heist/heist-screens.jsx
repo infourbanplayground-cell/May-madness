@@ -369,13 +369,18 @@ function MhMe({ D, go }) {
 function MhCrew({ D, go }) {
   const X = mhDerive(D);
   const [t, setT] = React.useState("all");
+  const [q, setQ] = React.useState("");
   const tiers = [["all", "All"]].concat((MH.tiers || []).map(x => [x.id, x.label[0] + x.label.slice(1).toLowerCase()]));
-  const shown = X.players.filter(p => t === "all" || p.tier.id === t);
+  const qn = q.trim().toLowerCase();
+  const shown = X.players.filter(p => (t === "all" || p.tier.id === t) && (!qn || p.name.toLowerCase().includes(qn)));
   return (
     <MhPage D={D} tab="crew" onTab={go}>
       <div className="mh-col">
         <MhTitle title="THE CREW" aside={`${D.rosterSize || X.players.length} players`} />
         <MhPills label="Tier" items={tiers} value={t} onChange={setT} />
+        {X.players.length > 8 && <input className="mh-search" type="search" placeholder="Search the crew" value={q}
+          onChange={e => setQ(e.target.value)} aria-label="Search the crew" />}
+        {!shown.length && <MhGlass><MhSerif size={14}>{qn ? `Nobody called "${q}" in this tier.` : "Nobody in this tier yet — it fills as the table moves."}</MhSerif></MhGlass>}
         <div className="mh-grid">
           {shown.map(p => (
             <MhCrewCard key={p.id} player={{ name: p.name, photo: p.photo, photoPos: p.pos }} rank={p.rank}

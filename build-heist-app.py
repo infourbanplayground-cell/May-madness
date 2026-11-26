@@ -337,6 +337,8 @@ def main():
     s = once(s, "          setSync(\"saved\"); setSyncErr(\"\");\n          // brief",
              "          setSync(\"saved\"); setSyncErr(\"\"); setLastSync(new Date());\n          // brief",
              "save stamps lastSync")
+    # a locked result is felt as well as seen, on phones that can
+    s = once(s, "function celebrate(word) {", "function celebrate(word) {\n  try { navigator.vibrate && navigator.vibrate([18, 60, 18, 60, 40]); } catch (e) {}", "celebrate haptic")
     app = s.index("function App()")
     nav = s.index("  const navTabs = [", app)
     tail = s[nav:s.index("\n}\n", nav)]
