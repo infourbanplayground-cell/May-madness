@@ -1033,6 +1033,15 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - Titles track in, so they are fitted at their WIDEST tracking.
   - Scene paintings are CHOSEN: the clubhouse poster and the walkout carry
     their own lettering, and a title over a title reads as neither.
+- **PRIZE-GIVING CERTIFICATES: `build-heist-certificates.py` ->
+  `render-heist-certificates.mjs` -> `pack-heist-certificate-pdfs.py`**, the
+  BLANK set (names by hand on 30 Dec) in `brand/certificates-heist/`. Navy,
+  the owner's logo, the finale's painting under the foot, and each place in
+  its knockout-card TIER colour (1st gold The Score, 2nd pink Getaway, 3rd
+  orange Inside Man, 4th-5th cream The Job), with the season prize beside it.
+  The renderer's font probe asks for weight 800 at `font-stretch:112%`, the
+  style the sheet draws — probing Blackout's italic 900 measured a face never
+  fetched and failed with nothing wrong. Heist MEDALS are not built yet.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:
