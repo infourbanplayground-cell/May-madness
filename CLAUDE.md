@@ -1086,9 +1086,14 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
 - **BODY COPY IS MANROPE, NOT THE BRUSH (owner, 26 Nov: "the font isn't
   readable").** `.mn-serif` sentences were Kaushan Script in hot pink; they are
   Manrope 500 in mist now. The brush stays only on short tags (top-bar line,
-  title asides, "you", the contenders' tagline). Orange/amber LOGO options for
-  the owner are in `brand/heist/logo-options/` (hue-shifted from the shipped
-  cut; the pink one is still what ships until they choose).
+  title asides, "you", the contenders' tagline).
+- **THE LOGO'S SCRIPT IS ORANGE (owner, 26 Nov: "Orange")**, chosen from the
+  pink / orange / amber sheet in `brand/heist/logo-options/`. `heist-logo.png`
+  and `.webp` are the original cut hue-shifted to 20°, with the purple shadow
+  trace under the "M" taken to a dark orange. The icons, posts, link preview
+  (hash-stamped, so WhatsApp fetches the new one), stories, film and
+  certificates were all rebuilt from it. The APP's pink accents are unchanged —
+  only the logo was asked for.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:
