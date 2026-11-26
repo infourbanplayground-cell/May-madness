@@ -32,7 +32,7 @@ H = os.path.join(HERE, "brand", "heist")
 season = json.load(open(os.path.join(HERE, "heist-season.json"), encoding="utf-8"))
 read = lambda n: open(os.path.join(H, n), encoding="utf-8").read()
 MODULES = ["heist-components.jsx", "heist-screens.jsx", "heist-night.jsx", "heist-moments.jsx",
-           "heist-stories.jsx", "heist-loot.jsx", "heist-night-share.jsx", "heist-qol.jsx", "heist-adapter.jsx"]
+           "heist-stories.jsx", "heist-loot.jsx", "heist-night-share.jsx", "heist-qol.jsx", "heist-wall.jsx", "heist-adapter.jsx"]
 
 
 def once(s, a, b, what):
@@ -337,6 +337,10 @@ def main():
     s = once(s, "          setSync(\"saved\"); setSyncErr(\"\");\n          // brief",
              "          setSync(\"saved\"); setSyncErr(\"\"); setLastSync(new Date());\n          // brief",
              "save stamps lastSync")
+    # THE WALL (?tv=) is the Heist's own (heist-wall.jsx); Blackout's WallPage
+    # stays in the page unreferenced, and so do its route, session pick and poll
+    s = once(s, "  if (tvMode()) return <WallPage state={state} refreshNow={refreshNow} lastSync={lastSync} />;",
+             "  if (tvMode()) return <MhWall state={state} leaderboard={leaderboard} refreshNow={refreshNow} />;", "Heist wall")
     # a locked result is felt as well as seen, on phones that can
     s = once(s, "function celebrate(word) {", "function celebrate(word) {\n  try { navigator.vibrate && navigator.vibrate([18, 60, 18, 60, 40]); } catch (e) {}", "celebrate haptic")
     app = s.index("function App()")

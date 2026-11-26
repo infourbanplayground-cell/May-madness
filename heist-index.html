@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "0ba53e11a044";
+  var V = "1e086a2a4e16";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1761,6 +1761,202 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 /* no animated sheen: story exports capture pseudo-elements mid-phase and the
    render-vs-export compare read it as a lost layer (7.8 per channel) */
 
+
+/* ═══ THE WALL (?tv=) — heist-wall.jsx ═════════════════════════════════════
+   One unit, --u = min(1vh, 1.78vw): a 1080x1920 panel is 100u tall and 56u
+   wide, a 1920x1080 TV 100u tall and 177u wide (two columns). Nothing here
+   carries a pixel size, so a 4K portrait display is the same page, larger.
+   Divs only: the inherited skin styles header/main/nav by tag. */
+html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--mn-navy) !important; }
+.mhw { --u: min(1vh, 1.78vw); --pad: calc(var(--u) * 2.4); --gap: calc(var(--u) * 1.4); --cf: 4.6; --rf: 2.7; --t: 1; --chf: 11;
+  position: fixed; inset: 0; z-index: 100; overflow: hidden; color: var(--mn-sand); background: var(--mn-navy);
+  font-family: var(--mn-font-ui); display: flex; flex-direction: column; padding: var(--pad); gap: var(--gap); }
+.mhw * { box-sizing: border-box; }
+.mhw-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.mhw-kb { position: absolute; inset: 0; animation: mhwKB 44s ease-in-out infinite alternate; transform-origin: 50% 40%; }
+.mhw-kb .mn-art, .mhw-kb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
+@keyframes mhwKB { from { transform: scale(1.04) translate3d(0,0,0); } to { transform: scale(1.18) translate3d(-2%,-1.5%,0); } }
+.mhw-shade { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,16,28,.88) 0%, rgba(10,16,28,.55) 22%, rgba(10,16,28,.62) 55%, rgba(7,4,13,.94) 100%),
+              radial-gradient(120% 60% at 50% 0%, rgba(255,45,120,.20), transparent 60%); }
+.mhw > div:not(.mhw-bg):not(.mhw-shade):not(.mhw-flash) { position: relative; z-index: 1; }
+.mhw-empty { margin: auto; font-size: calc(var(--u) * 5); }
+
+/* head */
+.mhw-head { display: flex; align-items: center; gap: calc(var(--u) * 2); flex: none; }
+.mhw-logo { height: calc(var(--u) * 8.4); width: auto; flex: none; filter: drop-shadow(0 calc(var(--u)*.4) calc(var(--u)*1) rgba(0,0,0,.5)); }
+.mhw-ep { flex: 1; min-width: 0; }
+.mhw-code { font-family: var(--mn-font-mono); font-weight: 700; font-size: calc(var(--u) * 1.35); letter-spacing: .3em; color: var(--mn-peach); display: flex; align-items: center; gap: calc(var(--u)*1); }
+.mhw-title { flex: none; font-size: calc(var(--u) * 4.2); line-height: 1; margin-top: calc(var(--u) * 1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .08em .1em 0; }
+.mhw-meta { font-size: calc(var(--u) * 1.3); font-weight: 600; color: var(--mn-mist); margin-top: calc(var(--u) * .4); letter-spacing: .04em; }
+.mhw-2x { display: inline-block; font-family: var(--mn-font-display); font-size: calc(var(--u)*1.4); letter-spacing: .04em; line-height: 1; padding: calc(var(--u)*.35) calc(var(--u)*.7);
+  background: var(--mn-tier-legend); color: var(--mn-ink); border-radius: calc(var(--u)*.5); margin-left: calc(var(--u)*.8); }
+.mhw-clock { flex: none; text-align: right; }
+.mhw-live { display: inline-flex; align-items: center; gap: calc(var(--u)*.6); font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.3); letter-spacing: .25em; color: var(--mn-mist); }
+.mhw-live[data-on] { color: #fff; }
+.mhw-live[data-on]::before { content: ""; width: calc(var(--u)*1.1); height: calc(var(--u)*1.1); border-radius: 50%; background: var(--mn-coral); box-shadow: 0 0 0 0 rgba(255,45,120,.7); animation: mhwPulse 1.6s ease-out infinite; }
+@keyframes mhwPulse { 0% { box-shadow: 0 0 0 0 rgba(255,45,120,.7); } 100% { box-shadow: 0 0 0 calc(var(--u)*1.4) rgba(255,45,120,0); } }
+.mhw-time { font-family: var(--mn-font-display); font-size: calc(var(--u)*3.4); line-height: 1; margin-top: calc(var(--u)*1); color: var(--mn-sand); -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
+
+/* progress */
+.mhw-prog { display: flex; align-items: center; gap: calc(var(--u)*1.4); flex: none; }
+.mhw-progword, .mhw-progn { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.25); letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; }
+.mhw-progword { color: var(--mn-peach); }
+.mhw-bar { flex: 1; height: calc(var(--u)*.9); border-radius: 999px; background: rgba(255,244,232,.14); overflow: hidden; }
+.mhw-bar i { display: block; height: 100%; border-radius: 999px; background: var(--mn-grad-nights); transition: width 1.2s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 calc(var(--u)*1.2) rgba(255,122,61,.6); }
+
+/* main: stacked in portrait, two columns on a landscape TV */
+.mhw-main { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 45fr) minmax(0, 55fr); gap: var(--gap); }
+@media (min-aspect-ratio: 1/1) { .mhw-main { grid-template-rows: 1fr; grid-template-columns: 1.05fr 1fr; } .mhw { --cf: 9; --rf: 4.4; --t: 1.6; --chf: 20; } }
+.mhw-now, .mhw-panel { min-height: 0; border-radius: calc(var(--u)*1.6); padding: calc(var(--u)*1.6);
+  background: rgba(12,20,34,.66); border: 1px solid rgba(255,45,120,.32); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; flex-direction: column; gap: calc(var(--u)*1.1); overflow: hidden; }
+.mhw-panel { position: relative; animation: mhwIn .7s cubic-bezier(.2,.8,.2,1) backwards; }
+@keyframes mhwIn { from { opacity: 0; transform: translateY(calc(var(--u)*1.5)); } }
+.mhw-label { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.25*var(--t)); letter-spacing: .3em; text-transform: uppercase; color: var(--mn-peach); display: flex; align-items: center; gap: calc(var(--u)*.6); flex: none; }
+.mhw-label[data-gold] { color: var(--mn-gold); }
+.mhw-wait { margin: auto; font-size: calc(var(--u)*3); color: var(--mn-mist); text-align: center; }
+.mhw-key { margin-left: auto; margin-right: calc(var(--u)*4.5); font-family: var(--mn-font-ui); font-weight: 600; letter-spacing: 0; text-transform: none; font-size: calc(var(--u)*1.05*var(--t)); color: var(--mn-dim); display: inline-flex; align-items: center; gap: calc(var(--u)*.6); white-space: nowrap; }
+.mhw-key i { width: calc(var(--u)*.45); height: calc(var(--u)*1.2); border-radius: 2px; background: var(--mn-coral); }
+.mhw-dots { position: absolute; right: calc(var(--u)*1.6); top: calc(var(--u)*1.7); display: flex; gap: calc(var(--u)*.5); }
+.mhw-dots i { width: calc(var(--u)*.7); height: calc(var(--u)*.7); border-radius: 50%; background: rgba(255,244,232,.25); }
+.mhw-dots i[data-on] { background: var(--mn-coral); }
+
+/* faces */
+.mhw-face.mn-avatar { position: relative; flex: none; border-radius: 50% !important; overflow: hidden; box-shadow: 0 0 0 calc(var(--u)*.22) var(--mn-navy); background: var(--mn-navy); }
+.mhw-face[data-ring="gold"] { box-shadow: 0 0 0 calc(var(--u)*.4) var(--mn-gold), 0 0 calc(var(--u)*3) rgba(255,194,74,.55); }
+.mhw-face[data-dim] { filter: grayscale(.7) brightness(.7); }
+.mhw-face .mn-art, .mhw-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mhw-pairfaces { display: flex; flex: none; }
+.mhw-pairfaces > * + * { margin-left: calc(var(--u) * -1); }
+
+/* on court */
+.mhw-courts { flex: 1; min-height: 0; display: grid; gap: var(--gap); grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
+.mhw-courts[data-n="1"] { grid-template-columns: 1fr; --cf: 7; }
+/* a TV with one or two matches left stacks them and lets the faces fill it */
+@media (min-aspect-ratio: 1/1) {
+  .mhw-courts[data-n="1"], .mhw-courts[data-n="2"] { grid-template-columns: 1fr; --cf: 13; }
+  .mhw-courts[data-n="1"] .mhw-stack span, .mhw-courts[data-n="2"] .mhw-stack span { font-size: calc(var(--u)*1.7*var(--t)); }
+}
+.mhw-courts[data-n="3"] > :last-child { grid-column: 1 / -1; }
+.mhw-court { min-width: 0; min-height: 0; border-radius: calc(var(--u)*1.2); padding: calc(var(--u)*.9) calc(var(--u)*1.1);
+  background: linear-gradient(160deg, rgba(255,45,120,.20), rgba(255,122,61,.08) 60%, rgba(15,27,43,.4)); border: 1px solid rgba(255,244,232,.14);
+  display: flex; flex-direction: column; justify-content: center; gap: calc(var(--u)*.6*var(--t)); }
+.mhw-court[data-hot] { background: linear-gradient(160deg, rgba(255,194,74,.30), rgba(255,122,61,.14) 60%, rgba(15,27,43,.4)); border-color: rgba(255,194,74,.5); }
+.mhw-court[data-done] { background: rgba(15,27,43,.35); }
+.mhw-ctag { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.05*var(--t)); letter-spacing: .22em; text-transform: uppercase; color: var(--mn-sand); display: flex; justify-content: space-between; gap: calc(var(--u)*.6); white-space: nowrap; }
+.mhw-ctag span { color: var(--mn-dim); letter-spacing: .12em; }
+.mhw-vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(var(--u)*.6); }
+.mhw-side { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u)*.5); }
+.mhw-side .mhw-stack { align-items: center; text-align: center; max-width: 100%; }
+.mhw-side .mhw-stack span { font-size: calc(var(--u)*1.3*var(--t)); }
+.mhw-pname { max-width: 100%; font-weight: 800; font-size: calc(var(--u)*1.35); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.mhw-vsword { font-size: calc(var(--u)*2.2*var(--t)); color: var(--mn-coral); }
+.mhw-next { font-size: calc(var(--u)*1.05*var(--t)); line-height: 1.25; color: var(--mn-mist); display: flex; align-items: baseline; gap: calc(var(--u)*.6); min-width: 0; }
+.mhw-next i { font-style: normal; color: var(--mn-coral); font-weight: 800; }
+.mhw-next b { font-family: var(--mn-font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--mn-peach); flex: none; }
+.mhw-next span { min-width: 0; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mhw-cdone { margin: auto; font-size: calc(var(--u)*2); color: var(--mn-dim); }
+
+/* tables + the draw */
+.mhw-tables { flex: 1; min-height: 0; display: grid; gap: var(--gap); grid-template-columns: 1fr 1fr; align-content: start; }
+.mhw-tables[data-n="1"] { grid-template-columns: 1fr; }
+.mhw-group { min-width: 0; display: flex; flex-direction: column; gap: calc(var(--u)*.35); }
+.mhw-ghead { display: grid; grid-template-columns: 1fr calc(var(--u)*2.1*var(--t)) calc(var(--u)*2.7*var(--t)) calc(var(--u)*2.5*var(--t)); align-items: end; padding-bottom: calc(var(--u)*.4); border-bottom: 1px solid var(--mn-line-2); }
+.mhw-ghead .mn-display { line-height: 1.2; font-size: calc(var(--u)*1.7*var(--t)); color: var(--mn-sand); }
+.mhw-ghead em, .mhw-grow em { font-style: normal; text-align: right; font-family: var(--mn-font-mono); font-weight: 700; }
+.mhw-ghead em { font-size: calc(var(--u)*.95*var(--t)); color: var(--mn-dim); letter-spacing: .1em; }
+.mhw-grow { position: relative; display: grid; grid-template-columns: calc(var(--u)*1.4*var(--t)) auto 1fr calc(var(--u)*2.1*var(--t)) calc(var(--u)*2.7*var(--t)) calc(var(--u)*2.5*var(--t)); align-items: center; gap: 0 calc(var(--u)*.7);
+  padding: calc(var(--u)*.22*var(--t)) calc(var(--u)*.3) calc(var(--u)*.22*var(--t)) calc(var(--u)*.6); border-radius: calc(var(--u)*.6); }
+.mhw-tables .mhw-grow:not(:has(.mhw-gpos)) { grid-template-columns: auto 1fr; }
+.mhw-grow[data-q] { background: rgba(255,45,120,.14); }
+.mhw-grow[data-q]::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: calc(var(--u)*.35); border-radius: 2px; background: var(--mn-coral); }
+.mhw-grow em { font-size: calc(var(--u)*1.2*var(--t)); color: var(--mn-mist); }
+.mhw-grow .mhw-gpts { color: #fff; font-size: calc(var(--u)*1.4*var(--t)); }
+.mhw-gpos { font-family: var(--mn-font-display); font-size: calc(var(--u)*1.45*var(--t)); color: var(--mn-peach); text-align: center; }
+.mhw-stack { min-width: 0; display: flex; flex-direction: column; line-height: 1.08; }
+.mhw-stack span { font-weight: 800; font-size: calc(var(--u)*1.12*var(--t)); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+
+/* bracket */
+.mhw-bracket { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u)*.6); }
+.mhw-bracket .mhw-face.mn-avatar { width: calc(var(--u)*2.4*var(--t)) !important; height: calc(var(--u)*2.4*var(--t)) !important; }
+.mhw-bracket [data-final] .mhw-face.mn-avatar { width: calc(var(--u)*3*var(--t)) !important; height: calc(var(--u)*3*var(--t)) !important; }
+.mhw-kr { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1*var(--t)); letter-spacing: .24em; text-transform: uppercase; color: var(--mn-dim); margin-bottom: calc(var(--u)*.4); }
+.mhw-kgrid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u)*.7); }
+.mhw-kmatch { border-radius: calc(var(--u)*.8); background: rgba(15,27,43,.55); border: 1px solid var(--mn-line-2); padding: calc(var(--u)*.3); display: flex; flex-direction: column; gap: calc(var(--u)*.2); min-width: 0; }
+.mhw-kmatch[data-final] { border-color: rgba(255,194,74,.6); background: linear-gradient(160deg, rgba(255,194,74,.22), rgba(15,27,43,.5)); padding: calc(var(--u)*.4); }
+.mhw-kside { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: calc(var(--u)*.6); min-width: 0; padding: calc(var(--u)*.05) calc(var(--u)*.3); border-radius: calc(var(--u)*.5); }
+.mhw-kside[data-win] { background: rgba(255,194,74,.16); }
+.mhw-kside[data-lose] { opacity: .5; }
+.mhw-kname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.15*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.mhw-kmatch[data-final] .mhw-kname { font-size: calc(var(--u)*1.5*var(--t)); }
+.mhw-kside b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.6*var(--t)); color: var(--mn-gold); min-width: calc(var(--u)*1.6); text-align: right; }
+.mhw-kside .mhw-pairfaces > * + * { margin-left: calc(var(--u) * -.6); }
+
+/* tonight's points */
+.mhw-points { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(5, min-content); gap: calc(var(--u)*.6); align-content: start; }
+@media (min-aspect-ratio: 1/1) { .mhw-points { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; gap: calc(var(--u)*.7); } }
+.mhw-prow { display: grid; grid-template-columns: calc(var(--u)*2*var(--t)) auto 1fr auto; align-items: center; gap: calc(var(--u)*1); padding: calc(var(--u)*.25*var(--t)) calc(var(--u)*.8); border-radius: calc(var(--u)*.7); background: rgba(15,27,43,.4); }
+.mhw-prow[data-top] { background: linear-gradient(90deg, rgba(255,194,74,.22), rgba(15,27,43,.35)); }
+.mhw-prow .mhw-gname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.35*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.mhw-prow b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.8*var(--t)); color: var(--mn-gold); }
+
+/* before the night, and the champions */
+.mhw-soon, .mhw-champs { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: calc(var(--u)*1.2); min-height: 0; }
+.mhw-soon .mhw-label, .mhw-champs .mhw-label { align-self: center; }
+.mhw-soonword { flex: none; font-size: calc(var(--u)*10*var(--t)); line-height: 1.15; color: var(--mn-sand); max-width: 100%; white-space: nowrap; overflow: hidden; }
+.mhw-soonsub { font-size: calc(var(--u)*1.5*var(--t)); font-weight: 700; color: var(--mn-mist); }
+.mhw-champfaces { display: flex; gap: calc(var(--u)*1.6); }
+.mhw[data-stage="done"] .mhw-main { grid-template-rows: minmax(0, 37fr) minmax(0, 63fr); }
+@media (min-aspect-ratio: 1/1) { .mhw[data-stage="done"] .mhw-main { grid-template-rows: 1fr; } }
+.mhw-champfaces .mhw-face { animation: mhwRise .9s cubic-bezier(.2,.9,.3,1.2) backwards; }
+.mhw-champfaces .mhw-face + .mhw-face { animation-delay: .12s; }
+@keyframes mhwRise { from { transform: scale(.6); opacity: 0; } }
+.mhw-champname { flex: none; line-height: 1.15; font-size: calc(var(--u)*4.8); color: var(--mn-gold); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .1em .12em; }
+.mhw-champscore { font-size: calc(var(--u)*1.6); font-weight: 600; color: var(--mn-mist); }
+.mhw-champscore b { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-sand); font-size: 1.3em; margin-right: .3em; }
+
+/* foot: the ticker */
+.mhw-foot { flex: none; display: flex; align-items: center; gap: calc(var(--u)*1.4); height: calc(var(--u)*4); border-radius: calc(var(--u)*1); background: rgba(7,4,13,.7); border: 1px solid var(--mn-line-2); padding: 0 calc(var(--u)*1.2); overflow: hidden; }
+.mhw-tick { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.mhw-tickrun { display: inline-flex; animation: mhwTick 40s linear infinite; }
+.mhw-tickrun > span { display: inline-flex; }
+@keyframes mhwTick { to { transform: translateX(-50%); } }
+.mhw-tick em { font-style: normal; font-size: calc(var(--u)*1.35); font-weight: 700; color: var(--mn-mist); padding-right: calc(var(--u)*3.2); text-transform: uppercase; letter-spacing: .02em; }
+.mhw-tick em b { font-family: var(--mn-font-mono); color: var(--mn-peach); letter-spacing: .14em; margin-right: .5em; }
+.mhw-tick em strong { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-gold); margin: 0 .35em; }
+.mhw-tickidle { font-size: calc(var(--u)*1.3); color: var(--mn-dim); font-weight: 600; }
+.mhw-url { flex: none; font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.2); letter-spacing: .14em; color: var(--mn-sand); }
+
+/* THE TAKEOVER — a score just locked */
+.mhw-flash { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  gap: calc(var(--u)*1.6); padding: var(--pad); animation: mhwFlashIn .45s ease-out backwards; overflow: hidden; }
+@keyframes mhwFlashIn { from { opacity: 0; } }
+.mhw-flashbg { position: absolute; inset: 0; z-index: -1; background: radial-gradient(70% 45% at 50% 42%, rgba(255,45,120,.55), rgba(15,27,43,0) 70%), linear-gradient(180deg, #0D1726, #07040D);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.mhw-flash[data-final] .mhw-flashbg { background: radial-gradient(70% 45% at 50% 42%, rgba(255,194,74,.6), rgba(255,122,61,.25) 45%, rgba(15,27,43,0) 75%), linear-gradient(180deg, #0D1726, #07040D); }
+.mhw-shards { position: absolute; left: 50%; top: 42%; width: 0; height: 0; z-index: -1; }
+.mhw-shards i { position: absolute; left: 0; top: 0; width: calc(var(--u)*.6); height: calc(var(--u)*7); margin-left: calc(var(--u)*-.3); border-radius: 999px;
+  background: linear-gradient(180deg, var(--mn-gold), var(--mn-coral)); transform-origin: 50% 0; transform: rotate(var(--a)) translateY(calc(var(--u)*8)) scaleY(.2); opacity: 0;
+  animation: mhwShard 1.3s cubic-bezier(.15,.8,.25,1) var(--d) forwards; }
+@keyframes mhwShard { 0% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--u)*6)) scaleY(.2); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--u)*32)) scaleY(1); } }
+.mhw-fkick { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.8); letter-spacing: .32em; text-transform: uppercase; color: var(--mn-peach);
+  padding: calc(var(--u)*.6) calc(var(--u)*1.4); border: 1px solid rgba(255,179,107,.5); border-radius: 999px; background: rgba(7,4,13,.5); animation: mhwDrop .5s .1s cubic-bezier(.2,.9,.3,1.2) backwards; }
+.mhw-flash[data-final] .mhw-fkick { color: var(--mn-gold); border-color: rgba(255,194,74,.6); }
+@keyframes mhwDrop { from { transform: translateY(calc(var(--u)*-3)); opacity: 0; } }
+.mhw-fwin { animation: mhwRise .8s .15s cubic-bezier(.2,.9,.3,1.25) backwards; }
+.mhw-fwin .mhw-pairfaces > * + * { margin-left: calc(var(--u)*-2); }
+.mhw-fname { flex: none; font-size: calc(var(--u)*6); color: #fff; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .1em .12em; animation: mhwDrop .5s .3s ease-out backwards; }
+.mhw-fscore { font-size: calc(var(--u)*15); line-height: .9; color: var(--mn-gold); animation: mhwSlam .55s .4s cubic-bezier(.2,1.4,.4,1) backwards; display: flex; align-items: center; gap: .08em; }
+.mhw-fscore span { color: var(--mn-sand); font-size: .6em; }
+@keyframes mhwSlam { from { transform: scale(2.2); opacity: 0; } 60% { opacity: 1; } }
+.mhw-fwhat { font-family: var(--mn-font-display); font-size: calc(var(--u)*3); text-transform: lowercase; color: var(--mn-sand); background: var(--mn-grad-primary); color: var(--mn-ink);
+  padding: calc(var(--u)*.5) calc(var(--u)*1.6) calc(var(--u)*.7); border-radius: calc(var(--u)*.8); animation: mhwDrop .5s .7s ease-out backwards; }
+.mhw-flash[data-final] .mhw-fwhat { background: var(--mn-tier-legend); }
+.mhw-flose { display: flex; align-items: center; gap: calc(var(--u)*1); font-size: calc(var(--u)*1.6); font-weight: 700; color: var(--mn-mist); text-transform: uppercase; animation: mhwDrop .5s .9s ease-out backwards; }
+.mhw-f2x { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.3); letter-spacing: .2em; text-transform: uppercase; color: var(--mn-gold); }
+@media (prefers-reduced-motion: reduce) { .mhw-kb, .mhw-tickrun, .mhw-shards { animation: none !important; } .mhw-shards { display: none; } }
 
 </style>
 <style id="heist-classic">
@@ -16810,6 +17006,626 @@ function MhCheckIn({
     "aria-hidden": "true"
   }, here[p.id] ? "✓" : ""))))));
 }
+const MHW_POLL = 10;
+const MHW_ROTATE = 16;
+const MHW_FLASH = 8;
+const mhwRound = {
+  qf: "Quarter-final",
+  sf: "Semi-final",
+  final: "The final"
+};
+const mhwPair = t => t ? t.players.map(p => p.first || mhFirstOf(p.name)).join(" & ") : "—";
+function MhwFace({
+  p,
+  size,
+  ring,
+  dim
+}) {
+  return React.createElement("div", {
+    className: "mn-avatar mhw-face",
+    "data-ring": ring || undefined,
+    "data-dim": dim ? "" : undefined,
+    style: {
+      width: `calc(var(--u) * ${size})`,
+      height: `calc(var(--u) * ${size})`,
+      fontSize: `calc(var(--u) * ${size} * .14)`
+    }
+  }, React.createElement(MhArt, {
+    src: p && p.photo,
+    name: p && p.name,
+    eager: true
+  }));
+}
+const MhwStack = ({
+  t
+}) => React.createElement("span", {
+  className: "mhw-stack"
+}, (t ? t.players : []).map((p, i) => React.createElement("span", {
+  key: i,
+  className: "mh-fitline"
+}, p.first || mhFirstOf(p.name))));
+const MhwPairFaces = ({
+  t,
+  size,
+  ring,
+  dim
+}) => React.createElement("div", {
+  className: "mhw-pairfaces"
+}, (t ? t.players : [null, null]).map((p, i) => React.createElement(MhwFace, {
+  key: i,
+  p: p,
+  size: size,
+  ring: ring,
+  dim: dim
+})));
+function mhwDecided(N) {
+  const out = [];
+  Object.entries(N.groups || {}).forEach(([g, G]) => G.matches.forEach(m => {
+    if (m.winner) out.push({
+      key: "g:" + m.id,
+      kind: "group",
+      group: g,
+      m,
+      label: "Group " + g
+    });
+  }));
+  const K = N.knockout;
+  if (K) [...K.qf, ...K.sf, K.final].filter(Boolean).forEach(m => {
+    if (m.winner) out.push({
+      key: `k:${m.round}:${m.n}`,
+      kind: m.round,
+      m,
+      label: mhwRound[m.round] + (m.round !== "final" ? " " + m.n : "")
+    });
+  });
+  return out;
+}
+function mhwWhat(N, r) {
+  const w = r.m.winner === "a" ? r.m.ta : r.m.tb;
+  if (r.kind === "final") return "tonight's champions";
+  if (r.kind === "sf") return "into the final";
+  if (r.kind === "qf") return "into the semi-finals";
+  const G = (N.groups || {})[r.group];
+  const row = G && w && G.standings.find(x => x.id === w.id);
+  if (!row) return "";
+  if (row.pos === 1) return G.done ? `win Group ${r.group}` : `top of Group ${r.group}`;
+  return `${["", "1st", "2nd", "3rd", "4th", "5th"][row.pos] || row.pos + "th"} in Group ${r.group}`;
+}
+function mhwFit() {
+  for (const el of document.querySelectorAll(".mhw-fit")) {
+    el.style.fontSize = "";
+    if (!el.clientWidth) continue;
+    el.style.textOverflow = "clip";
+    const r = document.createRange();
+    r.selectNodeContents(el);
+    const w = r.getBoundingClientRect().width,
+      room = el.clientWidth - 2;
+    el.style.textOverflow = "";
+    if (w > room) el.style.fontSize = parseFloat(getComputedStyle(el).fontSize) * room / w * .98 + "px";
+  }
+}
+function MhWall({
+  state,
+  leaderboard,
+  refreshNow
+}) {
+  const [portraits, setPortraits] = React.useState({});
+  const [now, setNow] = React.useState(() => new Date());
+  const [panel, setPanel] = React.useState(0);
+  const [flash, setFlash] = React.useState(null);
+  const queue = React.useRef([]);
+  const seen = React.useRef(null);
+  React.useEffect(() => {
+    const pull = () => {
+      try {
+        refreshNow();
+      } catch (e) {}
+    };
+    const t = setInterval(pull, MHW_POLL * 1000);
+    addEventListener("mh-wall-poll", pull);
+    return () => {
+      clearInterval(t);
+      removeEventListener("mh-wall-poll", pull);
+    };
+  }, [refreshNow]);
+  React.useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(t);
+  }, []);
+  React.useEffect(() => {
+    let live = true;
+    fetch(MH_HOST_PHOTOS).then(r => r.json()).then(j => {
+      if (live && j.ok) setPortraits(Object.fromEntries(j.players.filter(p => p.heist).map(p => [p.id, p.heist])));
+    }).catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, []);
+  React.useLayoutEffect(mhwFit);
+  React.useEffect(() => {
+    const f = () => requestAnimationFrame(mhwFit);
+    addEventListener("resize", f);
+    document.fonts && document.fonts.addEventListener("loadingdone", f);
+    document.fonts && document.fonts.ready.then(f);
+    return () => {
+      removeEventListener("resize", f);
+      document.fonts && document.fonts.removeEventListener("loadingdone", f);
+    };
+  }, []);
+  React.useEffect(() => {
+    document.documentElement.classList.add("mhw-on");
+    return () => document.documentElement.classList.remove("mhw-on");
+  }, []);
+  const D = React.useMemo(() => heistData(state, {
+    leaderboard,
+    portraits,
+    artBase: "assets/art/"
+  }), [state, leaderboard, portraits]);
+  const sess = typeof wallSession === "function" ? wallSession(state) : null;
+  const sv = sess && D.sessions.find(x => x.sid === sess.id) || D.sessions.find(x => x.state === "live") || D.sessions.find(x => x.state === "soon") || D.sessions[D.sessions.length - 1];
+  const N = sv && D.nights[sv.no] || {};
+  const groups = Object.entries(N.groups || {});
+  const K = N.knockout;
+  const decided = sv ? mhwDecided(N) : [];
+  React.useEffect(() => {
+    const keys = new Set(decided.map(r => r.key));
+    if (seen.current && seen.current.sid === (sv && sv.sid)) {
+      const fresh = decided.filter(r => !seen.current.keys.has(r.key));
+      if (fresh.length) {
+        queue.current.push(...fresh.map(r => ({
+          ...r,
+          what: mhwWhat(N, r)
+        })));
+        if (!flash) setFlash(queue.current.shift());
+      }
+    }
+    seen.current = {
+      sid: sv && sv.sid,
+      keys
+    };
+  }, [state]);
+  React.useEffect(() => {
+    if (!flash) return;
+    const t = setTimeout(() => setFlash(queue.current.shift() || null), (flash.kind === "final" ? 1.5 : 1) * MHW_FLASH * 1000);
+    return () => clearTimeout(t);
+  }, [flash]);
+  const panels = [];
+  if (sv && sv.state === "soon") panels.push("draw");
+  if (groups.length && N.started) panels.push("tables");
+  if (K) panels.push("bracket");
+  if (N.started) panels.push("points");
+  if (!panels.length) panels.push("draw");
+  React.useEffect(() => {
+    const step = () => setPanel(p => p + 1);
+    const t = setInterval(step, MHW_ROTATE * 1000);
+    addEventListener("mh-wall-next", step);
+    return () => {
+      clearInterval(t);
+      removeEventListener("mh-wall-next", step);
+    };
+  }, []);
+  const which = panels[panel % panels.length];
+  if (!sv) return React.createElement("div", {
+    className: "mhw"
+  }, React.createElement("div", {
+    className: "mhw-empty mn-display"
+  }, "no night scheduled"));
+  const groupOpen = groups.map(([g, G]) => {
+    const open = G.matches.filter(m => !m.winner);
+    return {
+      g,
+      now: open[0],
+      next: open[1],
+      left: open.length,
+      total: G.matches.length
+    };
+  });
+  const koOpen = K ? [...K.qf, ...K.sf, K.final].filter(m => m && !m.winner && m.ta && m.tb) : [];
+  const stage = !N.started ? "soon" : N.champion ? "done" : K ? "ko" : "groups";
+  const all = [...groups.flatMap(([, G]) => G.matches), ...(K ? [...K.qf, ...K.sf, K.final].filter(Boolean) : [])];
+  const played = all.filter(m => m.winner).length;
+  const total = Math.max(all.length, played) || 1;
+  const stageWord = {
+    soon: "Tonight",
+    groups: "Group stage",
+    ko: K && K.final && K.final.ta && K.final.tb ? "The final" : K && K.sf.some(m => m.ta) ? "Semi-finals" : "Knockouts",
+    done: "Full time"
+  }[stage];
+  const clock = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const ticker = decided.slice().reverse().slice(0, 10);
+  return React.createElement("div", {
+    className: "mhw",
+    "data-stage": stage,
+    "data-flash": flash ? "" : undefined
+  }, React.createElement("div", {
+    className: "mhw-bg",
+    "aria-hidden": "true"
+  }, React.createElement("div", {
+    className: "mhw-kb"
+  }, React.createElement(MhArt, {
+    src: sv.art,
+    pos: sv.artPos || "center",
+    eager: true
+  }))), React.createElement("div", {
+    className: "mhw-shade",
+    "aria-hidden": "true"
+  }), React.createElement("div", {
+    className: "mhw-head"
+  }, React.createElement("img", {
+    className: "mhw-logo",
+    src: mhLogoSrc() + ".webp",
+    alt: "Urban Playground Muscat Heist"
+  }), React.createElement("div", {
+    className: "mhw-ep"
+  }, React.createElement("div", {
+    className: "mhw-code"
+  }, sv.code, sv.doublePoints && React.createElement("span", {
+    className: "mhw-2x"
+  }, "2X")), React.createElement("div", {
+    className: "mn-display mhw-title mhw-fit"
+  }, sv.title), React.createElement("div", {
+    className: "mhw-meta"
+  }, mhDay(sv.date), " \xB7 ", MH.venue || "Al Hail North")), React.createElement("div", {
+    className: "mhw-clock"
+  }, React.createElement("div", {
+    className: "mhw-live",
+    "data-on": stage === "groups" || stage === "ko" ? "" : undefined
+  }, stage === "groups" || stage === "ko" ? "LIVE" : stage === "done" ? "FINAL" : MH.time || ""), React.createElement("div", {
+    className: "mhw-time"
+  }, clock))), React.createElement("div", {
+    className: "mhw-prog"
+  }, React.createElement("div", {
+    className: "mhw-progword"
+  }, stageWord), React.createElement("div", {
+    className: "mhw-bar"
+  }, React.createElement("i", {
+    style: {
+      width: (stage === "soon" ? 0 : 100 * played / total) + "%"
+    }
+  })), React.createElement("div", {
+    className: "mhw-progn"
+  }, stage === "soon" ? `${(N.teams || []).length} pairs in` : `${played} / ${total}`)), React.createElement("div", {
+    className: "mhw-main"
+  }, React.createElement("div", {
+    className: "mhw-now"
+  }, stage === "done" && N.champion ? React.createElement(MhwChampions, {
+    c: N.champion,
+    sv: sv
+  }) : stage === "soon" ? React.createElement(MhwSoon, {
+    sv: sv,
+    N: N
+  }) : React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mhw-label"
+  }, stage === "ko" ? "On court · knockouts" : "On court now"), React.createElement("div", {
+    className: "mhw-courts",
+    "data-n": stage === "ko" ? Math.min(koOpen.length, 4) : groupOpen.length
+  }, stage === "ko" ? koOpen.slice(0, 4).map((m, i) => React.createElement(MhwCourt, {
+    key: i,
+    tag: mhwRound[m.round] + (m.round !== "final" ? " " + m.n : ""),
+    m: m,
+    hot: m.round === "final"
+  })) : groupOpen.map(o => React.createElement(MhwCourt, {
+    key: o.g,
+    tag: `Group ${o.g}${o.now && o.now.court ? " · Court " + o.now.court : ""}`,
+    m: o.now,
+    next: o.next,
+    done: !o.now,
+    left: o.left
+  })), stage === "ko" && !koOpen.length && React.createElement("div", {
+    className: "mhw-wait mn-display"
+  }, "next round being drawn")))), React.createElement("div", {
+    className: "mhw-panel",
+    key: which
+  }, which === "tables" && React.createElement(MhwTables, {
+    groups: groups
+  }), which === "bracket" && React.createElement(MhwBracket, {
+    K: K
+  }), which === "points" && React.createElement(MhwPoints, {
+    list: N.tonight ? N.tonight().slice(0, 10) : [],
+    double: sv.doublePoints
+  }), which === "draw" && React.createElement(MhwDraw, {
+    N: N
+  }), panels.length > 1 && React.createElement("div", {
+    className: "mhw-dots"
+  }, panels.map((p, i) => React.createElement("i", {
+    key: p,
+    "data-on": p === which ? "" : undefined
+  }))))), React.createElement("div", {
+    className: "mhw-foot"
+  }, React.createElement("div", {
+    className: "mhw-tick"
+  }, ticker.length ? React.createElement("div", {
+    className: "mhw-tickrun",
+    style: {
+      animationDuration: Math.max(24, ticker.length * 7) + "s"
+    }
+  }, [0, 1].map(k => React.createElement("span", {
+    key: k,
+    "aria-hidden": k ? "true" : undefined
+  }, ticker.map(r => {
+    const w = r.m.winner === "a";
+    const sc = w ? `${r.m.ga}–${r.m.gb}` : `${r.m.gb}–${r.m.ga}`;
+    return React.createElement("em", {
+      key: r.key
+    }, React.createElement("b", null, r.label), " ", mhwPair(w ? r.m.ta : r.m.tb), " ", React.createElement("strong", null, sc), " ", mhwPair(w ? r.m.tb : r.m.ta));
+  })))) : React.createElement("div", {
+    className: "mhw-tickidle"
+  }, "Results land here the moment the scorer locks them")), React.createElement("div", {
+    className: "mhw-url"
+  }, "heist.urbanpadel.om")), flash && React.createElement(MhwFlash, {
+    key: flash.key,
+    r: flash,
+    N: N,
+    sv: sv
+  }));
+}
+function MhwCourt({
+  tag,
+  m,
+  next,
+  done,
+  left,
+  hot
+}) {
+  if (done) return React.createElement("div", {
+    className: "mhw-court",
+    "data-done": ""
+  }, React.createElement("div", {
+    className: "mhw-ctag"
+  }, tag), React.createElement("div", {
+    className: "mhw-cdone mn-display"
+  }, "group played"));
+  return React.createElement("div", {
+    className: "mhw-court",
+    "data-hot": hot ? "" : undefined
+  }, React.createElement("div", {
+    className: "mhw-ctag"
+  }, tag, left > 1 && React.createElement("span", null, left, " to play")), React.createElement("div", {
+    className: "mhw-vs"
+  }, React.createElement("div", {
+    className: "mhw-side"
+  }, React.createElement(MhwPairFaces, {
+    t: m.ta,
+    size: "var(--cf)"
+  }), React.createElement(MhwStack, {
+    t: m.ta
+  })), React.createElement("div", {
+    className: "mhw-vsword mn-display"
+  }, "vs"), React.createElement("div", {
+    className: "mhw-side"
+  }, React.createElement(MhwPairFaces, {
+    t: m.tb,
+    size: "var(--cf)"
+  }), React.createElement(MhwStack, {
+    t: m.tb
+  }))), next && React.createElement("div", {
+    className: "mhw-next"
+  }, React.createElement("b", null, "Next"), " ", React.createElement("span", null, mhwPair(next.ta), " ", React.createElement("i", null, "v"), " ", mhwPair(next.tb))));
+}
+function MhwTables({
+  groups
+}) {
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mhw-label"
+  }, "The tables", React.createElement("span", {
+    className: "mhw-key"
+  }, React.createElement("i", null), " qualifying right now")), React.createElement("div", {
+    className: "mhw-tables",
+    "data-n": groups.length
+  }, groups.map(([g, G]) => React.createElement("div", {
+    className: "mhw-group",
+    key: g
+  }, React.createElement("div", {
+    className: "mhw-ghead"
+  }, React.createElement("span", {
+    className: "mn-display"
+  }, "group ", g.toLowerCase()), React.createElement("em", null, "W"), React.createElement("em", null, "GD"), React.createElement("em", null, "PTS")), G.standings.map(r => React.createElement("div", {
+    className: "mhw-grow",
+    key: r.id,
+    "data-q": r.q ? "" : undefined
+  }, React.createElement("span", {
+    className: "mhw-gpos"
+  }, r.pos), React.createElement(MhwPairFaces, {
+    t: r,
+    size: "var(--rf)"
+  }), React.createElement(MhwStack, {
+    t: r
+  }), React.createElement("em", null, r.w), React.createElement("em", null, r.gd > 0 ? "+" + r.gd : r.gd), React.createElement("em", {
+    className: "mhw-gpts"
+  }, r.pts)))))));
+}
+function MhwBracket({
+  K
+}) {
+  const row = (m, i) => React.createElement("div", {
+    className: "mhw-kmatch",
+    key: i,
+    "data-final": m.round === "final" ? "" : undefined
+  }, [["a", m.ta, m.ga, m.sa], ["b", m.tb, m.gb, m.sb]].map(([k, t, g, s]) => React.createElement("div", {
+    className: "mhw-kside",
+    key: k,
+    "data-win": m.winner === k ? "" : undefined,
+    "data-lose": m.winner && m.winner !== k ? "" : undefined
+  }, React.createElement(MhwPairFaces, {
+    t: t,
+    size: m.round === "final" ? "calc(var(--rf) * 1.3)" : "var(--rf)"
+  }), React.createElement("span", {
+    className: "mhw-kname mh-fitline"
+  }, t ? mhwPair(t) : s || "—"), React.createElement("b", null, g != null ? g : ""))));
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mhw-label"
+  }, "The knockout"), React.createElement("div", {
+    className: "mhw-bracket"
+  }, K.qf.length > 0 && React.createElement("div", {
+    className: "mhw-kround"
+  }, React.createElement("div", {
+    className: "mhw-kr"
+  }, "Quarter-finals"), React.createElement("div", {
+    className: "mhw-kgrid"
+  }, K.qf.map(row))), K.sf.length > 0 && React.createElement("div", {
+    className: "mhw-kround"
+  }, React.createElement("div", {
+    className: "mhw-kr"
+  }, "Semi-finals"), React.createElement("div", {
+    className: "mhw-kgrid",
+    "data-two": ""
+  }, K.sf.map(row))), K.final && React.createElement("div", {
+    className: "mhw-kround"
+  }, React.createElement("div", {
+    className: "mhw-kr"
+  }, "The final"), row(K.final, 0))));
+}
+function MhwPoints({
+  list,
+  double
+}) {
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mhw-label"
+  }, "Tonight's points", double && React.createElement("span", {
+    className: "mhw-2x"
+  }, "2X"), React.createElement("span", {
+    className: "mhw-key"
+  }, "streak bonus not included")), React.createElement("div", {
+    className: "mhw-points"
+  }, list.map((p, i) => React.createElement("div", {
+    className: "mhw-prow",
+    key: p.id,
+    "data-top": i < 3 ? "" : undefined
+  }, React.createElement("span", {
+    className: "mhw-gpos"
+  }, list.findIndex(x => x.points === p.points) + 1), React.createElement(MhwFace, {
+    p: p,
+    size: "var(--rf)"
+  }), React.createElement("span", {
+    className: "mhw-gname mh-fitline"
+  }, p.name), React.createElement("b", null, "+", p.points))), !list.length && React.createElement("div", {
+    className: "mhw-wait mn-display"
+  }, "first points on the way")));
+}
+function MhwDraw({
+  N
+}) {
+  const teams = N.teams || [];
+  const byG = {};
+  teams.forEach(t => {
+    (byG[t.group || "—"] = byG[t.group || "—"] || []).push(t);
+  });
+  const gs = Object.entries(byG);
+  return React.createElement(React.Fragment, null, React.createElement("div", {
+    className: "mhw-label"
+  }, gs.length > 1 ? "The draw" : "The crew tonight"), React.createElement("div", {
+    className: "mhw-tables",
+    "data-n": gs.length
+  }, gs.map(([g, ts]) => React.createElement("div", {
+    className: "mhw-group",
+    key: g
+  }, g !== "—" && React.createElement("div", {
+    className: "mhw-ghead"
+  }, React.createElement("span", {
+    className: "mn-display"
+  }, "group ", g.toLowerCase())), ts.map(t => React.createElement("div", {
+    className: "mhw-grow",
+    key: t.id
+  }, React.createElement(MhwPairFaces, {
+    t: t,
+    size: "var(--rf)"
+  }), React.createElement(MhwStack, {
+    t: t
+  }))))), !teams.length && React.createElement("div", {
+    className: "mhw-wait mn-display"
+  }, "sign-ups open")));
+}
+function MhwSoon({
+  sv,
+  N
+}) {
+  return React.createElement("div", {
+    className: "mhw-soon"
+  }, React.createElement("div", {
+    className: "mhw-label"
+  }, "Tonight's job"), React.createElement("div", {
+    className: "mn-display mhw-soonword mhw-fit"
+  }, MH.time || "17:30"), React.createElement("div", {
+    className: "mhw-soonsub"
+  }, "first serve \xB7 ", (N.teams || []).length, " pairs signed in", sv.doublePoints ? " · every point counts double" : ""));
+}
+function MhwChampions({
+  c,
+  sv
+}) {
+  return React.createElement("div", {
+    className: "mhw-champs"
+  }, React.createElement("div", {
+    className: "mhw-label",
+    "data-gold": ""
+  }, sv.finale ? "The big score" : "Tonight's champions"), React.createElement("div", {
+    className: "mhw-champfaces"
+  }, c.team.players.map((p, i) => React.createElement(MhwFace, {
+    key: i,
+    p: p,
+    size: "var(--chf)",
+    ring: "gold"
+  }))), React.createElement("div", {
+    className: "mn-display mhw-champname mhw-fit"
+  }, mhwPair(c.team)), React.createElement("div", {
+    className: "mhw-champscore"
+  }, React.createElement("b", null, c.score.replace("-", "–")), " in the final against ", mhwPair(c.beat)));
+}
+function MhwFlash({
+  r,
+  N,
+  sv
+}) {
+  React.useLayoutEffect(mhwFit, []);
+  const aw = r.m.winner === "a";
+  const w = aw ? r.m.ta : r.m.tb,
+    l = aw ? r.m.tb : r.m.ta;
+  const sw = aw ? r.m.ga : r.m.gb,
+    sl = aw ? r.m.gb : r.m.ga;
+  const final = r.kind === "final";
+  return React.createElement("div", {
+    className: "mhw-flash",
+    "data-final": final ? "" : undefined,
+    role: "status",
+    "aria-live": "assertive"
+  }, React.createElement("div", {
+    className: "mhw-flashbg",
+    "aria-hidden": "true"
+  }), React.createElement("div", {
+    className: "mhw-shards",
+    "aria-hidden": "true"
+  }, Array.from({
+    length: 18
+  }, (_, i) => React.createElement("i", {
+    key: i,
+    style: {
+      "--a": i * 20 + "deg",
+      "--d": i % 3 * .08 + "s"
+    }
+  }))), React.createElement("div", {
+    className: "mhw-fkick"
+  }, final ? sv.finale ? "The big score" : "Champions" : "Result · " + r.label), React.createElement("div", {
+    className: "mhw-fwin"
+  }, React.createElement(MhwPairFaces, {
+    t: w,
+    size: final ? 19 : 15,
+    ring: "gold"
+  })), React.createElement("div", {
+    className: "mn-display mhw-fname mhw-fit"
+  }, mhwPair(w)), React.createElement("div", {
+    className: "mhw-fscore mn-display"
+  }, sw, React.createElement("span", null, "\u2013"), sl), r.what && React.createElement("div", {
+    className: "mhw-fwhat"
+  }, r.what), React.createElement("div", {
+    className: "mhw-flose"
+  }, React.createElement(MhwPairFaces, {
+    t: l,
+    size: 5,
+    dim: true
+  }), React.createElement("span", null, final ? "runners-up · " : "beat ", mhwPair(l))), sv.doublePoints && React.createElement("div", {
+    className: "mhw-f2x"
+  }, "2X night \xB7 points count double"));
+}
 const MH_HOST_PHOTOS = "/api/roster";
 const MH_HOST_LOOT = "/api/loot";
 const mhFirstOf = n => (n || "").split(/\s+/)[0];
@@ -17604,7 +18420,7 @@ function HeistShell(props) {
           mid: m.id,
           prev: prev ? JSON.parse(JSON.stringify(prev)) : null,
           at: Date.now(),
-          label: `${t1}–${t2} locked`,
+          label: `${t1}–${t2} locked · on the big screen`,
           next: nm ? `${nameOf(nm.team1Id)} v ${nameOf(nm.team2Id)}${nm.court ? " · Court " + nm.court : ""}` : null
         });
         go("back");
@@ -17935,10 +18751,10 @@ function App() {
   if (isPhotosMode) return React.createElement(PublicPhotosPage, {
     state: state
   });
-  if (tvMode()) return React.createElement(WallPage, {
+  if (tvMode()) return React.createElement(MhWall, {
     state: state,
-    refreshNow: refreshNow,
-    lastSync: lastSync
+    leaderboard: leaderboard,
+    refreshNow: refreshNow
   });
   if (!classic) return React.createElement(React.Fragment, null, React.createElement(HeistShell, {
     state: state,

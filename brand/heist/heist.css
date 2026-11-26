@@ -912,3 +912,199 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 /* no animated sheen: story exports capture pseudo-elements mid-phase and the
    render-vs-export compare read it as a lost layer (7.8 per channel) */
 
+
+/* ═══ THE WALL (?tv=) — heist-wall.jsx ═════════════════════════════════════
+   One unit, --u = min(1vh, 1.78vw): a 1080x1920 panel is 100u tall and 56u
+   wide, a 1920x1080 TV 100u tall and 177u wide (two columns). Nothing here
+   carries a pixel size, so a 4K portrait display is the same page, larger.
+   Divs only: the inherited skin styles header/main/nav by tag. */
+html.mhw-on, html.mhw-on body { overflow: hidden !important; background: var(--mn-navy) !important; }
+.mhw { --u: min(1vh, 1.78vw); --pad: calc(var(--u) * 2.4); --gap: calc(var(--u) * 1.4); --cf: 4.6; --rf: 2.7; --t: 1; --chf: 11;
+  position: fixed; inset: 0; z-index: 100; overflow: hidden; color: var(--mn-sand); background: var(--mn-navy);
+  font-family: var(--mn-font-ui); display: flex; flex-direction: column; padding: var(--pad); gap: var(--gap); }
+.mhw * { box-sizing: border-box; }
+.mhw-bg { position: absolute; inset: 0; overflow: hidden; z-index: 0; }
+.mhw-kb { position: absolute; inset: 0; animation: mhwKB 44s ease-in-out infinite alternate; transform-origin: 50% 40%; }
+.mhw-kb .mn-art, .mhw-kb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: var(--mn-art-filter); }
+@keyframes mhwKB { from { transform: scale(1.04) translate3d(0,0,0); } to { transform: scale(1.18) translate3d(-2%,-1.5%,0); } }
+.mhw-shade { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(10,16,28,.88) 0%, rgba(10,16,28,.55) 22%, rgba(10,16,28,.62) 55%, rgba(7,4,13,.94) 100%),
+              radial-gradient(120% 60% at 50% 0%, rgba(255,45,120,.20), transparent 60%); }
+.mhw > div:not(.mhw-bg):not(.mhw-shade):not(.mhw-flash) { position: relative; z-index: 1; }
+.mhw-empty { margin: auto; font-size: calc(var(--u) * 5); }
+
+/* head */
+.mhw-head { display: flex; align-items: center; gap: calc(var(--u) * 2); flex: none; }
+.mhw-logo { height: calc(var(--u) * 8.4); width: auto; flex: none; filter: drop-shadow(0 calc(var(--u)*.4) calc(var(--u)*1) rgba(0,0,0,.5)); }
+.mhw-ep { flex: 1; min-width: 0; }
+.mhw-code { font-family: var(--mn-font-mono); font-weight: 700; font-size: calc(var(--u) * 1.35); letter-spacing: .3em; color: var(--mn-peach); display: flex; align-items: center; gap: calc(var(--u)*1); }
+.mhw-title { flex: none; font-size: calc(var(--u) * 4.2); line-height: 1; margin-top: calc(var(--u) * 1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .08em .1em 0; }
+.mhw-meta { font-size: calc(var(--u) * 1.3); font-weight: 600; color: var(--mn-mist); margin-top: calc(var(--u) * .4); letter-spacing: .04em; }
+.mhw-2x { display: inline-block; font-family: var(--mn-font-display); font-size: calc(var(--u)*1.4); letter-spacing: .04em; line-height: 1; padding: calc(var(--u)*.35) calc(var(--u)*.7);
+  background: var(--mn-tier-legend); color: var(--mn-ink); border-radius: calc(var(--u)*.5); margin-left: calc(var(--u)*.8); }
+.mhw-clock { flex: none; text-align: right; }
+.mhw-live { display: inline-flex; align-items: center; gap: calc(var(--u)*.6); font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.3); letter-spacing: .25em; color: var(--mn-mist); }
+.mhw-live[data-on] { color: #fff; }
+.mhw-live[data-on]::before { content: ""; width: calc(var(--u)*1.1); height: calc(var(--u)*1.1); border-radius: 50%; background: var(--mn-coral); box-shadow: 0 0 0 0 rgba(255,45,120,.7); animation: mhwPulse 1.6s ease-out infinite; }
+@keyframes mhwPulse { 0% { box-shadow: 0 0 0 0 rgba(255,45,120,.7); } 100% { box-shadow: 0 0 0 calc(var(--u)*1.4) rgba(255,45,120,0); } }
+.mhw-time { font-family: var(--mn-font-display); font-size: calc(var(--u)*3.4); line-height: 1; margin-top: calc(var(--u)*1); color: var(--mn-sand); -webkit-text-stroke: var(--mn-ink-stroke) var(--mn-ink); paint-order: stroke fill; text-shadow: var(--mn-ink-drop); }
+
+/* progress */
+.mhw-prog { display: flex; align-items: center; gap: calc(var(--u)*1.4); flex: none; }
+.mhw-progword, .mhw-progn { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.25); letter-spacing: .22em; text-transform: uppercase; white-space: nowrap; }
+.mhw-progword { color: var(--mn-peach); }
+.mhw-bar { flex: 1; height: calc(var(--u)*.9); border-radius: 999px; background: rgba(255,244,232,.14); overflow: hidden; }
+.mhw-bar i { display: block; height: 100%; border-radius: 999px; background: var(--mn-grad-nights); transition: width 1.2s cubic-bezier(.2,.8,.2,1); box-shadow: 0 0 calc(var(--u)*1.2) rgba(255,122,61,.6); }
+
+/* main: stacked in portrait, two columns on a landscape TV */
+.mhw-main { flex: 1; min-height: 0; display: grid; grid-template-rows: minmax(0, 45fr) minmax(0, 55fr); gap: var(--gap); }
+@media (min-aspect-ratio: 1/1) { .mhw-main { grid-template-rows: 1fr; grid-template-columns: 1.05fr 1fr; } .mhw { --cf: 9; --rf: 4.4; --t: 1.6; --chf: 20; } }
+.mhw-now, .mhw-panel { min-height: 0; border-radius: calc(var(--u)*1.6); padding: calc(var(--u)*1.6);
+  background: rgba(12,20,34,.66); border: 1px solid rgba(255,45,120,.32); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  display: flex; flex-direction: column; gap: calc(var(--u)*1.1); overflow: hidden; }
+.mhw-panel { position: relative; animation: mhwIn .7s cubic-bezier(.2,.8,.2,1) backwards; }
+@keyframes mhwIn { from { opacity: 0; transform: translateY(calc(var(--u)*1.5)); } }
+.mhw-label { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.25*var(--t)); letter-spacing: .3em; text-transform: uppercase; color: var(--mn-peach); display: flex; align-items: center; gap: calc(var(--u)*.6); flex: none; }
+.mhw-label[data-gold] { color: var(--mn-gold); }
+.mhw-wait { margin: auto; font-size: calc(var(--u)*3); color: var(--mn-mist); text-align: center; }
+.mhw-key { margin-left: auto; margin-right: calc(var(--u)*4.5); font-family: var(--mn-font-ui); font-weight: 600; letter-spacing: 0; text-transform: none; font-size: calc(var(--u)*1.05*var(--t)); color: var(--mn-dim); display: inline-flex; align-items: center; gap: calc(var(--u)*.6); white-space: nowrap; }
+.mhw-key i { width: calc(var(--u)*.45); height: calc(var(--u)*1.2); border-radius: 2px; background: var(--mn-coral); }
+.mhw-dots { position: absolute; right: calc(var(--u)*1.6); top: calc(var(--u)*1.7); display: flex; gap: calc(var(--u)*.5); }
+.mhw-dots i { width: calc(var(--u)*.7); height: calc(var(--u)*.7); border-radius: 50%; background: rgba(255,244,232,.25); }
+.mhw-dots i[data-on] { background: var(--mn-coral); }
+
+/* faces */
+.mhw-face.mn-avatar { position: relative; flex: none; border-radius: 50% !important; overflow: hidden; box-shadow: 0 0 0 calc(var(--u)*.22) var(--mn-navy); background: var(--mn-navy); }
+.mhw-face[data-ring="gold"] { box-shadow: 0 0 0 calc(var(--u)*.4) var(--mn-gold), 0 0 calc(var(--u)*3) rgba(255,194,74,.55); }
+.mhw-face[data-dim] { filter: grayscale(.7) brightness(.7); }
+.mhw-face .mn-art, .mhw-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mhw-pairfaces { display: flex; flex: none; }
+.mhw-pairfaces > * + * { margin-left: calc(var(--u) * -1); }
+
+/* on court */
+.mhw-courts { flex: 1; min-height: 0; display: grid; gap: var(--gap); grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
+.mhw-courts[data-n="1"] { grid-template-columns: 1fr; --cf: 7; }
+/* a TV with one or two matches left stacks them and lets the faces fill it */
+@media (min-aspect-ratio: 1/1) {
+  .mhw-courts[data-n="1"], .mhw-courts[data-n="2"] { grid-template-columns: 1fr; --cf: 13; }
+  .mhw-courts[data-n="1"] .mhw-stack span, .mhw-courts[data-n="2"] .mhw-stack span { font-size: calc(var(--u)*1.7*var(--t)); }
+}
+.mhw-courts[data-n="3"] > :last-child { grid-column: 1 / -1; }
+.mhw-court { min-width: 0; min-height: 0; border-radius: calc(var(--u)*1.2); padding: calc(var(--u)*.9) calc(var(--u)*1.1);
+  background: linear-gradient(160deg, rgba(255,45,120,.20), rgba(255,122,61,.08) 60%, rgba(15,27,43,.4)); border: 1px solid rgba(255,244,232,.14);
+  display: flex; flex-direction: column; justify-content: center; gap: calc(var(--u)*.6*var(--t)); }
+.mhw-court[data-hot] { background: linear-gradient(160deg, rgba(255,194,74,.30), rgba(255,122,61,.14) 60%, rgba(15,27,43,.4)); border-color: rgba(255,194,74,.5); }
+.mhw-court[data-done] { background: rgba(15,27,43,.35); }
+.mhw-ctag { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.05*var(--t)); letter-spacing: .22em; text-transform: uppercase; color: var(--mn-sand); display: flex; justify-content: space-between; gap: calc(var(--u)*.6); white-space: nowrap; }
+.mhw-ctag span { color: var(--mn-dim); letter-spacing: .12em; }
+.mhw-vs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: calc(var(--u)*.6); }
+.mhw-side { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u)*.5); }
+.mhw-side .mhw-stack { align-items: center; text-align: center; max-width: 100%; }
+.mhw-side .mhw-stack span { font-size: calc(var(--u)*1.3*var(--t)); }
+.mhw-pname { max-width: 100%; font-weight: 800; font-size: calc(var(--u)*1.35); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.mhw-vsword { font-size: calc(var(--u)*2.2*var(--t)); color: var(--mn-coral); }
+.mhw-next { font-size: calc(var(--u)*1.05*var(--t)); line-height: 1.25; color: var(--mn-mist); display: flex; align-items: baseline; gap: calc(var(--u)*.6); min-width: 0; }
+.mhw-next i { font-style: normal; color: var(--mn-coral); font-weight: 800; }
+.mhw-next b { font-family: var(--mn-font-mono); letter-spacing: .18em; text-transform: uppercase; color: var(--mn-peach); flex: none; }
+.mhw-next span { min-width: 0; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mhw-cdone { margin: auto; font-size: calc(var(--u)*2); color: var(--mn-dim); }
+
+/* tables + the draw */
+.mhw-tables { flex: 1; min-height: 0; display: grid; gap: var(--gap); grid-template-columns: 1fr 1fr; align-content: start; }
+.mhw-tables[data-n="1"] { grid-template-columns: 1fr; }
+.mhw-group { min-width: 0; display: flex; flex-direction: column; gap: calc(var(--u)*.35); }
+.mhw-ghead { display: grid; grid-template-columns: 1fr calc(var(--u)*2.1*var(--t)) calc(var(--u)*2.7*var(--t)) calc(var(--u)*2.5*var(--t)); align-items: end; padding-bottom: calc(var(--u)*.4); border-bottom: 1px solid var(--mn-line-2); }
+.mhw-ghead .mn-display { line-height: 1.2; font-size: calc(var(--u)*1.7*var(--t)); color: var(--mn-sand); }
+.mhw-ghead em, .mhw-grow em { font-style: normal; text-align: right; font-family: var(--mn-font-mono); font-weight: 700; }
+.mhw-ghead em { font-size: calc(var(--u)*.95*var(--t)); color: var(--mn-dim); letter-spacing: .1em; }
+.mhw-grow { position: relative; display: grid; grid-template-columns: calc(var(--u)*1.4*var(--t)) auto 1fr calc(var(--u)*2.1*var(--t)) calc(var(--u)*2.7*var(--t)) calc(var(--u)*2.5*var(--t)); align-items: center; gap: 0 calc(var(--u)*.7);
+  padding: calc(var(--u)*.22*var(--t)) calc(var(--u)*.3) calc(var(--u)*.22*var(--t)) calc(var(--u)*.6); border-radius: calc(var(--u)*.6); }
+.mhw-tables .mhw-grow:not(:has(.mhw-gpos)) { grid-template-columns: auto 1fr; }
+.mhw-grow[data-q] { background: rgba(255,45,120,.14); }
+.mhw-grow[data-q]::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 18%; width: calc(var(--u)*.35); border-radius: 2px; background: var(--mn-coral); }
+.mhw-grow em { font-size: calc(var(--u)*1.2*var(--t)); color: var(--mn-mist); }
+.mhw-grow .mhw-gpts { color: #fff; font-size: calc(var(--u)*1.4*var(--t)); }
+.mhw-gpos { font-family: var(--mn-font-display); font-size: calc(var(--u)*1.45*var(--t)); color: var(--mn-peach); text-align: center; }
+.mhw-stack { min-width: 0; display: flex; flex-direction: column; line-height: 1.08; }
+.mhw-stack span { font-weight: 800; font-size: calc(var(--u)*1.12*var(--t)); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+
+/* bracket */
+.mhw-bracket { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: calc(var(--u)*.6); }
+.mhw-bracket .mhw-face.mn-avatar { width: calc(var(--u)*2.4*var(--t)) !important; height: calc(var(--u)*2.4*var(--t)) !important; }
+.mhw-bracket [data-final] .mhw-face.mn-avatar { width: calc(var(--u)*3*var(--t)) !important; height: calc(var(--u)*3*var(--t)) !important; }
+.mhw-kr { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1*var(--t)); letter-spacing: .24em; text-transform: uppercase; color: var(--mn-dim); margin-bottom: calc(var(--u)*.4); }
+.mhw-kgrid { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--u)*.7); }
+.mhw-kmatch { border-radius: calc(var(--u)*.8); background: rgba(15,27,43,.55); border: 1px solid var(--mn-line-2); padding: calc(var(--u)*.3); display: flex; flex-direction: column; gap: calc(var(--u)*.2); min-width: 0; }
+.mhw-kmatch[data-final] { border-color: rgba(255,194,74,.6); background: linear-gradient(160deg, rgba(255,194,74,.22), rgba(15,27,43,.5)); padding: calc(var(--u)*.4); }
+.mhw-kside { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: calc(var(--u)*.6); min-width: 0; padding: calc(var(--u)*.05) calc(var(--u)*.3); border-radius: calc(var(--u)*.5); }
+.mhw-kside[data-win] { background: rgba(255,194,74,.16); }
+.mhw-kside[data-lose] { opacity: .5; }
+.mhw-kname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.15*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.mhw-kmatch[data-final] .mhw-kname { font-size: calc(var(--u)*1.5*var(--t)); }
+.mhw-kside b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.6*var(--t)); color: var(--mn-gold); min-width: calc(var(--u)*1.6); text-align: right; }
+.mhw-kside .mhw-pairfaces > * + * { margin-left: calc(var(--u) * -.6); }
+
+/* tonight's points */
+.mhw-points { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(5, min-content); gap: calc(var(--u)*.6); align-content: start; }
+@media (min-aspect-ratio: 1/1) { .mhw-points { grid-template-columns: 1fr; grid-auto-flow: row; grid-template-rows: none; gap: calc(var(--u)*.7); } }
+.mhw-prow { display: grid; grid-template-columns: calc(var(--u)*2*var(--t)) auto 1fr auto; align-items: center; gap: calc(var(--u)*1); padding: calc(var(--u)*.25*var(--t)) calc(var(--u)*.8); border-radius: calc(var(--u)*.7); background: rgba(15,27,43,.4); }
+.mhw-prow[data-top] { background: linear-gradient(90deg, rgba(255,194,74,.22), rgba(15,27,43,.35)); }
+.mhw-prow .mhw-gname { min-width: 0; font-weight: 800; font-size: calc(var(--u)*1.35*var(--t)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.mhw-prow b { font-family: var(--mn-font-display); font-weight: 400; font-size: calc(var(--u)*1.8*var(--t)); color: var(--mn-gold); }
+
+/* before the night, and the champions */
+.mhw-soon, .mhw-champs { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: calc(var(--u)*1.2); min-height: 0; }
+.mhw-soon .mhw-label, .mhw-champs .mhw-label { align-self: center; }
+.mhw-soonword { flex: none; font-size: calc(var(--u)*10*var(--t)); line-height: 1.15; color: var(--mn-sand); max-width: 100%; white-space: nowrap; overflow: hidden; }
+.mhw-soonsub { font-size: calc(var(--u)*1.5*var(--t)); font-weight: 700; color: var(--mn-mist); }
+.mhw-champfaces { display: flex; gap: calc(var(--u)*1.6); }
+.mhw[data-stage="done"] .mhw-main { grid-template-rows: minmax(0, 37fr) minmax(0, 63fr); }
+@media (min-aspect-ratio: 1/1) { .mhw[data-stage="done"] .mhw-main { grid-template-rows: 1fr; } }
+.mhw-champfaces .mhw-face { animation: mhwRise .9s cubic-bezier(.2,.9,.3,1.2) backwards; }
+.mhw-champfaces .mhw-face + .mhw-face { animation-delay: .12s; }
+@keyframes mhwRise { from { transform: scale(.6); opacity: 0; } }
+.mhw-champname { flex: none; line-height: 1.15; font-size: calc(var(--u)*4.8); color: var(--mn-gold); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .1em .12em; }
+.mhw-champscore { font-size: calc(var(--u)*1.6); font-weight: 600; color: var(--mn-mist); }
+.mhw-champscore b { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-sand); font-size: 1.3em; margin-right: .3em; }
+
+/* foot: the ticker */
+.mhw-foot { flex: none; display: flex; align-items: center; gap: calc(var(--u)*1.4); height: calc(var(--u)*4); border-radius: calc(var(--u)*1); background: rgba(7,4,13,.7); border: 1px solid var(--mn-line-2); padding: 0 calc(var(--u)*1.2); overflow: hidden; }
+.mhw-tick { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent); }
+.mhw-tickrun { display: inline-flex; animation: mhwTick 40s linear infinite; }
+.mhw-tickrun > span { display: inline-flex; }
+@keyframes mhwTick { to { transform: translateX(-50%); } }
+.mhw-tick em { font-style: normal; font-size: calc(var(--u)*1.35); font-weight: 700; color: var(--mn-mist); padding-right: calc(var(--u)*3.2); text-transform: uppercase; letter-spacing: .02em; }
+.mhw-tick em b { font-family: var(--mn-font-mono); color: var(--mn-peach); letter-spacing: .14em; margin-right: .5em; }
+.mhw-tick em strong { font-family: var(--mn-font-display); font-weight: 400; color: var(--mn-gold); margin: 0 .35em; }
+.mhw-tickidle { font-size: calc(var(--u)*1.3); color: var(--mn-dim); font-weight: 600; }
+.mhw-url { flex: none; font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.2); letter-spacing: .14em; color: var(--mn-sand); }
+
+/* THE TAKEOVER — a score just locked */
+.mhw-flash { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  gap: calc(var(--u)*1.6); padding: var(--pad); animation: mhwFlashIn .45s ease-out backwards; overflow: hidden; }
+@keyframes mhwFlashIn { from { opacity: 0; } }
+.mhw-flashbg { position: absolute; inset: 0; z-index: -1; background: radial-gradient(70% 45% at 50% 42%, rgba(255,45,120,.55), rgba(15,27,43,0) 70%), linear-gradient(180deg, #0D1726, #07040D);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.mhw-flash[data-final] .mhw-flashbg { background: radial-gradient(70% 45% at 50% 42%, rgba(255,194,74,.6), rgba(255,122,61,.25) 45%, rgba(15,27,43,0) 75%), linear-gradient(180deg, #0D1726, #07040D); }
+.mhw-shards { position: absolute; left: 50%; top: 42%; width: 0; height: 0; z-index: -1; }
+.mhw-shards i { position: absolute; left: 0; top: 0; width: calc(var(--u)*.6); height: calc(var(--u)*7); margin-left: calc(var(--u)*-.3); border-radius: 999px;
+  background: linear-gradient(180deg, var(--mn-gold), var(--mn-coral)); transform-origin: 50% 0; transform: rotate(var(--a)) translateY(calc(var(--u)*8)) scaleY(.2); opacity: 0;
+  animation: mhwShard 1.3s cubic-bezier(.15,.8,.25,1) var(--d) forwards; }
+@keyframes mhwShard { 0% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--u)*6)) scaleY(.2); } 25% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateY(calc(var(--u)*32)) scaleY(1); } }
+.mhw-fkick { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.8); letter-spacing: .32em; text-transform: uppercase; color: var(--mn-peach);
+  padding: calc(var(--u)*.6) calc(var(--u)*1.4); border: 1px solid rgba(255,179,107,.5); border-radius: 999px; background: rgba(7,4,13,.5); animation: mhwDrop .5s .1s cubic-bezier(.2,.9,.3,1.2) backwards; }
+.mhw-flash[data-final] .mhw-fkick { color: var(--mn-gold); border-color: rgba(255,194,74,.6); }
+@keyframes mhwDrop { from { transform: translateY(calc(var(--u)*-3)); opacity: 0; } }
+.mhw-fwin { animation: mhwRise .8s .15s cubic-bezier(.2,.9,.3,1.25) backwards; }
+.mhw-fwin .mhw-pairfaces > * + * { margin-left: calc(var(--u)*-2); }
+.mhw-fname { flex: none; font-size: calc(var(--u)*6); color: #fff; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 .1em .12em; animation: mhwDrop .5s .3s ease-out backwards; }
+.mhw-fscore { font-size: calc(var(--u)*15); line-height: .9; color: var(--mn-gold); animation: mhwSlam .55s .4s cubic-bezier(.2,1.4,.4,1) backwards; display: flex; align-items: center; gap: .08em; }
+.mhw-fscore span { color: var(--mn-sand); font-size: .6em; }
+@keyframes mhwSlam { from { transform: scale(2.2); opacity: 0; } 60% { opacity: 1; } }
+.mhw-fwhat { font-family: var(--mn-font-display); font-size: calc(var(--u)*3); text-transform: lowercase; color: var(--mn-sand); background: var(--mn-grad-primary); color: var(--mn-ink);
+  padding: calc(var(--u)*.5) calc(var(--u)*1.6) calc(var(--u)*.7); border-radius: calc(var(--u)*.8); animation: mhwDrop .5s .7s ease-out backwards; }
+.mhw-flash[data-final] .mhw-fwhat { background: var(--mn-tier-legend); }
+.mhw-flose { display: flex; align-items: center; gap: calc(var(--u)*1); font-size: calc(var(--u)*1.6); font-weight: 700; color: var(--mn-mist); text-transform: uppercase; animation: mhwDrop .5s .9s ease-out backwards; }
+.mhw-f2x { font-family: var(--mn-font-mono); font-weight: 800; font-size: calc(var(--u)*1.3); letter-spacing: .2em; text-transform: uppercase; color: var(--mn-gold); }
+@media (prefers-reduced-motion: reduce) { .mhw-kb, .mhw-tickrun, .mhw-shards { animation: none !important; } .mhw-shards { display: none; } }

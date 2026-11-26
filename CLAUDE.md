@@ -1083,6 +1083,32 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     settings, confirm, undo restores the match, up-next, check-in saved,
     offline banner -> back online saves and clears) and `shots-heist.mjs`
     (who, howto).
+- **THE BIG SCREEN (`?tv=`) IS THE HEIST'S OWN — `brand/heist/heist-wall.jsx`**
+  (owner, 26 Nov: "everyone sees the session on the big screen, I don't want it
+  to be bland"). Blackout's `WallPage` stays in the page unreferenced; the route,
+  `wallSession` (`&s=<session id>`) and the self-poll (every 10s) are kept.
+  - The night's painting full-bleed and slowly pushing in, the logo, episode
+    code/title, 2X, a live clock and a progress bar; ON COURT (each group's first
+    open match face to face, and NEXT; the open knockout ties once drawn); a
+    panel rotating every 16s through the tables, the bracket and tonight's
+    points (the draw before a ball is hit); a ticker of results; the champions
+    once the final is won.
+  - **A SCORE LOCKED ON THE SCORER'S PHONE TAKES THE WALL OVER** for 8s (12s for
+    a final): the winners' faces, the score, what it did ("top of Group B",
+    "into the final"), who they beat. Detected by diffing decided matches between
+    pulls, so results already on the board at load are not news. The scorer's
+    undo toast says "on the big screen".
+  - One unit, `--u = min(1vh, 1.78vw)`; a landscape TV gets two columns and
+    `--t` scales its type 1.6x. Divs only: the inherited skin styles
+    header/main by tag. Display lines fit by `mhwFit` (proportional, ellipsis
+    off while measuring) because `mhFitAll` stops at 60%.
+  - `node ops/check-heist-wall.mjs` (`SHOTS=1`): soon / groups / knockout /
+    full time at 1080x1920, 1920x1080 and 720x1280 — no scroll, nothing cut by
+    its box OR any box it sits in, no overlaps (display type by its em box —
+    Bowlby's font box is far taller than its letters), faces and fonts drawn;
+    then a 6-2 posted from "another phone" must take the wall over, and semis
+    then final must queue and end on the champions. It caught the champions'
+    names squeezed to nothing (an overflow:hidden flex item shrinks to 0).
 - **BODY COPY IS MANROPE, NOT THE BRUSH (owner, 26 Nov: "the font isn't
   readable").** `.mn-serif` sentences were Kaushan Script in hot pink; they are
   Manrope 500 in mist now. The brush stays only on short tags (top-bar line,

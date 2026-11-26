@@ -431,7 +431,7 @@ function HeistShell(props) {
         const nm = later && later[0];
         const nameOf = id => mhTeamNames(sess, id, Object.fromEntries((state.players || []).map(p => [p.id, p])));
         setUndo({ sid: m.sid, mid: m.id, prev: prev ? JSON.parse(JSON.stringify(prev)) : null, at: Date.now(),
-          label: `${t1}–${t2} locked`, next: nm ? `${nameOf(nm.team1Id)} v ${nameOf(nm.team2Id)}${nm.court ? " · Court " + nm.court : ""}` : null });
+          label: `${t1}–${t2} locked · on the big screen`, next: nm ? `${nameOf(nm.team1Id)} v ${nameOf(nm.team2Id)}${nm.court ? " · Court " + nm.court : ""}` : null });
         go("back");
       };
     } else if (name === "live") { location.replace("#session/" + arg); return null; }
