@@ -272,6 +272,15 @@ def main():
              f'<style id="heist-css">\n{read("heist.css")}\n</style>\n'
              f'<style id="heist-classic">\n{classic_css}\n</style>\n</head>', "head")
 
+    # ── the inherited universal corner rule stops at the Heist screens ──
+    # A Vol.9-era layer rounds EVERY element 28px with !important. The handoff's
+    # tags, chips, pills and the knockout cards' badges have their own radii, and
+    # in the app (never in the preview, which has no such rule) they all came out
+    # as 28px lozenges. Organiser screens keep it: they are not inside .mh-page.
+    s = once(s, '*:not(.rounded-full):not([style*="border-radius: 50"]):not([style*="border-radius:50"]) {',
+             '*:not(.rounded-full):not([style*="border-radius: 50"]):not([style*="border-radius:50"]):not(.mh-page):not(.mh-page *) {',
+             "corner rule scoped")
+
     # ── the modules, ahead of App(), with a name-clash guard ──
     mods = "\n".join(read(m) for m in MODULES)
     i = s.index("function App()")

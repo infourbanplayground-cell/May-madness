@@ -197,7 +197,7 @@
 /* ── top bar ──────────────────────────────────────────────────────────── */
 .mn-topbar { position: absolute; left: 20px; right: 20px; top: 50px; z-index: 6; display: flex; justify-content: space-between; align-items: center; }
 .mn-topbar img { height: 28px; }
-.mn-topbar .mn-serif { font-size: 16px; color: var(--mn-sand); }
+.mn-topbar .mn-serif { font-size: 16px; color: var(--mn-sand); padding: 2px 10px; border-radius: var(--mn-r-pill); background: var(--mn-tag-bg); }
 
 /* ── art: every painting/photo gets the same treatment ────────────────── */
 .mn-art { position: absolute; inset: 0; overflow: hidden; }
@@ -340,7 +340,9 @@ button.mn-glass[data-accent="coral"] { border-color: var(--mn-coral); }
 /* the take */
 .mh-takehero { position: relative; height: 150px; border-radius: var(--mn-r-hero); overflow: hidden; }
 .mh-takehero .mn-art img { filter: var(--mn-art-filter) brightness(.7); }
-.mh-takebody { position: absolute; left: 16px; bottom: 14px; }
+.mh-takebody { position: absolute; left: 16px; bottom: 14px; z-index: 1; }
+/* the label sat on the bright half of the painting at 2.1:1 */
+.mh-takehero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,27,43,.15) 0%, rgba(15,27,43,.82) 45%, rgba(15,27,43,.94) 100%); pointer-events: none; }
 .mh-meter { position: relative; height: 12px; border-radius: 6px; background: var(--mn-line); overflow: hidden; }
 .mh-meter > div { height: 100%; border-radius: 6px; background: var(--mn-grad-meter); }
 .mh-segs { display: grid; gap: 3px; }
@@ -619,7 +621,7 @@ html:not(#mh) body::before, html:not(#mh) body::after { display: none !important
    (:not(.rounded-full)...), which leaves a 24px avatar round and turns a
    118px one into a rounded square. Faces are circles at every size. */
 html:not(#mh) .mn-avatar { border-radius: 50% !important; }
-.mn-avatar .mn-initials { font-size: max(9px, 2.2em) !important; }
+.mn-avatar .mn-initials { font-size: max(11px, 2.2em) !important; }
 /* a player with no photo is a disc with their initials, not loose letters on the page */
 .mn-avatar .mn-initials { background: rgba(255,244,232,.12); color: var(--mn-sand); }
 
@@ -1116,8 +1118,8 @@ function mhFitAll() {
   for (const el of document.querySelectorAll(MH_FIT_SEL)) {
     if (!el.offsetWidth) continue;
     el.style.fontSize = "";
-    let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
-    while (mhOver(el) && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+    let fs = parseFloat(getComputedStyle(el).fontSize); const min = Math.max(fs * .6, Math.min(fs, 11));   // never under the 11px floor: an ellipsis beats illegible
+    while (mhOver(el) && fs > min) { fs = Math.max(min, fs - .5); el.style.fontSize = fs + "px"; }
   }
 }
 // scrollWidth and clientWidth are whole numbers: text 0.4px too wide for a

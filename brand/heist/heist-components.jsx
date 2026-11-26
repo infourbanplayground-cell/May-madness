@@ -189,8 +189,8 @@ function mhFitAll() {
   for (const el of document.querySelectorAll(MH_FIT_SEL)) {
     if (!el.offsetWidth) continue;
     el.style.fontSize = "";
-    let fs = parseFloat(getComputedStyle(el).fontSize); const min = fs * .6;
-    while (mhOver(el) && fs > min) { fs -= .5; el.style.fontSize = fs + "px"; }
+    let fs = parseFloat(getComputedStyle(el).fontSize); const min = Math.max(fs * .6, Math.min(fs, 11));   // never under the 11px floor: an ellipsis beats illegible
+    while (mhOver(el) && fs > min) { fs = Math.max(min, fs - .5); el.style.fontSize = fs + "px"; }
   }
 }
 // scrollWidth and clientWidth are whole numbers: text 0.4px too wide for a
