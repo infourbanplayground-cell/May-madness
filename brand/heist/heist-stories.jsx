@@ -176,14 +176,15 @@ function MhShareSheet({ D, go, what = "card", id }) {
   const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
   const ref = React.useRef(null);
   const name = { loot: "knockout-card", card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
+  const me = D.players && D.players.find(p => p.id === (id ? String(id).split(".")[0] : D.meId));
+  const caption = { loot: `My ${MH.name || "Muscat Heist"} knockout card.`, card: me ? `${me.name} · #${me.rank} on Most Wanted · ${me.points} pts.` : `${MH.name || "Muscat Heist"}.`,
+    poster: `${MH.name || "Muscat Heist"} — nine nights at ${MH.venue || "Al Hail North"}.`, contenders: `${MH.name || "Muscat Heist"} — the contenders.` }[k];
   const run = async () => {
     setBusy(true); setErr("");
     try {
       const blob = await mhExportStory(ref.current.firstChild);
-      const file = new File([blob], `muscat-heist-${name}.png`, { type: "image/png" });
       window.__mhLastExport = blob;                       // for the harness
-      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
-      else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); }
+      await mhShareOut(blob, `muscat-heist-${name}.png`, caption);
     } catch (e) { if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again."); }
     setBusy(false);
   };
@@ -204,6 +205,7 @@ function MhShareSheet({ D, go, what = "card", id }) {
         {err && <MhSerif size={14} tone="coral" style={{ textAlign: "center" }}>{err}</MhSerif>}
         <div className="mh-momentfoot" style={{ padding: "12px 0 26px" }}>
           <MhButton live onClick={run} disabled={busy}>{busy ? "Making the image…" : "Share image"}</MhButton>
+          {typeof MhWhatsApp === "function" && <MhWhatsApp text={caption} label="Send the link on WhatsApp" />}
         </div>
       </main>
     </div>

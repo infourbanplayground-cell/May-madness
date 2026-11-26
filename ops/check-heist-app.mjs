@@ -210,12 +210,25 @@ if (!process.env.ONLY || process.env.ONLY === 'mid') {
     ok(/#live\/7\//.test(await pg.evaluate(() => location.hash)), 'tap opens Live Scoring for that match');
     const before = saves.length;
     for (let i = 0; i < 6; i++) await pg.click('.mh-two .mn-btn-primary');
-    await pg.click('.mh-livefoot .mn-btn-light'); await pg.waitForTimeout(4500);   // the inherited save debounces 3s
+    await pg.click('.mh-livefoot .mn-btn-light');
+    ok(await pg.locator('.mh-confirm').count() === 1, 'Lock asks to confirm before writing');
+    ok(/6–0/.test(await pg.locator('.mh-confirm').innerText()), 'the confirm states the score');
+    await pg.click('.mh-confirm .mn-btn-light'); await pg.waitForTimeout(4500);   // the inherited save debounces 3s
+    const toast = await pg.locator('.mh-undotoast').count() ? await pg.locator('.mh-undotoast').innerText() : '';
+    ok(/locked/i.test(toast), 'an undo toast follows the lock: ' + toast.replace(/\s+/g, ' '));
+    ok(/up next/i.test(toast), 'the toast names the next match');
     const s = saves.slice(before).pop();
     const n = s && s.state && s.state.sessions.find(x => x.date === SEASON.nights[6]);
     const m = n && n.groupMatches.find(x => x.winner && x.score && x.score.t1 === 6 && x.score.t2 === 0 && x.resultAt > Date.now() - 60000);
     ok(!!m, 'Lock result saved through the engine: ' + (m ? `${m.score.t1}-${m.score.t2} ${m.winner} ${m.lossType}` : 'no /save carried it'));
     ok(m && m.lossType === 'blowout', 'loss type derived by scoreToResult (6-0 is a blowout)');
+    if (m) {
+      const n0 = saves.length;
+      await pg.click('.mh-undotoast button'); await pg.waitForTimeout(4500);
+      const s2 = saves.slice(n0).pop(), n2 = s2 && s2.state.sessions.find(x => x.date === SEASON.nights[6]);
+      const back = n2 && n2.groupMatches.find(x => x.id === m.id);
+      ok(back && !back.winner, 'Undo takes the result back off the match: ' + (back ? JSON.stringify(back.score || null) : 'no save'));
+    }
   }
   ok(!errs.length, 'organiser: page errors: ' + errs.slice(0, 2).join(' | '));
   await ctx.close();

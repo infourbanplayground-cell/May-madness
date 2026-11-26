@@ -836,8 +836,10 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
   background: rgba(7,4,13,.55); color: var(--mn-sand); font: 600 16px 'Manrope', system-ui, sans-serif; }
 .mh-search::placeholder { color: rgba(246,234,211,.62); }
 .mh-search:focus { outline: 2px solid var(--mn-peach); outline-offset: 2px; }
-.mh-youstrip { position: sticky; top: 8px; z-index: 5; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px;
-  padding: 8px 14px; border-radius: var(--mn-r-pill); border: 1px solid var(--mn-peach); background: rgba(15,27,43,.94);
+/* pinned above the nav: the page shell clips overflow, so sticky never engages */
+.mh-youstrip { position: fixed; left: 16px; right: 16px; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); z-index: 25; width: auto !important;
+  box-shadow: 0 10px 30px rgba(7,4,13,.55); display: flex !important; align-items: center; gap: 10px !important; min-height: 52px;
+  padding: 8px 16px; border-radius: var(--mn-r-pill); border: 1px solid var(--mn-peach); background: #13233A;
   color: var(--mn-sand); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .mh-youlab { font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .16em; text-transform: uppercase; color: var(--mn-peach); }
 .mh-yourank { font-size: 20px; line-height: 1; }
@@ -853,7 +855,7 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 .mh-pull { position: fixed; left: 0; right: 0; top: 0; z-index: 40; display: flex; align-items: flex-end; justify-content: center;
   padding-bottom: 8px; background: linear-gradient(180deg, rgba(7,4,13,.9), rgba(7,4,13,0)); pointer-events: none;
   font: 700 11px 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
-.mh-fresh { position: fixed; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 30; min-height: 32px; padding: 6px 12px;
+.mh-fresh { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 10px); z-index: 30; white-space: nowrap; min-height: 32px; padding: 6px 12px;
   border-radius: var(--mn-r-pill); border: 1px solid rgba(246,234,211,.22); background: rgba(7,4,13,.78); color: rgba(246,234,211,.86);
   font: 600 11px 'JetBrains Mono', monospace; letter-spacing: .06em; }
 .mh-install { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
@@ -875,6 +877,19 @@ html:not(#mh) .mn-avatar { border-radius: 50% !important; }
 html.mh-bigtext .mn-serif, html.mh-bigtext .mh-wname, html.mh-bigtext .mh-setrow { font-size: 118% !important; }
 html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenext { font-size: 112% !important; }
 @media (prefers-reduced-motion: reduce) { .mh-wrow.mh-flash { animation: none; background: rgba(255,179,107,.24); } .mh-toggle::after { transition: none; } }
+
+.mh-page:has(.mh-youstrip) .mh-body { padding-bottom: 170px !important; }
+.mh-wa { display: flex !important; align-items: center; justify-content: center; text-align: center; text-decoration: none; min-height: 48px; }
+.mh-confirm { position: fixed; inset: 0; z-index: 60; background: rgba(7,4,13,.72); display: flex; align-items: flex-end; padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.mh-confirmbox { width: 100%; text-align: center; background: #13233A !important; }
+.mh-confirmbox b { color: var(--mn-sand); font-weight: 800; }
+.mh-undotoast { position: fixed; left: 12px; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 55; display: flex; gap: 12px;
+  align-items: center; justify-content: space-between; padding: 10px 10px 10px 16px; border-radius: 16px; background: #F6EAD3; color: #07040D;
+  box-shadow: 0 12px 30px rgba(7,4,13,.5); font: 600 14px 'Manrope', sans-serif; }
+.mh-undotoast b { font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .06em; }
+.mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
+  font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
 </style>
 </head><body>
 <div id="root"></div>
@@ -2088,8 +2103,13 @@ function MhLive({ D, go, match, onLock }) {
   }, [L.clock]);
   const firstServeA = (L.serving || "A") === "A" ? ((L.a + L.b) % 2 === 0) : ((L.a + L.b) % 2 === 1);
   const servingA = ((a + b) % 2 === 0) === firstServeA;
-  const add = side => { setHist(h => h.concat([[a, b]])); side === "a" ? setA(a + 1) : setB(b + 1); };
-  const undo = () => { if (!hist.length) return; const [x, y] = hist[hist.length - 1]; setA(x); setB(y); setHist(hist.slice(0, -1)); };
+  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+  const add = side => { buzz(10); setHist(h => h.concat([[a, b]])); side === "a" ? setA(a + 1) : setB(b + 1); };
+  const undo = () => { if (!hist.length) return; buzz(10); const [x, y] = hist[hist.length - 1]; setA(x); setB(y); setHist(hist.slice(0, -1)); };
+  // Lock asks once, in words: the score and who it gives the match to. A mistyped
+  // result is the commonest fault of a night, and this is the last cheap moment to catch it.
+  const [ask, setAsk] = React.useState(false);
+  const winner = a > b ? L.teamA : b > a ? L.teamB : null;
   const lines = t => { const p = t.split(" & "); return <>{p[0].toUpperCase()}<br />&amp; {(p[1] || "").toUpperCase()}</>; };
   const first = t => t.split(" & ")[0].toUpperCase();
   const Card = ({ team, score, on }) => (
@@ -2122,8 +2142,21 @@ function MhLive({ D, go, match, onLock }) {
         </div>
         <div className="mh-livefoot">
           <button type="button" className="mh-undo" onClick={undo} disabled={!hist.length}>Undo</button>
-          <MhButton kind="light" live onClick={() => onLock ? onLock({ t1: a, t2: b }) : go("back")}>Lock result</MhButton>
+          <MhButton kind="light" live onClick={() => { buzz(15); setAsk(true); }}>Lock result</MhButton>
         </div>
+        {ask && (
+          <div className="mh-confirm" role="dialog" aria-modal="true" aria-label="Confirm the result">
+            <div className="mn-glass mh-confirmbox">
+              <MhLabel tone="peach">Lock this result?</MhLabel>
+              <div className="mn-display" style={{ fontSize: 56, lineHeight: .95, marginTop: 6 }}>{a}–{b}</div>
+              <MhSerif size={15} style={{ marginTop: 6 }}>{winner ? <>Match to <b>{winner}</b></> : "Level — a set needs a winner"}</MhSerif>
+              <div className="mh-two" style={{ gap: 8, marginTop: 14 }}>
+                <MhButton kind="ghost" live onClick={() => setAsk(false)}>Back</MhButton>
+                <MhButton kind="light" live disabled={!winner} onClick={() => { buzz([12, 40, 12]); setAsk(false); onLock ? onLock({ t1: a, t2: b }) : go("back"); }}>Lock it</MhButton>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
       <MhGrain />
     </div>
@@ -2839,14 +2872,15 @@ function MhShareSheet({ D, go, what = "card", id }) {
   const [busy, setBusy] = React.useState(false), [err, setErr] = React.useState("");
   const ref = React.useRef(null);
   const name = { loot: "knockout-card", card: "my-card", poster: "campaign-poster", contenders: "contenders" }[k];
+  const me = D.players && D.players.find(p => p.id === (id ? String(id).split(".")[0] : D.meId));
+  const caption = { loot: `My ${MH.name || "Muscat Heist"} knockout card.`, card: me ? `${me.name} · #${me.rank} on Most Wanted · ${me.points} pts.` : `${MH.name || "Muscat Heist"}.`,
+    poster: `${MH.name || "Muscat Heist"} — nine nights at ${MH.venue || "Al Hail North"}.`, contenders: `${MH.name || "Muscat Heist"} — the contenders.` }[k];
   const run = async () => {
     setBusy(true); setErr("");
     try {
       const blob = await mhExportStory(ref.current.firstChild);
-      const file = new File([blob], `muscat-heist-${name}.png`, { type: "image/png" });
       window.__mhLastExport = blob;                       // for the harness
-      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
-      else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); }
+      await mhShareOut(blob, `muscat-heist-${name}.png`, caption);
     } catch (e) { if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again."); }
     setBusy(false);
   };
@@ -2867,6 +2901,7 @@ function MhShareSheet({ D, go, what = "card", id }) {
         {err && <MhSerif size={14} tone="coral" style={{ textAlign: "center" }}>{err}</MhSerif>}
         <div className="mh-momentfoot" style={{ padding: "12px 0 26px" }}>
           <MhButton live onClick={run} disabled={busy}>{busy ? "Making the image…" : "Share image"}</MhButton>
+          {typeof MhWhatsApp === "function" && <MhWhatsApp text={caption} label="Send the link on WhatsApp" />}
         </div>
       </main>
     </div>
@@ -3344,6 +3379,25 @@ function MhSettings({ D, go }) {
       </div>
     </MhGlass>
   );
+}
+
+// ── sharing: the image AND a line of text, then WhatsApp as one tap ──────
+// navigator.share with a file opens the phone's own sheet, where WhatsApp is
+// one tap; the caption rides along where the platform keeps it. With no file
+// share (desktop) the image downloads. The WhatsApp button sends the LINK, whose
+// preview is the season's own og-card — the fastest thing to post in a group.
+const mhLink = () => "https://" + (MH.host || "heist.urbanpadel.om");
+async function mhShareOut(blob, filename, text) {
+  const file = new File([blob], filename, { type: "image/png" });
+  const msg = text ? `${text}\n${mhLink()}` : mhLink();
+  if (navigator.canShare && navigator.canShare({ files: [file], text: msg })) { await navigator.share({ files: [file], text: msg }); return "shared"; }
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return "shared"; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  return "saved";
+}
+function MhWhatsApp({ text, label = "Send on WhatsApp" }) {
+  const href = "https://wa.me/?text=" + encodeURIComponent((text ? text + "\n" : "") + mhLink());
+  return <a className="mn-btn mn-btn-ghost mh-wa" href={href} target="_blank" rel="noopener" onClick={() => mhHaptic()}>{label}</a>;
 }
 
 // #story/<poster|contenders|card>/<id>: the bare 416x740 frame, for export and compare

@@ -220,3 +220,22 @@ function MhSettings({ D, go }) {
     </MhGlass>
   );
 }
+
+// ── sharing: the image AND a line of text, then WhatsApp as one tap ──────
+// navigator.share with a file opens the phone's own sheet, where WhatsApp is
+// one tap; the caption rides along where the platform keeps it. With no file
+// share (desktop) the image downloads. The WhatsApp button sends the LINK, whose
+// preview is the season's own og-card — the fastest thing to post in a group.
+const mhLink = () => "https://" + (MH.host || "heist.urbanpadel.om");
+async function mhShareOut(blob, filename, text) {
+  const file = new File([blob], filename, { type: "image/png" });
+  const msg = text ? `${text}\n${mhLink()}` : mhLink();
+  if (navigator.canShare && navigator.canShare({ files: [file], text: msg })) { await navigator.share({ files: [file], text: msg }); return "shared"; }
+  if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return "shared"; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  return "saved";
+}
+function MhWhatsApp({ text, label = "Send on WhatsApp" }) {
+  const href = "https://wa.me/?text=" + encodeURIComponent((text ? text + "\n" : "") + mhLink());
+  return <a className="mn-btn mn-btn-ghost mh-wa" href={href} target="_blank" rel="noopener" onClick={() => mhHaptic()}>{label}</a>;
+}

@@ -266,8 +266,13 @@ function MhLive({ D, go, match, onLock }) {
   }, [L.clock]);
   const firstServeA = (L.serving || "A") === "A" ? ((L.a + L.b) % 2 === 0) : ((L.a + L.b) % 2 === 1);
   const servingA = ((a + b) % 2 === 0) === firstServeA;
-  const add = side => { setHist(h => h.concat([[a, b]])); side === "a" ? setA(a + 1) : setB(b + 1); };
-  const undo = () => { if (!hist.length) return; const [x, y] = hist[hist.length - 1]; setA(x); setB(y); setHist(hist.slice(0, -1)); };
+  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+  const add = side => { buzz(10); setHist(h => h.concat([[a, b]])); side === "a" ? setA(a + 1) : setB(b + 1); };
+  const undo = () => { if (!hist.length) return; buzz(10); const [x, y] = hist[hist.length - 1]; setA(x); setB(y); setHist(hist.slice(0, -1)); };
+  // Lock asks once, in words: the score and who it gives the match to. A mistyped
+  // result is the commonest fault of a night, and this is the last cheap moment to catch it.
+  const [ask, setAsk] = React.useState(false);
+  const winner = a > b ? L.teamA : b > a ? L.teamB : null;
   const lines = t => { const p = t.split(" & "); return <>{p[0].toUpperCase()}<br />&amp; {(p[1] || "").toUpperCase()}</>; };
   const first = t => t.split(" & ")[0].toUpperCase();
   const Card = ({ team, score, on }) => (
@@ -300,8 +305,21 @@ function MhLive({ D, go, match, onLock }) {
         </div>
         <div className="mh-livefoot">
           <button type="button" className="mh-undo" onClick={undo} disabled={!hist.length}>Undo</button>
-          <MhButton kind="light" live onClick={() => onLock ? onLock({ t1: a, t2: b }) : go("back")}>Lock result</MhButton>
+          <MhButton kind="light" live onClick={() => { buzz(15); setAsk(true); }}>Lock result</MhButton>
         </div>
+        {ask && (
+          <div className="mh-confirm" role="dialog" aria-modal="true" aria-label="Confirm the result">
+            <div className="mn-glass mh-confirmbox">
+              <MhLabel tone="peach">Lock this result?</MhLabel>
+              <div className="mn-display" style={{ fontSize: 56, lineHeight: .95, marginTop: 6 }}>{a}–{b}</div>
+              <MhSerif size={15} style={{ marginTop: 6 }}>{winner ? <>Match to <b>{winner}</b></> : "Level — a set needs a winner"}</MhSerif>
+              <div className="mh-two" style={{ gap: 8, marginTop: 14 }}>
+                <MhButton kind="ghost" live onClick={() => setAsk(false)}>Back</MhButton>
+                <MhButton kind="light" live disabled={!winner} onClick={() => { buzz([12, 40, 12]); setAsk(false); onLock ? onLock({ t1: a, t2: b }) : go("back"); }}>Lock it</MhButton>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
       <MhGrain />
     </div>

@@ -350,6 +350,13 @@ function HeistShell(props) {
   const [route, setRoute] = React.useState(read);
   const [portraits, setPortraits] = React.useState({});
   const [lootArt, setLootArt] = React.useState({});
+  const [undo, setUndo] = React.useState(null);
+  React.useEffect(() => { if (!undo) return; const t = setTimeout(() => setUndo(null), 10000); return () => clearTimeout(t); }, [undo]);
+  const takeBack = () => {
+    if (!undo || !undo.prev) { setUndo(null); return; }
+    const u = undo; setUndo(null);
+    updateSession(u.sid, ss => ({ ...ss, groupMatches: (ss.groupMatches || []).map(x => x.id === u.mid ? u.prev : x) }));
+  };
   React.useEffect(() => { const f = () => setRoute(read()); addEventListener("hashchange", f); return () => removeEventListener("hashchange", f); }, []);
   // the Heist portraits made on /photos/ — a portrait wins over the volume photo
   React.useEffect(() => {
@@ -412,7 +419,15 @@ function HeistShell(props) {
       onLock = ({ t1, t2 }) => {
         const r = scoreToResult(t1, t2);
         if (!r.winner || Math.max(t1, t2) < 6) { alert("Not a finished score: a set is first to 6 (7-5 or 7-6 if it goes on)."); return; }
+        const sess = (state.sessions || []).find(x => x.id === m.sid);
+        const prev = sess && (sess.groupMatches || []).find(x => x.id === m.id);
         updateSession(m.sid, ss => ({ ...ss, groupMatches: (ss.groupMatches || []).map(x => x.id === m.id ? { ...x, ...r, resultAt: Date.now() } : x) }));
+        // ten seconds to take it back, and what to start next
+        const later = sess && (sess.groupMatches || []).filter(x => !x.winner && x.id !== m.id);
+        const nm = later && later[0];
+        const nameOf = id => mhTeamNames(sess, id, Object.fromEntries((state.players || []).map(p => [p.id, p])));
+        setUndo({ sid: m.sid, mid: m.id, prev: prev ? JSON.parse(JSON.stringify(prev)) : null, at: Date.now(),
+          label: `${t1}–${t2} locked`, next: nm ? `${nameOf(nm.team1Id)} v ${nameOf(nm.team2Id)}${nm.court ? " · Court " + nm.court : ""}` : null });
         go("back");
       };
     } else if (name === "live") { location.replace("#session/" + arg); return null; }
@@ -427,6 +442,15 @@ function HeistShell(props) {
       )}
       {typeof MhFresh === "function" && ["home", "wanted", "session", "me", "jobs"].includes(name || "home") &&
         <MhFresh pullY={pullY || 0} lastSync={lastSync} sync={sync} onRefresh={refreshNow} />}
+      {undo && canScore && (
+        <div className="mh-undotoast" role="status">
+          <div style={{ minWidth: 0 }}>
+            <b>{undo.label}</b>
+            {undo.next && <div className="mh-undonext">Up next: {undo.next}</div>}
+          </div>
+          <button type="button" onClick={takeBack}>Undo</button>
+        </div>
+      )}
       <Screen key={route.join("/")} D={D} go={go} id={name === "share" ? arg2 : arg} no={arg} what={arg}
         start={+arg2 || 0} kind={arg2} canScore={canScore} match={live} onLock={onLock} />
     </>

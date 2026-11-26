@@ -872,3 +872,14 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 @media (prefers-reduced-motion: reduce) { .mh-wrow.mh-flash { animation: none; background: rgba(255,179,107,.24); } .mh-toggle::after { transition: none; } }
 
 .mh-page:has(.mh-youstrip) .mh-body { padding-bottom: 170px !important; }
+.mh-wa { display: flex !important; align-items: center; justify-content: center; text-align: center; text-decoration: none; min-height: 48px; }
+.mh-confirm { position: fixed; inset: 0; z-index: 60; background: rgba(7,4,13,.72); display: flex; align-items: flex-end; padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.mh-confirmbox { width: 100%; text-align: center; background: #13233A !important; }
+.mh-confirmbox b { color: var(--mn-sand); font-weight: 800; }
+.mh-undotoast { position: fixed; left: 12px; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 55; display: flex; gap: 12px;
+  align-items: center; justify-content: space-between; padding: 10px 10px 10px 16px; border-radius: 16px; background: #F6EAD3; color: #07040D;
+  box-shadow: 0 12px 30px rgba(7,4,13,.5); font: 600 14px 'Manrope', sans-serif; }
+.mh-undotoast b { font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .06em; }
+.mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
+  font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }

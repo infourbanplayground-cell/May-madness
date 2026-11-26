@@ -33,7 +33,7 @@
   // reloading, so if that reload came back out of a cache the marker said
   // "current" while the page was stale — and it never checked again.
   // A phone could sit on a superseded build indefinitely.
-  var V = "35859ba3e256";
+  var V = "3798952ab169";
   fetch("/version.txt?_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.text(); })
     .then(function(v){
@@ -1721,6 +1721,17 @@ html.mh-bigtext .mn-label, html.mh-bigtext .mh-wgap, html.mh-bigtext .mh-livenex
 @media (prefers-reduced-motion: reduce) { .mh-wrow.mh-flash { animation: none; background: rgba(255,179,107,.24); } .mh-toggle::after { transition: none; } }
 
 .mh-page:has(.mh-youstrip) .mh-body { padding-bottom: 170px !important; }
+.mh-wa { display: flex !important; align-items: center; justify-content: center; text-align: center; text-decoration: none; min-height: 48px; }
+.mh-confirm { position: fixed; inset: 0; z-index: 60; background: rgba(7,4,13,.72); display: flex; align-items: flex-end; padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+.mh-confirmbox { width: 100%; text-align: center; background: #13233A !important; }
+.mh-confirmbox b { color: var(--mn-sand); font-weight: 800; }
+.mh-undotoast { position: fixed; left: 12px; right: 12px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 55; display: flex; gap: 12px;
+  align-items: center; justify-content: space-between; padding: 10px 10px 10px 16px; border-radius: 16px; background: #F6EAD3; color: #07040D;
+  box-shadow: 0 12px 30px rgba(7,4,13,.5); font: 600 14px 'Manrope', sans-serif; }
+.mh-undotoast b { font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .06em; }
+.mh-undonext { font-size: 13px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mh-undotoast button { flex: none; min-height: 44px; min-width: 72px; border: 0; border-radius: 12px; background: #07040D; color: #F6EAD3;
+  font: 700 13px 'JetBrains Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
 
 </style>
 <style id="heist-classic">
@@ -13447,17 +13458,26 @@ function MhLive({
   }, [L.clock]);
   const firstServeA = (L.serving || "A") === "A" ? (L.a + L.b) % 2 === 0 : (L.a + L.b) % 2 === 1;
   const servingA = (a + b) % 2 === 0 === firstServeA;
+  const buzz = ms => {
+    try {
+      navigator.vibrate && navigator.vibrate(ms);
+    } catch (e) {}
+  };
   const add = side => {
+    buzz(10);
     setHist(h => h.concat([[a, b]]));
     side === "a" ? setA(a + 1) : setB(b + 1);
   };
   const undo = () => {
     if (!hist.length) return;
+    buzz(10);
     const [x, y] = hist[hist.length - 1];
     setA(x);
     setB(y);
     setHist(hist.slice(0, -1));
   };
+  const [ask, setAsk] = React.useState(false);
+  const winner = a > b ? L.teamA : b > a ? L.teamB : null;
   const lines = t => {
     const p = t.split(" & ");
     return React.createElement(React.Fragment, null, p[0].toUpperCase(), React.createElement("br", null), "& ", (p[1] || "").toUpperCase());
@@ -13560,11 +13580,54 @@ function MhLive({
   }, "Undo"), React.createElement(MhButton, {
     kind: "light",
     live: true,
-    onClick: () => onLock ? onLock({
-      t1: a,
-      t2: b
-    }) : go("back")
-  }, "Lock result"))), React.createElement(MhGrain, null));
+    onClick: () => {
+      buzz(15);
+      setAsk(true);
+    }
+  }, "Lock result")), ask && React.createElement("div", {
+    className: "mh-confirm",
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-label": "Confirm the result"
+  }, React.createElement("div", {
+    className: "mn-glass mh-confirmbox"
+  }, React.createElement(MhLabel, {
+    tone: "peach"
+  }, "Lock this result?"), React.createElement("div", {
+    className: "mn-display",
+    style: {
+      fontSize: 56,
+      lineHeight: .95,
+      marginTop: 6
+    }
+  }, a, "\u2013", b), React.createElement(MhSerif, {
+    size: 15,
+    style: {
+      marginTop: 6
+    }
+  }, winner ? React.createElement(React.Fragment, null, "Match to ", React.createElement("b", null, winner)) : "Level — a set needs a winner"), React.createElement("div", {
+    className: "mh-two",
+    style: {
+      gap: 8,
+      marginTop: 14
+    }
+  }, React.createElement(MhButton, {
+    kind: "ghost",
+    live: true,
+    onClick: () => setAsk(false)
+  }, "Back"), React.createElement(MhButton, {
+    kind: "light",
+    live: true,
+    disabled: !winner,
+    onClick: () => {
+      buzz([12, 40, 12]);
+      setAsk(false);
+      onLock ? onLock({
+        t1: a,
+        t2: b
+      }) : go("back");
+    }
+  }, "Lock it"))))), React.createElement(MhGrain, null));
 }
 function MhRecap({
   D,
@@ -15061,25 +15124,20 @@ function MhShareSheet({
     poster: "campaign-poster",
     contenders: "contenders"
   }[k];
+  const me = D.players && D.players.find(p => p.id === (id ? String(id).split(".")[0] : D.meId));
+  const caption = {
+    loot: `My ${MH.name || "Muscat Heist"} knockout card.`,
+    card: me ? `${me.name} · #${me.rank} on Most Wanted · ${me.points} pts.` : `${MH.name || "Muscat Heist"}.`,
+    poster: `${MH.name || "Muscat Heist"} — nine nights at ${MH.venue || "Al Hail North"}.`,
+    contenders: `${MH.name || "Muscat Heist"} — the contenders.`
+  }[k];
   const run = async () => {
     setBusy(true);
     setErr("");
     try {
       const blob = await mhExportStory(ref.current.firstChild);
-      const file = new File([blob], `muscat-heist-${name}.png`, {
-        type: "image/png"
-      });
       window.__mhLastExport = blob;
-      if (navigator.canShare && navigator.canShare({
-        files: [file]
-      })) await navigator.share({
-        files: [file]
-      });else {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = file.name;
-        a.click();
-      }
+      await mhShareOut(blob, `muscat-heist-${name}.png`, caption);
     } catch (e) {
       if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again.");
     }
@@ -15145,7 +15203,10 @@ function MhShareSheet({
     live: true,
     onClick: run,
     disabled: busy
-  }, busy ? "Making the image…" : "Share image"))));
+  }, busy ? "Making the image…" : "Share image"), typeof MhWhatsApp === "function" && React.createElement(MhWhatsApp, {
+    text: caption,
+    label: "Send the link on WhatsApp"
+  }))));
 }
 const MH_LOOT = [{
   id: "job",
@@ -16064,20 +16125,8 @@ function MhNightShare({
     try {
       const blob = await mhExportStory(ref.current.firstChild);
       const tag = k === "lineup" && m ? m.round ? m.round + (m.round !== "final" ? m.n : "") : `g${m.group}${m.n}` : k;
-      const file = new File([blob], `muscat-heist-${s.code.replace(/\W/g, "").toLowerCase()}-${tag}.png`, {
-        type: "image/png"
-      });
       window.__mhLastExport = blob;
-      if (navigator.canShare && navigator.canShare({
-        files: [file]
-      })) await navigator.share({
-        files: [file]
-      });else {
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = file.name;
-        a.click();
-      }
+      await mhShareOut(blob, `muscat-heist-${s.code.replace(/\W/g, "").toLowerCase()}-${tag}.png`, `${MH.name || "Muscat Heist"} · ${s.code} ${s.title}`);
     } catch (e) {
       if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again.");
     }
@@ -16180,7 +16229,10 @@ function MhNightShare({
     live: true,
     onClick: run,
     disabled: busy
-  }, busy ? "Making the image…" : "Share image"))) : React.createElement(MhGlass, {
+  }, busy ? "Making the image…" : "Share image"), typeof MhWhatsApp === "function" && React.createElement(MhWhatsApp, {
+    text: `${MH.name || "Muscat Heist"} · ${s.code} ${s.title}`,
+    label: "Send the link on WhatsApp"
+  }))) : React.createElement(MhGlass, {
     style: {
       marginTop: 14
     }
@@ -16575,6 +16627,49 @@ function MhSettings({
     className: "mh-setrow mh-tap",
     onClick: () => go("howto")
   }, React.createElement("span", null, "How it works"), React.createElement("span", null, "\u203A"))));
+}
+const mhLink = () => "https://" + (MH.host || "heist.urbanpadel.om");
+async function mhShareOut(blob, filename, text) {
+  const file = new File([blob], filename, {
+    type: "image/png"
+  });
+  const msg = text ? `${text}\n${mhLink()}` : mhLink();
+  if (navigator.canShare && navigator.canShare({
+    files: [file],
+    text: msg
+  })) {
+    await navigator.share({
+      files: [file],
+      text: msg
+    });
+    return "shared";
+  }
+  if (navigator.canShare && navigator.canShare({
+    files: [file]
+  })) {
+    await navigator.share({
+      files: [file]
+    });
+    return "shared";
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  return "saved";
+}
+function MhWhatsApp({
+  text,
+  label = "Send on WhatsApp"
+}) {
+  const href = "https://wa.me/?text=" + encodeURIComponent((text ? text + "\n" : "") + mhLink());
+  return React.createElement("a", {
+    className: "mn-btn mn-btn-ghost mh-wa",
+    href: href,
+    target: "_blank",
+    rel: "noopener",
+    onClick: () => mhHaptic()
+  }, label);
 }
 const MH_HOST_PHOTOS = "/api/roster";
 const MH_HOST_LOOT = "/api/loot";
@@ -17201,6 +17296,24 @@ function HeistShell(props) {
   const [route, setRoute] = React.useState(read);
   const [portraits, setPortraits] = React.useState({});
   const [lootArt, setLootArt] = React.useState({});
+  const [undo, setUndo] = React.useState(null);
+  React.useEffect(() => {
+    if (!undo) return;
+    const t = setTimeout(() => setUndo(null), 10000);
+    return () => clearTimeout(t);
+  }, [undo]);
+  const takeBack = () => {
+    if (!undo || !undo.prev) {
+      setUndo(null);
+      return;
+    }
+    const u = undo;
+    setUndo(null);
+    updateSession(u.sid, ss => ({
+      ...ss,
+      groupMatches: (ss.groupMatches || []).map(x => x.id === u.mid ? u.prev : x)
+    }));
+  };
   React.useEffect(() => {
     const f = () => setRoute(read());
     addEventListener("hashchange", f);
@@ -17323,6 +17436,8 @@ function HeistShell(props) {
           alert("Not a finished score: a set is first to 6 (7-5 or 7-6 if it goes on).");
           return;
         }
+        const sess = (state.sessions || []).find(x => x.id === m.sid);
+        const prev = sess && (sess.groupMatches || []).find(x => x.id === m.id);
         updateSession(m.sid, ss => ({
           ...ss,
           groupMatches: (ss.groupMatches || []).map(x => x.id === m.id ? {
@@ -17331,6 +17446,17 @@ function HeistShell(props) {
             resultAt: Date.now()
           } : x)
         }));
+        const later = sess && (sess.groupMatches || []).filter(x => !x.winner && x.id !== m.id);
+        const nm = later && later[0];
+        const nameOf = id => mhTeamNames(sess, id, Object.fromEntries((state.players || []).map(p => [p.id, p])));
+        setUndo({
+          sid: m.sid,
+          mid: m.id,
+          prev: prev ? JSON.parse(JSON.stringify(prev)) : null,
+          at: Date.now(),
+          label: `${t1}–${t2} locked`,
+          next: nm ? `${nameOf(nm.team1Id)} v ${nameOf(nm.team2Id)}${nm.court ? " · Court " + nm.court : ""}` : null
+        });
         go("back");
       };
     } else if (name === "live") {
@@ -17348,7 +17474,19 @@ function HeistShell(props) {
     lastSync: lastSync,
     sync: sync,
     onRefresh: refreshNow
-  }), React.createElement(Screen, {
+  }), undo && canScore && React.createElement("div", {
+    className: "mh-undotoast",
+    role: "status"
+  }, React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, React.createElement("b", null, undo.label), undo.next && React.createElement("div", {
+    className: "mh-undonext"
+  }, "Up next: ", undo.next)), React.createElement("button", {
+    type: "button",
+    onClick: takeBack
+  }, "Undo")), React.createElement(Screen, {
     key: route.join("/"),
     D: D,
     go: go,

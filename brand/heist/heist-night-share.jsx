@@ -250,10 +250,8 @@ function MhNightShare({ D, go, no, kind }) {
     try {
       const blob = await mhExportStory(ref.current.firstChild);
       const tag = k === "lineup" && m ? (m.round ? m.round + (m.round !== "final" ? m.n : "") : `g${m.group}${m.n}`) : k;
-      const file = new File([blob], `muscat-heist-${s.code.replace(/\W/g, "").toLowerCase()}-${tag}.png`, { type: "image/png" });
       window.__mhLastExport = blob;                       // for the harness
-      if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
-      else { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; a.click(); }
+      await mhShareOut(blob, `muscat-heist-${s.code.replace(/\W/g, "").toLowerCase()}-${tag}.png`, `${MH.name || "Muscat Heist"} · ${s.code} ${s.title}`);
     } catch (e) { if (e && e.name !== "AbortError") setErr("Couldn't make the image. Try again."); }
     setBusy(false);
   };
@@ -285,6 +283,7 @@ function MhNightShare({ D, go, no, kind }) {
           {err && <MhSerif size={14} tone="coral" style={{ textAlign: "center" }}>{err}</MhSerif>}
           <div className="mh-momentfoot" style={{ padding: "12px 0 26px" }}>
             <MhButton live onClick={run} disabled={busy}>{busy ? "Making the image…" : "Share image"}</MhButton>
+            {typeof MhWhatsApp === "function" && <MhWhatsApp text={`${MH.name || "Muscat Heist"} · ${s.code} ${s.title}`} label="Send the link on WhatsApp" />}
           </div>
         </> : <MhGlass style={{ marginTop: 14 }}><MhSerif size={15}>Nothing to post yet — the draw is made on the night.</MhSerif></MhGlass>}
       </main>
