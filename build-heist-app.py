@@ -397,6 +397,13 @@ def main():
     s, k = re.subn(r"^const LANDMARKS = \[.*?\];$", lambda m: "const LANDMARKS = " + json.dumps(eps, ensure_ascii=False) + ";", s, count=1, flags=re.M)
     assert k == 1, "LANDMARKS not found"
 
+    # ── compile the JSX here, once, instead of on every phone on every open ──
+    # (3.1MB of Babel downloaded and ~900KB compiled before the first frame);
+    # ops/precompile-jsx.js runs the same compiler and preset and drops the CDN tag
+    import subprocess
+    s = subprocess.run(["node", os.path.join(HERE, "ops", "precompile-jsx.js")], input=s, capture_output=True,
+                       text=True, check=True).stdout
+
     # ── stamp ──
     bid = hashlib.sha256(s.encode()).hexdigest()[:12]
     s, n = re.subn(r'(\n\s*var V = )"[0-9a-f]{6,}";', r'\1"%s";' % bid, s, count=1)

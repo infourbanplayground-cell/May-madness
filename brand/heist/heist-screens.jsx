@@ -291,7 +291,7 @@ function MhMe({ D, go }) {
             points={me.points} rep={me.rep} size="S" foil={false} onClick={() => go("card", me.id)} />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
             <MhLabel>Your season</MhLabel>
-            <MhDisplay size={56} style={{ lineHeight: .85 }}>{me.points}</MhDisplay>
+            <MhDisplay size={56} style={{ lineHeight: .85 }}><MhCount n={me.points} /></MhDisplay>
             <div style={{ display: "flex", gap: 6 }}>
               <span className="mh-chip" data-tone={me.rep.id}>#{me.rank}</span>
               <span className="mh-chip" data-tone={me.rep.id}>REP {me.rep.label.toUpperCase()}</span>
@@ -421,7 +421,7 @@ function MhTake({ D, go }) {
           <MhArt src={mhScene(D, "take").src || D.sessions[D.sessions.length - 1].art} pos={mhScene(D, "take").pos || "center 50%"} />
           <div className="mh-takebody">
             <MhLabel tone="peach">Prize pool</MhLabel>
-            <MhDisplay size={52} style={{ lineHeight: .9 }}>{pool} OMR</MhDisplay>
+            <MhDisplay size={52} style={{ lineHeight: .9 }}><MhCount n={pool} /> OMR</MhDisplay>
             <div style={{ display: "flex", gap: 14 }}><MhLabel tone="teal">{paid} paid</MhLabel><MhLabel tone="gold">{left} left</MhLabel></div>
           </div>
         </div>

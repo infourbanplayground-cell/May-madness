@@ -328,6 +328,24 @@ function MhCrewCard({ player, rank, points, rep, size = "M", stats, foil = true,
     : card;
 }
 
+// ── a number that counts up to its value, once, when the screen opens ─────
+// 900ms ease-out; reduced motion and a value of 0 show the number straight away.
+// The figure is always the real one: only the frames on the way change.
+const MhCount = ({ n }) => <>{mhUseCount(n)}</>;
+function mhUseCount(target, ms = 900) {
+  const still = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const [v, setV] = React.useState(still || !target ? target : 0);
+  React.useEffect(() => {
+    if (still || !target) { setV(target); return; }
+    let raf, t0;
+    const step = t => { t0 = t0 || t; const k = Math.min(1, (t - t0) / ms); setV(Math.round(target * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target]);
+  return v;
+}
+
 // ── film grain, as the static design lays over every screen ──────────────
 const MhGrain = () => (
   <svg className="mn-grain" aria-hidden="true">

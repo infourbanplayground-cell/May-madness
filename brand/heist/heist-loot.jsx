@@ -213,7 +213,7 @@ function MhLootScreen({ D, go, id }) {
           <MhLabel tone={fresh ? "gold" : undefined}>{fresh ? "New knockout card" : "Knockout card"}</MhLabel>
           <button type="button" className="mh-close mn-serif" onClick={() => go("back")}>close ✕</button>
         </div>
-        <div className="mh-loot-stage" data-tier={card.tier}><MhLootCard card={card} size="L" /></div>
+        <div className="mh-loot-stage" data-tier={card.tier} data-fresh={fresh ? "" : undefined}><MhLootCard card={card} size="L" /></div>
         <div style={{ textAlign: "center" }}>
           <MhSerif size={16}>{card.code} · {card.title}</MhSerif>
           <MhLabel style={{ marginTop: 4 }}>{line}</MhLabel>

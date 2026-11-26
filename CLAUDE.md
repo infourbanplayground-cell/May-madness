@@ -966,6 +966,28 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
   - `node ops/check-heist-loot.mjs` (expected cards worked out in Node from the
     stored brackets, serials, fit, custom art, export; `SABOTAGE=tier` goes red)
     and `node ops/check-heist-loot-art.mjs` (the upload end to end, real API).
+- **THE JSX IS COMPILED AT BUILD TIME, NOT ON THE PHONE** (26 Nov 2026).
+  `build-heist-app.py` pipes the page through `ops/precompile-jsx.js`, which runs
+  the same Babel (`ops/vendor/babel-standalone-7.29.12.min.js`) with the same
+  `react` preset the tag asked for and removes the Babel CDN tag. Every volume
+  before this downloaded 3.1MB of Babel and compiled ~900KB of JSX on every
+  open: measured on a 4x-throttled CPU, Home drew at **7.0s before, 1.3s
+  after**. The build refuses if there is not exactly one `text/babel` block or
+  if any reference survives. National still ships raw JSX and would gain the
+  same; not done while its season is live.
+- **Episode titles are the owner's (26 Nov, option A)**: The Briefing, The
+  Crew, The Recon, The Plan, The Vault, The Double Cross, The Heat, No Way
+  Back (2X), The Big Score (2X). They print on the schedule post.
+- **Motion added 26 Nov**: the big knockout card turns in as it is dealt and a
+  NEW one catches the light once; the album deals in with a 40ms stagger; ME's
+  season points and The Take's pool count up (`mhUseCount`, 900ms). All
+  transform/opacity, fill BACKWARDS, and the loot foil runs three passes and
+  stops. Reduced motion shows the final state.
+- **Launch posts: `build-heist-post.py` + `ops/render-heist-post.mjs`** (four
+  feed cards, a story, `CAPTIONS.txt`) and `ops/heist-signup.py <night>` for the
+  WhatsApp list. Poster voice, not the app's: Archivo condensed caps, mono
+  credits, the paintings full-bleed (owner: "it shouldn't look childish").
+  Every figure from `heist-season.json`; the builder asserts the pool.
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:

@@ -2,7 +2,7 @@
   "_notes": [
     "Muscat Heist — Urban Social Series Vol.10, December 2026. Built from the Muscat Nights design handoff in brand/heist/handoff/, renamed by the owner on 22 Nov 2026.",
     "EVERY figure the app, the posts and the films show comes from this file or from the points engine. The pool is DERIVED (seasonPrizes + voucher x 2 x sessions) and never typed: the handoff said 402 and its own parts add to 407. Third place moved 30 -> 35 (owner, 26 Nov 2026), so the pool is 412.",
-    "No Arabic name — the owner removed it (22 Nov 2026). The session art is the owner's (23 Nov 2026); the episode titles are still PLACEHOLDERS."
+    "No Arabic name — the owner removed it (22 Nov 2026). The session art is the owner's (23 Nov 2026); the episode titles are the owner's option A (26 Nov 2026): a heist from the briefing to the big score."
   ],
   "name": "Muscat Heist",
   "nameLine1": "MUSCAT",
@@ -26,14 +26,14 @@
   "doubleNights": ["2026-12-28", "2026-12-30"],
   "finalsDate": "2026-12-30",
   "episodes": [
-    {"code": "EP.01", "title": "The Corniche", "art": "art-ep01-lounge.jpg", "artPos": "center 38%"},
-    {"code": "EP.02", "title": "The Arrival", "art": "art-ep02-arrival.jpg", "artPos": "center 48%"},
-    {"code": "EP.03", "title": "The Heat", "art": "art-ep03-courts.jpg", "artPos": "center 62%"},
-    {"code": "EP.04", "title": "The Knockout", "art": "art-ep04-four.jpg", "artPos": "center 34%"},
-    {"code": "EP.05", "title": "The Smash", "art": "art-ep05-smash.jpg", "artPos": "30% 22%"},
-    {"code": "EP.06", "title": "The Grudge", "art": "art-ep06-trio.jpg", "artPos": "center 26%"},
-    {"code": "EP.07", "title": "The Rematch", "art": "art-ep07-rail.jpg", "artPos": "center 18%"},
-    {"code": "EP.08", "title": "The Crew", "art": "art-ep08-crew.jpg", "artPos": "center 48%"},
+    {"code": "EP.01", "title": "The Briefing", "art": "art-ep01-lounge.jpg", "artPos": "center 38%"},
+    {"code": "EP.02", "title": "The Crew", "art": "art-ep02-arrival.jpg", "artPos": "center 48%"},
+    {"code": "EP.03", "title": "The Recon", "art": "art-ep03-courts.jpg", "artPos": "center 62%"},
+    {"code": "EP.04", "title": "The Plan", "art": "art-ep04-four.jpg", "artPos": "center 34%"},
+    {"code": "EP.05", "title": "The Vault", "art": "art-ep05-smash.jpg", "artPos": "30% 22%"},
+    {"code": "EP.06", "title": "The Double Cross", "art": "art-ep06-trio.jpg", "artPos": "center 26%"},
+    {"code": "EP.07", "title": "The Heat", "art": "art-ep07-rail.jpg", "artPos": "center 18%"},
+    {"code": "EP.08", "title": "No Way Back", "art": "art-ep08-crew.jpg", "artPos": "center 48%"},
     {"code": "EP.09", "title": "The Big Score", "art": "art-ep09-walkout.jpg", "artPos": "center 50%"}
   ],
   "loadingArt": [

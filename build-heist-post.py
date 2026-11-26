@@ -12,8 +12,8 @@ stays in the app; a poster that shouts in it reads as a kids' party flyer.
 EVERY FIGURE COMES FROM heist-season.json: the nights, the weekdays, the time,
 the venue, the entry, the voucher, the season prizes, the double nights, and
 the POOL, which is derived (seasonPrizes + voucher x 2 x nights) and never
-typed. Episode TITLES are placeholders and are deliberately not printed; the
-cards carry the episode number and the date.
+typed. The episode titles are the owner's (option A, 26 Nov 2026) and print on
+the schedule card under each episode's number.
 
 Output: brand/heist/posts/*.html (+ PNGs from the renderer) and CAPTIONS.txt.
 """
@@ -89,8 +89,9 @@ html,body{background:var(--navy)}
 .cell .bg{filter:saturate(1.15) brightness(.78)}
 .cell .cs{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,4,13,0) 40%,rgba(7,4,13,.85))}
 .cell .lab{position:absolute;left:16px;right:16px;bottom:14px}
-.cell .n{font-weight:800;font-stretch:112%;font-size:38px;line-height:1;color:var(--sand)}
-.cell .d{font-size:19px;color:var(--mist);margin-top:6px}
+.cell .n{font-weight:800;font-stretch:112%;font-size:32px;line-height:1;color:var(--sand)}
+.cell .t{font-family:'Manrope',sans-serif;font-weight:800;font-size:22px;color:var(--peach);margin-top:4px;white-space:nowrap}
+.cell .d{font-size:18px;color:var(--mist);margin-top:4px}
 .cell .x2{position:absolute;right:12px;top:12px;padding:4px 10px;background:var(--pink);color:var(--ink);font-size:19px;font-weight:700}
 .cell.dbl{outline:3px solid var(--pink);outline-offset:-3px}
 /* format */
@@ -171,7 +172,7 @@ def nights():
         dbl = d.isoformat() in DOUBLE
         cells.append(f"""<div class="cell{' dbl' if dbl else ''}"><div class="bg" style="background-image:url({art(e['art'])});--pos:{e['artPos']}"></div>
 <div class="cs"></div>{'<span class="mono x2">2X</span>' if dbl else ''}
-<div class="lab"><div class="n">EP.{i:02d}</div><div class="mono d">{d.strftime('%a %-d %b')}</div></div></div>""")
+<div class="lab"><div class="n">EP.{i:02d}</div><div class="t">{html.escape(e['title'])}</div><div class="mono d">{d.strftime('%a %-d %b')}</div></div></div>""")
     body = f"""<div class="shade" style="background:radial-gradient(120% 70% at 50% 0%,#24164A 0%,var(--navy) 60%)"></div>
 <div class="pad">{head_row("The schedule")}
 <div class="fitbox" style="margin-top:18px"><div class="h" data-fit="104">{WORDS[len(NIGHTS)].title()} episodes</div></div>

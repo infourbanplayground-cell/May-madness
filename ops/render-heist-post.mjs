@@ -61,6 +61,7 @@ for (const f of cards) {
       if (ox > 4 && oy > Math.max(caps(a.el), caps(c.el))) bad.push(`overlap "${a.t}" / "${c.t}" (${Math.round(oy)}px)`);
     }
     for (const el of document.querySelectorAll('[data-fit], .row .v, .h')) if (el.scrollWidth > el.parentElement.clientWidth + 1) bad.push(`too wide: "${el.textContent.slice(0, 24)}"`);
+    for (const el of document.querySelectorAll('.cell .t')) if (el.scrollWidth > el.parentElement.clientWidth + 1) bad.push(`title too wide: "${el.textContent}"`);
     for (const el of document.querySelectorAll('.row')) if (el.scrollWidth > el.clientWidth + 1) bad.push(`row overflows: "${el.textContent.trim().slice(0, 24)}"`);
     return { size: [Math.round(card.width), Math.round(card.height)], bad: [...new Set(bad)] };
   }, { story });
