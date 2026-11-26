@@ -193,11 +193,30 @@ Drop your name + partner below to lock your spot 👇
     # the head: title, description and the link preview
     h0 = s.index("<head>"); h1 = s.index("</head>")
     head = s[h0:h1]
-    desc = f"Social padel in Oman. Mon &amp; Wed, {S['schedule'].split(', ')[-1]}, all {month}. New partners every session, everyone ranked, {pool} OMR prize pool."
+    # Heist is "bring a partner": the inherited "New partners every session" was
+    # Americano copy, and it sat under the link right beside a sign-up list
+    # asking for name + partner
+    import datetime as _dt
+    first = _dt.date.fromisoformat(S["nights"][0]).strftime("%a %-d %b")
+    _w = ["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"]
+    desc = (f"Social padel in Oman. {_w[len(S['nights'])]} nights, every Mon &amp; Wed at {S['schedule'].split(', ')[-1]} "
+            f"from {first}, {S['venue']}. Bring a partner. {pool} OMR prize pool.")
+    assert len(desc.replace("&amp;", "&")) <= 150, f"link description is {len(desc)} chars; WhatsApp cuts near 150"
     head = re.sub(r'<meta name="apple-mobile-web-app-title" content="[^"]*" />', f'<meta name="apple-mobile-web-app-title" content="{name}" />', head)
     head = re.sub(r'<meta name="description" content="[^"]*" />', f'<meta name="description" content="{name} — Vol.{S["volume"]} of the Urban Social Series. {desc}" />', head)
     head = re.sub(r'<meta (property|name)="(og|twitter):description" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}:description" content="{desc}" />', head)
-    head = re.sub(r'<meta (property|name)="(og:image|twitter:image)" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}" content="https://{host}/assets/art/art-ep02-arrival.jpg" />', head)
+    # the preview is its own 1200x630 card (build-heist-post.py), served from the
+    # SITE ROOT so it exists before and after launch, and stamped with its own
+    # hash: Cloudflare caches it for hours and a same-URL re-upload unfurls old
+    og = os.path.join(HERE, "brand", "heist", "posts", "og-card.jpg")
+    assert os.path.exists(og) and os.path.getsize(og) < 300_000, "og-card.jpg missing or over 300KB (WhatsApp drops it)"
+    ogv = hashlib.sha256(open(og, "rb").read()).hexdigest()[:10]
+    head = re.sub(r'<meta (property|name)="(og:image|twitter:image)" content="[^"]*" />', lambda m: f'<meta {m.group(1)}="{m.group(2)}" content="https://{host}/og-card.jpg?v={ogv}" />', head)
+    # the tab icon was National's red khanjar; a phone's home screen had no icon at all
+    head, k = re.subn(r'<link rel="icon"[^>]*/>', '<link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />\n'
+                      '<link rel="apple-touch-icon" href="/apple-touch-icon.png" />\n<link rel="manifest" href="/manifest.webmanifest" />', head, count=1)
+    assert k == 1, "favicon link not found"
+    head = re.sub(r"<title>.*?</title>", f"<title>{name} · Urban Playground</title>", head, count=1, flags=re.S)
     head = re.sub(r'<meta property="og:image:alt" content="[^"]*" />', f'<meta property="og:image:alt" content="{name} — {tag}" />', head)
     s = s[:h0] + head + s[h1:]
 
@@ -238,6 +257,12 @@ def reskin_cards(s):
     sub("  {\n    const lm = ngLandmark(d);\n", "  if (false) {\n    const lm = ngLandmark(d);\n", "list medallion")
     return s[:a] + c + s[b:], n
 
+def launch_day(S):
+    # the app opens the day before night one (owner, 23 Nov: "goes live Tue 1 Dec")
+    import datetime as _d
+    return (_d.date.fromisoformat(S["nights"][0]) - _d.timedelta(days=1)).strftime("%a %-d %b")
+
+
 def main():
     s = open(SRC, encoding="utf-8").read()
     S = season
@@ -260,7 +285,6 @@ def main():
     s = const(s, "NATIONAL_DAY_TITLE", '"DOUBLE POINTS"')
     s = const(s, "NA_VOLUME_NAME", json.dumps(S["name"]))
     s = s.replace("56 NATIONAL SERIES", S["name"].upper())
-    s = once(s, "<title>", "<title>Muscat Heist · ", "title")
 
     s, swept = reskin(s)
     classic_css = open(os.path.join(H, "heist-classic.css"), encoding="utf-8").read()
@@ -410,6 +434,21 @@ def main():
     assert n == 1, "build stamp not found"
     open(DST, "w", encoding="utf-8").write(s)
     open(DST + ".version", "w").write(bid + "\n")
+
+    # ── the holding page at the site root until launch day ──
+    # A link pasted into the group before Tue 1 Dec lands here, so it carries the
+    # app's own <head> tags (title, description, preview card, icons) and nothing else.
+    import html as _h
+    hd = s[s.index("<head>") + 6:s.index("</head>")]
+    tags = "\n".join(m for m in re.findall(r'<meta (?:property|name)="(?:og:[^"]*|twitter:[^"]*|description|theme-color)"[^>]*/>|<link rel="(?:icon|apple-touch-icon|manifest)"[^>]*/>|<title>.*?</title>', hd, flags=re.S))
+    hold = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+{tags}
+<style>html,body{{margin:0;background:#0F1B2B;color:#F6EAD3;font:16px/1.5 system-ui,sans-serif}}main{{min-height:100dvh;display:grid;place-items:center;text-align:center;padding:24px}}
+img{{width:min(300px,70vw);height:auto}}b{{display:block;font-size:22px;letter-spacing:.04em;margin-top:18px}}p{{color:#D8DEE8;margin:8px 0}}a{{color:#FFB36B}}</style>
+</head><body data-heist-holding><main><div><img src="/preview/assets/heist-logo.webp" alt="Urban Playground Muscat Heist">
+<b>Opens {_h.escape(launch_day(S))}</b><p>{_h.escape(S["schedule"].replace(", ", " · "))} · {_h.escape(S["venue"])}</p>
+<p><a href="/photos/">Player photos</a></p></div></main></body></html>"""
+    open(os.path.join(HERE, "heist-holding.html"), "w", encoding="utf-8").write(hold)
 
     left = {t: s.count(t) for t in ("56 NATIONAL SERIES", "national.urbanpadel.om") if s.count(t)}
     print("  re-skin:", ", ".join(f"{k} {v}" for k, v in swept.items() if v))

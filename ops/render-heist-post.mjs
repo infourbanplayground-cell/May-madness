@@ -20,7 +20,8 @@ const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' })
 let fails = 0;
 for (const f of cards) {
   const story = f.startsWith('story');
-  const W = 1080, H = story ? 1920 : 1350;
+  const og = f.startsWith('og');
+  const W = og ? 1200 : 1080, H = story ? 1920 : og ? 630 : 1350;
   const pg = await (await b.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: 1 })).newPage();
   let src = fs.readFileSync(path.join(DIR, f), 'utf8');
   const was = src;

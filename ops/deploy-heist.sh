@@ -32,6 +32,16 @@ ssh urbanpadel "mkdir -p $DIR/assets/art $DIR/assets/fonts/brand $DIR/assets/fon
 scp -q "$PAGE" urbanpadel:$DIR/index.html.new
 scp -q brand/heist/art/*.jpg brand/heist/art/*.webp urbanpadel:$DIR/assets/art/
 scp -q brand/heist/up-logo-tight.png brand/heist/heist-logo.png brand/heist/heist-logo.webp brand/national/history.json urbanpadel:$DIR/assets/
+# the link preview, the icons and the home-screen manifest live at the SITE ROOT
+# in both modes, so a link shared before launch day unfurls with its picture
+scp -q brand/heist/posts/og-card.jpg brand/heist/favicon-64.png brand/heist/apple-touch-icon.png brand/heist/icon-192.png \
+  brand/heist/icon-512.png brand/heist/icon-maskable-512.png brand/heist/manifest.webmanifest urbanpadel:$WEB/
+# before launch the site root is a holding page: refresh it (it carries the link
+# preview) — but only while it IS the holding page, never over the live app
+if [ "${ROOT:-}" != 1 ]; then
+  scp -q heist-holding.html urbanpadel:/tmp/heist-holding.html
+  ssh urbanpadel "grep -q 'id=\"root\"' $WEB/index.html 2>/dev/null || install -m 644 /tmp/heist-holding.html $WEB/index.html"
+fi
 # the inherited all-time plate fetches /assets/history.json from the SITE ROOT
 ssh urbanpadel "mkdir -p $WEB/assets"; scp -q brand/national/history.json urbanpadel:$WEB/assets/
 scp -q brand/fonts/*.woff2 brand/fonts/fonts.css urbanpadel:$DIR/assets/fonts/brand/

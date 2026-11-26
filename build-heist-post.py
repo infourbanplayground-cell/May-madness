@@ -63,6 +63,7 @@ CSS = """
 html,body{background:var(--navy)}
 .frame{position:relative;width:1080px;overflow:hidden;background:var(--navy);color:var(--sand);font-family:'Archivo',sans-serif}
 .feed{height:1350px}.story{height:1920px}
+.og{width:1200px;height:630px}.og .pad{inset:48px 56px}
 .bg{position:absolute;inset:0;background-size:cover;background-position:var(--pos,center);filter:saturate(1.2) contrast(1.05)}
 .shade{position:absolute;inset:0}
 .grain{position:absolute;inset:0;opacity:.09;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
@@ -220,7 +221,22 @@ def take():
     return page("feed", body, "Muscat Heist · the take")
 
 
-CARDS = {"1-hero": hero(), "2-nights": nights(), "3-format": fmt(), "4-take": take(), "story-launch": hero(story=True)}
+# ── the link preview, 1200x630 (what WhatsApp unfurls under the link) ─────
+def og():
+    e = EP[0]
+    n = len(NIGHTS)
+    body = f"""<div class="bg" style="background-image:url({art(e['art'])});--pos:{e['artPos']}"></div>
+<div class="shade" style="background:linear-gradient(90deg,rgba(15,27,43,.94) 0%,rgba(15,27,43,.82) 46%,rgba(15,27,43,.15) 78%)"></div>
+<div class="pad"><img class="logo" src="{LOGO}" alt="Urban Playground Muscat Heist" style="width:250px">
+<div style="position:absolute;left:0;width:640px;bottom:58px">
+<div class="fitbox"><div class="h" data-fit="86">{WORDS[n].title()} nights.</div></div>
+<div class="fitbox"><div class="h" data-fit="86"><em>One take.</em></div></div>
+<div class="mono credits" style="margin-top:20px;font-size:22px;white-space:nowrap">{DAYS} · {CLOCK} · from {FIRST}</div></div>
+<div class="foot"><span class="mono url" style="font-size:22px">{S["host"]}</span><span class="mono tag hot" style="font-size:20px;background:rgba(7,4,13,.92)">{POOL} OMR pool</span></div></div>"""
+    return page("og", body, "Muscat Heist")
+
+
+CARDS = {"og-card": og(), "1-hero": hero(), "2-nights": nights(), "3-format": fmt(), "4-take": take(), "story-launch": hero(story=True)}
 for k, v in CARDS.items():
     open(os.path.join(OUT, f"{k}.html"), "w").write(v)
 
