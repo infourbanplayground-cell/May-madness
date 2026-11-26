@@ -158,7 +158,15 @@
 /* Bowlby One and Kaushan Script are single-weight upright faces: asking for
    900 or italic makes the browser SYNTHESISE a smeared bold and a slanted
    oblique, so every rule that set those on them is neutralised at the root */
-.mn-serif   { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-style: normal; color: var(--mn-coral); }
+/* READABLE FIRST (owner, 26 Nov: "the font isn't readable"). Sentences were set
+   in the Kaushan brush in hot pink — a display script, fine for three words and
+   hard work for a paragraph on a phone. Body copy is Manrope in mist now; the
+   brush is kept for the short decorative tags it suits (the top-bar line, the
+   title asides, "you", the contenders' tagline). */
+.mn-serif   { font-family: var(--mn-font-ui); font-weight: 500; font-style: normal; line-height: 1.45; color: var(--mn-mist); }
+.mn-topbar .mn-serif, .mh-title > .mn-serif, .mh-wname .mn-serif, .mh-conttag.mn-serif, .mn-lockup .mn-serif
+            { font-family: var(--mn-font-serif); font-variation-settings: var(--mn-serif-axes); font-weight: 400; line-height: 1.2; color: var(--mn-coral); }
+.mn-topbar .mn-serif { color: var(--mn-sand); }
 .mn-label   { font-family: var(--mn-font-mono); font-weight: 500; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--mn-peach); }
 .mn-glass   { position: relative; background: var(--mn-glass-bg); border: var(--mn-glass-border); border-radius: var(--mn-r-card); backdrop-filter: var(--mn-glass-blur); -webkit-backdrop-filter: var(--mn-glass-blur); padding: 14px 16px; }
 .mn-glass[data-accent="peach"] { border-color: var(--mn-peach); }

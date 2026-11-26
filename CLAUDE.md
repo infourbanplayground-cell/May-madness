@@ -1083,6 +1083,12 @@ FROM wc_matches m WHERE p.match_id=m.id AND p.odds_locked IS NULL;
     settings, confirm, undo restores the match, up-next, check-in saved,
     offline banner -> back online saves and clears) and `shots-heist.mjs`
     (who, howto).
+- **BODY COPY IS MANROPE, NOT THE BRUSH (owner, 26 Nov: "the font isn't
+  readable").** `.mn-serif` sentences were Kaushan Script in hot pink; they are
+  Manrope 500 in mist now. The brush stays only on short tags (top-bar line,
+  title asides, "you", the contenders' tagline). Orange/amber LOGO options for
+  the owner are in `brand/heist/logo-options/` (hue-shifted from the shipped
+  cut; the pink one is still what ships until they choose).
 - **NOW LOADING is GTA-style (owner, 24 Nov)**: one full-bleed poster at a
   time, panning across itself over 4.6s and crossfading every 4.2s; the
   owner's own posters first (`loadingArt` in heist-season.json:
